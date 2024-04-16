@@ -29,7 +29,7 @@ cSnowBackground::cSnowBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  ("environment_plant_06.md3");
+        oBase.DefineModel  ("environment_plant_03.md3");
         oBase.DefineTexture(0u, "environment_plant.png");
         oBase.DefineTexture(1u, "default_normal.png");
         oBase.DefineProgram("object_ground_program");

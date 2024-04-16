@@ -25,7 +25,7 @@
 // TODO 1: tod: gegner wird von seinen eigenen flügeln aufgespießt, tak-tak-tak-tak-boom
 // TODO 1: tod: fliegt in lava, kommt wieder raus
 // TODO 1: boss glüht nach dem einschlag in boden (und wand ?)
-// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: mehrere einzelne einschläge schon während der background sich noch bewegt, dann bleibt er stehen und alle 5 schlagen nochmal ein
 // TODO 1: banner-anzeige bei finalem tod hat anderen text "Real Time Bonus" (Real farbig ? und separat rausstehend)
 // TODO 1: wellen beim sturmangriff sind zu ähnlich wie von sword, vielleicht kreis-wellen wie beim alten leviathan ?
@@ -53,6 +53,7 @@
 // TODO 1: im finale geht drehung los, bevor bewegung
 // TODO 1: view-bullets wurden von way-blöcken aufgehalten, und eigentlich sind beide rosa
 // TODO 1: vielleicht fliegt boss in erster phase auch rauf und runter (separat oder gemischt mit links-rechts)
+// TODO 1: helfer: einer springt bei wellen von der anderen seite raus, bei gitter fliegt einer seitlich runter
 
 
 // ****************************************************************
@@ -1480,7 +1481,7 @@ void cCholBoss::__MoveOwn()
 // 
 void cCholBoss::__EnableFire(const coreUint8 iType)
 {
-    WARN_IF(m_Fire.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Fire.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableFire(false);
 
     // 
     m_Fire.SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -1560,7 +1561,7 @@ void cCholBoss::__KillFake()
 {
     // 
     const coreFloat  fTimeShifted = g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe();
-    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted);
+    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted, g_pGame->GetCurMission()->GetMedalGoal());
 
     // 
     g_pGame->GetInterface()->ShowScore(iBonus, 1u, MEDAL_TYPE_BOSS);

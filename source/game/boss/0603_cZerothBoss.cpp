@@ -29,7 +29,7 @@
 // spieler kann bei schwing-phase einfach stehen bleiben und alle rand-geschosse werden sauber zerstört, aber der zusätzliche boss-angriff bringt ihn dazu sich zu bewegen (geschwindigkeit der rand-geschosse sollte nicht weiter erhöht werden, weil es sonst zu schwer wird in kombination mit boss-angriff)
 // TODO 1: decent smoke on ice cubes ?
 // TODO 1: stone outside of boss should also be ice cube ?
-// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: ice-cube damage in coop will be halved, but should not
 // TODO 1: in coop: vor-letzter eiswürfel fängt spieler 1, letzter fängt spieler 2, bei bremsung vor ende von herumzieh phase reißt spieler 2 ab und verliert morgenstern
 // TODO 1: leichtes zucken vom boss(?) wenn er vom stern ge-grabt wird (wenn das ok is und nur ein zufall weil spieler-speed auf 0 gesetzt wird, dann mit effekt kaschieren)
@@ -161,6 +161,9 @@ void cZerothBoss::ResurrectIntro()
     // 
     for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i) m_aLimb[i].ChangeToBottom();
     m_Body.ChangeToBottom();
+
+    // 
+    m_bForeshadow = true;
 
     // 
     m_iPhase = 200u;
@@ -704,7 +707,7 @@ void cZerothBoss::__MoveOwn()
 
                     g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
-                    const coreUintW iIndex = m_aIce[i].LastAttacker() - g_pGame->GetPlayer(0u);
+                    const coreUintW iIndex = m_aIce[i].LastAttackerIndex();
 
                     pMission->StopSwing();
                     pMission->SetStarLength(iIndex, CALOR_CHAIN_CONSTRAINT2);
@@ -1297,7 +1300,7 @@ void cZerothBoss::__MoveOwn()
 // 
 void cZerothBoss::__EnableLaser(const coreUintW iLimb)
 {
-    WARN_IF(m_Laser.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Laser.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableLaser(false);
 
     // 
     ASSERT(iLimb < ZEROTH_LIMBS)

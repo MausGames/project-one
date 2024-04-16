@@ -13,7 +13,7 @@
 // constructor
 cSave::cSave()noexcept
 : m_Header {}
-, m_sPath  (coreData::UserFolderPrivate(SAVE_FILE_FOLDER "save." SAVE_FILE_EXTENSION))
+, m_sPath  (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save%s." SAVE_FILE_EXTENSION, g_bDemoVersion ? "_demo" : "")))
 , m_iToken (0u)
 {
     // 
@@ -103,7 +103,7 @@ coreBool cSave::LoadFile()
         coreData::FileMove(m_sPath.c_str(), PRINT("%s.invalid_%s", m_sPath.c_str(), coreData::DateTimePrint("%Y%m%d_%H%M%S")));
 
         // 
-        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.bak", m_sPath.c_str())))
+        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.backup", m_sPath.c_str())))
         {
             // 
             this->Clear();
@@ -135,7 +135,7 @@ void cSave::SaveFile()
     m_iToken = Core::Manager::Resource->AttachFunction([=, this]()
     {
         // 
-        coreData::FileMove(m_sPath.c_str(), PRINT("%s.bak", m_sPath.c_str()));
+        coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));
 
         // 
         sHeader* pHeader   = r_cast<sHeader*>(pHeaderData);
@@ -172,8 +172,9 @@ void cSave::Clear()
     // 
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
+        m_Header.oOptions.aiShield  [i]    = 20u;
         m_Header.oOptions.aaiWeapon [i][0] = 1u;
-        m_Header.oOptions.aaiSupport[i][0] = 1u;
+        m_Header.oOptions.aaiSupport[i][0] = 0u;
     }
 }
 
@@ -229,8 +230,10 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     pHeader->oOptions.iType       = CLAMP(pHeader->oOptions.iType,       0u, GAME_TYPE_MAX      -1u);
     pHeader->oOptions.iMode       = CLAMP(pHeader->oOptions.iMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->oOptions.iDifficulty = CLAMP(pHeader->oOptions.iDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);
+    // TODO 1: flags ?
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
+        pHeader->oOptions.aiShield[i] = CLAMP(pHeader->oOptions.aiShield[i], 0u, SHIELD);
         for(coreUintW j = 0u; j < SAVE_EQUIP_WEAPONS;  ++j) pHeader->oOptions.aaiWeapon [i][j] = CLAMP(pHeader->oOptions.aaiWeapon [i][j], 0u, WEAPONS -1u);
         for(coreUintW j = 0u; j < SAVE_EQUIP_SUPPORTS; ++j) pHeader->oOptions.aaiSupport[i][j] = CLAMP(pHeader->oOptions.aaiSupport[i][j], 0u, SUPPORTS-1u);
     }

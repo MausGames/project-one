@@ -66,6 +66,8 @@ private:
         cGuiObject oCooldownBar;             // cooldown bar
         cGuiLabel  oComboValue;              // combo label
         cGuiLabel  oChainValue;              // chain value
+        cGuiLabel  oImmune;                  // 
+        coreFlow   fImmuneTime;              // 
         coreFlow   fSpin;                    // 
         coreFlow   fSpin2;                   // 
 
@@ -155,6 +157,9 @@ public:
     // 
     void UpdateLayout();
     void UpdateEnabled();
+    
+    // 
+    void PingImmune(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_VIEWS) m_aView[iIndex].fImmuneTime = 1.0f;}
 
     // 
     inline void Reset() {m_fBannerStart = -FLT_MAX; m_fStoryStart = -FLT_MAX; m_fAlertStart = -FLT_MAX;}

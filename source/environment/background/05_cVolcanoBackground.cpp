@@ -73,8 +73,8 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  ("environment_pyramid.md3");
-        oBase.DefineTexture(0u, "environment_pyramid2_diff.png");
-        oBase.DefineTexture(1u, "environment_pyramid2_norm.png");
+        oBase.DefineTexture(0u, "environment_pyramid_diff.png");
+        oBase.DefineTexture(1u, "environment_pyramid_norm.png");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < VOLCANO_PYRAMID_NUM; ++i)
@@ -153,7 +153,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
-                        pObject->DefineModel(bType ? "environment_plant_08.md3" : "environment_plant_09.md3");
+                        pObject->DefineModel(bType ? "environment_plant_05.md3" : "environment_plant_04.md3");
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
@@ -193,7 +193,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
-        oBase.DefineTexture(0u, "environment_algae2.png");
+        oBase.DefineTexture(0u, "environment_particle_01.png");
         oBase.DefineProgram("effect_decal_single_program");
 
         for(coreUintW i = 0u; i < VOLCANO_SPARK_NUM; ++i)
@@ -399,7 +399,6 @@ void cVolcanoBackground::__MoveOwn()
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pSpark = (*pList->List())[i];
-        if(!pSpark->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
         // 
         const coreFloat   fOffset = I_TO_F(POW2(i) % m_iSparkNum);
@@ -408,7 +407,7 @@ void cVolcanoBackground::__MoveOwn()
         const coreVector2 vDir    = coreVector2::Direction(fTime);
 
         // 
-        pSpark->SetPosition (coreVector3(fPos, pSpark->GetPosition().yz()));
+        pSpark->SetPosition (coreVector3(fPos, pSpark->GetPosition().yz()));   // # always, to determine visibility
         pSpark->SetDirection(coreVector3(vDir, 0.0f));
     }
     pList->MoveNormal();

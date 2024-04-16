@@ -12,19 +12,16 @@
 // ****************************************************************
 // constructor
 cTooltip::cTooltip()noexcept
-: m_iNumLines (0u)
+: m_vOffset   (coreVector2(0.0f,0.0f))
+, m_iNumLines (0u)
 , m_bDisplay  (false)
 , m_pLastRef  (I_TO_P(-1))
 {
-    const coreVector2 vAlignment = coreVector2(TOOLTIP_TARGET_OFFSET.x ? SIGN(TOOLTIP_TARGET_OFFSET.x) : 0.0f,
-                                               TOOLTIP_TARGET_OFFSET.y ? SIGN(TOOLTIP_TARGET_OFFSET.y) : 0.0f);
     // load object resources
     this->DefineProgram("menu_color_program");
 
     // set object properties
-    this->SetPosition (TOOLTIP_TARGET_OFFSET);
-    this->SetAlignment(vAlignment);
-    this->SetColor3   (COLOR_MENU_BLACK);
+    this->SetColor3(COLOR_MENU_BLACK);
 
     // create text lines
     for(coreUintW i = 0u; i < TOOLTIP_LINES; ++i)
@@ -32,6 +29,9 @@ cTooltip::cTooltip()noexcept
         m_aLine[i].Construct   (MENU_FONT_DYNAMIC_1, TOOLTIP_OUTLINE_SIZE);
         m_aLine[i].SetAlignment(coreVector2(1.0f,-1.0f));
     }
+
+    // 
+    this->ChangeOffset(TOOLTIP_DEFAULT_OFFSET);
 }
 
 
@@ -67,6 +67,23 @@ void cTooltip::Move()
         m_aLine[i].SetAlpha (this->GetAlpha ());
         m_aLine[i].Move();
     }
+}
+
+
+// ****************************************************************
+// 
+void cTooltip::ChangeOffset(const coreVector2 vOffset)
+{
+    // 
+    m_vOffset = vOffset;
+
+    // 
+    const coreVector2 vAlignment = coreVector2(vOffset.x ? SIGN(vOffset.x) : 0.0f,
+                                               vOffset.y ? SIGN(vOffset.y) : 0.0f);
+
+    // 
+    this->SetPosition (vOffset);
+    this->SetAlignment(vAlignment);
 }
 
 
@@ -169,7 +186,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines - 1u) + TOOLTIP_LINE_BOTTOM) + TOOLTIP_BORDER_SIZE + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) * fFactor);
 
     // set text line position
-    const coreVector2 vBase = (this->GetSize() * this->GetAlignment() + (TOOLTIP_BORDER_SIZE - this->GetSize()) * m_aLine[0].GetAlignment()) * 0.5f + TOOLTIP_TARGET_OFFSET;
+    const coreVector2 vBase = (this->GetSize() * this->GetAlignment() + (TOOLTIP_BORDER_SIZE - this->GetSize()) * m_aLine[0].GetAlignment()) * 0.5f + m_vOffset;
     for(coreUintW i = 0u; i < m_iNumLines; ++i)
     {
         m_aLine[i].SetPosition(coreVector2(vBase.x, vBase.y - TOOLTIP_LINE_HEIGHT * I_TO_F(i)));

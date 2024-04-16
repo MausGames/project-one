@@ -79,12 +79,19 @@ enum eGameDifficulty : coreUint8
     GAME_DIFFICULTY_MAX          // 
 };
 
+enum eGameFlag : coreUint8
+{
+    GAME_FLAG_TASK = 0x01u   // 
+};
+
 struct sGameOptions final
 {
     coreUint8 iKind;                                             // 
     coreUint8 iType;                                             // 
     coreUint8 iMode;                                             // 
     coreUint8 iDifficulty;                                       // 
+    coreUint8 iFlags;                                            // 
+    coreUint8 aiShield  [GAME_PLAYERS];                          // 
     coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_EQUIP_WEAPONS];    // 
     coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_EQUIP_SUPPORTS];   // 
 };
@@ -143,6 +150,7 @@ static constexpr sMissionData g_aMissionData[] =
 #define DEPTH_PUSH           {g_pGame->PushDepthLevel(1u);}
 #define DEPTH_PUSH_DOUBLE    {g_pGame->PushDepthLevel(2u);}
 #define DEPTH_PUSH_SHIP      {g_pGame->PushDepthLevelShip();}
+#define DEPTH_POP            {g_pGame->PopDepthLevel(1u);}
 
 #define __DEPTH_GROUP_SHIP   {this->ChangeDepthLevel(8u, 10u);}                // 2 levels, static
 #define __DEPTH_GROUP_BOTTOM {m_iDepthDebug = 10u;     m_iDepthLevel = 20u;}   // 10 levels, dynamic, 2 in game
@@ -157,15 +165,17 @@ static constexpr sMissionData g_aMissionData[] =
 class cGame final
 {
 private:
-    cPlayer m_aPlayer[GAME_PLAYERS];        // player objects
-    cHelper m_aHelper[GAME_HELPERS];        // 
+    cPlayer  m_aPlayer[GAME_PLAYERS];       // player objects
+    cHelper  m_aHelper[GAME_HELPERS];       // 
+    cTracker m_Tracker;                    // 
 
-    cEnemyManager  m_EnemyManager;          // enemy manager
-    cBulletManager m_BulletManagerPlayer;   // low-priority bullet manager
-    cBulletManager m_BulletManagerEnemy;    // high-priority bullet manager
-    cItemManager   m_ItemManager;           // 
-    cShieldManager m_ShieldManager;         // 
-    cCrashManager  m_CrashManager;          // 
+    cEnemyManager   m_EnemyManager;          // enemy manager
+    cBulletManager  m_BulletManagerPlayer;   // low-priority bullet manager
+    cBulletManager  m_BulletManagerEnemy;    // high-priority bullet manager
+    cItemManager    m_ItemManager;           // 
+    cShieldManager  m_ShieldManager;         // 
+    cCrashManager   m_CrashManager;          // 
+    cExhaustManager m_ExhaustManager;        // 
     
     cBulletManager m_BulletManagerPlayerTop;
 
@@ -240,7 +250,7 @@ public:
     void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
     void PushDepthLevel    (const coreUint8 iLevels);
     void PushDepthLevelShip();
-    //void PopDepthLevel    (const coreUint8 iLevels);
+    void PopDepthLevel    (const coreUint8 iLevels);
 
     // 
     inline void SetVisibleCheck(const coreBool bCheck) {m_bVisibleCheck = bCheck;}
@@ -264,17 +274,22 @@ public:
     inline coreBool IsMasochist()const                          {return (this->GetMode      () == GAME_MODE_MASOCHIST);}
     inline coreBool IsEasy     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_EASY);}
     inline coreBool IsHard     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_HARD);}
+    inline coreBool IsTask     ()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_TASK);}
     inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
+    
+    inline coreUintW GetPlayerIndex(const cPlayer* pPlayer)const {ASSERT(pPlayer) return (pPlayer - &m_aPlayer[0]);}
 
     // access game objects
     inline cPlayer*         GetPlayer             (const coreUintW iIndex)   {ASSERT(iIndex                   < GAME_PLAYERS) return &m_aPlayer[iIndex];}
     inline cHelper*         GetHelper             (const coreUint8 iElement) {ASSERT(iElement - ELEMENT_WHITE < GAME_HELPERS) return &m_aHelper[iElement - ELEMENT_WHITE];}
+    inline cTracker*        GetTracker            ()                         {return &m_Tracker;}
     inline cEnemyManager*   GetEnemyManager       ()                         {return &m_EnemyManager;}
     inline cBulletManager*  GetBulletManagerPlayer()                         {return &m_BulletManagerPlayer;}
     inline cBulletManager*  GetBulletManagerEnemy ()                         {return &m_BulletManagerEnemy;}
     inline cItemManager*    GetItemManager        ()                         {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                         {return &m_ShieldManager;}
     inline cCrashManager*   GetCrashManager       ()                         {return &m_CrashManager;}
+    inline cExhaustManager* GetExhaustManager     ()                         {return &m_ExhaustManager;}
     inline cInterface*      GetInterface          ()                         {return &m_Interface;}
     inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
     inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}
@@ -295,13 +310,14 @@ public:
     inline const coreUint8&    GetType       ()const {return m_Options.iType;}
     inline const coreUint8&    GetMode       ()const {return m_Options.iMode;}
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
+    inline const coreUint8&    GetFlags      ()const {return m_Options.iFlags;}
     inline const coreUint16&   GetVersion    ()const {return m_iVersion;}
     inline const coreUint8&    GetStatus     ()const {return m_iStatus;}
 
     // 
     static coreUint8  CalcMedal       (const coreFloat fTime, const coreFloat* pfMedalGoal);
     static coreFloat  CalcMedalTime   (const coreFloat fTime, const coreFloat* pfMedalGoal);
-    static coreUint32 CalcBonusTime   (const coreFloat fTime);
+    static coreUint32 CalcBonusTime   (const coreFloat fTime, const coreFloat* pfMedalGoal);
     static coreUint32 CalcBonusMedal  (const coreUint8 iMedal);
     static coreUint32 CalcBonusBadge  (const coreUint8 iBadge);
     static coreUint32 CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead);

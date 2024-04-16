@@ -39,7 +39,8 @@
 // TODO 3: if dark-background blocks are only using 1 channel, only use single-channel texture, but requires special shader (merge with normal map then ?)
 // TODO 2: if flashes are disabled, disabling darkness in moss background cannot be hidden by lightning, so implement smooth blending (or black lightning with single fade (no flicker))
 // TODO 4: move base-sound into base class ?
-// TODO 3: caustics for sea background
+// TODO 3: caustics for sea background (Worley noise)
+// TODO 3: vielleicht visual height + Z reinrechnen für visibility calculations (dann kann große view range reduziert werden)
 
 
 // ****************************************************************
@@ -56,7 +57,7 @@
 #define GRASS_STONE_RESERVE     (384u)
 #define GRASS_PLANT_NUM         (3072u)
 #define GRASS_PLANT_1_RESERVE   (1024u)
-#define GRASS_PLANT_2_RESERVE   (256u)
+#define GRASS_PLANT_2_RESERVE   (384u)
 #define GRASS_SHIP_NUM          (1024u)
 #define GRASS_SHIP_RESERVE      (64u)
 #define GRASS_FLOWER_NUM        (2048u)
@@ -89,7 +90,7 @@
 #define DESERT_SAND_NUM         (7u)
 
 #define SPACE_METEOR_NUM        (1536u)
-#define SPACE_METEOR_RESERVE    (1024u)
+#define SPACE_METEOR_RESERVE    (1024u + 64u)
 #define SPACE_NEBULA_NUM        (4u)
 
 #define VOLCANO_SMOKE_NUM       (512u)
@@ -204,6 +205,8 @@ public:
     // access background components
     inline cOutdoor* GetOutdoor()const {return m_pOutdoor;}
     inline cWater*   GetWater  ()const {return m_pWater;}
+    
+    virtual coreVector3 GetButtonColor()const {return this->GetColor();}
 
 
 protected:
@@ -247,6 +250,9 @@ public:
 
     DISABLE_COPY(cNoBackground)
     ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f))
+    
+    
+    inline coreVector3 GetButtonColor()const final {return coreVector3(1.0f,1.0f,1.0f) * 0.8f;}      
 
 
 private:
@@ -577,6 +583,10 @@ public:
 
     // 
     inline cHeadlight* GetHeadlight() {return &m_Headlight;}
+    
+    
+    
+    inline coreVector3 GetButtonColor()const final {return coreVector3(1.0f,1.0f,1.0f) * 0.8f;}      
 
 
 private:
@@ -606,7 +616,7 @@ public:
     ~cStomachBackground()final;
 
     DISABLE_COPY(cStomachBackground)
-    ASSIGN_ID_EX(51, "Stomach", coreVector3(0.5f,0.5f,0.5f))
+    ASSIGN_ID_EX(51, "Stomach", COLOR_MENU_RED)
 
 
 private:

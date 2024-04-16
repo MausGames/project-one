@@ -137,7 +137,7 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
         this->__DisableBoomerang(i, bAnimated);
 
     // 
-    this->__DisableSummon();
+    this->__DisableSummon(bAnimated);
 
     // 
     g_pGlow->UnbindList(&m_DuplicateTrail);
@@ -529,7 +529,7 @@ void cDharukBoss::__MoveOwn()
             if(PHASE_BEGINNING)
             {
                 this->__EnableDuplicate();
-                this->__DisableSummon();
+                this->__DisableSummon(true);
             }
 
             const coreFloat fAlpha = MIN(fTime*10.0f, 1.0f);
@@ -733,7 +733,7 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2 vP
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
-    WARN_IF(pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableBoomerang(iIndex, false);
     pBoomerang->ChangeType(TYPE_DHARUK_BOOMERANG);
 
     // 
@@ -783,7 +783,7 @@ void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAni
 // 
 void cDharukBoss::__EnableSummon(const coreVector2 vPosition)
 {
-    WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableSummon(false);
 
     // 
     m_Summon.SetPosition(coreVector3(vPosition,0.0f));
@@ -797,7 +797,7 @@ void cDharukBoss::__EnableSummon(const coreVector2 vPosition)
 
 // ****************************************************************
 // 
-void cDharukBoss::__DisableSummon()
+void cDharukBoss::__DisableSummon(const coreBool bAnimated)
 {
     if(!m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 

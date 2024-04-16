@@ -92,8 +92,8 @@ public:
 class cFragmentItem final : public cItem
 {
 private:
-    coreObject3D m_Hull;           // 
-    coreObject3D m_aElectron[3];   // 
+    coreObject3D m_aHull[2];       // 
+    coreObject3D m_aaElectron[3][2];   // 
 
     cPlayer* m_pTarget;            // 
 

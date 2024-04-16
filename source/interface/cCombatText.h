@@ -17,12 +17,14 @@
 // TODO 3: RestrictCenter should also use size
 // TODO 4: use index instead of pointer for order-list ?
 // TODO 2: also invert with mirror mode (like interface, maybe move outside ?) (even more, like summary and continue menu) (should it be a 3rd option ? Off, Light, Full)
+// TODO 1: alle stellen mit DrawProgress und vielleicht DrawText (1, 2, 3, ...) brauchen sound effect
+// TODO 1: text which bumps up and down (score in arkanoid: https://www.youtube.com/watch?v=dm95AFruFEc)
 
 
 // ****************************************************************
 // combat text definitions
 #define COMBAT_LABELS_SMALL (32u)                                       // 
-#define COMBAT_LABELS_BIG   (4u)                                        // 
+#define COMBAT_LABELS_BIG   (16u)                                       // 
 #define COMBAT_LABELS       (COMBAT_LABELS_SMALL + COMBAT_LABELS_BIG)   // total number of label objects
 #define COMBAT_BORDER       (0.47f)                                     // 
 
@@ -70,7 +72,7 @@ public:
     void DrawChain(const coreUint32 iValue, const coreVector3 vPosition);
     void DrawShift(const coreUint32 iValue, const coreVector3 vPosition);
     void DrawProgress(const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition);
-    void DrawText(const coreChar* pcText, const coreVector3 vPosition);
+    void DrawText(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor);
     void DrawBadge(const coreUint32 iValue, const coreVector3 vPosition);
     
     // 

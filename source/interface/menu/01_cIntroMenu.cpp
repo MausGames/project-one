@@ -97,6 +97,11 @@ void cIntroMenu::Move()
                 {
                     // 
                     m_iIntroStatus = 2u;
+                    //if(m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL) < 2.0f)
+                    //{
+                    //    m_IntroTimer.SetValue(2.0f);
+                    //    this->ChangeSurface(SURFACE_INTRO_EMPTY, 0.0f);
+                    //}
                 }
             }
             else if(m_iIntroStatus == 2u)

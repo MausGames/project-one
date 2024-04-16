@@ -23,7 +23,7 @@ cCombatText::cCombatText()noexcept
 {
     // create label objects
     for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
     
     
     
@@ -48,13 +48,13 @@ cCombatText::cCombatText()noexcept
     // 
     m_BadgeIcon.DefineTexture(0u, "menu_star.png");
     m_BadgeIcon.DefineProgram("default_2d_program");
-    m_BadgeIcon.SetSize      (coreVector2( 1.0f,1.0f) * 0.06f);
-    m_BadgeIcon.SetAlignment (coreVector2(-1.0f,0.0f));
+    m_BadgeIcon.SetSize      (coreVector2( 1.0f,1.0f) * 0.12f);
+    //m_BadgeIcon.SetAlignment (coreVector2(-1.0f,0.0f));
     m_BadgeIcon.SetTexSize   (coreVector2( 0.5f,1.0f));
 
     // 
-    m_BadgeLabel.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_BadgeLabel.SetAlignment(coreVector2(1.0f,0.0f));
+    m_BadgeLabel.Construct   (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    //m_BadgeLabel.SetAlignment(coreVector2(1.0f,0.0f));
     m_BadgeLabel.SetColor3   (COLOR_MENU_INSIDE);
 }
 
@@ -82,8 +82,8 @@ void cCombatText::Render()
         // 
         if(m_fBadgeTimer)
         {
-            m_BadgeLabel.Render();
             m_BadgeIcon .Render();
+            m_BadgeLabel.Render();
         }
     }
     if(!g_bTiltMode) Core::Graphics->EndScissorTest();
@@ -117,7 +117,7 @@ void cCombatText::Move()
         // update label object
         oLabel.SetPosition(vPosition);
         oLabel.SetCenter  (vCenter);
-        oLabel.SetAlpha   (fAlpha * ((m_iLastLabel == i) ? 1.0f : 0.6f));
+        oLabel.SetAlpha   (fAlpha * (((m_aiType[i] != 0u) || (m_iLastLabel == i)) ? 1.0f : 0.6f));
         oLabel.SetScale   (fScale);
         oLabel.Move();
     }
@@ -211,10 +211,10 @@ void cCombatText::DrawProgress(const coreUint32 iCurrent, const coreUint32 iTota
     this->__DrawLabel(PRINT("%u/%u", iCurrent, iTotal), vPosition, true, COLOR_MENU_INSIDE, 4u);
 }
 
-void cCombatText::DrawText(const coreChar* pcText, const coreVector3 vPosition)
+void cCombatText::DrawText(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
-    this->__DrawLabel(pcText, vPosition, true, COLOR_MENU_INSIDE, 5u);
+    this->__DrawLabel(pcText, vPosition, true, vColor, 5u);
 }
 
 
@@ -235,11 +235,11 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
     m_BadgeLabel.SetAlpha (0.0f);
 
     // 
-    m_BadgeLabel.RetrieveDesiredSize([this](const coreVector2 vSize)
-    {
-        const coreFloat fOffset = (vSize.x - m_BadgeIcon.GetSize().x) * -0.5f;
-        m_BadgeIcon.SetPosition(coreVector2(fOffset, 0.0f));
-    });
+    //m_BadgeLabel.RetrieveDesiredSize([this](const coreVector2 vSize)
+    //{
+    //    const coreFloat fOffset = (vSize.x - m_BadgeIcon.GetSize().x) * -0.5f;
+    //    m_BadgeIcon.SetPosition(coreVector2(fOffset, 0.0f));
+    //});
 
     // 
     ASSERT(!m_fBadgeTimer)

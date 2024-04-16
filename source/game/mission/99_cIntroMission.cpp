@@ -16,4 +16,28 @@ cIntroMission::cIntroMission()noexcept
 {
     // 
     m_apBoss[0] = &m_Intro;
+
+    // 
+    m_aManual[0].ChangeOffset(-TOOLTIP_DEFAULT_OFFSET);
+    m_aManual[1].ChangeOffset( TOOLTIP_DEFAULT_OFFSET);
+}
+
+
+// ****************************************************************
+// 
+void cIntroMission::__RenderOwnTop()
+{
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aManual); ++i)
+        m_aManual[i].Render();
+}
+
+
+// ****************************************************************
+// 
+void cIntroMission::__MoveOwnAfter()
+{
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aManual); ++i)
+        m_aManual[i].Move();
 }

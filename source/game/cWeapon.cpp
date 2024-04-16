@@ -230,7 +230,7 @@ void cRayWeapon::__ShootOwn()
         m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
 
         // play bullet sound-effect
-        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 0.8f, SOUND_WEAPON_RAY);
+        //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 0.8f, SOUND_WEAPON_RAY);
     }
     else
     {
@@ -240,7 +240,7 @@ void cRayWeapon::__ShootOwn()
         //this->_MakeWhite(pManager->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
 
         // play bullet sound-effect
-        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), LERP(1.0f, 0.5f, m_fVolume), 1.0f, SOUND_WEAPON_RAY);
+        //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), LERP(1.0f, 0.5f, m_fVolume), 1.0f, SOUND_WEAPON_RAY);
     }
 }
 
@@ -261,11 +261,9 @@ void cRayWeapon::__RenderOwn()
 // 
 void cRayWeapon::__MoveOwn()
 {
-    static coreFlow fTest = 0.0f;
     fTest.Update(4.0f);//LERP(0.0f, 4.0f, m_fMuzzleTime));
     
     
-    static coreFlow fScale = 0.0f;
     
     if(!m_fMuzzleTime) fScale = 0.0f;
     else fScale.UpdateMin(20.0f, 1.0f);

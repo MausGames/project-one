@@ -44,18 +44,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_view_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("effect_explosion.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_explosion.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_crystal_01.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_crystal_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_animal_01.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_animal_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_animal_02.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_animal_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_desert_01.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_desert_02.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_desert_03.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_03.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_desert_04.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_04.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_desert_05.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_05.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_desert_06.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_06.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_desert_07.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_07.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_desert_08.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_08.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_desert_09.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_09.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_grave_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_grave_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_grave.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_grave.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_pillar_01.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_pillar_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_pillar_02.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_pillar_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_pillar_03.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_pillar_03.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -65,28 +60,16 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("environment_plant_03.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_plant_03.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_plant_04.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_plant_04.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_plant_05.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_plant_05.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_plant_06.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_plant_06.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_plant_07.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_plant_07.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_plant_08.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_plant_08.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_plant_09.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_plant_09.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_pyramid.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_pyramid.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_sea_01.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_sea_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_sea_02.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_sea_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_sea_03.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_sea_03.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_sea_04.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_sea_04.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_sea_05.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_sea_05.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_sea_06.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_sea_06.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_sea_07.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_sea_07.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_seashell.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_seashell.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_tree_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_tree_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_tree_02.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_tree_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_tree_03.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_tree_03.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_tree_04.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_tree_04.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_01.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_arrow.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -111,6 +94,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_penta_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_penta_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_sphere_center.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere_center.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_spike.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_spike.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_sting.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sting.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -239,11 +223,12 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("effect_track.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_track.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_algae.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_algae2.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae2.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_algae3.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae3.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_animal_diff.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_animal_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_animal_norm.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_animal_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_block_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_block_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_block_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_block_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
+    Core::Manager::Resource->Load<coreTexture>("environment_blood_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_blood_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_grey.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_grey.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
@@ -251,11 +236,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_high.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_high.png");
     Core::Manager::Resource->Load<coreTexture>("environment_crack_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_crack_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_crack_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_crack_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_crystal_diff.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_crystal_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_crystal_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_crystal_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_desert.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_desert.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_desert2.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_desert2.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_desert3.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_desert3.png");
     Core::Manager::Resource->Load<coreTexture>("environment_dust_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_dust_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_earth_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_earth_diff.png");
@@ -265,15 +246,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_grave_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grave_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_grave_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grave_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_blood_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_blood_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_lava_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_lava_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_leaf.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_leaf.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_mars_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_mars_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_mars_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_mars_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_moss_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_moss_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_moss_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_moss_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
+    Core::Manager::Resource->Load<coreTexture>("environment_particle_01.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_particle_01.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_particle_02.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_particle_02.png");
     Core::Manager::Resource->Load<coreTexture>("environment_pillar_01_diff.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_pillar_01_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_pillar_01_norm.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_pillar_01_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_pillar_02_diff.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_pillar_02_diff.png");
@@ -281,17 +260,12 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_plant.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_plant.png");
     Core::Manager::Resource->Load<coreTexture>("environment_pyramid_diff.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_pyramid_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_pyramid_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_pyramid_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_pyramid2_diff.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_pyramid2_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_pyramid2_norm.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_pyramid2_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_reed.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_reed.png");
     Core::Manager::Resource->Load<coreTexture>("environment_rock_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_rock_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_sea.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
-    Core::Manager::Resource->Load<coreTexture>("environment_sea_diff.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_sea_norm.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_snow_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_snow_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_space.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_space.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_space_inside.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_space_inside.png");
     Core::Manager::Resource->Load<coreTexture>("environment_space_outside.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_space_outside.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
@@ -301,11 +275,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_tree_02_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_02_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_tree_03_diff.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_03_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_tree_03_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_03_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_tree_04_diff.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_04_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_tree_04_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_04_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_rain.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_rain.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
+    Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_01.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_01.png");
@@ -370,6 +343,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_invert_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_FLAT SHADER_BULLET SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_direct_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_FLAT SHADER_BULLET SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_explosion.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_explosion.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("effect_explosion.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_explosion.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_frame.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_frame.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_frame.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_frame.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_gust.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_gust.vert");
@@ -485,15 +460,19 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_depth.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW SHADER_DEPTH);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
     Core::Manager::Resource->Load<coreShader> ("object_ice.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ice.frag");
+    Core::Manager::Resource->Load<coreShader> ("object_meteor.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag");
     Core::Manager::Resource->Load<coreShader> ("object_meteor_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_depth_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW SHADER_DEPTH);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
+    Core::Manager::Resource->Load<coreShader> ("object_meteor_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_meteor_blink_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_board.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_board.vert");
     Core::Manager::Resource->Load<coreShader> ("object_board.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_board.frag");
@@ -538,7 +517,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("bullet_reflect.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_reflect.wav");
     Core::Manager::Resource->Load<coreSound>("continue_tick.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_tick.wav");
     Core::Manager::Resource->Load<coreSound>("continue_accept.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_accept.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_dust.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_dust.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_error.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_error.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_fire.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_fire.wav");
     Core::Manager::Resource->Load<coreSound>("effect_shake.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_shake.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_sword_01.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_sword_01.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_sword_02.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_sword_02.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_woosh.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_woosh.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_01.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_01.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_02.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_02.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_03.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_03.wav");
@@ -552,6 +537,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("fragment_appear.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
     Core::Manager::Resource->Load<coreSound>("fragment_collect.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
     Core::Manager::Resource->Load<coreSound>("fragment_helper.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
+    Core::Manager::Resource->Load<coreSound>("helper.wav",               CORE_RESOURCE_UPDATE_AUTO, "data/sounds/helper.wav");
     Core::Manager::Resource->Load<coreSound>("medal_bronze.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/medal_bronze.wav");
     Core::Manager::Resource->Load<coreSound>("medal_dark.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/medal_dark.wav");
     Core::Manager::Resource->Load<coreSound>("medal_gold.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/medal_gold.wav");
@@ -764,10 +750,10 @@ void CoreApp::Setup()
         ->AttachShader("effect_energy_blink.frag")
         ->Finish();
 
-    //d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_flat_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-    //    ->AttachShader("effect_energy_flat_invert.vert")
-    //    ->AttachShader("effect_energy_blink.frag")
-    //    ->Finish();
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_flat_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_energy_flat_invert.vert")
+        ->AttachShader("effect_energy_blink.frag")
+        ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_inst.vert")
@@ -831,6 +817,11 @@ void CoreApp::Setup()
         ->AttachShader("effect_energy_bullet_direct_inst.vert")
         ->AttachShader("effect_energy_inst.frag")
         ->BindAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, BULLET_SHADER_ATTRIBUTE_DEPTH_NUM)
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_explosion_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_explosion.vert")
+        ->AttachShader("effect_explosion.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_frame_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -1234,6 +1225,11 @@ void CoreApp::Setup()
         ->AttachShader("object_ship_glow.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_depth_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_ship_depth.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ship_blink.frag")
@@ -1247,6 +1243,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ice_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ice.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_meteor.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -1269,10 +1270,20 @@ void CoreApp::Setup()
         ->AttachShader("object_ship_glow_inst.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_depth_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object_inst.vert")
+        ->AttachShader("object_ship_depth_inst.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_blink_inst.frag")
         ->BindAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, SHIP_SHADER_ATTRIBUTE_BLINK_NUM)
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader ("object_inst.vert")
+        ->AttachShader ("object_meteor_inst.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

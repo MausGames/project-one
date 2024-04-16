@@ -22,7 +22,6 @@
 // TODO 1: boss hat mit PHASE_CONTROL_TICKER noch einmal geschossen, nachdem er gestorben ist und alle geschosse zerstört wurden, sollte allgemein verhindert werden, auch bei normalen waves
 // TODO 1: check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
 // TODO 4: remove counters and vectors (first remove usage)
-// TODO 1: damage done to boss might not count to correct stats object before name is on screen
 // TODO 1: chain sollte beim erscheinen des time-bonus-banners gebrochen werden
 
 
@@ -31,6 +30,8 @@
 #define BOSS_TIMERS   (8u)    // 
 #define BOSS_COUNTERS (16u)   // 
 #define BOSS_VECTORS  (12u)   // 
+
+#define BOSS_HELPERS  (HELPERS - 1u)   // 
 
 
 // ****************************************************************
@@ -45,12 +46,11 @@
 
 #define TORUS_TURRETS             (2u)                                         // 
 #define TORUS_GUNNERS             (4u)                                         // 
-#define TORUS_CHARGERS            (4u)                                         // 
-#define TORUS_DRIVERS             (6u)                                         // 
+#define TORUS_CHARGERS            (2u)                                         // 
+#define TORUS_DRIVERS             (4u)                                         // 
 #define TORUS_WAVERS              (4u)                                         // 
+#define TORUS_BARRIERS            (8u)                                         // 
 #define TORUS_BOSS_ROTATION       (1.2f)                                       // 
-#define TORUS_TURRET_SPEED        (-0.2f)                                      // 
-#define TORUS_GUNNER_SPEED        (0.2f)                                       // 
 
 #define NAUTILUS_ATTACH_DIST      (-10.0f)                                     // 
 #define NAUTILUS_INK_TIME         (10.0f)                                      // 
@@ -61,7 +61,8 @@
 #define LEVIATHAN_RAYS            (LEVIATHAN_PARTS)                            // 
 #define LEVIATHAN_RAYS_RAWS       (2u * LEVIATHAN_RAYS)                        // 
 #define LEVIATHAN_RADIUS_OUTER    (FOREGROUND_AREA.x * 0.8f)                   // 
-#define LEVIATHAN_RADIUS_INNER    (10.0f)                                      // 
+#define LEVIATHAN_RADIUS_INNER_1  (20.0f)                                      // 
+#define LEVIATHAN_RADIUS_INNER_2  (10.0f)                                      // 
 #define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.6f : 4.8f)                          // 
 #define LEVIATHAN_RAY_HEIGHT      (0.2f)                                       // 
 #define LEVIATHAN_RAY_SIZE        (coreVector3(1.2f,50.0f,1.2f))               // 
@@ -149,13 +150,13 @@
 
 // ****************************************************************
 // 
-#define LERP_LINEAR     (&LERP  <coreFloat>)
-#define LERP_SMOOTH     (&LERPS <coreFloat>)
+#define LERP_LINEAR     (&LERP         <coreFloat>)
+#define LERP_SMOOTH     (&LERPS        <coreFloat>)
 #define LERP_SMOOTH_REV (&LerpSmoothRev<coreFloat>)
-#define LERP_BREAK      (&LERPB <coreFloat>)
-#define LERP_BREAK_REV  (&LERPBR<coreFloat>)
-#define LERP_HERMITE3   (&LERPH3<coreFloat>)
-#define LERP_HERMITE5   (&LERPH5<coreFloat>)
+#define LERP_BREAK      (&LERPB        <coreFloat>)
+#define LERP_BREAK_REV  (&LERPBR       <coreFloat>)
+#define LERP_HERMITE3   (&LERPH3       <coreFloat>)
+#define LERP_HERMITE5   (&LERPH5       <coreFloat>)
 
 
 // ****************************************************************
@@ -178,6 +179,12 @@ protected:
     coreFloat m_fPhaseTimeBefore;             // 
 
     coreBool m_bControlAgain;                 // 
+
+    coreUint8 m_iHelperSpawn;                 // 
+    coreUint8 m_iHelperHit;                   // 
+
+    coreBool m_bActive;                       // 
+    coreBool m_bForeshadow;                   // 
 
     static coreVector2 s_vPositionPoint;      // 
 
@@ -213,6 +220,10 @@ protected:
 
     // 
     void _ResurrectBoss();
+
+    // 
+    coreBool _ResurrectHelper(const coreUint8 iElement, const coreBool bSmooth);
+    void     _KillHelper     (const coreUint8 iElement, const coreBool bAnimated);
 
     // 
     template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
@@ -264,7 +275,7 @@ private:
 
     // 
     void __EnableSummon (const coreVector2 vPosition);
-    void __DisableSummon();
+    void __DisableSummon(const coreBool bAnimated);
 
     // 
     coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
@@ -323,7 +334,7 @@ private:
 
     // 
     void __EnableSummon (const coreVector2 vPosition);
-    void __DisableSummon();
+    void __DisableSummon(const coreBool bAnimated);
 
     // 
     inline void __BecomeInvisible() {m_fVisibility = -1.0f; this->SetAlpha(0.0f); this->AddStatus(ENEMY_STATUS_HIDDEN);}
@@ -370,13 +381,16 @@ private:
     coreFlow m_fRotationObject;                        // 
 
     coreUint8 m_iTurretActive;                         // 
+    coreUint8 m_iTurretMove;                           // 
     coreUint8 m_iGunnerActive;                         // 
-    coreUint8 m_iGunnerMove;                           // 
     coreUint8 m_iChargerActive;                        // 
     coreUint8 m_iDriverActive;                         // 
     coreUint8 m_iWaverActive;                          // 
 
     coreUint8 m_iDecalState;                           // 
+
+    coreSoundPtr m_pFireSound;                         // 
+    coreSoundPtr m_pWooshSound;                        // 
 
 
 public:
@@ -391,15 +405,16 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn  ()final;
-    void __KillOwn       (const coreBool bAnimated)final;
-    void __RenderOwnUnder()final;
-    void __RenderOwnOver ()final;
-    void __MoveOwn       ()final;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwn        ()final;
 
     // 
     void __EnableSummon (const coreVector2 vPosition, const coreVector3 vColor);
-    void __DisableSummon();
+    void __DisableSummon(const coreBool bAnimated);
 
     // 
     void __EnableTurret (const coreUintW iIndex, const coreVector2 vPosition);
@@ -534,22 +549,25 @@ private:
 class cLeviathanBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_Head;                            // 
-    cCustomEnemy m_aBody[LEVIATHAN_PARTS_BODIES];   // 
-    cCustomEnemy m_Tail;                            // 
+    cCustomEnemy m_Head;                              // 
+    cCustomEnemy m_aBody[LEVIATHAN_PARTS_BODIES];     // 
+    cCustomEnemy m_Tail;                              // 
 
-    coreBatchList m_Ray;                            // 
-    coreBatchList m_RayWave;                        // 
-    coreObject3D  m_aRayRaw[LEVIATHAN_RAYS_RAWS];   // 
+    coreBatchList m_Ray;                              // 
+    coreBatchList m_RayWave;                          // 
+    coreObject3D  m_aRayRaw  [LEVIATHAN_RAYS_RAWS];   // 
+    coreFlow      m_afRayTime[LEVIATHAN_RAYS];        // 
+    coreUint8     m_iRayState;                        // 
 
-    coreFlow   m_afRayTime[LEVIATHAN_RAYS];         // 
-    coreUint16 m_iDecalState;                       // 
+    coreUint16 m_iDecalState;                         // 
 
-    coreVector2 m_avSwimDir  [LEVIATHAN_PARTS];     // 
-    coreUint8   m_aiSwimCount[LEVIATHAN_PARTS];     // 
+    coreVector2 m_avSwimDir  [LEVIATHAN_PARTS];       // 
+    coreUint8   m_aiSwimCount[LEVIATHAN_PARTS];       // 
 
-    coreFlow m_fAnimation;                          // animation value
-    coreFlow m_fMovement;                           // 
+    coreFlow m_fAnimation;                            // animation value
+    coreFlow m_fMovement;                             // 
+
+    coreSoundPtr m_pFireSound;                        // 
 
 
 public:
@@ -574,6 +592,7 @@ private:
     // 
     void __EnableRay      (const coreUintW iIndex, const coreBool bAnimated);
     void __DisableRay     (const coreUintW iIndex, const coreBool bAnimated);
+    void __BeginRay       (const coreUintW iIndex);
     void __CreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround);
 
     // 
@@ -994,7 +1013,7 @@ private:
     coreSpline2 m_ChangePath;            // 
     coreSpline2 m_aPackPath[3];          // 
 
-    coreTexturePtr m_apStomachTex[15];   // (textures are the slowest to load) 
+    coreTexturePtr m_apStomachTex[14];   // (textures are the slowest to load) 
 
 
 public:
@@ -1246,6 +1265,9 @@ public:
 
     DISABLE_COPY(cIntroBoss)
     ASSIGN_ID_EX(9901, "SHINAI", COLOR_MENU_PURPLE)
+
+    // 
+    void ResurrectIntro();
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_00.ogg";}

@@ -81,7 +81,7 @@ cSpaceBackground::cSpaceBackground()noexcept
     }
 
     // 
-    m_Cover.DefineTexture(0u, "environment_space.png");
+    m_Cover.DefineTexture(0u, "environment_space_inside.png");
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);

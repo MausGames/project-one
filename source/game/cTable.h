@@ -180,6 +180,7 @@ public:
 class cTimeTable final
 {
 private:
+    coreProtect<coreUint32> m_iTimeMono;                                             // 
     coreProtect<coreUint32> m_iTimeEvent;                                            // 
 
     coreProtect<coreUint32> m_iTimeTotal;                                            // 
@@ -210,6 +211,10 @@ public:
     void RevertSegment();
 
     // 
+    void StartBoss(const coreUintW iMissionIndex, const coreUintW iBossIndex);
+    void StartBoss();
+
+    // 
     void AddShiftGood(const coreUint16 iValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
     void AddShiftGood(const coreUint16 iValue);
     void AddShiftBad (const coreUint16 iValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
@@ -224,6 +229,7 @@ public:
     coreFloat GetTimeShiftedSegmentSafe()const;
 
     // 
+    inline coreUint32 GetTimeMonoRaw       ()const                                                             {return m_iTimeMono;}
     inline coreUint32 GetTimeEventRaw      ()const                                                             {return m_iTimeEvent;}
     inline coreUint32 GetTimeTotalRaw      ()const                                                             {return m_iTimeTotal;}
     inline coreUint32 GetTimeMissionRaw    (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiTimeMission [iMissionIndex];}

@@ -31,7 +31,8 @@
 // TODO 3: change m_piData into static buffer (needs manual clear), that way I can also remove init-number (! sometimes there are 2 missions in memory at the same time)
 // TODO 3: morning star chain should be above player wind
 // TODO 3: insanity functions in harena copy (and override) some of the mission code, maybe this can be cleaned up
-// TODO 1: what happens to stare if any player is dead
+// TODO 1: what happens to morningstar if any player is dead
+// TODO 4: remove direct access with .List() or Raw containers in all missions (change to Getters)
 
 
 // ****************************************************************
@@ -43,7 +44,7 @@
 #define MISSION_NO_WAVE    (0xFFu)     // 
 #define MISSION_NO_SEGMENT (0xFFu)     // 
 #define MISSION_WAIT_INTRO (1.5f)      // 
-#define MISSION_WAIT_OUTRO (6.0f)      // 
+#define MISSION_WAIT_OUTRO (2.0f)      // 
 #define MISSION_WAIT_PLAY  (6.9f)      // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) >= MISSION_WAVES)
@@ -61,14 +62,18 @@
 #define VIRIDO_BALLS                (2u)                                              // 
 #define VIRIDO_BALLS_RAWS           (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))             // 
 #define VIRIDO_PADDLES              (3u)                                              // 
-#define VIRIDO_BARRIERS             (24u)                                             // 
+#define VIRIDO_BARRIERS             (26u)                                             // 
 #define VIRIDO_BARRIERS_RAWS        (VIRIDO_BARRIERS)                                 // 
+#define VIRIDO_BARRIERS_FIRST       (15u)                                             // 
+#define VIRIDO_BARRIERS_SECOND      (VIRIDO_BARRIERS - VIRIDO_BARRIERS_FIRST)         // 
 #define VIRIDO_LASERS               (8u)                                              // 
 #define VIRIDO_LASERS_RAWS          (VIRIDO_LASERS * 2u)                              // 
-#define VIRIDO_SHADOWS              (20u)                                             // 
+#define VIRIDO_SHADOWS_ENEMY        (20u)                                             // 
+#define VIRIDO_SHADOWS              (VIRIDO_SHADOWS_ENEMY + MISSION_PLAYERS)          // 
 #define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
 #define VIRIDO_BEANS                (16u)                                             // 
-#define VIRIDO_BEANS_RAWS           (VIRIDO_BEANS)                                    // 
+#define VIRIDO_BEANS_RAWS           (VIRIDO_BEANS * 2u)                               // 
+#define VIRIDO_DRUMS                (2u)                                              // 
 #define VIRIDO_BALL_SPEED           (1.5f)                                            // 
 #define VIRIDO_BARRIER_FREE         (r_cast<cShip*>(1u))                              // 
 
@@ -77,19 +82,29 @@
 #define NEVO_LINES                  (4u)                                              // 
 #define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
-#define NEVO_TILES                  (20u)//(16u)                                             // 
+#define NEVO_TILES                  (20u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_ARROWS                 (38u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
 #define NEVO_BLOCKS                 (2u)//(70u)                                       // (disabled) 
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
+#define NEVO_SCRAPS                 (4u)                                              // 
+#define NEVO_CHIPS                  (10u)                                             // 
+#define NEVO_CHIPS_RAWS             (NEVO_CHIPS * 2u)                                 // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
+#define NEVO_TILE_SPEED             (2.0f)                                            // 
 
 #define HARENA_FLOORS               (10u)                                             // 
 #define HARENA_FLOORS_RAWS          (HARENA_FLOORS)                                   // 
 #define HARENA_SPIKES               (36u)                                             // 
 #define HARENA_SPIKES_RAWS          (HARENA_SPIKES * 2u)                              // 
 #define HARENA_SPIKE_DIMENSION      (6u)                                              //    
+#define HARENA_SPIKE_LAUNCH         (1.0f)                                            // 
+#define HARENA_SPIKE_FADE           (0.5f)                                            // 
+#define HARENA_EGGS                 (8u)                                              // 
+#define HARENA_EGGS_RAWS            (HARENA_EGGS * 2u)                                // 
+#define HARENA_FLUMMIS              (21u)                                             // 
+#define HARENA_FLUMMIS_RAWS         (HARENA_FLUMMIS)                                  // 
 #define HARENA_INSANITY_P1          (10u)                                             // 
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
@@ -99,10 +114,14 @@
 #define RUTILUS_AREAS               (2u)                                              // 
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
+#define RUTILUS_TOCKS               (5u)                                              // 
+#define RUTILUS_TOCKS_RAWS          (RUTILUS_TOCKS * 2u)                              // 
+#define RUTILUS_SLAPS               (4u)                                              // 
+#define RUTILUS_SLAPS_RAWS          (RUTILUS_SLAPS * 2u)                              // 
 #define RUTILUS_PLATE_SPEED         (1.0f)                                            // 
 #define RUTILUS_AREA_SIZE           (20.0f)                                           // 
 #define RUTILUS_SAFE_SIZE           (20.0f)                                           // 
-#define RUTILUS_AREA_REGISTRY       (MISSION_PLAYERS + 1u)                            // 
+#define RUTILUS_AREA_REGISTRY       (MISSION_PLAYERS + 2u)                            // 
 
 #define GELU_FANGS                  (25u)                                             // 
 #define GELU_FANGS_RAWS             (GELU_FANGS)                                      // 
@@ -145,8 +164,6 @@
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if((e).HasStatus(ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE(i,n,...)                    {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(i, n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(this->_UpdateWait()) STAGE_FINISH_NOW}}
 
-#define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
-
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, __i) {if((coreIntW(__i) >= coreIntW(f)) && (coreIntW(__i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
@@ -155,10 +172,10 @@
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
 #define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
 
-#define STAGE_STEP(a,b)                        (STEP(I_TO_F(a), I_TO_F(b), I_TO_F(m_iStageSub)))
+#define STAGE_STEP(a,b)                        (STEP(I_TO_F(a), I_TO_F(b), I_TO_F(m_iStageSub)))   // TODO 1: remove ?
 
-#define STAGE_ADD_PATH(n)                      coreSpline2* const OUTPUT n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
-#define STAGE_ADD_SQUAD(n,t,c)                 cEnemySquad* const OUTPUT n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
+#define STAGE_ADD_PATH(n)                      coreSpline2* const OUTPUT n = this->_AddPath    (__LINE__,      [&](coreSpline2* OUTPUT n)
+#define STAGE_ADD_SQUAD(n,t,c)                 cEnemySquad* const OUTPUT n = this->_AddSquad<t>(__LINE__, (c), [&](cEnemySquad* OUTPUT n)
 
 #define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
@@ -341,6 +358,9 @@ public:
     void GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const coreVector3 vPosition);
 
     // 
+    void AddExtraScore(cPlayer* OUTPUT pPlayer, const coreUint32 iScore, const coreVector3 vPosition);
+
+    // 
     inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
     inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
     inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
@@ -427,9 +447,13 @@ private:
     coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];           // 
     const cShip* m_apPaddleOwner[VIRIDO_PADDLES];           // 
 
-    coreBatchList m_Barrier;                                // 
+    coreBatchList m_Barrier1;                               // 
+    coreBatchList m_Barrier2;                               // 
     coreObject3D  m_aBarrierRaw   [VIRIDO_BARRIERS_RAWS];   // 
     const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
+    coreVector2   m_avBarrierPos  [VIRIDO_BARRIERS];        // 
+    coreVector2   m_avBarrierDir  [VIRIDO_BARRIERS];        // 
+    coreBool      m_bBarrierClamp;                          // 
 
     coreBatchList m_Laser;                                  // 
     coreBatchList m_LaserWave;                              // 
@@ -438,18 +462,27 @@ private:
     coreVector2   m_avLaserPos  [VIRIDO_LASERS];            // 
     coreVector2   m_avLaserDir  [VIRIDO_LASERS];            // 
     coreFlow      m_afLaserTick [MISSION_PLAYERS];          // 
+    coreBool      m_bLaserCross;                            // 
 
     coreBatchList m_Shadow;                                 // 
     coreObject3D  m_aShadowRaw   [VIRIDO_SHADOWS_RAWS];     // 
     const cShip*  m_apShadowOwner[VIRIDO_SHADOWS];          // 
+    coreUint32    m_iShadowType;                            // 
 
     coreBatchList m_Bean;                                   // 
+    coreBatchList m_BeanWave;                               // 
     coreObject3D  m_aBeanRaw[VIRIDO_BEANS_RAWS];            // 
 
     cCustomEnemy m_Globe;                                   // 
 
-    coreUint16 m_iPoleCount;                                // 
-    coreUint8  m_iPoleIndex;                                // 
+    coreObject3D m_Target;                                  // 
+    coreObject3D m_aTargetWave[2];                          // 
+
+    coreUint16 m_aiDrumCount[VIRIDO_DRUMS];                 // 
+    coreUint8  m_aiDrumIndex[VIRIDO_DRUMS];                 // 
+
+    coreFlow  m_fPoleCount;                                 // 
+    coreUint8 m_iPoleIndex;                                 // 
 
     coreUint8 m_iRealState;                                 // 
     coreUint8 m_iStickyState;                               // (only between first ball and first paddle) 
@@ -482,7 +515,7 @@ public:
     void DisableLaser(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vPosition);
+    void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vPosition, const coreBool bQuad);
     void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -490,8 +523,23 @@ public:
     void DisableBean(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableTarget ();
+    void DisableTarget(const coreBool bAnimated);
+
+    // 
+    void StartDrumBeat(const coreUintW iDrum, const coreUintW iBarrier);
+    void EndDrumBeat  (const coreUintW iDrum, const coreBool bAnimated);
+
+    // 
     void StartPoleDance(const coreUintW iIndex);
     void EndPoleDance  (const coreBool bAnimated);
+
+    // 
+    void        SetBarrierScale(const coreUintW iIndex, const coreFloat fScale);
+    inline void SetBarrierClamp(const coreBool bClamp) {m_bBarrierClamp = bClamp;}
+
+    // 
+    inline void SetLaserCross(const coreBool bCross) {m_bLaserCross = bCross;}
 
     // 
     inline void MakeReal    (const coreUintW iIndex)       {ADD_BIT(m_iRealState, iIndex)}
@@ -508,9 +556,10 @@ public:
     inline coreObject3D* GetPaddle (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_PADDLES)  return &m_aPaddle    [iIndex];}
     inline coreObject3D* GetBarrier(const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BARRIERS) return &m_aBarrierRaw[iIndex];}
     inline coreObject3D* GetLaser  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_LASERS)   return &m_aLaserRaw  [iIndex * 2u];}
+    inline coreObject3D* GetBean   (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BEANS)    return &m_aBeanRaw   [iIndex * 2u];}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_01_loop.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_01_intro.ogg";}
 
 
 private:
@@ -554,6 +603,8 @@ private:
     coreFloat     m_afArrowAlpha[NEVO_ARROWS];        // 
     coreUint8     m_aiArrowDir  [NEVO_ARROWS];        // 
     coreUint8     m_iArrowActive;                     // 
+    coreUint64    m_iArrowFake;                       // 
+    coreBool      m_bArrowEnabled;                    // 
 
     coreBatchList m_Block;                            // 
     coreBatchList m_BlockWave;                        // 
@@ -561,6 +612,18 @@ private:
     const cShip*  m_apBlockOwner[NEVO_BLOCKS];        // 
     coreFloat     m_afBlockScale[NEVO_BLOCKS];        // 
     coreFloat     m_afBlockRota [NEVO_BLOCKS];        // 
+
+    coreObject3D m_aScrap     [NEVO_SCRAPS];          // 
+    coreFlow     m_afScrapTime[NEVO_SCRAPS];          // 
+
+    coreBatchList m_Chip;                             // 
+    coreBatchList m_ChipWave;                         // 
+    coreObject3D  m_aChipRaw  [NEVO_CHIPS_RAWS];      // 
+    coreFlow      m_afChipTime[NEVO_CHIPS];           // 
+
+    coreObject3D m_Guide;                             // 
+
+    coreObject3D m_Trend;                             // 
 
     cLodObject  m_Container;                          // 
     coreVector2 m_vForce;                             // 
@@ -599,6 +662,22 @@ public:
     void DisableBlock(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableScrap (const coreUintW iIndex, const coreVector2 vPosition);
+    void DisableScrap(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableChip (const coreUintW iIndex);
+    void DisableChip(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableGuide ();
+    void DisableGuide(const coreBool bAnimated);
+
+    // 
+    void EnableTrend ();
+    void DisableTrend(const coreBool bAnimated);
+
+    // 
     void EnableContainer (const coreVector2 vPosition);
     void DisableContainer(const coreBool bAnimated);
 
@@ -609,30 +688,39 @@ public:
     inline coreBool IsTileEnabled(const coreUintW iIndex)const {ASSERT(iIndex < NEVO_TILES) return (m_afTileTime[iIndex] > 0.0f);}
 
     // 
+    inline void SetArrowDir    (const coreUintW iIndex, const coreVector2 vDirection) {ASSERT(iIndex < NEVO_ARROWS) m_aiArrowDir[iIndex] = PackDirection(vDirection);}
+    inline void SetArrowFake   (const coreUintW iIndex)                               {ASSERT(iIndex < NEVO_ARROWS) ASSERT(m_aArrowRaw[iIndex].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) ADD_BIT(m_iArrowFake, iIndex)}
+    inline void SetArrowEnabled(const coreBool bEnabled)                              {m_bArrowEnabled = bEnabled;}
+
+    // 
     inline void SetContainerForce   (const coreVector2 vForce)    {m_vForce    = vForce;}
     inline void SetContainerClamp   (const coreBool    bClamp)    {m_bClamp    = bClamp;}
     inline void SetContainerOverdraw(const coreBool    bOverdraw) {m_bOverdraw = bOverdraw;}
 
     // 
     inline       coreFloat    GetBombTime       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS)  return m_afBombTime[iIndex];}
-    inline       coreBool     GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS)  return HAS_BIT(m_iBombGone, iIndex);}
+    inline       coreBool     GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS)  return HAS_BIT(m_iBombGone,  iIndex);}
     inline const coreUint8&   GetArrowDir       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_ARROWS) return m_aiArrowDir[iIndex];}
+    inline       coreBool     GetArrowFake      (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_ARROWS) return HAS_BIT(m_iArrowFake, iIndex);}
+    inline const coreBool&    GetArrowEnabled   ()const                       {return m_bArrowEnabled;}
     inline const coreVector2& GetContainerForce ()const                       {return m_vForce;}
     inline const coreVector2& GetContainerImpact()const                       {return m_vImpact;}
 
     // 
     inline cLodObject*   GetBomb     (const coreUintW iIndex) {ASSERT(iIndex < NEVO_BOMBS) return &m_aBombRaw[iIndex];}
     inline coreObject3D* GetTile     (const coreUintW iIndex) {ASSERT(iIndex < NEVO_TILES) return &m_aTileRaw[iIndex];}
+    inline coreObject3D* GetChip     (const coreUintW iIndex) {ASSERT(iIndex < NEVO_CHIPS) return &m_aChipRaw[iIndex * 2u];}
     inline cLodObject*   GetContainer()                       {return &m_Container;}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_02.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_02_intro.ogg";}
 
 
 private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __RenderOwnTop   ()final;
     void __MoveOwnAfter   ()final;
@@ -668,9 +756,22 @@ private:
     coreFlow      m_afSpikeTime[HARENA_SPIKES];         // 
     coreFlow      m_afSpikeCur [HARENA_SPIKES];         // 
     coreFloat     m_afSpikeMax [HARENA_SPIKES];         // 
+    coreUint64    m_iSpikeGood;                         // 
+    coreUint64    m_iSpikeBad;                          // 
+
+    coreBatchList m_Egg;                                // 
+    coreBatchList m_EggWave;                            // 
+    coreObject3D  m_aEggRaw[HARENA_EGGS_RAWS];          // 
+
+    coreBatchList m_Flummi;                             // 
+    coreObject3D  m_aFlummiRaw[HARENA_FLUMMIS_RAWS];    // 
+
+    coreObject3D m_Aim;                                 // 
 
     std::function<void()> m_aInsanityStage[5];          // 
     coreUint8             m_iInsanity;                  // 
+
+    coreFlow m_fAnimation;                              // animation value
 
 
 public:
@@ -681,7 +782,7 @@ public:
     ASSIGN_ID(3, "HARENA")
 
     // 
-    void EnableFloor (const coreUintW iIndex, const cShip* pOwner);
+    void EnableFloor (const coreUintW iIndex, const cShip* pOwner, const coreFloat fScale);
     void DisableFloor(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -689,10 +790,23 @@ public:
     void DisableSpike(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableEgg (const coreUintW iIndex);
+    void DisableEgg(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableFlummi (const coreUintW iIndex);
+    void DisableFlummi(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableAim ();
+    void DisableAim(const coreBool bAnimated);
+
+    // 
     void CreateExternChild(const coreVector2 vPosition, const coreVector2 vMove, const coreUint8 iType);
 
     // 
-    inline void LaunchSpike(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < HARENA_SPIKES) m_afSpikeCur[iIndex] = 0.0f; m_afSpikeMax[iIndex] = fTime;}
+    inline void LaunchSpike (const coreUintW iIndex, const coreFloat fTime, const coreBool bGood = false) {ASSERT(iIndex < HARENA_SPIKES) ASSERT(fTime > HARENA_SPIKE_LAUNCH + HARENA_SPIKE_FADE) m_afSpikeCur[iIndex] = 0.0f; m_afSpikeMax[iIndex] = fTime; SET_BIT(m_iSpikeGood, iIndex, bGood)}
+    inline void RetractSpike(const coreUintW iIndex)                                                      {ASSERT(iIndex < HARENA_SPIKES) if(m_afSpikeMax[iIndex]) m_afSpikeCur[iIndex] = MAX(m_afSpikeCur[iIndex], m_afSpikeMax[iIndex] - HARENA_SPIKE_FADE); ADD_BIT(m_iSpikeBad, iIndex)}
 
     // 
     void PlayInsanity();
@@ -703,11 +817,14 @@ public:
     void CrashEnemy(cEnemy* OUTPUT pEnemy)const;
 
     // 
-    inline coreBool GetSpikeLaunched(const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], 1.1f, m_afSpikeMax[iIndex] - 0.5f));}
+    inline coreBool GetSpikeLaunched(const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], HARENA_SPIKE_LAUNCH + 0.1f, m_afSpikeMax[iIndex] - HARENA_SPIKE_FADE));}
     inline coreBool GetSpikeQuiet   (const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] == 0.0f);}
+    inline coreBool GetSpikeGood    (const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], 0.0f, m_afSpikeMax[iIndex] - HARENA_SPIKE_FADE * 0.5f) && HAS_BIT(m_iSpikeGood, iIndex) && !HAS_BIT(m_iSpikeBad, iIndex));}
 
     // 
-    inline coreObject3D* GetSpikeBoard(const coreUintW iIndex) {ASSERT(iIndex < HARENA_SPIKES) return &m_aSpikeRaw[iIndex * 2u + 1u];}
+    inline coreObject3D* GetSpikeBoard(const coreUintW iIndex) {ASSERT(iIndex < HARENA_SPIKES)  return &m_aSpikeRaw [iIndex * 2u + 1u];}
+    inline coreObject3D* GetEgg       (const coreUintW iIndex) {ASSERT(iIndex < HARENA_EGGS)    return &m_aEggRaw   [iIndex * 2u];}
+    inline coreObject3D* GetFlummi    (const coreUintW iIndex) {ASSERT(iIndex < HARENA_FLUMMIS) return &m_aFlummiRaw[iIndex];}
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "mission_03_intro.ogg";}
@@ -717,6 +834,8 @@ private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
+    void __RenderOwnTop   ()final;
     void __MoveOwnAfter   ()final;
 };
 
@@ -734,10 +853,11 @@ private:
     coreUint8    m_iTeleporterActive;                      // 
 
     coreBatchList m_Plate;                                 // 
-    coreObject3D  m_aPlateRaw  [RUTILUS_PLATES_RAWS];      // 
-    coreFlow      m_afPlateTime[RUTILUS_PLATES];           // 
-    coreFloat     m_afPlateSide[RUTILUS_PLATES];           // 
-    coreVector4   m_avPlateData[RUTILUS_PLATES];           // 
+    coreObject3D  m_aPlateRaw   [RUTILUS_PLATES_RAWS];     // 
+    coreFlow      m_afPlateTime [RUTILUS_PLATES];          // 
+    coreFlow      m_afPlatePulse[RUTILUS_PLATES];          // 
+    coreFloat     m_afPlateSide [RUTILUS_PLATES];          // 
+    coreVector4   m_avPlateData [RUTILUS_PLATES];          // 
     coreUint8     m_iPlateActive;                          // 
     coreUint8     m_iPlateRotated;                         // 
 
@@ -752,11 +872,24 @@ private:
     coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
     coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
     coreVector2   m_vWavePos;                              // 
-    coreUint8     m_iWaveDir;                              // 
+    coreVector2   m_vWaveDir;                              // 
+    coreUint8     m_iWaveData;                             // 
     coreUint8     m_iWaveActive;                           // 
     coreUint8     m_iWaveType;                             // 
     coreFloat     m_fWavePower;                            // 
     coreModelPtr  m_apWaveModel[2];                        // 
+
+    coreBatchList m_Tock;                                  // 
+    coreBatchList m_TockWave;                              // 
+    coreObject3D  m_aTockRaw[RUTILUS_TOCKS_RAWS];          // 
+
+    coreBatchList m_Slap;                                  // 
+    coreBatchList m_SlapWave;                              // 
+    coreObject3D  m_aSlapRaw   [RUTILUS_TOCKS_RAWS];       // 
+    coreFlow      m_afSlapValue[RUTILUS_TOCKS];            // 
+
+    coreObject3D m_Capsule;                                // 
+    coreObject3D m_aCapsuleWave[4];                        // 
 
     coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
 
@@ -794,10 +927,22 @@ public:
     void DisableWave(const coreBool bAnimated);
 
     // 
+    void EnableTock (const coreUintW iIndex);
+    void DisableTock(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableSlap (const coreUintW iIndex);
+    void DisableSlap(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableCapsule ();
+    void DisableCapsule(const coreBool bAnimated);
+
+    // 
     inline coreBool IsPlateEnabled(const coreUintW iIndex)const {ASSERT(iIndex < RUTILUS_PLATES) return m_aPlateRaw[iIndex].IsEnabled(CORE_OBJECT_ENABLE_MOVE);}
 
     // 
-    coreFloat CalcAreaSpeed(const coreVector2 vPosition)const;
+    coreFloat CalcAreaSpeed(const coreVector2 vPosition, const coreFloat fFactorFast)const;
 
     // 
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
@@ -815,11 +960,19 @@ public:
     inline void SetAreaScale   (const coreFloat   fScale)    {m_fAreaScale = fScale;}
 
     // 
-    inline void SetWavePosition (const coreVector2 vPosition) {m_vWavePos = vPosition;}
-    inline void SetWaveDirection(const coreUint8   iStep)     {SET_BITVALUE(m_iWaveDir, 2u, 0u, iStep) ASSERT(iStep < 4u)}
-    inline void SetWavePull     (const coreBool    bPull)     {SET_BIT     (m_iWaveDir, 2u, bPull)}
-    inline void SetWaveDelayed  (const coreBool    bDelayed)  {SET_BIT     (m_iWaveDir, 3u, bDelayed)}
-    inline void SetWavePower    (const coreFloat   fPower)    {m_fWavePower = fPower;}
+    inline void SetWavePosition (const coreVector2 vPosition)  {m_vWavePos = vPosition;}
+    inline void SetWaveDirection(const coreVector2 vDirection) {m_vWaveDir = vDirection; ASSERT(vDirection.IsNormalized())}
+    inline void SetWavePull     (const coreBool    bPull)      {SET_BIT(m_iWaveData, 0u, bPull)}
+    inline void SetWaveDelayed  (const coreBool    bDelayed)   {SET_BIT(m_iWaveData, 1u, bDelayed)}
+    inline void SetWavePower    (const coreFloat   fPower)     {m_fWavePower = fPower;}
+
+    // 
+    inline coreBool GetWavePull   ()const {return HAS_BIT(m_iWaveData, 0u);}
+    inline coreBool GetWaveDelayed()const {return HAS_BIT(m_iWaveData, 1u);}
+
+    // 
+    inline coreObject3D* GetTock(const coreUintW iIndex) {ASSERT(iIndex < RUTILUS_TOCKS) return &m_aTockRaw[iIndex * 2u];}
+    inline coreObject3D* GetSlap(const coreUintW iIndex) {ASSERT(iIndex < RUTILUS_SLAPS) return &m_aSlapRaw[iIndex * 2u];}
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "mission_04_intro.ogg";}
@@ -829,6 +982,7 @@ private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __MoveOwnBefore  ()final;
     void __MoveOwnAfter   ()final;
@@ -1156,9 +1310,11 @@ private:
 class cIntroMission final : public cMission
 {
 private:
-    cIntroBoss m_Intro;      // 
+    cIntroBoss m_Intro;                    // 
 
-    coreBool m_bFirstPlay;   // 
+    cTooltip m_aManual[MISSION_PLAYERS];   // 
+
+    coreBool m_bFirstPlay;                 // 
 
 
 public:
@@ -1173,7 +1329,9 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn    ()final;
+    void __RenderOwnTop()final;
+    void __MoveOwnAfter()final;
 };
 
 

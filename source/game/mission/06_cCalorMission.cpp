@@ -141,7 +141,7 @@ void cCalorMission::EnableLoad(const cShip* pOwner)
     coreObject3D& oLoad = m_aLoadRaw[0];
 
     // 
-    WARN_IF(oLoad.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(oLoad.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableLoad(false);
 
     // 
     m_pLoadOwner     = pOwner;
@@ -208,7 +208,7 @@ void cCalorMission::EnableStar(const coreUintW iIndex, const cShip* pOwner, cons
     coreObject3D* pChain = (*m_StarChain.List())[iIndex*CALOR_CHAINS];
 
     // 
-    WARN_IF(pStar->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(pStar->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableStar(iIndex, false);
 
     // 
     ASSERT(pOwner)
@@ -327,7 +327,7 @@ void cCalorMission::UncatchObject(const coreUintW iIndex)
 // 
 void cCalorMission::__RenderOwnBottom()
 {
-    DEPTH_PUSH
+    //DEPTH_PUSH
 
     glDisable(GL_DEPTH_TEST);
     {

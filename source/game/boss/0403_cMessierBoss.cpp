@@ -23,7 +23,7 @@
 // time bubble hides stopping background movement
 // TODO 1: intro: meteoriten kommen zusammen, kurze drehung und wartezeit, dann bumm, und messier bricht raus schon mit schild
 // TODO 3: reversed bullets should disappear into boss with slight fade (oder mit partikel-effekt kaschieren ? bei creation und destruction)
-// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: mehr von Ikrauga endboss inspirieren lassen https://youtu.be/AVFdOhf5-P0?t=1247
 // TODO 1: spieler sollte bei start von plate-phase weggestoßen werden (oder ähnliches, damit er nicht den ersten bullet-angriff in die fresse bekommt, spieler is zu dem zeitpunkt nah dran)
 // TODO 1: improve bullet-directions for time-slowdown phase (sometimes they cluster, maybe first identify the reason/origin)
@@ -44,6 +44,11 @@
 // TODO 1: flip-bullets vielleicht mit 0.5f*GA oder 1.5f rotieren (statt 1.0f)
 // TODO 1: am anfang fliegt boss mit wenn alle kleine meteoriten weg sind, rastet ein bei nächster phase zusammen mit pause (kann aber länger sein, life-milestones bleiben ja gleich)
 // TODO 1: art der rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
+// TODO 1: arrow-platten mechanik soll angriffe vom boss ablenken, vielleicht nicht durchgezogene linien
+// TODO 1: zusätzliche geschosse in time-phase, aber nur bei part 1 und 2, nicht 3
+// TODO 1: from mission code: reduce bullet-animation + dark-animation speed (abhängig von flyspeed ?) (auch bei boss, auch fürs rückwärts-fliegen)
+// TODO 1: fix messier model
+// TODO 1: fix messier background rotation, wird von area speed-calculation in bewegung gesetzt
 
 
 // ****************************************************************
@@ -285,7 +290,7 @@ void cMessierBoss::__MoveOwn()
             pMission->EnableWave(1u);
 
             pMission->SetWavePosition (coreVector2(1.1f,0.0f) * FOREGROUND_AREA);
-            pMission->SetWaveDirection(0u);
+            pMission->SetWaveDirection(coreVector2(0.0f,1.0f));
             pMission->SetWavePull     (true);
             pMission->SetWaveDelayed  (true);
         }
@@ -332,7 +337,7 @@ void cMessierBoss::__MoveOwn()
         if(PHASE_BEGINNING2)
         {
             pMission->SetWavePosition (coreVector2(0.0f,1.1f) * FOREGROUND_AREA);
-            pMission->SetWaveDirection(2u);
+            pMission->SetWaveDirection(coreVector2(1.0f,0.0f));
         }
 
         PHASE_CONTROL_TIMER(0u, 0.3f, LERP_SMOOTH)
@@ -838,7 +843,7 @@ void cMessierBoss::__MoveOwn()
 // 
 void cMessierBoss::__EnableRings()
 {
-    WARN_IF(m_aRing[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_aRing[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableRings(false);
 
     // 
     m_fRingTime = -1.0f;

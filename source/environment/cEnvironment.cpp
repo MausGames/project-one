@@ -160,6 +160,10 @@ void cEnvironment::Move()
     // 
     const coreVector3 vColor = m_TransitionTime.GetStatus() ? LERPH3(m_pOldBackground->GetColor(), m_pBackground->GetColor(), m_TransitionTime.GetValuePct(CORE_TIMER_GET_NORMAL)) : m_pBackground->GetColor();
     g_pMenu->SetHighlightColor(vColor);
+    
+    
+    const coreVector3 vColor2 = m_TransitionTime.GetStatus() ? LERPH3(m_pOldBackground->GetButtonColor(), m_pBackground->GetButtonColor(), m_TransitionTime.GetValuePct(CORE_TIMER_GET_NORMAL)) : m_pBackground->GetButtonColor();
+    g_pMenu->SetButtonColor(vColor2);
 }
 
 

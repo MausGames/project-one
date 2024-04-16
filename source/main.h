@@ -99,6 +99,9 @@
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
 // TODO 1: all music files need equal base volume, also remove meta data
 // TODO 1: all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data, also shorten sound front and back (make sure there is no micro-sound), also make mono if better
+// TODO 3: object_tetra_top und object_cube_top brauchen gute outline
+// TODO 3: medal textur ist groß und sollten komprimiert werden, aber hat dann artefakte bei kleiner scale, vielleicht separate kleine textur erzeugen, andere texturen auch ?
+// TODO 1: alle sound-effekte bei denen man was einsammeln soll, prüfen ob pitch-inkrement verwendet werden soll
 
 
 // ****************************************************************
@@ -141,7 +144,7 @@
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
-#define SHIELD               (20u)
+#define SHIELD               (100u)
 #define BADGES               (3u)
 #define WEAPONS              (6u)
 #define SUPPORTS             (2u)
@@ -190,8 +193,18 @@
 #define COLOR_SHIP_BLUE      (coreVector3(0.151f, 0.600f, 1.000f))
 #define COLOR_SHIP_CYAN      (coreVector3(0.000f, 0.800f, 0.800f))
 #define COLOR_SHIP_GREEN     (coreVector3(0.308f, 0.720f, 0.308f))
+#define COLOR_SHIP_WHITE     (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_SHIP_GREY      (coreVector3(0.500f, 0.500f, 0.500f))
-#define COLOR_SHIP_BLACK     (COLOR_SHIP_GREY * 0.6f)
+#define COLOR_SHIP_BLACK     (COLOR_SHIP_GREY      * 0.6f)
+#define COLOR_PLAYER_WHITE   (COLOR_ENERGY_WHITE   * 0.5f)
+#define COLOR_PLAYER_YELLOW  (COLOR_ENERGY_YELLOW  * 0.7f)
+#define COLOR_PLAYER_ORANGE  (COLOR_ENERGY_ORANGE  * 0.95f)
+#define COLOR_PLAYER_RED     (COLOR_ENERGY_RED     * 0.9f)
+#define COLOR_PLAYER_MAGENTA (COLOR_ENERGY_MAGENTA * 0.9f)
+#define COLOR_PLAYER_PURPLE  (COLOR_ENERGY_PURPLE  * 1.0f)
+#define COLOR_PLAYER_BLUE    (COLOR_ENERGY_BLUE    * 1.1f)
+#define COLOR_PLAYER_CYAN    (COLOR_ENERGY_CYAN    * 1.0f)
+#define COLOR_PLAYER_GREEN   (COLOR_ENERGY_GREEN   * 0.77f)
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))   // TODO 1: remove
 
 // shader modifiers
@@ -207,6 +220,7 @@
 #define SHADER_SINGLE        "#define _P1_SINGLE_"      " (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_"       " (1) \n"        // outdoor, decal, outline
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_"    " (1) \n"        // object_ship
+#define SHADER_DEPTH         "#define _P1_DEPTH_"       " (1) \n"        // object_ship
 #define SHADER_BLINK         "#define _P1_BLINK_"       " (1) \n"        // energy, object_ship, object_meteor
 #define SHADER_THICK         "#define _P1_THICK_"       " (1) \n"        // outline
 #define SHADER_FLAT          "#define _P1_FLAT_"        " (1) \n"        // outline, energy
@@ -338,6 +352,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "visual/cBlur.h"
 #include "visual/cGlow.h"
 #include "visual/cDistortion.h"
+#include "visual/cExhaust.h"
 #include "visual/cHeadlight.h"
 #include "visual/cInk.h"
 #include "visual/cSnow.h"
@@ -375,6 +390,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cShip.h"
 #include "game/cEnemy.h"
 #include "game/cHelper.h"
+#include "game/cTracker.h"
 #include "game/cItem.h"
 #include "game/cShield.h"
 #include "game/cCrash.h"

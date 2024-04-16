@@ -33,6 +33,7 @@
 #define POST_WALLS_BASE  (2u)
 #define POST_WALLS_EXTRA (2u)
 #define POST_WALLS       (POST_WALLS_BASE + POST_WALLS_EXTRA)
+#define POST_BORDERS     (3u)
 
 
 // ****************************************************************
@@ -47,8 +48,8 @@ private:
 
     coreObject2D m_aInterior[POST_INTERIORS];   // 
     coreObject2D m_aWall    [POST_WALLS];       // wallpapers outside of the game area
+    coreObject2D m_aBorder  [POST_BORDERS];     // 
     coreObject2D m_Separator;                   // separator for split-screen
-    coreObject2D m_Border;                      // 
 
     coreFlow m_fSplitScreenValue;               // 
     coreBool m_bSplitScreen;                    // 

@@ -28,12 +28,13 @@ cShip::cShip()noexcept
 
 // ****************************************************************
 // 
-void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted, const coreBool bIgnored)
+void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted, const coreBool bIgnored, const coreBool bWhite)
 {
     // 
     m_iBaseColor = coreVector4(vColor, 0.0f).PackUnorm4x8();
     if(bInverted) ADD_BIT(m_iBaseColor, SHIP_INVERTED_BIT)
     if(bIgnored)  ADD_BIT(m_iBaseColor, SHIP_IGNORED_BIT)
+    if(bWhite)    ADD_BIT(m_iBaseColor, SHIP_WHITE_BIT)
 
     // 
     this->SetColor3(vColor);

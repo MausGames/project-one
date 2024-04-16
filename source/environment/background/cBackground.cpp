@@ -23,7 +23,7 @@ template <const coreChar* pcString, coreUintW iLength, coreUintW iNum> struct sS
 };
 
 #define __STRING_LIST(s,n,v)              \
-    extern const coreChar v ## __a[] = s; \
+    static const coreChar v ## __a[] = s; \
     static const sStringList<v ## __a, ARRAY_SIZE(v ## __a), n> v;
 
 __STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SPACE_NEBULA_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM, CLOUD_RAIN_NUM), s_asOverlayTransform)
@@ -196,9 +196,6 @@ void cBackground::Move()
     {
         // cache current camera position (to improve performance)
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
-        
-        coreUint32 A = 0u;
-        coreUint32 B = 0u;
 
         FOR_EACH(it, *papList)
         {
@@ -215,21 +212,35 @@ void cBackground::Move()
             {
                 coreObject3D* pObject = (*et);
 
-                // determine visibility and compare with current status
-                const coreVector2 vScreenPos = (pObject->GetPosition().xy() - vCameraPos) * mRota;
-                const coreVector2 vScreenPos2 = pObject->GetPosition().xy() - vCameraPos;
-                const coreVector2 vScreenPos3 = coreVector2(vScreenPos2.x, FMOD(ABS(vScreenPos2.y) + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) - I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL) * mRota;
-                //const coreVector2 vScreenPos = ((pObject->GetPosition().xy() - vCameraPos) * coreVector2(1.0f,0.6f)) * mRota;    // vielleicht visual height + Z reinrechnen    hab auch artefakte in space
-                const coreBool    bIsVisible = ((ABS(vScreenPos.x) + ABS(vScreenPos.y)) < fRange);
-                const coreBool    bIsVisible2 = ((ABS(vScreenPos3.x) + ABS(vScreenPos3.y)) < fRange);
-                if(bIsVisible2 != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+                // 
+                const coreVector2 vScreenDiff = pObject->GetPosition().xy() - vCameraPos;
+
+                // determine logical visibility (and handle infinity)
+                const coreVector2 vScreenPosWrap = coreVector2(vScreenDiff.x, FMOD(ABS(vScreenDiff.y) + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) - I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL) * mRota;
+                const coreBool    bIsVisibleWrap = ((ABS(vScreenPosWrap.x) + ABS(vScreenPosWrap.y)) < fRange);
+                if(bIsVisibleWrap != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
                     // 
+                    pObject->SetEnabled(bIsVisibleWrap ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_NOTHING);
+
+                    // 
                     const coreFloat fFract = FRACT(FMOD(pObject->GetPosition().y + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) * EU);
-                    pObject->SetEnabled(bIsVisible2 ? ((fFract < fDensity) ? (bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING) : CORE_OBJECT_ENABLE_MOVE) : CORE_OBJECT_ENABLE_NOTHING);
+                    pObject->SetStatus((fFract < fDensity) ? 1 : 0);
+
+                    // 
+                    bUpdate = true;
+                }
+
+                // determine real visibility
+                const coreVector2 vScreenPos = vScreenDiff * mRota;
+                const coreBool    bIsVisible = ((ABS(vScreenPos.x) + ABS(vScreenPos.y)) < fRange) && pObject->GetStatus();
+                if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+                {
+                    // 
+                    pObject->SetEnabled(bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 
                     // recalculate properties when becoming visible
-                    if(pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL))
+                    if(bIsVisible)
                     {
                         const coreUintW iIndex = (*it)->List()->index(et);
 
@@ -253,20 +264,10 @@ void cBackground::Move()
                     // 
                     bUpdate = true;
                 }
-                
-                if(bIsVisible)  A += 1u;
-                if(bIsVisible2) B += 1u;
             }
 
             // move only when necessary (also to reduce instancing updates)
             if(bUpdate) (*it)->MoveNormal();
-        }
-        
-        if(papList == &m_apGroundObjectList)
-        {
-            Core::Debug->InspectValue("visible",  A);
-            Core::Debug->InspectValue("visible2", B);
-            Core::Debug->InspectValue("cam", vCameraPos);
         }
     };
     const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotated45()).m12();
@@ -459,10 +460,10 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
 void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUintW iReserve)
 {
     coreSet<coreObject3D*>* pContent = pObjectList->List();
-    WARN_IF(pContent->size() < 2u) return;
+    WARN_IF(pContent->size() <= 1u) return;
 
     // 
-    ASSERT((pContent->size() < 3u) || (((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y) == ((*pContent)[1]->GetPosition().y > (*pContent)[2]->GetPosition().y)))
+    ASSERT((pContent->size() <= 2u) || (((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y) == ((*pContent)[1]->GetPosition().y > (*pContent)[2]->GetPosition().y)))
     if((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y)
         std::reverse(pContent->begin(), pContent->end());
 

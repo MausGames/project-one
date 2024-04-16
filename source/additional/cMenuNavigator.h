@@ -65,6 +65,7 @@ private:
 
     coreBool m_bPressed;                            // 
     coreList<coreUint8> m_aiLock;                   // (0 = all | 1 = move) 
+    coreList<coreUint8> m_aiLastPack;
 
     coreVector2 m_vMouseOffset;                     // 
 

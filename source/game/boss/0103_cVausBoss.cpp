@@ -82,6 +82,9 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cVausBoss::__MoveOwn()
 {
+    cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
+    coreObject3D*   pBall    = pMission->GetBall(0u);
+
     // 
     this->_UpdateBoss();
 
@@ -90,10 +93,6 @@ void cVausBoss::__MoveOwn()
         this->Kill(true);                
         this->_EndBoss();
     }
-
-
-    cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
-    coreObject3D*   pBall    = pMission->GetBall(0u);
 
     // ################################################################
     // 

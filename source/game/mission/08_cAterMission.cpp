@@ -77,7 +77,7 @@ void cAterMission::__RenderOwnBottom()
 {
     if(m_pInnerMission) m_pInnerMission->RenderBottom();
 
-    DEPTH_PUSH
+    //DEPTH_PUSH
 
     glDisable(GL_DEPTH_TEST);
     {

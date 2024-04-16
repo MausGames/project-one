@@ -110,11 +110,11 @@ void cNautilusBoss::__RenderOwnOver()
 // 
 void cNautilusBoss::__MoveOwn()
 {
-    // 
-    this->_UpdateBoss();
-
     cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
+
+    // 
+    this->_UpdateBoss();
 
     // 
     m_fAnimation.UpdateMod(1.0f, 10.0f);
@@ -507,7 +507,7 @@ void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2 vPosit
 // 
 void cNautilusBoss::__EnableBullet(const coreVector2 vStart, const coreVector2 vEnd)
 {
-    WARN_IF(m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableBullet(false);
 
     const coreVector2 vDir = (vEnd - vStart).Normalized();
 

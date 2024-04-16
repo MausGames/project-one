@@ -64,7 +64,7 @@ cSeaBackground::cSeaBackground()noexcept
 
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
-                    pObject->DefineModel((iType == 0u) ? "environment_sea_03.md3" : ((iType == 1u) ? "environment_sea_04.md3" : "environment_sea_05.md3"));
+                    pObject->DefineModel((iType == 0u) ? "environment_sea_02.md3" : ((iType == 1u) ? "environment_sea_03.md3" : "environment_sea_04.md3"));
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -165,8 +165,8 @@ cSeaBackground::cSeaBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineTexture(0u, "environment_sea_diff.png");
-        oBase.DefineTexture(1u, "environment_sea_norm.png");
+        oBase.DefineTexture(0u, "environment_animal_diff.png");
+        oBase.DefineTexture(1u, "environment_animal_norm.png");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < SEA_ANIMAL_NUM; ++i)
@@ -194,7 +194,7 @@ cSeaBackground::cSeaBackground()noexcept
 
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
-                    pObject->DefineModel(bType ? "environment_seashell.md3" : "environment_starfish.md3");
+                    pObject->DefineModel(bType ? "environment_animal_01.md3" : "environment_animal_02.md3");
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -235,7 +235,7 @@ cSeaBackground::cSeaBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
-        oBase.DefineTexture(0u, "environment_algae3.png");
+        oBase.DefineTexture(0u, "environment_particle_02.png");
         oBase.DefineProgram("effect_decal_single_program");
 
         for(coreUintW i = 0u; i < SEA_ALGAE_NUM; ++i)
@@ -340,7 +340,6 @@ void cSeaBackground::__MoveOwn()
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pAlgae = (*pList->List())[i];
-        if(!pAlgae->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
         // 
         const coreFloat   fOffset = I_TO_F(POW2(i) % m_iAlgaeNum);
@@ -349,7 +348,7 @@ void cSeaBackground::__MoveOwn()
         const coreVector2 vDir    = coreVector2::Direction(fTime);
 
         // 
-        pAlgae->SetPosition (coreVector3(fPos, pAlgae->GetPosition().yz()));
+        pAlgae->SetPosition (coreVector3(fPos, pAlgae->GetPosition().yz()));   // # always, to determine visibility
         pAlgae->SetDirection(coreVector3(vDir, 0.0f));
     }
     pList->MoveNormal();
@@ -384,9 +383,8 @@ void cSeaBackground::__MoveOwn()
 // 
 void cSeaBackground::__UpdateOwn()
 {
-    const coreBatchList*  pGround    = m_apGroundObjectList[0];
-    const coreBool        bInstanced = pGround->IsInstanced();
-    const coreProgramPtr& pProgram   = bInstanced ? pGround->GetProgram() : pGround->List()->front()->GetProgram();
+    const coreBatchList*  pGround  = m_apGroundObjectList[0];
+    const coreProgramPtr& pProgram = pGround->IsInstanced() ? pGround->GetProgram() : pGround->List()->front()->GetProgram();
 
     // enable the shader-program
     if(!pProgram.IsUsable()) return;
@@ -394,7 +392,7 @@ void cSeaBackground::__UpdateOwn()
 
     // 
     pProgram->SendUniform("u_v1Time", m_fWaveTime);
-    
-    
-            cShadow::EnableShadowRead(bInstanced ? SHADOW_HANDLE_OBJECT_WAVE_INST : SHADOW_HANDLE_OBJECT_WAVE);
+
+    // 
+    cShadow::EnableShadowRead(pGround->IsInstanced() ? SHADOW_HANDLE_OBJECT_WAVE_INST : SHADOW_HANDLE_OBJECT_WAVE);
 }

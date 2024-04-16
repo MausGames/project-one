@@ -390,9 +390,12 @@ void cTimeTable::Update()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
+    m_iTimeMono += 1u;
+
+    // 
     //if(!TIME) return;
     if(TIME < 0.001f) return;
-    ASSERT(TIME == m_fFrameTime)
+    //ASSERT(TIME == m_fFrameTime)
 
     // 
     m_iTimeEvent += 1u;
@@ -464,10 +467,11 @@ void cTimeTable::AddShiftBad(const coreUint16 iValue)
 void cTimeTable::Reset()
 {
     // reset all time values (# no memset)
+    m_iTimeMono  = 0u;
     m_iTimeEvent = 0u;
     m_iTimeTotal = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiTimeMission[j] = 0u;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * RCP(m_fFrameTime)) : 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-100.0f * RCP(m_fFrameTime)) : 0u;
 
     // reset all shift values (# no memset)
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiShiftGoodMission[j] = 0u;
@@ -484,10 +488,12 @@ void cTimeTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iS
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
 
+    // 
     m_iTimeTotal                                  -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
     m_aiTimeMission [iMissionIndex]               -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
-    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * RCP(m_fFrameTime)) : 0u;
+    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0f * RCP(m_fFrameTime)) : 0u;
 
+    // 
     m_aiShiftGoodMission [iMissionIndex]               -= m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex];
     m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex] = 0u;
     m_aiShiftBadMission  [iMissionIndex]               -= m_aaiShiftBadSegment [iMissionIndex][iSegmentIndex];
@@ -499,6 +505,24 @@ void cTimeTable::RevertSegment()
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+void cTimeTable::StartBoss(const coreUintW iMissionIndex, const coreUintW iBossIndex)
+{
+    // 
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iBossIndex    < TABLE_BOSSES)
+    m_aaiTimeSegment[iMissionIndex][MISSION_BOSS_TO_SEGMENT(iBossIndex)] = F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * RCP(m_fFrameTime));
+}
+
+void cTimeTable::StartBoss()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->StartBoss(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex());
 }
 
 

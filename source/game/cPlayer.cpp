@@ -20,6 +20,7 @@ cPlayer::cPlayer()noexcept
 , m_fTilt           (0.0f)
 , m_fMoveSpeed      (1.0f)
 , m_fShootSpeed     (1.0f)
+, m_fAnimSpeed      (1.0f)
 , m_fRollTime       (0.0f)
 , m_fFeelTime       (PLAYER_NO_FEEL)
 , m_fIgnoreTime     (PLAYER_NO_IGNORE)
@@ -42,6 +43,7 @@ cPlayer::cPlayer()noexcept
 , m_fCircleValue    (0.0f)
 
 , m_fHitDelay (0.0f)
+, m_fBoost    (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -163,9 +165,9 @@ void cPlayer::Configure(const coreUintW iShipType)
     switch(iShipType)
     {
     default: ASSERT(false)
-    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_BLUE   * 1.1f;  break;
-    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_ENERGY_YELLOW * 0.7f;  break;
-    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_ENERGY_GREEN  * 0.77f; break;
+    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_PLAYER_BLUE;   break;
+    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_PLAYER_YELLOW; break;
+    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_PLAYER_GREEN;  break;
     }
 
     // load models
@@ -187,6 +189,22 @@ void cPlayer::Configure(const coreUintW iShipType)
     // 
     SET_BITVALUE(m_iLook, 4u, 0u, iShipType)
     SET_BITVALUE(m_iLook, 8u, 4u, m_iBaseColor)
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EquipShield(const coreInt32 iShield)
+{
+    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
+    if(iShield)
+    {
+        // 
+        ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
+        m_iMaxShield = iShield;
+    }
 }
 
 
@@ -240,8 +258,7 @@ void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
     switch(iID)
     {
     default: ASSERT(false)
-    case 0u:                        break;
-    case 1u: this->__EquipShield(); break;
+    case 0u: break;
     }
 }
 
@@ -250,6 +267,8 @@ void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
 // render the player
 void cPlayer::Render()
 {
+    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_TOP)) return;
+
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
@@ -259,6 +278,8 @@ void cPlayer::Render()
 
 void cPlayer::RenderBefore()
 {
+    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_TOP)) return;
+
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
@@ -280,6 +301,8 @@ void cPlayer::RenderBefore()
 
 void cPlayer::RenderMiddle()
 {
+    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_TOP)) return;
+
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
@@ -291,6 +314,25 @@ void cPlayer::RenderAfter()
 {
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_TOP))
+        {
+            this->RemoveStatus(PLAYER_STATUS_TOP);
+            {
+                this->RenderBefore();
+
+                glEnable(GL_DEPTH_TEST);
+                {
+                    this->Render();
+                    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);   // TODO 1: wird doppelt gezeichnet
+                }
+                glDisable(GL_DEPTH_TEST);
+
+                this->RenderMiddle();
+            }
+            this->AddStatus(PLAYER_STATUS_TOP);
+        }
+        
+        
         // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Arrow);
@@ -319,13 +361,15 @@ void cPlayer::Move()
             coreVector2 vNewDir = this->GetDirection().xy();
 
             // 
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))
                 vNewDir = -vNewDir.Rotated90();
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT))
                 vNewDir =  vNewDir.Rotated90();
 
             // 
-            if(vNewDir != this->GetDirection().xy()) g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_TURN);
+#if defined(_CORE_DEBUG_)
+            //if(vNewDir != this->GetDirection().xy()) g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_TURN);
+#endif
 
             // set new direction
             this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
@@ -334,7 +378,7 @@ void cPlayer::Move()
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            //if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
+            //if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_ROLL))
             //    if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
@@ -393,7 +437,7 @@ void cPlayer::Move()
         }
 
         // 
-        m_fAnimation.UpdateMod(1.0f, 20.0f);
+        m_fAnimation.UpdateMod(1.0f * m_fAnimSpeed, 20.0f);
         this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
 
         // 
@@ -422,12 +466,12 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & PLAYER_ACTION_TURN_SHOOT(i)) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot, m_fShootSpeed);
         }
 
         // 
-        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL) || HAS_FLAG(m_iStatus, PLAYER_STATUS_KEEP_RANGE))
         {
             if(!m_fRangeValue) this->EnableRange();
             m_fRangeValue.UpdateMin(3.0f, 1.0f);
@@ -443,7 +487,7 @@ void cPlayer::Move()
            !coreMath::IsNear(m_vOldDir.y, this->GetDirection().y))
         {
             m_vOldDir = this->GetDirection().xy();
-            this->ShowArrow();
+            this->ShowArrow(0u);
         }
 
         // 
@@ -461,14 +505,14 @@ void cPlayer::Move()
             m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_RANGE_SIZE * PLAYER_SIZE_FACTOR * fScale);
             m_Range.SetDirection(coreVector3(vDir, 0.0f));
             m_Range.SetAlpha    (STEP(0.0f, 0.15f, fScale));
-            m_Range.SetTexOffset(m_Range.GetTexOffset() - m_Range.GetDirection().xy() * (0.1f * TIME));
+            m_Range.SetTexOffset(m_Range.GetTexOffset() - m_Range.GetDirection().xy() * (0.1f * TIME * m_fAnimSpeed));
             m_Range.Move();
         }
 
         if(m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            m_fArrowValue.Update(-2.0f);
+            m_fArrowValue.Update(-2.0f * m_fAnimSpeed);
 
             // 
             if(m_fArrowValue <= 0.0f) this->DisableArrow();
@@ -497,11 +541,11 @@ void cPlayer::Move()
         if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            m_fFeelTime.Update(-1.0f);
+            m_fFeelTime.Update(-1.0f * m_fAnimSpeed);
 
             // 
-            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*TIME, 1.0f));
-                              else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*TIME, 0.0f));
+            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*TIME * m_fAnimSpeed, 1.0f));
+                              else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*TIME * m_fAnimSpeed, 0.0f));
 
             // 
             if(!m_Bubble.GetAlpha()) this->EndFeeling();
@@ -513,14 +557,14 @@ void cPlayer::Move()
             m_Bubble.SetPosition (this->GetPosition());
             m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * PLAYER_SIZE_FACTOR * m_Bubble.GetAlpha());
             m_Bubble.SetDirection(coreVector3(vDir, 0.0f));
-            m_Bubble.SetTexOffset(m_Bubble.GetTexOffset() - m_Bubble.GetDirection().xy() * (0.2f * TIME));
+            m_Bubble.SetTexOffset(m_Bubble.GetTexOffset() - m_Bubble.GetDirection().xy() * (0.2f * TIME * m_fAnimSpeed));
             m_Bubble.Move();
         }
 
         if(m_aShield[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            m_fIgnoreTime.Update(-0.9f);
+            m_fIgnoreTime.Update(-1.0f / PLAYER_IGNORE_TIME * m_fAnimSpeed);
 
             // 
             if(m_fIgnoreTime <= 0.0f) this->EndIgnoring();
@@ -549,7 +593,7 @@ void cPlayer::Move()
         if(m_Circle.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            m_fCircleValue.Update(-5.0f);
+            m_fCircleValue.Update(-5.0f * m_fAnimSpeed);
 
             // 
             if(m_fCircleValue <= 0.0f) this->DisableCircle();
@@ -686,6 +730,15 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
         }
 
         // 
+        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_INVINCIBLE))
+        {
+            m_iCurHealth = m_iMaxHealth;
+            m_iCurShield = m_iMaxShield;
+            
+            g_pGame->GetInterface()->PingImmune(g_pGame->GetPlayerIndex(this));
+        }
+
+        // 
         m_DataTable.EditCounterTotal  ()->iDamageTaken += iTaken;
         m_DataTable.EditCounterMission()->iDamageTaken += iTaken;
         m_DataTable.EditCounterSegment()->iDamageTaken += iTaken;
@@ -778,6 +831,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     // 
     m_fMoveSpeed  = 1.0f;
     m_fShootSpeed = 1.0f;
+    m_fAnimSpeed  = 1.0f;
 
     // 
     m_fInterrupt      = 0.0f;
@@ -813,7 +867,7 @@ void cPlayer::Kill(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cPlayer::ShowArrow()
+void cPlayer::ShowArrow(const coreUint8 iType)
 {
     // 
     if(m_fArrowValue <= 0.0f) this->EnableArrow();
@@ -979,7 +1033,7 @@ void cPlayer::TurnIntoPlayer()
 // 
 void cPlayer::EnableRange()
 {
-    WARN_IF(m_Range.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Range.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableRange();
 
     // 
     m_Range.SetAlpha(0.0f);
@@ -1006,7 +1060,7 @@ void cPlayer::DisableRange()
 // 
 void cPlayer::EnableArrow()
 {
-    WARN_IF(m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableArrow();
 
     // 
     m_Arrow.SetAlpha(0.0f);
@@ -1033,7 +1087,7 @@ void cPlayer::DisableArrow()
 // 
 void cPlayer::EnableWind(const coreVector2 vDirection)
 {
-    WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableWind();
 
     // 
     const coreFloat fSide = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), vDirection));
@@ -1064,7 +1118,7 @@ void cPlayer::DisableWind()
 // 
 void cPlayer::EnableBubble()
 {
-    WARN_IF(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableBubble();
 
     // 
     m_Bubble.SetAlpha(0.0f);
@@ -1091,7 +1145,7 @@ void cPlayer::DisableBubble()
 // 
 void cPlayer::EnableShield()
 {
-    WARN_IF(m_aShield[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_aShield[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableShield();
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aShield); ++i)
     {
@@ -1124,7 +1178,7 @@ void cPlayer::DisableShield()
 // 
 void cPlayer::EnableCircle()
 {
-    WARN_IF(m_Circle.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Circle.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableCircle();
 
     // 
     m_Circle.SetAlpha(0.0f);
@@ -1261,7 +1315,7 @@ coreBool cPlayer::TestCollisionPrecise(const coreVector2 vRayPos, const coreVect
 
 // ****************************************************************
 // 
-coreVector2 cPlayer::CalcMove()const
+coreVector2 cPlayer::CalcMove()
 {
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
@@ -1281,31 +1335,22 @@ coreVector2 cPlayer::CalcMove()const
 
 // ****************************************************************
 // 
-coreFloat cPlayer::CalcMoveSpeed()const
+coreFloat cPlayer::CalcMoveSpeed()
 {
-    static coreFloat s_fBoost = 0.0f;
-    if(HAS_BIT(m_pInput->iActionPress,   0u) ||   // to make movement during quickshots easier
-       HAS_BIT(m_pInput->iActionRelease, 0u))     // to make emergency evasion maneuvers easier
-        s_fBoost = 1.0f;
-    else s_fBoost = MAX(s_fBoost - 10.0f * TIME, 0.0f);
+    
+    //if(HAS_BIT(m_pInput->iActionPress,   0u) ||   // to make movement during quickshots easier
+    //   HAS_BIT(m_pInput->iActionRelease, 0u))     // to make emergency evasion maneuvers easier
+    //    s_fBoost = 1.0f;
+    //else s_fBoost = MAX(s_fBoost - 10.0f * TIME, 0.0f);
+         if(HAS_BIT(m_pInput->iActionPress,   0u)) m_fBoost = 1.0f;
+    else if(HAS_BIT(m_pInput->iActionRelease, 0u)) m_fBoost = 0.0f;
+    else m_fBoost = MAX(m_fBoost - 10.0f * TIME, 0.0f);
 
     // 
     //const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost));
-    const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost);
+    //const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, m_fBoost) : LERPH3(50.0f, 70.0f, m_fBoost);
+    const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? ((m_fBoost) ? 50.0f : 20.0f) : 50.0f;
     return m_fMoveSpeed * fModifier;
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::__EquipShield()
-{
-    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
-
-    // 
-    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-    m_iMaxShield = PLAYER_SHIELD;
 }
 
 
@@ -1317,12 +1362,12 @@ coreBool cPlayer::__NewCollision(const coreObject3D* pObject)
     if(m_aiCollision.count(pObject))
     {
         // update frame number
-        m_aiCollision.at(pObject) = g_pGame->GetTimeTable()->GetTimeEventRaw();//Core::System->GetCurFrame();
+        m_aiCollision.at(pObject) = g_pGame->GetTimeTable()->GetTimeMonoRaw();//Core::System->GetCurFrame();
         return false;
     }
 
     // add collision to list
-    m_aiCollision.emplace(pObject, g_pGame->GetTimeTable()->GetTimeEventRaw());//Core::System->GetCurFrame());
+    m_aiCollision.emplace(pObject, g_pGame->GetTimeTable()->GetTimeMonoRaw());//Core::System->GetCurFrame());
     return true;
 }
 
@@ -1333,7 +1378,7 @@ cPlayer::sRayData cPlayer::__NewRayData(const coreVector2 vRayPos, const coreVec
 {
     // 
     sRayData oData;
-    oData.iFrame     = g_pGame->GetTimeTable()->GetTimeEventRaw();//Core::System->GetCurFrame();
+    oData.iFrame     = g_pGame->GetTimeTable()->GetTimeMonoRaw();//Core::System->GetCurFrame();
     oData.vPosition  = vRayPos;
     oData.vDirection = vRayDir;
 
@@ -1357,7 +1402,7 @@ cPlayer::sRayData cPlayer::__NewRayData(const coreVector2 vRayPos, const coreVec
 // 
 void cPlayer::__UpdateCollisions()
 {
-    const coreUint32 iCurFrame = g_pGame->GetTimeTable()->GetTimeEventRaw() - 1u;//Core::System->GetCurFrame() - 1u;
+    const coreUint32 iCurFrame = g_pGame->GetTimeTable()->GetTimeMonoRaw() - 1u;//Core::System->GetCurFrame() - 1u;
 
     // loop through all collisions
     FOR_EACH_DYN(it, m_aiCollision)

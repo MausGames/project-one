@@ -170,7 +170,7 @@ void cSummaryMenu::Move()
 
             // 
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= MENU_SUMMARY_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if((m_fIntroTimer >= 1.0f /*MENU_SUMMARY_BANNER_SPEED_REV*/) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 const eSummaryState eOld = m_eState;
                 
@@ -360,8 +360,8 @@ void cSummaryMenu::Move()
                 {
                     const coreFloat fDiff = vSize1.x - vSize2.x;
 
-                    m_aTitle[0].SetPosition(coreVector2(fDiff * 0.5f, m_aTitle[0].GetPosition().y));
-                    m_aTitle[1].SetPosition(coreVector2(fDiff * 0.5f, m_aTitle[1].GetPosition().y));
+                    m_aTitle[0].SetPosition(coreVector2(fDiff * 0.5f + 0.002f, m_aTitle[0].GetPosition().y));
+                    m_aTitle[1].SetPosition(coreVector2(fDiff * 0.5f - 0.002f, m_aTitle[1].GetPosition().y));
                 });
             });
         }

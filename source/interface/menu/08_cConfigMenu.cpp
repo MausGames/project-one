@@ -81,9 +81,28 @@ cConfigMenu::cConfigMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
+    coreSet<coreUintW> aiSkip;
+    #if defined(_CORE_EMSCRIPTEN_)
+        aiSkip.insert(ENTRY_VIDEO_MONITOR);
+        aiSkip.insert(ENTRY_VIDEO_RESOLUTION);
+        aiSkip.insert(ENTRY_VIDEO_DISPLAYMODE);
+        aiSkip.insert(ENTRY_VIDEO_ANTIALIASING);
+    #endif
+    #if !defined(_CORE_DEBUG_)
+        aiSkip.insert(ENTRY_INPUT_RUMBLE);
+        aiSkip.insert(ENTRY_GAME_TEXTSIZE);
+        aiSkip.insert(ENTRY_GAME_GAMESCALE);
+        aiSkip.insert(ENTRY_GAME_GAMESPEED);
+        aiSkip.insert(ENTRY_GAME_HUDSCALE);
+        aiSkip.insert(ENTRY_GAME_VERSION);
+        aiSkip.insert(ENTRY_GAME_MIRRORMODE);
+    #endif
+
     coreUint8 iOffset = 0u;
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
+        if(aiSkip.count(i)) continue;
+
         if(i == ENTRY_VIDEO || i == ENTRY_AUDIO || i == ENTRY_INPUT) iOffset = 0u;
         if(i == ENTRY_VIDEO_ANTIALIASING)  ++iOffset;   // # new paragraph
         if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
@@ -107,6 +126,8 @@ cConfigMenu::cConfigMenu()noexcept
 
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
+        if(aiSkip.count(i)) continue;
+
         m_aLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aLine[i].DefineProgram("menu_inner_program");
@@ -161,6 +182,8 @@ cConfigMenu::cConfigMenu()noexcept
         x.GetCaption()->ChangeLanguage(Core::Language);                          \
                                                                                  \
         m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                        \
+                                                                                 \
+        if(aiSkip.count(ENTRY_ ## n)) x.SetStatus(1);                            \
     }
     {
         __SET_OPTION(m_Monitor,        VIDEO_MONITOR,        0.26f)
@@ -196,11 +219,11 @@ cConfigMenu::cConfigMenu()noexcept
         m_HudType     .SetEndless(true);
         m_MirrorMode  .SetEndless(true);
 
-        m_Navigator.BindObject(&m_Monitor,        &m_VideoTab,      NULL, &m_Resolution,     NULL, &m_GlobalVolume,         MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_Monitor,        &m_VideoTab,      NULL, &m_Resolution,     NULL, NULL,         MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_Resolution,     &m_Monitor,       NULL, &m_DisplayMode,    NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_DisplayMode,    &m_Resolution,    NULL, &m_AntiAliasing,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_AntiAliasing,   &m_DisplayMode,   NULL, &m_TextureFilter,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-        m_Navigator.BindObject(&m_TextureFilter,  &m_AntiAliasing,  NULL, &m_RenderQuality,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_TextureFilter,  &m_AntiAliasing,  NULL, &m_RenderQuality,  NULL, &m_GlobalVolume,         MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_RenderQuality,  &m_TextureFilter, NULL, &m_ShadowQuality,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_ShadowQuality,  &m_RenderQuality, NULL, &m_ShakeEffects,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_ShakeEffects,   &m_ShadowQuality, NULL, &m_FlashEffects,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
@@ -219,9 +242,9 @@ cConfigMenu::cConfigMenu()noexcept
         m_Navigator.BindObject(&m_HudRotation,    &m_GameSpeed,     NULL, &m_HudScale,       NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_HudScale,       &m_HudRotation,   NULL, &m_HudType,        NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_HudType,        &m_HudScale,      NULL, &m_UpdateFreq,     NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-        m_Navigator.BindObject(&m_UpdateFreq,     &m_HudType,       NULL, &m_Version,        NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_UpdateFreq,     &m_HudType,       NULL, &m_Version,        NULL, &m_HitStopEffects,       MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_Version,        &m_UpdateFreq,    NULL, &m_MirrorMode,     NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-        m_Navigator.BindObject(&m_MirrorMode,     &m_Version,       NULL, &m_SaveButton,     NULL, &m_HitStopEffects,       MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_MirrorMode,     &m_Version,       NULL, &m_SaveButton,     NULL, NULL,       MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     }
     #undef __SET_OPTION
 
@@ -238,6 +261,8 @@ cConfigMenu::cConfigMenu()noexcept
         m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                             \
                                                                                                 \
         m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                       \
+                                                                                                \
+        if(aiSkip.count(ENTRY_ ## n)) m_aInput[i].x.SetStatus(1);                               \
     }
     {
         for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
@@ -343,7 +368,7 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 50u; i <= 150u; i += 1u) m_HudScale.AddEntry(PRINT("%zu%%", i), i);
     m_HudType       .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
     m_HudType       .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
-    m_HudType       .AddEntryLanguage("HUDTYPE_BORDER",         2u);
+    //m_HudType       .AddEntryLanguage("HUDTYPE_BORDER",         2u);
     m_UpdateFreq    .AddEntryLanguage("VALUE_AUTO",             0u);   // TODO 1: "Auto (60 Hz)"
     m_UpdateFreq    .AddEntry        ("60 Hz",                  60u);
     m_UpdateFreq    .AddEntry        ("75 Hz",                  75u);
@@ -375,7 +400,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.AssignSurface(&m_InputTab, SURFACE_CONFIG_INPUT);
     m_Navigator.AssignSurface(&m_GameTab,  SURFACE_CONFIG_GAME);
 
-    m_Navigator.AssignFirst(&m_Monitor);
+    m_Navigator.AssignFirst(!m_Monitor.GetStatus() ? &m_Monitor : &m_TextureFilter);
     m_Navigator.AssignMenu(this);
 
     // bind menu objects
@@ -401,48 +426,48 @@ cConfigMenu::cConfigMenu()noexcept
     }
 
     coreUintW iIndex;
-    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLine [iIndex]);
-    for(;            iIndex < ENTRY_AUDIO; ++iIndex) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLine [iIndex]);
-    for(;            iIndex < ENTRY_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLine [iIndex]);
-    for(;            iIndex < ENTRY_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLine [iIndex]);
-    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLabel[iIndex]);
-    for(;            iIndex < ENTRY_AUDIO; ++iIndex) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLabel[iIndex]);
-    for(;            iIndex < ENTRY_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLabel[iIndex]);
-    for(;            iIndex < ENTRY_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLabel[iIndex]);
+    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLine [iIndex]);}
+    for(;            iIndex < ENTRY_AUDIO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLine [iIndex]);}
+    for(;            iIndex < ENTRY_INPUT; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLine [iIndex]);}
+    for(;            iIndex < ENTRY_MAX;   ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLine [iIndex]);}
+    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLabel[iIndex]);}
+    for(;            iIndex < ENTRY_AUDIO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLabel[iIndex]);}
+    for(;            iIndex < ENTRY_INPUT; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLabel[iIndex]);}
+    for(;            iIndex < ENTRY_MAX;   ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLabel[iIndex]);}
 
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_Monitor);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_Resolution);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_DisplayMode);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_AntiAliasing);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_TextureFilter);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_RenderQuality);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShadowQuality);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShakeEffects);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_FlashEffects);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_HitStopEffects);
-    this->BindObject(SURFACE_CONFIG_AUDIO, &m_GlobalVolume);
-    this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
-    this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
-    this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientVolume);
-    this->BindObject(SURFACE_CONFIG_AUDIO, &m_3DSound);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_TextSize);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_GameRotation);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_GameScale);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_GameSpeed);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_HudRotation);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_HudScale);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_HudType);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_UpdateFreq);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_Version);
-    this->BindObject(SURFACE_CONFIG_GAME,  &m_MirrorMode);
+    if(!m_Monitor       .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_Monitor);
+    if(!m_Resolution    .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_Resolution);
+    if(!m_DisplayMode   .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_DisplayMode);
+    if(!m_AntiAliasing  .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_AntiAliasing);
+    if(!m_TextureFilter .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_TextureFilter);
+    if(!m_RenderQuality .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_RenderQuality);
+    if(!m_ShadowQuality .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShadowQuality);
+    if(!m_ShakeEffects  .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShakeEffects);
+    if(!m_FlashEffects  .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_FlashEffects);
+    if(!m_HitStopEffects.GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_HitStopEffects);
+    if(!m_GlobalVolume  .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_GlobalVolume);
+    if(!m_MusicVolume   .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
+    if(!m_EffectVolume  .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
+    if(!m_AmbientVolume .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientVolume);
+    if(!m_3DSound       .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_3DSound);
+    if(!m_Language      .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
+    if(!m_TextSize      .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_TextSize);
+    if(!m_GameRotation  .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_GameRotation);
+    if(!m_GameScale     .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_GameScale);
+    if(!m_GameSpeed     .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_GameSpeed);
+    if(!m_HudRotation   .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_HudRotation);
+    if(!m_HudScale      .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_HudScale);
+    if(!m_HudType       .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_HudType);
+    if(!m_UpdateFreq    .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_UpdateFreq);
+    if(!m_Version       .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_Version);
+    if(!m_MirrorMode    .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_MirrorMode);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueInput); ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aCueInput[i]);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oFireMode);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oType    .GetStatus()) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oRumble  .GetStatus()) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oFireMode.GetStatus()) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oFireMode);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputButton(i, j).GetStatus()) this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
     this->BindObject(SURFACE_CONFIG_INPUT, &m_SwapInput);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueRota); ++i) this->BindObject(SURFACE_CONFIG_GAME, &m_aCueRota[i]);
@@ -628,7 +653,7 @@ void cConfigMenu::Move()
                                             if(g_CurConfig.Input.aiType[n] == k)
                                             {
                                                 cGuiButton& oOtherButton = this->__RetrieveInputButton(n, m);
-                                                oOtherButton.GetCaption()->SetText(cConfigMenu::__PrintKey(k, iOtherCurValue));
+                                                oOtherButton.GetCaption()->SetText(cConfigMenu::PrintKey(k, iOtherCurValue));
                                                 break;
                                             }
                                         }
@@ -641,7 +666,7 @@ void cConfigMenu::Move()
 
                             // 
                             iCurValue = iKey;
-                            oButton.GetCaption()->SetText(cConfigMenu::__PrintKey(iType, iCurValue));
+                            oButton.GetCaption()->SetText(cConfigMenu::PrintKey(iType, iCurValue));
 
                             // 
                             this->CheckValues();
@@ -761,6 +786,8 @@ void cConfigMenu::Move()
         m_aDescription[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
     
+    if(TIME)   // for transition
+    {
     static cGuiObject* pCurLine = NULL;
     cGuiObject* pNewLine = NULL;
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
@@ -772,8 +799,10 @@ void cConfigMenu::Move()
 
         if(m_aLine[i].IsFocused())
         {
+            #if defined(_CORE_DEBUG_)
             m_aDescription[0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aDescription[0].SetTextLanguage(m_apcDescKey[i]);
+            #endif
             
             pNewLine = &m_aLine[i];
         }
@@ -783,6 +812,7 @@ void cConfigMenu::Move()
     {
         if(pNewLine) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_LINE);
         pCurLine = pNewLine;
+    }
     }
 }
 
@@ -909,6 +939,9 @@ void cConfigMenu::LoadValues()
     // 
     m_SaveButton   .SetOverride(-1);
     m_DiscardButton.SetOverride(-1);
+
+    // 
+    m_Navigator.ResetFirst();
 }
 
 
@@ -1005,6 +1038,29 @@ void cConfigMenu::SaveValues()
     // 
     InitDirection();
     InitFramerate();
+}
+
+
+// ****************************************************************
+// convert input key to readable string
+const coreChar* cConfigMenu::PrintKey(const coreUint8 iType, const coreInt16 iKey)
+{
+    // TODO 1: use as translation key, what about keyboard ?
+    
+    if(iType < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
+    {
+        if(-iKey == CORE_INPUT_LEFT)   return "Mouse Left";
+        if(-iKey == CORE_INPUT_MIDDLE) return "Mouse Middle";
+        if(-iKey == CORE_INPUT_RIGHT)  return "Mouse Right";
+        return (iKey <= 0) ? PRINT("Mouse %d", -iKey) : PRINT("%s", SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(iKey))));
+    }
+    else   // # joystick/gamepad
+    {
+        const coreUintW iJoystickID = iType - INPUT_SETS_KEYBOARD;
+
+        const coreChar* pcText = Core::Input->GetJoystickGamepad(iJoystickID) ? SDL_GameControllerGetStringForButton(SDL_GameControllerButton(iKey)) : NULL;
+        return pcText ? coreData::StrUpper(pcText) : PRINT("Joystick %d", iKey);
+    }
 }
 
 
@@ -1175,7 +1231,7 @@ void cConfigMenu::__LoadInputs()
             cGuiButton& oButton   = this->__RetrieveInputButton  (i, j);
             coreInt16&  iCurValue = this->__RetrieveInputCurValue(i, j);
 
-            oButton.GetCaption()->SetText(cConfigMenu::__PrintKey(g_CurConfig.Input.aiType[i], iCurValue));
+            oButton.GetCaption()->SetText(cConfigMenu::PrintKey(g_CurConfig.Input.aiType[i], iCurValue));
         }
 
         // 
@@ -1195,27 +1251,5 @@ void cConfigMenu::__LoadInputs()
 
         // 
         oInput.oRumble.SetOverride(bKeyboard ? -1 : 0);
-    }
-}
-
-
-// ****************************************************************
-// convert input key to readable string
-const coreChar* cConfigMenu::__PrintKey(const coreUint8 iType, const coreInt16 iKey)
-{
-    // TODO 1: use as translation key, what about keyboard ?
-    // TODO 1: test with old controller
-    
-    if(iType < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
-    {
-        if(-iKey == CORE_INPUT_LEFT)   return "M LEFT";
-        if(-iKey == CORE_INPUT_MIDDLE) return "M MIDDLE";
-        if(-iKey == CORE_INPUT_RIGHT)  return "M RIGHT";
-        return (iKey <= 0) ? PRINT("M %d", -iKey) : SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(iKey)));
-    }
-    else   // # joystick/gamepad
-    {
-        const coreChar* pcText = SDL_GameControllerGetStringForButton(SDL_GameControllerButton(iKey));
-        return pcText ? coreData::StrUpper(pcText) : PRINT("J %d", iKey);
     }
 }

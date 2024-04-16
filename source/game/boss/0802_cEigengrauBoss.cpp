@@ -29,7 +29,7 @@
 // creating a sinus-tunnel (e.g. left-right) was not feasible, if the wave was slow it was boring, if the wave was fast the player-ship disappeared behind the curve which was confusing
 // the classical rotating hole attack was too similar to the rotating lines, but the lines are more versatile
 // gegner die spawnen brauchen eine incentive um angegriffen zu werden (entweder sind sie unausweichlich, oder greifen selbst an)
-// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: fix glow on extended viewport
 // TODO 1: fix player-arrow when looking up or down
 // TODO 1: make sure background movement is correctly handled (coop), interpolated (maybe nothing to do), and is big enough
@@ -108,7 +108,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     m_Range.DefineModel  ("object_cube_top.md3");
     m_Range.DefineTexture(0u, "effect_energy.png");
     m_Range.DefineProgram("effect_energy_flat_invert_program");
-    m_Range.SetColor3    (COLOR_ENERGY_BLUE * 1.1f);
+    m_Range.SetColor3    (COLOR_PLAYER_BLUE);
     m_Range.SetAlpha     (0.0f);
     m_Range.SetTexSize   (coreVector2(0.1f,0.1f));
 
@@ -116,7 +116,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     m_RangePlayer.DefineModel  ("object_penta_top.md3");
     m_RangePlayer.DefineTexture(0u, "effect_energy.png");
     m_RangePlayer.DefineProgram("effect_energy_flat_invert_program");
-    m_RangePlayer.SetColor3    (COLOR_ENERGY_GREEN * 0.77f);
+    m_RangePlayer.SetColor3    (COLOR_PLAYER_GREEN);
     m_RangePlayer.SetAlpha     (0.0f);
     m_RangePlayer.SetTexSize   (coreVector2(0.1f,0.1f));
     m_RangePlayer.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -830,7 +830,7 @@ void cEigengrauBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_SMOOTH)
         {
             m_fRangeSpeed = LERP(0.4f, 0.0f, fTime);
-            m_Range.SetColor3(LERP(COLOR_ENERGY_BLUE * 1.1f, COLOR_ENERGY_WHITE * 0.2f, fTime));
+            m_Range.SetColor3(LERP(COLOR_PLAYER_BLUE, COLOR_ENERGY_WHITE * 0.2f, fTime));
 
             //g_pGame->GetInterface()->GetDialogText(0u)->SetColor3(LERP(COLOR_MENU_BLUE, COLOR_MENU_WHITE * 0.5f, fTime));
 
@@ -883,7 +883,7 @@ void cEigengrauBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_SMOOTH)
         {
             m_fRangeSpeedPlayer = LERP(0.4f, 0.0f, fTime);
-            m_RangePlayer.SetColor3(LERP(COLOR_ENERGY_GREEN * 0.77f, COLOR_ENERGY_WHITE * 0.2f, fTime));
+            m_RangePlayer.SetColor3(LERP(COLOR_PLAYER_GREEN, COLOR_ENERGY_WHITE * 0.2f, fTime));
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC

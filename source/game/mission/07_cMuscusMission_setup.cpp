@@ -106,7 +106,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: die beiden 4er wellen entfernen, wenn die fürn orsch sind
     // TODO 1: erster gegner in 6x6 gruppe stirbt zu schnell, wenn spieler grad richtig schießt
     // TODO 1: mehr zwischen-subwave flickern hinzufügen, bei anderen wellen nach 10
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: vielleicht wurm-gegner hören nach kurzer zeit oder sobald sie sichtbar sind zu schießen auf
     // TODO 1: bei raster-gruppe bleibt der spieler einfach ganz unten und schaut nach oben
     STAGE_MAIN({TAKE_ALWAYS, 0u})
@@ -487,7 +487,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: gegner in 12 12 12 pattern anders (siehe notizen) (achtung, die gegner sind im code 01237654)
     // TODO 1: TOP, bei 12 12 12 pattern, gegner eigentlich ganz oben mit abstand platzieren, nicht folgen lassen
     // TODO 1: die ersten 4 gruppen sind noch etwas fishy, vor allem die rauf-runter gruppe, adden die value ? diese 4 gruppen sollten die mechanik introducen
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep        = 0.275f;
@@ -764,7 +764,7 @@ void cMuscusMission::__SetupOwn()
 
             if(STAGE_BEGINNING)
             {
-                pHelper->Resurrect();
+                pHelper->Resurrect(false);
                 nCreateGenerateFunc(0u, 1.0f, 0.0f, 0.0f);
             }
 
@@ -1005,8 +1005,9 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: auch größerer effekt beim einsammeln der pearls (e.g. wave effect)
     // TODO 1: die 3 linien fühlen sich noch nicht so perfekt an, sollten aber nicht zu schwer sein (ruhe vor dem sturm)
     // TODO 1: attack pattern in end-wave changes after collecting half the pearls
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: make sure pearl animation-order is correct on all sub-stages
+    // TODO 1: ! viel mehr kugerl zum einsammeln, vor allem in den ersten paar phasen, um es von den ganzen einsammel-tasks zu unterscheiden
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1465,7 +1466,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: first (few?) enemies should fly further into center, to show teleportation better
     // TODO 1: gegner anordnung vor zweiter trail/highspeed gruppe sollte so geändert werden, dass man besser in die nächste gruppe startet
     // TODO 1: verwandlung ist sehr kurz, könnte ok sein, muss dann aber bei boss mehrmals verwendet werden
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: schräge gegner-bewegungen im finale ?
     // TODO 1: helper kommt einmal aus old-position vom spieler nach teleport
     STAGE_MAIN({TAKE_ALWAYS, 3u})
@@ -1494,6 +1495,7 @@ void cMuscusMission::__SetupOwn()
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
                 pEnemy->Configure(4, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
             });
 
             const auto nInitFunc = [&](const coreUintW iIndex, const coreVector2 vPos)
@@ -1553,6 +1555,8 @@ void cMuscusMission::__SetupOwn()
             STAGE_GET_VEC2_ARRAY (avPosStorage, iNumData)
             STAGE_GET_FLOAT_ARRAY(afPosTime,    iNumData)
         STAGE_GET_END
+
+        ASSERT(pSquad1->GetNumEnemiesAlive() <= iNumData)
 
         const auto nTeleportFunc = [](const cEnemy* pEnemy, const coreBool bTransform)
         {
@@ -1832,7 +1836,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: bei "quads with different speed" vielleicht die löcher bei letzter stufe etwas breiter machen
     // TODO 1: nochmal alle timings anschauen und anpassen (zeit zwischen mini-stages, länge der mini-stages, länge der steigerungen pro mini-stage)
     // TODO 1: fix rotating and crashing enemies having unintended symmetric direction
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: bei dem gegner den man in bullet-phase für badge abschießen kann sind blitze und partikel, und seine farbe blinkt (für paar s)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
@@ -2307,7 +2311,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: weakpoint rolls around border with high speed, flies like ZeroRanger fast enemies across screen, are like a wall with enemy at center
     // TODO 1: weakpoint dies faster, whole wave needs to be faster
     // TODO 1: actually damage and blink other enemy
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2417,7 +2421,7 @@ void cMuscusMission::__SetupOwn()
                 const coreFloat fAngleTo   = ((i == 3u || i == 5u || i == 7u || i == 9u) ? (afTarget[i-1u] + (0.5f*PI)) : afTarget[i]);
                 const coreFloat fShift     = ((i == 3u || i == 5u || i == 7u || i == 9u) ? (afSign  [i-1u])             : afSign  [i]) * ABS(AngleDiff(fAngleTo, fAngleFrom));
 
-                const coreVector2 vDir = coreVector2::Direction(STAGE_TAKEOFF ? fAngleTo : (fAngleFrom + AngleDiff(fAngleTo + fShift, fAngleFrom) * 2.5f * TIME));
+                const coreVector2 vDir = coreVector2::Direction(STAGE_TAKEOFF ? fAngleTo : AngleLerp(fAngleFrom, fAngleTo + fShift, 2.5f * TIME));
                 const coreVector2 vPos = pParent->GetPosition().xy() + vDir * 13.0f;
 
                 pEnemy->SetPosition(coreVector3(vPos, 0.0f));

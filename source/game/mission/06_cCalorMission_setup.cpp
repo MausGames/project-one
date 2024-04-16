@@ -106,7 +106,8 @@ void cCalorMission::__SetupOwn()
     // TODO 1: reichweite der bullet-berührung vielleicht (dynamisch, oder sub-gruppen abhängig) erhöhen (e.g. in sternen gruppe, pfad gruppe)
     // TODO 1: SQRT2 not necessary ? (oh wait, 0.7071 on corner)
     // TODO 1: gegner sollen leuchten, wenn sie getriggert sind (für interpoliertes movement)
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumEnemiesAll  = 63u;
@@ -427,7 +428,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: schnee wirbel auf wenn man in oder aus schnee geht (vlt. nur permanent-effekt)
     // TODO 1: final enemy needs better integration (blitze, rauch, ramp-up, soll er zerstört werden, soll es helfer sein)
     // TODO 1: improve pacing/add pause before "final enemy"
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: maybe remove the center enemy and let the flyers attack (Zeroth hat schon laser)
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
@@ -791,7 +792,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: press-wände müssen verschwinden, wenn spieler sie berührt (auch bei feel)
     // TODO 1: bullets in walls brauchen 100% collision range (handle BULLET_COLLISION_FACTOR in), vielleicht auch bei vielen andere waves, implement API
     // TODO 1: helper sollte pfeil + wellen haben, um den spieler dorthin zu locken
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: quad bullets all need the same rotation (animation variable), though they do not spawn at the same time
     // TODO 1: in dungeon, eck-bullets sind doppelt
     // TODO 3: late update: make sure corners in dungeon are consistent
@@ -1044,7 +1045,7 @@ void cCalorMission::__SetupOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5u, 0.0f, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
                 }
 
-                pHelper->Resurrect();
+                pHelper->Resurrect(false);
                 pHelper->SetPosition(coreVector3(nPositionFunc(-1, 21), 0.0f));
                 break;
             }
@@ -1242,7 +1243,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: die links-rechts wurm gruppe is zu schnell oder viel, vielleicht von 4 auf 3, oder beschleunigen
     // TODO 1: der ruck am ende is zu stark, kA warum
     // TODO 1: ganz am anfang wird man nach unten gedrückt, aber wenn man nicht schießt kann man entkommen, geschosse am unteren rand
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: super-schnelles dodging am anfang (Super Aleste)
     // TODO 1: in galaga schießen nur die unteren gegner
     STAGE_MAIN({TAKE_ALWAYS, 3u})
@@ -1282,8 +1283,8 @@ void cCalorMission::__SetupOwn()
         STAGE_ADD_PATH(pPath4)
         {
             pPath4->Reserve(2u);
-            pPath4->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath4->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath4->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath4->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
             pPath4->Refine();
         });
 
@@ -1356,7 +1357,7 @@ void cCalorMission::__SetupOwn()
 
             if(m_fStageSubTime == 0.0f)
             {
-                pHelper->Resurrect();
+                pHelper->Resurrect(false);
             }
 
             const coreFloat fShakeDist = pPath5->TranslateDistance(7u, 0.0f);
@@ -1435,7 +1436,7 @@ void cCalorMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i < 12u) ? 0.9f : ((i < 44u) ? 1.5f : ((i < 52u) ? 1.4f : 1.1f)), (i < 12u) ? (3.0f + 0.6f * I_TO_F(i)) : ((i >= 52u && i < 68u) ? (0.2f * I_TO_F((i - 52u) % 16u) + 1.2f * I_TO_F((i - 52u) / 4u)) : ((i < 76u) ? (0.2f * I_TO_F((i - 12u) % 8u)) : ((i < 84u) ? 0.0f : 0.1f))))
+            STAGE_LIFETIME(pEnemy, (i < 12u) ? 0.9f : ((i < 44u) ? 1.5f : ((i < 52u) ? 1.4f : 1.1f)), (i < 12u) ? (3.0f + 0.65f * I_TO_F(i)) : ((i >= 52u && i < 68u) ? (0.2f * I_TO_F((i - 52u) % 16u) + 1.2f * I_TO_F((i - 52u) / 4u)) : ((i < 76u) ? (0.2f * I_TO_F((i - 12u) % 8u)) : ((i < 84u) ? 0.0f : 0.1f))))
 
             if(i < 12u)
             {
@@ -1594,9 +1595,10 @@ void cCalorMission::__SetupOwn()
     // TODO 1: simple bullet-waves inbetween for the player to overcome
     // TODO 1: vielleicht mini-gegner oder boss-intro (10s) um morning-star zu erhalten
     // TODO 1: first side enemies on bullet-carpet more to the middle (maybe 50%), or all enemies in the middle
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: badge: zerstöre N bullets mit morgenstern (+ anzeige, aber erst am ende)
     // TODO 1: mehr kleine gegner unter dem teppich erschlagen (2 wellen statt 1)
+    // TODO 1: bessere bullet patterns, nicht so statisch wie derzeit, echte patterns
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         
@@ -1803,7 +1805,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: do not remove energy-effect on king after resurrection ?
     // TODO 1: maybe he is caught in an ice block
     // TODO 1: rotate (all balls) helper around enemy to highlight state
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)

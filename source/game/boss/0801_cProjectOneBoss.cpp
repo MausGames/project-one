@@ -24,7 +24,7 @@
 // TODO 1: final endboss, ship jumps into z dimension, while side blocks move away, star fox (either looping or dive animation), rotation around z
 // TODO 1: white flash on impact of white helper ?
 // TODO 1: different phases should map to the general feeling and behavior of the same-colored bosses ?
-// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: hard mode: add another mechanic to each sub-stage
 // TODO 1: alle objekte aller missionen müssen mit animation disabled werden, auch post-processing, auch spieler status und speed (eigene funktion ?)
 // TODO 1: next mission needs to be requested as early as possible (when helper starts flying into center)
@@ -105,6 +105,7 @@
 // TODO 1: boss bewegung in morningstar phase anpassen, schneller? auch Y?
 // TODO 1: vielleicht sollte blaue kugel schneller werden, die drehung des spielers braucht mehr impact
 // TODO 1: mehr als 1 kugel in snow phase
+// TODO 1: background wurde bei einem test nicht wieder nach vorne ausgerichtet
 
 // cyan:
 // cyan residue kann nicht verwendet werden, weil es mit dem cyan background verschwimmt
@@ -117,6 +118,7 @@
 // grow bullets sollten die mitte nicht berühren, der boss sollte immer angreifbar sein (auch wenn nur knapp)
 // TODO 1: der grüne arrow mit den roten bullets is ein problem ? pfeil größer machen, form dominiert
 // TODO 1: sollte schussfrequenz (zm. von residue) mit health erhöht werden?
+// TODO 1: vielleicht doch auch horizontal fliegen (mittlere 2)
 
 // green:
 // geschwindigkeit vom violettem laser muss sehr langsam anfangen und erst spät schnell werden um diese phase in zwei sub-phasen mit weichem übergang zu teilen (fly free, get dragged)
@@ -230,10 +232,10 @@ cProjectOneBoss::cProjectOneBoss()noexcept
         m_aShield[i].DefineModelHigh("object_sphere.md3");
         m_aShield[i].DefineModelLow ("object_sphere.md3");
         m_aShield[i].DefineTexture  (0u, "effect_energy.png");
-        m_aShield[i].DefineProgram  ("effect_energy_blink_spheric_program");
+        m_aShield[i].DefineProgram  ("effect_energy_blink_flat_spheric_program");
         m_aShield[i].SetTexSize     (coreVector2(1.0f,1.0f) * 4.0f);
         m_aShield[i].Configure      (1000, 0u, avColor[i]);
-        m_aShield[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_IMMORTAL);
+        m_aShield[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_FLAT);
     }
 
     // 
@@ -320,16 +322,16 @@ void cProjectOneBoss::CalcColor(const coreUintW iIndex, coreVector3* OUTPUT pvEn
     switch(iIndex)
     {
     default: ASSERT(false)
-    case 0u: (*pvEnergyColor) = COLOR_ENERGY_YELLOW  * 0.7f;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_YELLOW,  1.0f); (*pvLevelColor) = COLOR_MENU_YELLOW;  break;
-    case 1u: (*pvEnergyColor) = COLOR_ENERGY_ORANGE  * 0.95f; (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_ORANGE,  1.0f); (*pvLevelColor) = COLOR_MENU_ORANGE;  break;
-    case 2u: (*pvEnergyColor) = COLOR_ENERGY_RED     * 0.9f;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_RED,     0.9f); (*pvLevelColor) = COLOR_MENU_RED;     break;
-    case 3u: (*pvEnergyColor) = COLOR_ENERGY_MAGENTA * 0.9f;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_MAGENTA, 0.9f); (*pvLevelColor) = COLOR_MENU_MAGENTA; break;
-    case 4u: (*pvEnergyColor) = COLOR_ENERGY_PURPLE  * 1.0f;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_PURPLE,  1.0f); (*pvLevelColor) = COLOR_MENU_PURPLE;  break;
-    case 5u: (*pvEnergyColor) = COLOR_ENERGY_BLUE    * 1.1f;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_BLUE,    1.0f); (*pvLevelColor) = COLOR_MENU_BLUE;    break;
-    case 6u: (*pvEnergyColor) = COLOR_ENERGY_CYAN    * 1.0f;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_CYAN,    1.0f); (*pvLevelColor) = COLOR_MENU_CYAN;    break;
-    case 7u: (*pvEnergyColor) = COLOR_ENERGY_GREEN   * 0.77f; (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_GREEN,   1.0f); (*pvLevelColor) = COLOR_MENU_GREEN;   break;
-    case 8u: (*pvEnergyColor) = COLOR_ENERGY_WHITE   * 0.5f;  (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   break;
-    case 9u: (*pvEnergyColor) = COLOR_ENERGY_WHITE   * 0.5f;  (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   break;
+    case 0u: (*pvEnergyColor) = COLOR_PLAYER_YELLOW;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_YELLOW,  1.0f); (*pvLevelColor) = COLOR_MENU_YELLOW;  break;
+    case 1u: (*pvEnergyColor) = COLOR_PLAYER_ORANGE;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_ORANGE,  1.0f); (*pvLevelColor) = COLOR_MENU_ORANGE;  break;
+    case 2u: (*pvEnergyColor) = COLOR_PLAYER_RED;     (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_RED,     0.9f); (*pvLevelColor) = COLOR_MENU_RED;     break;
+    case 3u: (*pvEnergyColor) = COLOR_PLAYER_MAGENTA; (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_MAGENTA, 0.9f); (*pvLevelColor) = COLOR_MENU_MAGENTA; break;
+    case 4u: (*pvEnergyColor) = COLOR_PLAYER_PURPLE;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_PURPLE,  1.0f); (*pvLevelColor) = COLOR_MENU_PURPLE;  break;
+    case 5u: (*pvEnergyColor) = COLOR_PLAYER_BLUE;    (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_BLUE,    1.0f); (*pvLevelColor) = COLOR_MENU_BLUE;    break;
+    case 6u: (*pvEnergyColor) = COLOR_PLAYER_CYAN;    (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_CYAN,    1.0f); (*pvLevelColor) = COLOR_MENU_CYAN;    break;
+    case 7u: (*pvEnergyColor) = COLOR_PLAYER_GREEN;   (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_GREEN,   1.0f); (*pvLevelColor) = COLOR_MENU_GREEN;   break;
+    case 8u: (*pvEnergyColor) = COLOR_PLAYER_WHITE;   (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   break;
+    case 9u: (*pvEnergyColor) = COLOR_PLAYER_WHITE;   (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   break;
     }
 }
 
@@ -464,7 +466,7 @@ void cProjectOneBoss::__MoveOwn()
         {
             cHelper* pHelper = g_pGame->GetHelper(ELEMENT_YELLOW + i);
 
-            if(PHASE_BEGINNING2) pHelper->Resurrect();
+            if(PHASE_BEGINNING2) pHelper->Resurrect(false);
 
             const coreFloat fTime = CLAMP01((m_fPhaseTime - I_TO_F(i) * 0.2f) * 0.7f);
 
@@ -610,7 +612,7 @@ void cProjectOneBoss::__MoveOwn()
             cHelper*      pHelper = g_pGame->GetHelper(ELEMENT_YELLOW + i);
             cCustomEnemy* pShield = &m_aShield[i];
 
-            if(PHASE_MAINTIME_POINT(0.0f)) pHelper->Resurrect();
+            if(PHASE_MAINTIME_POINT(0.0f)) pHelper->Resurrect(false);
             if(PHASE_MAINTIME_POINT(1.0f / 0.3f - 1.0f)) pShield->Resurrect();
 
             const coreVector2 vDir = coreVector2::Direction((2.0f*PI) * I_TO_F(iRotaNum) * RCP(I_TO_F(iRotaCount)) + m_avVector[HELPER_DATA].z);
@@ -670,7 +672,7 @@ void cProjectOneBoss::__MoveOwn()
             cHelper*      pHelper = g_pGame->GetHelper(ELEMENT_YELLOW + i);
             cCustomEnemy* pShield = &m_aShield[i];
 
-            if(PHASE_MAINTIME_POINT(0.2f)) pHelper->Resurrect();
+            if(PHASE_MAINTIME_POINT(0.2f)) pHelper->Resurrect(true);
             if(PHASE_MAINTIME_POINT(0.0f)) pShield->Resurrect();
 
             const coreVector2 vDir = coreVector2::Direction((2.0f*PI) * I_TO_F(iRotaNum) * RCP(I_TO_F(iRotaCount)) + m_avVector[HELPER_DATA].z);
@@ -783,7 +785,7 @@ void cProjectOneBoss::__MoveOwn()
 
         if(PHASE_BEGINNING2)
         {
-            pHelper->Resurrect();
+            pHelper->Resurrect(false);
         }
 
         constexpr coreFloat fDelay = 2.5f / 0.6f;
@@ -1326,7 +1328,7 @@ void cProjectOneBoss::__MoveOrange()
                 }
             });
 
-            constexpr coreUint8 aiDance[] = {0u, 1u, 2u, 3u, 1u, 3u, 0u, 0u, 2u, 1u, 3u, 0u, 3u, 2u, 1u, 0u, 2u, 0u, 2u, 1u, 3u, 1u, 1u, 3u, 0u, 2u, 1u, 4u, 3u};
+            const coreUint8 aiDance[] = {0u, 1u, 2u, 3u, 1u, 3u, 0u, 0u, 2u, 1u, 3u, 0u, 3u, 2u, 1u, 0u, 2u, 0u, 2u, 1u, 3u, 1u, 1u, 3u, 0u, 2u, 1u, 4u, 3u};
 
             PHASE_CONTROL_TICKER(0u, ARRAY_SIZE(aiDance), 1.0f * fSpeed, LERP_LINEAR)
             {
@@ -1905,7 +1907,7 @@ void cProjectOneBoss::__MoveRed()
 
                     for(coreUintW j = 30u; j--; )
                     {
-                        if(((j % 6u) < 3u) == (iTick % 2u)) continue;
+                        if(((j % 6u) < 3u) == ((iTick % 2u) != 0u)) continue;
 
                         const coreVector2 vBase = coreVector2::Direction((I_TO_F(j) / 29.0f) * (0.5f*PI) + (0.5f*PI));
 
@@ -1929,7 +1931,7 @@ void cProjectOneBoss::__MoveRed()
             {
                 for(coreUintW i = 0u; i < PROJECTONE_ENEMIES_LEGION; ++i)
                 {
-                    if(((iTick % 30u) < 15u) == (i % 2u)) continue;
+                    if(((iTick % 30u) < 15u) == ((i % 2u) != 0u)) continue;
 
                     const cEnemy* pEnemy = pSquad2->GetEnemy(i);
 
@@ -1950,7 +1952,7 @@ void cProjectOneBoss::__MoveRed()
 
                     for(coreUintW j = 35u; j--; )
                     {
-                        if(((j % 10u) < 5u) == ((iTick + i) % 2u)) continue;
+                        if(((j % 10u) < 5u) == (((iTick + i) % 2u) != 0u)) continue;
 
                         const coreVector2 vBase = LERP(coreVector2(0.0f,-1.0f), coreVector2(-1.0f,0.0f), I_TO_F(j) / 34.0f);
 
@@ -2201,7 +2203,7 @@ void cProjectOneBoss::__MoveMagenta()
             const coreVector2 vPos = this->GetPosition().xy();
             const coreVector2 vDir = this->AimAtPlayerDual(1u).Normalized();
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, this, vPos, vDir)->ChangeSize(1.4f)->AddStatus(BULLET_STATUS_IMMORTAL);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, this, vPos, vDir)->ChangeSize(1.6f)->AddStatus(BULLET_STATUS_IMMORTAL);
         });
 
         if(this->GetLostHealth() >= 2500)
@@ -2288,7 +2290,7 @@ void cProjectOneBoss::__MoveMagenta()
             pSquad1->GetEnemy(iTick)->Kill(true);
         });
 
-        const coreVector2 vNewAxis = coreVector2::Direction(LERPS(m_fGameAngle, m_fGameAngle + AngleDiff(0.0f, m_fGameAngle), MIN1(m_fPhaseTime * 0.5f)));
+        const coreVector2 vNewAxis = coreVector2::Direction(AngleLerp(m_fGameAngle, 0.0f, BLENDS(MIN1(m_fPhaseTime * 0.5f))));
 
         g_pPostProcessing->SetDirectionGame(vNewAxis);
 
@@ -2988,7 +2990,7 @@ void cProjectOneBoss::__MoveBlue()
         }
         else
         {
-            const coreVector2 vDir = coreVector2::Direction(m_avVector[CALOR_ROTA].w + LERPS(AngleDiff(0.0f, m_avVector[CALOR_ROTA].w), 0.0f, STEP(-3.0f, 0.0f, m_avVector[CALOR_ROTA].z)));
+            const coreVector2 vDir = coreVector2::Direction(AngleLerp(m_avVector[CALOR_ROTA].w, 0.0f, BLENDS(STEP(-3.0f, 0.0f, m_avVector[CALOR_ROTA].z))));
 
             g_pEnvironment->SetTargetDirectionNow(vDir);
         }
@@ -3272,7 +3274,7 @@ void cProjectOneBoss::__MoveCyan()
             const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * GA);
             const coreVector2 vPos = (vDir + vDir.Rotated90() * 0.2f) * -1.2f * FOREGROUND_AREA * SQRT2;
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cGrowBullet>(5, 0.2f, this, vPos, vDir)->ChangeSize(0.0f)->AddStatus(BULLET_STATUS_IMMORTAL);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cGrowBullet>(5, 0.2f, this, vPos, vDir)->ChangeSize(1.0f)->AddStatus(BULLET_STATUS_IMMORTAL);
         });
 
         PHASE_CONTROL_TICKER(3u, 0u, fArrowSpeed, LERP_LINEAR)
@@ -3285,12 +3287,12 @@ void cProjectOneBoss::__MoveCyan()
         {
             if(!bFirstHit) return;
 
-            const coreVector2 vSide = AlongCrossNormal(-pBullet->GetFlyDir());
+            const coreVector2 vSide = AlongCrossNormal(pBullet->GetFlyDir());
             const coreUint8   iPack = PackDirection(vSide);
 
             if(iPack != pNevo->GetArrowDir(0u))
             {
-                pBullet->Reflect(pEnemy, vIntersection.xy(), -pBullet->GetFlyDir());
+                pBullet->Deactivate(true);
                 pBullet->AddStatus(BULLET_STATUS_GHOST);
             }
         });
@@ -3403,6 +3405,8 @@ void cProjectOneBoss::__MoveGreen()
             pVirido->EnableLaser(0u, this);
             pVirido->EnableLaser(1u, this);
 
+            pVirido->SetLaserCross(false);
+
             m_avVector[LASER_ROTA].x = 0.5f*PI;
             m_avVector[LASER_ROTA].y = 0.5f*PI;
 
@@ -3440,6 +3444,8 @@ void cProjectOneBoss::__MoveGreen()
 
             pVirido->DisableLaser(0u, true);
             pVirido->DisableLaser(1u, true);
+
+            pVirido->SetLaserCross(true);
         }
     }
 
@@ -3529,13 +3535,13 @@ void cProjectOneBoss::__MoveGreen()
             {
                 for(coreUintW i = 0u; i < 12u; ++i)
                 {
-                    pVirido->EnableBarrier(i, VIRIDO_BARRIER_FREE, coreVector2(0.0f,1.0f), 2.05f);
+                    pVirido->EnableBarrier((i % 6u) + ((i >= 6u) ? VIRIDO_BARRIERS_FIRST : 0u), VIRIDO_BARRIER_FREE, coreVector2(0.0f,1.0f), 2.05f);
                 }
             }
 
             for(coreUintW i = 0u; i < 12u; ++i)
             {
-                coreObject3D* pBarrier = pVirido->GetBarrier(i);
+                coreObject3D* pBarrier = pVirido->GetBarrier((i % 6u) + ((i >= 6u) ? VIRIDO_BARRIERS_FIRST : 0u));
 
                 coreVector2 vPos = coreVector2(I_TO_F(i % 2u) - 0.5f, I_TO_F((i / 2u) % 3u) - 1.0f) * 0.75f;
                 if(i >= 6u) vPos = vPos.Rotated90();
@@ -3568,7 +3574,7 @@ void cProjectOneBoss::__MoveGreen()
             {
                 this->ChangeToTop();
 
-                pVirido->EnableShadow(0u, this, m_avVector[JUMP_TARGET].xy());
+                pVirido->EnableShadow(0u, this, m_avVector[JUMP_TARGET].xy(), false);
             }
 
             const coreFloat   fSin    = SIN(fTime * (1.0f*PI));
@@ -4001,7 +4007,7 @@ void cProjectOneBoss::__EndFeeling()
 // 
 void cProjectOneBoss::__EnableRange()
 {
-    WARN_IF(m_Range.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Range.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableRange();
 
     // 
     m_Range.SetAlpha(0.0f);
@@ -4028,7 +4034,7 @@ void cProjectOneBoss::__DisableRange()
 // 
 void cProjectOneBoss::__EnableArrow()
 {
-    WARN_IF(m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableArrow();
 
     // 
     m_Arrow.SetAlpha(0.0f);
@@ -4055,7 +4061,7 @@ void cProjectOneBoss::__DisableArrow()
 // 
 void cProjectOneBoss::__EnableWind()
 {
-    WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableWind();
 
     // 
     m_Wind.SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -4079,7 +4085,7 @@ void cProjectOneBoss::__DisableWind()
 // 
 void cProjectOneBoss::__EnableBubble()
 {
-    WARN_IF(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableBubble();
 
     // 
     m_Bubble.SetAlpha(0.0f);

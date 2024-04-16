@@ -111,7 +111,7 @@ cMossBackground::cMossBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  ("environment_grave_01.md3");
+        oBase.DefineModel  ("environment_grave.md3");
         oBase.DefineTexture(0u, "environment_grave_diff.png");
         oBase.DefineTexture(1u, "environment_grave_norm.png");
         oBase.DefineProgram("object_ground_program");

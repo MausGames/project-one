@@ -341,8 +341,8 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         coreFileScope pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
 
         // decompress files to plain pixel data
-        coreSurfaceScope pSurface1 = IMG_LoadTyped_RW(pFile1->CreateReadStream(), true, coreData::StrExtension(pFile1->GetPath()));
-        coreSurfaceScope pSurface2 = IMG_LoadTyped_RW(pFile2->CreateReadStream(), true, coreData::StrExtension(pFile2->GetPath()));
+        coreSurfaceScope pSurface1 = IMG_LoadTyped_RW(pFile1->CreateReadStream(), 1, coreData::StrExtension(pFile1->GetPath()));
+        coreSurfaceScope pSurface2 = IMG_LoadTyped_RW(pFile2->CreateReadStream(), 1, coreData::StrExtension(pFile2->GetPath()));
         WARN_IF(!pSurface1 || (pSurface1->format->BitsPerPixel != 24u)) return CORE_OK;
         WARN_IF(!pSurface2 || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
 

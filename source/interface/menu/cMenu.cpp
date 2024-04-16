@@ -8,11 +8,12 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-coreVector3 cMenu::m_vHighlightColor  = (COLOR_MENU_WHITE);
-cGuiButton* cMenu::m_pCurButton       = NULL;
-cGuiButton* cMenu::m_pNewButton       = NULL;
-cGuiButton* cMenu::m_pCurTab          = NULL;
-cGuiButton* cMenu::m_pNewTab          = NULL;
+coreVector3 cMenu::m_vHighlightColor = COLOR_MENU_WHITE;
+coreVector3 cMenu::m_vButtonColor    = COLOR_MENU_WHITE;
+cGuiButton* cMenu::m_pCurButton      = NULL;
+cGuiButton* cMenu::m_pNewButton      = NULL;
+cGuiButton* cMenu::m_pCurTab         = NULL;
+cGuiButton* cMenu::m_pNewTab         = NULL;
 
 
 // ****************************************************************
@@ -83,6 +84,12 @@ cMenu::cMenu()noexcept
         m_GameMenu .ActivateFirstPlay();
         m_PauseMenu.ActivateFirstPlay();
     }
+
+    // 
+    if(g_bDemoVersion)
+    {
+        m_MainMenu.ActivateDemoVersion();
+    }
 }
 
 
@@ -131,12 +138,12 @@ void cMenu::Render()
             const coreUint8 iPrev = m_pTransitionMenu->GetCurSurface();
             const coreFloat fTime = TIME;   // TODO 1: HACK
 
-            m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);   // TODO 1: calls move
+            c_cast<coreFloat&>(TIME) = 0.0f;   // TODO 1: HACK
+            m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);   // TODO 1: calls move for both old and new
             //m_pTransitionMenu->coreMenu::Move();
             nRenderFunc(2u, m_pTransitionMenu);
             
-            c_cast<coreFloat&>(TIME) = 0.0f;   // TODO 1: HACK
-            m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);   // TODO 1: calls move
+            m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);   // TODO 1: calls move for both old and new
             c_cast<coreFloat&>(TIME) = fTime;   // TODO 1: HACK
         }
         if(m_iTransitionState < 1u && iForceB != 0xFFu)
@@ -257,11 +264,7 @@ void cMenu::Move()
                         this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
 
                         // 
-                        m_BridgeMenu.ReturnMenu(SURFACE_GAME, false, false);
-
-                        // 
-                        m_GameMenu.ChangeSurface((g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_STANDARD : SURFACE_GAME_TRAINING, 0.0f);
-                        m_GameMenu.LoadValues();
+                        m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
                     }
                 }
                 else if((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && g_MenuInput.bPause) || Core::System->GetWinFocusLost())
@@ -308,8 +311,9 @@ void cMenu::Move()
                 this->ShiftSurface(this, SURFACE_GAME, 3.0f, 1u, false, true);
 
                 // 
-                m_GameMenu.ChangeSurface(g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD, 0.0f);
+                m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD), 0.0f);
                 m_GameMenu.LoadValues();
+                m_GameMenu.LoadValuesDemo();
             }
             else if(m_MainMenu.GetStatus() == 2)
             {
@@ -663,12 +667,16 @@ coreBool cMenu::IsPausedWithStep()
 void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreUint8 iSound, const coreBool bUpdateFrom, const coreBool bUpdateTo)
 {
     ASSERT(pMenu && fSpeed)
-
-    iForceA = bUpdateFrom ? pMenu->GetCurSurface() : 0xFFu;
-    iForceB = bUpdateTo   ? iNewSurface            : 0xFFu;
+    
+    const coreUint8 iCurSurface = pMenu->GetCurSurface();
 
     if(pMenu->ChangeSurface(iNewSurface, 1.0e06f))
     {
+        //iForceA = bUpdateFrom ? pMenu->GetCurSurface() : 0xFFu;
+        //iForceB = bUpdateTo   ? iNewSurface            : 0xFFu;
+        iForceA = (iCurSurface != SURFACE_INTRO) ? iCurSurface : 0xFFu;
+        iForceB = (iCurSurface != SURFACE_INTRO) ? iNewSurface : 0xFFu;
+
         // 
         m_TransitionTime.Play(CORE_TIMER_PLAY_RESET);
         m_TransitionTime.SetValue(-0.15f);
@@ -677,10 +685,10 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
         // 
         m_iTransitionState = 2u;
         m_pTransitionMenu  = pMenu;
+
+             if(iSound == 1u) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SUB_IN);
+        else if(iSound == 2u) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SUB_OUT);
     }
-    
-         if(iSound == 1u) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SUB_IN);
-    else if(iSound == 2u) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SUB_OUT);
 }
 
 // ****************************************************************
@@ -694,6 +702,13 @@ void cMenu::SetHighlightColor(const coreVector3 vColor)
     // 
     m_SummaryMenu.SetHighlightColor(vColor);
     m_FinishMenu .SetHighlightColor(vColor);
+}
+
+
+void cMenu::SetButtonColor(const coreVector3 vColor)
+{
+    // 
+    m_vButtonColor = vColor;
 }
 
 
@@ -802,7 +817,7 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
 void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused)
 {
     // 
-    cMenu::UpdateButton(pButton, bFocused, m_vHighlightColor);
+    cMenu::UpdateButton(pButton, bFocused, m_vButtonColor);
 }
 
 
@@ -832,7 +847,7 @@ void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const cor
 void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const coreBool bFocused)
 {
     // 
-    cMenu::UpdateTab(pTab, bLocked, bFocused, m_vHighlightColor);
+    cMenu::UpdateTab(pTab, bLocked, bFocused, m_vButtonColor);
 }
 
 
@@ -962,8 +977,10 @@ void cMenu::__StartGame()
     oOptions.iType        = m_GameMenu.GetSelectedType      ();
     oOptions.iMode        = m_GameMenu.GetSelectedMode      ();
     oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
+    oOptions.iFlags       = GAME_FLAG_TASK;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
+        oOptions.aiShield  [i]    = m_GameMenu.GetSelectedShield (i);
         oOptions.aaiWeapon [i][0] = m_GameMenu.GetSelectedWeapon (i);
         oOptions.aaiSupport[i][0] = m_GameMenu.GetSelectedSupport(i);
     }
@@ -1008,6 +1025,12 @@ void cMenu::__EndGame()
         m_MainMenu .DeactivateFirstPlay();
         m_GameMenu .DeactivateFirstPlay();
         m_PauseMenu.DeactivateFirstPlay();
+    }
+
+    // 
+    if(g_bDemoVersion)
+    {
+        m_MainMenu.ActivateDemoVersion();
     }
 
     // 

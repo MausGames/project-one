@@ -112,6 +112,8 @@ void cMission::MoveBefore()
             // 
             m_fStageSubTimeBefore = m_fStageSubTime;
             m_fStageSubTime.Update(1.0f);
+            
+            // TODO 1: erste iteration startet mit m_fStageTime=0.016 und m_fStageSubTime=0.0, wegen erstem STAGE_SUB, is das problematisch ?
 
             // 
             m_anStage.back()();
@@ -201,7 +203,10 @@ void cMission::ActivateBoss(const cBoss* pBoss)
     this->__OpenSegment();
 
     // 
-    g_pGame->GetInterface()->ShowBoss(m_pCurBoss);
+    g_pGame->GetInterface()->ShowAlert();
+
+    // 
+    g_pGame->FadeMusic(0.3f);
 }
 
 void cMission::DeactivateBoss()
@@ -271,7 +276,7 @@ void cMission::DeactivateWave()
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->HealShield(pPlayer->GetMaxShield() / 4);
+        pPlayer->HealShield(pPlayer->GetMaxShield() / 5);
     });
 
     // 
@@ -310,6 +315,19 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 
 // ****************************************************************
 // 
+void cMission::AddExtraScore(cPlayer* OUTPUT pPlayer, const coreUint32 iScore, const coreVector3 vPosition)
+{
+    // 
+    const coreUint32 iFinalScore = pPlayer->GetScoreTable()->AddScore(iScore, true);
+    pPlayer->GetScoreTable()->AddCombo(1u);
+
+    // 
+    g_pGame->GetCombatText()->DrawScore(iFinalScore, vPosition, false);
+}
+
+
+// ****************************************************************
+// 
 void cMission::__OpenSegment()
 {
     // 
@@ -320,6 +338,13 @@ void cMission::__OpenSegment()
 
     // 
     g_pSave->EditLocalStatsSegment()->iCountStart += 1u;
+    
+    
+    
+    if(!g_pGame->IsTask())
+    {
+        g_pGame->GetTimeTable()->AddShiftGood(10u, iMissionIndex, m_iCurSegmentIndex);
+    }
 }
 
 
@@ -343,7 +368,7 @@ void cMission::__CloseSegment()
     // 
     const coreFloat  fTime        = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
     const coreFloat  fTimeShifted = g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe();
-    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted);
+    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted, m_pfMedalGoal);
 
     // 
     coreUint8 iMedal = MEDAL_NONE;

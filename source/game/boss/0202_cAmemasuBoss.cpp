@@ -132,11 +132,11 @@ void cAmemasuBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cAmemasuBoss::__MoveOwn()
 {
-    // 
-    this->_UpdateBoss();
-
     cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
+
+    // 
+    this->_UpdateBoss();
 
     // ################################################################
     // 

@@ -29,6 +29,7 @@
 #define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
 #define SPECIAL_GUSTS            (16u)     // 
 #define SPECIAL_BLASTS           (8u)      // number of energy-blasts
+#define SPECIAL_EXPLOSION        (8u)      // 
 
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
 #define SPECIAL_LIGHTNING_CUTOUT (0.5f)    // 
@@ -55,7 +56,7 @@
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
-#define SPECIAL_RELATIVE (coreVector3(0.0f,0.0f,0.0f))
+#define SPECIAL_RELATIVE       (coreVector3(0.0f,0.0f,0.0f))
 #define SPECIAL_SOUND_MEDAL(x) (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
 
 enum eSoundEffect : coreUint8
@@ -94,6 +95,8 @@ enum eSoundEffect : coreUint8
 
     SOUND_BADGE,
 
+    SOUND_HELPER,
+
     SOUND_FRAGMENT_HELPER,
     SOUND_FRAGMENT_APPEAR,
     SOUND_FRAGMENT_COLLECT,
@@ -119,7 +122,12 @@ enum eSoundEffect : coreUint8
     SOUND_MENU_SUB_IN,
     SOUND_MENU_SUB_OUT,
 
+    SOUND_EFFECT_DUST,
+    SOUND_EFFECT_ERROR,
     SOUND_EFFECT_SHAKE,   // bomb, laser
+    SOUND_EFFECT_SWORD_01,    
+    SOUND_EFFECT_SWORD_02,    
+    SOUND_EFFECT_WOOSH,
 
     SOUND_PLACEHOLDER,
 
@@ -131,6 +139,15 @@ enum eSoundEffect : coreUint8
 // special-effects class
 class cSpecialEffects final
 {
+private:
+    // 
+    struct cSoundData final
+    {
+        coreVector3 vPosition;   // 
+        coreUint16  iCount;      // 
+    };
+
+
 private:
     coreParticleSystem m_aParticleColor[2];                 // color particle system
     coreParticleSystem m_aParticleDark [2];                 // dark particle system
@@ -155,14 +172,21 @@ private:
     coreModelPtr m_apBlastModel[3];                         // 
     coreUintW    m_iCurBlast;                               // 
 
+    coreObject3D m_aExplosionBody[SPECIAL_EXPLOSION];       // 
+    coreObject3D m_aExplosionWave[SPECIAL_EXPLOSION];       // 
+    coreUintW    m_iCurExplosion;                           // 
+
     coreSoundPtr m_apSound[SOUND_MAX];                      // 
     coreUint64   m_iSoundGuard;                             // (to reduce multiple same sound-effects within one frame) 
+    coreList<cSoundData> m_aSoundData;
 
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
     coreUint8 m_iShakeCount;                                // 
 
     coreFloat m_fFreezeTime;                                // 
+    coreFloat m_fSlowTime;                                  // 
+    coreFloat m_fSlowStrength;                              // 
 
     coreUint16 m_iEffectFrame;                              // 
     coreUint8  m_iEffectCount;                              // 
@@ -188,8 +212,8 @@ public:
     // EXPOSE particle classes for own effects at certain locations
 
     // create centered particle splash
-    void CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
-    void CreateSplashDark (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor, const coreBool bDeep = false, const coreBool bLock = false);
+    void CreateSplashDark (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum,                           const coreBool bDeep = false, const coreBool bLock = false);
     void CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
     void CreateSplashFire (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
 
@@ -222,6 +246,9 @@ public:
     void CreateBlastTetra (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
 
     // 
+    void CreateExplosion(const coreVector3 vPosition);
+
+    // 
     void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex);
 
     // 
@@ -234,6 +261,11 @@ public:
     // 
     void FreezeScreen(const coreFloat fTime);
     inline const coreFloat& GetFreezeTime()const {return m_fFreezeTime;}
+
+    // 
+    void SlowScreen(const coreFloat fTime);
+    inline const coreFloat& GetSlowTime    ()const {return m_fSlowTime;}
+    inline const coreFloat& GetSlowStrength()const {return m_fSlowStrength;}
     
     // slow time
 
@@ -259,7 +291,7 @@ public:
 
 private:
     // 
-    coreFloat   __GetEffectBase ();
+    coreFloat   __GetEffectBase (const coreBool bLock);
     coreVector2 __GetBreakupSide();
 };
 

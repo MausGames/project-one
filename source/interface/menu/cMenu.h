@@ -59,6 +59,7 @@
 #define MENU_GAME_STAGES              (6u)
 #define MENU_GAME_PLAYERS             (PLAYERS)
 #define MENU_GAME_OPTIONS             (3u)
+#define MENU_GAME_DEMOS               (5u)
 #define MENU_GAME_EQUIPS              (2u)
 #define MENU_SCORE_ENTRIES            (20u)
 #define MENU_REPLAY_ENTRIES           (12u)
@@ -141,6 +142,7 @@ enum eSurface : coreUint8
     SURFACE_GAME_TRAINING,
     SURFACE_GAME_OPTIONS,
     SURFACE_GAME_ARMORY,
+    SURFACE_GAME_DEMO,
     SURFACE_GAME_MAX,
 
     SURFACE_SCORE_DEFAULT = 0u,
@@ -309,6 +311,7 @@ class cTitleMenu final : public coreMenu
 {
 private:
     cGuiObject m_GameLogo;          // game logo
+    cGuiObject m_GameLogoDemo;      // 
 
     cGuiLabel m_PromptText;         // 
     coreFlow  m_fPromptAnimation;   // 
@@ -341,6 +344,7 @@ private:
     cGuiButton m_ReplayButton;   // replay button
     cGuiButton m_ExtraButton;    // extra button
     cGuiButton m_ConfigButton;   // config button
+    cGuiButton m_SteamButton;    // steam button
     cGuiButton m_ExitButton;     // exit button
 
     cMenuNavigator m_Navigator;
@@ -357,6 +361,9 @@ public:
     // 
     void ActivateFirstPlay();
     void DeactivateFirstPlay();
+
+    // 
+    void ActivateDemoVersion();
 };
 
 
@@ -414,10 +421,28 @@ private:
     cGuiLabel  m_aEquipName[MENU_GAME_EQUIPS];                    // 
     cGuiObject m_aEquipLine[MENU_GAME_EQUIPS];                    // 
 
+    cGuiSwitchBox m_aShield     [MENU_GAME_PLAYERS];              // 
     cGuiSwitchBox m_aWeapon     [MENU_GAME_PLAYERS];              // 
     cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];              // 
     cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];              // 
     cGuiObject    m_aSupportIcon[MENU_GAME_PLAYERS];              // 
+
+    cGuiObject m_DemoBackground;                                  // 
+
+    cGuiButton m_DemoStartButton;                                 // 
+    cGuiButton m_DemoBackButton;                                  // 
+
+    cGuiLabel m_DemoHeader;                                       // 
+
+    cGuiLabel  m_aDemoName[MENU_GAME_DEMOS];                      // 
+    cGuiObject m_aDemoLine[MENU_GAME_DEMOS];                      // 
+
+    cGuiSwitchBox m_DemoType;                                     // 
+    cGuiSwitchBox m_DemoStage;                                    // 
+    cGuiSwitchBox m_DemoDifficulty;                               // 
+    cGuiSwitchBox m_DemoSpeed;                                    // 
+    cGuiSwitchBox m_aDemoShield[MENU_GAME_PLAYERS];               // 
+    cGuiLabel     m_aDemoPlayer[MENU_GAME_PLAYERS];               // 
 
     coreUint8 m_iCurPage;                                         // 
     coreUintW m_aiCurIndex[3];                                    // 
@@ -442,12 +467,17 @@ public:
     void SaveValues();
 
     // 
-    void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo, coreUint8* OUTPUT piKind);//const;
+    void LoadValuesDemo();
+    void SaveValuesDemo();
+
+    // 
+    void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo, coreUint8* OUTPUT piKind)const;
 
     // 
     inline const coreUint8& GetSelectedType      ()const                       {return m_Type      .GetCurValue();}
     inline const coreUint8& GetSelectedMode      ()const                       {return m_Mode      .GetCurValue();}
     inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurValue();}
+    inline const coreUint8& GetSelectedShield    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aShield [iIndex].GetCurValue();}
     inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurValue();}
     inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurValue();}
 
@@ -684,6 +714,9 @@ public:
     void LoadValues();
     void SaveValues();
 
+    // convert input key to readable string
+    static const coreChar* PrintKey(const coreUint8 iType, const coreInt16 iKey);
+
 
 private:
     // 
@@ -706,9 +739,6 @@ private:
     // 
     static inline coreFloat __VolumeToFloat(const coreUint8 iVolume) {return I_TO_F(iVolume) * 0.01f;}
     static inline coreUint8 __VolumeToUint8(const coreFloat fVolume) {return F_TO_UI(ROUND(CLAMP(fVolume, 0.0f, 1.0f) * 20.0f) * 5.0f);}
-
-    // convert input key to readable string
-    static const coreChar* __PrintKey(const coreUint8 iType, const coreInt16 iKey);
 };
 
 
@@ -891,10 +921,15 @@ private:
     cGuiLabel m_TotalValue;                      // 
     cGuiLabel m_aTotalPart[MENU_FINISH_PARTS];   // 
 
+    cGuiButton m_SteamButton;                    // steam button
+    cGuiButton m_ExitButton;                     // exit button
+
     coreFlow m_fIntroTimer;                      // 
     coreFlow m_fOutroTimer;                      // 
 
     eFinishState m_eState;                       // 
+
+    cMenuNavigator m_Navigator;
 
 
 public:
@@ -1007,6 +1042,7 @@ private:
     coreMenu* m_pTransitionMenu;         // 
 
     static coreVector3 m_vHighlightColor;       // 
+    static coreVector3 m_vButtonColor;       // 
     
     static cGuiButton* m_pCurButton;
     static cGuiButton* m_pNewButton;
@@ -1041,8 +1077,10 @@ public:
 
     // 
     void SetHighlightColor(const coreVector3 vColor);
+    void SetButtonColor(const coreVector3 vColor);
     
     inline const coreVector3& GetHighlightColor()const {return m_vHighlightColor;}
+    inline const coreVector3& GetButtonColor()const {return m_vButtonColor;}
 
     // 
     static void UpdateLanguageFont();

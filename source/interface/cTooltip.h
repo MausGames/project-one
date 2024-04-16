@@ -18,18 +18,18 @@
 
 // ****************************************************************
 // tooltip definitions
-#define TOOLTIP_LINES         (4u)                                  // number of available text lines
-#define TOOLTIP_LINE_HEIGHT   (0.026f)                              // spacing between two text lines
-#define TOOLTIP_LINE_BOTTOM   (0.022f)                              // 
-#define TOOLTIP_OUTLINE_SIZE  (MENU_OUTLINE_SMALL)                  // default text outline size
-#define TOOLTIP_BORDER_SIZE   (coreVector2(0.02f,0.016f))           // spacing between text and box-edge
-#define TOOLTIP_TARGET_OFFSET (coreVector2(0.04f,0.0f))             // position offset from target (and for direction/alignment)
+#define TOOLTIP_LINES          (4u)                                  // number of available text lines
+#define TOOLTIP_LINE_HEIGHT    (0.026f)                              // spacing between two text lines
+#define TOOLTIP_LINE_BOTTOM    (0.022f)                              // 
+#define TOOLTIP_OUTLINE_SIZE   (MENU_OUTLINE_SMALL)                  // default text outline size
+#define TOOLTIP_BORDER_SIZE    (coreVector2(0.02f,0.016f))           // spacing between text and box-edge
+#define TOOLTIP_DEFAULT_OFFSET (coreVector2(0.04f,0.0f))             // default position offset from target (also for direction/alignment)
 
-#define TOOLTIP_PRINT(f,...)  (this + __LINE__), f, ##__VA_ARGS__   // specialized print-function for ShowText()
-#define TOOLTIP_ONELINER      (FLT_MAX)                             // create tooltip without wrapping (infinite width)
+#define TOOLTIP_PRINT(f,...)   (this + __LINE__), f, ##__VA_ARGS__   // specialized print-function for ShowText()
+#define TOOLTIP_ONELINER       (FLT_MAX)                             // create tooltip without wrapping (infinite width)
 
-#define TOOLTIP_MOUSE         (Core::Input->GetMousePosition() * Core::System->GetResolution().MaxRatio())
-#define TOOLTIP_OBJECT(x)     (GetTranslation(x) * RCP(Core::System->GetResolution().Min()))
+#define TOOLTIP_MOUSE          (Core::Input->GetMousePosition() * Core::System->GetResolution().MaxRatio())
+#define TOOLTIP_OBJECT(x)      (GetTranslation(x) * RCP(Core::System->GetResolution().Min()))
 
 
 // ****************************************************************
@@ -38,6 +38,8 @@ class cTooltip final : public cGuiObject
 {
 private:
     cGuiLabel m_aLine[TOOLTIP_LINES];   // text lines
+
+    coreVector2 m_vOffset;              // 
 
     coreUintW m_iNumLines;              // currently active text lines
     coreBool  m_bDisplay;               // display the tooltip (once)
@@ -53,6 +55,9 @@ public:
     // render and move the tooltip
     void Render()final;
     void Move  ()final;
+
+    // 
+    void ChangeOffset(const coreVector2 vOffset);
 
     // 
     template <typename... A> void ShowText(const coreVector2 vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);

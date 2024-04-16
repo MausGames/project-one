@@ -175,8 +175,8 @@ cDesertBackground::cDesertBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  ("environment_desert_04.md3");
-        oBase.DefineTexture(0u, "environment_desert2.png");
+        oBase.DefineModel  ("environment_desert_02.md3");
+        oBase.DefineTexture(0u, "environment_desert.png");
         oBase.DefineTexture(1u, "default_normal.png");
         oBase.DefineProgram("object_ground_program");
 
@@ -232,7 +232,7 @@ cDesertBackground::cDesertBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  ("environment_desert_01.md3");
-        oBase.DefineTexture(0u, "environment_desert2.png");
+        oBase.DefineTexture(0u, "environment_desert.png");
         oBase.DefineTexture(1u, "default_normal.png");
         oBase.DefineProgram("object_ground_program");
 

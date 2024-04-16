@@ -36,8 +36,10 @@ void cReplay::CreateGame()
     oOptions.iType        = m_Header.iOptionType;
     oOptions.iMode        = m_Header.iOptionMode;
     oOptions.iDifficulty  = m_Header.iOptionDifficulty;
+    oOptions.iFlags       = GAME_FLAG_TASK;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
+        oOptions.aiShield[i] = m_Header.aaiOptionShield[i];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_WEAPONS;  ++j) oOptions.aaiWeapon [i][j] = m_Header.aaiOptionWeapon [i][j];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_SUPPORTS; ++j) oOptions.aaiSupport[i][j] = m_Header.aaiOptionSupport[i][j];
     }
@@ -71,13 +73,16 @@ void cReplay::StartRecording()
     m_Header.iOptionType       = g_pGame->GetOptions().iType;
     m_Header.iOptionMode       = g_pGame->GetOptions().iMode;
     m_Header.iOptionDifficulty = g_pGame->GetOptions().iDifficulty;
+    m_Header.iOptionFlags      = g_pGame->GetOptions().iFlags;
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
+        m_Header.aaiOptionShield[i] = g_pGame->GetOptions().aiShield[i];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_WEAPONS;  ++j) m_Header.aaiOptionWeapon [i][j] = g_pGame->GetOptions().aaiWeapon [i][j];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_SUPPORTS; ++j) m_Header.aaiOptionSupport[i][j] = g_pGame->GetOptions().aaiSupport[i][j];
     }
 
     // 
+    m_Header.iConfigGameSpeed  = g_CurConfig.Game.iGameSpeed;
     m_Header.iConfigUpdateFreq = g_CurConfig.Game.iUpdateFreq;   // TODO 1: should not be 0 
     m_Header.iConfigVersion    = 1u;   // TODO 1 
 
@@ -593,6 +598,7 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     }
 
     // 
+    pHeader->iConfigGameSpeed  = CLAMP(pHeader->iConfigGameSpeed,  50u,                    200u);
     pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
     pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO 1 
 

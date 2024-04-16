@@ -89,7 +89,8 @@ void cGeluMission::__SetupOwn()
     // TODO 1: pEnemy->AimAtPlayerDual((i < 16u || (i >= 80u && i < 96u)) ? ((i / 4u) % 2u) : ((i < 32u || (i >= 40u && i < 72u)) ? ((i / 8u) % 2u) : (i % 2u))).Normalized();
     // TODO 1: what about SetAngle, especially for dungeon ?
     // TODO 1: SQRT2 not necessary ? (both cases) (oh wait, 0.7071 on corner)
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fDungeonFactor  = 0.095f;
@@ -416,7 +417,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: handle assert in SetArea (both single and coop)
     // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
     // TODO 1: boss schießt die 4 flügel in den boden und zieht ihn nach oben mit seinen spitzen, spieler muss ihn nach unten schießen, beim rausziehen der flügel werden die spitzen rausgeschossen, X0X0, in zwei wellen
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: hard mode: attacking the border creates attacks (stings fly away, and respawn a second later ?)
     // TODO 1: helfer sollte sichtbar sein, bisschen nach unten schieben
     STAGE_MAIN({TAKE_ALWAYS, 1u})
@@ -522,7 +523,7 @@ void cGeluMission::__SetupOwn()
 
         if(STAGE_BEGINNING)
         {
-            pHelper->Resurrect();
+            pHelper->Resurrect(false);
         }
         if(STAGE_TIME_BEFORE(2.0f))
         {
@@ -962,7 +963,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: blöcke müssen besser explodieren, e.g. schrumpfen während explosion
     // TODO 1: blöcke müssen besser aussehen (form und farbe) (create better fang model with low-detail version)
     // TODO 1: in tunnel 2. teil, gegner können eh nur zerstört werden wenn man sich in die blauen wellen wagt
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: helder erscheint LERPB kurz bevor er zerquetscht wird bei transition
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
@@ -1555,7 +1556,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: irgendetwas mit dem linien-wechsel machen, wenn man gleich danach versuchen muss nem angriff auszuweichen, vielleicht wechsel in zwei schritten, alle linien kommen zurück und blinkende verschwinden dann (1s)
     // TODO 1: sollen linien am ende mergen ? 2x2 > 2x1, dann könnten auch 4 verbindungen am ende bleiben, vielleicht sollten gegner die den übergang verursachen immer vom mittel 2x2 angegriffen werden, wodurch man immer ausweichen kann
     // TODO 1: gegner am ende halten irgendwie nix aus (vielleicht verdoppeln und dicht hintereinander)
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -2049,7 +2050,8 @@ void cGeluMission::__SetupOwn()
     // TODO 1: sollte nicht über lava sein wegen kontrast der blöcke
     // TWIST: (boss?) line of blocks fom left and right at the same time, but with different direction, can crush player
     // TWIST: lines from the bottom
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: effect, wenn man im block ist, arrow is immer sichtbar ?
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreFloat fStep      = GELU_WAY_STEP;
@@ -2409,7 +2411,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: SCHAU ob man eine andere mechanik von der liste rein-mergen kann ####################################################
     // TODO 1: fixe position, wie minenfeld, ferne gegner greifen an
     // TODO 1: add bouncy ball, which enemies evade
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)

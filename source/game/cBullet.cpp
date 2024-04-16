@@ -8,8 +8,9 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-cRotaCache   cBullet    ::s_RotaCache = {};
-coreObject3D cMineBullet::s_Wave      = {};
+cRotaCache   cBullet      ::s_RotaCache = {};
+coreObject3D cDebrisBullet::s_Wave      = {};
+coreObject3D cMineBullet  ::s_Wave      = {};
 
 
 // ****************************************************************
@@ -24,6 +25,7 @@ cBullet::cBullet()noexcept
 , m_iElement   (ELEMENT_NEUTRAL)
 , m_fFlyTime   (0.0f)
 , m_vFlyDir    (coreVector2(0.0f,0.0f))
+, m_fAnimSpeed (1.0f)
 {
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -75,6 +77,8 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
     // 
     m_fFlyTime = 0.0f;
     m_vFlyDir  = vDirection;
+    
+    m_fAnimSpeed = 1.0f;
 
     // reset bullet properties
     this->SetPosition (coreVector3(vPosition,  0.0f));
@@ -106,7 +110,7 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact, co
 
     // disable collision
     this->ChangeType(0);
-    //this->SetSize(this->GetSize() * coreVector3(1.5f,1.0f,1.0f)); // TODO 1: nur für ray ?
+    //this->SetSize(this->GetSize() * coreVector3(1.5f,1.0f,1.0f)); // TODO 1: nur fuer ray ?
     //this->coreObject3D::Move();
 }
 
@@ -182,6 +186,9 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersecti
 
     // move the 3d-object
     this->coreObject3D::Move();   // for direction (and other) changes
+
+    // 
+    this->AddStatus(BULLET_STATUS_REFLECTED);
 }
 
 
@@ -427,6 +434,8 @@ void cBulletManager::ResetOrder()
 cRayBullet::cRayBullet()noexcept
 : m_fScale (1.0f)
 , m_fTilt  (0.0f)
+
+, m_vOldFlyDir (coreVector2(0.0f,1.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
@@ -486,7 +495,7 @@ void cRayBullet::__MoveOwn()
     const coreFloat fRelSpeed = m_fSpeed / (8.0f*BULLET_SPEED_FACTOR);
 
     // update animation
-    m_fAnimation.UpdateMod(0.4f * fRelSpeed, 1.0f);
+    m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.35f, 0.0f + 0.0f*m_fAnimation + 0.0f*FRACT(coreFloat(Core::System->GetTotalTime()) * 0.1f)));
 
     
@@ -505,6 +514,9 @@ void cRayBullet::__MoveOwn()
         const coreFloat fHeight = this->GetPosition().z;
         this->SetAlpha(STEPH3(-390.0f, -360.0f, fHeight) - STEPH3(50.0f, 150.0f, fHeight));
     }
+    
+    //this->SetColor3(coreVector3(m_vOldFlyDir * 0.5f + 0.5f, 0.0f));
+    //m_vOldFlyDir = m_vFlyDir;
 }
 
 
@@ -561,7 +573,7 @@ void cPulseBullet::__MoveOwn()
     const coreFloat fRelSpeed = m_fSpeed / (3.0f*BULLET_SPEED_FACTOR);
     
     // update animation
-    m_fAnimation.UpdateMod(0.4f * fRelSpeed, 1.0f);
+    m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -620,7 +632,7 @@ void cSurgeBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.06f, 1.0f);
+    m_fAnimation.UpdateMod(0.06f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
 
     // update fade
@@ -676,7 +688,7 @@ void cTeslaBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(-0.2f, -1.0f);
+    m_fAnimation.UpdateMod(-0.2f * m_fAnimSpeed, -1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -741,7 +753,7 @@ void cOrbBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -793,7 +805,7 @@ void cConeBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.15f, 1.0f);
+    m_fAnimation.UpdateMod(0.15f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -845,7 +857,7 @@ void cWaveBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.06f, 1.0f);
+    m_fAnimation.UpdateMod(0.06f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
 
     // update fade
@@ -897,7 +909,7 @@ void cSpearBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.18f, 1.0f);
+    m_fAnimation.UpdateMod(0.18f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -945,7 +957,7 @@ void cTriangleBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 8.0f);
+    m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
 
@@ -995,7 +1007,7 @@ void cFlipBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(-0.2f, -8.0f);
+    m_fAnimation.UpdateMod(-0.2f * m_fAnimSpeed, -8.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (9.0f*PI)), 0.0f));
     this->SetTexOffset(coreVector2(m_fAnimation * 0.625f, 0.0f));
 
@@ -1044,7 +1056,7 @@ void cQuadBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 8.0f);
+    m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
 
@@ -1097,8 +1109,96 @@ void cViewBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN1(20.0f * m_fFade));
+}
+
+
+// ****************************************************************
+// constructor
+cDebrisBullet::cDebrisBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("ship_meteor.md3");
+    this->DefineTexture(0u, "environment_stone_diff.png");
+    this->DefineTexture(1u, "environment_stone_norm.png");
+    this->DefineProgram("object_meteor_program");
+
+    // 
+    this->SetColor3(COLOR_SHIP_YELLOW / COLOR_SHIP_YELLOW.Max());
+}
+
+
+// ****************************************************************
+// 
+void cDebrisBullet::GlobalInit()
+{
+    // 
+    s_Wave.DefineModel  (Core::Manager::Object->GetLowQuad());
+    s_Wave.DefineTexture(0u, "effect_wave.png");
+    s_Wave.DefineProgram("effect_decal_single_program");
+    s_Wave.SetTexSize   (coreVector2(0.5f,1.0f));
+}
+
+
+// ****************************************************************
+// 
+void cDebrisBullet::GlobalExit()
+{
+    // 
+    s_Wave.Undefine();
+}
+
+
+// ****************************************************************
+// 
+void cDebrisBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 25.0f, 5u, COLOR_ENERGY_YELLOW);
+}
+
+
+// ****************************************************************
+// 
+void cDebrisBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// 
+void cDebrisBullet::__RenderOwnBefore()
+{
+    glDisable(GL_DEPTH_TEST);
+    {
+        const coreFloat fValue = LERPB(0.0f, 1.0f, FRACT(m_fAnimation * 0.5f));
+
+        // 
+        s_Wave.SetPosition(this->GetPosition());
+        s_Wave.SetSize    (coreVector3(coreVector2(7.5f,7.5f) * (0.25f + 0.75f*fValue) * this->GetSize().x, 1.0f));
+        s_Wave.SetAlpha   (1.0f - fValue);
+        s_Wave.Move();
+        s_Wave.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
+}
+
+
+// ****************************************************************
+// move the debris bullet
+void cDebrisBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+
+    // update animation
+    m_fAnimation.UpdateMod(1.5f * m_fAnimSpeed, 20.0f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (-0.3f*PI)), 0.0f));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -1129,6 +1229,7 @@ void cMineBullet::GlobalInit()
     s_Wave.DefineModel  (Core::Manager::Object->GetLowQuad());
     s_Wave.DefineTexture(0u, "effect_wave.png");
     s_Wave.DefineProgram("effect_decal_single_program");
+    s_Wave.SetTexSize   (coreVector2(0.5f,1.0f));
 }
 
 
@@ -1188,7 +1289,7 @@ void cMineBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(1.5f, 20.0f);
+    m_fAnimation.UpdateMod(1.5f * m_fAnimSpeed, 20.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (0.3f*PI)), 0.0f));
     this->SetColor3   (coreVector3(0.5f + 0.5f * SIN(m_fAnimation * (1.0f*PI)), 0.0f, 0.0f));
 
@@ -1260,7 +1361,7 @@ void cRocketBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(10.0f, 2.0f);
+    m_fAnimation.UpdateMod(10.0f * m_fAnimSpeed, 2.0f);
     this->SetColor3(coreVector3(0.0f, 0.6f + 0.4f * SIN(m_fAnimation * (1.0f*PI)), 0.0f));
 
     // update fade
@@ -1282,7 +1383,10 @@ cGrowBullet::cGrowBullet()noexcept
     // load object resources
     this->DefineModel  ("bullet_orb.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_program");
+    this->DefineProgram("effect_energy_bullet_spheric_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 0.95f);
 }
 
 
@@ -1290,9 +1394,32 @@ cGrowBullet::cGrowBullet()noexcept
 // 
 void cGrowBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
+    const coreBool bBig = (m_iDamage == 1);
+
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 10.0f, 3u, this->GetColor3());
-    // TODO 1: better explosion for big bullets
+    for(coreUintW i = 0u; i < 8u; ++i)
+    {
+        const coreVector2 vPos = vImpact + StepRotated45(i) * this->GetVisualRadius();
+        const coreVector2 vDir = vPos.Normalized();
+
+        // 
+        if(vForce.IsNull()) g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f),                          10.0f, bBig ? 9u : 3u, this->GetColor3());
+                       else g_pSpecialEffects->CreateBlowColor  (coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, bBig ? 9u : 3u, this->GetColor3());
+    }
+
+    if(bBig)
+    {
+        // 
+        for(coreUintW i = 0u; i < 8u; ++i)
+        {
+            const coreVector2 vPos = vImpact + StepRotated45X(i) * this->GetVisualRadius();
+            const coreVector2 vDir = vPos.Normalized();
+
+            // 
+            if(vForce.IsNull()) g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f),                          10.0f, 9u, this->GetColor3());
+                           else g_pSpecialEffects->CreateBlowColor  (coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 9u, this->GetColor3());
+        }
+    }
 }
 
 
@@ -1312,7 +1439,7 @@ void cGrowBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -1395,7 +1522,7 @@ void cTiltBullet::__MoveOwn()
     this->SetOrientation(coreVector3(0.0f,1.0f,0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade

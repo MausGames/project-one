@@ -32,7 +32,9 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
 
     // clamp input set selections
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
+    {
         pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);
+    }
 
     // loop trough input sets
     for(coreUintW i = 0u; i < INPUT_SETS; ++i)
@@ -49,7 +51,9 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
 
         // clamp action keys
         for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
+        {
             oSet.aiAction[j] = CLAMP(oSet.aiAction[j], iFrom, iTo);
+        }
     }
 
     // check for input sets with more than one selection
@@ -61,7 +65,9 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
             {
                 // reset all selections to default values
                 for(coreUintW k = 0u; k < INPUT_TYPES; ++k)
+                {
                     pConfig->Input.aiType[k] = k;
+                }
 
                 // leave all loops
                 i = j = INPUT_TYPES;
@@ -115,7 +121,7 @@ void LoadConfig()
     // read audio values
     g_OldConfig.Audio.fEffectVolume  = Core::Config->GetFloat(CONFIG_AUDIO_EFFECT_VOLUME);
     g_OldConfig.Audio.fAmbientVolume = Core::Config->GetFloat(CONFIG_AUDIO_AMBIENT_VOLUME);
-    g_OldConfig.Audio.i3DSound       = Core::Config->GetFloat(CONFIG_AUDIO_3D_SOUND);
+    g_OldConfig.Audio.i3DSound       = Core::Config->GetInt  (CONFIG_AUDIO_3D_SOUND);
 
     // read input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
@@ -126,13 +132,13 @@ void LoadConfig()
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
-        g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i), DEFAULT_KEYBOARD_1_MOVE_UP);
-        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i), DEFAULT_KEYBOARD_1_MOVE_LEFT);
-        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i), DEFAULT_KEYBOARD_1_MOVE_DOWN);
-        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i), DEFAULT_KEYBOARD_1_MOVE_RIGHT);
+        g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i), DEFAULT_MOVE_UP   (i));
+        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i), DEFAULT_MOVE_LEFT (i));
+        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i), DEFAULT_MOVE_DOWN (i));
+        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i), DEFAULT_MOVE_RIGHT(i));
         for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
         {
-            g_OldConfig.Input.aSet[i].aiAction[j] = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j), DEFAULT_KEYBOARD_1_ACTION(j));
+            g_OldConfig.Input.aSet[i].aiAction[j] = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j), DEFAULT_ACTION(i, j));
         }
     }
 
@@ -181,7 +187,7 @@ void SaveConfig()
     // write audio values
     Core::Config->SetFloat(CONFIG_AUDIO_EFFECT_VOLUME,  g_OldConfig.Audio.fEffectVolume);
     Core::Config->SetFloat(CONFIG_AUDIO_AMBIENT_VOLUME, g_OldConfig.Audio.fAmbientVolume);
-    Core::Config->SetFloat(CONFIG_AUDIO_3D_SOUND,       g_OldConfig.Audio.i3DSound);
+    Core::Config->SetInt  (CONFIG_AUDIO_3D_SOUND,       g_OldConfig.Audio.i3DSound);
 
     // write input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
@@ -270,6 +276,9 @@ void UpdateInput()
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
             }
+            
+            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
+            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
 
             // TODO 1: es gibt keinen cancel-button mehr
             //if(Core::Input->GetJoystickButton(iJoystickID, 1u, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
@@ -294,7 +303,7 @@ void UpdateInput()
         // 
         if(i >= INPUT_SETS_KEYBOARD)
         {
-            if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
+            //if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
             //if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
             if(HAS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
         }

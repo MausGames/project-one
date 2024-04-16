@@ -8,8 +8,6 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-coreUint8 cEnemy::s_iExhaustCount = 0u;
-
 
 // ****************************************************************
 // constructor
@@ -35,11 +33,11 @@ cEnemy::cEnemy()noexcept
 
 // ****************************************************************
 // configure the enemy
-void cEnemy::Configure(const coreInt32 iHealth, const coreUint16 iScore, const coreVector3 vColor, const coreBool bInverted, const coreBool bIgnored)
+void cEnemy::Configure(const coreInt32 iHealth, const coreUint16 iScore, const coreVector3 vColor, const coreBool bInverted, const coreBool bIgnored, const coreBool bWhite)
 {
     // set health and color
     this->SetMaxHealth(iHealth);
-    this->SetBaseColor(vColor, bInverted, bIgnored);
+    this->SetBaseColor(vColor, bInverted, bIgnored, bWhite);
 
     // 
     m_iScore = iScore;
@@ -128,7 +126,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 
     // 
     const coreBool bMulti = (pAttacker && g_pGame->IsMulti());
-    m_iLastAttacker = bMulti ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
+    m_iLastAttacker = bMulti ? g_pGame->GetPlayerIndex(pAttacker) : 0u;
 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
@@ -189,18 +187,8 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
                     // 
                     this->Kill(true);
 
-                    if(pAttacker)
-                    {
-                        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
-                        {
-                            // 
-                            const coreUint32 iScore = pAttacker->GetScoreTable()->AddScore(m_iScore ? m_iScore : (10u * m_iMaxHealth), true);
-                            pAttacker->GetScoreTable()->AddCombo(1u);
-
-                            // 
-                            g_pGame->GetCombatText()->DrawScore(iScore, this->GetPosition(), !g_pGame->GetEnemyManager()->GetNumEnemiesAlive());
-                        }
-                    }
+                    // 
+                    if(pAttacker) this->ApplyScore(pAttacker);
                 }
             }
 
@@ -355,6 +343,31 @@ void cEnemy::ResetProperties()
     m_iStatus = ENEMY_STATUS_DEAD;
 }
 
+
+// ****************************************************************
+// 
+void cEnemy::ApplyScore(cPlayer* pPlayer)
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
+    {
+        // 
+        const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(this->GetRealScore(), true);
+        pPlayer->GetScoreTable()->AddCombo(1u);
+
+        // 
+        g_pGame->GetCombatText()->DrawScore(iScore, this->GetPosition(), false);//!g_pGame->GetEnemyManager()->GetNumEnemiesAlive());   // TODO 1: bBig is not correct
+    }
+}
+
+void cEnemy::ApplyScore()
+{
+    // 
+    this->ApplyScore(this->LastAttacker());
+}
+
+
 // ****************************************************************
 // 
 void cEnemy::RefreshColorAll(const coreFloat fFactor)
@@ -369,6 +382,7 @@ void cEnemy::RefreshColorAll(const coreFloat fFactor)
     }
 
 }
+
 void cEnemy::RefreshColorAll()
 {
     // 
@@ -395,7 +409,8 @@ void cEnemy::InvokeBlinkAll()
 // 
 void cEnemy::ChangeToBottom()
 {
-    ASSERT(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
+    //ASSERT(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
+    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
 
     // 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
@@ -411,7 +426,8 @@ void cEnemy::ChangeToBottom()
 
 void cEnemy::ChangeToTop()
 {
-    ASSERT(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
+    //ASSERT(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
+    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
 
     // 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
@@ -427,7 +443,8 @@ void cEnemy::ChangeToTop()
 
 void cEnemy::ChangeToNormal()
 {
-    ASSERT(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
+    //ASSERT(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
+    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
 
     // 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
@@ -448,7 +465,14 @@ cPlayer* cEnemy::LastAttacker()const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return g_pGame->GetPlayer(m_iLastAttacker);
+    return g_pGame->GetPlayer(this->LastAttackerIndex());
+}
+
+coreUintW cEnemy::LastAttackerIndex()const
+{
+    // 
+    ASSERT(m_iLastAttacker < GAME_PLAYERS)
+    return m_iLastAttacker;
 }
 
 
@@ -525,15 +549,6 @@ void cEnemy::_SetParent(cEnemy* pParent)
 
     // 
     this->RefreshColor((pParent ? pParent : this)->GetCurHealthPct());
-}
-
-
-// ****************************************************************
-// 
-coreFloat cEnemy::_GetExhaustOffset()
-{
-    if(++s_iExhaustCount >= 10u) s_iExhaustCount = 0u;
-    return I_TO_F(s_iExhaustCount) * 0.1f;
 }
 
 
@@ -668,7 +683,7 @@ void cEnemyManager::RenderTop   () {
 DEPTH_PUSH
 
     /* */                                                            
-    const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)               
+    const auto nRenderFunc2 = [](cEnemy* OUTPUT pEnemy)              
     {                                                                
         if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))                     
             return;   
@@ -685,7 +700,7 @@ DEPTH_PUSH
                                                                      
     /* render all additional enemies */                              
     FOR_EACH(it, m_apAdditional)                                     
-        nRenderFunc(*it);                                            
+        nRenderFunc2(*it);                                           
                                                                      
     /* loop through all enemy sets */                                
     for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)                  
@@ -695,7 +710,7 @@ DEPTH_PUSH
                                                                      
         /* render all active enemies */                              
         FOR_EACH(it, *pEnemyActive->List())                          
-            nRenderFunc(d_cast<cEnemy*>(*it));                       
+            nRenderFunc2(d_cast<cEnemy*>(*it));                      
     }                                                                
     
 //glEnable(GL_DEPTH_TEST);
@@ -946,18 +961,10 @@ cDummyEnemy::cDummyEnemy()noexcept
 // ****************************************************************
 // constructor
 cScoutEnemy::cScoutEnemy()noexcept
-: m_fAnimation (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_enemy_scout_high.md3");
     this->DefineModelLow ("ship_enemy_scout_low.md3");
-
-    // 
-    m_Exhaust.DefineModel  ("object_tube_open.md3");
-    m_Exhaust.DefineTexture(0u, "effect_energy.png");
-    m_Exhaust.DefineProgram("effect_energy_flat_direct_program");
-    m_Exhaust.SetColor3    (COLOR_ENERGY_WHITE * 0.7f);
-    m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
 }
 
 
@@ -966,7 +973,7 @@ cScoutEnemy::cScoutEnemy()noexcept
 void cScoutEnemy::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Exhaust);
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_SCOUT);
 }
 
 
@@ -975,61 +982,17 @@ void cScoutEnemy::__ResurrectOwn()
 void cScoutEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pGlow->UnbindObject(&m_Exhaust);
-}
-
-
-// ****************************************************************
-// 
-void cScoutEnemy::__RenderOwnUnder()
-{
-    // 
-    m_Exhaust.Render();
-}
-
-
-// ****************************************************************
-// 
-void cScoutEnemy::__MoveOwn()
-{
-    constexpr coreFloat fStrength = 0.07f;
-
-    // 
-    m_fAnimation.UpdateMod(0.75f, 1.0f);
-
-    // 
-    const coreFloat fLen  = fStrength * 25.0f;
-    const coreFloat fSize = 1.0f - fStrength * 0.25f;
-
-    // 
-    m_Exhaust.SetSize       (coreVector3(fSize, fLen, fSize) * (0.9f * this->GetSize().x));
-    m_Exhaust.SetTexOffset  (coreVector2(0.0f, m_fAnimation));
-    m_Exhaust.SetPosition   (this->GetPosition   () - this->GetDirection() * (m_Exhaust.GetSize().y + 2.5f * this->GetSize().x));
-    m_Exhaust.SetDirection  (this->GetDirection  ());
-    m_Exhaust.SetOrientation(this->GetOrientation());
-    m_Exhaust.SetAlpha      (this->GetAlpha      () * (this->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
-    m_Exhaust.Move();
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_SCOUT);
 }
 
 
 // ****************************************************************
 // constructor
 cWarriorEnemy::cWarriorEnemy()noexcept
-: m_fAnimation (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_enemy_warrior_high.md3");
     this->DefineModelLow ("ship_enemy_warrior_low.md3");
-
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aExhaust); ++i)
-    {
-        // 
-        m_aExhaust[i].DefineModel  ("object_tube_open.md3");
-        m_aExhaust[i].DefineTexture(0u, "effect_energy.png");
-        m_aExhaust[i].DefineProgram("effect_energy_flat_direct_program");
-        m_aExhaust[i].SetColor3    (COLOR_ENERGY_WHITE * 0.7f);
-        m_aExhaust[i].SetTexSize   (coreVector2(0.5f,0.25f));
-    }
 }
 
 
@@ -1038,8 +1001,7 @@ cWarriorEnemy::cWarriorEnemy()noexcept
 void cWarriorEnemy::__ResurrectOwn()
 {
     // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aExhaust); ++i)
-        g_pGlow->BindObject(&m_aExhaust[i]);
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_WARRIOR);
 }
 
 
@@ -1048,67 +1010,18 @@ void cWarriorEnemy::__ResurrectOwn()
 void cWarriorEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aExhaust); ++i)
-        g_pGlow->UnbindObject(&m_aExhaust[i]);
-}
-
-
-// ****************************************************************
-// 
-void cWarriorEnemy::__RenderOwnUnder()
-{
-    // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aExhaust); ++i)
-        m_aExhaust[i].Render();
-}
-
-
-// ****************************************************************
-// 
-void cWarriorEnemy::__MoveOwn()
-{
-    constexpr coreFloat fStrength = 0.07f;
-
-    // 
-    m_fAnimation.UpdateMod(0.75f, 1.0f);
-
-    // 
-    const coreFloat fLen  = fStrength * 30.0f;
-    const coreFloat fSize = 1.0f - fStrength * 0.25f;
-
-    // 
-    const coreVector3 vTan = coreVector3::Cross(this->GetDirection(), this->GetOrientation()).Normalized();
-
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aExhaust); ++i)
-    {
-        // 
-        m_aExhaust[i].SetSize       (coreVector3(fSize, fLen, fSize) * (0.9f * this->GetSize().x));
-        m_aExhaust[i].SetTexOffset  (coreVector2(0.0f, m_fAnimation));
-        m_aExhaust[i].SetPosition   (this->GetPosition   () - this->GetDirection() * (m_aExhaust[i].GetSize().y + 1.85f * this->GetSize().x) + vTan * ((i ? -1.4f : 1.4f) * this->GetSize().x));
-        m_aExhaust[i].SetDirection  (this->GetDirection  ());
-        m_aExhaust[i].SetOrientation(this->GetOrientation());
-        m_aExhaust[i].SetAlpha      (this->GetAlpha      () * (this->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
-        m_aExhaust[i].Move();
-    }
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_WARRIOR);
 }
 
 
 // ****************************************************************
 // constructor
 cStarEnemy::cStarEnemy()noexcept
-: m_fAngle     (0.0f)
-, m_fAnimation (0.0f)
+: m_fAngle (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_enemy_star_high.md3");
     this->DefineModelLow ("ship_enemy_star_low.md3");
-
-    // 
-    m_Exhaust.DefineModel  ("object_sphere.md3");
-    m_Exhaust.DefineTexture(0u, "effect_energy.png");
-    m_Exhaust.DefineProgram("effect_energy_flat_program");
-    m_Exhaust.SetColor3    (COLOR_ENERGY_WHITE * 0.5f);
-    m_Exhaust.SetTexSize   (coreVector2(1.0f,1.0f) * 2.0f);
 }
 
 
@@ -1117,7 +1030,7 @@ cStarEnemy::cStarEnemy()noexcept
 void cStarEnemy::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Exhaust);
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_STAR);
 }
 
 
@@ -1126,16 +1039,7 @@ void cStarEnemy::__ResurrectOwn()
 void cStarEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pGlow->UnbindObject(&m_Exhaust);
-}
-
-
-// ****************************************************************
-// 
-void cStarEnemy::__RenderOwnUnder()
-{
-    // 
-    m_Exhaust.Render();
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_STAR);
 }
 
 
@@ -1148,47 +1052,26 @@ void cStarEnemy::__MoveOwn()
 
     // rotate around z-axis
     this->DefaultRotate(m_fAngle);
-
-    // 
-    m_fAnimation.UpdateMod(0.05f, 1.0f);
-
-    // 
-    const coreVector2 vDir = coreVector2::Direction(m_fAngle * 0.3f);
-
-    // 
-    m_Exhaust.SetSize     (coreVector3(1.0f,1.0f,1.0f) * this->GetVisualRadius() * 0.9f);
-    m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation));
-    m_Exhaust.SetPosition (this->GetPosition());
-    m_Exhaust.SetDirection(coreVector3(vDir, 0.0f));
-    m_Exhaust.SetAlpha    (this->GetAlpha() * (this->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
-    m_Exhaust.Move();
 }
 
 
 // ****************************************************************
 // constructor
 cArrowEnemy::cArrowEnemy()noexcept
-: m_fAngle     (0.0f)
-, m_fAnimation (0.0f)
+: m_fAngle (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_enemy_arrow_high.md3");
     this->DefineModelLow ("ship_enemy_arrow_low.md3");
-
-    // 
-    m_Exhaust.DefineModel  ("object_tube_open.md3");
-    m_Exhaust.DefineTexture(0u, "effect_energy.png");
-    m_Exhaust.DefineProgram("effect_energy_flat_direct_program");
-    m_Exhaust.SetColor3    (COLOR_ENERGY_WHITE * 0.7f);
-    m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
 }
+
 
 // ****************************************************************
 // 
 void cArrowEnemy::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Exhaust);
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_ARROW);
 }
 
 
@@ -1197,16 +1080,7 @@ void cArrowEnemy::__ResurrectOwn()
 void cArrowEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pGlow->UnbindObject(&m_Exhaust);
-}
-
-
-// ****************************************************************
-// 
-void cArrowEnemy::__RenderOwnUnder()
-{
-    // 
-    m_Exhaust.Render();
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_ARROW);
 }
 
 
@@ -1219,41 +1093,16 @@ void cArrowEnemy::__MoveOwn()
 
     // rotate around direction axis
     this->DefaultOrientate(m_fAngle);
-
-    constexpr coreFloat fStrength = 0.07f;
-
-    // 
-    m_fAnimation.UpdateMod(0.75f, 1.0f);
-
-    // 
-    const coreFloat fLen  = fStrength * 40.0f;
-    const coreFloat fSize = 1.0f - fStrength * 0.25f;
-
-    // 
-    m_Exhaust.SetSize       (coreVector3(fSize, fLen, fSize) * (0.9f * this->GetSize().x));
-    m_Exhaust.SetTexOffset  (coreVector2(0.0f, m_fAnimation));
-    m_Exhaust.SetPosition   (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 1.65f * this->GetSize().x));
-    m_Exhaust.SetDirection  (this->GetDirection());
-    m_Exhaust.SetAlpha      (this->GetAlpha    () * (this->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
-    m_Exhaust.Move();
 }
 
 
 // ****************************************************************
 // constructor
 cMinerEnemy::cMinerEnemy()noexcept
-: m_fAnimation (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_enemy_miner_high.md3");
     this->DefineModelLow ("ship_enemy_miner_low.md3");
-
-    // 
-    m_Exhaust.DefineModel  ("object_tube_open.md3");
-    m_Exhaust.DefineTexture(0u, "effect_energy.png");
-    m_Exhaust.DefineProgram("effect_energy_flat_direct_program");
-    m_Exhaust.SetColor3    (COLOR_ENERGY_WHITE * 0.7f);
-    m_Exhaust.SetTexSize   (coreVector2(0.75f,0.15f));
 }
 
 
@@ -1262,7 +1111,7 @@ cMinerEnemy::cMinerEnemy()noexcept
 void cMinerEnemy::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Exhaust);
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_MINER);
 }
 
 
@@ -1271,59 +1120,18 @@ void cMinerEnemy::__ResurrectOwn()
 void cMinerEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pGlow->UnbindObject(&m_Exhaust);
-}
-
-
-// ****************************************************************
-// 
-void cMinerEnemy::__RenderOwnUnder()
-{
-    // 
-    m_Exhaust.Render();
-}
-
-
-// ****************************************************************
-// 
-void cMinerEnemy::__MoveOwn()
-{
-    constexpr coreFloat fStrength = 0.07f;
-
-    // 
-    m_fAnimation.UpdateMod(0.75f * 0.6f, 1.0f);
-
-    // 
-    const coreFloat fLen  = fStrength * 25.0f;
-    const coreFloat fSize = (1.0f - fStrength * 0.25f) * 1.5f;
-
-    // 
-    m_Exhaust.SetSize       (coreVector3(fSize, fLen, fSize) * (0.9f * this->GetSize().x));
-    m_Exhaust.SetTexOffset  (coreVector2(0.0f, m_fAnimation));
-    m_Exhaust.SetPosition   (this->GetPosition   () - this->GetDirection() * (m_Exhaust.GetSize().y + 1.9f * this->GetSize().x));
-    m_Exhaust.SetDirection  (this->GetDirection  ());
-    m_Exhaust.SetOrientation(this->GetOrientation());
-    m_Exhaust.SetAlpha      (this->GetAlpha      () * (this->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
-    m_Exhaust.Move();
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_MINER);
 }
 
 
 // ****************************************************************
 // constructor
 cFreezerEnemy::cFreezerEnemy()noexcept
-: m_fAngle     (0.0f)
-, m_fAnimation (0.0f)
+: m_fAngle (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_enemy_freezer_high.md3");
     this->DefineModelLow ("ship_enemy_freezer_low.md3");
-
-    // 
-    m_Exhaust.DefineModel  ("object_tube_open.md3");
-    m_Exhaust.DefineTexture(0u, "effect_energy.png");
-    m_Exhaust.DefineProgram("effect_energy_flat_direct_program");
-    m_Exhaust.SetColor3    (COLOR_ENERGY_WHITE * 0.7f);
-    m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
 }
 
 
@@ -1332,7 +1140,7 @@ cFreezerEnemy::cFreezerEnemy()noexcept
 void cFreezerEnemy::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Exhaust);
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_FREEZER);
 }
 
 
@@ -1341,16 +1149,7 @@ void cFreezerEnemy::__ResurrectOwn()
 void cFreezerEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pGlow->UnbindObject(&m_Exhaust);
-}
-
-
-// ****************************************************************
-// 
-void cFreezerEnemy::__RenderOwnUnder()
-{
-    // 
-    m_Exhaust.Render();
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_FREEZER);
 }
 
 
@@ -1363,42 +1162,17 @@ void cFreezerEnemy::__MoveOwn()
 
     // rotate around direction axis
     this->DefaultOrientate(m_fAngle);
-
-    constexpr coreFloat fStrength = 0.07f;
-
-    // 
-    m_fAnimation.UpdateMod(0.75f, 1.0f);
-
-    // 
-    const coreFloat fLen  = fStrength * 25.0f;
-    const coreFloat fSize = 1.0f - fStrength * 0.25f;
-
-    // 
-    m_Exhaust.SetSize       (coreVector3(fSize, fLen, fSize) * (0.9f * this->GetSize().x));
-    m_Exhaust.SetTexOffset  (coreVector2(0.0f, m_fAnimation));
-    m_Exhaust.SetPosition   (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 2.35f * this->GetSize().x));
-    m_Exhaust.SetDirection  (this->GetDirection());
-    m_Exhaust.SetAlpha      (this->GetAlpha    () * (this->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
-    m_Exhaust.Move();
 }
 
 
 // ****************************************************************
 // constructor
 cCinderEnemy::cCinderEnemy()noexcept
-: m_fAngle     (0.0f)
-, m_fAnimation (0.0f)
+: m_fAngle (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_enemy_cinder_high.md3");
     this->DefineModelLow ("ship_enemy_cinder_low.md3");
-
-    // 
-    m_Exhaust.DefineModel  ("object_sphere.md3");
-    m_Exhaust.DefineTexture(0u, "effect_energy.png");
-    m_Exhaust.DefineProgram("effect_energy_flat_program");
-    m_Exhaust.SetColor3    (COLOR_ENERGY_WHITE * 0.5f);
-    m_Exhaust.SetTexSize   (coreVector2(1.0f,1.0f) * 3.0f);
 }
 
 
@@ -1407,7 +1181,7 @@ cCinderEnemy::cCinderEnemy()noexcept
 void cCinderEnemy::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Exhaust);
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_CINDER);
 }
 
 
@@ -1416,16 +1190,7 @@ void cCinderEnemy::__ResurrectOwn()
 void cCinderEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pGlow->UnbindObject(&m_Exhaust);
-}
-
-
-// ****************************************************************
-// 
-void cCinderEnemy::__RenderOwnUnder()
-{
-    // 
-    m_Exhaust.Render();
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_CINDER);
 }
 
 
@@ -1438,17 +1203,6 @@ void cCinderEnemy::__MoveOwn()
 
     // rotate around the rotating direction axis
     this->DefaultMultiate(m_fAngle);
-
-    // 
-    m_fAnimation.UpdateMod(0.1f, 1.0f);
-
-    // 
-    m_Exhaust.SetSize     (coreVector3(1.0f,1.0f,1.0f) * this->GetVisualRadius() * 1.2f);
-    m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation));
-    m_Exhaust.SetPosition (this->GetPosition ());
-    m_Exhaust.SetDirection(this->GetDirection());
-    m_Exhaust.SetAlpha    (this->GetAlpha    () * (this->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
-    m_Exhaust.Move();
 }
 
 
@@ -1462,6 +1216,24 @@ cMeteorEnemy::cMeteorEnemy()noexcept
     this->DefineTexture  (0u, "environment_stone_diff.png");
     this->DefineTexture  (1u, "environment_stone_norm.png");
     this->DefineProgram  ("object_meteor_blink_program");
+}
+
+
+// ****************************************************************
+// 
+void cMeteorEnemy::__ResurrectOwn()
+{
+    // 
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_METEOR);
+}
+
+
+// ****************************************************************
+// 
+void cMeteorEnemy::__KillOwn(const coreBool bAnimated)
+{
+    // 
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_METEOR);
 }
 
 
@@ -1590,14 +1362,16 @@ void cRepairEnemy::__RenderOwnOver()
 {
     DEPTH_PUSH
 
-    // 
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Bubble);
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Bubble);
 
-    // 
-    this->_EnableBlink(m_Bubble.GetProgram());
-    m_Bubble.Render();
-
-    DEPTH_PUSH
+        // 
+        this->_EnableBlink(m_Bubble.GetProgram());
+        m_Bubble.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 
     // 
     this->_EnableBlink(m_Ship.GetProgram());

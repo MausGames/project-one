@@ -87,6 +87,19 @@ inline FUNC_CONST coreFloat AnglePos(const coreFloat x)
 
 
 // ****************************************************************
+// 
+inline FUNC_CONST coreFloat AngleLerp(const coreFloat x, const coreFloat y, const coreFloat s)
+{
+    return x + AngleDiff(y, x) * s;
+}
+
+inline FUNC_CONST coreVector2 AngleLerpDir(const coreVector2 x, const coreVector2 y, const coreFloat s)
+{
+    return coreVector2::Direction(AngleLerp(x.Angle(), y.Angle(), s));
+}
+
+
+// ****************************************************************
 // value range helper-functions
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {
@@ -140,7 +153,7 @@ inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 // 
 inline FUNC_PURE coreFloat SmoothAimAngle(const coreFloat vOldAngle, const coreFloat vNewAngle, const coreFloat fStrength)
 {
-    return vOldAngle + AngleDiff(vNewAngle, vOldAngle) * (1.0f - FrictionFactor(fStrength));
+    return AngleLerp(vOldAngle, vNewAngle, 1.0f - FrictionFactor(fStrength));
 }
 
 inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
@@ -156,7 +169,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 constexpr FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
     ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
-    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));   // nicht framerate unabhängig (innerhalb des thresholds), je höher die FPS, desto langsamer (sanfter) ist die bewegung innerhalb des thresholds
+    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));   // TODO 1: nicht framerate unabhängig (innerhalb des thresholds), je höher die FPS, desto langsamer (sanfter) ist die bewegung innerhalb des thresholds
 }
 
 
@@ -270,7 +283,7 @@ constexpr FUNC_CONST coreVector2 MapStepRotatedInv90X(const coreVector2 vDirecti
 // 
 constexpr FUNC_CONST coreBool IsHorizontal(const coreVector2 v)
 {
-    //ASSERT(!v.IsNull())
+    ASSERT(!v.IsNull())
     if(std::is_constant_evaluated())
     {
         return ((v.x > v.y) && (v.x > -v.y)) ||
@@ -352,6 +365,42 @@ constexpr FUNC_CONST coreVector3 OriRoundDir(const coreVector2 vOrientation, con
     return coreVector3(-vOrientation.x * vDirection.y,
                         vOrientation.x * vDirection.x,
                         vOrientation.y);
+}
+
+
+// ****************************************************************
+// 
+inline FUNC_NOALIAS coreBool RayIntersection(const coreVector2 vPos1, const coreVector2 vDir1, const coreVector2 vPos2, const coreVector2 vDir2, coreVector2* OUTPUT pvIntersection)
+{
+    ASSERT(vDir1.IsNormalized() && vDir2.IsNormalized() && pvIntersection)
+
+    // 
+    const coreFloat fDet = coreVector2::Dot(vDir1.Rotated90(), vDir2);
+
+    // 
+    if(coreMath::IsNear(fDet, 0.0f)) return false;
+
+    // 
+    const coreVector2 vDiff = vPos2 - vPos1;
+    const coreFloat   fLen  = coreVector2::Dot(vDiff.Rotated90(), vDir2) * RCP(fDet);
+
+    // 
+    (*pvIntersection) = vPos1 + vDir1 * fLen;
+    return true;
+}
+
+// ****************************************************************
+// 
+constexpr FUNC_CONST coreBool SameDirection(const coreVector2 x, const coreVector2 y)
+{
+    ASSERT(x.IsNormalized() && y.IsNormalized())
+    return (coreVector2::Dot(x, y) >= (1.0f - CORE_MATH_PRECISION));
+}
+
+constexpr FUNC_CONST coreBool SameDirection90(const coreVector2 x, const coreVector2 y)
+{
+    ASSERT(x.IsNormalized() && y.IsNormalized())
+    return (coreVector2::Dot(x, y) >= (1.0f / SQRT2));
 }
 
 

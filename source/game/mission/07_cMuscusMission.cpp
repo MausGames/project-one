@@ -122,7 +122,7 @@ void cMuscusMission::EnableGenerate(const coreUintW iIndex)
     coreObject3D* pWave     = (*m_GenerateWave.List())[iIndex];
 
     // 
-    WARN_IF(pGenerate->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(pGenerate->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableGenerate(iIndex, false);
 
     // 
     m_afGenerateTime[iIndex] = 0.0f;
@@ -168,7 +168,7 @@ void cMuscusMission::EnablePearl(const coreUintW iIndex)
     coreObject3D* pWave  = (*m_PearlWave.List())[iIndex];
 
     // 
-    WARN_IF(pPearl->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(pPearl->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisablePearl(iIndex, false);
 
     // 
     ADD_BIT(m_iPearlActive, iIndex)

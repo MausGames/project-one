@@ -18,7 +18,7 @@ cPauseMenu::cPauseMenu()noexcept
     m_ResumeButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ResumeButton.DefineProgram("menu_border_program");
     m_ResumeButton.SetPosition  (coreVector2(0.0f,0.135f));
-    m_ResumeButton.SetSize      (coreVector2(0.3f,0.07f));
+    m_ResumeButton.SetSize      (coreVector2(0.4f,0.07f));
     m_ResumeButton.GetCaption()->SetTextLanguage("RESUME");
 
     m_RestartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);

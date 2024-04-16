@@ -23,6 +23,12 @@ cTitleMenu::cTitleMenu()noexcept
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.85f);
     m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
 
+    m_GameLogoDemo.DefineTexture(0u, "game_logo_demo.png");
+    m_GameLogoDemo.DefineProgram("default_2d_program");
+    m_GameLogoDemo.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.09f));
+    m_GameLogoDemo.SetSize      (coreVector2(1.0f,0.25f) * 0.23f);
+    m_GameLogoDemo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
+
     m_PromptText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_PromptText.SetTextLanguage("PROMPT");
 
@@ -42,6 +48,7 @@ cTitleMenu::cTitleMenu()noexcept
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_GameLogo);
+    if(g_bDemoVersion) this->BindObject(SURFACE_TITLE_LOGO, &m_GameLogoDemo);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_PromptText);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_aVersionText[0]);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_aVersionText[1]);

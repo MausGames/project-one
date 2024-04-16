@@ -72,6 +72,12 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oChainValue.SetAlignment(oScoreTotal.GetAlignment());
     oChainValue.SetColor3   (COLOR_MENU_INSIDE);
 
+    oImmune.Construct      (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    oImmune.SetColor3      (COLOR_MENU_INSIDE);
+    oImmune.SetTextLanguage("IMMUNE");
+    
+    fImmuneTime = 0.0f;
+
     // 
     fSpin  = 0.0f;
     fSpin2 = 0.0f;
@@ -321,6 +327,8 @@ void cInterface::Render()
             //m_aView[i].oScoreMission.Render();   // TODO 1: still needed ?
             m_aView[i].oComboValue  .Render();
             m_aView[i].oChainValue  .Render();
+            
+            if(m_aView[i].fImmuneTime) m_aView[i].oImmune.Render();
         }
 
         if(m_fAlphaBoss)
@@ -474,6 +482,10 @@ void cInterface::Move()
         
         m_WaveName  .SetPosition(coreVector2(m_WaveName  .GetPosition().x, oView.oScoreTotal.GetPosition().y));
         
+        oView.fImmuneTime.UpdateMax(-1.0f, 0.0f);
+        const coreFloat fImmuneValue = BLENDB(1.0f - oView.fImmuneTime);
+        oView.oImmune.SetPosition(GetTranslation(oView.aLife[2]) * RCP(Core::System->GetResolution().Min()) + coreVector2(0.0f, 0.05f * fImmuneValue));
+        
 
         // set player transparency
         oView.aShieldBar[0].SetAlpha(fAlphaPlayerFull);
@@ -485,6 +497,7 @@ void cInterface::Move()
         oView.oCooldownBar .SetAlpha(fAlphaPlayerFull);
         oView.oComboValue  .SetAlpha(fAlphaPlayerFull * (m_fAlphaBoss ? m_fAlphaBoss.ToFloat() : 1.0f));
         oView.oChainValue  .SetAlpha(fAlphaPlayerFull);
+        oView.oImmune      .SetAlpha(fAlphaPlayerFull * (1.0f - fImmuneValue));
 
         // move player
         oView.oShieldValue .Move();
@@ -496,6 +509,7 @@ void cInterface::Move()
         oView.oCooldownBar .Move();
         oView.oComboValue  .Move();
         oView.oChainValue  .Move();
+        oView.oImmune      .Move();
     }
 
     // check for active boss
@@ -584,18 +598,18 @@ void cInterface::Move()
 
     // 
     const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftSegmentSafe();
-    if(iShift)
+    if(fTime)//iShift)
     {
         m_aBossTime[2].SetText(PRINT("%+d", iShift));
         m_aWaveTime[2].SetText(m_aBossTime[2].GetText());
     }
     else
     {
-        if(g_pGame->GetCurMission()->GetMedalGoal())   
-        {   
-        m_aBossTime[2].SetText("");
-        m_aWaveTime[2].SetText("");
-        }   
+        //if(g_pGame->GetCurMission()->GetMedalGoal())   
+        //{   
+        //m_aBossTime[2].SetText("");
+        //m_aWaveTime[2].SetText("");
+        //}   
     }
 
     // adjust time position (# only required if alignment is centered)
@@ -788,8 +802,8 @@ void cInterface::Move()
         const coreFloat fAlert = g_pGame->GetTimeTable()->GetTimeEvent() - m_fAlertStart;
         if(m_pAlertSound->EnableRef(this))
         {
-            m_pAlertSound->SetVolume(BLENDH3(CLAMP01((6.0f - fAlert) * 4.0f)));
-            if(fAlert > 6.0f) m_pAlertSound->Stop();
+            m_pAlertSound->SetVolume(BLENDH3(CLAMP01((4.5f - fAlert) * 4.0f)));
+            if(fAlert > 4.5f) m_pAlertSound->Stop();
         }
     }
 }

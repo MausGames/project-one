@@ -39,7 +39,7 @@
 // TODO 1: turn effect
 // TODO 1: shooting effect
 
-#define CONFIG_INPUT_TYPE(p)        "Input",    PRINT("P%zu_Type",      (p)),           (p)
+#define CONFIG_INPUT_TYPE(p)        "Input",    PRINT("P%zu_Type",      (p)),           (p + INPUT_SETS_KEYBOARD)
 #define CONFIG_INPUT_RUMBLE(p)      "Input",    PRINT("P%zu_Rumble",    (p)),           (0)
 #define CONFIG_INPUT_FIRE_MODE(p)   "Input",    PRINT("P%zu_FireMode",  (p)),           (0)
 #define CONFIG_INPUT_MOVE_UP(s)     "Input",    PRINT("S%zu_MoveUp",    (s))
@@ -55,7 +55,7 @@
 #define CONFIG_GAME_HUD_ROTATION    "Game",     "HudRotation",                          (0)
 #define CONFIG_GAME_HUD_SCALE       "Game",     "HudScale",                             (100)
 #define CONFIG_GAME_HUD_TYPE        "Game",     "HudType",                              (0)
-#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (60)//(120) TODO 1: 120 makes it slow in menu, on debug
+#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (0)//((60)//(120) TODO 1: 120 makes it slow in menu, on debug
 #define CONFIG_GAME_VERSION         "Game",     "Version",                              (0)
 #define CONFIG_GAME_MIRROR_MODE     "Game",     "MirrorMode",                           (0)
 
@@ -74,25 +74,31 @@ STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint8)*8u)
 #define DEFAULT_KEYBOARD_1_MOVE_LEFT  (CORE_INPUT_KEY(A))
 #define DEFAULT_KEYBOARD_1_MOVE_DOWN  (CORE_INPUT_KEY(S))
 #define DEFAULT_KEYBOARD_1_MOVE_RIGHT (CORE_INPUT_KEY(D))
-#define DEFAULT_KEYBOARD_1_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+#define DEFAULT_KEYBOARD_1_ACTION(n)  (((n) == 0u) ? -1 : (((n) == 1u) ? CORE_INPUT_KEY(Q) : (((n) == 2u) ? CORE_INPUT_KEY(E) : 0)))
 
-#define DEFAULT_KEYBOARD_2_MOVE_UP    (CORE_INPUT_KEY(W))
-#define DEFAULT_KEYBOARD_2_MOVE_LEFT  (CORE_INPUT_KEY(A))
-#define DEFAULT_KEYBOARD_2_MOVE_DOWN  (CORE_INPUT_KEY(S))
-#define DEFAULT_KEYBOARD_2_MOVE_RIGHT (CORE_INPUT_KEY(D))
-#define DEFAULT_KEYBOARD_2_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+#define DEFAULT_KEYBOARD_2_MOVE_UP    (CORE_INPUT_KEY(UP))
+#define DEFAULT_KEYBOARD_2_MOVE_LEFT  (CORE_INPUT_KEY(LEFT))
+#define DEFAULT_KEYBOARD_2_MOVE_DOWN  (CORE_INPUT_KEY(DOWN))
+#define DEFAULT_KEYBOARD_2_MOVE_RIGHT (CORE_INPUT_KEY(RIGHT))
+#define DEFAULT_KEYBOARD_2_ACTION(n)  (((n) == 0u) ? CORE_INPUT_KEY(SPACE) : (((n) == 1u) ? CORE_INPUT_KEY(Z) : (((n) == 2u) ? CORE_INPUT_KEY(X) : 0)))
 
-#define DEFAULT_JOYSTICK_1_MOVE_UP    (CORE_INPUT_KEY(W))
-#define DEFAULT_JOYSTICK_1_MOVE_LEFT  (CORE_INPUT_KEY(A))
-#define DEFAULT_JOYSTICK_1_MOVE_DOWN  (CORE_INPUT_KEY(S))
-#define DEFAULT_JOYSTICK_1_MOVE_RIGHT (CORE_INPUT_KEY(D))
-#define DEFAULT_JOYSTICK_1_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+#define DEFAULT_JOYSTICK_1_MOVE_UP    (0)
+#define DEFAULT_JOYSTICK_1_MOVE_LEFT  (0)
+#define DEFAULT_JOYSTICK_1_MOVE_DOWN  (0)
+#define DEFAULT_JOYSTICK_1_MOVE_RIGHT (0)
+#define DEFAULT_JOYSTICK_1_ACTION(n)  (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : SDL_CONTROLLER_BUTTON_START)))
 
-#define DEFAULT_JOYSTICK_2_MOVE_UP    (CORE_INPUT_KEY(W))
-#define DEFAULT_JOYSTICK_2_MOVE_LEFT  (CORE_INPUT_KEY(A))
-#define DEFAULT_JOYSTICK_2_MOVE_DOWN  (CORE_INPUT_KEY(S))
-#define DEFAULT_JOYSTICK_2_MOVE_RIGHT (CORE_INPUT_KEY(D))
-#define DEFAULT_JOYSTICK_2_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+#define DEFAULT_JOYSTICK_2_MOVE_UP    (0)
+#define DEFAULT_JOYSTICK_2_MOVE_LEFT  (0)
+#define DEFAULT_JOYSTICK_2_MOVE_DOWN  (0)
+#define DEFAULT_JOYSTICK_2_MOVE_RIGHT (0)
+#define DEFAULT_JOYSTICK_2_ACTION(n)  (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : SDL_CONTROLLER_BUTTON_START)))
+
+#define DEFAULT_MOVE_UP(x)    (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_UP    : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_UP    : ((x) == 2u) ? DEFAULT_JOYSTICK_1_MOVE_UP    : DEFAULT_JOYSTICK_2_MOVE_UP)
+#define DEFAULT_MOVE_LEFT(x)  (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_LEFT  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_LEFT  : ((x) == 2u) ? DEFAULT_JOYSTICK_1_MOVE_LEFT  : DEFAULT_JOYSTICK_2_MOVE_LEFT)
+#define DEFAULT_MOVE_DOWN(x)  (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_DOWN  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_DOWN  : ((x) == 2u) ? DEFAULT_JOYSTICK_1_MOVE_DOWN  : DEFAULT_JOYSTICK_2_MOVE_DOWN)
+#define DEFAULT_MOVE_RIGHT(x) (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_RIGHT : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_RIGHT : ((x) == 2u) ? DEFAULT_JOYSTICK_1_MOVE_RIGHT : DEFAULT_JOYSTICK_2_MOVE_RIGHT)
+#define DEFAULT_ACTION(x, n)  (((x) == 0u) ? DEFAULT_KEYBOARD_1_ACTION(n)  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_ACTION(n)  : ((x) == 2u) ? DEFAULT_JOYSTICK_1_ACTION(n)  : DEFAULT_JOYSTICK_2_ACTION(n))
 
 
 // ****************************************************************

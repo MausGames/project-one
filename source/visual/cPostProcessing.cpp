@@ -43,15 +43,18 @@ cPostProcessing::cPostProcessing()noexcept
     }
     this->__UpdateWall();
 
+    // 
+    for(coreUintW i = 0u; i < POST_BORDERS; ++i)
+    {
+        m_aBorder[i].DefineTexture(0u, "menu_background_black.png");
+        m_aBorder[i].DefineProgram("menu_grey_program");
+        m_aBorder[i].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 3.0f * (I_TO_F(i + 1u) / I_TO_F(POST_BORDERS)));
+        m_aBorder[i].SetTexSize   (coreVector2(1.0f,1.0f)      * 3.0f);
+    }
+
     // create separator
     m_Separator.DefineProgram("menu_color_program");
     m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
-
-    // 
-    m_Border.DefineTexture(0u, "menu_background_black.png");
-    m_Border.DefineProgram("menu_grey_program");
-    m_Border.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
-    m_Border.SetTexSize   (coreVector2(1.0f,1.0f)      * 3.0f);
 
     // 
     this->SetWallOpacity  (0.0f);
@@ -98,7 +101,10 @@ void cPostProcessing::Render()
     {
         // 
         if(!this->GetDirection().IsAligned())
-            m_Border.Render();
+        {
+            for(coreUintW i = 0u; i < POST_BORDERS; ++i)
+                m_aBorder[i].Render();
+        }
 
         if(m_fFrameValue >= 1.0f)
         {
@@ -326,11 +332,17 @@ void cPostProcessing::__UpdateInterior()
     }
 
     // 
-    m_Border.SetPosition (this->GetPosition ());
-    m_Border.SetSize     (this->GetSize     () + 0.022f);
-    m_Border.SetDirection(this->GetDirection());
-    m_Border.SetTexOffset(coreVector2(0.1f,0.1f) * m_fAnimation);
-    m_Border.Move();
+    for(coreUintW i = 0u; i < POST_BORDERS; ++i)
+    {
+        const coreFloat fScale  = 0.025f * I_TO_F(POST_BORDERS - i);
+        const coreFloat fOffset = I_TO_F(i) / I_TO_F(POST_BORDERS);
+
+        m_aBorder[i].SetPosition (this->GetPosition ());
+        m_aBorder[i].SetSize     (this->GetSize     () + fScale);
+        m_aBorder[i].SetDirection(this->GetDirection());
+        m_aBorder[i].SetTexOffset(coreVector2(0.15f,0.15f) * (m_fAnimation + fOffset));
+        m_aBorder[i].Move();
+    }
 }
 
 

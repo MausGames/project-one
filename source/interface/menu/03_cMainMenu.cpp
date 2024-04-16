@@ -17,34 +17,33 @@ cMainMenu::cMainMenu()noexcept
     // create menu objects
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StartButton.DefineProgram("menu_border_program");
-    m_StartButton.SetPosition  (coreVector2(0.0f, 0.09f * 2.5f));
-    m_StartButton.SetSize      (coreVector2(0.34f,0.07f));
+    m_StartButton.SetSize      (coreVector2(0.4f,0.07f));
     m_StartButton.GetCaption()->SetTextLanguage("START_GAME");
 
     m_ScoreButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ScoreButton.DefineProgram("menu_border_program");
-    m_ScoreButton.SetPosition  (m_StartButton.GetPosition() + coreVector2(0.0f,-0.09f));
     m_ScoreButton.SetSize      (m_StartButton.GetSize());
 
     m_ReplayButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ReplayButton.DefineProgram("menu_border_program");
-    m_ReplayButton.SetPosition  (m_ScoreButton.GetPosition() + coreVector2(0.0f,-0.09f));
     m_ReplayButton.SetSize      (m_StartButton.GetSize());
 
     m_ExtraButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ExtraButton.DefineProgram("menu_border_program");
-    m_ExtraButton.SetPosition  (m_ReplayButton.GetPosition() + coreVector2(0.0f,-0.09f));
     m_ExtraButton.SetSize      (m_StartButton.GetSize());
 
     m_ConfigButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ConfigButton.DefineProgram("menu_border_program");
-    m_ConfigButton.SetPosition  (m_ExtraButton.GetPosition() + coreVector2(0.0f,-0.09f));
     m_ConfigButton.SetSize      (m_StartButton.GetSize());
     m_ConfigButton.GetCaption()->SetTextLanguage("SETTINGS");
 
+    m_SteamButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_SteamButton.DefineProgram("menu_border_program");
+    m_SteamButton.SetSize      (m_StartButton.GetSize());
+    m_SteamButton.GetCaption()->SetTextLanguage("TO_STEAM");
+
     m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ExitButton.DefineProgram("menu_border_program");
-    m_ExitButton.SetPosition  (m_ConfigButton.GetPosition() + coreVector2(0.0f,-0.09f));
     m_ExitButton.SetSize      (m_StartButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
@@ -53,19 +52,39 @@ cMainMenu::cMainMenu()noexcept
     m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, NULL, MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_ReplayButton, &m_ScoreButton,  NULL, &m_ExtraButton,  NULL, NULL, MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_SteamButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_SteamButton,  &m_ConfigButton, NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,   &m_SteamButton,  NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.AssignFirst(&m_StartButton);
 
     // bind menu objects
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartButton);
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
+
+    if(g_bDemoVersion)
+    {
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_SteamButton);
+    }
+    else
+    {
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
+    }
+
+    #if !defined(_CORE_EMSCRIPTEN_)
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
+    #endif
+
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_Navigator);
+
+    // 
+    coreSet<coreObject2D*>* pObjectSet = this->GetObjectSet(SURFACE_MAIN_DEFAULT);
+    for(coreUintW i = 0u, ie = pObjectSet->size() - 1u; i < ie; ++i)
+    {
+        (*pObjectSet)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
+    }
 
     // 
     this->DeactivateFirstPlay();
@@ -113,6 +132,11 @@ void cMainMenu::Move()
                 // 
                 m_iStatus = 5;
             }
+            else if(m_SteamButton.IsClicked())
+            {
+                // 
+                SDL_OpenURL("https://store.steampowered.com/app/1624320/Eigengrau/");
+            }
             else if(m_ExitButton.IsClicked())
             {
                 // 
@@ -129,6 +153,7 @@ void cMainMenu::Move()
             cMenu::UpdateButton(&m_ReplayButton, m_ReplayButton.IsFocused());
             cMenu::UpdateButton(&m_ExtraButton,  m_ExtraButton .IsFocused());
             cMenu::UpdateButton(&m_ConfigButton, m_ConfigButton.IsFocused());
+            cMenu::UpdateButton(&m_SteamButton,  m_SteamButton .IsFocused());
             cMenu::UpdateButton(&m_ExitButton,   m_ExitButton  .IsFocused());
         }
         break;
@@ -160,17 +185,22 @@ void cMainMenu::ActivateFirstPlay()
 // 
 void cMainMenu::DeactivateFirstPlay()
 {
-#if !defined(_CORE_DEBUG_)
-
     // 
-    m_ScoreButton .SetOverride(-1);   // TODO 1 
-    m_ReplayButton.SetOverride(-1);   // TODO 1 
-    m_ExtraButton .SetOverride(-1);   // TODO 1 
-
-#endif
+    m_ScoreButton .SetOverride(0);
+    m_ReplayButton.SetOverride(0);
+    m_ExtraButton .SetOverride(0);
 
     // 
     m_ScoreButton .GetCaption()->SetTextLanguage("LEADERBOARDS");
     m_ReplayButton.GetCaption()->SetTextLanguage("REPLAYS");
     m_ExtraButton .GetCaption()->SetTextLanguage("EXTRAS");
+}
+
+
+// ****************************************************************
+// 
+void cMainMenu::ActivateDemoVersion()
+{
+    // 
+    this->ActivateFirstPlay();
 }

@@ -57,11 +57,37 @@ void CoreApp::Init()
     LoadConfig();
 
     // load available music files
-    g_MusicPlayer.AddMusicFolder ("data/music",              "*.ogg");
+    //g_MusicPlayer.AddMusicFolder ("data/music",              "*.ogg");
     //g_MusicPlayer.AddMusicArchive("data/archives/pack1.cfa", "data/music/*.ogg");
     //g_MusicPlayer.AddMusicArchive("data/archives/pack2.cfa", "data/music/*.ogg");
-    
-    //g_MusicPlayer.AddMusicFile("data/music/boss_00.ogg")
+    g_MusicPlayer.AddMusicFile("data/music/boss_00.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_01.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_02.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_03.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_04_reverse.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_04.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_05.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_06.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_07.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_08_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_08_loop.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/boss_99.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/menu.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_00_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_00_loop.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_01_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_01_loop.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_02_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_02_loop.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_03_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_03_loop.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_04_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_04_loop.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_05.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_06_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_06_loop.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_07_intro.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/mission_07_loop.ogg");
 
     for(coreUintW i = 0u, ie = g_MusicPlayer.GetNumMusic(); i < ie; ++i)
     {
@@ -268,7 +294,7 @@ void CoreApp::Move()
     static coreFlow fBorder = 0.0f;
     if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 0.3f, 1.0f);
                            else fBorder.UpdateMax(-0.3f, 0.0f);
-    g_pPostProcessing->SetBorderAll(LERPH3(0.0f, 1.0f, fBorder));
+    g_pPostProcessing->SetBorderAll(LERPH3(0.0f, 0.75f, fBorder));
 
 
     // reshape and resize game
@@ -321,8 +347,8 @@ void CoreApp::Move()
     {
         g_MusicPlayer.SelectName("menu.ogg");
         
-        g_MusicPlayer.Control()->SetVolume(1.0f * MUSIC_VOLUME);
-        g_MusicPlayer.Control()->Play();
+        g_MusicPlayer.SetVolume(1.0f * MUSIC_VOLUME);
+        g_MusicPlayer.Play();
     }
 
         // update the music-player
@@ -376,7 +402,8 @@ void InitFramerate()
 {
     // get current display mode
     SDL_DisplayMode oMode = {};
-    SDL_GetWindowDisplayMode(Core::System->GetWindow(), &oMode);
+    if(SDL_GetWindowDisplayMode(Core::System->GetWindow(), &oMode) || (oMode.refresh_rate <= 0))
+        SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
     // 
     const coreUint32 iRefreshRate = (oMode.refresh_rate > 0) ? oMode.refresh_rate : 60u;
@@ -437,11 +464,14 @@ static void LockFramerate()
             dDifference  = coreDouble(iNewPerfTime - s_iOldPerfTime) * Core::System->GetPerfFrequency();
         };
 
+        // 
+        constexpr coreUint32 iMargin = 1u;
+
         // spin as long as frame time is too low
         for(nMeasureFunc(); dDifference < s_dPhysicalTime; nMeasureFunc())
         {
             // sleep (once) to reduce overhead
-            const coreUint32 iSleep = F_TO_UI((s_dPhysicalTime - dDifference) * 1000.0);
+            const coreUint32 iSleep = MAX(F_TO_UI((s_dPhysicalTime - dDifference) * 1000.0), iMargin) - iMargin;
             if(iSleep) SDL_Delay(iSleep);
 
             // 
@@ -459,8 +489,18 @@ static void LockFramerate()
     coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
     if(fFreezeTime)
     {
-        fFreezeTime = MAX(fFreezeTime - TIME, 0.0f);
+        fFreezeTime = MAX0(fFreezeTime - TIME);
         c_cast<coreFloat&>(TIME) *= 0.001f;
+    }
+
+    // 
+    coreFloat& fSlowTime     = c_cast<coreFloat&>(g_pSpecialEffects->GetSlowTime());
+    coreFloat& fSlowStrength = c_cast<coreFloat&>(g_pSpecialEffects->GetSlowStrength());
+    if(fSlowTime || fSlowStrength)
+    {
+        fSlowTime     = MAX0(fSlowTime - TIME);
+        fSlowStrength = fSlowTime ? 1.0f/*MIN1(fSlowStrength + TIME)*/ : MAX0(fSlowStrength - 0.3f * TIME);
+        c_cast<coreFloat&>(TIME) *= LERPH3(1.0f, 0.1f, fSlowStrength);
     }
 }
 
@@ -515,10 +555,12 @@ static void DebugGame()
             oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
             oOptions.iMode       = GAME_MODE_STANDARD;
             oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_NORMAL;
+            oOptions.iFlags      = GAME_FLAG_TASK;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
+                oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;
                 oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
-                oOptions.aaiSupport[i][0] = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 1u : 0u;
+                oOptions.aaiSupport[i][0] = 0u;
             }
 
             #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN, ARRAY_SIZE(GAME_MISSION_LIST_MAIN)) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->Activate(); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
@@ -638,8 +680,8 @@ static void DebugGame()
             s_bInvincible = !s_bInvincible;
             g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                pPlayer->SetMaxHealth(s_bInvincible ? PLAYER_SHIELD : (PLAYER_LIVES - 1u));
-                pPlayer->SetCurHealth(s_bInvincible ? PLAYER_SHIELD : (PLAYER_LIVES - 1u));
+                pPlayer->SetMaxHealth(s_bInvincible ? 100u : PLAYER_LIVES);
+                pPlayer->SetCurHealth(s_bInvincible ? 100u : PLAYER_LIVES);
             });
         }
     }
@@ -725,6 +767,8 @@ static void DebugGame()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_PRESS))
     {
         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        
+        g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
     }
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))

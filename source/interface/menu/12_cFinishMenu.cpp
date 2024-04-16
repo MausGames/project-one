@@ -51,6 +51,24 @@ cFinishMenu::cFinishMenu()noexcept
         m_aTotalPart[i].SetColor3  (COLOR_MENU_WHITE);
     }
 
+    m_SteamButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_SteamButton.DefineProgram("menu_border_program");
+    m_SteamButton.SetPosition  (coreVector2(0.0f,-0.15f));
+    m_SteamButton.SetSize      (coreVector2(0.4f,0.07f));
+    m_SteamButton.GetCaption()->SetTextLanguage("TO_STEAM");
+
+    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_ExitButton.DefineProgram("menu_border_program");
+    m_ExitButton.SetPosition  (m_SteamButton.GetPosition() + coreVector2(0.0f,-0.09f));
+    m_ExitButton.SetSize      (m_SteamButton.GetSize());
+    m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
+
+    // 
+    m_Navigator.BindObject(&m_SteamButton, &m_ExitButton,  NULL, &m_ExitButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,  &m_SteamButton, NULL, &m_SteamButton, NULL, NULL, MENU_TYPE_DEFAULT);
+
+    m_Navigator.AssignFirst(&m_SteamButton);
+
     // bind menu objects
     this->BindObject(SURFACE_FINISH_DEFAULT, &m_Background);
     this->BindObject(SURFACE_FINISH_DEFAULT, &m_ThankYouText);
@@ -58,6 +76,11 @@ cFinishMenu::cFinishMenu()noexcept
     this->BindObject(SURFACE_FINISH_DEFAULT, &m_TotalValue);
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) this->BindObject(SURFACE_FINISH_DEFAULT, &m_aTotalPart[i]);
+
+    this->BindObject(SURFACE_FINISH_DEFAULT, &m_SteamButton);
+    this->BindObject(SURFACE_FINISH_DEFAULT, &m_ExitButton);
+
+    this->BindObject(SURFACE_FINISH_DEFAULT, &m_Navigator);
 }
 
 
@@ -77,6 +100,9 @@ void cFinishMenu::Render()
 // move the finish menu
 void cFinishMenu::Move()
 {
+    // 
+    m_Navigator.Update();
+
     // move the menu
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
@@ -88,10 +114,18 @@ void cFinishMenu::Move()
         {
             // 
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= MENU_FINISH_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if((m_fIntroTimer >= MENU_FINISH_BANNER_SPEED_REV))// && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
-                // 
-                if(m_eState == FINISH_WAIT) m_eState = FINISH_OUTRO;
+                if(m_SteamButton.IsClicked())
+                {
+                    // 
+                    SDL_OpenURL("https://store.steampowered.com/app/1624320/Eigengrau/");
+                }
+                else if(m_ExitButton.IsClicked())
+                {
+                    // 
+                    if(m_eState == FINISH_WAIT) m_eState = FINISH_OUTRO;
+                }
             }
 
             // 
@@ -129,7 +163,16 @@ void cFinishMenu::Move()
                 m_TotalName   .SetAlpha(fVisibility);
                 m_TotalValue  .SetAlpha(fVisibility);
                 for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) m_aTotalPart[i].SetAlpha(fVisibility);
+
+                // 
+                m_SteamButton.SetAlpha(fVisibility);
+                m_ExitButton .SetAlpha(fVisibility);
+                m_Navigator  .SetAlpha(fVisibility);
             }
+
+            // 
+            cMenu::UpdateButton(&m_SteamButton, m_SteamButton.IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,  m_ExitButton .IsFocused());
         }
         break;
 

@@ -20,7 +20,7 @@
 // orange geschosse sollten bis zum rand gehen, aber bei abwechselnden schießen wird das nur von einer der beiden hälften gemacht ohne es komplett zu überspannen
 // stampf-phase geht nur auf einer ache, um die achse zu verändern müsste der boss in die mitte springen
 // pearls sollten so erzeugt werden, dass ihre animation eine schöne welle erzeugt (in bewegungs-richtung vom boss)
-// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: death: jaw opens like Pacmans death (make sure geometry does not collide), and sides will move away from each other (like a spring when backs touch) and will explode
 // TODO 1: death: rotation wird langsamer, dann fetzen zusammen, bei einschlag starke drehung die langsamer wird, bei stillstand -> pacman death
 // TODO 1: foreshadow: other boss, flies in the background
@@ -149,7 +149,6 @@ cGemingaBoss::cGemingaBoss()noexcept
         "environment_clouds_mid.png",
         "environment_grave_diff.png",
         "environment_grave_norm.png",
-        "environment_mars_diff.png",
         "environment_moss_diff.png",
         "environment_rock_diff.png",
         "environment_tree_01_diff.png",
@@ -271,7 +270,7 @@ void cGemingaBoss::__MoveOwn()
 
                 m_Dharuk.Kill(false);
 
-                g_MusicPlayer.Control()->Pause();
+                g_MusicPlayer.Pause();
             }
         });
     }
@@ -284,7 +283,7 @@ void cGemingaBoss::__MoveOwn()
         {
             PHASE_CHANGE_INC
 
-            g_MusicPlayer.Control()->Play();
+            g_MusicPlayer.Play();
         });
     }
 

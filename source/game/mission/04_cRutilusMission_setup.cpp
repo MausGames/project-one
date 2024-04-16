@@ -84,19 +84,16 @@ void cRutilusMission::__SetupOwn()
     // enemies flying perpendicular to shoot direction also need to move near the border, to make switching directions necessary
     // during moving plates, enemies on the side either still is bad (you can just mow them down), and moving too (too confusing, you crash all the time)
     // finaler ansturm ist kein problem, wenn man weiß von welcher seite er anfängt
-    // TODO 1: schräges background movement schaut gut aus, von oben rechts oder links ?
-    // TODO 1: platten sollten in ein muster auseinander gehen anstatt einfach nur zu verschwinden (e.g. platten moven abwechselnd links und rechts aus bild raus, mit delay)
-    // TODO 1: effect und noise wenn man versucht sich zu drehen (död död, XX)
-    // TODO 1: helfer fliegt am anfang casually vorbei (an mittelpunkt) und dropt die erste plate (schräg, e.g. von oben-links ? quer zu background bewegung)
-    // TODO 1: badge, another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge (oder für boss)
-    // TODO 1: plate shader should not have border on the shorter sides (e.g. for long plates, though quad plate still requires it)
     // TODO 1: hard mode: alles ist um 90 grad gedreht! (color/dir changes every X.X seconds) -> but adjust affected enemies in double-plate sub-stages to be meaningful in both types
-    // TODO 1: erster gegner im gauntlet sollte still stehen (dann braucht man auch den 1s delay nicht mehr, auch beim ende ?)
-    // TODO 1: maybe replace left-right enemy waves (coming from top and bottom) with something else, though spawning still from left and right did not feel that interesting)
-    // TODO 1: maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
-    // TODO 1: boss: spieler wird herumgedreht (mit gravitation und geschosse drehen sich auch), und beim verwenden der platte wird er in richtung forciert (eigentlich orsch)
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: fix badges !!!!!!!
     // TODO 1: effect (+ sound) when getting forced and unforced (also for boss) (not permanent, but when entering/exiting)
+    // TODO 1: maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
+    // TODO 1: badge: versuch N mal zu turnen, anzeige beginnt nach M mal (oder gar keine anzeige, hidden badge, na zm. für die letzten 3 mal)
+    // TODO 1: badge: N schwer zu erreichende gegner die sofort verschwinden, speziell markiert, black
+    // TODO 1: badge: kugerl bei rush-gruppe einsammeln
+    // TODO 1: badge: nicht zu lange auf einer platte, hin und her, timer für blau, etc.
+    // TODO 1: badge: another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge (oder für boss)
+    // TODO 1: MAIN: task-check, regular score, badges, sound
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -117,71 +114,90 @@ void cRutilusMission::__SetupOwn()
 
         STAGE_ADD_PATH(pPath3)
         {
-            pPath3->Reserve(2u);
-            pPath3->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath3->Reserve(3u);
+            pPath3->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f), 1.5f);
+            pPath3->AddStop(coreVector2(0.0f, 0.9f), coreVector2(0.0f,-1.0f));
             pPath3->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f), 2.5f);
             pPath3->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 126u)
+        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 110u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
                 pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
             });
         });
 
-        STAGE_GET_START(4u)
-            STAGE_GET_UINT (iTransitionState)
-            STAGE_GET_FLOAT(fTransitionTime)
-            STAGE_GET_FLOAT(fConveyerTime)
-            STAGE_GET_FLOAT(fConveyerSpeed)
+        STAGE_ADD_SQUAD(pSquad2, cStarEnemy, 5u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
+                pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
+            });
+        });
+
+        STAGE_GET_START(GAME_PLAYERS + 5u)
+            STAGE_GET_UINT_ARRAY(aiTryCount, GAME_PLAYERS)
+            STAGE_GET_UINT      (iBonusCount)
+            STAGE_GET_UINT      (iTransitionState)
+            STAGE_GET_FLOAT     (fTransitionTime)
+            STAGE_GET_FLOAT     (fConveyerTime)
+            STAGE_GET_FLOAT     (fConveyerSpeed)
         STAGE_GET_END
 
-        if(STAGE_CLEARED)
+        if(pSquad1->IsFinished())
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,   0u,   3u)
-            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,   4u,   7u)
-            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,   8u,  11u)
-            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1,  12u,  15u)
-            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1,  80u, 121u)   // #
-            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1,  28u,  31u)   // #
-            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1,  56u,  57u)   // #
-            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1,  58u,  59u)
-            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1,  60u,  61u)
-            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1,  62u,  63u)
-            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1,  64u,  65u)
-            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1,  66u,  67u)
-            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1,  68u,  71u)
-            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1,  72u,  75u)
-            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1,  76u,  79u)
-            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1,  16u,  19u)   // #
-            else if(STAGE_SUB(17u)) STAGE_RESURRECT(pSquad1,  20u,  23u)
-            else if(STAGE_SUB(18u)) STAGE_RESURRECT(pSquad1,  24u,  27u)
-            else if(STAGE_SUB(19u)) STAGE_RESURRECT(pSquad1,  32u,  33u)
-            else if(STAGE_SUB(20u)) STAGE_RESURRECT(pSquad1,  34u,  35u)
-            else if(STAGE_SUB(21u)) STAGE_RESURRECT(pSquad1,  36u,  37u)
-            else if(STAGE_SUB(22u)) STAGE_RESURRECT(pSquad1,  38u,  39u)
-            else if(STAGE_SUB(23u)) STAGE_RESURRECT(pSquad1,  40u,  41u)
-            else if(STAGE_SUB(24u)) STAGE_RESURRECT(pSquad1,  42u,  43u)
-            else if(STAGE_SUB(25u)) STAGE_RESURRECT(pSquad1,  44u,  45u)
-            else if(STAGE_SUB(26u)) STAGE_RESURRECT(pSquad1,  46u,  47u)
-            else if(STAGE_SUB(27u)) STAGE_RESURRECT(pSquad1,  48u,  49u)
-            else if(STAGE_SUB(28u)) STAGE_RESURRECT(pSquad1,  50u,  51u)
-            else if(STAGE_SUB(29u)) STAGE_RESURRECT(pSquad1,  52u,  53u)
-            else if(STAGE_SUB(30u)) STAGE_RESURRECT(pSquad1,  54u,  55u)
-            else if(STAGE_SUB(31u)) STAGE_RESURRECT(pSquad1, 122u, 125u)   // #
-            else if(STAGE_SUB(32u))
+                 if(STAGE_SUB( 1u)) {STAGE_RESURRECT(pSquad1,   0u,   3u)}
+            else if(STAGE_SUB( 2u)) {STAGE_RESURRECT(pSquad1,   4u,   7u)}
+            else if(STAGE_SUB( 3u)) {STAGE_RESURRECT(pSquad1,   8u,  11u) STAGE_RESURRECT(pSquad2, 0u, 0u)}
+            else if(STAGE_SUB( 4u)) {STAGE_RESURRECT(pSquad1,  12u,  15u)}
+            else if(STAGE_SUB( 5u)) {STAGE_RESURRECT(pSquad1,  68u, 109u)}   // #
+            else if(STAGE_SUB( 6u)) {STAGE_RESURRECT(pSquad1,  28u,  31u)}   // #
+            else if(STAGE_SUB( 7u)) {STAGE_RESURRECT(pSquad1,  56u,  57u) STAGE_RESURRECT(pSquad2, 1u, 1u)}   // #
+            else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1,  58u,  59u)}
+            else if(STAGE_SUB( 9u)) {STAGE_RESURRECT(pSquad1,  60u,  67u)}
+            else if(STAGE_SUB(10u)) {STAGE_RESURRECT(pSquad1,  16u,  19u) STAGE_RESURRECT(pSquad2, 2u, 2u)}   // #
+            else if(STAGE_SUB(11u)) {STAGE_RESURRECT(pSquad1,  20u,  27u)}
+            else if(STAGE_SUB(12u)) {STAGE_RESURRECT(pSquad1,  32u,  33u)}
+            else if(STAGE_SUB(13u)) {STAGE_RESURRECT(pSquad1,  34u,  35u) STAGE_RESURRECT(pSquad2, 3u, 3u)}
+            else if(STAGE_SUB(14u)) {STAGE_RESURRECT(pSquad1,  36u,  37u)}
+            else if(STAGE_SUB(15u)) {STAGE_RESURRECT(pSquad1,  38u,  39u)}
+            else if(STAGE_SUB(16u)) {STAGE_RESURRECT(pSquad1,  40u,  41u)}
+            else if(STAGE_SUB(17u)) {STAGE_RESURRECT(pSquad1,  42u,  43u)}
+            else if(STAGE_SUB(18u)) {STAGE_RESURRECT(pSquad1,  44u,  45u)}
+            else if(STAGE_SUB(19u)) {STAGE_RESURRECT(pSquad1,  46u,  47u)}
+            else if(STAGE_SUB(20u)) {STAGE_RESURRECT(pSquad1,  48u,  49u)}
+            else if(STAGE_SUB(21u)) {STAGE_RESURRECT(pSquad1,  50u,  51u)}
+            else if(STAGE_SUB(22u)) {STAGE_RESURRECT(pSquad1,  52u,  53u) STAGE_RESURRECT(pSquad2, 4u, 4u)}
+            else if(STAGE_SUB(23u)) {STAGE_RESURRECT(pSquad1,  54u,  55u)}
+            else if(STAGE_SUB(24u))
             {
                 for(coreUintW i = 0u; i < RUTILUS_PLATES; ++i)
                     this->DisablePlate(i, true);
+
+                g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f), 1.0f);
+
+                pSquad2->ClearEnemies(true);
             }
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
 
             g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f * STAGE_STEP(1u, 32u));
+        }
+
+        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_GREEN);
+
+        if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
+        {
+            const coreVector2 vPos = pHelper->GetPosition().xy() + coreVector2(1.5f * BULLET_SPEED_FACTOR, 0.0f) * TIME;
+            if(!g_pForeground->IsVisiblePoint(vPos / FOREGROUND_AREA, 1.2f)) pHelper->Kill(false);
+
+            pHelper->SetPosition(coreVector3(vPos, 0.0f));
         }
 
         const coreBool bRotated = g_pGame->IsHard();
@@ -195,23 +211,31 @@ void cRutilusMission::__SetupOwn()
             this->SetPlateRotated(2u,  bRotated);
             this->SetPlateRotated(3u,  bRotated);
             this->SetPlateRotated(4u,  bRotated);
+
+            g_pSpecialEffects->CreateSplashColor(coreVector3(0.0f,0.0f,0.0f), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
         }
 
         fTransitionTime += 1.0f * TIME;
 
         if(m_iStageSub == 2u)
         {
-            this->SetPlateDirection(0u, coreVector2::Direction(LERPB(0.0f*PI, 0.5f*PI, MIN(fTransitionTime, 1.0f))));
+            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPB(0.0f*PI, 0.5f*PI, MIN1(fTransitionTime))));
+
+            this->SetPlateDirection(0u, g_pEnvironment->GetDirection());
             m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.5f, 0.75f, MIN(fTransitionTime, 1.0f)));
         }
         else if(m_iStageSub == 3u)
         {
-            this->SetPlateDirection(0u, coreVector2::Direction(LERPB(0.5f*PI, 1.0f*PI, MIN(fTransitionTime, 1.0f))));
+            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPB(0.5f*PI, 1.0f*PI, MIN1(fTransitionTime))));
+
+            this->SetPlateDirection(0u, g_pEnvironment->GetDirection());
             m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.75f, 1.0f, MIN(fTransitionTime, 1.0f)));
         }
         else if(m_iStageSub == 4u)
         {
-            this->SetPlateDirection(0u, coreVector2::Direction(LERPB(1.0f*PI, 1.5f*PI, MIN(fTransitionTime, 1.0f))));
+            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPB(1.0f*PI, 1.5f*PI, MIN1(fTransitionTime))));
+
+            this->SetPlateDirection(0u, g_pEnvironment->GetDirection());
             m_avPlateData[0].zw(coreVector2(1.0f,1.0f));
         }
         else if(m_iStageSub == 6u)
@@ -228,8 +252,10 @@ void cRutilusMission::__SetupOwn()
                 this->SetPlateDirection(0u, coreVector2( 1.0f,0.0f));
                 this->SetPlateDirection(1u, coreVector2(-1.0f,0.0f));
             }
+
+            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPB(1.5f*PI, 1.75f*PI, MIN1(fTransitionTime))));
         }
-        else if(m_iStageSub == 16u)
+        else if(m_iStageSub == 10u)
         {
             if(iTransitionState == 0u)
             {
@@ -258,7 +284,7 @@ void cRutilusMission::__SetupOwn()
                 this->SetPlateRotated(1u, bRotated);
             }
         }
-        else if(m_iStageSub == 19u)
+        else if(m_iStageSub == 12u)
         {
             if(iTransitionState == 0u)
             {
@@ -277,10 +303,10 @@ void cRutilusMission::__SetupOwn()
                 this->SetPlateDirection(2u, coreVector2( 1.0f,0.0f));
             }
         }
-        else if(m_iStageSub >= 23u)
+        else if(m_iStageSub >= 16u)
         {
-            fConveyerSpeed = MIN(fConveyerSpeed + 0.5f * TIME, 1.0f);
-            fConveyerTime  = FmodRange(fConveyerTime - fConveyerSpeed * TIME * ((m_iStageSub >= 27u) ? -1.0f : 1.0f), 0.0f, 4.0f);
+            fConveyerSpeed = MIN1(fConveyerSpeed + 0.5f * TIME);
+            fConveyerTime  = FmodRange(fConveyerTime - fConveyerSpeed * TIME * ((m_iStageSub >= 20u) ? -1.0f : 1.0f), 0.0f, 4.0f);
 
             for(coreUintW i = 0; i < 4u; ++i)
             {
@@ -296,9 +322,9 @@ void cRutilusMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 1.0f, (i < 80u) ? (0.275f * I_TO_F(i % ((i < 32u) ? 4u : 2u)) + (((i < 20u) || (i >= 28u && i < 34u) || (i >= 40u && i < 42u)) ? 0.5f : 0.0f)) : (0.4f * I_TO_F((i - 80u) % 42u) + 1.0f))
+            STAGE_LIFETIME(pEnemy, (i < 68u) ? 1.0f : 1.2f, (i < 60u) ? (0.275f * I_TO_F(i % ((i < 32u) ? 4u : 2u)) + (((i < 20u) || (i >= 28u && i < 34u) || (i >= 40u && i < 42u)) ? 0.5f : 0.0f)) : ((i < 68u) ? (0.325f * I_TO_F((i - 60u) % 8u)) : (0.4f * I_TO_F((i - 68u) % 42u) + 1.0f)))
 
-            if(i < 80u)
+            if(i < 68u)
             {
                 const coreSpline2* pPath = (i < 12u) ? pPath1 : pPath2;
 
@@ -314,13 +340,11 @@ void cRutilusMission::__SetupOwn()
                          if(i <  4u) {}
                     else if(i <  8u) pEnemy->Rotate270();
                     else if(i < 12u) pEnemy->Rotate180();
-                    else if(i < 16u) pEnemy->Rotate90 ();
-                    else if(i < 20u) pEnemy->Rotate90 ()->InvertY();
-                    else if(i < 24u) pEnemy->Rotate180()->InvertY();
-                    else if(i < 28u) pEnemy->InvertY  ();
+                    else if(i < 16u) pEnemy->Rotate90 ()->InvertX();
+                    else if(i < 20u) pEnemy->Rotate90 ();
+                    else if(i < 24u) pEnemy->Rotate180();
+                    else if(i < 28u) {}
                     else if(i < 56u) {}
-
-                    if(i >= 16u && i < 18u) pEnemy->InvertX();
                 }
                 else if(i < 56u)
                 {
@@ -335,7 +359,7 @@ void cRutilusMission::__SetupOwn()
                     }
                     fSide *= 0.275f;
 
-                    const coreVector2 vFactor = coreVector2(1.0f, (i < 48u) ? 1.0f : -1.0f);
+                    const coreVector2 vFactor = coreVector2(1.0f,1.0f);
                     const coreVector2 vOffset = coreVector2(fSide, 0.0f);
 
                     pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
@@ -343,20 +367,20 @@ void cRutilusMission::__SetupOwn()
                 else
                 {
                     coreFloat fSide, fFlip;
-                    switch((i - 56u) / 2u)
+                    switch(i - 56u)
                     {
                     default: ASSERT(false)
                     case  0u: fSide =  3.5f; fFlip = -1.0f; break;
-                    case  1u: fSide = -3.5f; fFlip = -1.0f; break;
-                    case  2u: fSide =  1.5f; fFlip =  1.0f; break;
-                    case  3u: fSide =  3.5f; fFlip =  1.0f; break;
-                    case  4u: fSide = -1.5f; fFlip = -1.0f; break;
-                    case  5u: fSide = -3.5f; fFlip = -1.0f; break;
-                    case  6u: fSide =  3.5f; fFlip = -1.0f; break;
+                    case  1u: fSide =  3.5f; fFlip = -1.0f; break;
+                    case  2u: fSide = -3.5f; fFlip = -1.0f; break;
+                    case  3u: fSide = -3.5f; fFlip = -1.0f; break;
+                    case  4u: fSide =  3.5f; fFlip =  1.0f; break;
+                    case  5u: fSide = -3.5f; fFlip =  1.0f; break;
+                    case  6u: fSide =  3.5f; fFlip =  1.0f; break;
                     case  7u: fSide = -3.5f; fFlip =  1.0f; break;
-                    case  8u: fSide =  1.5f; fFlip =  1.0f; break;
-                    case  9u: fSide = -1.5f; fFlip = -1.0f; break;
-                    case 10u: fSide =  3.5f; fFlip = -1.0f; break;
+                    case  8u: fSide =  3.5f; fFlip =  1.0f; break;
+                    case  9u: fSide = -3.5f; fFlip =  1.0f; break;
+                    case 10u: fSide =  3.5f; fFlip =  1.0f; break;
                     case 11u: fSide = -3.5f; fFlip =  1.0f; break;
                     }
                     fSide *= 0.275f;
@@ -371,12 +395,11 @@ void cRutilusMission::__SetupOwn()
             {
                 constexpr coreInt32 A[] =
                 {
-                    0, 2, 4, 2, 0, 2, 0, -2, -4, -6, -4, -2, 0, 2, 4, 2, 0, -2, 0, 0, 0, 0, 0, 0, 2, 0, 2, 4, 6, 4, 6, 4, 2, 0, 2, 4, 2, 4, 6, 4, 2, 0,   // ikaruga
-                    -7, 7, -5, 5
+                    0, 2, 4, 2, 0, 2, 0, -2, -4, -6, -4, -2, 0, 2, 4, 2, 0, -2, 0, 0, 0, 0, 0, 0, 2, 0, 2, 4, 6, 4, 6, 4, 2, 0, 2, 4, 2, 4, 6, 4, 2, 0   // ikaruga
                 };
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2(I_TO_F(A[i - 80u]) * 0.275f * 0.5f, 0.0f);
+                const coreVector2 vOffset = coreVector2(I_TO_F(A[i - 68u]) * 0.275f * 0.5f, 0.0f);
 
                 if(pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime))
                 {
@@ -384,22 +407,74 @@ void cRutilusMission::__SetupOwn()
                     bPostpone = true;
                 }
 
-                if(i < 122u) pEnemy->Rotate90();
+                pEnemy->Rotate90();
             }
 
             if(pEnemy->ReachedDeath())
             {
-                for(coreUintW j = 0u; j < 4u; ++j)
+                if(!g_pGame->IsEasy())
                 {
-                    const coreVector2 vPos = pEnemy->GetPosition().xy();
-                    const coreVector2 vDir = StepRotated90(j);
+                    for(coreUintW j = 0u; j < 4u; ++j)
+                    {
+                        const coreVector2 vPos = pEnemy->GetPosition().xy();
+                        const coreVector2 vDir = StepRotated90(j);
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(2.5f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(2.5f);
+                    }
+
+                    g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
+                }
+
+                if(i == 6u)
+                {
+                    pHelper->Resurrect(true);
+                    pHelper->SetPosition(pEnemy->GetPosition());
                 }
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(0u, "NEUNZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2((i == 1u) ? -0.5f : ((i == 2u) ? -0.5f : 0.0f), 0.0f);
+
+            if(pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime))
+            {
+                pEnemy->Kill(false);
+                bPostpone = true;
+            }
+
+                 if(i == 2u) pEnemy->Rotate180();
+            else if(i == 3u) pEnemy->Rotate90 ();
+            else if(i == 4u) pEnemy->Rotate180();
+
+            if(pEnemy->ReachedDeath())
+            {
+                if(++iBonusCount == pSquad2->GetNumEnemies()) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
+                else g_pGame->GetCombatText()->DrawProgress(iBonusCount, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
+            }
+        });
+
+        STAGE_FOREACH_PLAYER(pPlayer, i)
+        {
+            if(!pPlayer->IsRolling() && pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_TURN))
+            {
+                if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT) ||
+                   HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT))
+                {
+                    constexpr coreUintW iTotal = 15u;
+
+                    aiTryCount[i] += 1u;
+
+                         if(aiTryCount[i] >= iTotal)      STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
+                    else if(aiTryCount[i] >= iTotal - 3u) g_pGame->GetCombatText()->DrawText(coreData::ToChars(iTotal - aiTryCount[i]), pPlayer->GetPosition(), COLOR_MENU_INSIDE);
+                }
+            }
+        });
+
+        if(!bPostpone) STAGE_WAVE(0u, "NEUNZEHN", {50.0f, 75.0f, 100.0f, 125.0f})
     });
 
     // ################################################################
@@ -413,6 +488,7 @@ void cRutilusMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
+            pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
             pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
         });
 
@@ -449,13 +525,13 @@ void cRutilusMission::__SetupOwn()
     // still circle group should not be too far on the outside, otherwise it is too annoying shooting them down, but not too much in the center, as it gets too easy
     // linear flying enemies and 4 corner enemies at the end both work by evading bullets which get affected by the rotation, while the enemies stand still, which creates some kind of maelstrom (similar to r-type leaver wave, or messier boss)
     // 4 corner enemies (both groups) are in blind spot on purpose
-    // TODO 1: permanent special effect on helper (auspuff strahl ! vielleicht schräg in rotations-richtung)
-    // TODO 1: letzte 4 gruppen, spieler rammt rein bei transition, weil die position relativ ist
-    // TODO 1: badge: shoot at helper
-    // TODO 1: whole border gets particle effect on helper impact (delayed)
-    // TODO 1: player bullets should not get deleted for final phase (in bullet-class, currently not fixed), and hit should be recognized (in game-class, handled with visibility-check bool)
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
-    // TODO 1: gegner die sich in den ecken verstecken bewegen sich langsa min mitte, oder sobald der erste tot ist
+    // TASK: shoot multiple times on the helper, at specific intervals
+    // TASK: kill a certain group of enemies in order
+    // TASK: move into all 4 invisible corners
+    // TODO 1: hardmode: player cannot rotate, is rotating all the time, player bullets rotate with background, rotation is based on player position or other actions
+    // TODO 1: do not always set base-color
+    // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
+    // TODO 1: MAIN: task-check, regular score, sound
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -500,14 +576,37 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(6u)
+        STAGE_GET_START(11u)
             STAGE_GET_UINT (iTransitionState)
             STAGE_GET_FLOAT(fTransitionTime)
             STAGE_GET_FLOAT(fRotationValue)
             STAGE_GET_FLOAT(fRotationSpeed)
             STAGE_GET_FLOAT(fRotationFrom)
             STAGE_GET_FLOAT(fRotationTo)
+            STAGE_GET_FLOAT(fCloseTime)
+            STAGE_GET_FLOAT(fCapsDelay)
+            STAGE_GET_UINT (iCapsCount)
+            STAGE_GET_UINT (iOrderState)
+            STAGE_GET_UINT (iEdgeState)
         STAGE_GET_END
+
+        const auto nScreenSplashFunc = [](const coreVector2 vSplashPos)
+        {
+            for(coreUintW i = 0u; i < 4u; ++i)
+            {
+                const coreVector2 vDir = StepRotated90(i);
+
+                for(coreUintW j = 0u; j < 30u; ++j)
+                {
+                    const coreVector2 vPos = (vDir + vDir.Rotated90() * ((I_TO_F(j) - 14.5f) / 14.5f)) * 1.1f * FOREGROUND_AREA;
+
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 1u, COLOR_ENERGY_MAGENTA);
+                }
+            }
+
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vSplashPos, 0.0f), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_MAGENTA);
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+        };
 
         if(STAGE_CLEARED)
         {
@@ -539,14 +638,14 @@ void cRutilusMission::__SetupOwn()
 
             g_pGame->SetVisibleCheck(m_iStageSub != 21u);
 
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.5f * STAGE_STEP(1u, 22u));
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f + 0.25f * STAGE_STEP(1u, 22u));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
 
         if(STAGE_BEGINNING)
         {
-            pHelper->Resurrect();
+            pHelper->Resurrect(false);
         }
 
         const coreFloat fRotationValueOld = fRotationValue;
@@ -563,8 +662,9 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+                    nScreenSplashFunc(pHelper->GetPosition().xy());
+
+                    this->EnableCapsule();
                 }
             }
             else if(iTransitionState == 1u)
@@ -575,8 +675,7 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    nScreenSplashFunc(pHelper->GetPosition().xy());
                 }
             }
         }
@@ -586,8 +685,7 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_MAGENTA);
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+                nScreenSplashFunc(pHelper->GetPosition().xy());
             }
 
             fRotationSpeed = MAX(fRotationSpeed - 0.2f * TIME, -0.6f);
@@ -598,8 +696,7 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_MAGENTA);
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+                nScreenSplashFunc(pHelper->GetPosition().xy());
 
                 fRotationSpeed = -fRotationSpeed;
             }
@@ -614,7 +711,7 @@ void cRutilusMission::__SetupOwn()
                 fRotationFrom  = (fRotationValue);
                 fRotationTo    = (fRotationValue > 1.0f*PI) ? (2.0f*PI) : (0.0f*PI);
 
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_MAGENTA);
+                this->DisableCapsule(true);
             }
 
             const coreFloat fTime = MAX(1.0f - fTransitionTime, 0.0f);
@@ -633,6 +730,66 @@ void cRutilusMission::__SetupOwn()
             }
         }
 
+        if(m_iStageSub == 6u)
+        {
+            if(pSquad1->GetNumEnemiesAlive() < 4u)
+            {
+                fCloseTime += 1.0f * TIME;
+            }
+        }
+
+        if(m_iStageSub == 21u)
+        {
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet([](cBullet* OUTPUT pBullet)
+            {
+                pBullet->AddStatus(BULLET_STATUS_IMMORTAL);
+                if(pBullet->GetFlyTime() >= 3.0f) pBullet->Deactivate(true);
+            });
+        }
+        else if(m_iStageSub == 22u)
+        {
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet([](cBullet* OUTPUT pBullet)
+            {
+                pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
+            });
+        }
+
+        if(m_Capsule.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            constexpr coreFloat  fCapsAnimation = 0.2f;
+            constexpr coreUint32 iCapsTotal     = 5u;
+
+            m_Capsule.SetPosition(pHelper->GetPosition());
+            m_Capsule.SetSize    (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+            m_Capsule.SetAlpha   (1.0f - MIN1(fCapsDelay / fCapsAnimation));
+
+            const coreFloat fCapsDelayOld = fCapsDelay;
+            fCapsDelay = MAX0(fCapsDelay - 1.0f * TIME);
+
+            if(InBetween(fCapsAnimation, fCapsDelay, fCapsDelayOld))
+            {
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
+            }
+
+            if(fCapsDelay < fCapsAnimation)
+            {
+                Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Capsule, [&](cBullet* OUTPUT pBullet, const coreObject3D* pCapsule, const coreVector3 vIntersection, const coreBool bFirstHit)
+                {
+                    if(fCapsDelay < fCapsAnimation)
+                    {
+                        pBullet->Deactivate(true);
+
+                        if(++iCapsCount >= iCapsTotal) STAGE_BADGE(1u, BADGE_NORMAL, m_Capsule.GetPosition())
+                        else g_pGame->GetCombatText()->DrawText(coreData::ToChars(iCapsTotal - iCapsCount), m_Capsule.GetPosition(), COLOR_MENU_INSIDE);
+
+                        fCapsDelay = (iCapsCount >= iCapsTotal) ? 3600.0f : 10.0f;
+
+                        g_pSpecialEffects->MacroExplosionColorSmall(pHelper->GetPosition(), COLOR_ENERGY_MAGENTA);
+                    }
+                });
+            }
+        }
+
         fRotationValue = FmodRange(fRotationValue + fRotationSpeed * TIME, 0.0f*PI, 2.0f*PI);
         const coreVector2 vDirection       = coreVector2::Direction(fRotationValue);
         const coreVector2 vDirectionMirror = g_CurConfig.Game.iMirrorMode ? vDirection.InvertedX() : vDirection;
@@ -643,9 +800,33 @@ void cRutilusMission::__SetupOwn()
         {
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
-                pPlayer->ShowArrow();
+                pPlayer->ShowArrow(0u);
             });
         }
+
+        const auto nMarkEdgeFunc = [&](const coreUintW iIndex)
+        {
+            if(!HAS_BIT(iEdgeState, iIndex))
+            {
+                ADD_BIT(iEdgeState, iIndex)
+
+                const coreVector3 vPos   = coreVector3(MapToAxis(StepRotated90(iIndex), vDirection) * FOREGROUND_AREA * 0.95f, 0.0f);
+                const coreUint32  iCount = coreMath::PopCount(iEdgeState);
+
+                if(iCount == 4u) STAGE_BADGE(0u, BADGE_EASY, vPos)
+                else g_pGame->GetCombatText()->DrawProgress(iCount, 4u, vPos);
+            }
+        };
+
+        STAGE_FOREACH_PLAYER(pPlayer, i)
+        {
+            const coreVector2 vRealPos = MapToAxisInv(pPlayer->GetPosition().xy(), vDirection);
+
+                 if(vRealPos.x < -FOREGROUND_AREA.x * 1.2f) nMarkEdgeFunc(1u);
+            else if(vRealPos.x >  FOREGROUND_AREA.x * 1.2f) nMarkEdgeFunc(3u);
+                 if(vRealPos.y < -FOREGROUND_AREA.x * 1.2f) nMarkEdgeFunc(2u);
+            else if(vRealPos.y >  FOREGROUND_AREA.x * 1.2f) nMarkEdgeFunc(0u);
+        });
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -685,7 +866,9 @@ void cRutilusMission::__SetupOwn()
             }
             else if(i < 76u)
             {
-                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreFloat fCloseMove = (i >= 68u && i < 72u) ? LERPS(1.0f, 0.3f, MIN1(fCloseTime * 0.2f)) : 1.0f;
+
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f) * fCloseMove;
                 const coreVector2 vOffset = coreVector2(0.0f,0.0f);
 
                 pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
@@ -714,6 +897,28 @@ void cRutilusMission::__SetupOwn()
                 pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
 
                 pEnemy->ToAxis(coreVector2::Direction(I_TO_F(i - 92u) / 8.0f * (-2.0f*PI) + (1.75f*PI)));
+
+                if((i - 92u) == iOrderState)
+                {
+                    pEnemy->SetBaseColor(COLOR_SHIP_BLACK, false, true);
+                    g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                }
+                else
+                {
+                    pEnemy->SetBaseColor(COLOR_SHIP_RED);
+                }
+
+                if(pEnemy->ReachedDeath())
+                {
+                    if((i - 92u) == iOrderState)
+                    {
+                        if(++iOrderState >= 8u) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                    }
+                    else
+                    {
+                        iOrderState = 0xFFu;
+                    }
+                }
             }
             else if(i < 116u)
             {
@@ -730,16 +935,18 @@ void cRutilusMission::__SetupOwn()
                 pEnemy->ToAxis(vDirectionMirror);
             }
 
-            if(((i < 76u) || (i >= 100u)) && STAGE_TICK_LIFETIME_BASE(6.0f, 0.0f))
+            if(((i < 76u) || (i >= 100u)) && STAGE_TICK_LIFETIME_BASE(6.0f, 0.0f) && (!g_pGame->IsEasy() || ((i >= 68u && i < 76u) ? ((s_iTick % 10u) < 4u) : (s_iTick < 4u))))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayerSide().Normalized();
+                const coreVector2 vDir = pEnemy->AimAtPlayerDual((i / 4u) % 2u).Normalized();
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_MAGENTA);
             }
         });
 
-        STAGE_WAVE(1u, "ZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(1u, "ZWANZIG", {55.0f, 80.0f, 110.0f, 135.0f})
     });
 
     // ################################################################
@@ -750,7 +957,14 @@ void cRutilusMission::__SetupOwn()
 
         g_pGame->SetVisibleCheck(true);
 
+        g_pGame->GetBulletManagerPlayer()->ForEachBullet([](cBullet* OUTPUT pBullet)
+        {
+            pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
+        });
+
         g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));
+
+        this->DisableCapsule(false);
 
         STAGE_FINISH_NOW
     });
@@ -782,21 +996,19 @@ void cRutilusMission::__SetupOwn()
     // zwei gegner hintereinander sollten nicht von der selben stelle spawnen, durch die zeit-verzögerten bullets sind die gleich wieder tot weil der nachhall so lang ist
     // zwei gegner gleichzeitig mit weitem wellen-angriff funktioniert nicht, die geschosse überlagern sich zu sehr, oder bei shift kommen die angriffe zu oft
     // bei finalen wellen-angriff gegnern müssen die schon 1 mal schießen bevor sie zerstört werden können
+    // TASK: collect fast objects, which can only be caught within slowdown bubble
+    // TODO 1: hardmode: slowdown/safe field follows player
     // TODO 1: effekt um verlangsamte objekte herum (schein)
-    // TODO 1: reduce bullet-animation + dark-animation speed (abhängig von flyspeed ?) (auch bei boss, auch fürs rückwärts-fliegen)
     // TODO 1: player bullets sollten nicht so stark gekürzt werden
-    // TODO 1: shift time-bubble to the side on disable ?
-    // TODO 1: on continuous shooting, maybe half frequency and do double-shots (same speed, shifted into direction) to make navigation easier
-    // TODO 1: enemies in matrix wave may need a different configuration, to have more movement possibilities
-    // TODO 1: nochmal schauen ob man den wellen-angriffen der letzten gegner gescheit ausweichen kann (hab bubble-größe wieder zurückgesetzt von 22 auf 20, könnte damit zu tun haben), ansonsten vielleicht offsets ändern 0.5f,0.0f,0.5f,0.0f
-    // TODO 1: gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
-    // TODO 1: wenn in bubble, musik wird langsamer
-    // TODO 1: vielleicht sollten gegner geschosse langsamer sein als derzeit, wenn sie in die "normale" bubble kommen am ende
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
-    // TODO 1: musik langsamer und verzerrt wiedergeben, wenn man selbst verlangsamt ist ? coop ? (vielleicht mittel von beiden spielern)
-    // TODO 1: slowdown/safe field follows player
+        // TODO 1: enemies in matrix wave may need a different configuration, to have more movement possibilities
+        // TODO 1: nochmal schauen ob man den wellen-angriffen der letzten gegner gescheit ausweichen kann (hab bubble-größe wieder zurückgesetzt von 22 auf 20, könnte damit zu tun haben), ansonsten vielleicht offsets ändern 0.5f,0.0f,0.5f,0.0f
+        // TODO 1: gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
+    // TODO 1: MAIN: task-check, hard idea, regular score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
+    // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
+        constexpr coreUintW iNumData = 6u;
+
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
@@ -847,12 +1059,16 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(4u)
-            STAGE_GET_UINT (iTransitionState)
-            STAGE_GET_FLOAT(fTransitionTime)
-            STAGE_GET_FLOAT(fAreaMove)
-            STAGE_GET_FLOAT(fAreaLerp)
+        STAGE_GET_START(5u + iNumData)
+            STAGE_GET_UINT      (iTransitionState)
+            STAGE_GET_FLOAT     (fTransitionTime)
+            STAGE_GET_FLOAT     (fAreaMove)
+            STAGE_GET_FLOAT     (fAreaLerp)
+            STAGE_GET_UINT      (iTockState)
+            STAGE_GET_UINT_ARRAY(aiOwnTick, iNumData)
         STAGE_GET_END
+
+        ASSERT(pSquad1->GetNumEnemiesAlive() <= iNumData)
 
         if(STAGE_CLEARED)
         {
@@ -884,14 +1100,16 @@ void cRutilusMission::__SetupOwn()
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
 
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.75f * STAGE_STEP(1u, 24u));
+            std::memset(aiOwnTick, 0, sizeof(coreUint32) * iNumData);
+
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.5f + 0.25f * STAGE_STEP(1u, 24u));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
 
         if(STAGE_BEGINNING)
         {
-            pHelper->Resurrect();
+            pHelper->Resurrect(false);
         }
 
         fTransitionTime += 1.0f * TIME;
@@ -911,6 +1129,14 @@ void cRutilusMission::__SetupOwn()
 
                     this->EnableArea();
                     g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
+
+                    for(coreUintW i = 0u; i < RUTILUS_TOCKS; ++i)
+                    {
+                        const coreVector2 vPos = coreVector2(I_TO_F((i * 2u) % 5u) * -0.5f + 1.0f, I_TO_F(i) * 0.5f - 1.0f) + coreVector2(4.0f,4.0f);
+
+                        this->EnableTock(i);
+                        this->GetTock(i)->SetPosition(coreVector3(vPos, 0.0f) * FOREGROUND_AREA3);
+                    }
                 }
             }
         }
@@ -990,7 +1216,7 @@ void cRutilusMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, (i < 4u) ? 2.0f : 0.0f)
 
-            const coreFloat fSpeed        = this->CalcAreaSpeed(pEnemy->GetPosition().xy());
+            const coreFloat fSpeed        = this->CalcAreaSpeed(pEnemy->GetPosition().xy(), 1.0f);
             const coreFloat fSlowLifeTime = fLifeTime * ((i < 19u) ? 1.0f : 0.4f);
 
             if(i < 10u || (i >= 19u && i < 29u))
@@ -1058,14 +1284,21 @@ void cRutilusMission::__SetupOwn()
             }
             else if(i < 15u || (i >= 19u && i < 37u))
             {
-                if(STAGE_TICK_LIFETIME(10.0f, 0.0f))
+                if(STAGE_TICK_LIFETIME(10.0f, 0.0f) && g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy(), 1.2f))
                 {
                     if(F_TO_UI(I_TO_F(s_iTick - 1u) * fSpeed) != F_TO_UI(I_TO_F(s_iTick) * fSpeed))
                     {
-                        const coreVector2 vPos = pEnemy->GetPosition().xy();
-                        const coreVector2 vDir = pEnemy->AimAtPlayerSideRev().Normalized();
+                        coreUint32& iOwnTick = aiOwnTick[i % iNumData];
 
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                        if(!g_pGame->IsEasy() || ((iOwnTick % 8u) < 4u))
+                        {
+                            const coreVector2 vPos = pEnemy->GetPosition().xy();
+                            const coreVector2 vDir = pEnemy->AimAtPlayerSideRev().Normalized();
+
+                            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                        }
+
+                        iOwnTick += 1u;
                     }
                 }
             }
@@ -1076,11 +1309,12 @@ void cRutilusMission::__SetupOwn()
                     if(F_TO_UI(I_TO_F(s_iTick - 1u) * fSpeed) != F_TO_UI(I_TO_F(s_iTick) * fSpeed))
                     {
                         const coreVector2 vPos  = pEnemy->GetPosition().xy();
-                        const coreFloat   fBase = pEnemy->AimAtPlayerDual((i < 17u || (i >= 37u && (i % 2u))) ? 0u : 1u).Angle();
+                        const coreFloat   fBase = pEnemy->AimAtPlayerDual((i - 15u) % 2u).Angle();
+                        const coreUintW   iNum  = g_pGame->IsEasy() ? 15u : 30u;
 
-                        for(coreUintW j = 30u; j--; )
+                        for(coreUintW j = iNum; j--; )
                         {
-                            const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 14.5f) * 4.0f) + fBase);
+                            const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iNum - 1u) * 0.5f) * 4.0f) + fBase);
 
                             g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
                         }
@@ -1088,6 +1322,40 @@ void cRutilusMission::__SetupOwn()
                 }
             }
         });
+
+        for(coreUintW i = 0u; i < RUTILUS_TOCKS; ++i)
+        {
+            coreObject3D* pTock = this->GetTock(i);
+            if(!pTock->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            const coreFloat fSpeed  = this->CalcAreaSpeed(pTock->GetPosition().xy(), 3.0f);
+            const coreBool  bActive = (fSpeed < 0.5f);
+
+            coreVector2 vCurDir = coreVector2(-1.0f,-3.0f).Normalized();
+            coreVector2 vCurPos = pTock->GetPosition().xy() + vCurDir * (fSpeed * 50.0f * TIME);
+
+                 if((vCurPos.x < -FOREGROUND_AREA.x * 1.2f) && (vCurDir.x < 0.0f)) vCurPos.x += FOREGROUND_AREA.x * 2.4f;
+            else if((vCurPos.x >  FOREGROUND_AREA.x * 1.2f) && (vCurDir.x > 0.0f)) vCurPos.x -= FOREGROUND_AREA.x * 2.4f;
+                 if((vCurPos.y < -FOREGROUND_AREA.y * 1.2f) && (vCurDir.y < 0.0f)) vCurPos.y += FOREGROUND_AREA.y * 2.4f;
+            else if((vCurPos.y >  FOREGROUND_AREA.y * 1.2f) && (vCurDir.y > 0.0f)) vCurPos.y -= FOREGROUND_AREA.y * 2.4f;
+
+            pTock->SetPosition(coreVector3(vCurPos, 0.0f));
+            pTock->SetAlpha   (bActive ? 1.0f : 0.5f);
+
+            if(bActive) STAGE_FOREACH_PLAYER(pPlayer, j)
+            {
+                const coreVector2 vDiff = pTock->GetPosition().xy() - pPlayer->GetPosition().xy();
+                if(vDiff.LengthSq() < POW2(5.0f))
+                {
+                    this->DisableTock(i, true);
+
+                    if(++iTockState == RUTILUS_TOCKS) STAGE_BADGE(1u, BADGE_NORMAL, pTock->GetPosition())
+                    else g_pGame->GetCombatText()->DrawProgress(iTockState, RUTILUS_TOCKS, pTock->GetPosition());
+
+                    g_pSpecialEffects->PlaySound(pTock->GetPosition(), 1.0f, 0.7f + 0.05f * I_TO_F(iTockState), SOUND_PLACEHOLDER);
+                }
+            });
+        }
 
         STAGE_WAVE(2u, "EINUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
@@ -1100,6 +1368,9 @@ void cRutilusMission::__SetupOwn()
 
         this->DisableArea(false);
         this->DisableSafe(false);
+
+        for(coreUintW i = 0u; i < RUTILUS_TOCKS; ++i)
+            this->DisableTock(i, false);
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -1135,19 +1406,18 @@ void cRutilusMission::__SetupOwn()
     // gravity with distance-falloff is too inconsistent regarding gameplay (too far away is boring, to near is too unpredictable)
     // speed-preservation is easy to grasp, but the created flight-patterns are too boring
     // vertikal und horizontal hat identisches gameplay, der einzige unterschied ist, dass eines geschosse abstoßt und das andere anzieht
+    // TASK: attack multiple targets at the same time
+    // TASK: fly multiple times around the helper
     // TODO 1: gravitation should work equally with all bullet types (basis-speed verwenden, von cWeapon, oder eher bullet, muss ich eh speichern für längen-veränderung)
+    
     // TODO 1: distortion for waves ?
-    // TODO 1: partikel die in die mitte gezogen werden, mit zusätzlichen waves
     // TODO 1: improve player bullet curve shape, with special vertex shader and different bullet entities
+    
     // TODO 1: move circular wave effect ot some other mechanic, then delete it here
-    // TODO 1: maybe really rotate instead of absolutely changing direction per wave (easier to understand) (would make more sense in combination with movement)
+    
     // TODO 1: improve coop targeting
-    // TODO 1: 2 gegner in der mitte am anfang weg oder aufteilen 4+4
-    // TODO 1: 2 gegner direkt am spitzerl bei schräger gruppe weg
-    // TODO 1: vielleicht die 3 unteren bei der 4x3 gruppe weggeben, vielleicht zu 3x4 machen, naaa diese gruppe muss sich aber von den linien-gruppen unterscheiden, so wie die eck-gruppe
-    // TODO 1: vielleicht anderer helper outro, der nicht so subtil ist
-    // TODO 1: die ganzen geraden gruppen könnten leichten shift in flug-richtung haben (zick-zack, oder 4+4)
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+
+    // TODO 1: MAIN: task-check, easy, hard idea, coop, regular score, badges, sound, attack size/count/speed, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumTargets = 16u;
@@ -1155,67 +1425,129 @@ void cRutilusMission::__SetupOwn()
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-1.3f,1.3f), coreVector2(1.0f,-1.0f).Normalized());
-            pPath1->AddStop(coreVector2(-0.9f,0.9f), coreVector2(1.0f,-1.0f).Normalized());
+            pPath1->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
             pPath1->Refine();
         });
 
         STAGE_ADD_PATH(pPath2)
         {
             pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
-            pPath2->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f).Normalized());
+            pPath2->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f).Normalized());
             pPath2->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath3)
-        {
-            pPath3->Reserve(2u);
-            pPath3->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f).Normalized());
-            pPath3->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f).Normalized());
-            pPath3->Refine();
         });
 
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 112u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
                 pEnemy->Configure(4, 0u, COLOR_SHIP_ORANGE);
             });
         });
 
-        STAGE_GET_START(2u * iNumTargets + 3u)
-            STAGE_GET_VEC2_ARRAY(avTarget, iNumTargets)
-            STAGE_GET_UINT      (iTransitionState)
-            STAGE_GET_FLOAT     (fTransitionTime)
-            STAGE_GET_FLOAT     (fMoveTime)
+        STAGE_GET_START(4u * iNumTargets + GAME_PLAYERS + 4u)
+            STAGE_GET_VEC2_ARRAY (avStart,  iNumTargets)
+            STAGE_GET_VEC2_ARRAY (avTarget, iNumTargets)
+            STAGE_GET_UINT       (iTransitionState)
+            STAGE_GET_FLOAT      (fTransitionTime)
+            STAGE_GET_FLOAT_ARRAY(afAroundAngle, GAME_PLAYERS)
+            STAGE_GET_UINT       (iAroundCount)
+            STAGE_GET_UINT       (iSlapState)
         STAGE_GET_END
+
+        ASSERT(pSquad1->GetNumEnemiesAlive() <= iNumTargets)
 
         if(STAGE_CLEARED)
         {
+            // TODO 1: 0-11 fixen
                  if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1, 12u,  19u)   // ##
             else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1, 20u,  35u)   // ##
-            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 0u,   11u)   // #
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 60u,  71u)   // ###
             else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 72u,  79u)   // ####
             else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 80u,  87u)   // ####
             else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 88u,  95u)   // ####
             else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 36u,  43u)   // ##
-            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 60u,  71u)   // ###
-            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 44u,  59u)   // ##
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 44u,  59u)   // ##
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 0u,   7u)   // #
             else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 96u, 111u)   // #####
             else if(STAGE_SUB(11u)) STAGE_DELAY_START_CLEAR
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
 
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 1.0f * STAGE_STEP(1u, 11u));
+            for(coreUintW i = 0u; i < iNumTargets; ++i)
+                avStart[i] = HIDDEN_POS;
+
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.75f + 0.25f * STAGE_STEP(1u, 11u));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_RED);
 
         if(STAGE_BEGINNING)
         {
-            pHelper->Resurrect();
+            pHelper->Resurrect(false);
+        }
+
+        if(m_iStageSub >= 2u)
+        {
+            coreBool bSlapSolved = true;
+            for(coreUintW i = 0u; i < RUTILUS_SLAPS; ++i)
+            {
+                coreObject3D* pSlap = this->GetSlap(i);
+                if(!pSlap->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                if(m_afSlapValue[i] < 0.95f) bSlapSolved = false;
+            }
+
+            if(bSlapSolved && (iSlapState < 4u))
+            {
+                for(coreUintW i = 0u; i < RUTILUS_SLAPS; ++i)
+                    this->DisableSlap(i, true);
+
+                if(iSlapState == 0u)
+                {
+                    for(coreUintW i = 0u; i < 2u; ++i)
+                        this->EnableSlap(i);
+
+                    this->GetSlap(0u)->SetPosition(coreVector3(-0.5f, 0.0f,0.0f) * FOREGROUND_AREA3);
+                    this->GetSlap(1u)->SetPosition(coreVector3( 0.5f, 0.0f,0.0f) * FOREGROUND_AREA3);
+                }
+                else if(iSlapState == 1u)
+                {
+                    for(coreUintW i = 0u; i < 3u; ++i)
+                        this->EnableSlap(i);
+
+                    this->GetSlap(0u)->SetPosition(coreVector3(-0.7f,-0.7f,0.0f) * FOREGROUND_AREA3);
+                    this->GetSlap(1u)->SetPosition(coreVector3( 0.7f, 0.7f,0.0f) * FOREGROUND_AREA3);
+                    this->GetSlap(2u)->SetPosition(coreVector3( 0.0f, 0.5f,0.0f) * FOREGROUND_AREA3);
+                }
+                else if(iSlapState == 2u)
+                {
+                    for(coreUintW i = 0u; i < 4u; ++i)
+                        this->EnableSlap(i);
+
+                    this->GetSlap(0u)->SetPosition(coreVector3(-0.2f,-0.5f,0.0f) * FOREGROUND_AREA3);
+                    this->GetSlap(1u)->SetPosition(coreVector3(-0.2f, 0.5f,0.0f) * FOREGROUND_AREA3);
+                    this->GetSlap(2u)->SetPosition(coreVector3( 0.2f,-0.5f,0.0f) * FOREGROUND_AREA3);
+                    this->GetSlap(3u)->SetPosition(coreVector3( 0.2f, 0.5f,0.0f) * FOREGROUND_AREA3);
+                }
+                else if(iSlapState == 3u)
+                {
+                    STAGE_BADGE(1u, BADGE_NORMAL, coreVector3(0.25f,0.0f,0.0f) * FOREGROUND_AREA3);
+                }
+
+                iSlapState += 1u;
+            }
+
+            if(m_iStageSub == 11u)
+            {
+                for(coreUintW i = 0u; i < RUTILUS_SLAPS; ++i)
+                    this->DisableSlap(i, true);
+
+                iSlapState = 100u;
+            }
         }
 
         fTransitionTime += 1.0f * TIME;
@@ -1242,9 +1574,11 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                this->SetWaveDirection(3u);
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
             }
+
+            const coreVector2 vDir = coreVector2::Direction(LERPB(0.0f*PI, -0.25f*PI, MIN1(m_fStageSubTime * 0.5f)));
+            this->SetWaveDirection(vDir);
         }
         else if(m_iStageSub == 5u)
         {
@@ -1266,15 +1600,23 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                this->SetWaveDirection(2u);
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
             }
-        }
-        else if((m_iStageSub >= 9u) && (m_iStageSub <= 10u))
-        {
-            fMoveTime += 1.0f * TIME;
 
-            pHelper->SetPosition(coreVector3(pHelper->GetPosition().x, SIN(fMoveTime * (0.3f*PI)) * FOREGROUND_AREA.y, pHelper->GetPosition().z));
+            const coreVector2 vDir = coreVector2::Direction(LERPB(-0.25f*PI, -0.5f*PI, MIN1(m_fStageSubTime * 0.5f)));
+            this->SetWaveDirection(vDir);
+        }
+        else if(m_iStageSub == 9u)
+        {
+            if(iTransitionState == 0u)
+            {
+                iTransitionState += 1u;
+
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
+            }
+
+            const coreVector2 vPos = coreVector2(0.0f, LERPB(0.0f, -0.9f, MIN1(m_fStageSubTime * 0.5f)));
+            pHelper->SetPosition(coreVector3(vPos * FOREGROUND_AREA, pHelper->GetPosition().z));
         }
         else if(m_iStageSub == 11u)
         {
@@ -1283,7 +1625,7 @@ void cRutilusMission::__SetupOwn()
                 iTransitionState += 1u;
 
                 this->DisableWave(true);
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_RED);
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
             }
 
             pHelper->SetPosition(coreVector3(ParaLerp(0.0f, 0.3f, -1.2f, fTransitionTime / 0.8f) * FOREGROUND_AREA.x, pHelper->GetPosition().yz()));
@@ -1299,30 +1641,56 @@ void cRutilusMission::__SetupOwn()
         if(HAS_BIT(m_iWaveActive, RUTILUS_WAVES))
         {
             this->SetWavePosition(pHelper->GetPosition().xy());
+
+            if(STAGE_TICK_FREE(10.0f, 0.0f))
+            {
+                if(this->GetWavePull()) g_pSpecialEffects->CreateChargeColor(pHelper->GetPosition(), 25.0f, 1u, COLOR_ENERGY_RED);
+                                   else g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), 25.0f, 1u, COLOR_ENERGY_RED);
+            }
+
+            STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+            {
+                const coreVector2 vDiff    = pPlayer->GetPosition().xy() - pHelper->GetPosition().xy();
+                const coreVector2 vDiffOld = pPlayer->GetOldPos()        - pHelper->GetOldPos();
+
+                if(!vDiff.IsNull() && !vDiffOld.IsNull())
+                {
+                    afAroundAngle[i] += AngleDiff(vDiff.Angle(), vDiffOld.Angle());
+
+                    if(ABS(afAroundAngle[i]) >= 2.0f*PI)
+                    {
+                        afAroundAngle[i] = FMOD(afAroundAngle[i], 2.0f*PI);
+                        iAroundCount    += 1u;
+                    }
+                }
+
+                     if(iAroundCount >= 4u) STAGE_BADGE(0u, BADGE_EASY, pHelper->GetPosition())
+                else if(iAroundCount >= 1u) g_pGame->GetCombatText()->AttachMarker(0u, coreData::ToChars(4u - iAroundCount), pHelper->GetPosition(), COLOR_MENU_INSIDE);
+            });
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i < 72u) ? 1.0f : 0.7f, (i < 96u) ? ((i < 20u || (i >= 36u && i < 60u)) ? 1.0f : ((i >= 80u && i < 88u) ? 2.0f : 0.2f)) : (0.4f * I_TO_F(i - 96u)))
+            STAGE_LIFETIME(pEnemy, (i >= 12u && i < 72u) ? 1.0f : 0.7f, (i < 12u) ? (0.4f * I_TO_F(i)) : ((i < 96u) ? ((i < 20u || (i >= 36u && i < 72u)) ? 1.0f : ((i >= 80u && i < 88u) ? 2.0f : 0.2f)) : (0.4f * I_TO_F(i - 96u))))
 
             if(i < 12u)
             {
+                STAGE_REPEAT(pPath2->GetTotalDistance())
+
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2(((i % 3u) == 1u) ? 0.3f : 0.0f, ((i % 3u) == 2u) ? -0.3f : 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(i) - 3.5f) * 0.28f, 0.0f);
 
-                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
 
-                     if(i <  3u) {}
-                else if(i <  6u) pEnemy->Rotate90 ();
-                else if(i <  9u) pEnemy->Rotate180();
-                else if(i < 12u) pEnemy->Rotate270();
+                pEnemy->Rotate90();
+                if(i % 2u) pEnemy->InvertX();
             }
             else if(i < 60u)
             {
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F((i - 12u) % 8u) - 3.5f) * 0.25f, 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 12u) % 8u) - 3.5f) * 0.28f, (i % 2u) ? -0.05f : 0.05f);
 
-                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
 
                      if(i < 20u) {}
                 else if(i < 28u) pEnemy->Rotate90 ();
@@ -1334,9 +1702,9 @@ void cRutilusMission::__SetupOwn()
             else if(i < 72u)
             {
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F((i - 60u) % 3u) - 1.0f) * 0.25f, 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 60u) % 3u) - 1.0f) * 0.28f, 0.0f);
 
-                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
 
                      if(i < 63u) {}
                 else if(i < 66u) pEnemy->Rotate90 ();
@@ -1345,12 +1713,12 @@ void cRutilusMission::__SetupOwn()
             }
             else if(i < 96u)
             {
-                STAGE_REPEAT(pPath3->GetTotalDistance())
+                STAGE_REPEAT(pPath2->GetTotalDistance())
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F((i - 72u) % 8u) - 3.5f) * 0.25f, 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 72u) % 8u) - 3.5f) * 0.28f, 0.0f);
 
-                pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
 
                       if(i < 80u) {}
                  else if(i < 88u) pEnemy->Rotate90 ();
@@ -1358,30 +1726,39 @@ void cRutilusMission::__SetupOwn()
             }
             else if(i < 112u)
             {
-                STAGE_REPEAT(pPath3->GetTotalDistance())
+                STAGE_REPEAT(pPath2->GetTotalDistance())
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F(((i - 96u + 1u) * 3u) % 8u) - 3.5f) * 0.25f, 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(((i - 96u + 1u) * 3u) % 8u) - 3.5f) * 0.28f, 0.0f);
 
-                pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
             }
+
+            pEnemy->SetDirection(coreVector3(pEnemy->AimAtPlayerSide().Normalized(), 0.0f));
 
             const coreFloat fShootSpeed = 9.0f / fLifeSpeed;
 
-            if(STAGE_TICK_LIFETIME_BASE(fShootSpeed, (i < 96u) ? 0.0f : (fLifeOffset * -fShootSpeed)) && ((s_iTick % 12u) >= 9u))
+            if(!g_pGame->IsEasy() && STAGE_TICK_LIFETIME_BASE(fShootSpeed, (i >= 12u && i < 96u) ? 0.0f : (fLifeOffset * -fShootSpeed)) && ((s_iTick % 13u) >= 9u))
             {
+                coreVector2& vStart  = avStart [i % iNumTargets];
                 coreVector2& vTarget = avTarget[i % iNumTargets];
 
-                if((s_iTick % 12u) == 9u) vTarget = pEnemy->NearestPlayerSide()->GetPosition().xy();
+                if(((s_iTick % 13u) == 9u) || (vStart == HIDDEN_POS))
+                {
+                    vStart  = pEnemy->GetPosition().xy();
+                    vTarget = pEnemy->NearestPlayerSide()->GetPosition().xy();
+                }
 
-                const coreVector2 vPos = pEnemy->GetPosition().xy();
+                const coreVector2 vPos = vStart;
                 const coreVector2 vDir = (vTarget - vPos).Normalized();
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_YELLOW);
             }
         });
 
-        STAGE_WAVE(3u, "ZWEIUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(3u, "ZWEIUNDZWANZIG", {50.0f, 75.0f, 100.0f, 125.0f})
     });
 
     // ################################################################
@@ -1391,6 +1768,9 @@ void cRutilusMission::__SetupOwn()
         g_pGame->KillHelpers();
 
         this->DisableWave(false);
+
+        for(coreUintW i = 0u; i < RUTILUS_SLAPS; ++i)
+            this->DisableSlap(i, false);
 
         STAGE_FINISH_NOW
     });
@@ -1421,30 +1801,31 @@ void cRutilusMission::__SetupOwn()
     // violette gegner am ende müssen vorher introduced werden, deswegen ist es wichtig einen davor schon zu erzeugen, aber eher bei wenigen meteoriten, damit man den gegner leichter beobachten kann
     // rundum gegner sollten nicht vollgas in die mitte fahren (sondern mit winkel), da es leichter ist die gegner rechtzeitig zu erkennen und ihnen auszuweichen
     // mittlere meteoriten erzeugen kleine meteoriten abhängig von ihrem winkel, es sollten keine kleinen erzeugt werden die sich achsen-ausgerichtet bewegen (2 von ihnen werden sonst sofort wieder zerstört)
-    // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
-    // TODO 1: badge: the last meteor to destroy is from the first wave (secret)
-    // TODO 1: badge: destroy big meteorite before impact
+    // TASK: destroy the big meteorite before impact
+    // TASK: heb dir meteoriten vom anfang bis zu einer bestimmten sub-phase auf
+    // TASK: destroy the debris meteor and collect all debris bevor they disappear
     // TODO 1: hard mode: every small meteor splits into 4 more smaller meteors
-    // TODO 1: maybe also slight color difference between different sized meteors
-    // TODO 1: meteor rotation affects enemy ships spawning from it, but the offset is currently based on index which might be different each time (due to pooling) (marked with TODOs)
-    // TODO 1: kleine meteoriten (vielleicht auch mittlere) kommen mir zu klein vor (wurden schon vergrößert)
-    // TODO 1: bei der links-rechts-links-... gruppe konnte ich ganz unten durchschlüpfen
-    // TODO 1: badge: 1 ganz spezieller gegner in nem meteor, verschwindet aber nach 1 bounce
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
-    // TODO 1: besser highlighten welcher gegner im meteor ist, vielleicht ganzen meteor einfärben
+    // TODO 1: hard mode: indestructible meteors
+    // TODO 1: hard mode: meteor bounce
+    // TODO 1: orb angriff is zu ähnlich zur snow-wave
+    // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
+    // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
         constexpr coreUintW iNumAdds2   = 6u;
         constexpr coreUintW iNumAdds3   = 8u;
+        constexpr coreUintW iLeftover   = 2u;
         constexpr coreFloat fBaseScale  = 1.5f;
 
         STAGE_ADD_SQUAD(pSquad1, cMeteorEnemy, iNumMeteors)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(1, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(1, 0u, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
+
+                if(g_pGame->IsEasy()) pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
             });
         });
 
@@ -1452,7 +1833,7 @@ void cRutilusMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
                 pEnemy->Configure(50, 0u, COLOR_SHIP_BLUE);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
@@ -1468,23 +1849,26 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(iNumMeteors * 2u + iNumAdds2 * 5u + iNumAdds3 * 1u + 6u)
-            STAGE_GET_VEC2_ARRAY (avMeteorMove,  iNumMeteors)
-            STAGE_GET_VEC2_ARRAY (avAddMove,     iNumAdds2)
-            STAGE_GET_FLOAT_ARRAY(afAddRotation, iNumAdds2)
-            STAGE_GET_FLOAT_ARRAY(afAddOffset,   iNumAdds2)
-            STAGE_GET_UINT_ARRAY (aiAddIndex,    iNumAdds2 + iNumAdds3)
+        STAGE_GET_START(iNumMeteors * 3u + iNumAdds2 * 5u + iNumAdds3 * 1u + iLeftover + 9u)
+            STAGE_GET_VEC2_ARRAY (avMeteorMove,     iNumMeteors)
+            STAGE_GET_FLOAT_ARRAY(afMeteorRotation, iNumMeteors)
+            STAGE_GET_VEC2_ARRAY (avAddMove,        iNumAdds2)
+            STAGE_GET_FLOAT_ARRAY(afAddRotation,    iNumAdds2)
+            STAGE_GET_FLOAT_ARRAY(afAddOffset,      iNumAdds2)
+            STAGE_GET_UINT_ARRAY (aiAddIndex,       iNumAdds2 + iNumAdds3)
+            STAGE_GET_UINT_ARRAY (aiBeginIndex,     iLeftover, for(coreUintW i = 0u; i < iLeftover; ++i) aiBeginIndex[i] = UINT32_MAX;)
             STAGE_GET_UINT       (iCurMeteorIndex)
             STAGE_GET_UINT       (iCurAdd2Index)
             STAGE_GET_UINT       (iCurAdd3Index)
             STAGE_GET_UINT       (iTypeMap)
             STAGE_GET_UINT       (iImpact)
             STAGE_GET_UINT       (iCreateAdd)
+            STAGE_GET_UINT       (iDebrisCount)
+            STAGE_GET_UINT       (iHelperIndex,  iHelperIndex  = UINT32_MAX)
+            STAGE_GET_UINT       (iCrumbleIndex, iCrumbleIndex = UINT32_MAX)
         STAGE_GET_END
 
-        const coreFloat fRotation = FMOD(m_fStageTime * 1.1f, 2.0f*PI);
-
-        const auto nSpawnMeteorFunc = [&](const coreVector2 vPos, const coreVector2 vMove, const coreUint8 iType)
+        const auto nSpawnMeteorFunc = [&](const coreUintW iIndex, const coreVector2 vPos, const coreVector2 vMove, const coreUint8 iType)
         {
             for(coreUintW i = 0u; i < iNumMeteors; ++i)
             {
@@ -1504,14 +1888,17 @@ void cRutilusMission::__SetupOwn()
                     case 0u: fScale = 11.0f * fBaseScale; fSpeed = 50.0f; iHealth = 120; break;
                     case 1u: fScale =  3.0f * fBaseScale; fSpeed = 40.0f; iHealth =  10; break;
                     case 2u: fScale =  5.0f * fBaseScale; fSpeed = 25.0f; iHealth =  50; break;
+                    case 3u: fScale =  3.0f * fBaseScale; fSpeed = 40.0f; iHealth = 100; break;
                     }
 
                     pNewEnemy->SetPosition (coreVector3(vPos,     0.0f) * FOREGROUND_AREA3);
                     pNewEnemy->SetSize     (coreVector3(1.0f,1.0f,1.0f) * fScale);
+                    pNewEnemy->SetBaseColor((iType == 3u) ? (COLOR_SHIP_YELLOW / COLOR_SHIP_YELLOW.Max()) : (COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max()));
                     pNewEnemy->SetMaxHealth(iHealth);
                     pNewEnemy->Resurrect();
 
-                    avMeteorMove[iCurMeteorIndex] = vMove * fSpeed;
+                    avMeteorMove    [iCurMeteorIndex] = vMove * fSpeed;
+                    afMeteorRotation[iCurMeteorIndex] = I_TO_F(iIndex) * (0.25f*PI);   // needs to be a deterministic offset
 
                     SET_BIT(iTypeMap, iCurMeteorIndex, (iType == 2u))
                     STATIC_ASSERT(iNumMeteors <= sizeof(coreUint32)*8u)
@@ -1532,6 +1919,7 @@ void cRutilusMission::__SetupOwn()
             pAdd->Resurrect();
 
             cEnemy* pParent = pSquad1->GetEnemy(iCurMeteorIndex);
+            pParent->SetBaseColor(COLOR_SHIP_BLUE / COLOR_SHIP_BLUE.Max());
             pParent->SetMaxHealth(50);
             pParent->SetCurHealth(50);
 
@@ -1547,11 +1935,20 @@ void cRutilusMission::__SetupOwn()
             pAdd->Resurrect();
 
             cEnemy* pParent = pSquad1->GetEnemy(iCurMeteorIndex);
+            pParent->SetBaseColor(COLOR_SHIP_CYAN / COLOR_SHIP_CYAN.Max());
             pParent->SetMaxHealth(30);
             pParent->SetCurHealth(30);
 
             iCurAdd3Index += 1u;
         };
+
+        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_CYAN);
+
+        if(STAGE_BEGINNING)
+        {
+            constexpr coreUint8 aiNewOrder[] = {cOrbBullet::ID, cQuadBullet::ID};
+            g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
+        }
 
         coreUintW iActive = 0u;
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)   // includes ReachedDeath()
@@ -1559,7 +1956,19 @@ void cRutilusMission::__SetupOwn()
             iActive += HAS_BIT(iTypeMap, i) ? 4u : 1u;
         });
 
-        if(iActive <= 2u)   // STAGE_CLEARED will be triggered by a lonely middle meteor explosion
+        if(iCrumbleIndex != UINT32_MAX)
+        {
+            if(pSquad1->GetEnemy(iCrumbleIndex)->ReachedDeath())
+            {
+                iCrumbleIndex = UINT32_MAX;
+            }
+            else
+            {
+                iActive += iLeftover;
+            }
+        }
+
+        if(iActive <= iLeftover)   // not STAGE_CLEARED, it would be triggered by a lonely middle meteor explosion
         {
             if(STAGE_SUB(1u))
             {
@@ -1568,21 +1977,34 @@ void cRutilusMission::__SetupOwn()
                     const coreVector2 vPos  = coreVector2((I_TO_F((i * 3u) % 10u) - 4.5f) * 0.2f, 1.3f + I_TO_F(i) * 0.2f);
                     const coreVector2 vMove = coreVector2((i % 2u) ? -1.0f : 1.0f, -2.0f).Normalized();
 
-                    nSpawnMeteorFunc(vPos, vMove, 1u);
+                    nSpawnMeteorFunc(i, vPos, vMove, 1u);
 
                     if(i == 16u) nSpawnAdd3Func();
                 }
+
+                pHelper->Resurrect(false);
+                iHelperIndex = iCurMeteorIndex;
             }
             else if(STAGE_SUB(2u))
             {
+                coreUintW iNum = 0u;
+                STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+                {
+                    if(!pEnemy->HasStatus(ENEMY_STATUS_DEAD))
+                    {
+                        ASSERT(iNum < iLeftover)
+                        aiBeginIndex[iNum++] = i;
+                    }
+                });
+
                 for(coreUintW i = 0u; i < 10u; ++i)
                 {
-                    const coreVector2 vPos  = coreVector2((I_TO_F(i) - 4.5f) * 0.2f, 1.3f + I_TO_F(i) * 0.2f);
+                    const coreVector2 vPos  = coreVector2((I_TO_F(i) - 4.5f) * 0.21f, 1.3f + I_TO_F(i) * 0.2f);
                     const coreVector2 vMove = coreVector2(0.0f,-1.0f);
 
-                    nSpawnMeteorFunc(vPos, vMove, 1u);
+                    nSpawnMeteorFunc(i, vPos, vMove, 1u);
 
-                    if(i == 1u) nSpawnAdd3Func();
+                    if(i == 8u) nSpawnAdd3Func();
                 }
             }
             else if(STAGE_SUB(3u))
@@ -1591,10 +2013,10 @@ void cRutilusMission::__SetupOwn()
                 {
                     const coreFloat fSide = (i % 2u) ? -1.0f : 1.0f;
 
-                    const coreVector2 vPos  = coreVector2(fSide * (1.3f + I_TO_F(i) * 0.2f), (I_TO_F(i) - 4.5f) * -0.2f);
+                    const coreVector2 vPos  = coreVector2(fSide * (1.3f + I_TO_F(i) * 0.2f), (I_TO_F(i) - 4.5f) * -0.21f);
                     const coreVector2 vMove = coreVector2(fSide * -1.0f, 0.0f);
 
-                    nSpawnMeteorFunc(vPos, vMove, 1u);
+                    nSpawnMeteorFunc(i, vPos, vMove, 1u);
 
                     if(i == 5u) nSpawnAdd3Func();
                 }
@@ -1606,7 +2028,7 @@ void cRutilusMission::__SetupOwn()
                     const coreVector2 vPos  = coreVector2(0.0f,1.3f);
                     const coreVector2 vMove = coreVector2::Direction((I_TO_F(i) - 4.5f) * (0.05f*PI) + (1.0f*PI));
 
-                    nSpawnMeteorFunc(vPos, vMove, 1u);
+                    nSpawnMeteorFunc(i, vPos, vMove, 1u);
 
                     if(i == 8u) nSpawnAdd3Func();
                 }
@@ -1614,7 +2036,7 @@ void cRutilusMission::__SetupOwn()
                 const coreVector2 vPos  = coreVector2(0.0f, 1.4f);
                 const coreVector2 vMove = coreVector2(0.0f,-1.0f);
 
-                nSpawnMeteorFunc(vPos, vMove, 2u);
+                nSpawnMeteorFunc(10u, vPos, vMove, 2u);
             }
             else if(STAGE_SUB(5u))
             {
@@ -1622,10 +2044,10 @@ void cRutilusMission::__SetupOwn()
                 {
                     const coreVector2 vDir = StepRotated90(i);
 
-                    const coreVector2 vPos  = (vDir * -1.3f);
+                    const coreVector2 vPos  = (vDir * -1.4f);
                     const coreVector2 vMove = (vDir *  2.0f + vDir.Rotated90()).Normalized();
 
-                    nSpawnMeteorFunc(vPos, vMove, 2u);
+                    nSpawnMeteorFunc(i, vPos, vMove, 2u);
                 }
 
                 iCreateAdd = 1u;
@@ -1639,31 +2061,42 @@ void cRutilusMission::__SetupOwn()
                     const coreVector2 vPos  = (vDir * -1.3f * SQRT2);
                     const coreVector2 vMove = (vDir *  2.0f - vDir.Rotated90()).Normalized();
 
-                    nSpawnMeteorFunc(vPos, vMove, 1u);
+                    nSpawnMeteorFunc(i, vPos, vMove, 1u);
 
                     if(i % 2u) nSpawnAdd3Func();
                 }
             }
             else if(STAGE_SUB(7u))
             {
+                const coreVector2 vPos  = coreVector2(-1.3f,0.0f);
+                const coreVector2 vMove = coreVector2( 1.0f,0.0f);
+
+                nSpawnMeteorFunc(0u, vPos, vMove, 3u);
+                iCrumbleIndex = iCurMeteorIndex;
+            }
+            else if(STAGE_SUB(8u))
+            {
                 const coreVector2 vDir = coreVector2(2.0f,-1.0f).Normalized();
 
                 for(coreUintW i = 0u; i < 4u; ++i)
                 {
-                    const coreVector2 vPos  = coreVector2(-0.5f,1.3f) - vDir * (I_TO_F(i) * 0.5f);
+                    const coreVector2 vPos  = coreVector2(-0.5f,1.4f) - vDir * (I_TO_F(i) * 0.5f);
                     const coreVector2 vMove = vDir * 2.0f;
 
-                    nSpawnMeteorFunc(vPos, vMove, 2u);
+                    nSpawnMeteorFunc(i, vPos, vMove, 2u);
                 }
 
                 iCreateAdd = 1u;
             }
-            else if(STAGE_SUB(8u))
+            else if(STAGE_SUB(9u))
             {
-                const coreVector2 vPos  = coreVector2(0.0f, 1.5f);
+                const coreVector2 vPos  = coreVector2(0.0f, 1.6f);
                 const coreVector2 vMove = coreVector2(0.0f,-1.0f);
 
-                nSpawnMeteorFunc(vPos, vMove, 0u);
+                nSpawnMeteorFunc(0u, vPos, vMove, 0u);
+            }
+            else if(STAGE_SUB(10u))
+            {
             }
         }
 
@@ -1671,8 +2104,9 @@ void cRutilusMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            const coreBool bBig    = (i == 0u);
-            const coreBool bMedium = HAS_BIT(iTypeMap, i);
+            const coreBool bBig     = (i == 0u);
+            const coreBool bMedium  = HAS_BIT(iTypeMap, i);
+            const coreBool bCrumble = (i == iCrumbleIndex);
 
             if(pEnemy->ReachedDeath())
             {
@@ -1693,7 +2127,7 @@ void cRutilusMission::__SetupOwn()
                         const coreVector2 vPos  = pEnemy->GetPosition().xy() / FOREGROUND_AREA + vDir * 0.1f;
                         const coreVector2 vMove = vDir;
 
-                        nSpawnMeteorFunc(vPos, vMove, 1u);
+                        nSpawnMeteorFunc(j, vPos, vMove, 1u);
                         nSpawnAdd2Func();
                     }
 
@@ -1704,10 +2138,10 @@ void cRutilusMission::__SetupOwn()
                         const coreVector2 vPos  = pEnemy->GetPosition().xy() / FOREGROUND_AREA + vDir * 0.1f;
                         const coreVector2 vMove = vDir;
 
-                        nSpawnMeteorFunc(vPos, vMove, 2u);
+                        nSpawnMeteorFunc(j, vPos, vMove, 2u);
                     }
 
-                    if(!iImpact) STAGE_BADGE(0u, BADGE_NORMAL, pEnemy->GetPosition())
+                    if(!iImpact) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
                 }
                 else if(bMedium)
                 {
@@ -1718,7 +2152,7 @@ void cRutilusMission::__SetupOwn()
                         const coreVector2 vPos  = pEnemy->GetPosition().xy() / FOREGROUND_AREA + vDir * 0.1f;
                         const coreVector2 vMove = vDir;
 
-                        nSpawnMeteorFunc(vPos, vMove, 1u);
+                        nSpawnMeteorFunc(j, vPos, vMove, 1u);
 
                         if(iCreateAdd)
                         {
@@ -1726,6 +2160,20 @@ void cRutilusMission::__SetupOwn()
                             nSpawnAdd2Func();
                         }
                     }
+                }
+            }
+
+            if(bCrumble)
+            {
+                const coreInt32 iCurTick = pEnemy->GetCurHealth() / 10;
+                const coreInt32 iPreTick = pEnemy->GetPreHealth() / 10;
+
+                for(coreUintW j = iCurTick, je = iPreTick; j < je; ++j)
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = (coreVector2::Direction(I_TO_F(j) * GA) - avMeteorMove[i].Normalized()).Normalized();
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cDebrisBullet>(5, 0.1f, pEnemy, vPos, vDir)->ChangeSize(1.0f)->AddStatus(BULLET_STATUS_GHOST);
                 }
             }
 
@@ -1743,7 +2191,8 @@ void cRutilusMission::__SetupOwn()
             }
             else
             {
-                pEnemy->SetDirection(coreVector3(coreVector2::Direction((fRotation + I_TO_F(i)) * (bMedium ? -1.0f : 1.0f)), 0.0f));   // TODO 1: fix rotation
+                pEnemy->SetDirection(coreVector3(coreVector2::Direction(afMeteorRotation[i] * (bMedium ? -1.0f : 1.0f)), 0.0f));
+                afMeteorRotation[i] += 1.1f * TIME;
 
                 if(avMeteorMove[i])
                 {
@@ -1754,7 +2203,7 @@ void cRutilusMission::__SetupOwn()
 
                     if(!bBig)
                     {
-                        const coreVector2 vArea = FOREGROUND_AREA * 1.15f - pEnemy->GetCollisionRadius();
+                        const coreVector2 vArea = FOREGROUND_AREA * 1.2f - pEnemy->GetCollisionRadius();
 
                              if((vCurPos.x < -vArea.x) && (vCurMove.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + vArea.x); vCurMove.x =  ABS(vCurMove.x);}
                         else if((vCurPos.x >  vArea.x) && (vCurMove.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - vArea.x); vCurMove.x = -ABS(vCurMove.x);}
@@ -1766,6 +2215,29 @@ void cRutilusMission::__SetupOwn()
                     avMeteorMove[i] = vCurMove;
                 }
             }
+
+            for(coreUintW j = 0u; j < iLeftover; ++j)
+            {
+                constexpr coreUintW iTargetSub = 5u;
+
+                if(i == aiBeginIndex[j])
+                {
+                    if(pEnemy->ReachedDeath())
+                    {
+                        aiBeginIndex[j] = UINT32_MAX;
+                    }
+                    else if(m_iStageSub == iTargetSub)
+                    {
+                        STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                        aiBeginIndex[j] = UINT32_MAX;
+                    }
+                    else
+                    {
+                        g_pGame->GetCombatText()->AttachMarker(j, coreData::ToChars(iTargetSub - m_iStageSub), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                    }
+                    break;
+                }
+            }
         });
 
         STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
@@ -1775,14 +2247,14 @@ void cRutilusMission::__SetupOwn()
             const coreUintW iIndex  = aiAddIndex[i];
             const cEnemy*   pParent = pSquad1->GetEnemy(iIndex);
 
-            if(pParent->HasStatus(ENEMY_STATUS_DEAD))
+            if(pParent->ReachedDeath() || !pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
                 if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                 {
                     pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
 
                     avAddMove    [i] = -pEnemy->GetDirection().xy() * 25.0f;
-                    afAddRotation[i] = fRotation;
+                    afAddRotation[i] = pParent->GetDirection().xy().Angle();
                     afAddOffset  [i] = fLifeTimeBase;
                 }
 
@@ -1804,15 +2276,16 @@ void cRutilusMission::__SetupOwn()
 
                 afAddRotation[i] = FMOD(afAddRotation[i] - 2.4f * TIME, -2.0f*PI);
 
-                pEnemy->SetDirection(coreVector3(coreVector2::Direction((afAddRotation[i] + I_TO_F(iIndex)) * 1.0f), 0.0f));   // TODO 1: fix rotation
+                pEnemy->SetDirection(coreVector3(coreVector2::Direction(afAddRotation[i]), 0.0f));
 
                 if(STAGE_TICK_LIFETIME_BASE(26.0f, 26.0f * afAddOffset[i]) && ((s_iTick % 4u) < 2u))
                 {
                     const coreVector2 vPos = pEnemy->GetPosition ().xy();
                     const coreVector2 vDir = pEnemy->GetDirection().xy();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, pEnemy, vPos - vDir * 1.5f, vDir)->ChangeSize(1.7f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, pEnemy, vPos + vDir * 1.5f, vDir)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(2.0f);
+
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_BLUE);
                 }
             }
             else
@@ -1840,7 +2313,7 @@ void cRutilusMission::__SetupOwn()
 
             d_cast<cArrowEnemy*>(pEnemy)->SetAngle(0.0f);
 
-            if(pParent->HasStatus(ENEMY_STATUS_DEAD))
+            if(pParent->ReachedDeath())
             {
                 pEnemy->Kill(false);
 
@@ -1850,13 +2323,43 @@ void cRutilusMission::__SetupOwn()
                 {
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 18.0f));
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.5f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.6f);
                 }
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
             }
         });
 
-        STAGE_WAVE(4u, "DREIUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
+        {
+            const cEnemy* pParent = pSquad1->GetEnemy(iHelperIndex);
+
+            const coreVector3 vOffset = pParent->GetRotation().QuatApply(coreVector3(0.0f,-3.5f,0.0f) * fBaseScale);
+
+            pHelper->SetPosition   (pParent->GetPosition   () + vOffset);
+            pHelper->SetAngle      (pParent->GetDirection  ().xy().Angle());
+            pHelper->SetOrientation(pParent->GetOrientation());
+
+            if(pParent->ReachedDeath()) pHelper->Kill(true);
+        }
+
+        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cDebrisBullet>([&](cDebrisBullet* OUTPUT pBullet)
+        {
+            STAGE_FOREACH_PLAYER(pPlayer, i)
+            {
+                const coreVector2 vDiff = pBullet->GetPosition().xy() - pPlayer->GetPosition().xy();
+                if(vDiff.LengthSq() < POW2(5.0f))
+                {
+                    pBullet->Deactivate(true);
+
+                    if(++iDebrisCount >= 10u) STAGE_BADGE(1u, BADGE_NORMAL, pBullet->GetPosition())
+                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(10u - iDebrisCount), pBullet->GetPosition(), COLOR_MENU_INSIDE);
+                }
+            });
+        });
+
+        STAGE_WAVE(4u, "DREIUNDZWANZIG", {50.0f, 75.0f, 100.0f, 125.0f})
     });
 
     // ################################################################
@@ -1864,6 +2367,8 @@ void cRutilusMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         g_pGame->KillHelpers();
+
+        g_pGame->GetBulletManagerEnemy()->ResetOrder();
 
         STAGE_FINISH_NOW
     });
@@ -1903,7 +2408,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: !!!! gegner sollten sich nicht bewegen, sie spawnen aus portalen (unsichtbar, bis erswter teleportation)
     // TODO 1: !!!! wenn portale als hindernisse wahrgenommen werden, sollten sie auch als solche funktionieren
     // TODO 1: links und rechts teleporter, meteoriten kommen raus in unendlichkeit, sind manchmal so arranged (seitlich und von oben-schräg), dass man durch teleporter durch muss
-    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2088,8 +2593,8 @@ void cRutilusMission::__SetupOwn()
 
         if(STAGE_BEGINNING)
         {
-            pHelperOrange->Resurrect();
-            pHelperBlue  ->Resurrect();
+            pHelperOrange->Resurrect(false);
+            pHelperBlue  ->Resurrect(false);
         }
 
         fTransitionTime += 1.0f * TIME;
@@ -2414,7 +2919,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(10, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(10, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
                 pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
@@ -2424,7 +2929,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 5.0f * fBaseScale);
-                pEnemy->Configure(50 * 100, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(50 * 100, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
                 pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_TOP | ENEMY_STATUS_SECRET);
             });
         });

@@ -84,9 +84,12 @@ public:
         coreUint8  iOptionType;                                                            // 
         coreUint8  iOptionMode;                                                            // 
         coreUint8  iOptionDifficulty;                                                      // 
+        coreUint8  iOptionFlags;                                                           // 
+        coreUint8  aaiOptionShield [REPLAY_PLAYERS];                                       // 
         coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                 // 
         coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                // 
 
+        coreUint16 iConfigGameSpeed;                                                       // 
         coreUint16 iConfigUpdateFreq;                                                      // 
         coreUint16 iConfigVersion;                                                         // 
 

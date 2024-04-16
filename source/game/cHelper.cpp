@@ -15,15 +15,18 @@ coreVector2 cHelper::s_vDirection = coreVector2(0.0f,1.0f);
 // ****************************************************************
 // constructor
 cHelper::cHelper()noexcept
-: m_iElement (ELEMENT_NEUTRAL)
-, m_pShield  (NULL)
+: m_fLifeTime       (0.0f)
+, m_fLifeTimeBefore (0.0f)
+, m_bSmooth         (false)
+, m_fAngleOverride  (FLT_MAX)
+, m_iElement        (ELEMENT_NEUTRAL)
+, m_pShield         (NULL)
 {
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
     this->DefineProgram("object_ship_glow_program");
 
     // set object properties
-    this->SetSize       (coreVector3(1.0f,1.0f,1.0f) * 1.75f);
     this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
 
@@ -32,6 +35,12 @@ cHelper::cHelper()noexcept
 
     // 
     this->SetMaxHealth(1);
+
+    // 
+    m_Wind.DefineModel  ("object_sphere.md3");
+    m_Wind.DefineTexture(0u, "effect_energy.png");
+    m_Wind.DefineProgram("effect_energy_flat_direct_program");
+    m_Wind.SetTexSize   (coreVector2(1.0f,5.0f) * 0.7f);
 }
 
 
@@ -53,19 +62,20 @@ void cHelper::Configure(const coreUint8 iElement)
 
     // select appearance type
     coreHashString sModel;
-    coreVector3    vColor;
+    coreVector3    vBase;
+    coreVector3    vEnergy;
     switch(iElement)
     {
     default: ASSERT(false)
-    case ELEMENT_WHITE:   sModel = "ship_helper_01.md3"; vColor = COLOR_ENERGY_WHITE   * 0.6f; break;
-    case ELEMENT_YELLOW:  sModel = "ship_helper_03.md3"; vColor = COLOR_ENERGY_YELLOW  * 0.7f; break;
-    case ELEMENT_ORANGE:  sModel = "ship_helper_06.md3"; vColor = COLOR_ENERGY_ORANGE  * 0.9f; break;
-    case ELEMENT_RED:     sModel = "ship_helper_02.md3"; vColor = COLOR_ENERGY_RED     * 0.8f; break;
-    case ELEMENT_MAGENTA: sModel = "ship_helper_07.md3"; vColor = COLOR_ENERGY_MAGENTA * 0.9f; break;
-    case ELEMENT_PURPLE:  sModel = "ship_helper_05.md3"; vColor = COLOR_ENERGY_PURPLE  * 0.9f; break;
-    case ELEMENT_BLUE:    sModel = "ship_helper_09.md3"; vColor = COLOR_ENERGY_BLUE    * 0.9f; break;
-    case ELEMENT_CYAN:    sModel = "ship_helper_08.md3"; vColor = COLOR_ENERGY_CYAN    * 0.9f; break;
-    case ELEMENT_GREEN:   sModel = "ship_helper_04.md3"; vColor = COLOR_ENERGY_GREEN   * 0.8f; break;
+    case ELEMENT_WHITE:   sModel = "ship_helper_01.md3"; vBase = COLOR_ENERGY_WHITE   * 0.6f; vEnergy = COLOR_ENERGY_WHITE;   break;
+    case ELEMENT_YELLOW:  sModel = "ship_helper_03.md3"; vBase = COLOR_ENERGY_YELLOW  * 0.7f; vEnergy = COLOR_ENERGY_YELLOW;  break;
+    case ELEMENT_ORANGE:  sModel = "ship_helper_06.md3"; vBase = COLOR_ENERGY_ORANGE  * 0.9f; vEnergy = COLOR_ENERGY_ORANGE;  break;
+    case ELEMENT_RED:     sModel = "ship_helper_02.md3"; vBase = COLOR_ENERGY_RED     * 0.8f; vEnergy = COLOR_ENERGY_RED;     break;
+    case ELEMENT_MAGENTA: sModel = "ship_helper_07.md3"; vBase = COLOR_ENERGY_MAGENTA * 0.9f; vEnergy = COLOR_ENERGY_MAGENTA; break;
+    case ELEMENT_PURPLE:  sModel = "ship_helper_05.md3"; vBase = COLOR_ENERGY_PURPLE  * 0.9f; vEnergy = COLOR_ENERGY_PURPLE;  break;
+    case ELEMENT_BLUE:    sModel = "ship_helper_09.md3"; vBase = COLOR_ENERGY_BLUE    * 0.9f; vEnergy = COLOR_ENERGY_BLUE;    break;
+    case ELEMENT_CYAN:    sModel = "ship_helper_08.md3"; vBase = COLOR_ENERGY_CYAN    * 0.9f; vEnergy = COLOR_ENERGY_CYAN;    break;
+    case ELEMENT_GREEN:   sModel = "ship_helper_04.md3"; vBase = COLOR_ENERGY_GREEN   * 0.8f; vEnergy = COLOR_ENERGY_GREEN;   break;
     }
 
     // load models
@@ -73,7 +83,10 @@ void cHelper::Configure(const coreUint8 iElement)
     this->DefineModelLow (sModel);
 
     // set color
-    this->SetBaseColor(vColor);
+    this->SetBaseColor(vBase);
+
+    // 
+    m_Wind.SetColor3(vEnergy * (1.6f/1.1f));
 }
 
 
@@ -88,6 +101,22 @@ void cHelper::Render()
     }
 }
 
+void cHelper::RenderBefore()
+{
+    if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
+    {
+        if(m_pShield)
+        {
+            // 
+            m_pShield->Render();
+            g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(m_pShield);
+        }
+
+        // 
+        m_Wind.Render();
+    }
+}
+
 
 // ****************************************************************
 // move the helper
@@ -99,16 +128,41 @@ void cHelper::Move()
     if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
     {
         // 
-        this->SetDirection(coreVector3(s_vDirection, 0.0f));
+        m_fLifeTimeBefore = m_fLifeTime;
+        m_fLifeTime.Update(1.0f);
+
+        // 
+        const coreFloat   fFade   = m_bSmooth ? BLENDH3(MIN1(m_fLifeTime * 2.0f)) : 1.0f;
+        const coreFloat   fOffset = I_TO_F(m_iElement) * (1.0f/8.0f);
+        const coreVector2 vDir    = (m_fAngleOverride != FLT_MAX) ? coreVector2::Direction(m_fAngleOverride) : s_vDirection;
+
+        // 
+        this->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.75f * fFade);
+        this->SetDirection(coreVector3(vDir, 0.0f));
 
         // move the 3d-object
         this->coreObject3D::Move();
+
+        // 
+        this->SetEnabled(HAS_FLAG(m_iStatus, HELPER_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
+
+        // 
+        m_Wind.SetPosition (this->GetPosition());
+        m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * 3.3f * fFade);
+        m_Wind.SetAlpha    (this->GetAlpha() * fFade);
+        m_Wind.SetTexOffset(coreVector2(0.0f, m_fLifeTime * -0.2f + fOffset));
+        m_Wind.SetEnabled  (this->GetEnabled());
+        m_Wind.Move();
 
         if(m_pShield)
         {
             // 
             m_pShield->SetPosition (this->GetPosition());
-            m_pShield->SetTexOffset(coreVector2(0.0f, m_pShield->GetLifeTime() * 0.1f));
+            m_pShield->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 5.0f * fFade);
+            m_pShield->SetAlpha    (this->GetAlpha() * fFade);
+            m_pShield->SetTexOffset(coreVector2(0.0f, m_fLifeTime * 0.1f + fOffset));
+            m_pShield->SetEnabled  (this->GetEnabled());
+            m_pShield->Move();
         }
     }
 
@@ -119,11 +173,23 @@ void cHelper::Move()
 
 // ****************************************************************
 // add helper to the game
-void cHelper::Resurrect()
+void cHelper::Resurrect(const coreBool bSmooth)
 {
     // resurrect helper
     if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, HELPER_STATUS_DEAD)
+
+    // 
+    m_fLifeTime       = 0.0f;
+    m_fLifeTimeBefore = 0.0f;
+    m_bSmooth         = bSmooth;
+    m_fAngleOverride  = FLT_MAX;
+
+    // 
+    if(bSmooth) this->SetSize(coreVector3(0.0f,0.0f,0.0f));
+
+    // 
+    g_pGlow->BindObject(&m_Wind);
 
     // add ship to global shadow and outline
     cShadow::GetGlobalContainer()->BindObject(this);
@@ -146,9 +212,13 @@ void cHelper::Kill(const coreBool bAnimated)
     this->DisableShield(bAnimated);
 
     // 
+    g_pGlow->UnbindObject(&m_Wind);
+
+    // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
-        g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), this->GetColor3());
+        g_pSpecialEffects->MacroExplosionColorSmall(this->GetPosition(), this->GetColor3());
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_02);
     }
 
     // remove ship from global shadow and outline
@@ -183,20 +253,18 @@ void cHelper::EnableShield()
     }
 
     // 
-    m_pShield = new cCustomEnemy();
+    m_pShield = new coreObject3D();
 
     // 
-    m_pShield->DefineModelHigh("object_sphere.md3");
-    m_pShield->DefineModelLow ("object_sphere.md3");
-    m_pShield->DefineTexture  (0u, "effect_energy.png");
-    m_pShield->DefineProgram  ("effect_energy_blink_spheric_program");
-    m_pShield->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
-    m_pShield->SetTexSize     (coreVector2(1.0f,1.0f)      * 4.0f);
-    m_pShield->Configure      (1000, 0u, vColor);
-    m_pShield->AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS);
+    m_pShield->DefineModel  ("object_sphere.md3");
+    m_pShield->DefineTexture(0u, "effect_energy.png");
+    m_pShield->DefineProgram("effect_energy_flat_spheric_program");
+    m_pShield->SetSize      (coreVector3(0.0f,0.0f,0.0f));
+    m_pShield->SetColor3    (vColor);
+    m_pShield->SetTexSize   (coreVector2(1.0f,1.0f) * 4.0f);
 
     // 
-    m_pShield->Resurrect();
+    g_pGlow->BindObject(m_pShield);
 }
 
 
@@ -207,7 +275,7 @@ void cHelper::DisableShield(const coreBool bAnimated)
     if(!m_pShield) return;
 
     // 
-    m_pShield->Kill(bAnimated);
+    g_pGlow->UnbindObject(m_pShield);
 
     // 
     SAFE_DELETE(m_pShield)

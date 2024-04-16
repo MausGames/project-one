@@ -20,7 +20,6 @@
 // TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 // TODO 3: effect on player when loosing combo or chain (and on UI, and combat text)
-// TODO 1: PLAYER_SHIELD_INTRO always for intro
 // TODO 3: all player bullets get destroyed with death
 // TODO 1: make sure player receives final combo or chain at the end of segment
 // TODO 1: check what variables and states need to be reset on player kill
@@ -28,25 +27,25 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_EQUIP_WEAPONS      (EQUIP_WEAPONS)      // number of weapons a player can carry
-#define PLAYER_EQUIP_SUPPORTS     (EQUIP_SUPPORTS)     // 
-#define PLAYER_LIVES              (LIVES)              // 
-#define PLAYER_SHIELD             (SHIELD)             // 
-#define PLAYER_SHIELD_INTRO       (100u)               // 
-#define PLAYER_COLLISION_MIN      (0.15f)              // 
-#define PLAYER_SIZE_FACTOR        (1.15f * m_fScale)   // 
-#define PLAYER_AREA_FACTOR        (1.06f)              // 
-#define PLAYER_RANGE_SIZE         (1.04f)              // 
-#define PLAYER_WIND_SIZE          (4.5f)               // 
-#define PLAYER_BUBBLE_SIZE        (4.8f)               // 
-#define PLAYER_ROLL_SPEED         (0.4f)               // 
-#define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)      // (ship is vulnerable for a single frame) 
-#define PLAYER_FEEL_TIME          (3.0f)               // 
-#define PLAYER_FEEL_TIME_CONTINUE (5.0f)               // 
-#define PLAYER_FEEL_TIME_REPAIR   (5.0f)               // 
-#define PLAYER_FEEL_TIME_SHIELD   (10.0f)              // 
-#define PLAYER_INTERRUPT          (0.3f)               // 
-#define PLAYER_DESATURATE         (1.2f)               // 
+#define PLAYER_EQUIP_WEAPONS       (EQUIP_WEAPONS)      // number of weapons a player can carry
+#define PLAYER_EQUIP_SUPPORTS      (EQUIP_SUPPORTS)     // 
+#define PLAYER_LIVES               (LIVES)              // 
+#define PLAYER_COLLISION_MIN       (0.15f)              // 
+#define PLAYER_SIZE_FACTOR         (1.15f * m_fScale)   // 
+#define PLAYER_AREA_FACTOR         (1.06f)              // 
+#define PLAYER_RANGE_SIZE          (1.04f)              // 
+#define PLAYER_WIND_SIZE           (4.5f)               // 
+#define PLAYER_BUBBLE_SIZE         (4.8f)               // 
+#define PLAYER_ROLL_SPEED          (0.4f)               // 
+#define PLAYER_ROLL_COOLDOWN       (FRAMERATE_MAX)      // (ship is vulnerable for a single frame) 
+#define PLAYER_FEEL_TIME           (3.0f)               // 
+#define PLAYER_FEEL_TIME_CONTINUE  (5.0f)               // 
+#define PLAYER_FEEL_TIME_REPAIR    (5.0f)               // 
+#define PLAYER_FEEL_TIME_SHIELD    (10.0f)              // 
+#define PLAYER_IGNORE_TIME         (1.1f)               // 
+#define PLAYER_INTERRUPT           (0.3f)               // 
+#define PLAYER_DESATURATE          (1.2f)               // 
+#define PLAYER_DESATURATE_FRAGMENT (1.8f)               // 
 
 #define PLAYER_SHIP_ATK  (0u)        // 
 #define PLAYER_SHIP_DEF  (1u)        // 
@@ -55,20 +54,29 @@
 #define PLAYER_NO_FEEL   (-100.0f)   // 
 #define PLAYER_NO_IGNORE (-100.0f)   // 
 
+
+#define PLAYER_ACTION_TURN_SHOOT(i) (BITLINE(WEAPON_MODES) << ((i) * WEAPON_MODES))
+#define PLAYER_ACTION_TURN_LEFT     (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
+#define PLAYER_ACTION_TURN_RIGHT    (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
+#define PLAYER_ACTION_TURN_ROLL     (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
+
 #define PLAYER_AREA_DEFAULT (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
 
 //STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
 
-enum ePlayerStatus : coreUint8
+enum ePlayerStatus : coreUint16
 {
-    PLAYER_STATUS_DEAD           = 0x01u,   // completely removed from the game
-    PLAYER_STATUS_SHIELDED       = 0x02u,   // 
-    PLAYER_STATUS_GHOST          = 0x04u,   // 
-    PLAYER_STATUS_HEALER         = 0x08u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x10u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x20u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x40u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x80u,   // 
+    PLAYER_STATUS_DEAD           = 0x0001u,   // completely removed from the game
+    PLAYER_STATUS_SHIELDED       = 0x0002u,   // 
+    PLAYER_STATUS_GHOST          = 0x0004u,   // 
+    PLAYER_STATUS_INVINCIBLE     = 0x0008u,   // 
+    PLAYER_STATUS_HEALER         = 0x0010u,   // 
+    PLAYER_STATUS_TOP            = 0x0020u,   // 
+    PLAYER_STATUS_KEEP_RANGE     = 0x0040u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0080u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0100u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x0200u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x0400u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
@@ -109,6 +117,7 @@ private:
 
     coreProtect<coreFloat> m_fMoveSpeed;                      // 
     coreProtect<coreFloat> m_fShootSpeed;                     // 
+    coreFloat              m_fAnimSpeed;                      // (also affects feel and ignore duration)   
 
     coreFlow  m_fRollTime;                                    // 
     coreFlow  m_fFeelTime;                                    // 
@@ -154,6 +163,7 @@ private:
     coreMap<const coreObject3D*, sRayData>   m_aRayData;      // 
     
     coreFlow m_fHitDelay;
+    coreFloat m_fBoost;
 
 
 public:
@@ -164,6 +174,7 @@ public:
 
     // configure the player
     void Configure   (const coreUintW iShipType);
+    void EquipShield (const coreInt32 iShield);
     void EquipWeapon (const coreUintW iIndex, const coreInt32 iID);
     void EquipSupport(const coreUintW iIndex, const coreInt32 iID);
 
@@ -186,7 +197,7 @@ public:
     void Kill     (const coreBool bAnimated);
 
     // 
-    void ShowArrow();
+    void ShowArrow(const coreUint8 iType);
     void ShowCircle();
 
     // 
@@ -242,8 +253,8 @@ public:
     inline void ApplyForceTimed(const coreVector2 vForce) {m_vForce += vForce * TIME;}
 
     // 
-    coreVector2 CalcMove     ()const;
-    coreFloat   CalcMoveSpeed()const;
+    coreVector2 CalcMove     ();
+    coreFloat   CalcMoveSpeed();
 
     // 
     inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_EQUIP_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
@@ -256,6 +267,7 @@ public:
     inline void SetForce     (const coreVector2 vForce)      {m_vForce      = vForce;}
     inline void SetMoveSpeed (const coreFloat   fMoveSpeed)  {m_fMoveSpeed  = fMoveSpeed;}
     inline void SetShootSpeed(const coreFloat   fShootSpeed) {m_fShootSpeed = fShootSpeed;}
+    inline void SetAnimSpeed (const coreFloat   fAnimSpeed)  {m_fAnimSpeed  = fAnimSpeed;}
     inline void SetScale     (const coreFloat   fScale)      {m_fScale      = fScale;}
     inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
@@ -269,6 +281,7 @@ public:
     inline const coreVector2& GetForce       ()const {return m_vForce;}
     inline       coreFloat    GetMoveSpeed   ()const {return m_fMoveSpeed;}
     inline       coreFloat    GetShootSpeed  ()const {return m_fShootSpeed;}
+    inline const coreFloat&   GetAnimSpeed   ()const {return m_fAnimSpeed;}
     inline const coreFloat&   GetScale       ()const {return m_fScale;}
     inline const coreFloat&   GetTilt        ()const {return m_fTilt;}
     inline const coreFloat&   GetInterrupt   ()const {return m_fInterrupt;}
@@ -310,9 +323,6 @@ public:
 
 
 private:
-    // 
-    void __EquipShield();
-
     // 
     coreBool __NewCollision(const coreObject3D* pObject);
     sRayData __NewRayData  (const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef);
@@ -377,7 +387,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     {
         // 
         cPlayer* pPlayer = d_cast<cPlayer*>(*it);
-        if(pPlayer->__CheckPlayerTest(eTest))
+        if(pPlayer && pPlayer->__CheckPlayerTest(eTest))
         {
             // 
             coreFloat fNewHitDistance;

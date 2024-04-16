@@ -88,7 +88,7 @@ void cAterMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(10 * 1000, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(10 * 1000, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
                 pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });

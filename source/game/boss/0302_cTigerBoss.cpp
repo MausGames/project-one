@@ -29,7 +29,7 @@
 // TODO 1: arrow für schussrichtung ? (gelb)
 // TODO 1: manche gegner in mission sollen schon abstürzen
 // TODO 1: fixup scoring (enemies or damaging boss makes score ? how to handle chain ?)
-// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: reifen unrealistisch animieren, damit sie bei hoher geschwindigkeit noch gut aussehen ?
 // TODO 1: hard-mode: wind + minen
 // TODO 1: make sure health is same in coop and non-coop (should already be, but check and confirm)
@@ -223,10 +223,10 @@ void cTigerBoss::__RenderOwnOver()
 // 
 void cTigerBoss::__MoveOwn()
 {
+    cHarenaMission* pMission = d_cast<cHarenaMission*>(g_pGame->GetCurMission());
+
     // 
     this->_UpdateBoss();
-
-    cHarenaMission* pMission = d_cast<cHarenaMission*>(g_pGame->GetCurMission());
 
     if(this->ReachedDeath())
     {

@@ -48,14 +48,16 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 #endif
 
     // configure first player
-    m_aPlayer[0].Configure(PLAYER_SHIP_ATK);
+    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK);
+    m_aPlayer[0].EquipShield(oOptions.aiShield[0]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
 
     if(this->IsMulti())
     {
         // configure second player
-        m_aPlayer[1].Configure(PLAYER_SHIP_DEF);
+        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF);
+        m_aPlayer[1].EquipShield(oOptions.aiShield[1]);
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oOptions.aaiWeapon [1][i]);
         for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oOptions.aaiSupport[1][i]);
 
@@ -123,7 +125,7 @@ cGame::~cGame()
     // 
     g_pSave->SaveFile();
     
-    g_MusicPlayer.Control()->Stop();
+    g_MusicPlayer.Stop();
 }
 
 
@@ -157,6 +159,9 @@ void cGame::Render()
             for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
                 m_aHelper[i].Render();
 
+            // 
+            m_Tracker.Render();
+
             // render all enemies
             m_EnemyManager.Render();
         }
@@ -183,6 +188,9 @@ void cGame::Render()
             // 
             m_ShieldManager.Render();
 
+            // 
+            m_ExhaustManager.Render();
+
             // render underlying objects
             //if(!g_bTiltMode) m_EnemyManager.RenderUnder();
             //if(!g_bTiltMode) m_pCurMission->RenderUnder();
@@ -196,8 +204,15 @@ void cGame::Render()
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                     m_aPlayer[i].RenderBefore();
+
+                // 
+                m_Tracker.RenderBefore();
             }
             glDepthMask(true);
+
+            // 
+            for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+                m_aHelper[i].RenderBefore();
         }
 
         __DEPTH_GROUP_SHIP   // # 2
@@ -232,6 +247,9 @@ void cGame::Render()
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                     m_aPlayer[i].RenderMiddle();
+
+                // 
+                m_Tracker.RenderMiddle();
             }
             glDepthMask(true);
         }
@@ -260,6 +278,9 @@ void cGame::Render()
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                     m_aPlayer[i].RenderAfter();
+
+                // 
+                m_Tracker.RenderAfter();
             }
             glEnable(GL_DEPTH_TEST);
         }
@@ -291,6 +312,9 @@ void cGame::Render()
             for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
                 m_aHelper[i].Render();
 
+            // 
+            m_Tracker.Render();
+
             // render all enemies
             m_EnemyManager.Render();
         }
@@ -306,6 +330,9 @@ void cGame::Render()
             // 
             m_ShieldManager.Render();
 
+            // 
+            m_ExhaustManager.Render();
+
             // render underlying objects
             m_pCurMission->RenderUnder();   
             m_EnemyManager.RenderUnder();   
@@ -317,8 +344,15 @@ void cGame::Render()
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                     m_aPlayer[i].RenderBefore();
+
+                // 
+                m_Tracker.RenderBefore();
             }
             glDepthMask(true);
+
+            // 
+            for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+                m_aHelper[i].RenderBefore();
         }
 
         __DEPTH_GROUP_SHIP   // # 2
@@ -344,6 +378,9 @@ void cGame::Render()
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                     m_aPlayer[i].RenderMiddle();
+
+                // 
+                m_Tracker.RenderMiddle();
             }
             glDepthMask(true);
         }
@@ -368,6 +405,9 @@ void cGame::Render()
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                     m_aPlayer[i].RenderAfter();
+
+                // 
+                m_Tracker.RenderAfter();
             }
             glEnable(GL_DEPTH_TEST);
         }
@@ -407,6 +447,9 @@ void cGame::Move()
         m_aHelper[i].Move();
 
     // 
+    m_Tracker.Move();
+
+    // 
     m_pCurMission->MoveMiddle();   // # swapped
     m_EnemyManager.MoveMiddle();
 
@@ -426,6 +469,9 @@ void cGame::Move()
 
     // 
     m_CrashManager.Move();
+
+    // 
+    m_ExhaustManager.Move();
 
     // handle default object collisions
     this->__HandleCollisions();   // TODO 1: do all collisions here (virtual funcs), for consistency, e.g. bullet collisions are done before move when handled in mission/boss 
@@ -468,10 +514,10 @@ void cGame::MoveAlways()
     if(m_fMusicFade)
     {
         m_fMusicFade.UpdateMax(-m_fMusicSpeed, 0.0f);
-        if(!m_fMusicFade) g_MusicPlayer.Control()->Stop();
+        if(!m_fMusicFade) g_MusicPlayer.Stop();
     }
 
-    g_MusicPlayer.Control()->SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * (g_pMenu->IsPaused() ? 0.3f : 1.0f) * MUSIC_VOLUME);
+    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * (g_pMenu->IsPaused() ? 0.3f : 1.0f) * MUSIC_VOLUME);
 }
 
 
@@ -623,6 +669,9 @@ void cGame::StartIntro()
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);   // TODO 1: handle combination with gameplay code
 
         // 
+        m_aPlayer[i].ActivateNormalShading();   // TODO 1: move to where the fragment is collected ?
+
+        // 
         const coreFloat fSide = this->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
         m_aPlayer[i].SetPosition(coreVector3(fSide, -140.0f, 0.0f));
 
@@ -659,8 +708,15 @@ void cGame::StartOutro(const coreUint8 iType)
 
     // 
     g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION, 1.0f);
-    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE,      1.0f);
-    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED,     1.0f);
+    //g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE,      1.0f);
+    //g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED,     1.0f);
+    
+    if(m_iOutroType == GAME_OUTRO_BEGINNING)
+    {
+        m_Tracker.Resurrect();
+        m_Tracker.EnableWind();
+        m_Tracker.SetPosition(coreVector3(-0.5f,-1.5f,0.0f) * FOREGROUND_AREA3);
+    }
 }
 
 
@@ -752,15 +808,15 @@ void cGame::PushDepthLevelShip()
     __DEPTH_GROUP_SHIP
 }
 
-//void cGame::PopDepthLevel(const coreUint8 iLevels)
-//{
-//    // 
-//    ASSERT()
-//    m_iDepthLevel += iLevels;
-//
-//    // 
-//    this->ChangeDepthLevel(m_iDepthLevel, m_iDepthLevel + iLevels);
-//}
+void cGame::PopDepthLevel(const coreUint8 iLevels)
+{
+    // 
+    ASSERT(m_iDepthLevel < (m_iDepthDebug & ~BIT(7u)) + 10u)
+    m_iDepthLevel += iLevels;
+
+    // 
+    this->ChangeDepthLevel(m_iDepthLevel, m_iDepthLevel + iLevels);
+}
 
 
 // ****************************************************************
@@ -827,10 +883,14 @@ coreFloat cGame::CalcMedalTime(const coreFloat fTime, const coreFloat* pfMedalGo
 
 // ****************************************************************
 // 
-coreUint32 cGame::CalcBonusTime(const coreFloat fTime)
+coreUint32 cGame::CalcBonusTime(const coreFloat fTime, const coreFloat* pfMedalGoal)
 {
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
+
+    // TODO 1: weiteres medal-goal für time-bonus ?
+
     // 
-    return F_TO_UI(LERP(20000.0f, 100.0f, MIN(fTime * (1.0f/180.0f), 1.0f)));
+    return F_TO_UI(LERP(20000.0f, 1000.0f, MIN(fTime * RCP(pfMedalGoal[3] * 2.0f), 1.0f)));
 }
 
 
@@ -974,7 +1034,7 @@ coreBool cGame::__HandleIntro()
                 if(pcName && pcName[0])
                 {
                     g_MusicPlayer.SelectName(pcName);
-                    g_MusicPlayer.Control()->Play();
+                    g_MusicPlayer.Play();
                 }
             }
         }
@@ -1013,6 +1073,21 @@ coreBool cGame::__HandleOutro()
                 if(m_fTimeInOut >= 5.0f) pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
             }
         });
+        
+        if(!m_Tracker.HasStatus(TRACKER_STATUS_DEAD))
+        {
+            // 
+            const coreFloat   fTime = MAX(m_fTimeInOut - 2.5f, 0.0f);
+            const coreFloat   fPos  = MIN(m_Tracker.GetPosition().y + 90.0f * fTime * TIME, 1000.0f);
+            const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 2.0f*PI, 0.6f * fTime));
+
+            // 
+            m_Tracker.SetPosition   (coreVector3(m_Tracker.GetPosition().x, fPos, m_Tracker.GetPosition().z));
+            m_Tracker.SetDirection  (coreVector3(0.0f,1.0f,0.0f));
+            m_Tracker.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+            m_Tracker.UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+        }
+        
     }
 
     return true;
@@ -1066,7 +1141,7 @@ void cGame::__HandleDefeat()
                 SAFE_DELETE(m_pRepairEnemy)
             }
             
-            g_MusicPlayer.Control()->Stop();
+            g_MusicPlayer.Stop();
         }
 
         if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
@@ -1203,7 +1278,8 @@ void cGame::__HandleCollisions()
                     if(!m_fHitDelay && !pEnemy->ReachedDeath())
                     {
                         m_fHitDelay = 1.0f;
-                        g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_BULLET_HIT);
+                        //g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_BULLET_HIT);
+                        g_pSpecialEffects->PlaySound(vIntersection, 0.5f, 1.0f, SOUND_WEAPON_RAY);
                     }
                 }
 
@@ -1258,6 +1334,9 @@ void cGame::__ClearAll(const coreBool bAnimated)
     // 
     for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
         m_aHelper[i].Kill(bAnimated);
+
+    // 
+    m_Tracker.Kill(bAnimated);
 
     // 
     m_EnemyManager       .ClearEnemies(bAnimated);

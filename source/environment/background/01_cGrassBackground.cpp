@@ -75,7 +75,7 @@ cGrassBackground::cGrassBackground()noexcept
         m_apWaterRefList.push_back(pList1);
     }
 
-    // allocate reed lists
+    // 
     pList1 = new coreBatchList(GRASS_PLANT_1_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
 
@@ -108,7 +108,7 @@ cGrassBackground::cGrassBackground()noexcept
 
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
-                        pObject->DefineModel(bType ? "environment_plant_05.md3" : "environment_plant_01.md3");
+                        pObject->DefineModel(bType ? "environment_plant_02.md3" : "environment_plant_01.md3");
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
@@ -187,6 +187,58 @@ cGrassBackground::cGrassBackground()noexcept
 
         // post-process list and add to the ground
         cBackground::_FillInfinite(pList1, GRASS_SHIP_RESERVE);
+        m_apGroundObjectList.push_back(pList1);
+
+        // bind list to shadow map
+        m_pOutdoor->GetShadowMap()->BindList(pList1);
+
+        // 
+        m_apWaterRefList.push_back(pList1);
+    }
+
+    // 
+    pList1 = new coreBatchList(1u);
+    pList1->DefineProgram(NULL);   // # no instancing required
+    {
+        for(coreUintW i = 256u; i < GRASS_SHIP_NUM - 256u; ++i)
+        {
+            // calculate position and height
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_SHIP_NUM);
+            const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
+
+            // test for valid values
+            if((fHeight < -23.0f) && (F_TO_SI(vPosition.y+150.0f) % 80 < 40))
+            {
+                if(!cBackground::_CheckIntersection(m_apGroundObjectList[0], vPosition, POW2(15.0f)) &&
+                   !cBackground::_CheckIntersection(m_apGroundObjectList[1], vPosition, POW2(15.0f)) &&
+                   !cBackground::_CheckIntersection(m_apGroundObjectList[2], vPosition, POW2(15.0f)))
+                {
+                    // create object
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D);
+                    pObject->DefineModel  ("ship_boss_torus_high.md3");
+                    pObject->DefineTexture(0u, "ship_enemy.png");
+                    pObject->DefineTexture(1u, "default_normal.png");
+                    pObject->DefineProgram("object_ground_program");
+
+                    // set object properties
+                    pObject->SetPosition   (coreVector3(vPosition, 0.0f));
+                    pObject->SetSize       (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
+                    pObject->SetDirection  (coreVector3(coreVector2::Rand(), 1.0f).Normalized());
+                    pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
+                    pObject->SetColor3     (COLOR_SHIP_GREY * Core::Rand->Float(0.85f, 1.0f));
+                    pObject->SetEnabled    (CORE_OBJECT_ENABLE_NOTHING);   // # force re-calculation
+
+                    // add object to the list
+                    pList1->BindObject(pObject);
+                    break;   // # only once
+                }
+            }
+        }
+
+        // 
+        this->_StoreHeight(pList1, 0.5f);
+
+        // 
         m_apGroundObjectList.push_back(pList1);
 
         // bind list to shadow map
@@ -342,6 +394,7 @@ cGrassBackground::cGrassBackground()noexcept
 
     // 
     this->SetGroundDensity(3u, 0.0f);
+    this->SetGroundDensity(4u, 0.0f);
 }
 
 
@@ -398,26 +451,32 @@ void cGrassBackground::__MoveOwn()
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pLeaf = (*pList->List())[i];
-        if(!pLeaf->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
         // 
-        const coreFloat   fOffset = I_TO_F(POW2(i) % m_iLeafNum);
-        const coreFloat   fTime   = m_fLeafTime * ((i % 2u) ? 1.0f : -1.0f) + fOffset;
-        const coreFloat   fPos    = SIN(fTime * 0.05f + fOffset) * (I_TO_F(OUTDOOR_WIDTH) * OUTDOOR_DETAIL * 0.2f);
-        const coreVector2 vOri    = coreVector2::Direction(fTime);
-        const coreVector2 vDir    = MapStepRotated90(vOri, i % 4u);
+        const coreFloat fOffset = I_TO_F(POW2(i) % m_iLeafNum);
+        const coreFloat fTime   = m_fLeafTime * ((i % 2u) ? 1.0f : -1.0f) + fOffset;
+        const coreFloat fPos    = SIN(fTime * 0.05f + fOffset) * (I_TO_F(OUTDOOR_WIDTH) * OUTDOOR_DETAIL * 0.2f);
 
         // 
-        pLeaf->SetPosition   (coreVector3(fPos, pLeaf->GetPosition().yz()));
-        pLeaf->SetDirection  (coreVector3(vDir, 0.0f));
-        pLeaf->SetOrientation(OriRoundDir(vOri, vDir));
+        pLeaf->SetPosition(coreVector3(fPos, pLeaf->GetPosition().yz()));   // # always, to determine visibility
 
-        // get currently visible polygon side
-        const coreBool bSide = (coreVector3::Dot(g_pEnvironment->GetCameraPos() - pLeaf->GetPosition(), pLeaf->GetOrientation()) >= 0.0f);
+        if(pLeaf->IsEnabled(CORE_OBJECT_ENABLE_ALL))
+        {
+            // 
+            const coreVector2 vOri = coreVector2::Direction(fTime);
+            const coreVector2 vDir = MapStepRotated90(vOri, i % 4u);
 
-        // simulate two-sided polygon (flip vertex-order and change texture)
-        pLeaf->SetSize     (coreVector3(pLeaf->GetSize().x, pLeaf->GetSize().x * (bSide ? 0.7f : -0.7f), pLeaf->GetSize().z));
-        pLeaf->SetTexOffset(coreVector2(bSide ? 0.5f : 0.0f, 0.15f));
+            // 
+            pLeaf->SetDirection  (coreVector3(vDir, 0.0f));
+            pLeaf->SetOrientation(OriRoundDir(vOri, vDir));
+
+            // get currently visible polygon side
+            const coreBool bSide = (coreVector3::Dot(g_pEnvironment->GetCameraPos() - pLeaf->GetPosition(), pLeaf->GetOrientation()) >= 0.0f);
+
+            // simulate two-sided polygon (flip vertex-order and change texture)
+            pLeaf->SetSize     (coreVector3(pLeaf->GetSize().x, pLeaf->GetSize().x * (bSide ? 0.7f : -0.7f), pLeaf->GetSize().z));
+            pLeaf->SetTexOffset(coreVector2(bSide ? 0.5f : 0.0f, 0.15f));
+        }
     }
     pList->MoveNormal();
 

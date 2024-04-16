@@ -26,11 +26,14 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_GustList         (SPECIAL_GUSTS)
 , m_iCurGust         (0u)
 , m_iCurBlast        (0u)
+, m_iCurExplosion    (0u)
 , m_iSoundGuard      (0u)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
 , m_iShakeCount      (0u)
 , m_fFreezeTime      (0.0f)
+, m_fSlowTime        (0.0f)
+, m_fSlowStrength    (0.0f)
 , m_iEffectFrame     (0u)
 , m_iEffectCount     (0u)
 , m_iBreakupCount    (0u)
@@ -80,6 +83,26 @@ cSpecialEffects::cSpecialEffects()noexcept
     m_apBlastModel[2] = Core::Manager::Resource->Get<coreModel>("object_tetra_top.md3");
 
     // 
+    for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
+    {
+        m_aExplosionBody[i].DefineModel  ("effect_explosion.md3");
+        m_aExplosionBody[i].DefineProgram("effect_explosion_program");
+        m_aExplosionBody[i].SetAlpha     (0.0f);
+    }
+
+    // 
+    for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
+    {
+        //m_aExplosionWave[i].DefineModel  (Core::Manager::Resource->Load<coreModel>("effect_torus.md3", CORE_RESOURCE_UPDATE_AUTO, "data/models/effect_torus.md3"));//   "object_ring.md3");
+        m_aExplosionWave[i].DefineModel  ("object_ring.md3");
+        m_aExplosionWave[i].DefineProgram("effect_explosion_program");
+        m_aExplosionWave[i].SetAlpha     (0.0f);
+        
+        //m_aExplosionWave[i].SetDirection  (coreVector3(0.0f,0.0f,1.0f));
+        //m_aExplosionWave[i].SetOrientation(coreVector3(0.0f,1.0f,0.0f));
+    }
+
+    // 
     const auto nLoadSoundFunc = [this](const eSoundEffect eSoundIndex, const coreChar* pcName)
     {
         ASSERT(eSoundIndex < SOUND_MAX)
@@ -115,6 +138,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_MEDAL_PLATINUM,       "medal_platinum.wav");
     nLoadSoundFunc(SOUND_MEDAL_DARK,           "medal_dark.wav");
     nLoadSoundFunc(SOUND_BADGE,                "badge.wav");
+    nLoadSoundFunc(SOUND_HELPER,               "helper.wav");
     nLoadSoundFunc(SOUND_FRAGMENT_HELPER,      "fragment_helper.wav");
     nLoadSoundFunc(SOUND_FRAGMENT_APPEAR,      "fragment_appear.wav");
     nLoadSoundFunc(SOUND_FRAGMENT_COLLECT,     "fragment_collect.wav");
@@ -136,13 +160,21 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_MENU_SCROLL,          "menu_scroll.wav");
     nLoadSoundFunc(SOUND_MENU_SUB_IN,          "menu_sub_in.wav");
     nLoadSoundFunc(SOUND_MENU_SUB_OUT,         "menu_sub_out.wav");
+    nLoadSoundFunc(SOUND_EFFECT_DUST,          "effect_dust.wav");
+    nLoadSoundFunc(SOUND_EFFECT_ERROR,         "effect_error.wav");
     nLoadSoundFunc(SOUND_EFFECT_SHAKE,         "effect_shake.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SWORD_01,      "effect_sword_01.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SWORD_02,      "effect_sword_02.wav");
+    nLoadSoundFunc(SOUND_EFFECT_WOOSH,         "effect_woosh.wav");
 
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
 
     // 
     m_ShakeTimer.SetTimeID(0);
+    
+    
+    m_aSoundData.resize(SOUND_MAX);
 }
 
 
@@ -178,19 +210,20 @@ void cSpecialEffects::Render()
             m_GustList.Render();
 
             // render all blast objects
-            const auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
+            for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
             {
-                for(coreUintW i = 0u; i < iSize; ++i)
-                {
-                    // check for visibility
-                    coreObject3D& oObject = pArray[i];
-                    if(!oObject.GetAlpha()) continue;
+                if(m_aBlast[i].GetAlpha()) m_aBlast[i].Render();
+            }
 
-                    // render the object
-                    oObject.Render();
-                }
-            };
-            nRenderFunc(m_aBlast, SPECIAL_BLASTS);
+            // render all explosion objects
+            for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
+            {
+                if(m_aExplosionBody[i].GetAlpha()) m_aExplosionBody[i].Render();
+            }
+            for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
+            {
+                //if(m_aExplosionWave[i].GetAlpha()) m_aExplosionWave[i].Render();
+            }
         }
         glEnable(GL_DEPTH_TEST);
     }
@@ -238,7 +271,8 @@ void cSpecialEffects::Move()
                 m_aParticleFire [0].GetNumActiveParticles() || m_aParticleFire [1].GetNumActiveParticles() ||
                 !m_LightningList.List()->empty()            ||
                 !m_GustList     .List()->empty()            ||
-                std::any_of(m_aBlast, m_aBlast + SPECIAL_BLASTS, [](const coreObject3D& oBlast) {return oBlast.GetAlpha() ? true : false;});
+                std::any_of(m_aBlast, m_aBlast + SPECIAL_BLASTS, [](const coreObject3D& oBlast) {return oBlast.GetAlpha() ? true : false;}) ||
+                std::any_of(m_aExplosionBody, m_aExplosionBody + SPECIAL_EXPLOSION, [](const coreObject3D& oExplosion) {return oExplosion.GetAlpha() ? true : false;});
     if(m_bActive)
     {
         // move particle systems
@@ -307,10 +341,46 @@ void cSpecialEffects::Move()
             const coreFloat fSpeed = oBlast.GetCollisionModifier().y;
 
             // 
-            oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * TIME, 0.0f));
+            oBlast.SetAlpha    (MAX0(oBlast.GetAlpha() - fSpeed * TIME));
             oBlast.SetSize     (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oBlast.GetAlpha())));
             oBlast.SetTexOffset(coreVector2(0.0f,0.1f) * oBlast.GetAlpha());
             oBlast.Move();
+        }
+        
+        
+        
+
+        // 
+        for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
+        {
+            coreObject3D& oExplosion = m_aExplosionBody[i];
+            if(!oExplosion.GetAlpha()) continue;
+
+            // 
+            const coreFloat fScale = oExplosion.GetCollisionModifier().x;
+            const coreFloat fSpeed = oExplosion.GetCollisionModifier().y;
+
+            // 
+            oExplosion.SetAlpha(MAX0(oExplosion.GetAlpha() - fSpeed * (2.3f) * TIME));
+            oExplosion.SetSize (coreVector3(0.25f,0.25f,0.1f) * (fScale * 40.0f * 10.0f * SIN((0.5f*PI) * MAX0((1.0f - oExplosion.GetAlpha())))));
+            oExplosion.Move();
+        }
+        
+
+        // 
+        for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
+        {
+            coreObject3D& oExplosion = m_aExplosionWave[i];
+            if(!oExplosion.GetAlpha()) continue;
+
+            // 
+            const coreFloat fScale = oExplosion.GetCollisionModifier().x;
+            const coreFloat fSpeed = oExplosion.GetCollisionModifier().y;
+
+            // 
+            oExplosion.SetAlpha(MAX0(oExplosion.GetAlpha() - fSpeed * (2.2f) * TIME));
+            oExplosion.SetSize (coreVector3(0.2f,0.2f,0.2f) * (fScale * 50.0f * SIN((0.6f*PI) * (1.0f - oExplosion.GetAlpha()))));
+            oExplosion.Move();
         }
     }
 
@@ -318,7 +388,7 @@ void cSpecialEffects::Move()
     if(m_fShakeStrength && m_ShakeTimer.Update(1.0f))
     {
         // update shake animation
-        m_fShakeStrength = MAX(m_fShakeStrength - 0.07f, 0.0f);   // # without delta-time
+        m_fShakeStrength = MAX0(m_fShakeStrength - 0.07f);   // # without delta-time
         m_iShakeCount    = m_iShakeCount + 1u;
 
         // 
@@ -337,17 +407,17 @@ void cSpecialEffects::MoveAlways()
 
 // ****************************************************************
 // create centered particle splash
-void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
+void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor, const coreBool bDeep, const coreBool bLock)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(bLock);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
     coreUintW i = 0u;
     m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), bDeep ? Core::Rand->Float(-1.0f,1.0f) : 0.0f).Normalized();
 
         pParticle->SetPositionRel(vPosition + vDir,           vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f,                       1.0f);
@@ -357,17 +427,17 @@ void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreBool bDeep, const coreBool bLock)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(bLock);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
     coreUintW i = 0u;
     m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), bDeep ? Core::Rand->Float(-1.0f,1.0f) : 0.0f).Normalized();
 
         pParticle->SetPositionRel(vPosition + vDir,                 vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f,                             1.0f);
@@ -380,7 +450,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFl
 void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -400,7 +470,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreF
 void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -425,7 +495,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3 vPosition, const coreVec
     ASSERT(vDirection.IsNormalized())
 
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -447,7 +517,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVect
     ASSERT(vDirection.IsNormalized())
 
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -470,7 +540,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVect
 void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -490,7 +560,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreF
 void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -513,7 +583,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFl
 void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -534,7 +604,7 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFl
 void cSpecialEffects::CreateWhirlDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
-    const coreFloat fBase = this->__GetEffectBase();
+    const coreFloat fBase = this->__GetEffectBase(false);
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -811,13 +881,45 @@ void cSpecialEffects::CreateBlastTetra(const coreVector3 vPosition, const coreVe
 
 // ****************************************************************
 // 
+void cSpecialEffects::CreateExplosion(const coreVector3 vPosition)
+{
+    // 
+    if(++m_iCurExplosion >= SPECIAL_EXPLOSION) m_iCurExplosion = 0u;
+    coreObject3D& oExplosion = m_aExplosionBody[m_iCurExplosion];
+
+    ASSERT(!oExplosion.GetAlpha())
+    
+    const coreFloat fScale = 1.0f;
+    const coreFloat fSpeed = 1.0f;
+    const coreVector3 vColor = coreVector3(1.0f, 0.3f, 0.1f);
+
+    // 
+    //oExplosion.DefineModel         (m_apBlastModel[0]);
+    oExplosion.SetPosition         (vPosition);
+    oExplosion.SetSize             (coreVector3(0.0f,0.0f,0.0f));
+    //oExplosion.SetDirection        (coreVector3(coreVector2::Rand(), 0.0f));
+    oExplosion.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
+    //oExplosion.SetColor4           (coreVector4(vColor, 1.4f));
+    oExplosion.SetColor4           (coreVector4(vColor, 1.0f));
+    //oExplosion.SetTexSize          (coreVector2(12.0f,12.0f));
+    
+    
+
+    coreObject3D& oExplosion2 = m_aExplosionWave[m_iCurExplosion];
+
+    // 
+    oExplosion2.SetPosition         (vPosition);
+    oExplosion2.SetSize             (coreVector3(0.0f,0.0f,0.0f));
+    oExplosion2.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
+    oExplosion2.SetColor4           (coreVector4(vColor, 1.0f));
+}
+
+
+// ****************************************************************
+// 
 void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
-
-    // 
-    if(HAS_BIT(m_iSoundGuard, eSoundIndex)) return; // TODO 1: what about different position? maybe left<>right locking, or moving the sound, or deferring execution     
-    ADD_BIT(m_iSoundGuard, eSoundIndex)
 
     // 
     if(!m_apSound[eSoundIndex].IsUsable()) return;
@@ -848,7 +950,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_WEAPON_RAY:           fBaseVolume = 0.8f; fBasePitch = 0.5f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_WEAPON_ENEMY:         fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_BULLET_HIT:           fBaseVolume = 1.5f; fBasePitch = 0.9f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_BULLET_REFLECT:       fBaseVolume = 1.2f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_BULLET_REFLECT:       fBaseVolume = 1.1f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_SHIELD_HIT:           fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_SHIELD_DESTROY:       fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_MEDAL_BRONZE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
@@ -857,6 +959,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_MEDAL_PLATINUM:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_MEDAL_DARK:           fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_BADGE:                fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_HELPER:               fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_FRAGMENT_HELPER:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_FRAGMENT_APPEAR:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_FRAGMENT_COLLECT:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
@@ -878,12 +981,40 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_MENU_SCROLL:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MENU_SUB_IN:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MENU_SUB_OUT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_EFFECT_DUST:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_ERROR:         fBaseVolume = 1.0f; fBasePitch = 0.9f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SHAKE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SWORD_01:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SWORD_02:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_WOOSH:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_PLACEHOLDER:          return;   // #
     }
 
     // 
     if(!g_CurConfig.Audio.i3DSound) bRelative = true;
+
+    
+    cSoundData& oData = m_aSoundData[eSoundIndex];
+
+    // 
+    if(HAS_BIT(m_iSoundGuard, eSoundIndex))
+    {
+        if(!bRelative)
+        {
+            // 
+            oData.vPosition = (oData.vPosition * I_TO_F(oData.iCount) + vPosition) / I_TO_F(oData.iCount + 1u);
+            oData.iCount    = (oData.iCount + 1u);
+
+            // 
+            if(pSound->EnableRef(this)) pSound->SetSource(oData.vPosition);
+        }
+        return;
+    }
+    ADD_BIT(m_iSoundGuard, eSoundIndex)
+
+    // 
+    oData.vPosition = vPosition;
+    oData.iCount    = 1u;
 
     // 
     fBaseVolume *= (1.0f + Core::Rand->Float(-0.3f,          0.0f));
@@ -945,6 +1076,14 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 void cSpecialEffects::FreezeScreen(const coreFloat fTime)
 {
     m_fFreezeTime = MAX(m_fFreezeTime, fTime);
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::SlowScreen(const coreFloat fTime)
+{
+    m_fSlowTime = MAX(m_fSlowTime, fTime);
 }
 
 
@@ -1103,10 +1242,10 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 
 // ****************************************************************
 // 
-coreFloat cSpecialEffects::__GetEffectBase()
+coreFloat cSpecialEffects::__GetEffectBase(const coreBool bLock)
 {
     // 
-    //if(m_iEffectFrame != Core::System->GetCurFrame())
+    if(!bLock || (m_iEffectFrame != Core::System->GetCurFrame()))
     {
         m_iEffectFrame = Core::System->GetCurFrame();
         m_iEffectCount = (m_iEffectCount + 1u) % 144u;  // loop at (110.00621124003 * PI)

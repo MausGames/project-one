@@ -24,6 +24,10 @@ cBoss::cBoss()noexcept
 , m_fPhaseTime       (0.0f)
 , m_fPhaseTimeBefore (0.0f)
 , m_bControlAgain    (false)
+, m_iHelperSpawn     (0u)
+, m_iHelperHit       (0u)
+, m_bActive          (false)
+, m_bForeshadow      (false)
 {
     // 
     for(coreUintW i = 0u; i < BOSS_TIMERS; ++i)
@@ -37,6 +41,9 @@ cBoss::cBoss()noexcept
 
     // 
     g_pGame->GetEnemyManager()->BindEnemy(this);
+
+    STATIC_ASSERT(BOSS_HELPERS <= sizeof(m_iHelperSpawn)*8u)
+    STATIC_ASSERT(BOSS_HELPERS <= sizeof(m_iHelperHit)  *8u)
 }
 
 
@@ -102,7 +109,10 @@ void cBoss::StoreRotation()
 void cBoss::_StartBoss()
 {
     // 
-    g_pGame->GetCurMission()->ActivateBoss(this);
+    g_pGame->GetTimeTable()->StartBoss();
+
+    // 
+    g_pGame->GetInterface()->ShowBoss(this);
 }
 
 
@@ -110,6 +120,9 @@ void cBoss::_StartBoss()
 // 
 void cBoss::_EndBoss()
 {
+    // 
+    m_bActive = false;
+
     // 
     g_pGame->GetCurMission()->DeactivateBoss();
 
@@ -143,19 +156,69 @@ void cBoss::_UpdateBoss()
     m_fPhaseTimeBefore = m_fPhaseTime;
     m_fPhaseTime.Update(1.0f);
 
-    // 
-    g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    if(m_bActive && !m_bForeshadow)
     {
-        pPlayer->GetScoreTable()->SetOverride(1.0f - this->GetCurHealthPct());
-    });
-    
-    if(InBetween(INTERFACE_BANNER_DURATION_ALERT, m_fLifeTimeBefore, m_fLifeTime))
-    {
-        const coreChar* pcName = this->GetMusicName();
-        if(pcName && pcName[0])
+        // 
+        g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            g_MusicPlayer.SelectName(pcName);
-            g_MusicPlayer.Control()->Play();
+            pPlayer->GetScoreTable()->SetOverride(1.0f - this->GetCurHealthPct());
+        });
+        
+        if(InBetween(INTERFACE_BANNER_DURATION_ALERT, m_fLifeTimeBefore, m_fLifeTime))
+        {
+            const coreChar* pcName = this->GetMusicName();
+            if(pcName && pcName[0])
+            {
+                g_MusicPlayer.SelectName(pcName);
+                g_MusicPlayer.Play();
+            }
+        }
+    
+    
+        for(coreUintW i = 0u; i < BOSS_HELPERS; ++i)
+        {
+            cHelper*      pHelper = g_pGame->GetHelper(ELEMENT_YELLOW + i);
+            coreObject3D* pShield = pHelper->GetShield();
+            if(pHelper->HasStatus(HELPER_STATUS_DEAD)) continue;
+    
+            if(pShield)
+            {
+                coreBool bHit = false;
+                Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pShield, [&](cBullet* OUTPUT pBullet, const coreObject3D* pShield, const coreVector3 vIntersection, const coreBool bFirstHit)
+                {
+                    if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+                    if(!bHit)
+                    {
+                        bHit = true;
+    
+                        pBullet->Deactivate(true);
+    
+                        d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->RefreshCooldown();
+                    }
+                });
+    
+                if(bHit)
+                {
+                    ADD_BIT(m_iHelperHit, i)
+    
+                    pHelper->Kill(true);
+    
+                    g_pGame->GetCombatText()->DrawText("???", pHelper->GetPosition(), COLOR_MENU_INSIDE);
+
+                    g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_HELPER);
+
+                    if(m_iHelperHit == BITLINE(BOSS_HELPERS))
+                    {
+                        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+                        {
+                            pPlayer->ActivateDarkShading();
+
+                            g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
+                        });
+                    }
+                }
+            }
         }
     }
 }
@@ -166,10 +229,51 @@ void cBoss::_UpdateBoss()
 void cBoss::_ResurrectBoss()
 {
     // 
-    g_pGame->GetInterface()->ShowAlert();
+    m_bActive = true;
 
     // 
-    g_pGame->FadeMusic(0.3f);
+    m_bForeshadow = false;
+
+    // 
+    g_pGame->GetCurMission()->ActivateBoss(this);
+}
+
+
+// ****************************************************************
+// 
+coreBool cBoss::_ResurrectHelper(const coreUint8 iElement, const coreBool bSmooth)
+{
+    const coreUintW iIndex = iElement - ELEMENT_YELLOW;
+
+    // 
+    if(HAS_BIT(m_iHelperSpawn, iIndex)) return false;
+    ADD_BIT(m_iHelperSpawn, iIndex);
+
+    // 
+    cHelper* pHelper = g_pGame->GetHelper(iElement);
+
+    // 
+    pHelper->Resurrect(bSmooth);
+    pHelper->EnableShield();
+
+    // 
+    pHelper->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+    // TODO 1: sound-effect jingle
+
+    return true;
+}
+
+
+// ****************************************************************
+// 
+void cBoss::_KillHelper(const coreUint8 iElement, const coreBool bAnimated)
+{
+    // 
+    cHelper* pHelper = g_pGame->GetHelper(iElement);
+
+    // 
+    pHelper->Kill(bAnimated);
 }
 
 

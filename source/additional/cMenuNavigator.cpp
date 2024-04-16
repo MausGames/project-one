@@ -35,17 +35,18 @@ cMenuNavigator::cMenuNavigator()noexcept
 // 
 void cMenuNavigator::Move()
 {
-    if(m_pCurObject)
+    if(m_pCurObject)// && TIME)// && !bIsShiftingAway)
     {
         const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
-        const coreVector2 vOffset     = coreVector2(m_pCurObject->GetSize().x * -0.5f - 0.05f, 0.0f);
+        const coreVector2 vOffset     = coreVector2(m_pCurObject->GetSize().x * -0.5f - 0.025f, 0.0f);
         const coreVector2 vResolution = Core::System->GetResolution();
 
-        Core::Input->SetMousePosition((vPosition + m_vMouseOffset) / vResolution);
         this->SetPosition (vPosition * RCP(vResolution.Min()) + vOffset);
-        this->SetDirection(coreVector2::Direction(1.2f * coreFloat(Core::System->GetTotalTime()))); // TODO 1: goes faster when confirming something
+        this->SetDirection(coreVector2::Direction(1.2f * coreFloat(Core::System->GetTotalTime()))); // TODO 1: should go faster when confirming something
 
-        m_pCurObject->SetFocused(true);
+        if(TIME) Core::Input->SetMousePosition((vPosition + m_vMouseOffset) / vResolution);
+
+        m_pCurObject->SetFocused(m_pCurObject->IsFocusable());
 
         m_iStore = this->__ToIndex(m_pCurObject);
     }
@@ -60,6 +61,9 @@ void cMenuNavigator::Move()
     }
 
     this->coreObject2D::Move();
+    
+    if(!this->GetAlpha()) 
+            Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, false);
 }
 
 
@@ -67,6 +71,8 @@ void cMenuNavigator::Move()
 // 
 void cMenuNavigator::Update()
 {
+    if(!TIME) return;
+
     if(!s_bJoystick)
     {
         m_pCurObject = NULL;
@@ -74,28 +80,25 @@ void cMenuNavigator::Update()
 
     m_vMouseOffset = coreVector2(0.0f,0.0f);
 
-    if(m_bPressed)
+    coreBool bNewPressed = false;
+    const auto nPressFunc = [&]()
     {
-        Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, false);
-        m_bPressed = false;
-    }
-
-    const auto nPressFunc = [this]()
-    {
-        if(!m_bPressed) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, true);
-        m_bPressed = true;
+        if(!m_bPressed && !bNewPressed) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, true);
+        bNewPressed = true;
     };
-
-    Core::Input->ShowCursor(!s_bJoystick);
 
     if(m_aiLock.size() != Core::Input->GetJoystickNum())
     {
-        m_aiLock.resize(Core::Input->GetJoystickNum(), 0xFFu);
+        m_aiLock    .resize(Core::Input->GetJoystickNum(), 0xFFu);
+        m_aiLastPack.resize(Core::Input->GetJoystickNum(), 8u);
     }
 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
         const coreVector2 vRelative = Core::Input->GetJoystickRelativeL(i);
+
+        const coreVector2 vMove = vRelative.IsNull() ? vRelative : AlongCross(vRelative);
+        const coreUint8   iPack = PackDirection(vMove);
 
         if(vRelative.IsNull() && !Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD))
             REMOVE_BIT(m_aiLock[i], 0u)
@@ -103,14 +106,6 @@ void cMenuNavigator::Update()
         if(!HAS_BIT(m_aiLock[i], 0u))
         {
             if(Core::Input->GetJoystickButton(i, 0u, CORE_INPUT_PRESS)) nPressFunc();
-
-            if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_SWITCH_PRESS))
-            {
-                coreSwitchBoxU16* pSwitchBox = d_cast<coreSwitchBoxU16*>(m_pCurObject);
-
-                     if(Core::Input->GetJoystickButton(i, 1u, CORE_INPUT_HOLD)) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
-                else if(Core::Input->GetJoystickButton(i, 0u, CORE_INPUT_HOLD)) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
-            }
 
             if(!m_aTab.empty())
             {
@@ -155,21 +150,27 @@ void cMenuNavigator::Update()
                 }
             }
 
-            if(!vRelative.IsNull())
+            const sMenuEntry& oEntry = m_aObject.at(m_pCurObject);
+
+            if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS))
             {
-                const coreVector2 vMove = AlongCross(vRelative);
-                const coreUint8   iPack = PackDirection(vMove);
+                coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
 
-                const sMenuEntry& oEntry = m_aObject.at(m_pCurObject);
+                //     if(Core::Input->GetJoystickButton(i, 1u, CORE_INPUT_HOLD)) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
+                //else 
+                    if(Core::Input->GetJoystickButton(i, 0u, CORE_INPUT_HOLD)) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
+            }
 
-                if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_MOVE))
-                {
-                    coreSwitchBoxU16* pSwitchBox = d_cast<coreSwitchBoxU16*>(m_pCurObject);
+            if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_MOVE))
+            {
+                coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
 
-                         if(iPack == 2u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
-                    else if(iPack == 6u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
-                }
+                     if(iPack == 2u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
+                else if(iPack == 6u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
+            }
 
+            if((iPack != m_aiLastPack[i]) && (iPack != 8u))
+            {
                 if(!HAS_BIT(m_aiLock[i], 1u))
                 {
                     ADD_BIT(m_aiLock[i], 1u)
@@ -217,7 +218,7 @@ void cMenuNavigator::Update()
                         }
                     }
 
-                    if(pNewObject)
+                    if(pNewObject && pNewObject->GetAlpha())
                     {
                         m_pCurObject = pNewObject;
 
@@ -232,18 +233,20 @@ void cMenuNavigator::Update()
             {
                 REMOVE_BIT(m_aiLock[i], 1u)
             }
+
+            m_aiLastPack[i] = iPack;
         }
     }
 
     if(s_bJoystick && !m_pCurObject && (m_iStore || m_iFirst))
     {
         m_pCurObject = this->__ToObject(m_iStore ? m_iStore : m_iFirst);
-        for(coreUintW i = 0u, ie = m_aObject.size(); (i < ie) && m_pCurObject && !m_pCurObject->GetAlpha(); ++i)
-        {
-            const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
-            if(!iFallback) break;
-            m_pCurObject = this->__ToObject(iFallback);
-        }
+        //for(coreUintW i = 0u, ie = m_aObject.size(); (i < ie) && m_pCurObject && !m_pCurObject->GetAlpha(); ++i)
+        //{
+        //    const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
+        //    if(!iFallback) break;
+        //    m_pCurObject = this->__ToObject(iFallback);
+        //}
     }
 
     if(!s_bJoystick && !m_iFirst)
@@ -253,11 +256,27 @@ void cMenuNavigator::Update()
 
     if(m_pMenu && !m_pMenu->GetAlpha())
     {
-        this->ResetFirst();
+    //    this->ResetFirst();
         std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
     }
 
     if(!s_bJoystick) std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
+
+    if(m_pCurObject && m_pCurObject->GetAlpha())
+    {
+        const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
+        const coreVector2 vResolution = Core::System->GetResolution();
+
+        Core::Input->SetMousePosition((vPosition + m_vMouseOffset) / vResolution);
+    }
+    
+    
+    if(m_bPressed)
+    {
+        if(!bNewPressed) 
+            Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, false);
+    }
+    m_bPressed = bNewPressed;
 }
 
 
@@ -290,6 +309,8 @@ void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreOb
         ASSERT(!m_aTab.count(pObject))
         m_aTab.emplace(pObject);
     }
+    
+    if(pObject) pObject->SetAlpha(0.0f);
 }
 
 
@@ -310,4 +331,12 @@ void cMenuNavigator::GlobalUpdate()
             s_bJoystick  = true;
         }
     }
+    
+    
+
+    Core::Input->ShowCursor(!s_bJoystick && (g_pMenu->GetCurSurface() != SURFACE_EMPTY)   &&
+                                            (g_pMenu->GetCurSurface() != SURFACE_SUMMARY) &&
+                                            (g_pMenu->GetCurSurface() != SURFACE_DEFEAT)  &&
+                                            (g_pMenu->GetCurSurface() != SURFACE_FINISH)  &&
+                                            (g_pMenu->GetCurSurface() != SURFACE_BRIDGE));
 }

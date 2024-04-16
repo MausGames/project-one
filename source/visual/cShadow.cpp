@@ -57,9 +57,14 @@ void cShadow::Update()
                     // reduce current view frustum
                     Core::Graphics->SetView(m_FrameBuffer.GetResolution() * SHADOW_TEST_FACTOR, m_FrameBuffer.GetFOV(), m_FrameBuffer.GetNearClip(), m_FrameBuffer.GetFarClip());
 
-                    // render low-resolution test area (for improved shading performance)
-                    cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
-                    cShadow::RenderSingle   (s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+                    // 
+                    Core::Graphics->StartConservativeRaster();
+                    {
+                        // render low-resolution test area (for improved shading performance)
+                        cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
+                        cShadow::RenderSingle   (s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+                    }
+                    Core::Graphics->EndConservativeRaster();
                 }
                 glEnable(GL_DEPTH_TEST);
             }
@@ -80,6 +85,9 @@ void cShadow::Reconfigure()
     if(m_iLevel == g_CurConfig.Graphics.iShadow) return;
     m_iLevel = g_CurConfig.Graphics.iShadow;
 
+    // 
+    if(!CORE_GL_SUPPORT(ARB_depth_texture)) m_iLevel = 0u;
+
     // delete old shadow map
     m_FrameBuffer.Delete();
 
@@ -93,7 +101,6 @@ void cShadow::Reconfigure()
         m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
         m_FrameBuffer.Create(vRes, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-        // TODO 1: can crash if shadow texture not supported, though is minimum GL_WEBGL_depth_texture
         // enable depth value comparison
         m_FrameBuffer.GetDepthTarget().pTexture->EnableShadowSampling();
 
@@ -188,10 +195,10 @@ void cShadow::Recompile()
     {
         coreProgramPtr& pHandle  = s_apHandle[i];
         const coreChar* pcConfig = PRINT("%s%s%s%s%s", PRINT(SHADER_SHADOW(%u), g_CurConfig.Graphics.iShadow),
-                                                       (i == SHADOW_HANDLE_OBJECT_INST)      ? CORE_SHADER_OPTION_INSTANCING                      : "",
-                                                       (i == SHADOW_HANDLE_OBJECT_WAVE_INST) ? CORE_SHADER_OPTION_INSTANCING SHADER_WAVE          : "",
-                                                       (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW  : "",
-                                                       (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT : "");
+                                                       (i == SHADOW_HANDLE_OBJECT_INST   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? CORE_SHADER_OPTION_INSTANCING : "",
+                                                       (i == SHADOW_HANDLE_OBJECT_WAVE   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? SHADER_WAVE                   : "",
+                                                       (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW                   : "",
+                                                       (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT                  : "");
 
         // change configuration of related shaders
         for(coreUintW j = 0u, je = pHandle->GetNumShaders(); j < je; ++j)

@@ -21,6 +21,7 @@
 // ship definitions
 #define SHIP_INVERTED_BIT (24u)   // for inverted base color interpolation
 #define SHIP_IGNORED_BIT  (25u)   // 
+#define SHIP_WHITE_BIT    (26u)   // 
 
 #define SHIP_SHADER_ATTRIBUTE_BLINK     "a_v1Blink"
 #define SHIP_SHADER_ATTRIBUTE_BLINK_NUM (CORE_SHADER_ATTRIBUTE_USER_NUM + 0u)
@@ -52,7 +53,7 @@ public:
     ENABLE_COPY(cShip)
 
     // 
-    void SetBaseColor(const coreVector3 vColor, const coreBool bInverted = false, const coreBool bIgnored = false);
+    void SetBaseColor(const coreVector3 vColor, const coreBool bInverted = false, const coreBool bIgnored = false, const coreBool bWhite = false);
 
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
     coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance);
@@ -80,10 +81,12 @@ public:
     {
         this->SetPosition   (MapToAxis(this->GetPosition   (), vAxis));
         this->SetDirection  (MapToAxis(this->GetDirection  (), vAxis));
-        this->SetOrientation(MapToAxis(this->GetOrientation(), vAxis)); return this;}
-    
+        this->SetOrientation(MapToAxis(this->GetOrientation(), vAxis));
+        return this;
+    }
+
     // 
-    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fRealFactor = cShip::TransformColorFactor(fFactor); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_IGNORED_BIT) ? 1.0f : (HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fRealFactor) : fRealFactor)));}
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fRealFactor = cShip::TransformColorFactor(fFactor); this->SetColor3(LERP(HAS_BIT(m_iBaseColor, SHIP_WHITE_BIT) ? COLOR_SHIP_WHITE : COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_IGNORED_BIT) ? 1.0f : (HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fRealFactor) : fRealFactor)));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
     inline void InvokeBlink ()                        {if(!g_CurConfig.Graphics.iFlash || (m_fBlink < 0.4f)) m_fBlink = 1.2f;}
 

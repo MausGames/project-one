@@ -157,7 +157,7 @@ void cGeluMission::EnableFang(const coreUintW iIndex)
     cLodObject& oFang = m_aFangRaw[iIndex];
 
     // 
-    WARN_IF(oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableFang(iIndex, false);
 
     // 
     ADD_BIT(m_iFangActive, iIndex)
@@ -203,7 +203,7 @@ void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2 vPosition
     coreObject3D* pArrow = (*m_WayArrow.List())[iIndex];
 
     // 
-    WARN_IF(pWay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(pWay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableWay(iIndex, false);
 
     // 
     ADD_BIT(m_iWayActive,  iIndex)
@@ -261,7 +261,7 @@ void cGeluMission::EnableOrb(const coreUintW iIndex)
     coreObject3D& oOrb = m_aOrbRaw[iIndex];
 
     // 
-    WARN_IF(oOrb.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(oOrb.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableOrb(iIndex, false);
 
     // 
     m_afOrbTime[iIndex] = 1.0f;
@@ -304,7 +304,7 @@ void cGeluMission::EnableLine(const coreUintW iIndex)
     coreObject3D& oLine = m_aLineRaw[iIndex];
 
     // 
-    WARN_IF(oLine.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(oLine.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableLine(iIndex, false);
 
     // 
     m_afLineTime[iIndex] = 1.0f;
@@ -466,7 +466,7 @@ void cGeluMission::__MoveOwnAfter()
         {
             const cPlayer* pPlayer = g_pGame->FindPlayerSide(pWay->GetPosition().xy());
 
-            if(coreVector2::Dot(pPlayer->GetDirection().xy(), pWay->GetDirection().xy()) > 0.9f)
+            if(SameDirection(pPlayer->GetDirection().xy(), pWay->GetDirection().xy()))
             {
                 REMOVE_BIT(m_iWayVisible, i)
             }
