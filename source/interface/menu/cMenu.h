@@ -39,6 +39,7 @@
 // TODO 3: display gamepad/device name in options description
 // TODO 4: locked config input buttons are set with dummy values before getting locked
 // TODO 2: handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
+// TODO 1: show correct button icons in input config menu
 
 
 // ****************************************************************
@@ -737,7 +738,7 @@ private:
     cGuiObject m_BackgroundMain;                                    // 
     cGuiObject m_BackgroundCoop;                                    // 
 
-    cGuiLabel m_Title;                                              // 
+    cGuiLabel m_aTitle[2];                                          // 
 
     cGuiLabel m_aHeader[2];                                         // 
 

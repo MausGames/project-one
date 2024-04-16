@@ -13,7 +13,6 @@
 // constructor
 cGeluMission::cGeluMission()noexcept
 : m_Fang          (GELU_FANGS)
-, m_avOldPos  {}
 , m_Way           (GELU_WAYS)
 , m_WayArrow      (GELU_WAYS)
 , m_iWayActive    (0u)
@@ -22,6 +21,7 @@ cGeluMission::cGeluMission()noexcept
 , m_afOrbTime     {}
 , m_Line          (GELU_LINES)
 , m_afLineTime    {}
+, m_avOldPos      {}
 , m_abCrushImmune {}
 , m_iCrushState   (0u)
 , m_fAnimation    (0.0f)
@@ -157,7 +157,9 @@ void cGeluMission::EnableFang(const coreUintW iIndex)
     // 
     WARN_IF(oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
+    // 
     m_avOldPos[iIndex] = coreVector2(0.0f,0.0f);
+    STATIC_ASSERT(GELU_FANGS <= GELU_POSITIONS)
 
     // 
     oFang.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
@@ -200,7 +202,9 @@ void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2 vPosition
     STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayActive) *8u)
     STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayVisible)*8u)
 
+    // 
     m_avOldPos[iIndex] = coreVector2(0.0f,0.0f);
+    STATIC_ASSERT(GELU_WAYS <= GELU_POSITIONS)
 
     // 
     pWay  ->SetPosition (coreVector3(vPosition,  0.0f));
@@ -343,7 +347,7 @@ void cGeluMission::__RenderOwnUnder()
     DEPTH_PUSH
 
     // 
-    cLodObject::RenderHighList(&m_Fang);
+    if(m_Fang.GetCurEnabled()) cLodObject::RenderHighList(&m_Fang);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Fang);
 
     // 

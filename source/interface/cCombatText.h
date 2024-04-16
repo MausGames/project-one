@@ -21,7 +21,7 @@
 
 // ****************************************************************
 // combat text definitions
-#define COMBAT_LABELS_SMALL (16u)                                       // 
+#define COMBAT_LABELS_SMALL (32u)                                       // 
 #define COMBAT_LABELS_BIG   (4u)                                        // 
 #define COMBAT_LABELS       (COMBAT_LABELS_SMALL + COMBAT_LABELS_BIG)   // total number of label objects
 #define COMBAT_BORDER       (0.47f)                                     // 
@@ -59,6 +59,7 @@ public:
     void DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
     void DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
     void DrawChain(const coreUint32 iValue, const coreVector3 vPosition);
+    void DrawShift(const coreUint32 iValue, const coreVector3 vPosition);
     void DrawBadge(const coreUint32 iValue, const coreVector3 vPosition);
 
     // 

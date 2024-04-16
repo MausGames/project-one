@@ -17,6 +17,7 @@
 // TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
 // TODO 3: try to reduce overdraw when all walls are active
 // TODO 3: remove overdraw when rendering border object
+// TODO 3: border might flicker-disappear when rotating, briefly passing 0.0f, and shaking screen
 
 
 // ****************************************************************
@@ -55,6 +56,8 @@ private:
     coreVector3 m_avData  [POST_INTERIORS];     // 
     coreFloat   m_afOffset[POST_WALLS];         // (-x, +x, -y, +y) 
     coreBool    m_bOffsetActive;                // 
+
+    coreFlow m_fAnimation;                      // 
 
 
 public:

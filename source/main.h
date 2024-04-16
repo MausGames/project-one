@@ -83,13 +83,17 @@
 // TODO 2: test maximum number of replays, provide upper limit, define communication when approaching or reaching limit
 // TODO 2: prevent shaking of center-aligned rectified animated text
 // TODO 3: add gamepad led colors
-// TODO 1: clarify and simplify upper-case handling (for all texts, but especially for boss and mission names)
+// TODO 1: clarify and simplify upper-case handling (for all texts, but especially for boss and mission names) (manually fix all-uppercase character/glyph distance(!) -> CALOR)
 // TODO 3: expose HRTF option (Headphones: No, Yes, Auto)
 // TODO 2: d-pad is for movement, but and can also be used for button mapping
 // TODO 4: if font awesome will be used in the end, remove all unused icons in font-file
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 // TODO 4: check if any % (modulo) can be changed to coreMath::IsAligned
-// TODO 2: fix broken pw-database printing on MacOS
+// TODO 2: fix broken pw-database printing on MacOS (maybe put TODO into engine)
+// TODO 1: look if enemies with health 10 should be changed to 4
+// TODO 1: check for importing save-game from demo (if on Steam and no main save-game found)
+// TODO 1: make frequency rounding corrections: boss ticker, player weapon
+// TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
 
 
 // ****************************************************************
@@ -136,7 +140,7 @@
 #define EQUIP_WEAPONS        (1u)
 #define EQUIP_SUPPORTS       (1u)
 #define FRAMERATE_MIN        (60.0f)
-#define FRAMERATE_MAX        (240.0f)
+#define FRAMERATE_MAX        (360.0f * 2.0f)
 #define SCALE_FACTOR         (CORE_GL_SUPPORT(ARB_texture_rg) ? 0.5f : 0.4f)
 #define CAMERA_POSITION      (coreVector3(0.0f,  0.0f,  1.0f) * 110.0f)
 #define CAMERA_DIRECTION     (coreVector3(0.0f,  0.0f, -1.0f))
@@ -286,6 +290,8 @@ enum eBadge : coreUint8
 extern void InitResolution(const coreVector2 vResolution);   // init resolution properties (1:1)
 extern void InitDirection();                                 // 
 extern void InitFramerate();                                 // init frame rate properties (lock)
+
+extern FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq);
 
 
 // ****************************************************************

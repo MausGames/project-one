@@ -205,6 +205,8 @@ void cTurf::DrawAll(const coreUint8 iType)
 // 
 coreFloat cTurf::CalcPercent()
 {
+    STATIC_ASSERT(coreMath::IsAligned(TURF_SIZE * TURF_SIZE, 4u))
+
     coreUint32 iCount = 0u;
 
     // 

@@ -197,4 +197,7 @@ void cIntroMenu::ActivateFirstPlay()
 {
     // 
     m_iIntroStatus = 0u;
+
+    // 
+    m_WelcomeText.SetText("");
 }

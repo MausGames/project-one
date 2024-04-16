@@ -250,12 +250,12 @@ void cMission::DeactivateWave()
 
     // 
     m_iStageSub  = 0xFFu;
-    m_fStageWait = 4.0f;
+    m_fStageWait = 6.0f;
 
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->HealShield(5u);
+        pPlayer->HealShield(pPlayer->GetMaxShield() / 4);
     });
 
     // 
@@ -278,10 +278,11 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->GetDataTable ()->GiveBadge(iIndex);
-        pPlayer->GetScoreTable()->AddScore(iBonus, false);
-        pPlayer->HealHealth(1u);
+        pPlayer->GetDataTable()->GiveBadge(iIndex);
     });
+
+    // 
+    g_pGame->GetTimeTable()->AddShiftGood(iBonus);
 
     // 
     g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
@@ -326,18 +327,18 @@ void cMission::__CloseSegment()
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
 
     // 
-    const coreFloat  fTime  = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
-    const coreUint32 iBonus = cGame::CalcBonusTime(fTime);
+    const coreFloat  fTime        = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
+    const coreFloat  fTimeShifted = g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe();
+    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted);
 
     // 
     coreUint8 iMedal = 0u;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        const coreUint32 iDamageTaken  = pPlayer->GetDataTable ()->GetCounterSegment(iMissionIndex, m_iCurSegmentIndex).iDamageTaken;
-        const coreUint32 iScoreSegment = pPlayer->GetScoreTable()->GetScoreSegment  (iMissionIndex, m_iCurSegmentIndex);
+        const coreUint32 iScoreSegment = pPlayer->GetScoreTable()->GetScoreSegment(iMissionIndex, m_iCurSegmentIndex);
 
         // 
-        iMedal += cGame::CalcMedal(fTime, iDamageTaken, m_pfMedalGoal);
+        iMedal += cGame::CalcMedal(fTimeShifted, m_pfMedalGoal);
 
         // 
         pPlayer->GetScoreTable()->AddScore(iBonus, false);
@@ -374,12 +375,27 @@ void cMission::__CloseSegment()
     g_pSave->EditLocalStatsSegment()->iCountEnd  += 1u;
 
     // 
+    const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(fTimeShifted);
+    if(iTimeShiftedUint < g_pSave->EditLocalStatsSegment()->iTimeBestShifted)
+    {
+        g_pSave->EditLocalStatsSegment()->iTimeBestShifted   = iTimeShiftedUint;
+        g_pSave->EditLocalStatsSegment()->iTimeBestShiftGood = g_pGame->GetTimeTable()->GetShiftGoodSegment(iMissionIndex, m_iCurSegmentIndex);
+        g_pSave->EditLocalStatsSegment()->iTimeBestShiftBad  = g_pGame->GetTimeTable()->GetShiftBadSegment (iMissionIndex, m_iCurSegmentIndex);
+    }
+    if(iTimeShiftedUint > g_pSave->EditLocalStatsSegment()->iTimeWorstShifted)
+    {
+        g_pSave->EditLocalStatsSegment()->iTimeWorstShifted   = iTimeShiftedUint;
+        g_pSave->EditLocalStatsSegment()->iTimeWorstShiftGood = g_pGame->GetTimeTable()->GetShiftGoodSegment(iMissionIndex, m_iCurSegmentIndex);
+        g_pSave->EditLocalStatsSegment()->iTimeWorstShiftBad  = g_pGame->GetTimeTable()->GetShiftBadSegment (iMissionIndex, m_iCurSegmentIndex);
+    }
+
+    // 
     g_pSave->SaveFile();
 
 #if defined(_P1_VIDEO_)
 
-    static coreUint8 iDir = 0u;
-    g_pEnvironment->SetTargetDirectionNow(StepRotated90((++iDir) % 4u));
+    //static coreUint8 iDir = 0u;
+    //g_pEnvironment->SetTargetDirectionNow(StepRotated90((++iDir) % 4u));
 
 #endif
     

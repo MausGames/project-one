@@ -58,8 +58,7 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oScoreMission.SetAlignment(oScoreTotal.GetAlignment());
     oScoreMission.SetColor3   (COLOR_MENU_INSIDE);
 
-    oCooldownBar.DefineTexture(0u, "default_white.png");
-    oCooldownBar.DefineProgram("default_2d_program");
+    oCooldownBar.DefineProgram("menu_color_program");
     oCooldownBar.SetPosition  (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.105f) * vSide);
     oCooldownBar.SetAlignment (oScoreTotal.GetAlignment());
 
@@ -135,6 +134,11 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBossTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
     m_aBossTime[1].SetColor3   (COLOR_MENU_INSIDE);
 
+    m_aBossTime[2].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aBossTime[2].SetPosition (m_aBossTime[0].GetPosition() + coreVector2(0.06f - m_BossHealthValue.GetPosition().x, 0.0f));
+    m_aBossTime[2].SetAlignment(coreVector2(1.0f,-1.0f));
+    m_aBossTime[2].SetColor3   (COLOR_MENU_INSIDE * 0.75f);
+
     m_WaveName.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     m_WaveName.SetPosition (coreVector2(0.0f,0.005f));
     m_WaveName.SetAlignment(coreVector2(0.0f,1.0f));
@@ -149,6 +153,20 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aWaveTime[1].SetPosition (m_aWaveTime[0].GetPosition());
     m_aWaveTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
     m_aWaveTime[1].SetColor3   (COLOR_MENU_INSIDE);
+
+    m_aWaveTime[2].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aWaveTime[2].SetPosition (m_aWaveTime[0].GetPosition() + coreVector2(0.06f,0.0f));
+    m_aWaveTime[2].SetAlignment(coreVector2(1.0f,-1.0f));
+    m_aWaveTime[2].SetColor3   (COLOR_MENU_INSIDE * 0.75f);
+
+    m_GoalMedal.DefineTexture(0u, "menu_medal.png");
+    m_GoalMedal.DefineProgram("default_2d_program");
+    m_GoalMedal.SetAlignment (coreVector2(-1.0f,-1.0f));
+    m_GoalMedal.SetTexSize   (coreVector2(0.25f,0.25f));
+
+    m_GoalTime.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_GoalTime.SetAlignment(coreVector2(-1.0f,-1.0f));
+    m_GoalTime.SetColor3   (COLOR_MENU_INSIDE * 0.75f);
 
     m_BannerBar.DefineTexture(0u, "menu_detail_04.png");
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
@@ -174,6 +192,12 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_Medal.DefineTexture(0u, "menu_medal.png");
     m_Medal.DefineProgram("default_2d_program");
     m_Medal.SetTexSize   (coreVector2(0.25f,0.25f));
+    
+    
+        m_aBossTime[0].SetText("0.");
+        m_aBossTime[1].SetText("0");
+        m_aWaveTime[0].SetText("0.");
+        m_aWaveTime[1].SetText("0");
 }
 
 
@@ -219,6 +243,9 @@ void cInterface::Render()
             m_aBossHealthBar[2].Render();
         }
 
+        // 
+        m_GoalMedal.Render();
+
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
             // render player labels
@@ -235,6 +262,7 @@ void cInterface::Render()
             m_BossHealthValue.Render();
             m_aBossTime[0]   .Render();
             m_aBossTime[1]   .Render();
+            m_aBossTime[2]   .Render();
         }
 
         if(m_fAlphaBoss != 1.0f)
@@ -243,7 +271,11 @@ void cInterface::Render()
             //m_WaveName    .Render();   // TODO 1: der nervt
             m_aWaveTime[0].Render();
             m_aWaveTime[1].Render();
+            m_aWaveTime[2].Render();
         }
+
+        // 
+        m_GoalTime.Render();
     }
 
     if(this->IsStoryActive())
@@ -295,7 +327,7 @@ void cInterface::Move()
         oView.aShieldBar[2].SetTexOffset (coreVector2(i ? 0.0f : fPercent, 1.0f));
 
             // set shield bar color
-            const coreVector3 vColor = (i ? (COLOR_ENERGY_YELLOW * 1.45f) : (COLOR_ENERGY_BLUE * 2.3f)) * 0.95f * 0.95f + ((fPercent <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
+            const coreVector3 vColor = (pPlayer->GetEnergyColor() * 2.3f) * 0.95f * 0.95f + ((fPercent <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
             oView.aShieldBar[1].SetColor3(vColor * 1.0f);
             oView.aShieldBar[2].SetColor3(vColor * 0.3f);
 
@@ -436,6 +468,19 @@ void cInterface::Move()
         m_aWaveTime[1].SetText(m_aBossTime[1].GetText());
     }
 
+    // 
+    const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftSegmentSafe();
+    if(iShift)
+    {
+        m_aBossTime[2].SetText(PRINT("%+d", iShift));
+        m_aWaveTime[2].SetText(m_aBossTime[2].GetText());
+    }
+    else
+    {
+        m_aBossTime[2].SetText("");
+        m_aWaveTime[2].SetText("");
+    }
+
     // adjust time position (# only required if alignment is centered)
     (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2 vSize)
     {
@@ -454,6 +499,7 @@ void cInterface::Move()
     m_BossHealthValue  .SetAlpha(fAlphaBossFull);
     m_aBossTime[0]     .SetAlpha(fAlphaBossFull);
     m_aBossTime[1]     .SetAlpha(fAlphaBossFull);
+    m_aBossTime[2]     .SetAlpha(fAlphaBossFull);
 
     // move boss
     m_aBossHealthBar[0].Move();
@@ -462,16 +508,50 @@ void cInterface::Move()
     m_BossHealthValue  .Move();
     m_aBossTime[0]     .Move();
     m_aBossTime[1]     .Move();
+    m_aBossTime[2]     .Move();
 
     // set wave transparency
     m_WaveName    .SetAlpha(fAlphaWaveFull);
     m_aWaveTime[0].SetAlpha(fAlphaWaveFull);
     m_aWaveTime[1].SetAlpha(fAlphaWaveFull);
+    m_aWaveTime[2].SetAlpha(fAlphaWaveFull);
 
     // move wave
     m_WaveName    .Move();
     m_aWaveTime[0].Move();
     m_aWaveTime[1].Move();
+    m_aWaveTime[2].Move();
+    
+    
+    const coreFloat* pfMedalGoal  = g_pGame->GetCurMission()->GetMedalGoal();
+    const coreFloat  fTimeShifted = g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe();
+    if(pfMedalGoal && fTimeShifted)
+    {
+        cMenu::ApplyMedalTexture(&m_GoalMedal, cGame::CalcMedal(fTimeShifted, pfMedalGoal), MEDAL_TYPE_WAVE);
+        m_GoalTime.SetText(PRINT("%03.0f", CEIL(cGame::CalcMedalTime(fTimeShifted, pfMedalGoal))));
+
+        m_GoalMedal.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        m_GoalTime .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    }
+    else
+    {
+        m_GoalMedal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_GoalTime .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
+    
+    
+    m_GoalTime .SetPosition(coreVector2(-0.06f, m_aWaveTime[0].GetPosition().y));
+    m_GoalMedal.SetSize(coreVector2(1.0f,1.0f) * 0.04f);
+    m_GoalMedal.SetPosition(coreVector2(-0.12f,  m_aWaveTime[0].GetPosition().y + (m_GoalMedal.GetSize().y - m_GoalTime.GetSize().y) * 0.5f));
+    
+    
+    // 
+    m_GoalMedal.SetAlpha(fAlphaWaveFull);    
+    m_GoalTime .SetAlpha(fAlphaWaveFull);    
+
+    // 
+    m_GoalMedal.Move();
+    m_GoalTime .Move();
 
     // check for active banner
     const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart;
@@ -862,11 +942,17 @@ void cInterface::UpdateLayout()
     nUpdateFunc(&m_BossHealthValue,   vTop);
     nUpdateFunc(&m_aBossTime[0],      vTop);
     nUpdateFunc(&m_aBossTime[1],      vTop);
+    nUpdateFunc(&m_aBossTime[2],      vTop);
 
     // 
     nUpdateFunc(&m_WaveName,     vBottom);
     nUpdateFunc(&m_aWaveTime[0], vTop);
     nUpdateFunc(&m_aWaveTime[1], vTop);
+    nUpdateFunc(&m_aWaveTime[2], vTop);
+
+    // 
+    nUpdateFunc(&m_GoalMedal, vTop);
+    nUpdateFunc(&m_GoalTime,  vTop);
 }
 
 

@@ -357,6 +357,21 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
         g_pSave->EditLocalStatsMission(iOldIndex)->iCountEnd  += 1u;
 
         // 
+        const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(m_TimeTable.GetTimeShiftedMission(iOldIndex));
+        if(iTimeShiftedUint < g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShifted)
+        {
+            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShifted   = iTimeShiftedUint;
+            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShiftGood = g_pGame->GetTimeTable()->GetShiftGoodMission(iOldIndex);
+            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShiftBad  = g_pGame->GetTimeTable()->GetShiftBadMission (iOldIndex);
+        }
+        if(iTimeShiftedUint > g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShifted)
+        {
+            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShifted   = iTimeShiftedUint;
+            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShiftGood = g_pGame->GetTimeTable()->GetShiftGoodMission(iOldIndex);
+            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShiftBad  = g_pGame->GetTimeTable()->GetShiftBadMission (iOldIndex);
+        }
+
+        // 
         g_pSave->SaveFile();
     }
 
@@ -571,22 +586,31 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
 
 // ****************************************************************
 // 
-coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal)
+coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreFloat* pfMedalGoal)
 {
     ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
 
     // 
-    coreUint8 iMedal;
-         if(fTime <= pfMedalGoal[0]) iMedal = MEDAL_DARK;
-    else if(fTime <= pfMedalGoal[1]) iMedal = MEDAL_PLATINUM;
-    else if(fTime <= pfMedalGoal[2]) iMedal = MEDAL_GOLD;
-    else if(fTime <= pfMedalGoal[3]) iMedal = MEDAL_SILVER;
-    else                             iMedal = MEDAL_BRONZE;
+         if(fTime <= pfMedalGoal[0]) return MEDAL_DARK;
+    else if(fTime <= pfMedalGoal[1]) return MEDAL_PLATINUM;
+    else if(fTime <= pfMedalGoal[2]) return MEDAL_GOLD;
+    else if(fTime <= pfMedalGoal[3]) return MEDAL_SILVER;
+    else                             return MEDAL_BRONZE;
+}
+
+
+// ****************************************************************
+// 
+coreFloat cGame::CalcMedalTime(const coreFloat fTime, const coreFloat* pfMedalGoal)
+{
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
 
     // 
-    iMedal -= MIN(iDamageTaken, coreUint32(iMedal - MEDAL_BRONZE));
-
-    return iMedal;
+         if(fTime <= pfMedalGoal[0]) return pfMedalGoal[0] - fTime;
+    else if(fTime <= pfMedalGoal[1]) return pfMedalGoal[1] - fTime;
+    else if(fTime <= pfMedalGoal[2]) return pfMedalGoal[2] - fTime;
+    else if(fTime <= pfMedalGoal[3]) return pfMedalGoal[3] - fTime;
+    else                             return 0.0f;
 }
 
 
@@ -625,9 +649,9 @@ coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
     switch(iBadge)
     {
     default: ASSERT(false)
-    case BADGE_HARD:   return 3000u;
-    case BADGE_NORMAL: return 2000u;
-    case BADGE_EASY:   return 1000u;
+    case BADGE_HARD:   return 15u;
+    case BADGE_NORMAL: return 10u;
+    case BADGE_EASY:   return 5u;
     }
 }
 
@@ -719,7 +743,7 @@ coreBool cGame::__HandleIntro()
                 if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
                 {
                     g_pSpecialEffects->PlaySound      (pPlayer->GetPosition(), 1.0f, SOUND_RUSH_LONG);
-                    g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, i ? (COLOR_ENERGY_YELLOW) : (COLOR_ENERGY_BLUE));     
+                    g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, pPlayer->GetEnergyColor());
                 }
 
                 // fly player animated into the game field

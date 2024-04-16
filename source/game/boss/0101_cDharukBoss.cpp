@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+// TODO 1: boomerangs: can fly in sinus wave from left to right, can fly in a circle (either as row, or as column), can fly as star-shape back and forth in the center with delay
+
 
 // ****************************************************************
 // counter identifier

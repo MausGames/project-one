@@ -71,7 +71,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
     */
 
@@ -218,7 +218,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -397,7 +397,7 @@ void cErrorMission::__SetupOwn()
 
         });
 
-        STAGE_WAVE("fünf", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("fünf", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -546,7 +546,7 @@ void cErrorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -600,7 +600,7 @@ void cErrorMission::__SetupOwn()
 
         
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
 
         // der ausweichende gegner weicht aus sobald er getroffen wird
     });
@@ -654,7 +654,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->SetPosition (coreVector3(vNewPos, 0.0f));
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
 
         // pushing enemies are on left and right side and shooting on them will move them to the other side, they die when reaching the other side (is only second wave?)
     });
@@ -735,7 +735,7 @@ void cErrorMission::__SetupOwn()
                               else pBullet->SetPosition(coreVector3(pOwner ->GetPosition().x, pBullet->GetPosition().y, pBullet->GetPosition().z));
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -773,7 +773,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -845,7 +845,7 @@ void cErrorMission::__SetupOwn()
                         else pBulletEnemy->SetDamage(iDamage - 1);
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -896,7 +896,7 @@ void cErrorMission::__SetupOwn()
             pBullet->SetPosition(pBullet->GetPosition() + coreVector3(0.0f, TIME * FOREGROUND_AREA.y * -1.5f, 0.0f));
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -948,7 +948,7 @@ void cErrorMission::__SetupOwn()
             g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.0f, NULL, -vPos,  vDir)->ChangeSize(1.2f); 
         }
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -997,7 +997,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 30.0f);
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1056,7 +1056,7 @@ void cErrorMission::__SetupOwn()
 
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1139,7 +1139,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1239,7 +1239,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1287,7 +1287,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1362,7 +1362,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("fünf", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("fünf", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1530,7 +1530,7 @@ void cErrorMission::__SetupOwn()
 
         });
 
-        STAGE_WAVE("EINUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("EINUNDSECHZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -2220,7 +2220,7 @@ void UnusedWaves()
             }
         });
 
-        STAGE_WAVE("EINS", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("EINS", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -2299,7 +2299,7 @@ void UnusedWaves()
             }
         });
 
-        STAGE_WAVE("EINS", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("EINS", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -2408,7 +2408,7 @@ void UnusedWaves()
             pEnemy->TakeDamage(100, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
         });
 
-        STAGE_WAVE("VIER", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("VIER", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -2529,7 +2529,7 @@ void UnusedWaves()
             }
         });
 #endif
-        STAGE_WAVE("SECHSUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("SECHSUNDSECHZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -2702,7 +2702,7 @@ void UnusedWaves()
             }
         });
 
-        STAGE_WAVE("SECHSUNDNEUNZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("SECHSUNDNEUNZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -2781,4 +2781,28 @@ void UnusedWaves()
         pPath3->AddNode (coreVector2( 1.7f, -1.3f), coreVector2(1.0f,-1.0f).Normalized());
         pPath3->Refine();
     });
+    
+    // infinity back and forth flying
+    else if(m_iStageSub == 0u)
+    {
+        coreVector2 vCurPos = pEnemy->GetPosition ().xy();
+        coreVector2 vCurDir = pEnemy->GetDirection().xy();
+
+        vCurPos += vCurDir * (50.0f * TIME);
+
+                if((vCurPos.x < -FOREGROUND_AREA.x * 1.3f) && (vCurDir.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + FOREGROUND_AREA.x * 1.3f); vCurDir.x =  ABS(vCurDir.x); vCurPos.y = pEnemy->NearestPlayerDual(1u)->GetPosition().y;}
+        else if((vCurPos.x >  FOREGROUND_AREA.x * 1.3f) && (vCurDir.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - FOREGROUND_AREA.x * 1.3f); vCurDir.x = -ABS(vCurDir.x); vCurPos.y = pEnemy->NearestPlayerDual(0u)->GetPosition().y;}
+
+        pEnemy->SetPosition (coreVector3(vCurPos, 0.0f));
+        pEnemy->SetDirection(coreVector3(vCurDir, 0.0f));
+
+        if(STAGE_TICK_LIFETIME(16.0f, 0.0f) && ((s_iTick % 6u) < 3u))
+        {
+            const coreVector2 vPos = pEnemy->GetPosition ().xy();
+            const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
+
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.4f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.4f);
+        }
+    }
 */

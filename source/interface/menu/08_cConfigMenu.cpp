@@ -335,9 +335,18 @@ cConfigMenu::cConfigMenu()noexcept
     m_HudType      .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
     m_HudType      .AddEntryLanguage("HUDTYPE_BORDER",         2u);
-    for(coreUintW i = 60u; i <= 240u; i += 30u) m_UpdateFreq.AddEntry(coreData::ToChars(i), i);
+    m_UpdateFreq   .AddEntryLanguage("VALUE_AUTO",             0u);   // TODO 1: "Auto (60 Hz)"
+    m_UpdateFreq   .AddEntry        ("60 Hz",                  60u);
+    m_UpdateFreq   .AddEntry        ("75 Hz",                  75u);
+    m_UpdateFreq   .AddEntry        ("100 Hz",                 100u);
+    m_UpdateFreq   .AddEntry        ("120 Hz",                 120u);
+    m_UpdateFreq   .AddEntry        ("144 Hz",                 144u);
+    m_UpdateFreq   .AddEntry        ("165 Hz",                 165u);
+    m_UpdateFreq   .AddEntry        ("240 Hz",                 240u);
+    //m_UpdateFreq   .AddEntry        ("360 Hz",                 360u); check again which hz are actually useful
+    //m_UpdateFreq   .AddEntry        ("480 Hz",                 480u); brand new https://arstechnica.com/gadgets/2022/05/480-hz-desktop-laptop-displays-teased-by-pc-panel-pusher-auo/
     m_Version      .AddEntry        ("1.0.0",                  1u);
-    m_Version      .AddEntryLanguage("VERSION_LATEST",         0u);   // "Latest (v1.2)"
+    m_Version      .AddEntryLanguage("VERSION_LATEST",         0u);   // TODO 1: "Latest (1.2.0)"
     m_MirrorMode   .AddEntryLanguage("VALUE_OFF",              0u);
     m_MirrorMode   .AddEntryLanguage("VALUE_LOW",              1u);
     m_MirrorMode   .AddEntryLanguage("VALUE_HIGH",             2u);

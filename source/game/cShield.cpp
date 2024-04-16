@@ -169,7 +169,7 @@ void cShieldEffect::UnbindEnemy(cEnemy* pEnemy)
 cShieldManager::cShieldManager()noexcept
 {
     // 
-    m_aShieldEffect[SHIELD_EFFECT_INVINCIBLE].Construct("effect_energy_spheric_program", "effect_energy_spheric_inst_program", COLOR_ENERGY_CYAN);
+    m_aShieldEffect[SHIELD_EFFECT_INVINCIBLE].Construct("effect_energy_spheric_program", "effect_energy_spheric_inst_program", COLOR_ENERGY_BLUE);
     m_aShieldEffect[SHIELD_EFFECT_DAMAGING]  .Construct("effect_energy_program",         "effect_energy_inst_program",         COLOR_ENERGY_RED);
 }
 

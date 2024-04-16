@@ -19,8 +19,7 @@ cTooltip::cTooltip()noexcept
     const coreVector2 vAlignment = coreVector2(TOOLTIP_TARGET_OFFSET.x ? SIGN(TOOLTIP_TARGET_OFFSET.x) : 0.0f,
                                                TOOLTIP_TARGET_OFFSET.y ? SIGN(TOOLTIP_TARGET_OFFSET.y) : 0.0f);
     // load object resources
-    this->DefineProgram("default_2d_program");
-    this->DefineTexture(0u, "default_white.png");
+    this->DefineProgram("menu_color_program");
 
     // set object properties
     this->SetPosition (TOOLTIP_TARGET_OFFSET);

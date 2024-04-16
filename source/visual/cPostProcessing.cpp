@@ -19,6 +19,7 @@ cPostProcessing::cPostProcessing()noexcept
 , m_avData            {}
 , m_afOffset          {}
 , m_bOffsetActive     (false)
+, m_fAnimation        (0.0f)
 {
     // load post-processing shader-programs
     m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
@@ -32,21 +33,21 @@ cPostProcessing::cPostProcessing()noexcept
     // create wallpapers
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
     {
-        m_aWall[i].DefineProgram("menu_border_direct_program");
         m_aWall[i].DefineTexture(0u, "menu_background_black.png");
+        m_aWall[i].DefineProgram("menu_border_direct_program");
         m_aWall[i].SetTexOffset (coreVector2(0.0f,0.071f));
     }
     this->__UpdateWall();
 
     // create separator
-    m_Separator.DefineProgram("default_2d_program");
-    m_Separator.DefineTexture(0u, "default_white.png");
+    m_Separator.DefineProgram("menu_color_program");
     m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
 
     // 
-    m_Border.DefineProgram("default_2d_program");
-    m_Border.DefineTexture(0u, "default_white.png");
-    m_Border.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.4f);
+    m_Border.DefineTexture(0u, "menu_background_black.png");
+    m_Border.DefineProgram("menu_grey_program");
+    m_Border.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
+    m_Border.SetTexSize   (coreVector2(1.0f,1.0f)      * 3.0f);
 
     // 
     this->SetWallOpacity  (0.0f);
@@ -128,6 +129,9 @@ void cPostProcessing::Move()
     // 
     if(m_bSplitScreen) m_fSplitScreenValue.UpdateMin( 3.0f, 1.0f);
                   else m_fSplitScreenValue.UpdateMax(-3.0f, 0.0f);
+
+    // 
+    m_fAnimation.UpdateMod(1.0f, 10.0f);
 
     // update interiors
     this->__UpdateInterior();
@@ -268,8 +272,9 @@ void cPostProcessing::__UpdateInterior()
 
     // 
     m_Border.SetPosition (this->GetPosition ());
-    m_Border.SetSize     (this->GetSize     () + 0.02f);
+    m_Border.SetSize     (this->GetSize     () + 0.022f);
     m_Border.SetDirection(this->GetDirection());
+    m_Border.SetTexOffset(coreVector2(0.1f,0.1f) * m_fAnimation);
     m_Border.Move();
 }
 

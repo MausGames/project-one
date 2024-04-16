@@ -174,6 +174,13 @@ void cSave::Clear()
 coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, const coreChar* pcPath)
 {
     // 
+    if(!coreData::FileExists(pcPath))
+    {
+        Core::Log->Warning("Save (%s) does not exist!", pcPath);
+        return false;
+    }
+
+    // 
     coreArchive oArchive(pcPath);
     coreFile* pHeaderFile = oArchive.GetFile("header");
     WARN_IF(!pHeaderFile)

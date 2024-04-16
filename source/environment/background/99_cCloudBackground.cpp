@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+// TODO 1: wind sound sollte noch ausgetauscht werden, dieses schnell+langsam abwechselnd is orsch
+
 
 // ****************************************************************
 // constructor

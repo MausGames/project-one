@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO 3: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
+
 // ****************************************************************
 // constructor
 cNevoMission::cNevoMission()noexcept
@@ -28,6 +28,7 @@ cNevoMission::cNevoMission()noexcept
 , m_BlockWave    (NEVO_BLOCKS)
 , m_apBlockOwner {}
 , m_afBlockScale {}
+, m_afBlockRota  {}
 , m_vForce       (coreVector2(0.0f,0.0f))
 , m_vImpact      (coreVector2(0.0f,0.0f))
 , m_bClamp       (false)
@@ -140,16 +141,13 @@ cNevoMission::cNevoMission()noexcept
             // load object resources
             coreObject3D* pBlock = &m_aBlockRaw[i];
             pBlock->DefineModel  ("object_tetra_top.md3");
+            //pBlock->DefineModel  ("object_cube_top.md3");
+            //pBlock->DefineModel  ("object_sphere.md3");
             pBlock->DefineTexture(0u, "effect_energy.png");
             pBlock->DefineProgram("effect_energy_flat_spheric_program");
 
             // set object properties
-#if defined(_P1_VIDEO_)
-            pBlock->SetColor3 (COLOR_ENERGY_YELLOW);
-#else
             pBlock->SetColor3 (COLOR_ENERGY_ORANGE);
-#endif
-            pBlock->SetTexSize(coreVector2(3.0f,1.2f) * 0.55f);
             pBlock->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
@@ -386,10 +384,14 @@ void cNevoMission::EnableBlock(const coreUintW iIndex, const cShip* pOwner, cons
     ASSERT(pOwner)
     m_apBlockOwner[iIndex] = pOwner;
     m_afBlockScale[iIndex] = fScale;
+    m_afBlockRota [iIndex] = 0.0f;
 
     // 
     pBlock->SetSize   (coreVector3(0.0f,0.0f,0.0f));
+    pBlock->SetTexSize(coreVector2(3.0f,1.2f) * 0.055f * ABS(fScale));
+    //pBlock->SetTexSize(coreVector2(3.0f,1.2f) * 0.55f * ABS(fScale));
     pBlock->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    pWave ->SetTexSize(pBlock->GetTexSize());
     pWave ->SetEnabled(CORE_OBJECT_ENABLE_ALL);
 }
 
@@ -475,25 +477,6 @@ void cNevoMission::__RenderOwnBottom()
 
 // ****************************************************************
 // 
-void cNevoMission::__RenderOwnUnder()
-{
-    DEPTH_PUSH
-
-    glDepthMask(false);
-    {
-        // 
-        m_BlockWave.Render();
-    }
-    glDepthMask(true);
-
-    // 
-    m_Block.Render();
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Block);
-}
-
-
-// ****************************************************************
-// 
 void cNevoMission::__RenderOwnOver()
 {
     DEPTH_PUSH
@@ -503,16 +486,23 @@ void cNevoMission::__RenderOwnOver()
         // 
         m_BlastLine.Render();
         m_Blast    .Render();
+
+        // 
+        m_BlockWave.Render();
     }
     glEnable(GL_DEPTH_TEST);
 
     // 
-    cLodObject::RenderHighList(&m_Bomb);
+    if(m_Bomb.GetCurEnabled()) cLodObject::RenderHighList(&m_Bomb);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Bomb);
 
     // 
     m_Arrow.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Arrow);
+
+    // 
+    m_Block.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Block);
 
 #if !defined(_P1_VIDEO_)
     // 
@@ -693,7 +683,7 @@ void cNevoMission::__MoveOwnAfter()
         const cShip* pOwner = m_apBlockOwner[i];
         if(pOwner)
         {
-            pBlock->SetPosition(coreVector3(pOwner->GetPosition().xy(), 0.0f));
+            
         }
 
         // 
@@ -705,9 +695,9 @@ void cNevoMission::__MoveOwnAfter()
         if(fFade >= 2.0f) this->DisableBlock(i, false);
 
         // 
-        const coreFloat   fValue = FRACT(5.0f * m_fAnimation);
-        const coreFloat   fSize  = ABS(m_afBlockScale[i]) * (LERPB(0.0f, 1.0f, MIN(fFade, 1.0f)) + LERPB(0.0f, 1.0f, MAX(fFade - 1.0f, 0.0f)));
-        const coreVector2 vDir   = coreVector2::Direction(m_fAnimation * ((m_afBlockScale[i] < 0.0f) ? (-2.0f*PI) : (1.0f*PI)));
+        const coreFloat   fValue = FRACT(2.0f * m_fAnimation);
+        const coreFloat   fSize  = m_afBlockScale[i] * (LERPB(0.0f, 1.0f, MIN(fFade, 1.0f)) + LERPB(0.0f, 1.0f, MAX(fFade - 1.0f, 0.0f)));
+        const coreVector2 vDir   = coreVector2::Direction(m_afBlockRota[i]);
 
         // 
         pBlock->SetSize     (coreVector3(fSize, fSize, fFade));
@@ -728,16 +718,16 @@ void cNevoMission::__MoveOwnAfter()
     m_BlockWave.MoveNormal();
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBlock, const coreVector3 vIntersection, const coreBool bFirstHit)
-    {
-        if(!bFirstHit) return;
-
-        // 
-        pPlayer->TakeDamage(10, ELEMENT_ORANGE, vIntersection.xy());
-
-        // 
-        g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_ORANGE);
-    });
+    //cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pBlock, const coreVector3 vIntersection, const coreBool bFirstHit)
+    //{
+    //    if(!bFirstHit) return;
+//
+    //    // 
+    //    pPlayer->TakeDamage(10, ELEMENT_ORANGE, vIntersection.xy());
+//
+    //    // 
+    //    g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_ORANGE);
+    //});
 
     if(m_Container.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
@@ -768,7 +758,7 @@ void cNevoMission::__MoveOwnAfter()
         m_Container.Move();
 
         // 
-        cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             if(!bFirstHit) return;
 
@@ -782,7 +772,7 @@ void cNevoMission::__MoveOwnAfter()
         });
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, const coreObject3D* pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             if(!bFirstHit) return;
 

@@ -13,6 +13,10 @@
 // TODO 1: re-position everything after resolution-change (also menu)
 // TODO 3: realtime language update (other locations as well ?), boss-titles and wave-names
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
+// TODO 3: effect on UI when recovering life or shield (and on player, and combat text)
+// TODO 1: aktuelles level anzeigen mit wave 01-03, 03-BOSS (e.g. oben rechts im single-player)
+// TODO 1: health icons should be different, when the player has color (+ transformed to enemy)
+// TODO 4: merge wave time and boss time if possible
 
 
 // ****************************************************************
@@ -27,7 +31,7 @@
 #define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
 #define INTERFACE_BANNER_DURATION_MISSION (3.7f)                            // 
 #define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
-#define INTERFACE_BANNER_DURATION_SCORE   (3.0f)                            // 
+#define INTERFACE_BANNER_DURATION_SCORE   (5.0f)                            // 
 #define INTERFACE_BANNER_DURATION_ALERT   (3.0f)                            // 
 
 #define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
@@ -69,11 +73,14 @@ private:
 
     cGuiObject m_aBossHealthBar[3];         // boss health bar (0 = background, 1 = foreground, 2 = empty)
     cGuiLabel  m_BossHealthValue;           // boss health value
-    cGuiLabel  m_aBossTime[2];              // boss time (0 = seconds, 1 = deci-seconds)
+    cGuiLabel  m_aBossTime[3];              // boss time (0 = seconds, 1 = deci-seconds, 2 = shift)
     coreFlow   m_fBossSpin;                 // 
 
     cGuiLabel m_WaveName;                   // wave name
-    cGuiLabel m_aWaveTime[2];               // wave time (0 = seconds, 1 = deci-seconds)
+    cGuiLabel m_aWaveTime[3];               // wave time (0 = seconds, 1 = deci-seconds, 2 = shift)
+
+    cGuiObject m_GoalMedal;                 // 
+    cGuiLabel  m_GoalTime;                  // 
 
     cGuiObject m_BannerBar;                 // banner background
     cGuiObject m_BannerShadow;              // 

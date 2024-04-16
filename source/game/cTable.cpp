@@ -383,6 +383,44 @@ void cTimeTable::Update()
 
 // ****************************************************************
 // 
+void cTimeTable::AddShiftGood(const coreUint16 iValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+    m_aiShiftGoodMission [iMissionIndex]                += iValue;
+    m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex] += iValue;
+}
+
+void cTimeTable::AddShiftGood(const coreUint16 iValue)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->AddShiftGood(iValue, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+void cTimeTable::AddShiftBad(const coreUint16 iValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+    m_aiShiftBadMission [iMissionIndex]                += iValue;
+    m_aaiShiftBadSegment[iMissionIndex][iSegmentIndex] += iValue;
+}
+
+void cTimeTable::AddShiftBad(const coreUint16 iValue)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->AddShiftBad(iValue, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
 void cTimeTable::Reset()
 {
     // reset all time values (# no memset)
@@ -390,6 +428,12 @@ void cTimeTable::Reset()
     m_iTimeTotal = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiTimeMission[j] = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * RCP(m_fFrameTime)) : 0u;
+
+    // reset all shift values (# no memset)
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiShiftGoodMission[j] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiShiftGoodSegment[j][i] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiShiftBadMission [j] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiShiftBadSegment [j][i] = 0u;
 }
 
 
@@ -406,4 +450,36 @@ coreFloat cTimeTable::GetTimeSegmentSafe()const
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->GetTimeSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+coreInt32 cTimeTable::GetShiftSegmentSafe(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const
+{
+    // 
+    return (iSegmentIndex != MISSION_NO_SEGMENT) ? (coreInt32(this->GetShiftBadSegment(iMissionIndex, iSegmentIndex)) - coreInt32(this->GetShiftGoodSegment(iMissionIndex, iSegmentIndex))) : 0;
+}
+
+coreInt32 cTimeTable::GetShiftSegmentSafe()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->GetShiftSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+coreFloat cTimeTable::GetTimeShiftedSegmentSafe(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const
+{
+    // 
+    return this->GetTimeSegmentSafe(iMissionIndex, iSegmentIndex) + I_TO_F(this->GetShiftSegmentSafe(iMissionIndex, iSegmentIndex));
+}
+
+coreFloat cTimeTable::GetTimeShiftedSegmentSafe()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->GetTimeShiftedSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }

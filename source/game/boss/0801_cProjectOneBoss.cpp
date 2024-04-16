@@ -28,6 +28,7 @@
 // - m_aBlockRaw[i].SetColor3(coreVector3(1.0f,1.0f,1.0f) * (0.5f + 0.5f * ABS(vPosition.Normalized().z)));
 // - colors on blocks may need *1.5 like on ship-shader
 // - return (iIndex + F_TO_UI(m_fFlyOffset / DARK_DETAIL)) % DARK_BLOCKS_Y; GetBlockShift
+// - color interpolation der blocks, abhängig von ihrer höhe, entweder zwischen zwei farbtönen oder farbton+grau
 
 
 // ****************************************************************

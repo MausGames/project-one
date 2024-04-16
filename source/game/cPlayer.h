@@ -20,6 +20,9 @@
 // TODO 4: remove dark shading resources, if not required anymore (maybe for bonus phases)
 // TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
+// TODO 3: effect on player when loosing combo or chain (and on UI, and combat text)
+// TODO 1: PLAYER_SHIELD_INTRO always for intro
+// TODO 3: all player bullets get destroyed with death
 
 
 // ****************************************************************
@@ -28,13 +31,14 @@
 #define PLAYER_EQUIP_SUPPORTS     (EQUIP_SUPPORTS)     // 
 #define PLAYER_LIVES              (LIVES)              // 
 #define PLAYER_SHIELD             (SHIELD)             // 
+#define PLAYER_SHIELD_INTRO       (1000u)              // 
 #define PLAYER_COLLISION_MIN      (0.15f)              // 
 #define PLAYER_SIZE_FACTOR        (1.15f * m_fScale)   // 
 #define PLAYER_AREA_FACTOR        (1.06f)              // 
 #define PLAYER_RANGE_SIZE         (1.04f)              // 
 #define PLAYER_WIND_SIZE          (4.5f)               // 
 #define PLAYER_BUBBLE_SIZE        (4.8f)               // 
-#define PLAYER_ROLL_SPEED         (0.5f)               // 
+#define PLAYER_ROLL_SPEED         (0.4f)               // 
 #define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)      // (ship is vulnerable for a single frame) 
 #define PLAYER_FEEL_TIME          (3.0f)               // 
 #define PLAYER_FEEL_TIME_CONTINUE (5.0f)               // 
@@ -92,56 +96,56 @@ private:
 
 
 private:
-    cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];               // main weapon objects (bullet factories, should never be NULL)
+    cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];                // main weapon objects (bullet factories, should never be NULL)
 
-    const sGameInput* m_pInput;                              // pointer to associated input set (should never be NULL)
-    coreVector4       m_vArea;                               // 
+    const sGameInput* m_pInput;                               // pointer to associated input set (should never be NULL)
+    coreVector4       m_vArea;                                // 
 
-    coreVector2 m_vForce;                                    // 
-    coreFloat   m_fScale;                                    // 
-    coreFloat   m_fTilt;                                     // 
+    coreVector2 m_vForce;                                     // 
+    coreFloat   m_fScale;                                     // 
+    coreFloat   m_fTilt;                                      // 
 
-    coreProtect<coreFloat> m_fMoveSpeed;                     // 
-    coreProtect<coreFloat> m_fShootSpeed;                    // 
+    coreProtect<coreFloat> m_fMoveSpeed;                      // 
+    coreProtect<coreFloat> m_fShootSpeed;                     // 
 
-    coreFlow  m_fRollTime;                                   // 
-    coreFlow  m_fFeelTime;                                   // 
-    coreFlow  m_fIgnoreTime;                                 // 
-    coreUint8 m_iRollDir;                                    // 
-    coreUint8 m_iFeelType;                                   // 
-    coreUint8 m_iIgnoreType;                                 // 
+    coreFlow  m_fRollTime;                                    // 
+    coreFlow  m_fFeelTime;                                    // 
+    coreFlow  m_fIgnoreTime;                                  // 
+    coreUint8 m_iRollDir;                                     // 
+    coreUint8 m_iFeelType;                                    // 
+    coreUint8 m_iIgnoreType;                                  // 
 
-    coreFlow  m_fInterrupt;                                  // 
-    coreFlow  m_fLightningTime;                              // 
-    coreFloat m_fLightningAngle;                             // 
+    coreFlow  m_fInterrupt;                                   // 
+    coreFlow  m_fLightningTime;                               // 
+    coreFloat m_fLightningAngle;                              // 
 
-    coreFlow m_fDesaturate;                                  // 
+    coreFlow m_fDesaturate;                                   // 
 
-    coreProtect<coreInt32> m_iMaxShield;                     // 
-    coreProtect<coreInt32> m_iCurShield;                     // 
+    coreProtect<coreInt32> m_iMaxShield;                      // 
+    coreProtect<coreInt32> m_iCurShield;                      // 
 
-    cDataTable  m_DataTable;                                 // 
-    cScoreTable m_ScoreTable;                                // 
+    cDataTable  m_DataTable;                                  // 
+    cScoreTable m_ScoreTable;                                 // 
 
-    coreProgramPtr m_pNormalProgram;                         // 
-    coreProgramPtr m_pDarkProgram;                           // 
-    coreFlow       m_fAnimation;                             // 
-    coreUint16     m_iLook;                                  // 
+    coreProgramPtr m_pNormalProgram;                          // 
+    coreProgramPtr m_pDarkProgram;                            // 
+    coreFlow       m_fAnimation;                              // 
+    coreUint16     m_iLook;                                   // 
 
-    coreVector2 m_vOldDir;                                   // 
-    coreFlow    m_fRangeValue;                               // 
-    coreFlow    m_fArrowValue;                               // 
+    coreVector2 m_vOldDir;                                    // 
+    coreFlow    m_fRangeValue;                                // 
+    coreFlow    m_fArrowValue;                                // 
 
-    coreObject3D m_Dot;                                      // 
-    coreObject3D m_Range;                                    // 
-    coreObject3D m_Arrow;                                    // 
-    coreObject3D m_Wind;                                     // 
-    coreObject3D m_Bubble;                                   // 
-    coreObject3D m_aShield[2];                               // 
-    coreObject3D m_Exhaust;                                  // 
+    coreObject3D m_Dot;                                       // 
+    coreObject3D m_Range;                                     // 
+    coreObject3D m_Arrow;                                     // 
+    coreObject3D m_Wind;                                      // 
+    coreObject3D m_Bubble;                                    // 
+    coreObject3D m_aShield[2];                                // 
+    coreObject3D m_Exhaust;                                   // 
 
-    coreMap<const coreObject3D*, coreUint32> m_aCollision;   // 
-    coreMap<const coreObject3D*, sRayData>   m_aRayData;     // 
+    coreMap<const coreObject3D*, coreUint32> m_aiCollision;   // 
+    coreMap<const coreObject3D*, sRayData>   m_aRayData;      // 
     
     
             coreVector2 vTest;
@@ -217,6 +221,9 @@ public:
     void UpdateExhaust(const coreFloat fStrength);
 
     // 
+    inline coreVector3 GetEnergyColor()const {return m_Range.GetColor3() * (1.0f/1.1f);}
+
+    // 
     coreBool TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);
     coreBool TestCollisionPrecise(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, coreFloat* OUTPUT pfHitDistance, coreUint8* OUTPUT piHitCount, coreBool* OUTPUT pbFirstHit);
 
@@ -244,7 +251,8 @@ public:
     inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
     inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
-    inline void SetCurShield (const coreUint8   iCurShield)  {m_iCurShield  = iCurShield;}
+    inline void SetMaxShield (const coreInt32   iMaxShield)  {m_iMaxShield  = iMaxShield;}
+    inline void SetCurShield (const coreInt32   iCurShield)  {m_iCurShield  = iCurShield;}
 
     // get object properties
     inline const sGameInput*  GetInput       ()const {ASSERT(m_pInput) return m_pInput;}
@@ -346,7 +354,8 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
 {
     // 
     //Core::Manager::Object->TestCollision(TYPE_PLAYER, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), [&](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount, const coreBool bFirstHit)
-    FOR_EACH(it, Core::Manager::Object->GetObjectList(TYPE_PLAYER))
+    const coreList<coreObject3D*>& oPlayerList = Core::Manager::Object->GetObjectList(TYPE_PLAYER);
+    FOR_EACH(it, oPlayerList)
     {
         cPlayer* pPlayer = d_cast<cPlayer*>(*it);
 

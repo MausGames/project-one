@@ -114,6 +114,8 @@
 #define LERP_SMOOTH_REV (&LerpSmoothRev<coreFloat>)
 #define LERP_BREAK      (&LERPB <coreFloat>)
 #define LERP_BREAK_REV  (&LERPBR<coreFloat>)
+#define LERP_HERMITE3   (&LERPH3<coreFloat>)
+#define LERP_HERMITE5   (&LERPH5<coreFloat>)
 
 
 // ****************************************************************
@@ -904,6 +906,29 @@ private:
 
 
 // ****************************************************************
+// Intro boss class
+class cIntroBoss final : public cBoss
+{
+private:
+    cCustomEnemy m_Shield;   // 
+
+
+public:
+    cIntroBoss()noexcept;
+
+    DISABLE_COPY(cIntroBoss)
+    ASSIGN_ID_EX(9901, "BALMUNG", COLOR_MENU_PURPLE)
+
+
+private:
+    // execute own routines
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
+};
+
+
+// ****************************************************************
 // 
 template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat fSpeed, G&& nLerpFunc, F&& nUpdateFunc)
 {
@@ -955,7 +980,7 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
     {
         // 
         const coreUint16 iTicksBefore = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
-        oTimer.Update(fRate * RCP(I_TO_F(iTicks)));
+        oTimer.Update(RoundFreq(fRate) * RCP(I_TO_F(iTicks)));
         const coreUint16 iTicksAfter  = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
 
         // 
@@ -967,7 +992,7 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
         ASSERT(fRate <= FRAMERATE_MIN)
 
         // 
-        if(oTimer.Update(fRate)) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
+        if(oTimer.Update(RoundFreq(fRate))) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
     }
 }
 

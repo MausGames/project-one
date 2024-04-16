@@ -16,6 +16,7 @@
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
 // TODO 3: remove unused mix types, or init them on demand
 // TODO 4: check if m_afStrength != 0.0f is required and remove otherwise
+// TODO 2: on first-play, the first background should always be the clouds
 
 
 // ****************************************************************

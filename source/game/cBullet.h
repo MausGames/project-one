@@ -645,7 +645,7 @@ public:
     inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cQuadBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
     inline cQuadBullet* MakeYellow () {ASSERT(false)             return this;}
     inline cQuadBullet* MakeOrange () {ASSERT(false)             return this;}
     inline cQuadBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}

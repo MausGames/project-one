@@ -32,9 +32,17 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_BackgroundCoop.DefineProgram("menu_animate_program");
     m_BackgroundCoop.SetCenter    (coreVector2(0.0f,-0.16f));
 
-    m_Title.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_Title.SetPosition(coreVector2(0.0f,0.0f));
-    m_Title.SetText    (Core::Application->Settings.Name);
+    m_aTitle[0].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_aTitle[0].SetPosition(coreVector2(0.0f,0.0f));
+    m_aTitle[0].SetAlignment(coreVector2(-1.0f,1.0f));
+    m_aTitle[0].SetColor3  (COLOR_MENU_INSIDE);
+    m_aTitle[0].SetText    ("EIGEN");
+
+    m_aTitle[1].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_aTitle[1].SetPosition(coreVector2(0.0f,0.0f));
+    m_aTitle[1].SetAlignment(coreVector2(1.0f,1.0f));
+    m_aTitle[1].SetColor3  (COLOR_MENU_INSIDE * 0.6f);
+    m_aTitle[1].SetText    ("GRAU");
 
     m_aHeader[0].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     m_aHeader[0].SetPosition(coreVector2(0.0f,0.39f));
@@ -123,7 +131,8 @@ cSummaryMenu::cSummaryMenu()noexcept
         this->BindObject(SURFACE_SUMMARY_COOP, &m_aTotalPart[j]);
     }
 
-    this->BindObject(SURFACE_SUMMARY_TITLE, &m_Title);
+    this->BindObject(SURFACE_SUMMARY_TITLE, &m_aTitle[0]);
+    this->BindObject(SURFACE_SUMMARY_TITLE, &m_aTitle[1]);
 }
 
 
@@ -278,24 +287,24 @@ void cSummaryMenu::Move()
             if(m_eState == SUMMARY_INTRO)
             {
                 // 
-                g_pPostProcessing->SetValueAll(CLAMP(4.0f - m_fIntroTimer, 0.0f, 1.0f));
+                g_pPostProcessing->SetValueAll(1.0f - STEPH3(3.0f, 5.0f, m_fIntroTimer));
 
                 // 
-                if(g_pSave->GetHeader().oProgress.bFirstPlay)
+                if(g_pSave->GetHeader().oProgress.bFirstPlay)   // TODO 1: replace
                 {
-                    if(m_fIntroTimer >= 7.5f)
+                    if(m_fIntroTimer >= 12.0f)
                     {
                         // 
-                        this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.75f);
+                        this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.7f);
                     }
-                    else if(m_fIntroTimer >= 4.0f)
+                    else if(m_fIntroTimer >= 6.0f)
                     {
                         // 
                         g_pMenu->ShiftSurface(this, SURFACE_SUMMARY_TITLE, 0.5f);
                     }
                 }
 
-                if(m_fIntroTimer >= (g_pSave->GetHeader().oProgress.bFirstPlay ? 9.5f : 5.0f))
+                if(m_fIntroTimer >= (g_pSave->GetHeader().oProgress.bFirstPlay ? 14.0f : 6.0f))   // TODO 1: replace
                 {
                     // 
                     m_iStatus = 1;
@@ -315,6 +324,17 @@ void cSummaryMenu::Move()
                     g_pSpecialEffects->ClearAll();
                 }
             }
+
+            m_aTitle[0].RetrieveDesiredSize([this](const coreVector2 vSize1)
+            {
+                m_aTitle[1].RetrieveDesiredSize([&](const coreVector2 vSize2)
+                {
+                    const coreFloat fDiff = vSize1.x - vSize2.x;
+
+                    m_aTitle[0].SetPosition(coreVector2(fDiff * 0.5f, m_aTitle[0].GetPosition().y));
+                    m_aTitle[1].SetPosition(coreVector2(fDiff * 0.5f, m_aTitle[1].GetPosition().y));
+                });
+            });
         }
         break;
 

@@ -524,7 +524,16 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("DREIZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("DREIZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
+    {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################
@@ -547,6 +556,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: adjust final phase, maybe not targeting player, maybe enemies have actual health, be aware that enemies need to be deterministic (which might be in the current phase, enemies move into rota direction based on player position)
     // TODO 1: add extra score for hits
     // TODO 1: check if bullet-collision really affects the whole shooting area, to never cause any frame-delay when getting visible
+    // TODO 1: finale phase ist vielleicht etwas zu schnell (oder steigt zu schnell an)
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumEnemies = 8u;
@@ -805,7 +815,16 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("VIERZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("VIERZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################
@@ -843,6 +862,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: helper comes out of last "moving" enemy and flies straight out
     // TODO 1: bottom resizing should also be interpolated
     // TODO 1: add better indicator for fly start-direction (arrow, can be same color as attack, big on big enemy)
+    // TODO 1: somehow add assertion for iNumData
+    // TODO 1: vielleicht bekommen angreifende gegner den energy-shader, oder den damaging-effekt eher so aussehen lassen (eigener shader wie outline)
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumEnemies = 61u;
@@ -1062,13 +1083,15 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("FÜNFZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("FÜNFZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
-    // reset all floors
+    // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
         for(coreUintW i = 0u; i < HARENA_FLOORS; ++i)
             this->DisableFloor(i, false);
 
@@ -1102,6 +1125,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: final explosion causes too many particles (ASSERT)
     // TODO 1: large shield (vielleicht) gruppierte linien, XXX   XXX   XXX (2 oder 3 oder 4, etc.), um durch fliegen leichter/interessanter zu machen
     // TODO 1: leicht: letzter angriff kommt von seite, statt von oben-unten (is das wirklich leichter ?)
+    // TODO 1: hard: every killed enemy makes an attack (target single ?)
+    // TODO 1: sonne hat mir von oben eine gegeben, vielleicht langsamer spawnen (rotation + ausbreitung)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumEnemies = 150u;
@@ -1184,7 +1209,7 @@ void cHarenaMission::__SetupOwn()
 
         const auto nDropShieldFunc = [&](const coreUint8 iType)
         {
-            ASSERT(iType >= 4u)
+            //ASSERT(iType >= 4u)   // TODO 1: still needed ? should be converted to "if", or call-location needs adaption
             STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
             {
                 if(aiByteType[i] == iType)
@@ -1472,7 +1497,16 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("SECHSZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("SECHSZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################
@@ -1485,145 +1519,6 @@ void cHarenaMission::__SetupOwn()
         }
 
         STAGE_FINISH_PLAY
-    });
-
-    // ################################################################
-    // can only kill in order
-    // coop last enemy, need to work together
-    // abwechselnd links rechts
-    // doppelgruppe nur breites pattern um ausweichen zu erleichtern
-    // reihenfolge am weitesten entfernt
-    // TODO 1: show 3142 group at start, matrix of enemies
-    // TODO 1: simon says, linear up and down, to make distinction easy, and to prevent accidental hits (order forward, backward, mirrored, to stay fair but variable)
-    // TODO 1: static assertion, keine der chief-order darf enemy-count übersteigen
-    STAGE_MAIN({TAKE_ALWAYS, 4u})
-    {
-        UNUSED STAGE_ADD_PATH(pPath1)          
-        {
-            pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-1.3f,0.0f), coreVector2(1.0f,0.0f));
-            pPath1->AddStop(coreVector2(-0.9f,0.0f), coreVector2(1.0f,0.0f));
-            pPath1->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath2)
-        {
-            pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
-            pPath2->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
-            pPath2->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 69u)                                    
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                //if(i == 8u) pEnemy->SetSize(coreVector3(1.3f,1.3f,1.3f));
-
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                //pEnemy->Configure((i == 8u) ? 200 : 50, COLOR_SHIP_GREY);
-                pEnemy->Configure(4, COLOR_SHIP_GREY);
-                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
-            });
-        });
-
-        STAGE_GET_START(2u)
-            STAGE_GET_UINT (iChiefNum)
-            STAGE_GET_FLOAT(fShotOffset)
-        STAGE_GET_END
-
-        if(STAGE_CLEARED)
-        {
-                  if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 8u)
-             //else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
-        }
-
-        const auto nCreateChiefFunc = [&]()
-        {
-            //constexpr coreUintW aiChiefOrder[] = {5u, 3u, 4u, 2u, 7u, 0u, 6u, 1u, 8u};
-            constexpr coreUintW aiChiefOrder[] = {6u, 3u, 0u, 7u, 4u, 8u, 1u, 5u, 2u};
-
-            ASSERT(iChiefNum < ARRAY_SIZE(aiChiefOrder))
-            cEnemy* pNewChief = pSquad1->GetEnemy(aiChiefOrder[iChiefNum]);
-
-            pNewChief->SetSize     (pNewChief->GetSize() * 1.25f);
-            pNewChief->SetBaseColor(COLOR_SHIP_BLUE);
-            pNewChief->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-
-            iChiefNum  += 1u;
-            fShotOffset = FRACT(m_fStageTime * ((iChiefNum == 9u) ? 3.0f : 1.1f)) - 0.05f;
-
-            g_pSpecialEffects->CreateSplashColor(pNewChief->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_BLUE);
-        };
-
-        if(STAGE_TIME_POINT(2.0f)) nCreateChiefFunc();
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 0.8f + 0.4f * I_TO_F(i / 3u), (2.6f/3.0f) * I_TO_F(i % 3u))
-
-            STAGE_REPEAT(pPath2->GetTotalDistance())
-
-            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-            const coreVector2 vOffset = coreVector2(I_TO_F(i / 3u) * -0.3f - 0.1f, 0.0f);
-
-            pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
-
-            pEnemy->Rotate90();
-            if((i / 3u) % 2u) pEnemy->InvertX();
-
-            /*
-            STAGE_LIFETIME(pEnemy, 1.0f, 0.2f * I_TO_F(i % 4u))
-
-            const coreVector2 vFactor = coreVector2((i < 4u) ? -1.0f : 1.0f, 1.0f);
-            const coreVector2 vOffset = coreVector2(0.0f, (i == 8u) ? 0.0f : (0.4f - 0.4f * I_TO_F(i % 4u)));
-
-            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-
-            if(i == 8u) pEnemy->Rotate90();
-
-            if(pEnemy->ReachedDeath())
-            {
-                if(!pSquad1->IsFinished())
-                {
-                    if(iChiefNum <= 7u) nCreateChiefFunc();
-                    if(iChiefNum == 7u) nCreateChiefFunc();
-                    if(iChiefNum == 8u) if(pSquad1->GetNumEnemiesAlive() == 1u) nCreateChiefFunc();
-                }
-            }
-            else 
-            */
-            if(pEnemy->ReachedDeath())
-            {
-                if(!pSquad1->IsFinished())
-                {
-                    nCreateChiefFunc();
-                }
-            }
-
-            if(!pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
-            {
-                if(STAGE_TICK_TIME((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))
-                {
-                    const coreVector2 vPos  = pEnemy->GetPosition ().xy();
-                    const coreFloat   fBase = pEnemy->GetDirection().xy().Angle();
-                    //const coreUintW   iType = 4u - ((iChiefNum == 9u) ? (s_iTick % 3u) : (((iChiefNum - 1u) / 2u) % 3u));
-                    const coreUintW   iType = 4u;
-
-                    for(coreUintW j = 40u; j--; )
-                    {
-                        if(((j / iType) + (s_iTick & 0x01u)) & 0x01u) continue;
-
-                        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f) + fBase);
-
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.2f, pEnemy, vPos,  vDir)->ChangeSize(1.15f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.2f, pEnemy, vPos, -vDir)->ChangeSize(1.15f);
-                    }
-                }
-            }
-        });
-
-        STAGE_WAVE("SIEBZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -1642,7 +1537,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: make sure spike range covers the full area
     // TODO 1: add a bit of delay when damage can be taken
     // TODO 1: all enemies have to rotate in the same direction (intro-spin is negative value which gets removed to 0)
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    // TODO 1: dünklere kreise sollten auf der platte sein, wo die stacheln raus kommen
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumEnemies = 42u;
 
@@ -1945,15 +1841,165 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ACHTZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("SIEBZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
-    // reset all spikes
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
         for(coreUintW i = 0u; i < HARENA_SPIKES; ++i)
             this->DisableSpike(i, false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // can only kill in order
+    // coop last enemy, need to work together
+    // abwechselnd links rechts
+    // doppelgruppe nur breites pattern um ausweichen zu erleichtern
+    // reihenfolge am weitesten entfernt
+    // TODO 1: show 3142 group at start, matrix of enemies
+    // TODO 1: simon says, linear up and down, to make distinction easy, and to prevent accidental hits (order forward, backward, mirrored, to stay fair but variable)
+    // TODO 1: static assertion, keine der chief-order darf enemy-count übersteigen
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        UNUSED STAGE_ADD_PATH(pPath1)          
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(-1.3f,0.0f), coreVector2(1.0f,0.0f));
+            pPath1->AddStop(coreVector2(-0.9f,0.0f), coreVector2(1.0f,0.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath2)
+        {
+            pPath2->Reserve(2u);
+            pPath2->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
+            pPath2->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 69u)                                    
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                //if(i == 8u) pEnemy->SetSize(coreVector3(1.3f,1.3f,1.3f));
+
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                //pEnemy->Configure((i == 8u) ? 200 : 50, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
+                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+            });
+        });
+
+        STAGE_GET_START(2u)
+            STAGE_GET_UINT (iChiefNum)
+            STAGE_GET_FLOAT(fShotOffset)
+        STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                  if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 8u)
+             //else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
+        }
+
+        const auto nCreateChiefFunc = [&]()
+        {
+            //constexpr coreUintW aiChiefOrder[] = {5u, 3u, 4u, 2u, 7u, 0u, 6u, 1u, 8u};
+            constexpr coreUintW aiChiefOrder[] = {6u, 3u, 0u, 7u, 4u, 8u, 1u, 5u, 2u};
+
+            ASSERT(iChiefNum < ARRAY_SIZE(aiChiefOrder))
+            cEnemy* pNewChief = pSquad1->GetEnemy(aiChiefOrder[iChiefNum]);
+
+            pNewChief->SetSize     (pNewChief->GetSize() * 1.25f);
+            pNewChief->SetBaseColor(COLOR_SHIP_BLUE);
+            pNewChief->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+
+            iChiefNum  += 1u;
+            fShotOffset = FRACT(m_fStageTime * ((iChiefNum == 9u) ? 3.0f : 1.1f)) - 0.05f;
+
+            g_pSpecialEffects->CreateSplashColor(pNewChief->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_BLUE);
+        };
+
+        if(STAGE_TIME_POINT(2.0f)) nCreateChiefFunc();
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.8f + 0.4f * I_TO_F(i / 3u), (2.6f/3.0f) * I_TO_F(i % 3u))
+
+            STAGE_REPEAT(pPath2->GetTotalDistance())
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2(I_TO_F(i / 3u) * -0.3f - 0.1f, 0.0f);
+
+            pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+
+            pEnemy->Rotate90();
+            if((i / 3u) % 2u) pEnemy->InvertX();
+
+            /*
+            STAGE_LIFETIME(pEnemy, 1.0f, 0.2f * I_TO_F(i % 4u))
+
+            const coreVector2 vFactor = coreVector2((i < 4u) ? -1.0f : 1.0f, 1.0f);
+            const coreVector2 vOffset = coreVector2(0.0f, (i == 8u) ? 0.0f : (0.4f - 0.4f * I_TO_F(i % 4u)));
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+            if(i == 8u) pEnemy->Rotate90();
+
+            if(pEnemy->ReachedDeath())
+            {
+                if(!pSquad1->IsFinished())
+                {
+                    if(iChiefNum <= 7u) nCreateChiefFunc();
+                    if(iChiefNum == 7u) nCreateChiefFunc();
+                    if(iChiefNum == 8u) if(pSquad1->GetNumEnemiesAlive() == 1u) nCreateChiefFunc();
+                }
+            }
+            else 
+            */
+            if(pEnemy->ReachedDeath())
+            {
+                if(!pSquad1->IsFinished())
+                {
+                    nCreateChiefFunc();
+                }
+            }
+
+            if(!pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
+            {
+                if(STAGE_TICK_TIME((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))
+                {
+                    const coreVector2 vPos  = pEnemy->GetPosition ().xy();
+                    const coreFloat   fBase = pEnemy->GetDirection().xy().Angle();
+                    //const coreUintW   iType = 4u - ((iChiefNum == 9u) ? (s_iTick % 3u) : (((iChiefNum - 1u) / 2u) % 3u));
+                    const coreUintW   iType = 4u;
+
+                    for(coreUintW j = 40u; j--; )
+                    {
+                        if(((j / iType) + (s_iTick & 0x01u)) & 0x01u) continue;
+
+                        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f) + fBase);
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.2f, pEnemy, vPos,  vDir)->ChangeSize(1.15f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.2f, pEnemy, vPos, -vDir)->ChangeSize(1.15f);
+                    }
+                }
+            }
+        });
+
+        STAGE_WAVE("ACHTZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
 
         STAGE_FINISH_NOW
     });

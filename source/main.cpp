@@ -26,14 +26,15 @@ STATIC_MEMORY(cEnvironment,    g_pEnvironment)
 STATIC_MEMORY(cMenu,           g_pMenu)
 STATIC_MEMORY(cGame,           g_pGame)
 
-static coreProtect<coreUint64> s_iOldPerfTime  = 0u;    // last measured high-precision time value
-static coreProtect<coreDouble> s_dLogicalTime  = 0.0;   // logical frame time (simulation rate)
-static coreProtect<coreDouble> s_dPhysicalTime = 0.0;   // physical frame time (display rate)
+static coreProtect<coreUint64> s_iOldPerfTime  = 0u;     // last measured high-precision time value
+static coreProtect<coreFloat>  s_fLogicalRate  = 0.0f;   // logical frame rate
+static coreProtect<coreFloat>  s_fLogicalTime  = 0.0f;   // logical frame time (simulation rate)
+static coreProtect<coreDouble> s_dPhysicalTime = 0.0;    // physical frame time (display rate)
 
-static void LockFramerate();                            // lock frame rate and override frame time
-static void UpdateListener();                           // 
-static void ReshapeGame();                              // reshape and resize game
-static void DebugGame();                                // debug and test game
+static void LockFramerate();                             // lock frame rate and override frame time
+static void UpdateListener();                            // 
+static void ReshapeGame();                               // reshape and resize game
+static void DebugGame();                                 // debug and test game
 
 
 // ****************************************************************
@@ -231,8 +232,8 @@ void CoreApp::Render()
 void CoreApp::Move()
 {
     static coreFlow fBorder = 0.0f;
-    if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 0.5f, 1.0f);
-                           else fBorder.UpdateMax(-0.5f, 0.0f);
+    if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 0.3f, 1.0f);
+                           else fBorder.UpdateMax(-0.3f, 0.0f);
     g_pPostProcessing->SetBorderAll(LERPH3(0.0f, 1.0f, fBorder));
 
 
@@ -325,18 +326,33 @@ void InitDirection()
 // init frame rate properties
 void InitFramerate()
 {
-    // calculate logical and physical frame time
-    if(!STATIC_ISVALID(g_pGame)) s_dLogicalTime  = (1.0   / coreDouble(CLAMP(g_CurConfig.Game.iUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX))));
-                                 s_dPhysicalTime = (100.0 / coreDouble(MAX  (g_CurConfig.Game.iGameSpeed,  1u))) * s_dLogicalTime;
+    // get current display mode
+    SDL_DisplayMode oMode = {};
+    SDL_GetWindowDisplayMode(Core::System->GetWindow(), &oMode);
 
+    // 
+    const coreUint32 iRefreshRate = (oMode.refresh_rate > 0) ? oMode.refresh_rate : 60u;
+
+    // calculate logical and physical frame time
+    if(!STATIC_ISVALID(g_pGame))
+    {
+        const coreDouble dUpdateFreq = coreDouble(g_CurConfig.Game.iUpdateFreq ? g_CurConfig.Game.iUpdateFreq : iRefreshRate);
+        const coreDouble dGameSpeed  = coreDouble(g_CurConfig.Game.iGameSpeed  ? g_CurConfig.Game.iGameSpeed  : 100u) / 100.0;
+
+        const coreDouble dRawRate   = dUpdateFreq / dGameSpeed;
+        const coreDouble dFixedRate = MIN(CEIL(coreDouble(FRAMERATE_MIN) / dRawRate) * dRawRate, coreDouble(FRAMERATE_MAX));   // increase in multiples, if too low
+
+        s_fLogicalRate  = coreFloat(dFixedRate);
+        s_fLogicalTime  = coreFloat(1.0 / dFixedRate);
+        s_dPhysicalTime = 1.0 / (dFixedRate * dGameSpeed);
+    }
+
+    // override vertical synchronization
     if(Core::Config->GetBool(CORE_CONFIG_SYSTEM_VSYNC))
     {
-        // get current display mode
-        SDL_DisplayMode oMode = {};
-        SDL_GetWindowDisplayMode(Core::System->GetWindow(), &oMode);
+        ASSERT(s_dPhysicalTime)
 
-        // override vertical synchronization
-        if(oMode.refresh_rate == F_TO_SI(1.0 / s_dPhysicalTime))   // TODO 1: emscripten
+        if(iRefreshRate == F_TO_UI(1.0 / s_dPhysicalTime))
         {
             if(SDL_GL_SetSwapInterval(-1)) SDL_GL_SetSwapInterval(1);
         }
@@ -345,6 +361,15 @@ void InitFramerate()
             SDL_GL_SetSwapInterval(0);
         }
     }
+}
+
+
+// ****************************************************************
+// 
+FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq)
+{
+    ASSERT((fFreq > 0.0f) && (fFreq <= FRAMERATE_MIN))
+    return RCP(ROUND(RCP(fFreq) * s_fLogicalRate)) * s_fLogicalRate;
 }
 
 
@@ -387,7 +412,7 @@ static void LockFramerate()
     //}
 
     // override frame time
-    if(TIME) c_cast<coreFloat&>(TIME) = coreFloat(s_dLogicalTime);
+    if(TIME) c_cast<coreFloat&>(TIME) = s_fLogicalTime;
 }
 
 

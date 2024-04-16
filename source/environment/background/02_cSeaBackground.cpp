@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+// TODO 1: vielleicht eher blasen, statt partikel
+
 static coreUint32 m_iSparkNum = 0u;
 // ****************************************************************
 // constructor

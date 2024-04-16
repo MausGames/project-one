@@ -118,7 +118,7 @@ void cDefeatMenu::Move()
                 }
 
                 // 
-                m_ContinueTimer.SetText(PRINT("%.0f", MAX(FLOOR(m_fCountdown), 0.0f)));
+                m_ContinueTimer.SetText(PRINT("%.0f", MAX(FLOOR(m_fCountdown.ToFloat()), 0.0f)));
             }
             else
             {

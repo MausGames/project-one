@@ -25,6 +25,8 @@
 // TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
 // TODO 1: morningstar sticks to boss and throws player around instead
 // TODO 1: check if all allocated enemy numbers are correct
+// TODO 2: generate objects are preventing each others outlines while being alpha 0 (especially on diagonal movement)
+// TODO 3: nevo: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
 
 
 // ****************************************************************
@@ -36,8 +38,8 @@
 #define MISSION_NO_WAVE    (0xFFu)     // 
 #define MISSION_NO_SEGMENT (0xFFu)     // 
 #define MISSION_WAIT_INTRO (1.5f)      // 
-#define MISSION_WAIT_OUTRO (2.0f)      // 
-#define MISSION_WAIT_PLAY  (5.9f)      // 
+#define MISSION_WAIT_OUTRO (6.0f)      // 
+#define MISSION_WAIT_PLAY  (6.9f)      // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) >= MISSION_WAVES)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) +  MISSION_WAVES)
@@ -71,7 +73,7 @@
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_ARROWS                 (38u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
-#define NEVO_BLOCKS                 (12u)                                             // 
+#define NEVO_BLOCKS                 (70u)//(12u)                                             // 
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
@@ -101,6 +103,7 @@
 #define GELU_ORBS_RAWS              (GELU_ORBS)                                       // 
 #define GELU_LINES                  (24u)                                             // 
 #define GELU_LINES_RAWS             (GELU_LINES)                                      // 
+#define GELU_POSITIONS              (MAX(GELU_FANGS, GELU_WAYS))                      // 
 
 #define CALOR_LOADS                 (12u)                                             // 
 #define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
@@ -110,7 +113,7 @@
 #define CALOR_CHAIN_CONSTRAINT1     (20.0f)                                           // 
 #define CALOR_CHAIN_CONSTRAINT2     (46.0f)                                           // 
 
-#define MUSCUS_GENERATES            (24u)                                             // 
+#define MUSCUS_GENERATES            (40u)                                             // 
 #define MUSCUS_GENERATES_RAWS       (MUSCUS_GENERATES * 2u)                           // 
 #define MUSCUS_PEARLS               (21u)                                             // 
 #define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
@@ -139,8 +142,8 @@
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
 #define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
 
-#define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
-#define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
+#define STAGE_ADD_PATH(n)                      coreSpline2* const OUTPUT n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
+#define STAGE_ADD_SQUAD(n,t,c)                 cEnemySquad* const OUTPUT n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
 
 #define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
@@ -176,18 +179,18 @@
     UNUSED const coreFloat fLifeOffset         = (a);                                                 \
     UNUSED const coreFloat fLifeTimeBase       = (e)->GetLifeTime()       * fLifeSpeed - fLifeOffset; \
     UNUSED const coreFloat fLifeTimeBeforeBase = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset; \
-    UNUSED coreFloat       fLifeTime           = fLifeTimeBase;                                       \
-    UNUSED coreFloat       fLifeTimeBefore     = fLifeTimeBeforeBase;                                 \
+    UNUSED       coreFloat fLifeTime           = fLifeTimeBase;                                       \
+    UNUSED       coreFloat fLifeTimeBefore     = fLifeTimeBeforeBase;                                 \
     UNUSED const coreBool  bIsDead             = (e)->HasStatus(ENEMY_STATUS_DEAD);
 
 #define STAGE_BRANCH(x,y)                      ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
 
-#define STAGE_TICK_EXTERN(a,b,c,o)             ((s_iTick = F_TO_UI((a) * (c) - (o)) - 1u) != coreUint16(F_TO_UI((b) * (c) - (o)) - 1u))
-#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore    >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageTime,    m_fStageTimeBefore,    c, o))
-#define STAGE_TICK_FREE2(c,o)                  ((m_fStageSubTimeBefore >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageSubTime, m_fStageSubTimeBefore, c, o))
+#define STAGE_TICK_EXTERN(a,b,c,o)             ((s_iTick = F_TO_UI((a) * (c) - (o)) - 1u) != coreUint16(F_TO_UI((b) * (c) - (o)) - 1u))   // wrap into function, to only calc c and o once
+#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore    >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageTime,    m_fStageTimeBefore,    RoundFreq(c), o))
+#define STAGE_TICK_FREE2(c,o)                  ((m_fStageSubTimeBefore >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageSubTime, m_fStageSubTimeBefore, RoundFreq(c), o))
 #define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_FREE(c, o))
-#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTime,       fLifeTimeBefore,       c, o))
+#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTime,       fLifeTimeBefore,       c, o))   // RoundFreq((c) * fLifeSpeed) / fLifeSpeed
 #define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTimeBase,   fLifeTimeBeforeBase,   c, o))
 
 #define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
@@ -336,12 +339,13 @@ public:
     inline const coreUintW& GetCurWaveIndex   ()const                       {return m_iCurWaveIndex;}
     inline const coreUintW& GetCurSegmentIndex()const                       {return m_iCurSegmentIndex;}
     inline cEnemySquad*     GetEnemySquad     (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
+    inline const coreFloat* GetMedalGoal      ()const                       {return m_pfMedalGoal;}
 
 
 protected:
     // 
-    template             <typename F> coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
-    template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
+    template             <typename F> RETURN_RESTRICT coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
+    template <typename T, typename F> RETURN_RESTRICT cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
 
     // 
     inline coreBool _UpdateWait() {m_fStageWait.UpdateMax(-1.0f, 0.0f); return !m_fStageWait;}
@@ -504,6 +508,7 @@ private:
     coreObject3D  m_aBlockRaw   [NEVO_BLOCKS_RAWS];   // 
     const cShip*  m_apBlockOwner[NEVO_BLOCKS];        // 
     coreFloat     m_afBlockScale[NEVO_BLOCKS];        // 
+    coreFloat     m_afBlockRota [NEVO_BLOCKS];        // 
 
     cLodObject  m_Container;                          // 
     coreVector2 m_vForce;                             // 
@@ -566,7 +571,6 @@ private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
-    void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __MoveOwnAfter   ()final;
 };
@@ -717,7 +721,6 @@ private:
 
     coreBatchList m_Fang;                          // 
     cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
-    coreVector2 m_avOldPos[MAX(GELU_FANGS, GELU_WAYS)];
 
     coreBatchList m_Way;                           // 
     coreBatchList m_WayArrow;                      // 
@@ -732,6 +735,8 @@ private:
     coreBatchList m_Line;                          // 
     coreObject3D  m_aLineRaw  [GELU_LINES_RAWS];   // 
     coreFlow      m_afLineTime[GELU_LINES];        // 
+
+    coreVector2 m_avOldPos[GELU_POSITIONS];        // 
 
     coreBool  m_abCrushImmune[MISSION_PLAYERS];    // 
     coreUint8 m_iCrushState;                       // 
@@ -916,6 +921,7 @@ private:
     // execute own routines
     void __SetupOwn      ()final;
     void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
     void __MoveOwnAfter  ()final;
 };
 
@@ -947,12 +953,9 @@ private:
 class cIntroMission final : public cMission
 {
 private:
-    cProjectOneBoss m_ProjectOne;   // 
-    
-    cTurf m_Turf;                       
-            
-                 //pPlayer->SetTilt(0.5f*PI); // TODO   
-//m_Turf.Enable(); // TODO   
+    cIntroBoss m_Intro;      // 
+
+    coreBool m_bFirstPlay;   // 
 
 
 public:
@@ -964,9 +967,7 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn       ()final;             
-    void __RenderOwnBottom()final;             
-    void __MoveOwnAfter   ()final;             
+    void __SetupOwn()final;
 };
 
 
@@ -1099,7 +1100,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
+template <typename F> RETURN_RESTRICT coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
 {
     if(!m_apPath.count(iCodeLine))
     {
@@ -1118,7 +1119,7 @@ template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine
 
 // ****************************************************************
 // 
-template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc)
+template <typename T, typename F> RETURN_RESTRICT cEnemySquad* cMission::_AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc)
 {
     if(!m_apSquad.count(iCodeLine))
     {

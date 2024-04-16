@@ -76,7 +76,7 @@ void cReplay::StartRecording()
     }
 
     // 
-    m_Header.iConfigUpdateFreq = g_CurConfig.Game.iUpdateFreq;
+    m_Header.iConfigUpdateFreq = g_CurConfig.Game.iUpdateFreq;   // TODO 1: should not be 0 
     m_Header.iConfigVersion    = 1u;   // TODO 1 
 
     // 
@@ -135,6 +135,16 @@ void cReplay::EndRecording()
         m_Header.iTimeTotal = pTable->GetTimeTotalRaw();
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiTimeMission[j] = pTable->GetTimeMissionRaw(j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaiTimeSegment[j][i] = pTable->GetTimeSegmentRaw(j, i);
+    }
+
+    // 
+    {
+        const cTimeTable* pTable = g_pGame->GetTimeTable();
+
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiShiftGoodMission[j] = pTable->GetShiftGoodMission(j);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaiShiftGoodSegment[j][i] = pTable->GetShiftGoodSegment(j, i);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiShiftBadMission[j]  = pTable->GetShiftBadMission (j);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaiShiftBadSegment [j][i] = pTable->GetShiftBadSegment (j, i);
     }
 
     // 
@@ -306,6 +316,13 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
 
     // 
     this->Clear();
+
+    // 
+    if(!coreData::FileExists(pcPath))
+    {
+        Core::Log->Warning("Replay (%s) does not exists!", pcPath);
+        return false;
+    }
 
     // 
     coreArchive oArchive(pcPath);

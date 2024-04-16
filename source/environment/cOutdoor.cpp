@@ -345,8 +345,8 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         // allocate required memory
         const coreUintW iSize   = pSurface1->w * pSurface1->h * 4u;
         coreByte*       pOutput = new coreByte[iSize];
-        const coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
-        const coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
+        const coreByte* pInput1 = s_cast<const coreByte*>(pSurface1->pixels);
+        const coreByte* pInput2 = s_cast<const coreByte*>(pSurface2->pixels);
 
         // merge XY components of both normal maps (divided by Z, partial-derivative)
         for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
@@ -667,6 +667,10 @@ void cOutdoor::__Reset(const coreResourceReset eInit)
     }
     else
     {
+        // 
+        if(m_pModel)     m_pModel    ->Unload();
+        if(m_pNormalMap) m_pNormalMap->Unload();
+
         // 
         if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Delete();
     }

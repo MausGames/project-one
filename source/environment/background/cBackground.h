@@ -24,7 +24,6 @@
 // TODO 3: all environment sound effects should fade in transition (check at end)
 // TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO 3: calls to pList->MoveNormal(); may be redundant
-// TODO 3: remove texture-sampling from lightning effect in moss
 // TODO 3: stomach should not create all vertices
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO 5: grass+blood and sand+snow (norm) textures are duplicated (especially normal maps), proxies are not possible, because files are loaded directly
@@ -35,6 +34,7 @@
 // TODO 3: remove draw-call for volcano smoke base-objects
 // TODO 3: adding temporary objects can/should implicitly rotate the position ?
 // TODO 3: use __Reset in water class, instead of __OwnInit
+// TODO 3: tropfen einschlag bei moss
 
 
 // ****************************************************************

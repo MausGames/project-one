@@ -188,8 +188,11 @@ void cBridgeMenu::EnterGame()
     m_iTarget      = 0u;
     m_bPaused      = false;
 
-    // 
-    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+    if(!g_pSave->GetHeader().oProgress.bFirstPlay)   // TODO 1: replace
+    {
+        // 
+        g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+    }
 
     // 
     this->SetAlpha(0.0f);

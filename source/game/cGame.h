@@ -15,6 +15,7 @@
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
 // TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow
+// TODO 3: repair enemy only in coop ? (not duel)
 
 
 // ****************************************************************
@@ -263,7 +264,8 @@ public:
     inline const coreUint8&    GetStatus     ()const {return m_iStatus;}
 
     // 
-    static coreUint8  CalcMedal       (const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal);
+    static coreUint8  CalcMedal       (const coreFloat fTime, const coreFloat* pfMedalGoal);
+    static coreFloat  CalcMedalTime   (const coreFloat fTime, const coreFloat* pfMedalGoal);
     static coreUint32 CalcBonusTime   (const coreFloat fTime);
     static coreUint32 CalcBonusMedal  (const coreUint8 iMedal);
     static coreUint32 CalcBonusBadge  (const coreUint8 iBadge);

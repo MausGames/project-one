@@ -14,6 +14,8 @@
 // TODO 1: ram von boss und wings braucht flammen-wellen-effekt
 // TODO 1: outline vom body is dünner als von flügeln (wegen shape)
 // TODO 1: wing-parts crushing into the screen get a timer, and explode if not attacked
+// TODO 1: sollte sich mehr bewegen, so wie andere bosse
+// TODO 1: flügel können separat feuer verlieren, für angriffe
 // wave with heat areas und temperaturanzeige über spieler is hidden phase
 // tod: gegner wird von seinen eigenen flügeln aufgespießt, tak-tak-tak-tak-boom
 // 3 verschiedene death animations, die letzte is offensichtlicher
@@ -473,8 +475,8 @@ void cCholBoss::__ResurrectFake()
 void cCholBoss::__KillFake()
 {
     // 
-    const coreFloat  fTime  = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
-    const coreUint32 iBonus = cGame::CalcBonusTime(fTime);
+    const coreFloat  fTimeShifted = g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe();
+    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted);
 
     // 
     g_pGame->GetInterface()->ShowScore(iBonus, 1u, MEDAL_TYPE_BOSS);

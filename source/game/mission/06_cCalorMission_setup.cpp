@@ -362,7 +362,16 @@ void cCalorMission::__SetupOwn()
             pEnemy->DefaultMoveSmooth(vTarget, 120.0f, 12.0f);
         });
 
-        STAGE_WAVE("EINUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("EINUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
+    {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################
@@ -388,6 +397,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: schnee wirbel auf wenn man in oder aus schnee geht (vlt. nur permanent-effekt)
     // TODO 1: final enemy needs better integration (blitze, rauch, ramp-up, soll er zerstört werden, soll es helfer sein)
     // TODO 1: improve pacing/add pause before "final enemy"
+    // TODO 1: schnee hat weiterhin bullets geschluckt nach punkte-vergabe, sollte nicht sein
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -675,18 +685,18 @@ void cCalorMission::__SetupOwn()
             pPlayer->SetMoveSpeed((!pPlayer->IsRolling() && m_Snow.IsActive() && m_Snow.TestCollision(pPlayer->GetPosition().xy())) ? 0.2f : 1.0f);
         });
 
-        STAGE_WAVE("ZWEIUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ZWEIUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
-    // reset snow
+    // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         g_pGame->GetHelper(ELEMENT_BLUE)->Kill(false);
 
         m_Snow.Disable(0.0f);
 
-        STAGE_FOREACH_PLAYER(pPlayer, i)
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
             pPlayer->SetMoveSpeed(1.0f);
         });
@@ -697,527 +707,6 @@ void cCalorMission::__SetupOwn()
     // ################################################################
     // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
-    {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
-        STAGE_FINISH_PLAY
-    });
-
-    // ################################################################
-    // keep shooting and charge it (astral chain)
-    // gegner müssen so positioniert sein, dass du vom king ablassen musst
-    // first few orbs need to introduce player to orb-charge, and orb-attack (TODO 1: and orb-shrink if possible)
-    // orb must shrink fast enough, to make it meaningful
-    // gegner links und rechts vom king dürfen nicht zu nah sein, sonst schießt man sie unabsichtlich ab beim ausweichen
-    // TODO 1: force bullet order ? red more important ?
-    // TODO 1: continuous sound to improve understanding grow<>shrink
-    // TODO 1: funkten bei ball-aufladung in welle verwandeln ?
-    // TODO 1: beginnt sich ab nem bestimmten orb zu bewegen (vaus ball ?) ?
-    // TODO 1: how to practically introduce orb shrinking ? durch (leichte) bewegung ?
-    // TODO 1: do not remove energy-effect on king after resurrection ?
-    // TODO 1: maybe he is caught in an ice block
-    // TODO 1: rotate (all balls) helper around enemy to highlight state
-    STAGE_MAIN({TAKE_ALWAYS, 2u})
-    {
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
-            pPath1->AddStop(coreVector2(0.0f,0.5f), coreVector2(0.0f,-1.0f));
-            pPath1->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath2)
-        {
-            pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(-1.2f,0.95f), coreVector2(1.0f,0.0f));
-            pPath2->AddStop(coreVector2( 0.0f,0.95f), coreVector2(1.0f,0.0f));
-            pPath2->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 1u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.8f);
-                pEnemy->Configure(200, COLOR_SHIP_GREY);
-                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
-
-                pEnemy->Resurrect();
-            });
-        });
-
-        STAGE_ADD_SQUAD(pSquad2, cScoutEnemy, 16u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
-            {
-                pEnemy->Configure(10, COLOR_SHIP_YELLOW);
-            });
-        });
-
-        STAGE_GET_START(1u)
-            STAGE_GET_FLOAT(fRotation, fRotation = 1.0f*PI)
-        STAGE_GET_END
-
-        cEnemy* pKing = pSquad1->GetEnemy(0u);
-
-        if(STAGE_BEGINNING)
-        {
-            this->EnableLoad(pKing);
-        }
-
-        const coreUintW iLoadStage = (F_TO_UI(m_afLoadPower[0]) != F_TO_UI(m_afLoadPower[1])) ? F_TO_UI(m_afLoadPower[0]) : 0u;
-
-             if(iLoadStage ==  4u) STAGE_RESURRECT(pSquad2, 0u,  3u)
-        else if(iLoadStage ==  7u) STAGE_RESURRECT(pSquad2, 4u,  7u)
-        else if(iLoadStage == 10u) STAGE_RESURRECT(pSquad2, 8u, 15u)
-        else if(iLoadStage == 12u)
-        {
-            this->DisableLoad(true);
-
-            pKing->SetBaseColor(COLOR_SHIP_RED);
-            pKing->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-
-            pKing->Kill(false);   // reset lifetime
-            pKing->Resurrect();
-
-            g_pSpecialEffects->MacroExplosionColorBig(pKing->GetPosition(), COLOR_ENERGY_RED);
-
-            if(pSquad2->GetNumEnemies() == pSquad2->GetNumEnemiesAlive())
-                STAGE_BADGE(0u, BADGE_HARD, pKing->GetPosition())
-        }
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 0.5f, 0.0f)
-
-            fRotation = FMOD(fRotation + m_afLoadPower[0] * 0.7f * TIME, 2.0f*PI);
-
-            if(pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
-            {
-                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-
-                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-                pEnemy->DefaultRotate  (fRotation);
-
-                if(STAGE_TICK_TIME(0.6f, 0.75f))
-                {
-                    for(coreUintW j = 0u, je = F_TO_UI(m_afLoadPower[0]); j < je; ++j)
-                    {
-                        const coreVector2 vPos = m_aLoadRaw[j].GetPosition().xy();
-                        const coreVector2 vDir = (g_pGame->FindPlayerDual(s_iTick % 2u)->GetPosition().xy() - vPos).Normalized();
-
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.1f);
-                    }
-                }
-            }
-            else
-            {
-                pEnemy->SetPosition  (coreVector3(SIN(fLifeTime) * 1.0f * FOREGROUND_AREA.x, pEnemy->GetPosition().yz()));
-                pEnemy->DefaultRotate(fRotation);
-
-                if(STAGE_TICK_LIFETIME(30.0f, 0.0f) && ((s_iTick % 8u) < 2u))
-                {
-                    const coreVector2 vPos  = pEnemy->GetPosition().xy();
-                    const coreFloat   fBase = I_TO_F(s_iTick) * (0.015f*PI);
-
-                    for(coreUintW j = 6u; j--; )
-                    {
-                        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 30.0f) + fBase);
-
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.1f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.1f);
-                    }
-                }
-            }
-        });
-
-        STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 4.0f, 0.0f)
-
-            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-            const coreVector2 vOffset = coreVector2(I_TO_F(i % 4u) * -0.18f - 0.41f, 0.0f);
-
-            pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
-
-                 if(i <  4u) pEnemy->Rotate270();
-            else if(i <  8u) pEnemy->Rotate270()->InvertX();
-            else if(i < 12u) pEnemy->InvertX();
-            else if(i < 16u) {}
-
-            const coreVector2 vDir = pEnemy->AimAtPlayerSide().Normalized();
-
-            pEnemy->SetDirection(coreVector3(vDir, 0.0f));
-
-            if(STAGE_LIFETIME_AFTER(2.0f) && STAGE_TICK_TIME(0.6f, ((i % 8u) < 4u) ? 0.0f : 0.5f))
-            {
-                const coreVector2 vPos = pEnemy->GetPosition().xy();
-
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
-            }
-        });
-
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_THIS)
-        {
-            if(!bFirstHit || (pEnemy->GetID() != cWarriorEnemy::ID)) return;
-
-            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.03f * RCP(I_TO_F(g_pGame->GetNumPlayers())));
-
-            pBullet->Deactivate(true, vIntersection.xy());
-        });
-
-        STAGE_WAVE("DREIUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
-    });
-
-    // ################################################################
-    // reset all loads
-    STAGE_MAIN({TAKE_ALWAYS, 2u})
-    {
-        this->DisableLoad(false);
-
-        STAGE_FINISH_NOW
-    });
-
-    // ################################################################
-    // stick to one side and stay there
-    // side movement of galaga groups helps to attack them even when they attack directly
-    // splitting side-groups to 4-4-4-4 (instead of 8-8) makes it easier to prevent getting hit
-    // wenn man bei den seiten-gegnern im letzten moment umschwenkt und drauf hält, muss man überleben, der cross-point soll sich nicht bewegen (beware of coop)
-    // gegner können sich nicht zu schnell in/gegen flugrichtung bewegen, man nimmt sie nicht war wegen dem schnellen boden
-    // hat nicht funktioniert: pang (boring + slow), flip speed (too unpredictable crashing into stuff), rotate (there was no meaningful mechanic, just visual, player-controlled needs incentive and this is only done by shooting along border)
-    // erste gruppe soll dog-fight feeling vermitteln
-    // TODO 1: make sure player-respawn does not cause "push" issues
-    // TODO 1: own UFO model
-    // TODO 1: springende gegner zweite welle is orsch auszuweichen
-    // TODO 1: jumping worm is too boring
-    // TODO 1: can be used to highlight player beging freed from morning-star (fels reißt leicht aus mit bröckerl)
-    // TODO 1: beschleunigung und force müssen viel viel schneller sein, spieler muss überrascht werden, richtig BAM (mit speed lines ?)
-    // TODO 1: gegner mit geschoss linien aus beiden seiten, vertikale und horizontale bewegung
-    // TODO 1: erste gruppe vielleicht zu lang
-    // TODO 1: vielleicht 2. galaga gruppe alternierend auf-ab bewegen statt links-rechts
-    STAGE_MAIN({TAKE_ALWAYS, 3u})
-    {
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->Reserve(4u);
-            pPath1->AddNode(coreVector2( 0.2f,  1.2f),  coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(-0.7f,  0.0f),  coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(-0.45f,-0.25f), coreVector2(1.0f, 0.0f));
-            pPath1->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2(0.0f, 1.0f));
-            pPath1->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath2)
-        {
-            pPath2->Reserve(6u);
-            pPath2->AddNode(coreVector2(-1.2f, -0.8f),  coreVector2( 1.0f, 0.0f));
-            pPath2->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2( 0.0f, 1.0f));
-            pPath2->AddNode(coreVector2(-0.45f, 0.25f), coreVector2(-1.0f, 0.0f));
-            pPath2->AddNode(coreVector2(-0.7f,  0.0f),  coreVector2( 0.0f,-1.0f));
-            pPath2->AddNode(coreVector2(-0.45f,-0.25f), coreVector2( 1.0f, 0.0f));
-            pPath2->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2( 0.0f, 1.0f));
-            pPath2->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath3)
-        {
-            pPath3->Reserve(6u);
-            pPath3->AddNode (coreVector2(-1.0f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath3->AddNodes(coreVector2(-1.0f,-1.0f), coreVector2(0.0f,-1.0f), coreVector2(1.0f,0.0f));
-            pPath3->AddNodes(coreVector2( 1.0f,-1.0f), coreVector2(1.0f, 0.0f), coreVector2(0.0f,1.0f));
-            pPath3->AddNode (coreVector2( 1.0f, 1.2f), coreVector2(0.0f, 1.0f));
-            pPath3->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath4)
-        {
-            pPath4->Reserve(2u);
-            pPath4->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath4->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
-            pPath4->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath5)
-        {
-            pPath5->Reserve(11u);
-            pPath5->AddNode (coreVector2(-1.2f, 0.6f), coreVector2( 1.0f, 0.0f), 0.5f);
-            pPath5->AddNode (coreVector2( 0.2f, 0.4f), coreVector2( 1.0f, 0.0f), 2.0f);
-            pPath5->AddNode (coreVector2( 0.4f, 0.6f), coreVector2( 0.0f, 1.0f), 1.5f);
-            pPath5->AddNode (coreVector2( 0.2f, 0.8f), coreVector2(-1.0f, 0.0f), 1.0f);
-            pPath5->AddNode (coreVector2( 0.0f, 0.6f), coreVector2( 0.0f,-1.0f), 0.5f);
-            pPath5->AddNode (coreVector2( 0.0f, 0.5f), coreVector2( 0.0f,-1.0f), 0.0f);
-            pPath5->AddNodes(coreVector2( 0.0f,-1.1f), coreVector2( 0.0f,-1.0f),              coreVector2( 0.0f, 1.0f), 5.0f, 1.0f);
-            pPath5->AddNodes(coreVector2(-0.2f,-0.6f), coreVector2(-1.0f, 1.0f).Normalized(), coreVector2( 1.0f, 0.0f), 0.0f, 1.0f);
-            pPath5->AddNode (coreVector2( 1.2f,-0.4f), coreVector2( 1.0f, 0.0f), 3.0f);
-            pPath5->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 92u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
-                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING);
-            });
-        });
-
-        STAGE_ADD_SQUAD(pSquad2, cWarriorEnemy, 1u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
-            {
-                pEnemy->SetSize  (coreVector3(3.0f,1.0f,1.0f));
-                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
-            });
-        });
-
-        STAGE_GET_START(34u + 2u * GAME_PLAYERS)
-            STAGE_GET_VEC2_ARRAY(avForce,   16u)
-            STAGE_GET_VEC2_ARRAY(avTurn,    GAME_PLAYERS)
-            STAGE_GET_FLOAT     (fOldSpeed, fOldSpeed = g_pEnvironment->GetSpeed())
-            STAGE_GET_UINT      (iPushBack, iPushBack  = true)
-        STAGE_GET_END
-
-        if(pSquad1->IsFinished())
-        {
-                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 11u)
-            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 12u, 27u)
-            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 28u, 43u)
-            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 52u, 67u)   // #
-            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 44u, 51u)   // #
-            else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 68u, 75u)
-            else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 76u, 91u)
-            else if(STAGE_SUB(8u)) STAGE_DELAY_START_CLEAR
-
-            if(m_iStageSub == 3u) STAGE_RESURRECT(pSquad2, 0u, 0u)
-        }
-
-        const coreFloat fBoost    = CLAMP01(m_fStageTime * 0.35f);
-        const coreFloat fNewSpeed = 16.0f;
-        const coreFloat fCurSpeed = LERPB(fOldSpeed, fNewSpeed, fBoost);
-
-        if(m_iStageSub < 8u)
-        {
-            g_pEnvironment->SetTargetSpeedNow(fCurSpeed);
-        }
-        else
-        {
-            cHelper* pHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
-
-            if(m_fStageSubTime == 0.0f)
-            {
-                pHelper->Resurrect();
-            }
-
-            const coreFloat fShakeDist = pPath5->TranslateDistance(7u, 0.0f);
-            const coreFloat fTotalDist = pPath5->GetTotalDistance();
-            const coreFloat fRotaDist  = fShakeDist + 1.0f;
-            const coreFloat fTime      = MIN(DelayTime(m_fStageSubTime, fShakeDist, 1.0f), fTotalDist);
-
-            pHelper->SetPosition(coreVector3(pPath5->CalcPosition(fTime) * FOREGROUND_AREA, 0.0f));
-
-            if(STAGE_SUBTIME_POINT(fShakeDist))
-            {
-                g_pEnvironment->SetTargetSpeedNow(fOldSpeed);
-                c_cast<coreFloat&>(g_pEnvironment->GetSpeed()) = fOldSpeed;
-
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-
-                iPushBack = false;
-
-                STAGE_FOREACH_PLAYER(pPlayer, i)
-                {
-                    pPlayer->ApplyForce(coreVector2(0.0f,1000.0f));
-                    avTurn[i] = pPlayer->GetDirection().xy();
-                });
-            }
-
-            if(STAGE_SUBTIME_BETWEEN(fShakeDist, fRotaDist))
-            {
-                const coreVector2 vRota = coreVector2::Direction(LERPB(0.0f*PI, 4.0f*PI, STEP(fShakeDist, fRotaDist, m_fStageSubTime)));
-
-                STAGE_FOREACH_PLAYER(pPlayer, i)
-                {
-                    pPlayer->SetDirection(coreVector3(MapToAxis(avTurn[i], vRota), 0.0f));
-                    pPlayer->AddStatus (PLAYER_STATUS_NO_INPUT_TURN);
-                });
-            }
-            else if(STAGE_SUBTIME_POINT(fRotaDist))
-            {
-                STAGE_FOREACH_PLAYER(pPlayer, i)
-                {
-                    pPlayer->SetDirection(coreVector3(avTurn[i], 0.0f));
-                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
-                });
-            }
-
-            if(fTime >= fTotalDist)
-            {
-                pHelper->Kill(false);
-
-                STAGE_DELAY_END
-            }
-        }
-
-        if(iPushBack)
-        {
-            const coreVector2 vPush = g_pEnvironment->GetDirection() * LERPB(0.5f, -1.0f, fBoost);   // also hide Y movement (forward leaning)
-
-            STAGE_FOREACH_PLAYER(pPlayer, i)
-            {
-                pPlayer->SetPosition(pPlayer->GetPosition() + coreVector3(vPush, 0.0f));
-            });
-        }
-
-        const coreVector4 vArea   = PLAYER_AREA_DEFAULT * RCP(iPushBack ? LERPH3(1.0f, PLAYER_AREA_FACTOR, MIN(m_fStageTime * 3.0f, 1.0f)) : 1.0f);
-        const coreFloat   fExaust = 0.5f * SIN(LERPB(0.0f*PI, 1.0f*PI, fBoost));
-
-        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
-        {
-            pPlayer->SetArea      (vArea);
-            pPlayer->UpdateExhaust(fExaust);
-        });
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, (i < 12u) ? 0.9f : ((i < 44u) ? 1.5f : ((i < 52u) ? 1.4f : 1.1f)), (i < 12u) ? (3.0f + 0.6f * I_TO_F(i)) : ((i >= 52u && i < 68u) ? (0.2f * I_TO_F((i - 52u) % 16u) + 1.2f * I_TO_F((i - 52u) / 4u)) : ((i < 76u) ? (0.2f * I_TO_F((i - 12u) % 8u)) : ((i < 84u) ? 0.0f : 0.1f))))
-
-            if(i < 12u)
-            {
-                STAGE_REPEAT(pPath4->GetTotalDistance())
-
-                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F((i * 5u + 4u) % 12u) - 5.5f) * 0.15f, 0.0f);
-
-                pEnemy->DefaultMovePath(pPath4, vFactor, vOffset * vFactor, fLifeTime);
-                pEnemy->SetDirection   (coreVector3(0.0f,1.0f,0.0f));
-            }
-            else if(i < 44u)
-            {
-                const coreSpline2* pPath = (i < 28u) ? pPath1 : pPath2;
-
-                const coreVector2 vFactor = coreVector2((((i - 12u) % 16u) < 8u) ? 1.0f : -1.0f, 1.0f);
-                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-
-                if(pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime))
-                {
-                    const coreFloat   fTime = MIN((fLifeTime - pPath->GetTotalDistance()) * 1.5f, 1.0f);
-                    const coreVector2 vMove = coreVector2(0.2f * SIN(m_fStageSubTime * (0.5f*PI)), 0.0f);
-                    const coreVector2 vFrom = pEnemy->GetPosition().xy();
-                    const coreVector2 vTo   = (coreVector2(I_TO_F(((i - 12u) % 4u) + (((i >= 28u) && (((i - 12u) / 2u) % 2u)) ? 2u : 1u)) * 0.15f, (((i - 12u) % 8u) < 4u) ? 0.6f : 0.4f) * vFactor.InvertedX() + vMove) * FOREGROUND_AREA;
-
-                    pEnemy->SetPosition(coreVector3(LERPH3(vFrom.x, vTo.x, fTime), LERP(vFrom.y, vTo.y, fTime), 0.0f));
-                }
-            }
-            else if(i < 68u)
-            {
-                STAGE_REPEAT(pPath3->GetTotalDistance())
-
-                const coreVector2 vFactor = coreVector2(((i < 52u) || (((i - 52) % 8u) >= 4u)) ? 1.0f : -1.0f, 1.0f);
-                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-
-                pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
-
-                const coreVector2 vPos   = pEnemy->GetPosition().xy();
-                const coreVector2 vNorm  = AlongCrossNormal(-vPos);
-                const coreFloat   fValue = coreVector2::Dot(vPos, vNorm.Rotated90()) / (FOREGROUND_AREA.x * 1.0f);
-                const coreFloat   fPower = ((i >= 52u) && (vPos.y <= 0.0f)) ? 0.0f : 10.0f;
-                const coreFloat   fJump  = fPower * ABS(SIN(fValue * (1.0f*PI)));
-
-                pEnemy->SetPosition(coreVector3(vPos + vNorm * fJump, 0.0f));
-
-                if(i < 52u) pEnemy->DefaultRotate(fLifeTime * -3.0f);
-            }
-            else
-            {
-                coreVector2& vForce = avForce[(i - 68u) % 16u];
-
-                if(STAGE_TAKEOFF)
-                {
-                    pEnemy->SetPosition(coreVector3(-1.2f,-0.9f,0.0f) * FOREGROUND_AREA3);
-                    vForce = coreVector2::Direction(I_TO_F((i - 68u) % 8u) / 8.0f * (-0.1f*PI) - ((i < 76u) ? (0.1f*PI) : (0.05f*PI))) * 1.65f;
-
-                    if(i % 2u)
-                    {
-                        pEnemy->InvertX();
-                        vForce = vForce.InvertedX();
-                    }
-                }
-
-                vForce.y -= 1.0f * TIME;
-
-                coreVector2 vNewPos = pEnemy->GetPosition().xy() + vForce * FOREGROUND_AREA * 1.5f * TIME;
-
-                     if((vNewPos.x < -FOREGROUND_AREA.x * 1.1f) && (vForce.x < 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x + FOREGROUND_AREA.x * 1.1f); vForce.x =  ABS(vForce.x);}
-                else if((vNewPos.x >  FOREGROUND_AREA.x * 1.1f) && (vForce.x > 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - FOREGROUND_AREA.x * 1.1f); vForce.x = -ABS(vForce.x);}
-                     if((vNewPos.y < -FOREGROUND_AREA.y * 1.1f) && (vForce.y < 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y + FOREGROUND_AREA.y * 1.1f); vForce.y =  ABS(vForce.y);}
-
-                pEnemy->SetPosition (coreVector3(vNewPos,             0.0f));
-                pEnemy->SetDirection(coreVector3(vForce.Normalized(), 0.0f));
-            }
-        });
-
-        STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 0.8f, 2.5f)
-
-            const coreVector2 vFactor = coreVector2(1.0f,1.2f);
-            const coreVector2 vOffset = coreVector2(0.9f,0.0f);
-
-            if(pEnemy->DefaultMovePath(pPath4, vFactor, vOffset * vFactor, fLifeTime)) pEnemy->Kill(false);
-
-            pEnemy->SetDirection(coreVector3(1.0f,0.0f,0.0f));
-            pEnemy->Rotate270();
-
-            if(pEnemy->ReachedDeath()) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
-        });
-
-        if((((m_iStageSub >= 1u) && (m_iStageSub < 4u)) || (m_iStageSub == 5u)) && STAGE_TIME_AFTER(2.0f) && STAGE_TICK_FREE(3.5f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
-        {
-            const coreUintW iNumEnemies = pSquad1->GetNumEnemiesAlive();
-            if(iNumEnemies)
-            {
-                coreUintW iShooter = (s_iTick * ((iNumEnemies == 11u) ? 13u : 11u)) % iNumEnemies;
-                STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-                {
-                    if(iShooter--) return;
-
-                    const coreVector2 vPos = pEnemy->GetPosition().xy();
-                    const coreVector2 vDir = (m_iStageSub == 2u) ? coreVector2(0.0f,-1.0f) : pEnemy->AimAtPlayerSideRev().Normalized();
-
-                    if(vPos.y > 0.0f) g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
-                });
-            }
-        }
-
-        STAGE_WAVE("VIERUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
-    });
-
-    // ################################################################
-    // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 3u})
-    {
-        g_pGame->GetHelper(ELEMENT_MAGENTA)->Kill(false);
-
-        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
-        {
-            pPlayer->SetArea      (PLAYER_AREA_DEFAULT);
-            pPlayer->UpdateExhaust(0.0f);
-            pPlayer->RemoveStatus (PLAYER_STATUS_NO_INPUT_TURN);
-        });
-
-        STAGE_FINISH_NOW
-    });
-
-    // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -1254,7 +743,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: press-wände müssen verschwinden, wenn spieler sie berührt (auch bei feel)
     // TODO 1: bullets in walls brauchen 100% collision range (handle BULLET_COLLISION_FACTOR in), vielleicht auch bei vielen andere waves, implement API
     // TODO 1: helper sollte pfeil + wellen haben, um den spieler dorthin zu locken
-    STAGE_MAIN({TAKE_ALWAYS, 4u})
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1662,16 +1151,363 @@ void cCalorMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE("FÜNFUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("DREIUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 4u})
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         g_pGame->GetHelper(ELEMENT_BLUE)->Kill(false);
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // stick to one side and stay there
+    // side movement of galaga groups helps to attack them even when they attack directly
+    // splitting side-groups to 4-4-4-4 (instead of 8-8) makes it easier to prevent getting hit
+    // wenn man bei den seiten-gegnern im letzten moment umschwenkt und drauf hält, muss man überleben, der cross-point soll sich nicht bewegen (beware of coop)
+    // gegner können sich nicht zu schnell in/gegen flugrichtung bewegen, man nimmt sie nicht war wegen dem schnellen boden
+    // hat nicht funktioniert: pang (boring + slow), flip speed (too unpredictable crashing into stuff), rotate (there was no meaningful mechanic, just visual, player-controlled needs incentive and this is only done by shooting along border)
+    // erste gruppe soll dog-fight feeling vermitteln
+    // TODO 1: make sure player-respawn does not cause "push" issues
+    // TODO 1: own UFO model
+    // TODO 1: springende gegner zweite welle is orsch auszuweichen
+    // TODO 1: jumping worm is too boring
+    // TODO 1: can be used to highlight player beging freed from morning-star (fels reißt leicht aus mit bröckerl)
+    // TODO 1: beschleunigung und force müssen viel viel schneller sein, spieler muss überrascht werden, richtig BAM (mit speed lines ?)
+    // TODO 1: gegner mit geschoss linien aus beiden seiten, vertikale und horizontale bewegung
+    // TODO 1: erste gruppe vielleicht zu lang
+    // TODO 1: vielleicht 2. galaga gruppe alternierend auf-ab bewegen statt links-rechts
+    // TODO 1: die links-rechts wurm gruppe is zu schnell oder viel, vielleicht von 4 auf 3, oder beschleunigen
+    // TODO 1: der ruck am ende is zu stark, kA warum
+    // TODO 1: ganz am anfang wird man nach unten gedrückt, aber wenn man nicht schießt kann man entkommen, geschosse am unteren rand
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(4u);
+            pPath1->AddNode(coreVector2( 0.2f,  1.2f),  coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(-0.7f,  0.0f),  coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(-0.45f,-0.25f), coreVector2(1.0f, 0.0f));
+            pPath1->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2(0.0f, 1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath2)
+        {
+            pPath2->Reserve(6u);
+            pPath2->AddNode(coreVector2(-1.2f, -0.8f),  coreVector2( 1.0f, 0.0f));
+            pPath2->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2( 0.0f, 1.0f));
+            pPath2->AddNode(coreVector2(-0.45f, 0.25f), coreVector2(-1.0f, 0.0f));
+            pPath2->AddNode(coreVector2(-0.7f,  0.0f),  coreVector2( 0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(-0.45f,-0.25f), coreVector2( 1.0f, 0.0f));
+            pPath2->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2( 0.0f, 1.0f));
+            pPath2->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath3)
+        {
+            pPath3->Reserve(6u);
+            pPath3->AddNode (coreVector2(-1.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath3->AddNodes(coreVector2(-1.0f,-1.0f), coreVector2(0.0f,-1.0f), coreVector2(1.0f,0.0f));
+            pPath3->AddNodes(coreVector2( 1.0f,-1.0f), coreVector2(1.0f, 0.0f), coreVector2(0.0f,1.0f));
+            pPath3->AddNode (coreVector2( 1.0f, 1.2f), coreVector2(0.0f, 1.0f));
+            pPath3->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath4)
+        {
+            pPath4->Reserve(2u);
+            pPath4->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath4->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath4->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath5)
+        {
+            pPath5->Reserve(11u);
+            pPath5->AddNode (coreVector2(-1.2f, 0.6f), coreVector2( 1.0f, 0.0f), 0.5f);
+            pPath5->AddNode (coreVector2( 0.2f, 0.4f), coreVector2( 1.0f, 0.0f), 2.0f);
+            pPath5->AddNode (coreVector2( 0.4f, 0.6f), coreVector2( 0.0f, 1.0f), 1.5f);
+            pPath5->AddNode (coreVector2( 0.2f, 0.8f), coreVector2(-1.0f, 0.0f), 1.0f);
+            pPath5->AddNode (coreVector2( 0.0f, 0.6f), coreVector2( 0.0f,-1.0f), 0.5f);
+            pPath5->AddNode (coreVector2( 0.0f, 0.5f), coreVector2( 0.0f,-1.0f), 0.0f);
+            pPath5->AddNodes(coreVector2( 0.0f,-1.1f), coreVector2( 0.0f,-1.0f),              coreVector2( 0.0f, 1.0f), 5.0f, 1.0f);
+            pPath5->AddNodes(coreVector2(-0.2f,-0.6f), coreVector2(-1.0f, 1.0f).Normalized(), coreVector2( 1.0f, 0.0f), 0.0f, 1.0f);
+            pPath5->AddNode (coreVector2( 1.2f,-0.4f), coreVector2( 1.0f, 0.0f), 3.0f);
+            pPath5->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 92u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
+                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING);
+            });
+        });
+
+        STAGE_ADD_SQUAD(pSquad2, cWarriorEnemy, 1u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(3.0f,1.0f,1.0f));
+                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
+            });
+        });
+
+        STAGE_GET_START(34u + 2u * GAME_PLAYERS)
+            STAGE_GET_VEC2_ARRAY(avForce,   16u)
+            STAGE_GET_VEC2_ARRAY(avTurn,    GAME_PLAYERS)
+            STAGE_GET_FLOAT     (fOldSpeed, fOldSpeed = g_pEnvironment->GetSpeed())
+            STAGE_GET_UINT      (iPushBack, iPushBack  = true)
+        STAGE_GET_END
+
+        if(pSquad1->IsFinished())
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 11u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 12u, 27u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 28u, 43u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 52u, 67u)   // #
+            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 44u, 51u)   // #
+            else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 68u, 75u)
+            else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 76u, 91u)
+            else if(STAGE_SUB(8u)) STAGE_DELAY_START_CLEAR
+
+            if(m_iStageSub == 3u) STAGE_RESURRECT(pSquad2, 0u, 0u)
+        }
+
+        const coreFloat fBoost    = CLAMP01(m_fStageTime * 0.35f);
+        const coreFloat fNewSpeed = 16.0f;
+        const coreFloat fCurSpeed = LERPB(fOldSpeed, fNewSpeed, fBoost);
+
+        if(m_iStageSub < 8u)
+        {
+            g_pEnvironment->SetTargetSpeedNow(fCurSpeed);
+        }
+        else
+        {
+            cHelper* pHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
+
+            if(m_fStageSubTime == 0.0f)
+            {
+                pHelper->Resurrect();
+            }
+
+            const coreFloat fShakeDist = pPath5->TranslateDistance(7u, 0.0f);
+            const coreFloat fTotalDist = pPath5->GetTotalDistance();
+            const coreFloat fRotaDist  = fShakeDist + 1.0f;
+            const coreFloat fTime      = MIN(DelayTime(m_fStageSubTime, fShakeDist, 1.0f), fTotalDist);
+
+            pHelper->SetPosition(coreVector3(pPath5->CalcPosition(fTime) * FOREGROUND_AREA, 0.0f));
+
+            if(STAGE_SUBTIME_POINT(fShakeDist))
+            {
+                g_pEnvironment->SetTargetSpeedNow(fOldSpeed);
+                c_cast<coreFloat&>(g_pEnvironment->GetSpeed()) = fOldSpeed;
+
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+
+                iPushBack = false;
+
+                STAGE_FOREACH_PLAYER(pPlayer, i)
+                {
+                    pPlayer->ApplyForce(coreVector2(0.0f,1000.0f));
+                    avTurn[i] = pPlayer->GetDirection().xy();
+                });
+            }
+
+            if(STAGE_SUBTIME_BETWEEN(fShakeDist, fRotaDist))
+            {
+                const coreVector2 vRota = coreVector2::Direction(LERPB(0.0f*PI, 4.0f*PI, STEP(fShakeDist, fRotaDist, m_fStageSubTime)));
+
+                STAGE_FOREACH_PLAYER(pPlayer, i)
+                {
+                    pPlayer->SetDirection(coreVector3(MapToAxis(avTurn[i], vRota), 0.0f));
+                    pPlayer->AddStatus (PLAYER_STATUS_NO_INPUT_TURN);
+                });
+            }
+            else if(STAGE_SUBTIME_POINT(fRotaDist))
+            {
+                STAGE_FOREACH_PLAYER(pPlayer, i)
+                {
+                    pPlayer->SetDirection(coreVector3(avTurn[i], 0.0f));
+                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+                });
+            }
+
+            if(fTime >= fTotalDist)
+            {
+                pHelper->Kill(false);
+
+                STAGE_DELAY_END
+            }
+        }
+
+        if(iPushBack)
+        {
+            const coreVector2 vPush = g_pEnvironment->GetDirection() * LERPB(0.5f, -1.0f, fBoost);   // also hide Y movement (forward leaning)
+
+            STAGE_FOREACH_PLAYER(pPlayer, i)
+            {
+                pPlayer->SetPosition(pPlayer->GetPosition() + coreVector3(vPush, 0.0f));
+            });
+        }
+
+        const coreVector4 vArea   = PLAYER_AREA_DEFAULT * RCP(iPushBack ? LERPH3(1.0f, PLAYER_AREA_FACTOR, MIN(m_fStageTime * 3.0f, 1.0f)) : 1.0f);
+        const coreFloat   fExaust = 0.5f * SIN(LERPB(0.0f*PI, 1.0f*PI, fBoost));
+
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->SetArea      (vArea);
+            pPlayer->UpdateExhaust(fExaust);
+        });
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, (i < 12u) ? 0.9f : ((i < 44u) ? 1.5f : ((i < 52u) ? 1.4f : 1.1f)), (i < 12u) ? (3.0f + 0.6f * I_TO_F(i)) : ((i >= 52u && i < 68u) ? (0.2f * I_TO_F((i - 52u) % 16u) + 1.2f * I_TO_F((i - 52u) / 4u)) : ((i < 76u) ? (0.2f * I_TO_F((i - 12u) % 8u)) : ((i < 84u) ? 0.0f : 0.1f))))
+
+            if(i < 12u)
+            {
+                STAGE_REPEAT(pPath4->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i * 5u + 4u) % 12u) - 5.5f) * 0.15f, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath4, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->SetDirection   (coreVector3(0.0f,1.0f,0.0f));
+            }
+            else if(i < 44u)
+            {
+                const coreSpline2* pPath = (i < 28u) ? pPath1 : pPath2;
+
+                const coreVector2 vFactor = coreVector2((((i - 12u) % 16u) < 8u) ? 1.0f : -1.0f, 1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+                if(pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime))
+                {
+                    const coreFloat   fTime = MIN((fLifeTime - pPath->GetTotalDistance()) * 1.5f, 1.0f);
+                    const coreVector2 vMove = coreVector2(0.2f * SIN(m_fStageSubTime * (0.5f*PI)), 0.0f);
+                    const coreVector2 vFrom = pEnemy->GetPosition().xy();
+                    const coreVector2 vTo   = (coreVector2(I_TO_F(((i - 12u) % 4u) + (((i >= 28u) && (((i - 12u) / 2u) % 2u)) ? 2u : 1u)) * 0.15f, (((i - 12u) % 8u) < 4u) ? 0.6f : 0.4f) * vFactor.InvertedX() + vMove) * FOREGROUND_AREA;
+
+                    pEnemy->SetPosition(coreVector3(LERPH3(vFrom.x, vTo.x, fTime), LERP(vFrom.y, vTo.y, fTime), 0.0f));
+                }
+            }
+            else if(i < 68u)
+            {
+                STAGE_REPEAT(pPath3->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(((i < 52u) || (((i - 52) % 8u) >= 4u)) ? 1.0f : -1.0f, 1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+                pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
+
+                const coreVector2 vPos   = pEnemy->GetPosition().xy();
+                const coreVector2 vNorm  = AlongCrossNormal(-vPos);
+                const coreFloat   fValue = coreVector2::Dot(vPos, vNorm.Rotated90()) / (FOREGROUND_AREA.x * 1.0f);
+                const coreFloat   fPower = ((i >= 52u) && (vPos.y <= 0.0f)) ? 0.0f : 10.0f;
+                const coreFloat   fJump  = fPower * ABS(SIN(fValue * (1.0f*PI)));
+
+                pEnemy->SetPosition(coreVector3(vPos + vNorm * fJump, 0.0f));
+
+                if(i < 52u) pEnemy->DefaultRotate(fLifeTime * -3.0f);
+            }
+            else
+            {
+                coreVector2& vForce = avForce[(i - 68u) % 16u];
+
+                if(STAGE_TAKEOFF)
+                {
+                    pEnemy->SetPosition(coreVector3(-1.2f,-0.9f,0.0f) * FOREGROUND_AREA3);
+                    vForce = coreVector2::Direction(I_TO_F((i - 68u) % 8u) / 8.0f * (-0.1f*PI) - ((i < 76u) ? (0.1f*PI) : (0.05f*PI))) * 1.65f;
+
+                    if(i % 2u)
+                    {
+                        pEnemy->InvertX();
+                        vForce = vForce.InvertedX();
+                    }
+                }
+
+                vForce.y -= 1.0f * TIME;
+
+                coreVector2 vNewPos = pEnemy->GetPosition().xy() + vForce * FOREGROUND_AREA * 1.5f * TIME;
+
+                     if((vNewPos.x < -FOREGROUND_AREA.x * 1.1f) && (vForce.x < 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x + FOREGROUND_AREA.x * 1.1f); vForce.x =  ABS(vForce.x);}
+                else if((vNewPos.x >  FOREGROUND_AREA.x * 1.1f) && (vForce.x > 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - FOREGROUND_AREA.x * 1.1f); vForce.x = -ABS(vForce.x);}
+                     if((vNewPos.y < -FOREGROUND_AREA.y * 1.1f) && (vForce.y < 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y + FOREGROUND_AREA.y * 1.1f); vForce.y =  ABS(vForce.y);}
+
+                pEnemy->SetPosition (coreVector3(vNewPos,             0.0f));
+                pEnemy->SetDirection(coreVector3(vForce.Normalized(), 0.0f));
+            }
+        });
+
+        STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.8f, 2.5f)
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.2f);
+            const coreVector2 vOffset = coreVector2(0.9f,0.0f);
+
+            if(pEnemy->DefaultMovePath(pPath4, vFactor, vOffset * vFactor, fLifeTime)) pEnemy->Kill(false);
+
+            pEnemy->SetDirection(coreVector3(1.0f,0.0f,0.0f));
+            pEnemy->Rotate270();
+
+            if(pEnemy->ReachedDeath()) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+        });
+
+        if((((m_iStageSub >= 1u) && (m_iStageSub < 4u)) || (m_iStageSub == 5u)) && STAGE_TIME_AFTER(2.0f) && STAGE_TICK_FREE(3.5f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
+        {
+            const coreUintW iNumEnemies = pSquad1->GetNumEnemiesAlive();
+            if(iNumEnemies)
+            {
+                coreUintW iShooter = (s_iTick * ((iNumEnemies == 11u) ? 13u : 11u)) % iNumEnemies;
+                STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+                {
+                    if(iShooter--) return;
+
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = (m_iStageSub == 2u) ? coreVector2(0.0f,-1.0f) : pEnemy->AimAtPlayerSideRev().Normalized();
+
+                    if(vPos.y > 0.0f) g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                });
+            }
+        }
+
+        STAGE_WAVE("VIERUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        g_pGame->GetHelper(ELEMENT_MAGENTA)->Kill(false);
+
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->SetArea      (PLAYER_AREA_DEFAULT);
+            pPlayer->UpdateExhaust(0.0f);
+            pPlayer->RemoveStatus (PLAYER_STATUS_NO_INPUT_TURN);
+        });
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1696,7 +1532,8 @@ void cCalorMission::__SetupOwn()
     // TODO 1: remove catch-forwarding if separator stays disabled, maybe also make swing-direction identical
     // TODO 1: simple bullet-waves inbetween for the player to overcome
     // TODO 1: vielleicht mini-gegner oder boss-intro (10s) um morning-star zu erhalten
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    // TODO 1: first side enemies on bullet-carpet more to the middle (maybe 50%)
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         
         // TODO 1
@@ -1869,7 +1706,195 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE("SECHSUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("FÜNFUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
+    {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // keep shooting and charge it (astral chain)
+    // gegner müssen so positioniert sein, dass du vom king ablassen musst
+    // first few orbs need to introduce player to orb-charge, and orb-attack (TODO 1: and orb-shrink if possible)
+    // orb must shrink fast enough, to make it meaningful
+    // gegner links und rechts vom king dürfen nicht zu nah sein, sonst schießt man sie unabsichtlich ab beim ausweichen
+    // TODO 1: force bullet order ? red more important ?
+    // TODO 1: continuous sound to improve understanding grow<>shrink
+    // TODO 1: funkten bei ball-aufladung in welle verwandeln ?
+    // TODO 1: beginnt sich ab nem bestimmten orb zu bewegen (vaus ball ?) ?
+    // TODO 1: how to practically introduce orb shrinking ? durch (leichte) bewegung ?
+    // TODO 1: do not remove energy-effect on king after resurrection ?
+    // TODO 1: maybe he is caught in an ice block
+    // TODO 1: rotate (all balls) helper around enemy to highlight state
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,0.5f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath2)
+        {
+            pPath2->Reserve(2u);
+            pPath2->AddNode(coreVector2(-1.2f,0.95f), coreVector2(1.0f,0.0f));
+            pPath2->AddStop(coreVector2( 0.0f,0.95f), coreVector2(1.0f,0.0f));
+            pPath2->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 1u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.8f);
+                pEnemy->Configure(200, COLOR_SHIP_GREY);
+                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+
+                pEnemy->Resurrect();
+            });
+        });
+
+        STAGE_ADD_SQUAD(pSquad2, cScoutEnemy, 16u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->Configure(10, COLOR_SHIP_YELLOW);
+            });
+        });
+
+        STAGE_GET_START(1u)
+            STAGE_GET_FLOAT(fRotation, fRotation = 1.0f*PI)
+        STAGE_GET_END
+
+        cEnemy* pKing = pSquad1->GetEnemy(0u);
+
+        if(STAGE_BEGINNING)
+        {
+            this->EnableLoad(pKing);
+        }
+
+        const coreUintW iLoadStage = (F_TO_UI(m_afLoadPower[0]) != F_TO_UI(m_afLoadPower[1])) ? F_TO_UI(m_afLoadPower[0]) : 0u;
+
+             if(iLoadStage ==  4u) STAGE_RESURRECT(pSquad2, 0u,  3u)
+        else if(iLoadStage ==  7u) STAGE_RESURRECT(pSquad2, 4u,  7u)
+        else if(iLoadStage == 10u) STAGE_RESURRECT(pSquad2, 8u, 15u)
+        else if(iLoadStage == 12u)
+        {
+            this->DisableLoad(true);
+
+            pKing->SetBaseColor(COLOR_SHIP_RED);
+            pKing->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+
+            pKing->Kill(false);   // reset lifetime
+            pKing->Resurrect();
+
+            g_pSpecialEffects->MacroExplosionColorBig(pKing->GetPosition(), COLOR_ENERGY_RED);
+
+            if(pSquad2->GetNumEnemies() == pSquad2->GetNumEnemiesAlive())
+                STAGE_BADGE(0u, BADGE_HARD, pKing->GetPosition())
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.5f, 0.0f)
+
+            fRotation = FMOD(fRotation + m_afLoadPower[0] * 0.7f * TIME, 2.0f*PI);
+
+            if(pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
+            {
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultRotate  (fRotation);
+
+                if(STAGE_TICK_TIME(0.6f, 0.75f))
+                {
+                    for(coreUintW j = 0u, je = F_TO_UI(m_afLoadPower[0]); j < je; ++j)
+                    {
+                        const coreVector2 vPos = m_aLoadRaw[j].GetPosition().xy();
+                        const coreVector2 vDir = (g_pGame->FindPlayerDual(s_iTick % 2u)->GetPosition().xy() - vPos).Normalized();
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.1f);
+                    }
+                }
+            }
+            else
+            {
+                pEnemy->SetPosition  (coreVector3(SIN(fLifeTime) * 1.0f * FOREGROUND_AREA.x, pEnemy->GetPosition().yz()));
+                pEnemy->DefaultRotate(fRotation);
+
+                if(STAGE_TICK_LIFETIME(30.0f, 0.0f) && ((s_iTick % 8u) < 2u))
+                {
+                    const coreVector2 vPos  = pEnemy->GetPosition().xy();
+                    const coreFloat   fBase = I_TO_F(s_iTick) * (0.015f*PI);
+
+                    for(coreUintW j = 6u; j--; )
+                    {
+                        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 30.0f) + fBase);
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.1f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.1f);
+                    }
+                }
+            }
+        });
+
+        STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 4.0f, 0.0f)
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2(I_TO_F(i % 4u) * -0.18f - 0.41f, 0.0f);
+
+            pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+
+                 if(i <  4u) pEnemy->Rotate270();
+            else if(i <  8u) pEnemy->Rotate270()->InvertX();
+            else if(i < 12u) pEnemy->InvertX();
+            else if(i < 16u) {}
+
+            const coreVector2 vDir = pEnemy->AimAtPlayerSide().Normalized();
+
+            pEnemy->SetDirection(coreVector3(vDir, 0.0f));
+
+            if(STAGE_LIFETIME_AFTER(2.0f) && STAGE_TICK_TIME(0.6f, ((i % 8u) < 4u) ? 0.0f : 0.5f))
+            {
+                const coreVector2 vPos = pEnemy->GetPosition().xy();
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+            }
+        });
+
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_THIS)
+        {
+            if(!bFirstHit || (pEnemy->GetID() != cWarriorEnemy::ID)) return;
+
+            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.03f * RCP(I_TO_F(g_pGame->GetNumPlayers())));
+
+            pBullet->Deactivate(true, vIntersection.xy());
+        });
+
+        STAGE_WAVE("SECHSUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+    });
+
+    // ################################################################
+    // reset helper
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+
+        this->DisableLoad(false);
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################

@@ -121,7 +121,7 @@ void cDemoMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -174,7 +174,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -237,7 +237,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -383,7 +383,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("DREI", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("DREI", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -519,7 +519,7 @@ void cDemoMission::__SetupOwn()
             pBulletEnemy->Deactivate(true, vIntersection.xy());
         });
 
-        STAGE_WAVE("ACHT", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ACHT", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -801,7 +801,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("EINUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("EINUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -978,7 +978,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ZWEIUNDNEUNZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ZWEIUNDNEUNZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1235,7 +1235,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("SIEBZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("SIEBZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1475,7 +1475,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ACHTUNDVIERZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ACHTUNDVIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -1752,7 +1752,7 @@ void cDemoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("EINDUNDFÜNFZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("EINDUNDFÜNFZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################

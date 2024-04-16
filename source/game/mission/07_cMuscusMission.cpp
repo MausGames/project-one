@@ -247,20 +247,32 @@ void cMuscusMission::__RenderOwnUnder()
     glDepthMask(false);
     {
         // 
-        m_GenerateWave.Render();
-
-        // 
         m_PearlWave.Render();
+    }
+    glDepthMask(true);
+
+    // 
+    m_Pearl.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Pearl);
+}
+
+
+// ****************************************************************
+// 
+void cMuscusMission::__RenderOwnOver()
+{
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_GenerateWave.Render();
     }
     glDepthMask(true);
 
     // 
     m_Generate.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Generate);
-
-    // 
-    m_Pearl.Render();
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Pearl);
 }
 
 

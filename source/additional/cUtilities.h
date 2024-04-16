@@ -77,6 +77,11 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
     return FmodRange(x - y, -PI, PI);
 }
 
+inline FUNC_CONST coreFloat AngleAbs(const coreFloat x)
+{
+    return FmodRange(x, 0.0f*PI, 2.0f*PI);
+}
+
 
 // ****************************************************************
 // value range helper-functions
@@ -130,6 +135,13 @@ inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 
 // ****************************************************************
 // 
+inline FUNC_PURE coreFloat SmoothAimAngle(const coreFloat vOldAngle, const coreFloat vNewAngle, const coreFloat fStrength)
+{
+    const coreFloat fDiff = AngleDiff(vNewAngle, vOldAngle);
+
+    return vOldAngle + fDiff * (1.0f - FrictionFactor(fStrength));
+}
+
 inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())

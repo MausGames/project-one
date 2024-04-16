@@ -449,7 +449,7 @@ void cTigerBoss::__MoveOwn()
 
                 const coreVector3 vStart = m_Weapon.GetPosition() + m_Weapon.GetDirection() * 9.0f;
                 const coreVector3 vDiff  = coreVector3(vHit, 0.0f) - vStart;
-                const coreUintW   iNum   = F_TO_UI(vDiff.Length() / 1.9f);
+                const coreUintW   iNum   = MAX(F_TO_UI(vDiff.Length() / 1.9f), 2u);
 
                 for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, COLOR_ENERGY_WHITE);
 
@@ -854,7 +854,7 @@ void cTigerBoss::__CreateTrail(const coreUintW iIndex, const coreVector3 vInters
                 coreObject3D* pObject = MANAGED_NEW(coreObject3D);
                 pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
                 pObject->DefineTexture(0u, "default_white.png");
-                pObject->DefineProgram("effect_decal_single_program");
+                pObject->DefineProgram("effect_decal_single_program");   // TODO 1: eigenen decal_color shader (similar to menu_color)
 
                 // set object properties
                 pObject->SetSize     (coreVector3(vDecalSize, 1.0f));

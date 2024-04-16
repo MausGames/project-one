@@ -89,13 +89,18 @@ public:
         coreUint8  iMissionStartIndex;                                                     // 
         coreInt32  aiMissionList[REPLAY_MISSIONS];                                         // 
 
+        coreUint32 aiScoreTotal    [REPLAY_PLAYERS];                                       // 
+        coreUint32 aaiScoreMission [REPLAY_PLAYERS][REPLAY_MISSIONS];                      // 
+        coreUint32 aaaiScoreSegment[REPLAY_PLAYERS][REPLAY_MISSIONS][REPLAY_SEGMENTS];     // 
+
         coreUint32 iTimeTotal;                                                             // 
         coreUint32 aiTimeMission [REPLAY_MISSIONS];                                        // 
         coreUint32 aaiTimeSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                       // 
 
-        coreUint32 aiScoreTotal    [REPLAY_PLAYERS];                                       // 
-        coreUint32 aaiScoreMission [REPLAY_PLAYERS][REPLAY_MISSIONS];                      // 
-        coreUint32 aaaiScoreSegment[REPLAY_PLAYERS][REPLAY_MISSIONS][REPLAY_SEGMENTS];     // 
+        coreUint16 aiShiftGoodMission [REPLAY_MISSIONS];                                   // 
+        coreUint16 aaiShiftGoodSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                  // 
+        coreUint16 aiShiftBadMission  [REPLAY_MISSIONS];                                   // 
+        coreUint16 aaiShiftBadSegment [REPLAY_MISSIONS][REPLAY_SEGMENTS];                  // 
 
         coreUint64 iChecksum;                                                              // 
     };

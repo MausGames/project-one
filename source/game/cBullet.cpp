@@ -666,7 +666,6 @@ void cOrbBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    //this->SetAlpha(1.0f);
 }
 
 
@@ -718,7 +717,6 @@ void cConeBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
 }
 
 
@@ -770,7 +768,6 @@ void cWaveBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
 }
 
 
@@ -822,7 +819,6 @@ void cSpearBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
 }
 
 
@@ -871,7 +867,6 @@ void cTriangleBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
 }
 
 
@@ -921,7 +916,6 @@ void cFlipBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
 }
 
 
@@ -970,7 +964,6 @@ void cQuadBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
 }
 
 
@@ -1022,7 +1015,6 @@ void cViewBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
 }
 
 

@@ -170,13 +170,18 @@ public:
 class cTimeTable final
 {
 private:
-    coreProtect<coreUint32> m_iTimeEvent;                                       // 
+    coreProtect<coreUint32> m_iTimeEvent;                                            // 
 
-    coreProtect<coreUint32> m_iTimeTotal;                                       // 
-    coreProtect<coreUint32> m_aiTimeMission [TABLE_MISSIONS];                   // total time per mission 
-    coreProtect<coreUint32> m_aaiTimeSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+    coreProtect<coreUint32> m_iTimeTotal;                                            // 
+    coreProtect<coreUint32> m_aiTimeMission [TABLE_MISSIONS];                        // total time per mission 
+    coreProtect<coreUint32> m_aaiTimeSegment[TABLE_MISSIONS][TABLE_SEGMENTS];        // 
 
-    coreFloat m_fFrameTime;                                                     // 
+    coreProtect<coreUint16> m_aiShiftGoodMission [TABLE_MISSIONS];                   // 
+    coreProtect<coreUint16> m_aaiShiftGoodSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+    coreProtect<coreUint16> m_aiShiftBadMission  [TABLE_MISSIONS];                   // 
+    coreProtect<coreUint16> m_aaiShiftBadSegment [TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+
+    coreFloat m_fFrameTime;                                                          // 
 
 
 public:
@@ -191,18 +196,36 @@ public:
     void Reset();
 
     // 
-    coreFloat GetTimeSegmentSafe(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const;
-    coreFloat GetTimeSegmentSafe()const;
+    void AddShiftGood(const coreUint16 iValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void AddShiftGood(const coreUint16 iValue);
+    void AddShiftBad (const coreUint16 iValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void AddShiftBad (const coreUint16 iValue);
 
     // 
-    inline coreUint32 GetTimeEventRaw  ()const                                                             {return m_iTimeEvent;}
-    inline coreUint32 GetTimeTotalRaw  ()const                                                             {return m_iTimeTotal;}
-    inline coreUint32 GetTimeMissionRaw(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiTimeMission [iMissionIndex];}
-    inline coreUint32 GetTimeSegmentRaw(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiTimeSegment[iMissionIndex][iSegmentIndex];}
-    inline coreFloat  GetTimeEvent     ()const                                                             {return __TABLE_TIME_CONVERT(this->GetTimeEventRaw  ());}
-    inline coreFloat  GetTimeTotal     ()const                                                             {return __TABLE_TIME_CONVERT(this->GetTimeTotalRaw  ());}
-    inline coreFloat  GetTimeMission   (const coreUintW iMissionIndex)const                                {return __TABLE_TIME_CONVERT(this->GetTimeMissionRaw(iMissionIndex));}
-    inline coreFloat  GetTimeSegment   (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {return __TABLE_TIME_CONVERT(this->GetTimeSegmentRaw(iMissionIndex, iSegmentIndex));}
+    coreFloat GetTimeSegmentSafe       (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const;
+    coreFloat GetTimeSegmentSafe       ()const;
+    coreInt32 GetShiftSegmentSafe      (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const;
+    coreInt32 GetShiftSegmentSafe      ()const;
+    coreFloat GetTimeShiftedSegmentSafe(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const;
+    coreFloat GetTimeShiftedSegmentSafe()const;
+
+    // 
+    inline coreUint32 GetTimeEventRaw      ()const                                                             {return m_iTimeEvent;}
+    inline coreUint32 GetTimeTotalRaw      ()const                                                             {return m_iTimeTotal;}
+    inline coreUint32 GetTimeMissionRaw    (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiTimeMission [iMissionIndex];}
+    inline coreUint32 GetTimeSegmentRaw    (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiTimeSegment[iMissionIndex][iSegmentIndex];}
+    inline coreFloat  GetTimeEvent         ()const                                                             {return __TABLE_TIME_CONVERT(this->GetTimeEventRaw  ());}
+    inline coreFloat  GetTimeTotal         ()const                                                             {return __TABLE_TIME_CONVERT(this->GetTimeTotalRaw  ());}
+    inline coreFloat  GetTimeMission       (const coreUintW iMissionIndex)const                                {return __TABLE_TIME_CONVERT(this->GetTimeMissionRaw(iMissionIndex));}
+    inline coreFloat  GetTimeSegment       (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {return __TABLE_TIME_CONVERT(this->GetTimeSegmentRaw(iMissionIndex, iSegmentIndex));}
+    inline coreUint16 GetShiftGoodMission  (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiShiftGoodMission [iMissionIndex];}
+    inline coreUint16 GetShiftGoodSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex];}
+    inline coreUint16 GetShiftBadMission   (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiShiftBadMission  [iMissionIndex];}
+    inline coreUint16 GetShiftBadSegment   (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiShiftBadSegment [iMissionIndex][iSegmentIndex];}
+    inline coreInt32  GetShiftMission      (const coreUintW iMissionIndex)const                                {return coreInt32(this->GetShiftBadMission(iMissionIndex))                - coreInt32(this->GetShiftGoodMission(iMissionIndex));}
+    inline coreInt32  GetShiftSegment      (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {return coreInt32(this->GetShiftBadSegment(iMissionIndex, iSegmentIndex)) - coreInt32(this->GetShiftGoodSegment(iMissionIndex, iSegmentIndex));}
+    inline coreFloat  GetTimeShiftedMission(const coreUintW iMissionIndex)const                                {return this->GetTimeMission(iMissionIndex)                + I_TO_F(this->GetShiftMission(iMissionIndex));}
+    inline coreFloat  GetTimeShiftedSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {return this->GetTimeSegment(iMissionIndex, iSegmentIndex) + I_TO_F(this->GetShiftSegment(iMissionIndex, iSegmentIndex));}
 };
 
 

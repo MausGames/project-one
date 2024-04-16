@@ -167,7 +167,7 @@ cGameMenu::cGameMenu()noexcept
             const coreVector2 vPos  = coreVector2((I_TO_F(j) - 3.5f) * 0.05f + (bBoss ? 0.02f : 0.0f), m_aMissionName[i].GetPosition().y);
             const coreVector2 vSize = bBoss ? coreVector2(0.1f,0.05f) : coreVector2(0.05f,0.05f);
 
-            m_aaStage[i][j].DefineTexture   (0u, "environment_clouds_grey.png");
+            m_aaStage[i][j].DefineTexture   (0u, Core::Manager::Resource->Load<coreTexture>("test.png", CORE_RESOURCE_UPDATE_AUTO, "data/textures/test.png"));
             m_aaStage[i][j].DefineProgram   ("menu_grey_program");
             //m_aaStage[i][j].SetPosition     (vPos + coreVector2(0.225f,0.0f));
             m_aaStage[i][j].SetPosition     (vPos + coreVector2(0.05f,0.0f));

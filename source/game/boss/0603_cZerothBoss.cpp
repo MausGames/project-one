@@ -13,6 +13,7 @@
 // TODO 1: decent smoke on ice cubes
 // TODO 1: schildkröte, zieht gliedmaßen ein, kann "umfallen"
 // TODO 1: stone outside of boss should also be ice cube
+// TODO 1: sollte sich mehr bewegen, so wie andere bosse
 // nur extremitäten können angegriffen werden, ziehen sich zurück
 
 

@@ -12,7 +12,7 @@
 
 // TODO 4: cleanup, even header members and functions
 // TODO 1: add button descriptions (at bottom) and for tabs
-// TODO 1: improve cursor graphics
+// TODO 1: improve cursor graphics (gamepad, also mouse?)
 // TODO 3: allow selecting the current tab when going below bottom, instead of skipping it
 // TODO 1: allow hiding cursor (e.g. for world-map)
 // TODO 1: correctly handle button-remapping feature

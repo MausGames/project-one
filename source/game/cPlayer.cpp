@@ -585,12 +585,21 @@ void cPlayer::Move()
 // reduce current health
 coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact)
 {
+    ASSERT(STATIC_ISVALID(g_pGame))
+
     if(iDamage > 0)
     {
         constexpr coreInt32 iReplacement = 1;
 
         // 
         m_ScoreTable.CancelCooldown();
+
+        // 
+        const coreUint16 iShift = g_pGame->IsMulti() ? 2u : 3u;
+        g_pGame->GetTimeTable()->AddShiftBad(iShift);
+
+        // 
+        g_pGame->GetCombatText()->DrawShift(iShift, this->GetPosition());
 
         // 
         const coreInt32 iShieldDamage = CLAMP(iReplacement, m_iCurShield - m_iMaxShield, m_iCurShield);
@@ -1184,15 +1193,15 @@ void cPlayer::__EquipShield()
 coreBool cPlayer::__NewCollision(const coreObject3D* pObject)
 {
     // find existing collision
-    if(m_aCollision.count(pObject))
+    if(m_aiCollision.count(pObject))
     {
         // update frame number
-        m_aCollision.at(pObject) = Core::System->GetCurFrame();
+        m_aiCollision.at(pObject) = Core::System->GetCurFrame();
         return false;
     }
 
     // add collision to list
-    m_aCollision.emplace(pObject, Core::System->GetCurFrame());
+    m_aiCollision.emplace(pObject, Core::System->GetCurFrame());
     return true;
 }
 
@@ -1203,11 +1212,11 @@ void cPlayer::__UpdateCollisions()
 {
     // loop through all collisions
     const coreUint32 iCurFrame = Core::System->GetCurFrame() - 1u;
-    FOR_EACH_DYN(it, m_aCollision)
+    FOR_EACH_DYN(it, m_aiCollision)
     {
         // check for old entries and remove them
         if((*it) == iCurFrame) DYN_KEEP  (it)
-                          else DYN_REMOVE(it, m_aCollision)
+                          else DYN_REMOVE(it, m_aiCollision)
     }
     
     

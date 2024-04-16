@@ -115,19 +115,25 @@ void cCombatText::Move()
 void cCombatText::DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
     // 
-    this->__DrawLabel(PRINT("+%d", iValue), vPosition, bBig, COLOR_MENU_INSIDE, 0u);
+    this->__DrawLabel(PRINT("+%u", iValue), vPosition, bBig, COLOR_MENU_INSIDE, 0u);
 }
 
 void cCombatText::DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
     // 
-    this->__DrawLabel(PRINT("+%d", iValue), vPosition, bBig, COLOR_MENU_YELLOW, 1u);
+    this->__DrawLabel(PRINT("+%u", iValue), vPosition, bBig, COLOR_MENU_YELLOW, 1u);
 }
 
 void cCombatText::DrawChain(const coreUint32 iValue, const coreVector3 vPosition)
 {
     // 
-    this->__DrawLabel(PRINT("+%d", iValue), vPosition, true, COLOR_MENU_BLUE, 2u);
+    this->__DrawLabel(PRINT("+%u", iValue), vPosition, true, COLOR_MENU_BLUE, 2u);
+}
+
+void cCombatText::DrawShift(const coreUint32 iValue, const coreVector3 vPosition)
+{
+    // 
+    this->__DrawLabel(PRINT("+%u", iValue), vPosition, true, COLOR_MENU_RED, 3u);
 }
 
 
@@ -143,7 +149,7 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
     m_BadgeIcon.SetAlpha (0.0f);
 
     // 
-    m_BadgeLabel.SetText  (coreData::ToChars(iValue));
+    m_BadgeLabel.SetText  (PRINT("-%u", iValue));
     m_BadgeLabel.SetCenter(vOnScreen);
     m_BadgeLabel.SetAlpha (0.0f);
 

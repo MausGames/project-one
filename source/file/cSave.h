@@ -19,6 +19,7 @@
 // TODO 2: disable or handle save stats while in error-mission
 // TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 // TODO 1: scoring + leaderboard also needs to be version specific
+// TODO 1: iBadge needs to be handled correctly, 64-bit ? 5 badges per segment ? [SAVE_MISSIONS][SAVE_SEGMENTS]
 
 
 // ****************************************************************
@@ -45,8 +46,8 @@ public:
     // 
     struct sGlobalStats final
     {
-        coreUint64 iTimePlayed;                   // 
         coreUint64 iScoreGained;                  // 
+        coreUint64 iTimePlayed;                   // 
         coreUint32 iMissionsDone;                 // 
         coreUint32 iBossesDone;                   // 
         coreUint32 iWavesDone;                    // 
@@ -56,12 +57,14 @@ public:
         coreUint32 iDamageTaken;                  // 
         coreUint32 iContinuesUsed;                // 
         coreUint32 iRepairsUsed;                  // 
+        coreUint32 iShiftGoodAdded;               // TODO 1 (aber nicht bei mission oder segment ende, sollte in echtzeit aktualisiert werden) 
+        coreUint32 iShiftBadAdded;                // TODO 1 (aber nicht bei mission oder segment ende, sollte in echtzeit aktualisiert werden) 
         coreUint64 iMovesMade;                    // TODO 1 (+table) 
         coreUint32 iTurnsMade;                    // TODO 1 (+table) 
         coreUint32 iRollsMade;                    // TODO 1 (+table) 
         coreUint64 iBulletsShot;                  // TODO 1 (+table) 
         coreUint64 iChromaCollected;              // TODO 1: remove 
-        coreUint32 iItemsCollected;               // 
+        coreUint32 iItemsCollected;               // TODO 1: remove 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
         coreUint32 iFragmentsEarned;              // 
         coreUint32 iBadgesEarned;                 // 
@@ -70,25 +73,34 @@ public:
     // 
     struct sLocalStats final
     {
-        coreUint32 iTimeBest;                     // 
-        coreUint32 iTimeWorst;                    // 
-        coreUint64 iTimeTotal;                    // 
         coreUint32 iScoreBest;                    // 
         coreUint32 iScoreWorst;                   // 
         coreUint64 iScoreTotal;                   // 
+        coreUint32 iTimeBest;                     // 
+        coreUint32 iTimeWorst;                    // 
+        coreUint64 iTimeTotal;                    // 
         coreUint32 iCountStart;                   // 
         coreUint32 iCountEnd;                     // 
+
+        coreUint32 iTimeBestShifted;              // (already shifted) 
+        coreUint16 iTimeBestShiftGood;            // 
+        coreUint16 iTimeBestShiftBad;             // 
+        coreUint32 iTimeWorstShifted;             // (already shifted) 
+        coreUint16 iTimeWorstShiftGood;           // 
+        coreUint16 iTimeWorstShiftBad;            // 
 
         coreUint64 iDamageGiven;                  // 
         coreUint32 iDamageTaken;                  // 
         coreUint32 iContinuesUsed;                // 
         coreUint32 iRepairsUsed;                  // 
+        coreUint32 iShiftGoodAdded;               // TODO 1 (aber nicht bei mission oder segment ende, sollte in echtzeit aktualisiert werden) 
+        coreUint32 iShiftBadAdded;                // TODO 1 (aber nicht bei mission oder segment ende, sollte in echtzeit aktualisiert werden) 
         coreUint64 iMovesMade;                    // TODO 1 (+table) 
         coreUint32 iTurnsMade;                    // TODO 1 (+table) 
         coreUint32 iRollsMade;                    // TODO 1 (+table) 
         coreUint64 iBulletsShot;                  // TODO 1 (+table) 
         coreUint64 iChromaCollected;              // TODO 1: remove 
-        coreUint32 iItemsCollected;               // 
+        coreUint32 iItemsCollected;               // TODO 1: remove 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
         coreUint32 iFragmentsEarned;              // 
         coreUint32 iBadgesEarned;                 // 
@@ -116,7 +128,7 @@ public:
         coreUint8  aiMedalMission [SAVE_MISSIONS];                  // 
         coreUint8  aaiMedalSegment[SAVE_MISSIONS][SAVE_SEGMENTS];   // 
         coreUint8  aiFragment     [SAVE_MISSIONS];                  // (bitfield) 
-        coreUint32 aiBadge        [SAVE_MISSIONS];                  // (bitfield) 
+        coreUint64 aiBadge        [SAVE_MISSIONS];                  // (bitfield) 
         coreUint64 iTrophy;                                         // (bitfield) 
         coreUint64 iUnlock;                                         // (bitfield) 
         coreUint64 aiHideMessage[2];                                // (bitfield) 
