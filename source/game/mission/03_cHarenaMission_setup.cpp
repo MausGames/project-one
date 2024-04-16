@@ -26,7 +26,7 @@ void cHarenaMission::__SetupOwn()
     {
         g_pEnvironment->ChangeBackground(cDesertBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
         g_pEnvironment->SetTargetSpeedNow(6.0f);
-        
+
         //g_pEnvironment->SetTargetDirection(coreVector2(1.0f,-1.0f).Normalized());   // kommt gut mit den säulen          
 
         g_pGame->StartIntro();

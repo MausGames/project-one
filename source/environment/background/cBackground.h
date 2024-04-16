@@ -27,12 +27,15 @@
 // TODO 3: remove texture-sampling from lightning effect in moss
 // TODO 3: stomach should not create all vertices
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
-// TODO 5: grass and blood textures are duplicated (especially normal maps)
-// TODO 1: can thunder effect cause issues for some players ? are there other effects causing issues ? (change effects or add disable option)
+// TODO 5: grass+blood and sand+snow (norm) textures are duplicated (especially normal maps), proxies are not possible, because files are loaded directly
+// TODO 1: thunder effect can cause issues for some players, are there other effects causing issues ? (not only flash or shake) (add them to/as disable option)
 // TODO 3: improve snow texture to little flakes (broken quads) 
 // TODO 3: in Add functions change sListKey to a combination of resource identifiers
 // TODO 3: adding temporary objects should cache resources
+// TODO 3: remove draw-call for volcano smoke base-objects
 // TODO 3: adding temporary objects can/should implicitly rotate the position ?
+// TODO 3: use __Reset in water class, instead of __OwnInit
+// TODO 1: sound (e.g. on cloud background) seems to be broken on resize
 
 
 // ****************************************************************
@@ -115,7 +118,7 @@
 
 // ****************************************************************
 // background interface
-class INTERFACE cBackground
+class INTERFACE cBackground : public coreResourceRelation
 {
 private:
     // 
@@ -123,7 +126,6 @@ private:
 
 
 protected:
-    // TODO 1: background nicht neu erzeugen, sondern refresh function aufrufen hier
     coreFrameBuffer m_FrameBuffer;                   // background frame buffer (multisampled)
     coreFrameBuffer m_ResolvedTexture;               // resolved texture
 
@@ -146,7 +148,7 @@ protected:
 
 public:
     static coreRand       s_Rand;                    // 
-    // rand für background, outdoor (andere location für dieses coreRand object?) (oder eigentlich nur ein stack-object in Outdoor und Background)
+    // TODO 3: rand für background, outdoor (andere location für dieses coreRand object?) (oder eigentlich nur ein stack-object in Outdoor und Background)
     cBackground()noexcept;
     virtual ~cBackground();
 
@@ -193,7 +195,11 @@ protected:
 
 
 private:
+    // reset with the resource manager
+    void __Reset(const coreResourceReset eInit)final;
+
     // own routines for derived classes
+    virtual void __InitOwn        () {}
     virtual void __RenderOwnBefore() {}
     virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
@@ -239,6 +245,7 @@ public:
 
 protected:
     // execute own routines
+    void __InitOwn()final;
     void __MoveOwn()final;
 };
 
@@ -263,6 +270,7 @@ public:
 
 protected:
     // execute own routines
+    void __InitOwn  ()final;
     void __MoveOwn  ()final;
     void __UpdateOwn()final;
 };
@@ -392,6 +400,7 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
 };
@@ -439,6 +448,7 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
@@ -506,6 +516,7 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
     void __UpdateOwn     ()final;

@@ -347,12 +347,12 @@ void cCalorMission::__SetupOwn()
                     pBullet->Deactivate(true);
                 }
             });
-
-            STAGE_FOREACH_PLAYER(pPlayer, i)
-            {
-                pPlayer->SetSpeed((!pPlayer->IsRolling() && m_Snow.TestCollision(pPlayer->GetPosition().xy())) ? 0.5f : 1.0f);
-            });
         }
+
+        STAGE_FOREACH_PLAYER(pPlayer, i)
+        {
+            pPlayer->SetSpeed((!pPlayer->IsRolling() && m_Snow.IsActive() && m_Snow.TestCollision(pPlayer->GetPosition().xy())) ? 0.5f : 1.0f);
+        });
 
         STAGE_WAVE("ZWEIUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
@@ -656,7 +656,7 @@ void cCalorMission::__SetupOwn()
             STAGE_GET_UINT      (iPushBack, iPushBack  = true)
         STAGE_GET_END
 
-        if(STAGE_CLEARED)
+        if(pSquad1->IsFinished())
         {
                  if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
             else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  4u, 19u)
@@ -721,6 +721,11 @@ void cCalorMission::__SetupOwn()
                 pPlayer->SetPosition(pPlayer->GetPosition() + coreVector3(0.0f, fPush, 0.0f));
             });
         }
+
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->SetArea(PLAYER_AREA_DEFAULT * RCP(iPushBack ? LERPH3(1.0f, PLAYER_AREA_FACTOR, MIN(m_fStageTime, 1.0f)) : 1.0f));
+        });
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -831,6 +836,11 @@ void cCalorMission::__SetupOwn()
     {
         g_pGame->GetHelper(ELEMENT_MAGENTA)->Kill(false);
 
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->SetArea(PLAYER_AREA_DEFAULT);
+        });
+
         STAGE_FINISH_NOW
     });
 
@@ -862,6 +872,8 @@ void cCalorMission::__SetupOwn()
     // TODO 1: coop: average, only move if both look at same direction, both control both ships
     // TODO 1: star field ? lines from the side |> -> ?
     // TODO 1: infinity bullets für nicht-star patterns sollten früher sein
+    // TODO 1: player respawn! coop! (alles friert ein, helfer bewegt spieler an alte stelle, langsame beschleunigung)
+    // TODO 1: attack an enemy at the top before starting with bullets
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)

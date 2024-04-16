@@ -50,6 +50,8 @@
 #define PLAYER_NO_FEEL   (-100.0f)   // 
 #define PLAYER_NO_IGNORE (-100.0f)   // 
 
+#define PLAYER_AREA_DEFAULT (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
+
 //STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
 
 enum ePlayerStatus : coreUint8
@@ -166,7 +168,7 @@ public:
 
     // 
     inline void ActivateNormalShading() {this->DefineProgram(m_pNormalProgram);}
-    inline void ActivateDarkShading  () {this->ActivateNormalShading(); this->SetBaseColor(COLOR_SHIP_GREY * 0.5f);/*this->DefineProgram(m_pDarkProgram);*/}
+    inline void ActivateDarkShading  () {this->DefineProgram(m_pDarkProgram);}
 
     // 
     void TurnIntoEnemy ();
@@ -177,7 +179,7 @@ public:
     inline coreBool IsRolling    ()const {return (m_iRollDir    != PLAYER_NO_ROLL);}
     inline coreBool IsFeeling    ()const {return (m_fFeelTime   >  PLAYER_NO_FEEL);}
     inline coreBool IsIgnoring   ()const {return (m_fIgnoreTime >  PLAYER_NO_IGNORE);}
-    inline coreBool IsDarkShading()const {return true;}//(this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
+    inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
     inline coreBool IsEnemyLook  ()const {return (m_apWeapon[0]->GetID() == cEnemyWeapon::ID);}
 
     // 

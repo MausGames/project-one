@@ -413,7 +413,7 @@ void cRayBullet::__MoveOwn()
     
     if(this->GetPosition().z < -500.0f) this->Deactivate(false);
     
-    const coreFloat fRelSpeed = m_fSpeed / (6.0f*BULLET_SPEED_FACTOR);
+    const coreFloat fRelSpeed = m_fSpeed / (8.0f*BULLET_SPEED_FACTOR);
 
     // update animation
     m_fAnimation.UpdateMod(0.4f * fRelSpeed, 1.0f);
@@ -423,8 +423,11 @@ void cRayBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.5f * fRelSpeed);
     const coreFloat fWave = 1.0f + 0.25f * SIN(m_fFade * 40.0f);
-    this->SetSize (coreVector3(3.7f * fWave, 3.7f * MIN(12.0f * m_fFade, 1.0f) * fRelSpeed, 3.7f * fWave) * 0.5f * m_fScale);
+    this->SetSize (coreVector3(3.7f * fWave, 3.7f * MIN(12.0f * m_fFade, 1.0f) * fRelSpeed * 1.0f, 3.7f * fWave) * 0.5f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
+    
+    
+    this->SetTexSize(coreVector2(0.4f,0.2f * MIN(12.0f * m_fFade, 1.0f) * fRelSpeed * 1.0f) * 0.7f);
 }
 
 
@@ -701,7 +704,7 @@ void cConeBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.15f, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -849,9 +852,9 @@ void cTriangleBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 2.0f);
+    m_fAnimation.UpdateMod(0.2f, 16.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -898,9 +901,9 @@ void cFlipBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(-0.2f, -2.0f);
-    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (15.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    m_fAnimation.UpdateMod(-0.2f, -16.0f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (9.0f*PI)), 0.0f));
+    this->SetTexOffset(coreVector2(m_fAnimation * 0.625f, 0.0f));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -946,9 +949,9 @@ void cQuadBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 2.0f);
+    m_fAnimation.UpdateMod(0.2f, 16.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
 
     // update fade
     m_fFade.Update(1.0f);

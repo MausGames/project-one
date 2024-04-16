@@ -130,15 +130,14 @@ void cRutilusMission::__SetupOwn()
             else if(STAGE_SUB(17u)) STAGE_RESURRECT(pSquad1, 46u, 47u)
             else if(STAGE_SUB(18u)) STAGE_RESURRECT(pSquad1, 48u, 49u)
             else if(STAGE_SUB(19u)) STAGE_RESURRECT(pSquad1, 50u, 51u)
-
-            iTransitionState = 0u;
-            fTransitionTime  = 0.0f;
-
-            if(STAGE_CLEARED)
+            else if(STAGE_SUB(20u))
             {
                 for(coreUintW i = 0u; i < RUTILUS_PLATES; ++i)
                     this->DisablePlate(i, true);
             }
+
+            iTransitionState = 0u;
+            fTransitionTime  = 0.0f;
         }
 
         STAGE_FOREACH_PLAYER(pPlayer, i)   // before plates change, positions may not be updated yet
@@ -468,7 +467,8 @@ void cRutilusMission::__SetupOwn()
         }
 
         fRotationValue = FMOD(fRotationValue + fRotationSpeed * TIME, 2.0f*PI);
-        const coreVector2 vDirection = coreVector2::Direction(fRotationValue);
+        const coreVector2 vDirection       = coreVector2::Direction(fRotationValue);
+        const coreVector2 vDirectionMirror = g_CurConfig.Game.iMirrorMode ? vDirection.InvertedX() : vDirection;
 
         g_pPostProcessing->SetDirectionGame(vDirection);
 
@@ -500,8 +500,8 @@ void cRutilusMission::__SetupOwn()
             else if(i < 52u) {}
             else if(i < 64u)
             {
-                pEnemy->SetPosition (coreVector3(MapToAxis(pEnemy->GetPosition ().xy(), vDirection), 0.0f));
-                pEnemy->SetDirection(coreVector3(MapToAxis(pEnemy->GetDirection().xy(), vDirection), 0.0f));
+                pEnemy->SetPosition (coreVector3(MapToAxis(pEnemy->GetPosition ().xy(), vDirectionMirror), 0.0f));
+                pEnemy->SetDirection(coreVector3(MapToAxis(pEnemy->GetDirection().xy(), vDirectionMirror), 0.0f));
             }
 
             if(STAGE_TICK_LIFETIME_BASE(6.0f, 0.0f))
@@ -618,7 +618,7 @@ void cRutilusMission::__SetupOwn()
             pHelperBlue  ->Resurrect();
         }
 
-        const coreBool bVertical = false;
+        constexpr coreBool bVertical = true;
 
         fTransitionTime += 1.0f * TIME;
 

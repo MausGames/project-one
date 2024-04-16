@@ -17,6 +17,7 @@
 // TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
 // TODO 1: pause (or other) overlays should adapt to offsets
 // TODO 3: try to reduce overdraw when all walls are active
+// TODO 1: rotating screen with offset does not update wall calculations
 
 
 // ****************************************************************
@@ -72,6 +73,7 @@ public:
     void UpdateLayout();
 
     // 
+    inline coreBool IsOffset  ()const {return m_bOffsetActive;}
     inline coreBool IsMirrored()const {return (this->GetSize().x < 0.0f);}
 
     // 

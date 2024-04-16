@@ -20,8 +20,8 @@ cGrassBackground::cGrassBackground()noexcept
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("grass", "dust", 2u, 4.0f);
 
-    // create water-surface object
-    m_pWater = new cWater("environment_clouds_blue.png");
+    // 
+    this->__InitOwn();
 
     // allocate stone list
     pList1 = new coreBatchList(GRASS_STONE_RESERVE);
@@ -297,6 +297,15 @@ cGrassBackground::~cGrassBackground()
     if(m_pNatureSound->EnableRef(this))
         m_pNatureSound->Stop();
     // TODO 1: it might request stop, before play was started, if I unload background quickly again, then sound hangs
+}
+
+
+// ****************************************************************
+// 
+void cGrassBackground::__InitOwn()
+{
+    // create water-surface object
+    m_pWater = new cWater("environment_clouds_blue.png");
 }
 
 

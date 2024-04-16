@@ -19,7 +19,7 @@
 // ****************************************************************
 // 
 #if defined(_CORE_MSVC_)
-    #define UNITY_BUILD __pragma(warning(disable : 4005))
+    #define UNITY_BUILD __pragma(warning(disable : 4005))   // macro identifier redefinition
 #else
     #define UNITY_BUILD _Pragma("GCC diagnostic ignored \"-Wmacro-redefined\"")
 #endif

@@ -67,7 +67,7 @@ void cWeapon::Render()
 coreBool cWeapon::_IsOwnerDarkShading()const
 {
     // 
-    return m_pOwner->IsDarkShading();
+    return true;//m_pOwner->IsDarkShading();
 }
 
 
@@ -77,7 +77,7 @@ cRayWeapon::cRayWeapon()noexcept
 : m_bBurst (false)
 {
     // set base fire-rate
-    m_CooldownTimer.SetSpeed(15.0f);
+    m_CooldownTimer.SetSpeed(20.0f);
 
     // load shooting sound-effects
     m_pBulletSound = Core::Manager::Resource->Get<coreSound>("bullet_ray.wav");
@@ -161,16 +161,24 @@ void cRayWeapon::__ShootOwn()
         m_bBurst = true;
 
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 6.0f, m_pOwner, vPos, vDir))->ChangeScale(1.1f)->ChangeTilt(m_pOwner->GetTilt());
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(6, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->ChangeTilt(m_pOwner->GetTilt());
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cSpearBullet>   (4, 0.0f, m_pOwner, vPos + coreVector2(0.0f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cConeBullet>    (4, 0.0f, m_pOwner, vPos + coreVector2(0.1f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cTriangleBullet>(4, 0.0f, m_pOwner, vPos + coreVector2(0.2f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cViewBullet>    (4, 0.0f, m_pOwner, vPos + coreVector2(0.3f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cFlipBullet>    (4, 0.0f, m_pOwner, vPos + coreVector2(0.4f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cOrbBullet>     (4, 0.0f, m_pOwner, vPos + coreVector2(0.5f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cQuadBullet>    (4, 0.0f, m_pOwner, vPos + coreVector2(0.6f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>    (4, 0.0f, m_pOwner, vPos + coreVector2(0.7f,0.0f)*FOREGROUND_AREA, vDir)->ChangeSize(1.5f);
 
         // 
-        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
     }
     else
     {
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos + vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt());
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos - vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt());
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 8.0f, m_pOwner, vPos + vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt());
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 8.0f, m_pOwner, vPos - vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt());
         //this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 6.0f, m_pOwner, vPos, vDir))->ChangeTilt(m_pOwner->GetTilt());
     }
 

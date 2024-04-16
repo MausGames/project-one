@@ -34,6 +34,7 @@ cPostProcessing::cPostProcessing()noexcept
     {
         m_aWall[i].DefineProgram("menu_border_direct_program");
         m_aWall[i].DefineTexture(0u, "menu_background_black.png");
+        m_aWall[i].SetTexOffset (coreVector2(0.0f,0.071f));
     }
     this->__UpdateWall();
 
@@ -263,15 +264,21 @@ void cPostProcessing::__UpdateWall()
 {
     // place objects left-right or top-down depending on window aspect ratio
     const coreVector2 vResolution = Core::System->GetResolution();
-    const coreVector2 vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
+    const coreVector2 vSize       = coreVector2(0.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 1.1f;
     const coreVector2 vFlip       = IsHorizontal(vResolution) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
-    const coreUintW   iAdd        = IsHorizontal(vResolution) ? POST_WALLS_BASE        : 0u;
+    const coreUintW   iAdd        = IsHorizontal(vResolution) ? POST_WALLS_BASE : 0u;
+
+    // change ordering depending on game-rotation and mirror-mode
+    const coreVector2 vBaseDir  = this->GetDirection();
+    const coreVector2 vBaseSize = this->GetSize();
+    const coreVector2 vSwap     = (vBaseDir.yx() + vBaseDir.InvertedX()) * (IsHorizontal(vBaseDir) ? vBaseSize.yx() : vBaseSize).Processed(SIGN);
+    const coreUintW   iAdd2     = IsHorizontal(vBaseDir) ? POST_WALLS_BASE : 0u;
 
     // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
     {
-        const coreVector2 vTurn = ((i < 2u) ? vFlip.yx() : vFlip) * ((i % 2u) ? 1.0f : -1.0f);
-        const coreFloat   fMove = ((i < 2u) ? vSize.y    :  0.1f) - m_afOffset[(i + iAdd) % POST_WALLS];
+        const coreVector2 vTurn = ((i < 2u) ? vFlip.yx() : vFlip) * ((i % 2u) ? 1.0f : -1.0f) * vSwap;
+        const coreFloat   fMove = ((i < 2u) ? vSize.y    :  1.1f) - m_afOffset[(i + iAdd + iAdd2) % POST_WALLS];
 
         m_aWall[i].SetPosition (vTurn *  fMove);
         m_aWall[i].SetSize     (vSize);

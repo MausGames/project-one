@@ -13,6 +13,7 @@
 // TODO 1: transfer to Core Engine (and bake those height transformations into the glyph function)
 // TODO 3: does not handle kerning (relevant ?)
 // TODO 3: (this + __LINE__) may not handle implementation-split between cpp and h file
+// TODO 2: text not readable in vertical window
 
 
 // ****************************************************************

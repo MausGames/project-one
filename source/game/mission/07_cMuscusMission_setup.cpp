@@ -681,7 +681,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(1, COLOR_SHIP_RED);
+                pEnemy->Configure(1000, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();
@@ -699,7 +699,7 @@ void cMuscusMission::__SetupOwn()
             ASSERT(iIndex < MUSCUS_PEARLS)
 
             coreObject3D* pPearl = &m_aPearlRaw[iIndex * 2u];
-            return (pPearl->IsEnabled(CORE_OBJECT_ENABLE_MOVE) && HAS_BIT(m_iPearlActive, iIndex)) ? pPearl : NULL;
+            return (pPearl->IsEnabled(CORE_OBJECT_ENABLE_MOVE) && HAS_BIT(m_iPearlActive, iIndex) && !m_apStrikeTarget[iIndex]) ? pPearl : NULL;
         };
 
         const auto nCreatePearlWave = [this](const coreUintW iCount)
@@ -801,7 +801,7 @@ void cMuscusMission::__SetupOwn()
                 const coreVector2 vDiff = pPlayer->GetPosition().xy() - pPearl->GetPosition().xy();
                 if(vDiff.LengthSq() < POW2(4.5f))
                 {
-                    this->DisablePearl(j, true);
+                    this->StrikeAttack(j, pPlayer, pSquad1->GetEnemy(0u));
                     g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_YELLOW);
 
                     if(m_iStageSub == 6u)
@@ -1094,7 +1094,7 @@ void cMuscusMission::__SetupOwn()
             if(pEnemy->ReachedDeath())
             {
                 cPlayer* pPlayer = pEnemy->LastAttacker();
-                if(pPlayer->IsDarkShading())
+                if(!pPlayer->IsEnemyLook())
                 {
                     const coreVector3 vPos  = pPlayer->GetPosition();
                     const coreVector3 vDiff = pEnemy ->GetPosition() - vPos;

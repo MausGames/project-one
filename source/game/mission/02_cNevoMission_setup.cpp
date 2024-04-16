@@ -964,19 +964,18 @@ void cNevoMission::__SetupOwn()
             else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 12u, 15u)
             else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 16u, 19u)
             else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 20u, 23u)
-
-            STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-            {
-                if(!pEnemy->ReachedDeath()) this->EnableBlock((i < iNumBig) ? i : ((i % (NEVO_BLOCKS - iNumBig)) + iNumBig), pEnemy, (i < iNumBig) ? 10.0f : -5.0f);
-            });
-
-            if(STAGE_CLEARED)
+            else if(STAGE_SUB(10u))
             {
                 for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i)
                     this->DisableBlock(i, true);
 
                 g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(true);
             }
+
+            STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+            {
+                if(!pEnemy->ReachedDeath()) this->EnableBlock((i < iNumBig) ? i : ((i % (NEVO_BLOCKS - iNumBig)) + iNumBig), pEnemy, (i < iNumBig) ? 10.0f : -5.0f);
+            });
         }
 
         if(m_iStageSub >= 5u)

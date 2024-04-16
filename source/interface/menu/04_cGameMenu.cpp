@@ -134,8 +134,10 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
     {
         m_aMissionName[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-        m_aMissionName[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.3f, -0.1f - 0.025f*I_TO_F(iOffset)));
-        m_aMissionName[i].SetAlignment(coreVector2(1.0f,0.0f));
+        //m_aMissionName[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.3f, -0.1f - 0.025f*I_TO_F(iOffset)));
+        //m_aMissionName[i].SetAlignment(coreVector2(1.0f,0.0f));
+        m_aMissionName[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,0.5f) + coreVector2(-0.04f, -0.1f - 0.025f*I_TO_F(iOffset)));
+        m_aMissionName[i].SetAlignment(coreVector2(-1.0f,0.0f));
         m_aMissionName[i].SetColor3   (COLOR_MENU_WHITE);
 
         m_aMissionLine[i].DefineTexture(0u, "menu_detail_04.png");
@@ -167,7 +169,8 @@ cGameMenu::cGameMenu()noexcept
 
             m_aaStage[i][j].DefineTexture   (0u, "environment_clouds_grey.png");
             m_aaStage[i][j].DefineProgram   ("menu_grey_program");
-            m_aaStage[i][j].SetPosition     (vPos + coreVector2(0.225f,0.0f));
+            //m_aaStage[i][j].SetPosition     (vPos + coreVector2(0.225f,0.0f));
+            m_aaStage[i][j].SetPosition     (vPos + coreVector2(0.05f,0.0f));
             m_aaStage[i][j].SetSize         (vSize * 0.8f);
             m_aaStage[i][j].SetFocusable    (true);
             m_aaStage[i][j].SetFocusModifier(coreVector2(1.25f,1.25f));
@@ -556,6 +559,28 @@ void cGameMenu::Move()
             m_aMissionLine[7].SetColor3((m_aiStageSelection[0] == 7u) ? cDarkBackground   ::Color : coreVector3(1.0f,1.0f,1.0f));
             m_aMissionLine[8].SetColor3((m_aiStageSelection[0] == 8u) ? cDarkBackground   ::Color : coreVector3(1.0f,1.0f,1.0f));
             
+            
+            /*
+            m_aMissionName[0].SetColor3(cDesertBackground ::Color);
+            m_aMissionName[1].SetColor3(cVolcanoBackground::Color);
+            m_aMissionName[2].SetColor3(cMossBackground   ::Color);
+            m_aMissionName[3].SetColor3(cSpaceBackground  ::Color);
+            m_aMissionName[4].SetColor3(cCloudBackground  ::Color);
+            m_aMissionName[5].SetColor3(cSnowBackground   ::Color);
+            m_aMissionName[6].SetColor3(cSeaBackground    ::Color);
+            m_aMissionName[7].SetColor3(cGrassBackground  ::Color);
+            m_aMissionName[8].SetColor3(cDarkBackground   ::Color);
+            
+            m_aMissionLine[0].SetColor3(cDesertBackground ::Color);
+            m_aMissionLine[1].SetColor3(cVolcanoBackground::Color);
+            m_aMissionLine[2].SetColor3(cMossBackground   ::Color);
+            m_aMissionLine[3].SetColor3(cSpaceBackground  ::Color);
+            m_aMissionLine[4].SetColor3(cCloudBackground  ::Color);
+            m_aMissionLine[5].SetColor3(cSnowBackground   ::Color);
+            m_aMissionLine[6].SetColor3(cSeaBackground    ::Color);
+            m_aMissionLine[7].SetColor3(cGrassBackground  ::Color);
+            m_aMissionLine[8].SetColor3(cDarkBackground   ::Color);
+            */
         }
         break;
 

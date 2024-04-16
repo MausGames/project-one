@@ -136,7 +136,7 @@ void cCombatText::DrawChain(const coreUint32 iValue, const coreVector3 vPosition
 void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition)
 {
     // 
-    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection);
+    const coreVector2 vOnScreen = cCombatText::__TransformPosition(vPosition);
 
     // 
     m_BadgeIcon.SetCenter(vOnScreen);
@@ -188,7 +188,7 @@ void cCombatText::__DrawLabel(const coreChar* pcText, const coreVector3 vPositio
     ASSERT(pcText)
 
     // 
-    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection);
+    const coreVector2 vOnScreen = cCombatText::__TransformPosition(vPosition);
 
     // 
     const coreUintW iFrom = bBig ? COMBAT_LABELS_SMALL : 0u;
@@ -254,6 +254,24 @@ void cCombatText::__RemoveOrder(cGuiLabel* pLabel)
 
     // 
     WARN_IF(true) {}
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cCombatText::__TransformPosition(const coreVector3 vPosition)
+{
+    // 
+    const coreFloat fSide = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+
+    // 
+    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+    const coreVector2 vHud   = g_vHudDirection;
+    const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+    ASSERT(vFinal.IsNormalized())
+
+    // 
+    return MapToAxisInv(g_pForeground->Project2D(vPosition) * coreVector2(fSide, 1.0f), vFinal);
 }
 
 

@@ -28,7 +28,7 @@ cMossBackground::cMossBackground()noexcept
     m_pOutdoor = new cOutdoor("moss", "blood", 5u, 4.5f);
 
     // 
-    m_pWater = new cRainWater("environment_clouds_grey.png");
+    this->__InitOwn();
 
     // 
     pList1 = new coreBatchList(MOSS_TREE_RESERVE);
@@ -236,6 +236,15 @@ cMossBackground::~cMossBackground()
     // 
     if(m_pRainSound->EnableRef(this))
         m_pRainSound->Stop();
+}
+
+
+// ****************************************************************
+// 
+void cMossBackground::__InitOwn()
+{
+    // 
+    m_pWater = new cRainWater("environment_clouds_grey.png");
 }
 
 

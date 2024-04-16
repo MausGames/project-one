@@ -16,7 +16,7 @@
 // TODO 2: use oldest active label instead of nothing, if all labels are busy (or dynamically allocated fallback)
 // TODO 3: RestrictCenter should also use size
 // TODO 4: use index instead of pointer for order-list ?
-// TODO 2: also invert with mirror mode (like interface, maybe move outside ? only size needs to be flipped, not position) (even more, like summary and continue menu) (should it be a 3rd option ?)
+// TODO 2: also invert with mirror mode (like interface, maybe move outside ?) (even more, like summary and continue menu) (should it be a 3rd option ? Off, Light, Full)
 
 
 // ****************************************************************
@@ -75,6 +75,9 @@ private:
     // 
     void __AddOrder   (cGuiLabel* pLabel);
     void __RemoveOrder(cGuiLabel* pLabel);
+
+    // 
+    static coreVector2 __TransformPosition(const coreVector3 vPosition);
 
     // 
     static coreVector2 __RestrictCenter(const coreVector2 vPosition, const coreVector2 vCenter);

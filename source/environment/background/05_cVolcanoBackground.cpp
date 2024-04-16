@@ -24,13 +24,15 @@ cVolcanoBackground::cVolcanoBackground()noexcept
     m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
     m_pOutdoor->LoadProgram(true);
 
-    // 
-    //m_pWater = new cUnderWater();
-
     // allocate smoke list
     pList1 = new coreBatchList(VOLCANO_SMOKE_RESERVE);
-                pList1->DefineProgram("effect_decal_color_inst_program");
+    pList1->DefineProgram("object_ground_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
+        oBase.DefineProgram("object_ground_program");
+
         for(coreUintW i = 0u; i < VOLCANO_SMOKE_NUM; ++i)
         {
             // calculate position and height
@@ -43,19 +45,14 @@ cVolcanoBackground::cVolcanoBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(35.0f)))
                 {
                     // create object
-                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D);
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
-                    pObject->SetPosition(coreVector3(vPosition, 0.0f));
+                    pObject->SetPosition(coreVector3(vPosition,0.0f));
                     pObject->SetSize    (coreVector3(0.0f,0.0f,0.0f));
 
                     // add object to the list
                     pList1->BindObject(pObject);
-                    
-                    
-                    
-        pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
-        pObject->DefineProgram("effect_decal_color_program");
                 }
             }
         }
@@ -375,20 +372,18 @@ void cVolcanoBackground::__RenderOwnBefore()
 // 
 void cVolcanoBackground::__MoveOwn()
 {
-    const coreFloat fFlyOffset = g_pEnvironment->GetFlyOffset();
-    
     // 
-    m_Lava.SetFlyOffset(fFlyOffset);
+    m_Lava.SetFlyOffset(g_pEnvironment->GetFlyOffset());
     m_Lava.Move();
     
     
-    const coreFloat fShift = g_pEnvironment->GetOffsetShift();
-    if(fShift)
+    const coreFloat fShove = g_pEnvironment->GetFlyShove();
+    if(fShove)
     {
         m_Smoke.ForEachParticleAll([&](coreParticle* OUTPUT pParticle, const coreUintW i)
         {
-            pParticle->GetBeginState().vPosition.y += fShift;
-            pParticle->GetEndState  ().vPosition.y += fShift;
+            pParticle->GetBeginState().vPosition.y += fShove;
+            pParticle->GetEndState  ().vPosition.y += fShove;
         });
     }
 
@@ -400,18 +395,6 @@ void cVolcanoBackground::__MoveOwn()
         coreObject3D* pSmoke = (*pList->List())[i];
         if(!pSmoke->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
-        /*
-        m_aSmokeEffect[i].CreateParticle(1, 6.0f, [](coreParticle* OUTPUT pParticle)
-        {
-            constexpr coreFloat fScale = 10.0f;
-            pParticle->SetPositionRel(coreVector3::Rand(0.0f), coreVector3::Rand(1.0f) + coreVector3::Rand(-fScale, fScale) + coreVector3(0.0f,20.0f,10.0f) * 2.0f);
-            pParticle->SetScaleAbs   (3.0f,                              12.5f * 2.0f);
-            pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.1f, PI*0.1f));
-            pParticle->SetColor4Abs  (coreVector4(0.8f,0.8f,0.8f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
-            pParticle->SetColor4Abs  (coreVector4(0.5f,0.5f,0.5f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
-            pParticle->SetSpeed      (0.1f * Core::Rand->Float(0.9f, 1.1f));
-        });
-        */
         m_aSmokeEffect[i].CreateParticle(1, 6.0f, [](coreParticle* OUTPUT pParticle)
         {
             constexpr coreFloat fScale = 10.0f;
@@ -425,8 +408,6 @@ void cVolcanoBackground::__MoveOwn()
 
     m_Smoke.Move();
 
-
-    // TODO 1: no smoke at all in area where we rewind, particles need to be shifted
 
     // 
     m_fSparkTime.Update(0.25f * MAX(ABS(g_pEnvironment->GetSpeed()), 2.0f));

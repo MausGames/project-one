@@ -412,6 +412,15 @@ void cCholBoss::__EnableFire()
     m_Fire.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     g_pGlow->BindObject(&m_Fire);
     
+
+    const coreVector2 vPos = this->GetPosition().xy();
+
+    for(coreUintW i = 20u; i--; )
+    {
+        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(i) - 9.5f) * 9.0f + 180.0f));
+
+        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.1f, this, vPos,  vDir)->ChangeSize(1.4f);
+    }
     
     
     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)

@@ -312,7 +312,7 @@ void UpdateInput()
             pInput->vMove = pInput->vMove.NormalizedUnsafe();
         }
 
-        if(g_pPostProcessing->IsMirrored())
+        if(g_CurConfig.Game.iMirrorMode == 1u)
         {
             // 
             pInput->vMove = pInput->vMove.InvertedX();

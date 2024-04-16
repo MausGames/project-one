@@ -118,7 +118,7 @@ void cMsgBox::Move()
         m_Yes.Interact();
 
         // 
-        cMenu::UpdateButton(&m_Yes, m_Yes.IsFocused(), COLOR_MENU_GREEN);
+        cMenu::UpdateButton(&m_Yes, m_Yes.IsFocused(), COLOR_MENU_BLUE);
 
         // 
         if(m_Yes.IsClicked() /*|| g_MenuInput.bAccept*/)

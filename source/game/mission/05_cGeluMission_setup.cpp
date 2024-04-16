@@ -161,19 +161,21 @@ void cGeluMission::__SetupOwn()
         const coreUint8 iDefend = (m_iStageSub >= 8u) ? 2u : ((m_iStageSub >= 6u) ? 1u : 0u);
         const coreBool  bDelay  = pSquad1->IsFinished();
 
-        coreVector2 vAreaFrom = -FOREGROUND_AREA + 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);
-        coreVector2 vAreaTo   =  FOREGROUND_AREA - 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[1], afOffCurrent[3]);
+        coreVector2 vOffFrom  = 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);
+        coreVector2 vOffTo    = 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[1], afOffCurrent[3]);
+        coreVector2 vAreaFrom = -FOREGROUND_AREA + vOffFrom;
+        coreVector2 vAreaTo   =  FOREGROUND_AREA - vOffTo;
 
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+        if(iActive) g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
         {
             const coreVector2 vPos  = pBullet->GetPosition().xy();
             const coreVector2 vDir  = pBullet->GetFlyDir();
             const coreFloat   fPush = 0.005f * I_TO_F(pBullet->GetDamage()) * (iDefend ? -4.0f : 3.0f) * RCP(I_TO_F(g_pGame->GetNumPlayers()));
 
-                 if((vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {afOffTarget[0] += fPush; pBullet->Deactivate(true);}
-            else if((vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {afOffTarget[1] += fPush; pBullet->Deactivate(true);}
-                 if((vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {afOffTarget[2] += fPush; pBullet->Deactivate(true);}
-            else if((vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {afOffTarget[3] += fPush; pBullet->Deactivate(true);}
+                 if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {afOffTarget[0] += fPush; pBullet->Deactivate(true);}
+            else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {afOffTarget[1] += fPush; pBullet->Deactivate(true);}
+                 if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {afOffTarget[2] += fPush; pBullet->Deactivate(true);}
+            else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {afOffTarget[3] += fPush; pBullet->Deactivate(true);}
         });
 
         for(coreUintW i = 0u; i < POST_WALLS; ++i)
@@ -197,7 +199,10 @@ void cGeluMission::__SetupOwn()
                         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
 
                         REMOVE_BIT(iActive, i)
-                        if(!iActive) STAGE_DELAY_END
+                        if(!iActive)
+                        {
+                            STAGE_DELAY_END
+                        }
 
                         g_pPostProcessing->SetWallOffset(i, 0.0f);
 
@@ -221,10 +226,18 @@ void cGeluMission::__SetupOwn()
             //g_pPostProcessing->SetWallOffset(i, afOffTarget[i]);
         }
 
-        vAreaFrom = -FOREGROUND_AREA * PLAYER_AREA_FACTOR + 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);
-        vAreaTo   =  FOREGROUND_AREA * PLAYER_AREA_FACTOR - 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[1], afOffCurrent[3]);
+        vOffFrom  = 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);   // re-calculated with new offsets
+        vOffTo    = 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[1], afOffCurrent[3]);
+        vAreaFrom = -FOREGROUND_AREA + vOffFrom;
+        vAreaTo   =  FOREGROUND_AREA - vOffTo;
 
-        g_pGame->GetPlayer(0u)->SetArea(coreVector4(vAreaFrom, vAreaTo));
+        const coreVector2 vPlayerAreaFrom = PLAYER_AREA_DEFAULT.xy() + vOffFrom;
+        const coreVector2 vPlayerAreaTo   = PLAYER_AREA_DEFAULT.zw() - vOffTo;
+
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->SetArea(coreVector4(vPlayerAreaFrom, vPlayerAreaTo));
+        });
 
         if(m_iStageSub >= 2u)
         {
@@ -253,10 +266,10 @@ void cGeluMission::__SetupOwn()
                     {
                         const coreVector2 vPos = pPlayer->GetPosition().xy();
 
-                        if((vPos.x <= vAreaFrom.x + CORE_MATH_PRECISION) ||
-                           (vPos.x >= vAreaTo  .x - CORE_MATH_PRECISION) ||
-                           (vPos.y <= vAreaFrom.y + CORE_MATH_PRECISION) ||
-                           (vPos.y >= vAreaTo  .y - CORE_MATH_PRECISION))
+                        if((vPos.x <= vPlayerAreaFrom.x + CORE_MATH_PRECISION) ||
+                           (vPos.x >= vPlayerAreaTo  .x - CORE_MATH_PRECISION) ||
+                           (vPos.y <= vPlayerAreaFrom.y + CORE_MATH_PRECISION) ||
+                           (vPos.y >= vPlayerAreaTo  .y - CORE_MATH_PRECISION))
                         {
                             pPlayer->TakeDamage(5u, ELEMENT_NEUTRAL, vPos);
                             std::memset(afOffTarget, 0, sizeof(coreFloat) * POST_WALLS);
@@ -388,7 +401,14 @@ void cGeluMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         for(coreUintW i = 0u; i < POST_WALLS; ++i)
+        {
             g_pPostProcessing->SetWallOffset(i, 0.0f);
+        }
+
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->SetArea(PLAYER_AREA_DEFAULT);
+        });
 
         STAGE_FINISH_NOW
     });
@@ -978,17 +998,16 @@ void cGeluMission::__SetupOwn()
             else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 11u, 18u)
             else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 19u, 30u)
             else if(STAGE_SUB(8u)) STAGE_RESURRECT(pSquad1, 31u, 40u)
+            else if(STAGE_SUB(9u))
+            {
+                for(coreUintW i = 0u; i < GELU_WAYS; ++i)
+                    this->DisableWay(i, true);
+            }
 
                  if(m_iStageSub == 2u) iPatternCount = (((iPatternCount + 1u) % 4u) < 2u) ? 1u : 0u;
             else if(m_iStageSub >= 5u) iPatternCount = 0u;
 
             fSpawnOffset = 0.74f + FRACT(vSpawnTime.y * fStepDelay) * fStep;
-
-            if(STAGE_CLEARED)
-            {
-                for(coreUintW i = 0u; i < GELU_WAYS; ++i)
-                    this->DisableWay(i, true);
-            }
         }
 
         coreVector2 vMove;
@@ -1338,6 +1357,16 @@ void cGeluMission::__SetupOwn()
             else if(STAGE_SUB(23u)) STAGE_RESURRECT(pSquad1, 24u, 25u)
             else if(STAGE_SUB(24u)) STAGE_RESURRECT(pSquad1, 26u, 27u)
             else if(STAGE_SUB(25u)) STAGE_RESURRECT(pSquad1, 28u, 35u)
+            else if(STAGE_SUB(26u))
+            {
+                for(coreUintW i = 0u; i < GELU_ORBS; ++i)
+                    this->DisableOrb(i, true);
+
+                STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+                {
+                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+                });
+            }
 
                  if(m_iStageSub ==  4u) this->DisableOrb( 3u, true);
             else if(m_iStageSub ==  6u) this->DisableOrb(15u, true);
@@ -1351,17 +1380,6 @@ void cGeluMission::__SetupOwn()
             else if(m_iStageSub == 19u) this->DisableOrb( 4u, true);
             else if(m_iStageSub == 20u) this->DisableOrb(11u, true);
             else if(m_iStageSub == 21u) this->DisableOrb( 2u, true);
-
-            if(STAGE_CLEARED)
-            {
-                for(coreUintW i = 0u; i < GELU_ORBS; ++i)
-                    this->DisableOrb(i, true);
-
-                STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
-                {
-                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
-                });
-            }
         }
 
 #if 0

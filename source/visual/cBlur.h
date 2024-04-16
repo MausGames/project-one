@@ -11,6 +11,7 @@
 #define _P1_GUARD_BLUR_H_
 
 // TODO 5: use shader subroutines
+// TODO 3: attenuation should be affected by update-rate (actually only for moving objects)
 
 
 // ****************************************************************

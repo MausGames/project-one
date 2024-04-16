@@ -17,10 +17,10 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION})
     {
-        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            pPlayer->ActivateDarkShading();
-        });
+        //STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        //{
+        //    pPlayer->ActivateDarkShading();
+        //});
 
         STAGE_FINISH_NOW
     });

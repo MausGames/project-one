@@ -23,8 +23,8 @@ cSeaBackground::cSeaBackground()noexcept
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("dust", "earth", 6u, 4.0f);
 
-    // create underwater-surface object
-    m_pWater = new cUnderWater();
+    // 
+    this->__InitOwn();
 
     // allocate animal lists
     pList1 = new coreBatchList(SEA_ANIMAL_1_RESERVE);
@@ -256,6 +256,15 @@ cSeaBackground::~cSeaBackground()
     // 
     if(m_pUnderSound->EnableRef(this))
         m_pUnderSound->Stop();
+}
+
+
+// ****************************************************************
+// 
+void cSeaBackground::__InitOwn()
+{
+    // create underwater-surface object
+    m_pWater = new cUnderWater();
 }
 
 

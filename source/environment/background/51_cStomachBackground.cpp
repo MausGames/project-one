@@ -18,8 +18,8 @@ cStomachBackground::cStomachBackground()noexcept
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("mars", "rock", 9u, 4.0f);
 
-    // create water-surface object
-    m_pWater = new cWater("environment_mars_diff.png");
+    // 
+    this->__InitOwn();
 
     // allocate cloud list
     pList1 = new coreBatchList(STOMACH_CLOUD_RESERVE);
@@ -58,6 +58,15 @@ cStomachBackground::cStomachBackground()noexcept
 
         ASSERT(pList1->GetCurCapacity() == STOMACH_CLOUD_RESERVE)
     }
+}
+
+
+// ****************************************************************
+// 
+void cStomachBackground::__InitOwn()
+{
+    // create water-surface object
+    m_pWater = new cWater("environment_mars_diff.png");
 }
 
 

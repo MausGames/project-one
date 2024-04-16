@@ -19,10 +19,10 @@ cEnvironment::cEnvironment()noexcept
 , m_vTransitionDir (coreVector2(0.0f,0.0f))
 , m_afStrength     {}
 , m_fFlyOffset     (0.0f)
+, m_fFlyShove      (0.0f)
 , m_fSideOffset    (0.0f)
 , m_vCameraPos     (CAMERA_POSITION)
 , m_vLightDir      (LIGHT_DIRECTION)
-, m_fOffsetShift   (0.0f)
 , m_bActive        (false)
 {
     // create environment frame buffer
@@ -125,10 +125,13 @@ void cEnvironment::Move()
     if(m_afStrength[3] > 0.0f) m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (TIME * m_afStrength[3]);
 
     // calculate global fly offset
-    m_fFlyOffset  += TIME * m_afSpeed[0];
-    m_fOffsetShift = 0.0f;
-         if(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_fOffsetShift =  I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fOffsetShift); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fOffsetShift);}
-    else if(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_fOffsetShift = -I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fOffsetShift); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fOffsetShift);}
+    m_fFlyOffset += TIME * m_afSpeed[0];
+    m_fFlyShove   = 0.0f;
+         if(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_fFlyShove =  I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fFlyShove); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fFlyShove);}
+    else if(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_fFlyShove = -I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fFlyShove); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fFlyShove);}
+
+    // handle rare rounding errors
+    m_fFlyOffset = CLAMP(m_fFlyOffset, 0.0f, I_TO_F(OUTDOOR_HEIGHT) - CORE_MATH_PRECISION);
 
     // calculate global side offset (only perpendicular to flight direction, never on diagonal camera (smooth with max-min))
     const coreVector2 vAbsDir = m_avDirection[0].Processed(ABS);
@@ -254,12 +257,6 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
 {
     if(eInit)
     {
-        const coreInt32 iID = P_TO_SI(m_pBackground);
-
-        // re-create background with saved ID
-        m_pBackground = NULL;
-        this->ChangeBackground(iID, ENVIRONMENT_MIX_FADE, 0.0f);
-
         // re-create environment frame buffer
         m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
@@ -268,21 +265,7 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
     }
     else
     {
-        const coreInt32 iID = m_pBackground->GetID();
-
-        // unbind textures and stop possible transition
-        m_MixObject.DefineTexture(0u, NULL);
-        m_MixObject.DefineTexture(1u, NULL);
-        m_TransitionTime.Stop();
-
-        // delete both backgrounds
-        SAFE_DELETE(m_pBackground)
-        SAFE_DELETE(m_pOldBackground)
-
         // delete environment frame buffer
         m_FrameBuffer.Delete();
-
-        // save background ID
-        m_pBackground = s_cast<cBackground*>(I_TO_P(iID));
     }
 }

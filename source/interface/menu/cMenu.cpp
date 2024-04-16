@@ -121,14 +121,19 @@ void cMenu::Render()
             coreFrameBuffer::EndDraw();   // TODO 1: reduce those calls
         };
         
-        //if(((m_iTransitionState <= 1u) && !m_pTransitionMenu->GetTransition().GetStatus()) && iForceA != 0xFFu)
-        //{
-        //    const coreUint8 iPrev = m_pTransitionMenu->GetCurSurface();
-        //    m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);
-        //    //m_pTransitionMenu->coreMenu::Move();
-        //    nRenderFunc(2u, m_pTransitionMenu);
-        //    m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);
-        //}
+        if(((m_iTransitionState <= 1u) && !m_pTransitionMenu->GetTransition().GetStatus()) && iForceA != 0xFFu)
+        {
+            const coreUint8 iPrev = m_pTransitionMenu->GetCurSurface();
+            const coreFloat fTime = TIME;   // TODO 1: HACK
+
+            m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);   // TODO 1: calls move
+            //m_pTransitionMenu->coreMenu::Move();
+            nRenderFunc(2u, m_pTransitionMenu);
+            
+            c_cast<coreFloat&>(TIME) = 0.0f;   // TODO 1: HACK
+            m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);   // TODO 1: calls move
+            c_cast<coreFloat&>(TIME) = fTime;   // TODO 1: HACK
+        }
         if(m_iTransitionState < 1u && iForceB != 0xFFu)
         {
             nRenderFunc(1u, this);
@@ -639,8 +644,8 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
     const coreVector3 vColor = bFocused ? vFocusColor       : COLOR_MENU_WHITE;
 
     // set button and caption color
-    pButton              ->SetColor3(vColor * (fLight / MENU_CONTRAST_WHITE));
-    if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * (fLight));
+                              pButton              ->SetColor3(vColor * fLight);
+    if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * fLight);
 
     // 
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
@@ -649,7 +654,7 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
 void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused)
 {
     // 
-    cMenu::UpdateButton(pButton, bFocused, LERP(m_vHighlightColor * 0.8f, COLOR_MENU_WHITE, 0.0f));
+    cMenu::UpdateButton(pButton, bFocused, m_vHighlightColor);
 }
 
 

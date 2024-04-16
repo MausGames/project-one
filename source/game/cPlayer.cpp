@@ -14,7 +14,7 @@
 cPlayer::cPlayer()noexcept
 : m_apWeapon        {}
 , m_pInput          (&g_TotalInput)
-, m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
+, m_vArea           (PLAYER_AREA_DEFAULT)
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fSpeed          (1.0f)
 , m_fTilt           (0.0f)
@@ -52,6 +52,7 @@ cPlayer::cPlayer()noexcept
 
     // 
     this->SetMaxHealth(PLAYER_LIVES);
+    this->SetBaseColor(COLOR_SHIP_GREY * 0.5f);
 
     // load first weapons
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
@@ -67,7 +68,7 @@ cPlayer::cPlayer()noexcept
     // 
     m_pNormalProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_program");
     m_pDarkProgram   = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
-    this->ActivateDarkShading();
+    this->ActivateNormalShading();
 
     // 
     m_Dot.DefineModel("object_dot.md3");
@@ -570,9 +571,6 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
         if(m_iCurHealth)
         {
-            // 
-            if(!this->IsDarkShading()) this->RefreshColor();
-
             if(iShieldDamage)
             {
                 // 
@@ -832,6 +830,7 @@ void cPlayer::TurnIntoPlayer()
     this->Configure(GET_BITVALUE(m_iLook, 4u, 0u));//, coreVector4::UnpackUnorm4x8(GET_BITVALUE(m_iLook, 8u, 4u)).xyz());
     this->EquipWeapon(0u, GET_BITVALUE(m_iLook, 4u, 12u));
     this->ActivateDarkShading();
+    // TODO: color
 }
 
 

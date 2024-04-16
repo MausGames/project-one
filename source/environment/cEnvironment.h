@@ -12,10 +12,8 @@
 
 // TODO 3: render depth-quads or use scissor test (tested: works bad, no gain) or stencil test on unused background areas (for transition!)
 // TODO 3: separate culling between normal rendering and shadow, to improve efficiency (though this would update instancing buffer again ?)
-// TODO 2: transition is reset when resizing window
 // TODO 3: different background than cNoBackground on invalid ID (error background ?)
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
-// TODO 1: all background parameters (sand wind, dark dissolve, etc.) are removed on __Reset
 // TODO 3: remove unused mix types, or init them on demand
 // TODO 4: check if m_afStrength != 0.0f is required and remove otherwise
 
@@ -57,11 +55,10 @@ private:
     coreFloat   m_afStrength [4];                        // 
 
     coreFloat   m_fFlyOffset;                            // global fly offset (directly accessed by background objects)
+    coreFloat   m_fFlyShove;                             // 
     coreFloat   m_fSideOffset;                           // global side offset
     coreVector3 m_vCameraPos;                            // moved camera position
     coreVector3 m_vLightDir;                             // rotated light direction
-    
-    coreFloat m_fOffsetShift;                            // 
 
     coreBool m_bActive;                                  // enables the environment (only for first background-transition on intro)
 
@@ -110,11 +107,10 @@ public:
 
     // get offset values
     inline const coreFloat&   GetFlyOffset ()const {return m_fFlyOffset;}
+    inline const coreFloat&   GetFlyShove  ()const {return m_fFlyShove;}
     inline const coreFloat&   GetSideOffset()const {return m_fSideOffset;}
     inline const coreVector3& GetCameraPos ()const {return m_vCameraPos;}
     inline const coreVector3& GetLightDir  ()const {return m_vLightDir;}
-    
-    inline const coreFloat& GetOffsetShift()const {return m_fOffsetShift;}
 
     // enable the environment
     inline void Activate() {m_bActive = true;}

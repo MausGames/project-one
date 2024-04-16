@@ -339,7 +339,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_Version      .AddEntry        ("1.0.0",                  1u);
     m_Version      .AddEntryLanguage("VERSION_LATEST",         0u);
     m_MirrorMode   .AddEntryLanguage("VALUE_OFF",              0u);
-    m_MirrorMode   .AddEntryLanguage("VALUE_ON",               1u);
+    m_MirrorMode   .AddEntryLanguage("VALUE_LOW",              1u);
+    m_MirrorMode   .AddEntryLanguage("VALUE_HIGH",             2u);
 
     // 
     m_Navigator.BindObject(&m_VideoTab, &m_SaveButton, &m_GameTab,  &m_Monitor, &m_AudioTab, NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);

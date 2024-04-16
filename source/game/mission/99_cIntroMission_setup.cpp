@@ -17,10 +17,10 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            pPlayer->ActivateNormalShading();
-        });
+        //STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        //{
+        //    pPlayer->ActivateNormalShading();
+        //});
 
         STAGE_FINISH_NOW
     });
@@ -310,6 +310,7 @@ void cIntroMission::__SetupOwn()
         {
             const coreUint8 iFrom = m_iStageSub;
             const coreUint8 iTo   = m_iStageSub + ((iFrom == 8u) ? 1u : 0u);
+
             if((iTo < pSquad1->GetNumEnemies()) && STAGE_SUB(iTo + 1u)) STAGE_RESURRECT(pSquad1, iFrom, iTo)
         }
 

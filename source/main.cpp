@@ -191,9 +191,11 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Foreground");
     }
 
-    glDisable(GL_CULL_FACE);   // for mirror mode
     glDisable(GL_DEPTH_TEST);
     {
+        // 
+        if(g_CurConfig.Game.iMirrorMode) glDisable(GL_CULL_FACE);
+
         Core::Debug->MeasureStart("Post Processing");
         {
             // render post-processing
@@ -202,15 +204,24 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Post Processing");
         Core::Debug->MeasureStart("Interface");
         {
+            // 
+            const coreMatrix4 mOldOrtho = Core::Graphics->GetOrtho();
+            if(g_CurConfig.Game.iMirrorMode >= 2u) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = coreMatrix4::Scaling(IsHorizontal(g_vHudDirection) ? coreVector3(1.0f,-1.0f,1.0f) : coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho;
+
             // render the overlay separately
             if(STATIC_ISVALID(g_pGame)) g_pGame->RenderOverlay();
 
             // render the menu
             g_pMenu->Render();
+
+            // 
+            if(g_CurConfig.Game.iMirrorMode >= 2u) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = mOldOrtho;
         }
         Core::Debug->MeasureEnd("Interface");
+
+        // 
+        if(g_CurConfig.Game.iMirrorMode) glEnable(GL_CULL_FACE);
     }
-    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -385,12 +396,16 @@ static void LockFramerate()
 static void UpdateListener()
 {
     // 
-    const coreFloat   fSide = g_pPostProcessing->IsMirrored() ? 1.0f : -1.0f;
-    const coreVector2 vGame = g_pPostProcessing->GetDirection();
-    const coreVector2 vHud  = g_vHudDirection;
+    const coreFloat fSide = (g_CurConfig.Game.iMirrorMode == 1u) ? 1.0f : -1.0f;
 
     // 
-    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f, 0.0f, fSide), coreVector3(MapToAxisInv(vGame, vHud), 0.0f));
+    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+    const coreVector2 vHud   = g_vHudDirection;
+    const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+    ASSERT(vFinal.IsNormalized())
+
+    // 
+    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f, 0.0f, fSide), coreVector3(vFinal, 0.0f));
 }
 
 

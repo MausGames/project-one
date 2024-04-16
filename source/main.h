@@ -84,9 +84,9 @@
 // TODO 2: prevent shaking of center-aligned rectified animated text
 // TODO 3: add gamepad led colors
 // TODO 1: clarify and simplify upper-case handling (for all texts, but especially for boss and mission names)
-// TODO 3: only disable or switch culling in actual mirror mode
 // TODO 3: expose HRTF option (Headphones: No, Yes, Auto)
 // TODO 2: d-pad is for movement, but and can also be used for button mapping
+// TODO 1: improve looping in environment sound
 
 
 // ****************************************************************
@@ -143,14 +143,14 @@
 #define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
 #define COLOR_MENU_BLACK     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
 #define COLOR_MENU_INSIDE    (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_INSIDE)
-#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO 1: improve use Jetbrains Git colors ?
-#define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.543f, 0.227f))   // TODO 1: improve 
-#define COLOR_MENU_RED       (coreVector3(1.000f, 0.225f, 0.225f))   // TODO 1: improve !! those colors may be used in 3d objects too
-#define COLOR_MENU_MAGENTA   (coreVector3(1.000f, 0.310f, 0.720f))   // TODO 1: improve 
-#define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO 1: improve 
-#define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))   // TODO 1: improve 
-#define COLOR_MENU_CYAN      (coreVector3(0.000f, 0.789f, 0.876f))   // TODO 1: improve 
-#define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))   // TODO 1: improve 
+#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.292f))
+#define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.543f, 0.177f))
+#define COLOR_MENU_RED       (coreVector3(0.950f, 0.225f, 0.225f))
+#define COLOR_MENU_MAGENTA   (coreVector3(1.000f, 0.310f, 0.720f))
+#define COLOR_MENU_PURPLE    (coreVector3(0.760f, 0.333f, 1.000f))
+#define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.602f, 1.000f))
+#define COLOR_MENU_CYAN      (coreVector3(0.000f, 0.776f, 0.806f))
+#define COLOR_MENU_GREEN     (coreVector3(0.253f, 0.745f, 0.253f))
 #define COLOR_ENERGY_WHITE   (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.420f, 0.000f))
@@ -163,15 +163,15 @@
 #define COLOR_FIRE_WHITE     (coreVector3(0.220f, 0.220f, 0.220f))
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
-#define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f,  95.0f/100.0f,  95.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_MAGENTA   (coreVector3(330.0f/360.0f,  65.0f/100.0f,  85.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_YELLOW    (coreVector3(0.950f, 0.778f, 0.170f))
+#define COLOR_SHIP_ORANGE    (coreVector3(1.000f, 0.539f, 0.108f))
+#define COLOR_SHIP_RED       (coreVector3(0.950f, 0.288f, 0.288f))
+#define COLOR_SHIP_MAGENTA   (coreVector3(0.935f, 0.328f, 0.631f))
+#define COLOR_SHIP_PURPLE    (coreVector3(0.729f, 0.382f, 0.900f))
+#define COLOR_SHIP_BLUE      (coreVector3(0.151f, 0.600f, 1.000f))
+#define COLOR_SHIP_CYAN      (coreVector3(0.000f, 0.800f, 0.800f))
+#define COLOR_SHIP_GREEN     (coreVector3(0.308f, 0.720f, 0.308f))
+#define COLOR_SHIP_GREY      (coreVector3(0.500f, 0.500f, 0.500f))
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))   // TODO 1: remove
 
 // shader modifiers
@@ -308,6 +308,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"
+#include "visual/cWorm.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
 #include "visual/cBlur.h"
