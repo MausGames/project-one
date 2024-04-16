@@ -82,9 +82,9 @@ coreBool cWeapon::_IsOwnerDarkShading()const
 
 // ****************************************************************
 // 
-coreBool cWeapon::_IsOwnerProjectOne()const
+coreBool cWeapon::_IsOwnerRainbow()const
 {
-    return m_pOwner->IsProjectOne();
+    return m_pOwner->IsRainbow();
 }
 
 
@@ -231,16 +231,14 @@ void cRayWeapon::__ShootOwn()
 
     // 
     const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
-    
-    cBulletManager* pManager = ((vDir.y <= 0.0f) && m_pOwner->GetTilt()) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
 
     // 
     if(!m_bBurst)
     {
         m_bBurst = true;
 
-        // 
-        this->_MakeWhite(pManager->AddBullet<cRayBullet>(6 * iSign, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
+        // (# bit less, as it basically merges upcoming damage) 
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(5 * iSign, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->ChangeHeight(m_pOwner->GetPosition().z);
 
         // 
         m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
@@ -251,9 +249,9 @@ void cRayWeapon::__ShootOwn()
     else
     {
         // 
-        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vTan*1.55f, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
-        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos - vTan*1.55f, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
-        //this->_MakeWhite(pManager->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos - vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
+        //this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
 
         // play bullet sound-effect
         g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), LERP(1.0f, 0.5f, m_fVolume), 1.0f, SOUND_WEAPON_RAY);
@@ -490,7 +488,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
             const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
 
             // 
-            pTarget->TakeDamage(6 * iSign, ELEMENT_BLUE, vPosTo, m_pOwner);
+            pTarget->TakeDamage(6 * iSign, ELEMENT_BLUE, vPosTo, m_pOwner, false);
             g_pSpecialEffects->MacroExplosionColorSmall(pTarget->GetPosition(), COLOR_ENERGY_BLUE);
         }
     }
@@ -550,4 +548,67 @@ void cEnemyWeapon::__ShootOwn()
 
     // play bullet sound-effect
     g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+}
+
+
+// ****************************************************************
+// constructor
+cFinalWeapon::cFinalWeapon()noexcept
+: m_bBurst (false)
+{
+    // set base fire-rate
+    m_CooldownTimer.SetSpeed(20.0f);
+}
+
+
+// ****************************************************************
+// 
+void cFinalWeapon::__ReleaseOwn(const coreUint8 iMode)
+{
+    // 
+    m_bBurst = false;
+}
+
+
+// ****************************************************************
+// shoot with the final weapon
+void cFinalWeapon::__ShootOwn()
+{
+    // 
+    const coreVector2 vPos = m_pOwner->GetPosition ().xy();
+    const coreVector2 vDir = m_pOwner->GetDirection().xy();
+    //const coreVector2 vTan = vDir.Rotated90();
+
+    // 
+    cBulletManager* pManager = ((vDir.y <= 0.0f) && m_pOwner->GetTilt()) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
+    
+    const coreMatrix3 mTiltMat  = coreMatrix4::RotationX(m_pOwner->GetTilt()).m123();
+    const coreVector3 vRealDir  = coreVector3(vDir, 0.0f) * mTiltMat;
+    //const coreVector3 vRealTan  = coreVector3(vTan, 0.0f) * mTiltMat;
+/*
+    // 
+    if(!m_bBurst)
+    {
+        m_bBurst = true;
+
+        // (# bit less, as it basically merges upcoming damage) 
+        this->_MakeWhite(pManager->AddBullet<cFinalBullet>(5, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->SetTiltProperties(m_pOwner->GetPosition(), vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
+
+        // 
+        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
+
+        // play bullet sound-effect
+        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 0.8f, SOUND_WEAPON_RAY);
+    }
+    else*/
+    {
+        // 
+        //this->_MakeWhite(pManager->AddBullet<cFinalBullet>(1, 8.0f, m_pOwner, vPos + vTan*1.55f, vDir))->SetTiltProperties(m_pOwner->GetPosition() + vRealTan*3.0f, vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
+        //this->_MakeWhite(pManager->AddBullet<cFinalBullet>(1, 8.0f, m_pOwner, vPos - vTan*1.55f, vDir))->SetTiltProperties(m_pOwner->GetPosition() - vRealTan*3.0f, vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
+        
+        this->_MakeWhite(pManager->AddBullet<cFinalBullet>(2, 16.0f, m_pOwner, vPos, vDir))->ChangeScale(1.5f)->SetTiltProperties(m_pOwner->GetPosition(), vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
+
+        // play bullet sound-effect
+        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
+    }
 }

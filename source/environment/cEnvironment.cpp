@@ -12,18 +12,19 @@
 // ****************************************************************
 // constructor
 cEnvironment::cEnvironment()noexcept
-: m_pBackground    (NULL)
-, m_pOldBackground (NULL)
-, m_iLastID        (0)
-, m_TransitionTime (coreTimer(1.3f, 0.0f, 1u))
-, m_vTransitionDir (coreVector2(0.0f,0.0f))
-, m_afStrength     {}
-, m_fFlyOffset     (0.0f)
-, m_fFlyShove      (0.0f)
-, m_fSideOffset    (0.0f)
-, m_vCameraPos     (CAMERA_POSITION)
-, m_vLightDir      (LIGHT_DIRECTION)
-, m_bActive        (false)
+: m_pBackground     (NULL)
+, m_pOldBackground  (NULL)
+, m_pTempBackground (NULL)
+, m_iLastID         (0)
+, m_TransitionTime  (coreTimer(1.3f, 0.0f, 1u))
+, m_vTransitionDir  (coreVector2(0.0f,0.0f))
+, m_afStrength      {}
+, m_fFlyOffset      (0.0f)
+, m_fFlyShove       (0.0f)
+, m_fSideOffset     (0.0f)
+, m_vCameraPos      (CAMERA_POSITION)
+, m_vLightDir       (LIGHT_DIRECTION)
+, m_bActive         (false)
 {
     // create environment frame buffer
     m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
@@ -65,6 +66,7 @@ cEnvironment::~cEnvironment()
     // delete background instances
     SAFE_DELETE(m_pBackground)
     SAFE_DELETE(m_pOldBackground)
+    SAFE_DELETE(m_pTempBackground)
 }
 
 
@@ -150,9 +152,7 @@ void cEnvironment::Move()
         if(m_bActive && (!Core::Manager::Resource->IsLoading() || (m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) > 0.0f)) && m_TransitionTime.Update(1.0f))
         {
             // delete old background
-            m_MixObject.DefineTexture(0u, NULL);
-            m_MixObject.DefineTexture(1u, NULL);
-            SAFE_DELETE(m_pOldBackground)
+            this->__ClearTransition();
         }
         else m_pOldBackground->Move();
     }
@@ -172,12 +172,10 @@ void cEnvironment::Move()
 void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2 vTransitionDir)
 {
     // delete possible old background
-    m_MixObject.DefineTexture(0u, NULL);
-    m_MixObject.DefineTexture(1u, NULL);
-    SAFE_DELETE(m_pOldBackground)
+    if(m_TransitionTime.GetStatus()) this->__ClearTransition();
 
     // make current to old
-    //if(!fTransitionSpeed) SAFE_DELETE(m_pBackground)
+    ASSERT(!m_pOldBackground)
     m_pOldBackground = m_pBackground;
 
     // create new background
@@ -198,11 +196,14 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     }
 
     // 
+    SAFE_DELETE(m_pTempBackground)
+
+    // 
+    if(!fTransitionSpeed) this->__ClearTransition();
+
+    // 
     if((iID != cNoBackground::ID) && (iID != cStomachBackground::ID) && (!g_bDemoVersion || (iID != cDarkBackground::ID)))
         m_iLastID = iID;
-    
-    
-    if(!fTransitionSpeed) SAFE_DELETE(m_pOldBackground)
 
     if(m_pOldBackground)
     {
@@ -274,5 +275,34 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
     {
         // delete environment frame buffer
         m_FrameBuffer.Delete();
+    }
+}
+
+
+// ****************************************************************
+// 
+void cEnvironment::__ClearTransition()
+{
+    ASSERT(m_pOldBackground)
+
+    // 
+    m_TransitionTime.Pause();
+
+    // 
+    m_MixObject.DefineTexture(0u, NULL);
+    m_MixObject.DefineTexture(1u, NULL);
+
+    if(m_pBackground->GetID() == cNoBackground::ID)
+    {
+        ASSERT(!m_pTempBackground)
+
+        // 
+        m_pTempBackground = m_pOldBackground;
+        m_pOldBackground  = NULL;
+    }
+    else
+    {
+        // 
+        SAFE_DELETE(m_pOldBackground)
     }
 }

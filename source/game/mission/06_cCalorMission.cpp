@@ -196,7 +196,7 @@ cCalorMission::cCalorMission()noexcept
     m_Boulder.DefineProgram  ("object_meteor_blink_program");
     m_Boulder.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
     m_Boulder.Configure      (50, 0u, coreVector3(1.0f,1.0f,1.0f));
-    m_Boulder.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
+    m_Boulder.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET | ENEMY_STATUS_KEEPVOLUME);
 
     // 
     g_pGlow->BindList(&m_Load);
@@ -485,9 +485,12 @@ void cCalorMission::EnableStar(const coreUintW iIndex, const cShip* pOwner, cons
     ADD_BIT(m_iStarConnect, iIndex)
 
     // 
+    if(pOwner == g_pGame->GetPlayer(iIndex)) g_pGame->SetRepairMove(iIndex, false);
+
+    // 
     const auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
     {
-        pObject->SetPosition(coreVector3(HIDDEN_POS + 1.0f, 0.0f));
+        pObject->SetPosition(pOwner->GetPosition() + coreVector3(0.0f,1.0f,0.0f));
         pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
     };
     nInitFunc(pStar);
@@ -505,6 +508,9 @@ void cCalorMission::DisableStar(const coreUintW iIndex, const coreBool bAnimated
 
     // 
     if(!pStar->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    if(m_apStarOwner[iIndex] == g_pGame->GetPlayer(iIndex)) g_pGame->SetRepairMove(iIndex, true);
 
     if(bAnimated)
     {
@@ -548,7 +554,18 @@ void cCalorMission::StartSwing(const coreFloat fSpeed)
         if(m_apStarOwner[i])
         {
             const coreObject3D* pStar = (*m_Star.List())[i];
-            m_afSwingValue[i] = (pStar->GetPosition().xy() - m_apStarOwner[i]->GetPosition().xy()).Angle();
+            m_afSwingValue[i] = ((pStar->GetPosition().xy() - m_apStarOwner[i]->GetPosition().xy()) * coreVector2(i ? -1.0f : 1.0f, 1.0f)).Angle();
+            
+            
+            cPlayer* pPlayer = g_pGame->GetPlayer(i);
+            if(pPlayer == m_apStarOwner[i])
+            {
+                if(!pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE))   // should not be changed on intro
+                {
+                    pPlayer->SetPosition(coreVector3(pPlayer->GetOldPos(), 0.0f));
+                    pPlayer->SetMoveSpeed(0.0f);
+                }
+            }
         }
     }
 }
@@ -595,8 +612,6 @@ void cCalorMission::UncatchObject(const coreUintW iIndex)
 // 
 void cCalorMission::__RenderOwnBottom()
 {
-    //DEPTH_PUSH
-
     glDisable(GL_DEPTH_TEST);
     {
         // 
@@ -775,11 +790,17 @@ void cCalorMission::__MoveOwnMiddle()
                     const coreVector2 vDir = coreVector2::Direction(m_afSwingValue[i]) * coreVector2(i ? -1.0f : 1.0f, 1.0f);
 
                     // 
-                    pStar->SetPosition (coreVector3(pPlayer->GetPosition().xy() + vDir * m_afStarLength[i], 0.0f));
+                    pStar->SetPosition (coreVector3(pPlayer->GetPosition().xy() + vDir * m_afStarLength[i], pPlayer->GetPosition().z));   // # for intro animation
                     pStar->SetDirection(coreVector3(vDir, 0.0f));
 
                     // 
                     pPlayer->SetMoveSpeed(m_fSwingStart);
+                }
+
+                if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
+                {
+                    pStar  ->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+                    pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
                 }
             }
             else
@@ -794,17 +815,18 @@ void cCalorMission::__MoveOwnMiddle()
             // 
             const coreVector2 vBase = pOwner->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pOwner->GetDirection().xy());   // # again
             const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
-            const coreVector2 vDir  = vDiff.Normalized();
+            const coreVector2 vDir  = vDiff.IsNull() ? coreVector2(0.0f,1.0f) : vDiff.Normalized();
 
             // 
-            if(pPlayer == pOwner)
+            if((pPlayer == pOwner) && !coreMath::IsNear(vDiff.LengthSq(), 0.0f))
             {
-                if(!pPlayer->HasStatus(PLAYER_STATUS_DEAD))
+                //if(!pPlayer->HasStatus(PLAYER_STATUS_DEAD))
+                //if(!HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
                     // 
                     Core::Manager::Object->TestCollision(TYPE_ENEMY, pStar, [&](cEnemy* OUTPUT pEnemy, const coreObject3D* pStar, const coreVector3 vIntersection, const coreBool bFirstHit)
                     {
-                        if(m_apCatchObject[i] || (pEnemy == &m_Bull) || pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild()) return;
+                        if(m_apCatchObject[i] || (pEnemy == &m_Bull) || pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild() || (pEnemy->GetID() == cRepairEnemy::ID)) return;
 
                         if(pEnemy == m_apCatchObject[1u - i])
                         {
@@ -827,65 +849,66 @@ void cCalorMission::__MoveOwnMiddle()
 
                             // 
                             //pEnemy->ChangeToTop();
-                            pEnemy->AddStatus(ENEMY_STATUS_GHOST_BULLET);   // # full ghost changes bounding volume
+                            pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_KEEPVOLUME);
                         }
                     });
-                }
 
-                if(m_apCatchObject[i])
-                {
-                    cEnemy* pCopy = d_cast<cEnemy*>(m_apCatchObject[i]);
-
-                    // 
-                    pCopy->SetPosition (coreVector3(MapToAxis(m_avCatchPos[i], -vDir), 0.0f) + pStar->GetPosition());
-                    pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], -vDir), 0.0f));
-
-                    // 
-                    Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, pCopy, [](cBullet* OUTPUT pBullet, const cEnemy* pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
+                    if(m_apCatchObject[i])
                     {
-                        if((pBullet->GetID() != cFlipBullet::ID) && (pBullet->GetID() != cTriangleBullet::ID)) return;
-
-                        pBullet->Deactivate(true, vIntersection.xy());
-                    });
-
-                    // 
-                    Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
-                    {
-                        if(!m_apCatchObject[i])                   return;
-                        if(pEnemy == &m_Bull)                     return;
-                        if(pObject->HasStatus(ENEMY_STATUS_BOSS)) return;   // boss should not collide with own children
+                        cEnemy* pCopy = d_cast<cEnemy*>(m_apCatchObject[i]);
 
                         // 
-                        const coreBool bEnemyBig  = (pEnemy ->GetMaxHealth() >= 10) || pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild();
-                        const coreBool bObjectBig = (pObject->GetMaxHealth() >= 10);
+                        pCopy->SetPosition (coreVector3(MapToAxis(m_avCatchPos[i], -vDir), 0.0f) + pStar->GetPosition());
+                        pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], -vDir), 0.0f));
 
-                        if(bObjectBig || !bEnemyBig)
+                        // 
+                        Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, pCopy, [](cBullet* OUTPUT pBullet, const cEnemy* pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                         {
-                            // 
-                            const coreBool bOther      = (pEnemy == m_apCatchObject[1u - i]);
-                            const coreBool bInvincible = pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE);
+                            if((pBullet->GetID() != cFlipBullet::ID) && (pBullet->GetID() != cTriangleBullet::ID)) return;
 
-                            // 
-                            pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pEnemy->TakeDamage  (pObject->GetCurHealth() / (g_pGame->IsMulti() ? 1 : GAME_PLAYERS), ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
+                            pBullet->Deactivate(true, vIntersection.xy());
+                        });
 
-                            // 
-                            if(bOther) this->UncatchObject(1u - i);
-
-                            // 
-                            if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
-                        }
-
-                        if(bEnemyBig || !bObjectBig)
+                        // 
+                        Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                         {
-                            // 
-                            pObject->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pObject->TakeDamage  (1000, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
+                            if(!m_apCatchObject[i])                   return;
+                            if(pEnemy == &m_Bull)                     return;
+                            if(pObject->HasStatus(ENEMY_STATUS_BOSS)) return;   // boss should not collide with own children
+                            if(pEnemy->GetID() == cRepairEnemy::ID)   return;
 
                             // 
-                            this->UncatchObject(i);
-                        }
-                    });
+                            const coreBool bEnemyBig  = (pEnemy ->GetMaxHealth() >= 10) || pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild();
+                            const coreBool bObjectBig = (pObject->GetMaxHealth() >= 10);
+
+                            if(bObjectBig || !bEnemyBig)
+                            {
+                                // 
+                                const coreBool bOther      = (pEnemy == m_apCatchObject[1u - i]);
+                                const coreBool bInvincible = pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE);
+
+                                // 
+                                pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+                                pEnemy->TakeDamage  (pObject->GetCurHealth(), ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer, true);
+
+                                // 
+                                if(bOther) this->UncatchObject(1u - i);
+
+                                // 
+                                if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+                            }
+
+                            if(bEnemyBig || !bObjectBig)
+                            {
+                                // 
+                                pObject->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+                                pObject->TakeDamage  (10000, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer, true);
+
+                                // 
+                                this->UncatchObject(i);
+                            }
+                        });
+                    }
                 }
             }
 
@@ -896,7 +919,26 @@ void cCalorMission::__MoveOwnMiddle()
             // 
             m_afStarLength[i] += 1.0f * TIME;
             if(m_afStarLength[i] >= 2.0f) this->DisableStar(i, false);
+            
+            
+            const coreFloat fSpeed = 120.0f * TIME * m_fSwingSpeed;//m_avStarOffset[i];
+            const coreVector2 vDir1  = -coreVector2::Direction(m_avStarOffset[i].x);
+            
+            // 
+            for(coreUintW j = 0u; j < CALOR_CHAINS; ++j)
+            {
+                coreObject3D* pChain = (*m_StarChain.List())[i*CALOR_CHAINS + j];
+                if(!pChain->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
+                // 
+                const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) * -0.3f + (1.0f*PI)) * coreVector2(i ? -1.0f : 1.0f, 1.0f);
+                const coreVector2 vPos = pChain->GetPosition().xy() + MapToAxis(vDir, vDir1) * fSpeed;
+
+                // 
+                pChain->SetPosition(coreVector3(vPos, 0.0f));
+            }
+
+#if 0
             // 
             const coreFloat   fSpeed = 6.0f * TIME * m_avStarOffset[i].y;
             const coreVector2 vDir1  = coreVector2::Direction(m_avStarOffset[i].x);
@@ -924,9 +966,11 @@ void cCalorMission::__MoveOwnMiddle()
                 cShip* pCopy = m_apCatchObject[i];
 
                 // 
-                pCopy->SetPosition (coreVector3(MapToAxis(m_avCatchPos[i], vDir1), 0.0f) + pStar->GetPosition());
-                pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], vDir1), 0.0f));
+                pCopy->SetPosition (coreVector3(MapToAxis(m_avCatchPos[i], -vDir1), 0.0f) + pStar->GetPosition());
+                pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], -vDir1), 0.0f));
             }
+            
+#endif
         }
     }
 
@@ -1138,7 +1182,7 @@ void cCalorMission::__MoveOwnAfter()
     // 
     for(coreUintW i = 0u; i < CALOR_STARS; ++i)
     {
-        const coreObject3D* pStar = (*m_Star.List())[i];
+        coreObject3D* pStar = (*m_Star.List())[i];
         if(!pStar->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
@@ -1157,12 +1201,18 @@ void cCalorMission::__MoveOwnAfter()
                     // 
                     pPlayer->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), m_afStarLength[i]), 0.0f));
                 }
+
+                if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
+                {
+                    pStar  ->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+                    pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+                }
             }
 
             // 
             const coreVector2 vBase = pOwner->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pOwner->GetDirection().xy());   // # again
             const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
-            const coreVector2 vDir  = vDiff.Normalized();
+            const coreVector2 vDir  = vDiff.IsNull() ? coreVector2(0.0f,1.0f) : vDiff.Normalized();
             const coreFloat   fLen  = vDiff.Length();
 
             // 
@@ -1211,6 +1261,12 @@ void cCalorMission::__MoveOwnAfter()
                 m_apStarOwner [i] = NULL;
                 m_avStarOffset[i] = coreVector2(vDiff.Angle(), fLen * m_fSwingSpeed);
                 m_afStarLength[i] = 0.0f;
+                
+                g_pSpecialEffects->CreateSplashColor(pStar->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->PlaySound(pStar->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_02);
+                (*m_Star.List())[i]->SetPosition(coreVector3(HIDDEN_POS, 0.0f));                 
+                
+                this->UncatchObject(i);
             }
 
             STATIC_ASSERT(CALOR_STARS == 2u)

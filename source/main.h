@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.1.4 (https://www.maus-games.at)                             |//
+//| Project One v0.1.5 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -105,6 +105,9 @@
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 // TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
 // TODO 1: badges anordnen nach reihenfolge im level (index + description)
+// TODO 1: the repair-enemy needs to work in every wave and boss!
+// TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
+// TODO 3: sphere model kann ungenau sein, vor allem bei der area-bubble bei P1 magenta phase
 
 
 // ****************************************************************
@@ -352,7 +355,7 @@ extern coreVector2     g_vGameResolution;   // pre-calculated 1:1
 extern coreFloat       g_fGameRate;         // 
 extern coreVector2     g_vHudDirection;     // 
 extern coreBool        g_bTiltMode;         // 
-extern coreBool        g_bShiftMode;        // 
+extern coreFloat       g_fShiftMode;        // 
 extern coreBool        g_bDemoVersion;      // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player

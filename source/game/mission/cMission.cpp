@@ -524,7 +524,7 @@ void cMission::__CloseSegment()
     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SPECIAL_SOUND_MEDAL(iMedal));
 
     // 
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         pPlayer->StartRolling(pPlayer->GetInput()->vMove);
     });

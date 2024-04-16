@@ -34,6 +34,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_iDepthDebug         (0u)
 , m_iOutroType          (GAME_OUTRO_MISSION)
 , m_bVisibleCheck       (false)
+, m_iRepairMove         (0xFFu)
 , m_Options             (oOptions)
 , m_iVersion            (0u)
 , m_iStatus             (0u)
@@ -114,13 +115,7 @@ cGame::~cGame()
     g_pWindscreen->ClearAdds(true);
 
     // 
-    for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO 1: make transition smoother
-    g_pPostProcessing->SetSplitScreen  (false);
-    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO 1: make transition smoother
-    g_pPostProcessing->SetSaturationAll(1.0f);   // TODO 1: make transition smoother
-    
-    g_pPostProcessing->SetFrameValue(0.0f);
-    g_pPostProcessing->SetChroma(0.0f);
+    g_pPostProcessing->Reset();
 
     // 
     if(g_pEnvironment->GetOldBackground())
@@ -152,7 +147,11 @@ void cGame::Render()
 {
     if(g_bTiltMode)
     {
-        if(g_bShiftMode) Core::Graphics->SetCamera(CAMERA_POSITION + m_aPlayer[0].GetPosition() * 0.5f, CAMERA_DIRECTION, CAMERA_ORIENTATION);
+        if(g_fShiftMode)
+        {
+            const coreVector3 vShake = coreVector3(g_pPostProcessing->GetPosition() * 80.0f, 0.0f);
+            Core::Graphics->SetCamera(CAMERA_POSITION + this->CalculateCamShift() * 0.5f + vShake, CAMERA_DIRECTION, CAMERA_ORIENTATION);   // do not reset at the end
+        }
 
         __DEPTH_GROUP_BOTTOM
         {
@@ -299,6 +298,10 @@ void cGame::Render()
                     m_aPlayer[i].RenderAfter();
 
                 // 
+                for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+                    m_aHelper[i].RenderAfter();
+
+                // 
                 m_Tracker.RenderAfter();
             }
             glEnable(GL_DEPTH_TEST);
@@ -308,7 +311,6 @@ void cGame::Render()
     }
     else
     {
-        //Core::Graphics->SetCamera(CAMERA_POSITION + m_aPlayer[0].GetPosition() * 0.03f, CAMERA_DIRECTION, CAMERA_ORIENTATION);   // wand-interaktionen der bosse gehn nicht
         __DEPTH_GROUP_BOTTOM
         {
             // 
@@ -426,6 +428,10 @@ void cGame::Render()
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                     m_aPlayer[i].RenderAfter();
+
+                // 
+                for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+                    m_aHelper[i].RenderAfter();
 
                 // 
                 m_Tracker.RenderAfter();
@@ -683,6 +689,12 @@ void cGame::StartOutro(const coreUint8 iType)
     // 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+    
+    if(m_iOutroType == GAME_OUTRO_ENDING_NORMAL)
+    {
+        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
+            m_aPlayer[i].AddStatus(PLAYER_STATUS_KEEP_RANGE);
+    }
 
     // 
     m_Interface .SetVisible(false);
@@ -800,6 +812,8 @@ void cGame::UseRestart()
 // 
 void cGame::RepairPlayer()
 {
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED)) return;
+
     if(m_pRepairEnemy)
     {
         cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
@@ -888,6 +902,21 @@ void cGame::PopDepthLevel(const coreUint8 iLevels)
 
     // 
     this->ChangeDepthLevel(m_iDepthLevel, m_iDepthLevel + iLevels);
+}
+
+
+// ****************************************************************
+// 
+coreVector3 cGame::CalculateCamShift()const
+{
+    coreVector3 vShift = coreVector3(0.0f,0.0f,0.0f);
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
+    {
+        vShift += m_aPlayer[i].GetPosition();
+    }
+    vShift /= I_TO_F(this->GetNumPlayers());
+
+    return vShift * g_fShiftMode * 1.5f;
 }
 
 
@@ -1348,7 +1377,7 @@ void cGame::__HandleCollisions()
             if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST_BULLET) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
             {
                 // 
-                const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
+                const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()), false);
 
                 if(iTaken)
                 {

@@ -19,7 +19,7 @@
 // TODO 3: remove overdraw when rendering border object (own shader with discard ?)
 // TODO 3: border might flicker-disappear when rotating, briefly passing 0.0f, and shaking screen
 // TODO 3: if overdraw can be handled, then N "shadow-border" can be used when rotating (like on Dharuk) (own shader with discard ?)
-// TODO 1: implement outomatic smooth reset for certain values (e.g. wall offset, frame value, etc.)
+// TODO 1: implement automatic smooth reset for certain values (e.g. wall offset, frame value, etc.)
 
 
 // ****************************************************************
@@ -55,6 +55,8 @@ private:
     coreObject2D m_aBorder  [POST_BORDERS];     // 
     coreObject2D m_Separator;                   // separator for split-screen
 
+    coreFullscreen m_Black;                     // 
+
     coreFlow m_fSplitScreenValue;               // 
     coreBool m_bSplitScreen;                    // 
 
@@ -73,6 +75,10 @@ private:
     coreFloat      m_fFrameValue;               // 
     coreFlow       m_fFrameAnimation;           // 
 
+    coreFlow  m_fReset;                         // 
+    coreFloat m_fResetAngle;                    // 
+    coreFloat m_afResetOffset[POST_WALLS];      // 
+
 
 public:
     cPostProcessing()noexcept;
@@ -82,9 +88,14 @@ public:
     // render and move post-processing
     void Render()final;
     void Move  ()final;
+    
+    inline void RenderBlack() {m_Black.Render();}
 
     // recompile post-processing shader-programs
     void Recompile();
+
+    // 
+    void Reset();
 
     // 
     void UpdateLayout();
@@ -95,7 +106,7 @@ public:
 
     // 
     void        SetWallOpacity  (const coreFloat   fOpacity);
-    inline void SetWallOffset   (const coreUintW   iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; m_bOffsetActive = true;}
+    inline void SetWallOffset   (const coreUintW   iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; if(fOffset) m_bOffsetActive = true;}
     inline void SetSplitScreen  (const coreBool    bSplitScreen)                        {m_bSplitScreen   = bSplitScreen;}
     inline void SetDirectionGame(const coreVector2 vDirectionGame)                      {m_vDirectionGame = vDirectionGame; ASSERT(vDirectionGame.IsNormalized())}
     inline void SetFrameValue   (const coreFloat   fFrameValue) {m_fFrameValue = fFrameValue;}
@@ -103,7 +114,7 @@ public:
     inline void SetValue        (const coreUintW   iIndex, const coreFloat fValue)      {ASSERT((iIndex < POST_INTERIORS) && (fValue      >= 0.0f) && (fValue      <= 1.0f)) m_avData[iIndex].y = LERP(0.0f, 1.0f,  fValue);}
     inline void SetBorder       (const coreUintW   iIndex, const coreFloat fBorder)     {ASSERT((iIndex < POST_INTERIORS) && (fBorder     >= 0.0f) && (fBorder     <= 1.0f)) m_avData[iIndex].z = LERP(0.4f, 2.0f,  fBorder);}
     inline void SetSaturationAll(const coreFloat   fSaturation)                         {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetSaturation(i, fSaturation);}
-    inline void SetValueAll     (const coreFloat   fValue)                              {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetValue     (i, fValue);}
+    inline void SetValueAll     (const coreFloat   fValue)                              {/*for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetValue     (i, fValue);*/ m_Black.SetAlpha(1.0f - fValue); m_Black.SetEnabled(m_Black.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);}
     inline void SetBorderAll    (const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBorder    (i, fBorder);}
     inline void SetChroma       (const coreFloat   fChroma)                             {m_fChroma = fChroma;}
 

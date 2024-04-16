@@ -51,7 +51,9 @@ enum eEnemyStatus : coreUint32
     ENEMY_STATUS_LIGHT = 0x10000u,
     ENEMY_STATUS_FLAT  = 0x20000u,
     ENEMY_STATUS_SECRET = 0x40000u,
-    ENEMY_STATUS_CUSTOM = 0x80000u
+    ENEMY_STATUS_CUSTOM = 0x80000u,
+    ENEMY_STATUS_CHAIN = 0x100000u,
+    ENEMY_STATUS_KEEPVOLUME = 0x200000u
    // ENEMY_STATUS_UNDER = 0x20000u
 };
 
@@ -93,7 +95,7 @@ public:
     void Move  ()final;
 
     // reduce current health
-    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* OUTPUT pAttacker);
+    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* OUTPUT pAttacker, const coreBool bNeutral);
 
     // control life and death
     void Resurrect();
@@ -151,7 +153,7 @@ public:
     inline  const coreFloat&  GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
     inline  const coreUint16& GetScore         ()const {return m_iScore;}
     inline        coreUint16  GetRealScore     ()const {return m_iScore ? m_iScore : (10u * m_iMaxHealth);}
-    virtual eSoundEffect      GetExplosionSound()const {return SOUND_ENEMY_EXPLOSION_01;}
+    virtual eSoundEffect      GetExplosionSound()const {return SOUND_ENEMY_EXPLOSION_09;}
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}

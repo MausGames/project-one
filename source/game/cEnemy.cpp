@@ -96,7 +96,7 @@ void cEnemy::Move()
 
             // reduce collision overhead for ghost enemies without bounding volume
             const coreModelPtr& pLowQuad = Core::Manager::Object->GetLowQuad();
-            if(HAS_FLAG(m_iStatus, ENEMY_STATUS_GHOST))
+            if(HAS_FLAG(m_iStatus, ENEMY_STATUS_GHOST) && !HAS_FLAG(m_iStatus, ENEMY_STATUS_KEEPVOLUME))
             {
                 if(m_pVolume.GetHandle() == NULL) this->DefineVolume(pLowQuad);
             }
@@ -124,7 +124,7 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* OUTPUT pAttacker)
+coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* OUTPUT pAttacker, const coreBool bNeutral)
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
@@ -140,7 +140,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         // forward to parent
         if(this->IsChild())
         {
-            const coreInt32 iTaken = m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
+            const coreInt32 iTaken = m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker, bNeutral);
             m_iDamageForwarded += iTaken;
             return iTaken;
         }
@@ -148,9 +148,9 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         if(iDamage)
         {
             // 
-            const coreInt32 iPower = (bMulti || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
+            const coreInt32 iPower = (bMulti || bNeutral || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
             
-            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy()        && (!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS) || (this->GetID() != cTigerBoss::ID))) ? 110 : 100);
+            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 110 : 100);
             
             const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 100, iElement, vImpact) / iPower);
             ASSERT(!(this->GetMaxHealth() % iPower))
@@ -169,14 +169,14 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
                     // 
                     pAttacker->GetScoreTable()->RefreshCooldown();
 
-                    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))
-                    {
-                        // 
-                        pAttacker->GetScoreTable()->AddChain(iTaken);
-                    }
-
                     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
                     {
+                        if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS) || HAS_FLAG(m_iStatus, ENEMY_STATUS_CHAIN))
+                        {
+                            // 
+                            pAttacker->GetScoreTable()->AddChain(iTaken);
+                        }
+
                         // 
                         pAttacker->GetDataTable()->EditCounterTotal  ()->iDamageGiven += iTaken;
                         pAttacker->GetDataTable()->EditCounterMission()->iDamageGiven += iTaken;
@@ -366,6 +366,7 @@ void cEnemy::ResetProperties()
 void cEnemy::ApplyScore(cPlayer* pPlayer)
 {
     ASSERT(STATIC_ISVALID(g_pGame))
+    ASSERT(!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))
 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
     {
@@ -1336,6 +1337,7 @@ cRepairEnemy::cRepairEnemy()noexcept
     this->Configure(50, 0u, COLOR_SHIP_GREY);
     this->AddStatus(ENEMY_STATUS_SINGLE);
     this->AddStatus(ENEMY_STATUS_IMMORTAL);
+    this->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
     this->AddStatus(ENEMY_STATUS_HIDDEN);
     this->AddStatus(ENEMY_STATUS_WORTHLESS);
 
@@ -1456,7 +1458,14 @@ void cRepairEnemy::__MoveOwn()
     m_fAnimation.UpdateMod(0.2f, 4.0f);
 
     // 
-    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * TIME);
+    const coreUintW iIndex = g_pGame->GetPlayerIndex(m_pPlayer);
+    const coreBool  bMove  = g_pGame->HasRepairMove(iIndex) && !m_pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+
+    // 
+    if(!bMove) this->SetPosition(coreVector3(m_pPlayer->GetPosition().xy(), 0.0f));
+
+    // 
+    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * TIME * (bMove ? 1.0f : 0.0f));
     const coreVector2 vNewDir = coreVector2::Direction(m_fAnimation * (8.0f*PI));
     const coreVector4 vArea   = m_pPlayer->GetArea();
 

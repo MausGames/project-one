@@ -14,6 +14,7 @@
 cCreditRoll::cCreditRoll()noexcept
 : m_fOffset    (0.0f)
 , m_fMaxOffset (0.0f)
+, m_eType      (CREDIT_TYPE_MENU)
 , m_bFinished  (false)
 {
     constexpr coreFloat fWait = 1.1f;
@@ -85,6 +86,7 @@ cCreditRoll::cCreditRoll()noexcept
 
             pEntry[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
             pEntry[i].SetPosition(coreVector2(0.0f, fHeight2));
+            pEntry[i].SetColor3  (COLOR_MENU_INSIDE);
             pEntry[i].SetAlpha   (MENU_INSIDE_ALPHA);
             pEntry[i].SetEnabled (CORE_OBJECT_ENABLE_NOTHING);
             pEntry[i].SetText    (ppcText[i]);
@@ -101,6 +103,14 @@ cCreditRoll::cCreditRoll()noexcept
     //nInitFunc(&m_aOtherHeader[6], m_aOtherThanks,    "CREDITS_THANKS",    g_apcCreditEntryThanks,    CREDIT_ENTRIES_THANKS);
 
     // 
+    m_ThankYouText.Construct      (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    m_ThankYouText.SetPosition    (coreVector2(0.0f,0.0f));
+    m_ThankYouText.SetColor3      (COLOR_MENU_INSIDE);
+    m_ThankYouText.SetAlpha       (0.0f);
+    m_ThankYouText.SetEnabled     (CORE_OBJECT_ENABLE_NOTHING);
+    m_ThankYouText.SetTextLanguage("THANK_YOU");
+
+    // 
     m_fMaxOffset = I_TO_F(iOffset) * 0.05f + fWait + 0.6f;
 }
 
@@ -111,6 +121,9 @@ void cCreditRoll::Render()
 {
     // 
     m_ViewBox.Render();
+
+    // 
+    m_ThankYouText.Render();
 }
 
 
@@ -128,7 +141,7 @@ void cCreditRoll::Move()
     m_fOffset.Update(0.1f * fSpeed);
 
     // 
-    m_bFinished = (m_fOffset >= m_fMaxOffset);
+    m_bFinished = (m_fOffset >= m_fMaxOffset) && (m_eType == CREDIT_TYPE_MENU);
     if(m_bFinished) m_fOffset = 0.0f;
 
     // 
@@ -155,38 +168,105 @@ void cCreditRoll::Move()
     nCullListFunc(m_aOtherFonts,     1.1f, CREDIT_ENTRIES_FONTS);
     nCullListFunc(m_aOtherLibraries, 1.1f, CREDIT_ENTRIES_LIBRARIES);
     //nCullListFunc(m_aOtherThanks,    1.1f, CREDIT_ENTRIES_THANKS);
+
+    
+    if(m_eType != CREDIT_TYPE_MENU)
+    {
+        ASSERT(STATIC_ISVALID(g_pGame))
+
+        const coreFloat fFactor = m_fOffset * RCP(m_fMaxOffset);
+        
+        if(m_eType == CREDIT_TYPE_NORMAL)
+        {
+            constexpr coreInt32 iBackground[] =
+            {
+                cCloudBackground  ::ID,
+                cGrassBackground  ::ID,
+                cSeaBackground    ::ID,
+                cDesertBackground ::ID,
+                cSpaceBackground  ::ID,
+                cVolcanoBackground::ID,
+                cSnowBackground   ::ID,
+                cMossBackground   ::ID,
+                cDarkBackground   ::ID
+            };
+
+            const coreUintW iNewIndex = MIN(F_TO_UI(fFactor * I_TO_F(ARRAY_SIZE(iBackground))), ARRAY_SIZE(iBackground) - 1u);
+            const coreInt32 iNewID    = iBackground[iNewIndex];
+
+            if(iNewID != g_pEnvironment->GetBackground()->GetID())
+            {
+                g_pEnvironment->ChangeBackground(iNewID, ENVIRONMENT_MIX_FADE, 0.5f);
+                g_pEnvironment->SetTargetSpeedNow(1.0f);
+            }
+
+            g_pPostProcessing->SetSaturationAll(0.0f);
+
+            if(fFactor >= 1.0f)
+            {
+                g_pGame->GetInterface()->ShowFragment(INTERFACE_FRAGMENT_TYPE_SHOW);
+                g_pGame->GetInterface()->SetAlphaFragment(STEPH3(0.0f, 0.03f, fFactor - 1.0f) - STEPH3(0.0f, 0.03f, fFactor - 1.1f));
+            }
+
+            if(fFactor >= 1.15f)
+            {
+                g_pGame->GetInterface()->ShowFragment(INTERFACE_FRAGMENT_TYPE_HIDE);
+
+                m_fOffset   = 0.0f;
+                m_bFinished = true;
+            }
+        }
+        else if(m_eType == CREDIT_TYPE_SECRET)
+        {
+            if(fFactor >= 1.15f)
+            {
+                m_fOffset   = 0.0f;
+                m_bFinished = true;
+            }
+        }
+
+        if(fFactor >= 1.0f)
+        {
+            const coreFloat fAlpha = STEPH3(0.0f, 0.03f, fFactor - 1.0f) - STEPH3(0.0f, 0.03f, fFactor - 1.1f);
+
+            m_ThankYouText.SetAlpha  (fAlpha * MENU_INSIDE_ALPHA);
+            m_ThankYouText.SetEnabled(fAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        }
+    }
 }
 
 
 // ****************************************************************
 // 
-void cCreditRoll::Start()
+void cCreditRoll::Start(const eCreditType eType)
 {
     // 
     const coreBool bHorizontal = IsHorizontal(g_vHudDirection);
 
     // 
-    const auto nSetRectifyFunc = [&](cGuiLabel* OUTPUT pLabel, const coreUintW iNum)
+    const auto nSetRectifyFunc = [&](cGuiLabel* OUTPUT pLabel)
     {
-        for(coreUintW i = 0u; i < iNum; ++i)
-        {
-            pLabel[i].SetRectifyX(!bHorizontal);
-            pLabel[i].SetRectifyY( bHorizontal);
-        }
+        pLabel->SetRectifyX(!bHorizontal);
+        pLabel->SetRectifyY( bHorizontal);
     };
-    nSetRectifyFunc(m_aName,           CREDIT_ENTRIES);
-    nSetRectifyFunc(m_aDescription,    CREDIT_ENTRIES);
-    nSetRectifyFunc(m_aOtherHeader,    CREDIT_HEADERS);
-    nSetRectifyFunc(m_aOtherMusic,     CREDIT_ENTRIES_MUSIC);
-    nSetRectifyFunc(m_aOtherSounds,    CREDIT_ENTRIES_SOUNDS);
-    nSetRectifyFunc(m_aOtherTextures,  CREDIT_ENTRIES_TEXTURES);
-    nSetRectifyFunc(m_aOtherModels,    CREDIT_ENTRIES_MODELS);
-    nSetRectifyFunc(m_aOtherFonts,     CREDIT_ENTRIES_FONTS);
-    nSetRectifyFunc(m_aOtherLibraries, CREDIT_ENTRIES_LIBRARIES);
-    //nSetRectifyFunc(m_aOtherThanks,    CREDIT_ENTRIES_THANKS);
+    const auto nSetRectifyListFunc = [&](cGuiLabel* OUTPUT pLabel, const coreUintW iNum)
+    {
+        for(coreUintW i = 0u; i < iNum; ++i) nSetRectifyFunc(&pLabel[i]);
+    };
+    nSetRectifyListFunc(m_aName,           CREDIT_ENTRIES);
+    nSetRectifyListFunc(m_aDescription,    CREDIT_ENTRIES);
+    nSetRectifyListFunc(m_aOtherHeader,    CREDIT_HEADERS);
+    nSetRectifyListFunc(m_aOtherMusic,     CREDIT_ENTRIES_MUSIC);
+    nSetRectifyListFunc(m_aOtherSounds,    CREDIT_ENTRIES_SOUNDS);
+    nSetRectifyListFunc(m_aOtherTextures,  CREDIT_ENTRIES_TEXTURES);
+    nSetRectifyListFunc(m_aOtherModels,    CREDIT_ENTRIES_MODELS);
+    nSetRectifyListFunc(m_aOtherFonts,     CREDIT_ENTRIES_FONTS);
+    nSetRectifyListFunc(m_aOtherLibraries, CREDIT_ENTRIES_LIBRARIES);
+    //nSetRectifyListFunc(m_aOtherThanks,    CREDIT_ENTRIES_THANKS);
 
     // 
     m_fOffset   = 0.0f;
+    m_eType     = eType;
     m_bFinished = false;
 
     // 

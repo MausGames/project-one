@@ -29,35 +29,23 @@
 // creating a sinus-tunnel (e.g. left-right) was not feasible, if the wave was slow it was boring, if the wave was fast the player-ship disappeared behind the curve which was confusing
 // the classical rotating hole attack was too similar to the rotating lines, but the lines are more versatile
 // gegner die spawnen brauchen eine incentive um angegriffen zu werden (entweder sind sie unausweichlich, oder greifen selbst an)
-// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// neither repair-enemy nor continue is properly handled, both situations are prevented by making players invincible
+// TODO 1: hard: additional enemies and side-turning
+// TODO 1: improve player-arrow appearance when looking into/outof z-axis
+// TODO 1: background für time-score-banner hängt in leere bei vertikaler resolution
+// TODO 1: spieler kann bei wänden hinaushängen, solange sie noch sichtbar sind (vor allem in coop) -> restrict with area ?
+// TODO 1: MAIN: sound
 // TODO 1: ACHIEVEMENT: name (), description (), 
-// TODO 1: fix glow on extended viewport
-// TODO 1: fix player-arrow when looking up or down
-// TODO 1: make sure background movement is correctly handled (coop), interpolated (maybe nothing to do), and is big enough
-// TODO 1: tilted ray bullet sollte von vorne schön(er) aussehen, vielleicht anderes model
-// TODO 1: Eigengrau name sollte das logo sein, statt normales label ? oder zm. grauer GRAU text
-// TODO 1: fix name banner handling in interface-class (+ label-shadow)
-// TODO 1: make sure all possible resolutions look fine (1:1, (very) wide horizontal, wide vertical)
-// TODO 1: handle invalid segment-index when taking damage from intro enemies
-// TODO 1: alle layer sollten getroffen werden können (custom-enemy geht aber nicht, wegen render-reihenfolge, aah aber virtuelle gegner, zm. einen für den zweiten layer, oder gleich zwei)
-// TODO 1: boss sollte einen health-bar für jede sub-phase haben
-// TODO 1: hard: parasite enemies
-// TODO 1: sinus-line gegner sieht man schlecht von oben kommen (vielleicht beim ersten gegner ein loch lassen um (überraschendes) erstes ausweichen zu erleichtern)
-// TODO 1: walls sollten sich vielleicht wie bei transition auflösen, statt sich zu bewegen
+
+// TODO 1: sound when fragment-board splits up, sound when bullet flies past player
+
+// TODO 1: post-processing fehlt und farben sind anders, fix glow and distortion on extended viewport
+
+// TODO 1: alle layer sollten getroffen werden können (custom-enemy geht aber nicht, wegen render-reihenfolge), adjust size+dir+ori depending on current layer
 // TODO 1: boss sollte vielleicht eigenen shader haben, zum rand hin weniger transparenz (spherisch ?) statt ganz flach
-// TODO 1: handle farb-änderung von adds
-// TODO 1: random lines und random spread sollten selben deterministischen algorithmus haben ? (achtung: mittel-schuss bei spread könnte verschwinden)
-// TODO 1: background für time-score-banner hängt in leere bei vertikaler resolution (vielleicht egal)
-// TODO 1: wenn chain beim time-bonus-banner gebrochen wird (separates TODO), sollte der text noch an der alten position erscheinen (nicht HIDDEN_POS)
-// TODO 1: sollten transitions angepasst werden ? tunnel, seiten-weg, camera-move
-// TODO 1: outlines bei blauem range-objekt sind zu dünn
-// TODO 1: screen shake is not working! (because currently only the post-processing object is moved)
-// TODO 1: post-processing fehlt und farben sind anders
-// TODO 1: die seiten sollen anders verschwinden, vielleicht sollen gegner drüber fliegen bevor sie ganz weg sind (hellsinker hat das auch beim finale)
-// TODO 1: kid ikarus https://www.youtube.com/watch?v=PnMWJlCAGug
-// TODO 1: spieler kann selbst seiten-teile weg-schießen
-// TODO 1: lang-gezogene partikel in flugrichtung !
-// TODO 1: rolle bei phasen-wechseln
+
+// (TODO 1: sinus-line gegner sieht man schlecht von oben kommen (vielleicht beim ersten gegner ein loch lassen um (überraschendes) erstes ausweichen zu erleichtern))
+// (TODO 1: handle farb-änderung von adds)
 
 
 // ****************************************************************
@@ -68,6 +56,8 @@
 // ****************************************************************
 // vector identifier
 #define ROTA_VALUE (0u)
+#define PLAYER_POS (1u)   // # uses 1u - 2u
+#define HEART_BEAT (3u)
 
 
 // ****************************************************************
@@ -84,6 +74,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
 , m_fRangeSpeedPlayer (1.0f)
 , m_fLightningDelay   (0.0f)
 , m_fRotaSpeed        (0.0f)
+, m_fAttackSpeed      (0.0f)
 , m_iBurstTick        (0u)
 {
     // load models
@@ -128,6 +119,16 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     m_RangePlayer.SetTexSize   (coreVector2(0.1f,0.1f));
     m_RangePlayer.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
+    for(coreUintW i = 0u; i < BOSS_PLAYERS; ++i)
+    {
+        m_aArrow[i].DefineModel  ("object_arrow.md3");
+        m_aArrow[i].DefineTexture(0u, "effect_energy.png");
+        m_aArrow[i].DefineProgram("effect_energy_flat_invert_program");
+        m_aArrow[i].SetSize      (coreVector3(1.0f,1.0f,1.0f) * 2.2f);
+        m_aArrow[i].SetTexSize   (coreVector2(1.0f,1.0f) * 0.4f);
+        m_aArrow[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
     for(coreUintW i = 0u; i < EIGENGRAU_PARASITES; ++i)
     {
         // 
@@ -167,12 +168,15 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     // 
     m_PlayerPath.Reserve(6u);
     m_PlayerPath.AddNode(1.8f * coreVector2(-0.5f,  0.0f),  coreVector2( 1.0f, 0.0f));
-    m_PlayerPath.AddNode(5.0f * coreVector2( 0.0f,  0.0f),  coreVector2( 1.0f, 0.0f));
-    m_PlayerPath.AddNode(5.0f * coreVector2( 0.5f,  0.25f), coreVector2( 0.0f, 1.0f));
-    m_PlayerPath.AddNode(5.0f * coreVector2( 0.25f, 0.5f),  coreVector2(-1.0f, 0.0f));
-    m_PlayerPath.AddNode(5.0f * coreVector2( 0.0f,  0.0f),  coreVector2( 0.0f,-1.0f));
-    m_PlayerPath.AddNode(5.0f * coreVector2( 0.0f, -0.5f),  coreVector2( 0.0f,-1.0f));
+    m_PlayerPath.AddNode(4.5f * coreVector2( 0.0f,  0.0f),  coreVector2( 1.0f, 0.0f));
+    m_PlayerPath.AddNode(4.5f * coreVector2( 0.5f,  0.25f), coreVector2( 0.0f, 1.0f));
+    m_PlayerPath.AddNode(4.5f * coreVector2( 0.25f, 0.5f),  coreVector2(-1.0f, 0.0f));
+    m_PlayerPath.AddNode(4.5f * coreVector2( 0.0f,  0.0f),  coreVector2( 0.0f,-1.0f));
+    m_PlayerPath.AddNode(5.0f * coreVector2( 0.0f, -0.5f),  coreVector2( 0.0f,-1.0f));   // # height affects collision
     m_PlayerPath.Refine();
+
+    // 
+    m_pHeartSound = Core::Manager::Resource->Get<coreSound>("effect_heart.wav");
 }
 
 
@@ -184,8 +188,13 @@ void cEigengrauBoss::__ResurrectOwn()
     this->SetAlpha(0.0f);
 
     // 
-    g_bTiltMode  = true;
-    g_bShiftMode = true;
+    g_bTiltMode = true;
+
+    // 
+    m_fAttackSpeed = g_pGame->IsEasy() ? 1.0f : 1.5f;
+
+    // 
+    this->_ResurrectBoss();
 }
 
 
@@ -202,15 +211,10 @@ void cEigengrauBoss::__KillOwn(const coreBool bAnimated)
         m_aFollower[i].Kill(bAnimated);
 
     // 
-    for(coreUintW i = 0u; i < POST_WALLS; ++i)
-        g_pPostProcessing->SetWallOffset(i, 0.0f);
-
-    // 
-    g_pPostProcessing->SetFrameValue(0.0f);
-
-    // 
     g_bTiltMode  = false;
-    g_bShiftMode = false;
+    g_fShiftMode = 0.0f;
+
+    // # no postprocessing reset, for credits
 }
 
 
@@ -220,21 +224,32 @@ void cEigengrauBoss::__RenderOwnUnder()
 {
     for(coreUintW i = EIGENGRAU_LAYERS; i--; )
     {
-        DEPTH_PUSH
+        if(m_aLayer[i].IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+        {
+            DEPTH_PUSH
 
-        m_aLayer[i].Render();
-        g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_THICK)->ApplyObject(&m_aLayer[i]);
+            m_aLayer[i].Render();
+            g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_THICK)->ApplyObject(&m_aLayer[i]);
+        }
     }
 
-    DEPTH_PUSH
+    if(m_Range.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    {
+        DEPTH_PUSH
 
-    // 
-    m_Range      .Render();
-    m_RangePlayer.Render();
+        // 
+        m_Range.Render();
+        g_pOutline->GetStyle(m_bActive ? OUTLINE_STYLE_FLAT_THICK : OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
+    }
 
-    // 
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_RangePlayer);
+    if(m_RangePlayer.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    {
+        DEPTH_PUSH
+
+        // 
+        m_RangePlayer.Render();
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_RangePlayer);
+    }
 }
 
 
@@ -242,6 +257,12 @@ void cEigengrauBoss::__RenderOwnUnder()
 // 
 void cEigengrauBoss::__RenderOwnTop()
 {
+    DEPTH_PUSH
+
+    // 
+    for(coreUintW i = 0u; i < BOSS_PLAYERS; ++i) m_aArrow[i].Render();
+    for(coreUintW i = 0u; i < BOSS_PLAYERS; ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_aArrow[i]);
+
     if(m_Lightning.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         glDisable(GL_DEPTH_TEST);
@@ -271,6 +292,10 @@ void cEigengrauBoss::__MoveOwn()
     if(fCurHealthPct > 0.0f)
     {
         this->SetSize(coreVector3(1.0f,1.0f,1.0f) * LERP(150.0f, 30.0f, fCurHealthPct));
+
+        g_pSpecialEffects->CreateGust(1.0f - fCurHealthPct, 0.0f);
+
+        g_pGame->SetMusicVolume(STEP(0.01f, 0.06f, fCurHealthPct));
     }
 
     // ################################################################
@@ -279,14 +304,41 @@ void cEigengrauBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
-            g_pEnvironment->SetTargetSpeedNow(0.0f);
-
-            pBackground->Dissolve();
+            g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
 
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+                m_avVector[PLAYER_POS + i].xy(pPlayer->GetPosition().xy());
             });
+        }
+
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_SMOOTH)
+        {
+            const coreVector2 vTarget = m_PlayerPath.CalcPosition(0.0f);
+
+            g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                const coreFloat   fSide = g_pGame->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
+                const coreVector2 vPos  = LERP(m_avVector[PLAYER_POS + i].xy(), coreVector2(fSide, (vTarget.x - 1.0f) * FOREGROUND_AREA.y), fTime);
+
+                pPlayer->SetPosition(coreVector3(vPos, 0.0f));
+            });
+
+            g_fShiftMode = fTime;
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 1u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            pBackground->Dissolve();
         }
 
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_LINEAR)
@@ -295,10 +347,10 @@ void cEigengrauBoss::__MoveOwn()
 
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                if(PHASE_BEGINNING2) pPlayer->Configure(PLAYER_SHIP_P1);
-
+                if(PHASE_TIME_POINT(0.2f)) g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                
                 coreVector2 vPos, vDir;
-                m_PlayerPath.CalcPosDirLerp(BLENDS(fTime), &vPos, &vDir);
+                m_PlayerPath.CalcPosDirLerp(BLENDS(fTime), &vPos, &vDir);                       
 
                 const coreFloat   fSide   = g_pGame->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
                 const coreVector2 vHeight = coreVector2(-1.0f, BLENDS(STEP(0.5f, 1.0f, fTime)) * 2.5f);
@@ -320,24 +372,27 @@ void cEigengrauBoss::__MoveOwn()
                 g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
                 {
                     pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
+                    pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
                 });
+
+                g_pGame->GetInterface()->SetVisible(true);
             }
         });
     }
 
     // ################################################################
     // 
-    else if(m_iPhase == 1u)
+    else if(m_iPhase == 2u)
     {
         PHASE_CONTROL_TIMER(0u, 0.15f*2.0f, LERP_LINEAR)
         {
-            for(coreUintW i = 0u; i < POST_WALLS; ++i)
+            /*for(coreUintW i = 0u; i < POST_WALLS; ++i)
             {
                 const coreVector2 vResolution = Core::System->GetResolution();
                 const coreVector2 vSize       = coreVector2(0.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f);
 
                 g_pPostProcessing->SetWallOffset(i, -vSize.Max() * BLENDH3(fTime));
-            }
+            }*/
 
             g_pPostProcessing->SetFrameValue(fTime);
 
@@ -348,8 +403,9 @@ void cEigengrauBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 2u)
+    else if(m_iPhase == 3u)
     {
+        /*
         if(PHASE_BEGINNING2)
         {
             for(coreUintW i = 0u; i < 4u; ++i)
@@ -360,11 +416,13 @@ void cEigengrauBoss::__MoveOwn()
         {
             PHASE_CHANGE_INC
         }
+         */
+        PHASE_CHANGE_INC
     }
 
     // ################################################################
     // 
-    else if(m_iPhase == 3u)
+    else if(m_iPhase == 4u)
     {
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
@@ -374,7 +432,7 @@ void cEigengrauBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 4u)
+    else if(m_iPhase == 5u)
     {
         if(PHASE_BEGINNING2)
         {
@@ -388,7 +446,15 @@ void cEigengrauBoss::__MoveOwn()
         {
             this->SetAlpha(BLENDH3(MIN1(fTime * 2.0f)));
 
-            g_pPostProcessing->SetFrameValue(CLAMP01(fTime * 2.0f - 1.0f) + 1.0f);
+            g_pPostProcessing->SetFrameValue(1.0f + CLAMP01(fTime * 2.0f - 1.0f));
+            
+            for(coreUintW i = 0u; i < POST_WALLS; ++i)
+            {
+                const coreVector2 vResolution = Core::System->GetResolution();
+                const coreVector2 vSize       = coreVector2(0.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f);
+
+                g_pPostProcessing->SetWallOffset(i, -vSize.Max() * BLENDH3(fTime));
+            }
 
             if(PHASE_FINISHED)
             {
@@ -401,7 +467,7 @@ void cEigengrauBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 5u)
+    else if(m_iPhase == 6u)
     {
         PHASE_CONTROL_PAUSE(0u, 0.2f)
         {
@@ -411,11 +477,13 @@ void cEigengrauBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 6u)
+    else if(m_iPhase == 7u)
     {
         PHASE_CONTROL_TICKER(0u, 1u, 1.0f, LERP_LINEAR)
         {
             this->__AddBulletBurst();
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
@@ -424,11 +492,12 @@ void cEigengrauBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 7u)
+    else if(m_iPhase == 8u)
     {
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(10u)
+            this->__PhaseChange();
         });
     }
 
@@ -437,15 +506,17 @@ void cEigengrauBoss::__MoveOwn()
     else if(m_iPhase == 10u)
     {
         // rotating lines
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 0u, 1.0f * m_fAttackSpeed, LERP_LINEAR)
         {
             const coreVector2 vPos = this->NearestPlayerDual(iTick % 2u)->GetPosition().xy();
-            const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * 0.1f);
+            const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * GA);
 
             const coreInt32 iDamage = (iTick % 2u) ? 6 : 7;
 
             this->__AddBulletLine(iDamage, 5.0f, vPos, vDir);
             this->__AddBulletLine(iDamage, 5.0f, vPos, vDir.Rotated90());
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         m_fRotaSpeed = 1.5f * (1.0f - STEP(0.8f, 0.9f, fCurHealthPct));
@@ -453,6 +524,7 @@ void cEigengrauBoss::__MoveOwn()
         if(fCurHealthPct <= 0.8f)
         {
             PHASE_CHANGE_INC
+            this->__PhaseChange();
         }
     }
 
@@ -472,12 +544,12 @@ void cEigengrauBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
-            for(coreUintW i = 4u; i < 20u; ++i)
-                this->__ResurrectFollower(i);
+            //for(coreUintW i = 4u; i < 20u; ++i)
+            //    this->__ResurrectFollower(i);
         }
 
         // direct attack
-        PHASE_CONTROL_TICKER(0u, 0u, 15.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 0u, 15.0f * m_fAttackSpeed, LERP_LINEAR)
         {
             const coreVector3 vOffset = coreVector3(coreVector2::Direction(I_TO_F(iTick) * GA) * 0.01f, 0.0f);
 
@@ -485,11 +557,25 @@ void cEigengrauBoss::__MoveOwn()
             const coreVector3 vDir = ((this->NearestPlayerDual((iTick / 10u) % 2u)->GetPosition() - this->GetPosition()).Normalized() + vOffset).Normalized();
 
             this->__AddBullet(5, 5.0f, vPos, vDir);
+            
+            
+            const coreVector2 vRota  = coreVector2::Direction(I_TO_F(iTick) *  0.12f) * 50.0f;
+            const coreVector2 vRota2 = coreVector2::Direction(I_TO_F(iTick) * -0.08f) * 100.0f;
+            const coreVector2 vRota3 = coreVector2::Direction(I_TO_F(iTick) *  0.04f) * 150.0f;
+            if(fCurHealthPct <= 0.74f) this->__AddBullet(5, 5.0f, vPos, ((coreVector3( vRota,             0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
+            if(fCurHealthPct <= 0.74f) this->__AddBullet(5, 5.0f, vPos, ((coreVector3(-vRota,             0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
+            if(fCurHealthPct <= 0.77f) this->__AddBullet(5, 5.0f, vPos, ((coreVector3( vRota2, 0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
+            if(fCurHealthPct <= 0.77f) this->__AddBullet(5, 5.0f, vPos, ((coreVector3(-vRota2, 0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
+            this->__AddBullet(5, 5.0f, vPos, ((coreVector3( vRota3, 0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
+            this->__AddBullet(5, 5.0f, vPos, ((coreVector3(-vRota3, 0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
+            
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.7f)
         {
             PHASE_CHANGE_INC
+            this->__PhaseChange();
         }
     }
 
@@ -508,17 +594,19 @@ void cEigengrauBoss::__MoveOwn()
     else if(m_iPhase == 30u)
     {
         // random spread
-        PHASE_CONTROL_TICKER(0u, 0u, 3.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 0u, 3.0f * m_fAttackSpeed, LERP_LINEAR)
         {
-            for(coreUintW i = 0u; i < 20u; ++i)
+            for(coreUintW i = 0u; i < 24u; ++i)
             {
-                const coreVector2 vBase = coreVector2((I_TO_F(i) - 9.5f) * 1.5f, 14.5f * SIN(I_TO_F(i) + I_TO_F(iTick) * 0.4f));
+                const coreVector2 vBase = coreVector2((I_TO_F(i) - 11.5f) * 1.5f, 14.5f * SIN(I_TO_F(i) + I_TO_F(iTick) * 0.4f));
 
                 const coreVector3 vPos = this->GetPosition() + coreVector3(vBase * 5.0f, 0.0f);
                 const coreVector3 vDir = coreVector3(0.0f,0.0f,1.0f);
 
                 this->__AddBullet(6, 5.0f, vPos, vDir);
             }
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         m_fRotaSpeed = 1.0f * (1.0f - STEP(0.6f, 0.69f, fCurHealthPct));
@@ -526,6 +614,7 @@ void cEigengrauBoss::__MoveOwn()
         if(fCurHealthPct <= 0.6f)
         {
             PHASE_CHANGE_INC
+            this->__PhaseChange();
         }
     }
 
@@ -544,19 +633,22 @@ void cEigengrauBoss::__MoveOwn()
     else if(m_iPhase == 40u)
     {
         // center wave
-        PHASE_CONTROL_TICKER(0u, 0u, 12.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 0u, 12.0f * m_fAttackSpeed, LERP_LINEAR)
         {
-            m_avVector[ROTA_VALUE].x += 0.09f * LERP(2.0f, 1.0f, STEP(0.5f, 0.6f, fCurHealthPct));
+            m_avVector[ROTA_VALUE].x += 0.09f * LERP(2.0f, 0.0f, STEP(0.5f, 0.6f, fCurHealthPct));
 
             const coreVector2 vPos = coreVector2(0.0f,0.0f);
             const coreVector2 vDir = coreVector2::Direction(m_avVector[ROTA_VALUE].x);
 
             this->__AddBulletLine(5, 5.0f, vPos, vDir);
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.5f)
         {
             PHASE_CHANGE_INC
+            this->__PhaseChange();
         }
     }
 
@@ -576,16 +668,16 @@ void cEigengrauBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
-            for(coreUintW i = 20u; i < 36u; ++i)
-                this->__ResurrectFollower(i);
+            //for(coreUintW i = 20u; i < 36u; ++i)
+            //    this->__ResurrectFollower(i);
         }
 
         // block attack
         if(PHASE_MAINTIME_AFTER(1.0f))
         {
-            const coreFloat fSpeed = LERP(5.0f, 3.0f, STEP(0.4f, 0.5f, fCurHealthPct));
+            const coreFloat fSpeed = LERP(6.0f, 3.0f, STEP(0.4f, 0.5f, fCurHealthPct));
 
-            PHASE_CONTROL_TICKER(0u, 0u, fSpeed, LERP_LINEAR)
+            PHASE_CONTROL_TICKER(0u, 0u, fSpeed * m_fAttackSpeed, LERP_LINEAR)
             {
                 constexpr coreUintW aiTile[] = {9u, 2u, 15u, 8u, 6u, 13u, 0u, 7u, 10u, 4u, 3u, 14u, 5u, 11u, 12u, 1u};
 
@@ -603,7 +695,7 @@ void cEigengrauBoss::__MoveOwn()
                 }
                 else
                 {
-                    vOffset = coreVector2(I_TO_F(iSelect % 4u) - 1.5f, I_TO_F(iSelect / 4u) - 1.5f) * 5.0f;
+                    vOffset = coreVector2(I_TO_F(iSelect % 4u) - 1.5f, I_TO_F(iSelect / 4u) - 1.5f) * 6.0f;
                     vTarget = this->GetPosition();
                 }
 
@@ -623,12 +715,15 @@ void cEigengrauBoss::__MoveOwn()
                         this->__AddBullet(5, 5.0f, vPos, vDir);
                     }
                 }
+
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             });
         }
 
         if(fCurHealthPct <= 0.4f)
         {
             PHASE_CHANGE_INC
+            this->__PhaseChange();
         }
     }
 
@@ -647,9 +742,9 @@ void cEigengrauBoss::__MoveOwn()
     else if(m_iPhase == 60u)
     {
         // random rays
-        PHASE_CONTROL_TICKER(0u, 0u, 10.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 0u, 10.0f * m_fAttackSpeed, LERP_LINEAR)
         {
-            for(coreUintW i = 0u; i < 20u; ++i)
+            for(coreUintW i = 0u; i < 24u; ++i)
             {
                 const coreVector2 vBase = coreVector2::Direction(I_TO_F(i + (iTick / 10u) * 3u) * GA) * ((I_TO_F(i) + 1.3f) * 1.5f);
 
@@ -660,6 +755,8 @@ void cEigengrauBoss::__MoveOwn()
             }
 
             this->__AddBullet(5, 5.0f, coreVector3(0.0f, 0.0f, this->GetPosition().z), coreVector3(0.0f,0.0f,1.0f));
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         m_fRotaSpeed = 1.0f * (1.0f - STEP(0.3f, 0.39f, fCurHealthPct));
@@ -667,6 +764,7 @@ void cEigengrauBoss::__MoveOwn()
         if(fCurHealthPct <= 0.3f)
         {
             PHASE_CHANGE_INC
+            this->__PhaseChange();
         }
     }
 
@@ -686,25 +784,36 @@ void cEigengrauBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
-            for(coreUintW i = 36u; i < 52u; ++i)
-                this->__ResurrectFollower(i);
+            //for(coreUintW i = 36u; i < 52u; ++i)
+            //    this->__ResurrectFollower(i);
 
             m_avVector[ROTA_VALUE].y = 0.0f;
         }
 
         // side wave
-        PHASE_CONTROL_TICKER(0u, 0u, 6.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 0u, 6.0f * m_fAttackSpeed, LERP_LINEAR)
         {
-            const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * -0.36f);
-            const coreVector2 vPos = vDir.Rotated90() * 30.0f;
+            const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * -0.18f);
+            const coreVector2 vPos = vDir.Rotated90() * LERP(25.0f, 60.0f, STEP(0.2f, 0.3f, fCurHealthPct));
 
             this->__AddBulletLine(5, 5.0f,  vPos, vDir);
             this->__AddBulletLine(5, 5.0f, -vPos, vDir);
+
+            if((iTick % 6u) == 5u)
+            {
+                const coreVector2 vPos2 = coreVector2(0.0f,0.0f);
+                const coreVector2 vDir2 = vDir;
+
+                this->__AddBulletLine(5, 5.0f, vPos2, vDir2);
+            }
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.2f)
         {
             PHASE_CHANGE_INC
+            this->__PhaseChange();
         }
     }
 
@@ -725,7 +834,7 @@ void cEigengrauBoss::__MoveOwn()
         const coreFloat fSpeed = LERP(10.0f, 5.0f, STEP(0.05f, 0.2f, fCurHealthPct));
 
         // static lines
-        PHASE_CONTROL_TICKER(0u, 0u, fSpeed, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 0u, fSpeed * m_fAttackSpeed, LERP_LINEAR)
         {
             coreVector2 vBase;
             if(fCurHealthPct > 0.15f)
@@ -752,9 +861,11 @@ void cEigengrauBoss::__MoveOwn()
             }
             else
             {
-                const coreFloat fSide = (I_TO_F(iNewTick * 3u % 8u) - 3.5f) * 24.0f;
-                this->__AddBulletLine(5, 5.0f, vBase.Rotated90() * fSide, vBase);
+                const coreFloat fSide = I_TO_F(iNewTick * 3u % 8u) - 3.5f;
+                this->__AddBulletLine(5, 5.0f, vBase.Rotated90() * LERP(fSide, SIGN(fSide) * 3.5f, 0.1f) * 30.0f, vBase);
             }
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.05f)
@@ -786,18 +897,24 @@ void cEigengrauBoss::__MoveOwn()
 
             this->_EndBoss();
 
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+
             g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
+                ASSERT(!pPlayer->GetScoreTable()->GetCurChain())
+
                 pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
                 pPlayer->AddStatus  (PLAYER_STATUS_NO_INPUT_ALL);
+                pPlayer->SetRainbow (false);
             });
 
-            g_pGame->GetInterface ()->SetVisible (false);
-            g_pGame->GetInterface ()->SetAlphaAll(0.0f);
-            g_pGame->GetCombatText()->SetVisible (false);
-            g_pGame->GetCombatText()->SetAlpha   (0.0f);
+            g_pGame->GetInterface()->SetVisible (false);
+            g_pGame->GetInterface()->SetAlphaAll(0.0f);
+
+            g_MusicPlayer.Stop();
+            g_pGame->SetMusicVolume(1.0f);
 
             g_pPostProcessing->SetFrameValue(1.0f);
 
@@ -810,7 +927,7 @@ void cEigengrauBoss::__MoveOwn()
             m_fRangeSpeed       = 0.4f;
             m_fRangeSpeedPlayer = 0.4f;
 
-            g_bShiftMode = false;
+            g_fShiftMode = 0.0f;
 
             for(coreUintW i = 0u; i < EIGENGRAU_PARASITES; ++i)
                 m_aParasite[i].Kill(false);
@@ -906,6 +1023,9 @@ void cEigengrauBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
             PHASE_CHANGE_INC
+
+            g_MusicPlayer.SelectName("ending_secret.ogg");
+            g_MusicPlayer.Play();
         });
     }
 
@@ -1071,11 +1191,35 @@ void cEigengrauBoss::__MoveOwn()
     {
         m_fRangeAnim.Update(m_fRangeSpeed);
 
+        if(fCurHealthPct > 0.0f)
+        {
+            const coreFloat fOldBeat = m_avVector[HEART_BEAT].x;
+            m_avVector[HEART_BEAT].x += 3.0f * TIME;
+
+            const coreUint32 iTickOld = F_TO_UI(fOldBeat);
+            const coreUint32 iTickNew = F_TO_UI(m_avVector[HEART_BEAT].x);
+
+            if(iTickOld != iTickNew)
+            {
+                const coreFloat fPower = 1.0f - STEP(0.0f, 0.05f, fCurHealthPct);
+
+                if((iTickNew % 4u) < 2u) m_avVector[HEART_BEAT].y = 0.5f * fPower;
+
+                if((iTickNew % 4u) == 0u && fPower) m_pHeartSound->PlayRelative(NULL, fPower, 1.0f, false, SOUND_EFFECT);
+            }
+
+            m_avVector[HEART_BEAT].y *= FrictionFactor(3.0f);
+        }
+        else
+        {
+            m_avVector[HEART_BEAT].y = 0.0f;
+        }
+
         // 
         const coreVector2 vDir = coreVector2::Direction(m_fRangeAnim * (-1.6f*PI));
 
         m_Range.SetPosition (this->GetPosition());
-        m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 0.03f * this->GetSize().x);
+        m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 0.03f * this->GetSize().x * (1.0f + m_avVector[HEART_BEAT].y));
         m_Range.SetDirection(coreVector3(vDir, 0.0f));
         m_Range.SetAlpha    (this->GetAlpha());
         m_Range.SetTexOffset(m_Range.GetTexOffset() - m_Range.GetDirection().xy() * (0.1f * m_fRangeSpeed * TIME));
@@ -1095,6 +1239,34 @@ void cEigengrauBoss::__MoveOwn()
         m_RangePlayer.Move();
     }
 
+    // 
+    if(g_pGame->IsMulti())
+    {
+        g_pGame->ForEachPlayerAll([&](const cPlayer* pPlayer, const coreUintW i)
+        {
+            const coreVector2 vRatio = Core::System->GetResolution().HighRatio();
+
+            const coreVector2 vFrom = g_pGame->CalculateCamShift().xy() * 0.5f;
+            const coreVector2 vTo   = pPlayer->GetPosition().xy();
+            const coreVector2 vDiff = vTo - vFrom;
+
+            const coreVector2 vClamp = coreVector2(CLAMP(vDiff.x, -vRatio.x * 46.0f + 9.0f, vRatio.x * 46.0f - 9.0f),
+                                                   CLAMP(vDiff.y, -vRatio.y * 46.0f + 9.0f, vRatio.y * 46.0f - 9.0f));
+
+            const coreVector2 vCorr = vDiff * (vDiff.IsAligned() ? 1.0f : (vClamp / vDiff).Min());
+            const coreVector2 vPos   = vFrom + vCorr;
+            const coreVector2 vDir   = vDiff.Normalized();
+            const coreFloat   fAlpha = (pPlayer->HasStatus(PLAYER_STATUS_DEAD) || pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_ALL)) ? 0.0f : STEPH3(42.0f, 46.0f, (vDiff / vRatio).Processed(ABS).Max());
+
+            m_aArrow[i].SetPosition (coreVector3(vPos, 0.0f));
+            m_aArrow[i].SetDirection(coreVector3(vDir, 0.0f));
+            m_aArrow[i].SetColor3   (pPlayer->GetEnergyColor());
+            m_aArrow[i].SetAlpha    (fAlpha);
+            m_aArrow[i].SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
+            m_aArrow[i].SetEnabled  (fAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aArrow[i].Move();
+        });
+    }
     const coreMatrix2 mRota    = coreMatrix3::Rotation(m_fRotaSpeed * TIME).m12();
     const coreMatrix2 mRotaRev = mRota.Transposed();
 
@@ -1102,13 +1274,13 @@ void cEigengrauBoss::__MoveOwn()
     {
         if(pBullet->GetDamage() == 6)
         {
-            pBullet->SetPosition (coreVector3(pBullet->GetPosition ().xy() * mRota, pBullet->GetPosition ().z));
-            pBullet->SetDirection(coreVector3(pBullet->GetDirection().xy() * mRota, pBullet->GetDirection().z));
+            pBullet->SetPosition(coreVector3(pBullet->GetPosition().xy() * mRota, pBullet->GetPosition().z));
+            pBullet->SetFlyDir3D(coreVector3(pBullet->GetFlyDir3D().xy() * mRota, pBullet->GetFlyDir3D().z));
         }
         else if(pBullet->GetDamage() == 7)
         {
-            pBullet->SetPosition (coreVector3(pBullet->GetPosition ().xy() * mRotaRev, pBullet->GetPosition ().z));
-            pBullet->SetDirection(coreVector3(pBullet->GetDirection().xy() * mRotaRev, pBullet->GetDirection().z));
+            pBullet->SetPosition(coreVector3(pBullet->GetPosition().xy() * mRotaRev, pBullet->GetPosition().z));
+            pBullet->SetFlyDir3D(coreVector3(pBullet->GetFlyDir3D().xy() * mRotaRev, pBullet->GetFlyDir3D().z));
         }
     });
 
@@ -1140,12 +1312,7 @@ cBullet* cEigengrauBoss::__AddBullet(const coreInt32 iDamage, const coreFloat fS
     constexpr coreVector2 vFakePos = coreVector2(0.0f,0.0f);
     constexpr coreVector2 vFakeDir = coreVector2(0.0f,1.0f);
 
-    cBullet* pBullet = g_pGame->GetBulletManagerEnemy()->AddBullet<cTiltBullet>(iDamage, fSpeed, this, vFakePos, vFakeDir)->ChangeSize(4.0f);
-
-    pBullet->SetPosition (vPos);
-    pBullet->SetDirection(vDir);
-
-    return pBullet;
+    return g_pGame->GetBulletManagerEnemy()->AddBullet<cTiltBullet>(iDamage, fSpeed * m_fAttackSpeed, this, vFakePos, vFakeDir)->SetTiltProperties(vPos, vDir)->ChangeSize(4.0f);
 }
 
 
@@ -1153,9 +1320,9 @@ cBullet* cEigengrauBoss::__AddBullet(const coreInt32 iDamage, const coreFloat fS
 // 
 void cEigengrauBoss::__AddBulletLine(const coreInt32 iDamage, const coreFloat fSpeed, const coreVector2 vLinePos, const coreVector2 vLineDir)
 {
-    for(coreUintW i = 0u; i < 35u; ++i)
+    for(coreUintW i = 0u; i < 45u; ++i)
     {
-        const coreVector2 vBase = vLinePos + vLineDir * ((I_TO_F(i) - 17.0f) * 7.2f);
+        const coreVector2 vBase = vLinePos + vLineDir * ((I_TO_F(i) - 22.0f) * 7.2f);
 
         const coreVector3 vPos = coreVector3(vBase, this->GetPosition().z);
         const coreVector3 vDir = coreVector3(0.0f,0.0f,1.0f);
@@ -1183,6 +1350,18 @@ void cEigengrauBoss::__AddBulletBurst()
             this->__AddBullet(5, 5.0f, vPos, vDir);
         }
     }
+}
+
+
+// ****************************************************************
+// 
+void cEigengrauBoss::__PhaseChange()
+{
+    // 
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->StartRolling(pPlayer->GetInput()->vMove);
+    });
 }
 
 

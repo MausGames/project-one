@@ -23,6 +23,7 @@ cMuscusMission::cMuscusMission()noexcept
 , m_PearlWave      (MUSCUS_PEARLS)
 , m_iPearlActive   (0u)
 , m_iPearlHidden   (0u)
+, m_iPearlPitch    (0u)
 , m_iDiamondIndex  (UINT8_MAX)
 , m_afStrikeTime   {}
 , m_apStrikePlayer {}
@@ -327,6 +328,23 @@ void cMuscusMission::EndDiamond(const coreBool bAnimated)
     // 
     m_Diamond.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     g_pGlow->UnbindObject(&m_Diamond);
+}
+
+
+// ****************************************************************
+// 
+coreFloat cMuscusMission::RetrievePearlPitch()
+{
+    const coreUint8 iValue = m_iPearlPitch;
+    if(++m_iPearlPitch >= 3u) m_iPearlPitch = 0u;
+
+    switch(iValue)
+    {
+    default: ASSERT(false)
+    case 0u: return 1.0f;
+    case 1u: return 1.1f;
+    case 2u: return 1.2f;
+    }
 }
 
 

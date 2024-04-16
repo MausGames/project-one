@@ -82,6 +82,7 @@ void cReplay::StartRecording()
     }
 
     // 
+    m_Header.iConfigRotation   = g_CurConfig.Graphics.iRotation;
     m_Header.iConfigGameSpeed  = g_CurConfig.Game.iGameSpeed;
     m_Header.iConfigUpdateFreq = g_CurConfig.Game.iUpdateFreq;   // TODO 1: should not be 0 
     m_Header.iConfigVersion    = 1u;   // TODO 1 
@@ -610,6 +611,7 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     }
 
     // 
+    pHeader->iConfigRotation   = CLAMP(pHeader->iConfigRotation,   0u,                     1u);
     pHeader->iConfigGameSpeed  = CLAMP(pHeader->iConfigGameSpeed,  50u,                    200u);
     pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
     pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO 1 

@@ -12,7 +12,7 @@ coreVector2     g_vGameResolution = coreVector2(0.0f,0.0f);
 coreFloat       g_fGameRate       = 0.0f;
 coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
 coreBool        g_bTiltMode       = false;
-coreBool        g_bShiftMode      = false;
+coreFloat       g_fShiftMode      = 0.0f;
 coreBool        g_bDemoVersion    = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
@@ -77,6 +77,8 @@ void CoreApp::Init()
     g_MusicPlayer.AddMusicFile("data/music/boss_08_intro.ogg");
     g_MusicPlayer.AddMusicFile("data/music/boss_08_loop.ogg");
     g_MusicPlayer.AddMusicFile("data/music/boss_99.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/ending_normal.ogg");
+    g_MusicPlayer.AddMusicFile("data/music/ending_secret.ogg");
     g_MusicPlayer.AddMusicFile("data/music/menu.ogg");
     g_MusicPlayer.AddMusicFile("data/music/mission_00_intro.ogg");
     g_MusicPlayer.AddMusicFile("data/music/mission_00_loop.ogg");
@@ -162,8 +164,16 @@ void CoreApp::Render()
 {
     Core::Debug->MeasureStart("Update Always");
     {
+        
+        const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
+        const coreVector3 vOldCamOri = Core::Graphics->GetCamOrientation();
+
+        Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);   // for tilt-mode
+
         // 
         g_pSpecialEffects->Update();
+
+        Core::Graphics->SetCamera(vOldCamPos, CAMERA_DIRECTION, vOldCamOri);
     }
     Core::Debug->MeasureEnd("Update Always");
 
@@ -240,6 +250,8 @@ void CoreApp::Render()
                         g_pGame->Render();
                     }
                     glDisable(GL_DEPTH_TEST);
+
+                    g_pPostProcessing->RenderBlack();
                 }
             }
 
@@ -717,7 +729,7 @@ static void DebugGame()
                 const coreBool bInvincible = pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE);
                 pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
 
-                pEnemy->TakeDamage(pEnemy->HasStatus(ENEMY_STATUS_BOSS) ? 200 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+                pEnemy->TakeDamage(pEnemy->HasStatus(ENEMY_STATUS_BOSS) ? 400 : 20, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL, true);
 
                 if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
@@ -729,7 +741,7 @@ static void DebugGame()
     {
         if(STATIC_ISVALID(g_pGame) && g_pGame->GetCurMission()->GetCurBoss())
         {
-            g_pGame->GetCurMission()->GetCurBoss()->TakeDamage(200, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+            g_pGame->GetCurMission()->GetCurBoss()->TakeDamage(400, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL, true);
         }
     }
 

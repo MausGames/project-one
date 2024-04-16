@@ -28,6 +28,13 @@
 #define CREDIT_ENTRIES_THANKS    (ARRAY_SIZE(g_apcCreditEntryThanks))      // 
 #define CREDIT_HEADERS           (6u)//(7u)                                      // 
 
+enum eCreditType : coreUint8
+{
+    CREDIT_TYPE_MENU   = 0u,   // 
+    CREDIT_TYPE_NORMAL = 1u,   // 
+    CREDIT_TYPE_SECRET = 2u    // 
+};
+
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2] =
 {
@@ -37,7 +44,7 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2]
     {"Lukas Meindl",     "Tester"},
     {"Martin Mauersics", "Game Designer, Programmer"},
     {"Stefan Karner",    "Tester"},
-    {"Tobe Mayr",        "Adviser, Tester"}
+    {"Tova Sarah Bele",  "Adviser, Tester"}
 };
 
 // 
@@ -142,10 +149,13 @@ private:
     cGuiLabel m_aOtherLibraries[CREDIT_ENTRIES_LIBRARIES];   // 
     cGuiLabel m_aOtherThanks   [CREDIT_ENTRIES_THANKS];      // 
 
+    cGuiLabel m_ThankYouText;                                // 
+
     coreFlow  m_fOffset;                                     // 
     coreFloat m_fMaxOffset;                                  // 
 
-    coreBool m_bFinished;                                    // 
+    eCreditType m_eType;                                     // 
+    coreBool    m_bFinished;                                 // 
 
 
 public:
@@ -158,10 +168,11 @@ public:
     void Move  ()final;
 
     // 
-    void Start();
+    void Start(const eCreditType eType);
 
     // 
-    inline const coreBool& GetFinished()const {return m_bFinished;}
+    inline const eCreditType& GetType    ()const {return m_eType;}
+    inline const coreBool&    GetFinished()const {return m_bFinished;}
 };
 
 

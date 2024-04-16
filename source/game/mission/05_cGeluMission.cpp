@@ -59,7 +59,6 @@ cGeluMission::cGeluMission()noexcept
             // set object properties
             pFang->SetSize             (coreVector3(1.0f,1.0f,1.0f) * 9.0f);
             pFang->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.05f);
-            pFang->SetColor3           (coreVector3(1.0f,1.0f,1.0f) * 0.25f);
             pFang->SetTexOffset        (coreVector2(1.0f,1.0f) * (I_TO_F(i) * (1.0f/7.0f)));
             pFang->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
@@ -265,6 +264,7 @@ void cGeluMission::EnableFang(const coreUintW iIndex)
 
     // 
     oFang.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+    oFang.SetColor3  (GELU_FANG_COLOR);
     oFang.SetEnabled (CORE_OBJECT_ENABLE_ALL);
 }
 
@@ -746,8 +746,8 @@ void cGeluMission::__MoveOwnAfter()
                     if(InBetween(vDiff, -pWay->GetCollisionRange().xy(), pWay->GetCollisionRange().xy()))
                         pBullet->Deactivate(true);
                 };
-                g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletWayCollFunc);
-                g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletWayCollFunc);
+                g_pGame->GetBulletManagerPlayer()->ForEachBullet                 (nBulletWayCollFunc);
+                g_pGame->GetBulletManagerEnemy ()->ForEachBulletTyped<cOrbBullet>(nBulletWayCollFunc);
             }
         }
     }

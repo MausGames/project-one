@@ -65,6 +65,8 @@ private:
     coreTimer m_Flicker;                       // 
     coreUint8 m_iShatter;                      // 
 
+    coreFlow m_fBlend;                         // 
+
     coreUint8 m_iDefault;                      // 
 
 
@@ -90,6 +92,9 @@ public:
     void PlayFlicker (const coreUint8 iShatter);
     void StopFlicker ();
     void ResetFlicker();
+
+    // 
+    inline void BlendOut() {ASSERT(!m_fBlend) m_fBlend = 1.0f;}
     
     inline coreBool IsFlickering()const {return m_Flicker.GetStatus();}
     

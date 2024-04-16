@@ -45,6 +45,7 @@
 
 #define INTERFACE_FRAGMENT_SPEED          (1.5f)           // 
 #define INTERFACE_FRAGMENT_DURATION       (5.0f)           // 
+#define INTERFACE_FRAGMENT_DURATION_EXT   (8.0f)           // 
 #define INTERFACE_FRAGMENT_SCALE          (0.4f)           // 
 #define INTERFACE_FRAGMENT_TYPE_SHOW      (0xFFu)          // 
 #define INTERFACE_FRAGMENT_TYPE_HIDE      (0xFEu)          // 
@@ -117,6 +118,7 @@ private:
     coreFloat  m_fBannerDuration;                   // 
     coreFloat  m_fBannerSpeed;                      // 
     coreUint8  m_iBannerType;                       // animation type (boss, mission, wave, score, alert)
+    coreBool   m_bBannerEigengrau;                  // 
 
     cGuiLabel m_aStoryText[2];                      // 
     coreFloat m_fStoryStart;                        // 
@@ -127,6 +129,7 @@ private:
     cGuiObject m_aFragmentTable[2];                 // 
     cGuiObject m_FragmentShadow;                    // 
     coreFloat  m_fFragmentStart;                    // 
+    coreFloat  m_fFragmentDuration;                 // 
     coreUint8  m_iFragmentNew;                      // 
     coreUint8  m_iFragmentState;                    // 
 
@@ -147,6 +150,10 @@ private:
     coreFlow m_fAlphaTurf;                          // 
     coreFlow m_fAlphaGoal;                          // 
     coreFlow m_fAlphaBadge;                         // 
+    coreFlow m_fAlphaFragment;                      // 
+
+    coreBool m_bFakeEnd;                            // 
+    coreBool m_bBossChange;                         // 
 
 
 public:
@@ -189,13 +196,16 @@ public:
     inline void PingImmune(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_VIEWS) m_aView[iIndex].fImmuneTime = 1.0f;}
 
     // 
-    inline void Reset() {m_fBannerStart = INTERFACE_INVALID_START; m_fStoryStart = INTERFACE_INVALID_START; m_fFragmentStart = INTERFACE_INVALID_START; m_fAlertStart = INTERFACE_INVALID_START;}
+    inline void Reset() {m_iBannerType = 0u; m_fBannerStart = INTERFACE_INVALID_START; m_fStoryStart = INTERFACE_INVALID_START; m_fFragmentStart = INTERFACE_INVALID_START; m_fAlertStart = INTERFACE_INVALID_START;}
 
     // set object properties
-    inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}
-    inline void SetAlphaAll (const coreFloat fAlpha)   {m_fAlphaAll  = fAlpha;}
-    inline void SetAlphaBoss(const coreFloat fAlpha)   {m_fAlphaBoss = fAlpha;}
-    inline void SetAlphaWave(const coreFloat fAlpha)   {m_fAlphaWave = fAlpha;}
+    inline void SetVisible      (const coreBool  bVisible)    {m_bVisible       = bVisible;}
+    inline void SetAlphaAll     (const coreFloat fAlpha)      {m_fAlphaAll      = fAlpha;}
+    inline void SetAlphaBoss    (const coreFloat fAlpha)      {m_fAlphaBoss     = fAlpha;}
+    inline void SetAlphaWave    (const coreFloat fAlpha)      {m_fAlphaWave     = fAlpha;}
+    inline void SetAlphaFragment(const coreFloat fAlpha)      {m_fAlphaFragment = fAlpha;}
+    inline void SetFakeEnd      (const coreBool  bFakeEnd)    {m_bFakeEnd       = bFakeEnd;}
+    inline void SetBossChange   (const coreBool  bBossChange) {m_bBossChange    = bBossChange;}
 
     // 
     inline cGuiLabel* GetDialogText(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_DIALOGS) return &m_aDialogText[iIndex];}

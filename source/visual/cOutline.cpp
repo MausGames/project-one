@@ -54,15 +54,16 @@ void cOutlineStyle::ApplyList(coreBatchList* pList)const
 cOutline::cOutline()noexcept
 {
     // 
-    m_aOutlineStyle[OUTLINE_STYLE_FULL]         .Construct("effect_outline_program",                    "effect_outline_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_DIRECT]       .Construct("effect_outline_direct_program",             "effect_outline_direct_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_FLAT_FULL]    .Construct("effect_outline_flat_program",               "effect_outline_flat_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_FLAT_DIRECT]  .Construct("effect_outline_flat_direct_program",        "effect_outline_flat_direct_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_BULLET_FULL]  .Construct("effect_outline_bullet_program",             "effect_outline_bullet_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_BULLET_DIRECT].Construct("effect_outline_bullet_direct_program",      "effect_outline_bullet_direct_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_LIGHT]        .Construct("effect_outline_light_program",              "effect_outline_light_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_LIGHT_THICK]  .Construct("effect_outline_light_thick_program",        "effect_outline_light_thick_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_LIGHT_BULLET] .Construct("effect_outline_light_bullet_thick_program", "effect_outline_light_bullet_thick_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_FULL]              .Construct("effect_outline_program",                    "effect_outline_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_DIRECT]            .Construct("effect_outline_direct_program",             "effect_outline_direct_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_FLAT_FULL]         .Construct("effect_outline_flat_program",               "effect_outline_flat_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_FLAT_DIRECT]       .Construct("effect_outline_flat_direct_program",        "effect_outline_flat_direct_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_FLAT_THICK]        .Construct("effect_outline_flat_thick_program",         "effect_outline_flat_thick_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_BULLET_FULL]       .Construct("effect_outline_bullet_program",             "effect_outline_bullet_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_BULLET_DIRECT]     .Construct("effect_outline_bullet_direct_program",      "effect_outline_bullet_direct_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_LIGHT]             .Construct("effect_outline_light_program",              "effect_outline_light_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_LIGHT_THICK]       .Construct("effect_outline_light_thick_program",        "effect_outline_light_thick_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_LIGHT_BULLET_THICK].Construct("effect_outline_light_bullet_thick_program", "effect_outline_light_bullet_thick_inst_program");
 }
 
 

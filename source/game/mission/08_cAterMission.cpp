@@ -15,6 +15,7 @@ cAterMission::cAterMission()noexcept
 : m_pInnerMission (NULL)
 , m_iNextID       (-1)
 , m_bTurfState    (false)
+, m_Secret        (false)
 {
     // 
     m_apBoss[0] = &m_ProjectOne;
@@ -76,8 +77,6 @@ void cAterMission::LoadInnerMission(const coreInt32 iID)
 void cAterMission::__RenderOwnBottom()
 {
     if(m_pInnerMission) m_pInnerMission->RenderBottom();
-
-    //DEPTH_PUSH
 
     glDisable(GL_DEPTH_TEST);
     {

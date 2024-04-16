@@ -15,7 +15,7 @@
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
 // TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (but needs separation between sub-ghost states, maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
-// TODO 3: temporarily changing to no-background (on mission start) unloads all resources, even though we were just on that background (caching old background ? tripple buffering ?)
+// TODO 2: vor dem tod von immortal enemies, vor allem bossen, kann es sein, dass spieler-geschosse (sichtbar) reflektiert werden und der entsprechende sound-gespielt wird
 
 
 // ****************************************************************
@@ -175,6 +175,7 @@ static constexpr sFragmentData g_aFragmentData[] =
 };
 
 #define FRAGMENT_POSITION(x) (g_aFragmentData[x].vOffset + g_aFragmentData[x].vSize * 0.5f - 0.5f)
+#define FRAGMENT_DIRECTION   (coreVector2(1.0f,1.0f).Normalized())
 
 STATIC_ASSERT(ARRAY_SIZE(g_aFragmentData) >= FRAGMENTS)
 STATIC_ASSERT(ARRAY_SIZE(g_aFragmentData) == ARRAY_SIZE(g_aMissionData))
@@ -242,7 +243,8 @@ private:
 
     coreUint8 m_iOutroType;                 // 
 
-    coreBool m_bVisibleCheck;               // 
+    coreBool  m_bVisibleCheck;              // 
+    coreUint8 m_iRepairMove;                // 
 
     sGameOptions m_Options;                 // 
     coreUint16   m_iVersion;                // 
@@ -298,7 +300,12 @@ public:
     void PopDepthLevel    (const coreUint8 iLevels);
 
     // 
-    inline void SetVisibleCheck(const coreBool bCheck) {m_bVisibleCheck = bCheck;}
+    coreVector3 CalculateCamShift()const;
+
+    // 
+    inline void SetVisibleCheck(const coreBool bCheck)                        {m_bVisibleCheck = bCheck;}
+    inline void SetRepairMove  (const coreUintW iIndex, const coreBool bMove) {ASSERT(iIndex < GAME_PLAYERS) SET_BIT(m_iRepairMove, iIndex, bMove)}
+    inline coreBool HasRepairMove(const coreUintW iIndex) {ASSERT(iIndex < GAME_PLAYERS) return HAS_BIT(m_iRepairMove, iIndex);}
 
     // 
     inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}

@@ -7,7 +7,6 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
-#include "file/cConfig.h"
 
 
 // ****************************************************************
@@ -25,6 +24,9 @@ cPostProcessing::cPostProcessing()noexcept
 
 , m_fFrameValue       (0.0f)
 , m_fFrameAnimation   (0.0f)
+, m_fReset            (0.0f)
+, m_fResetAngle       (0.0f)
+, m_afResetOffset     {}
 {
     // load post-processing shader-programs
     m_pProgramSimple      = Core::Manager::Resource->Get<coreProgram>("full_post_program");
@@ -60,12 +62,18 @@ cPostProcessing::cPostProcessing()noexcept
     m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
 
     // 
+    m_Black.DefineProgram("menu_color_program");
+    m_Black.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Black.SetColor4    (coreVector4(0.0f,0.0f,0.0f,0.0f));
+    m_Black.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     this->SetWallOpacity  (0.0f);
     this->SetSaturationAll(1.0f);
     this->SetValueAll     (1.0f);
     this->SetBorderAll    (POST_DEFAULT_BORDER_MIN);
 
-
+    
     // 
     m_Frame.DefineTexture(0u, "menu_background_black.png");
     m_Frame.DefineProgram("effect_frame_program");
@@ -99,7 +107,7 @@ void cPostProcessing::Render()
     this->__UpdateData();
 
     // 
-    const coreBool bDisableBlend = ((m_aWall[0].GetAlpha() >= 1.0f) && !m_fFrameValue);
+    const coreBool bDisableBlend = ((m_aWall[0].GetAlpha() >= 1.0f) && !m_Black.GetAlpha() && !m_fFrameValue);
 
     if(bDisableBlend) glDisable(GL_BLEND);
     {
@@ -120,7 +128,10 @@ void cPostProcessing::Render()
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
             m_aInterior[i].Render(this->GetProgram());
 
-        if(m_fFrameValue < 1.0f)
+        // 
+        m_Black.Render();
+
+        if(m_fFrameValue < 2.0f)
         {
             // render wallpapers
             for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
@@ -155,6 +166,16 @@ void cPostProcessing::Render()
 // move post-processing
 void cPostProcessing::Move()
 {
+    if(m_fReset)
+    {
+        m_fReset.UpdateMax(-0.6f, 0.0f);
+
+        const coreFloat fLerp = m_fReset ? (1.0f - BLENDS(m_fReset)) : 1.0f;
+
+        this->SetDirectionGame(coreVector2::Direction(LERP(m_fResetAngle, 0.0f, fLerp)));
+        for(coreUintW i = 0u; i < POST_WALLS; ++i) this->SetWallOffset(i, LERP(m_afResetOffset[i], 0.0f, fLerp));
+    }
+    
     // 
     if(m_bSplitScreen) m_fSplitScreenValue.UpdateMin( 3.0f, 1.0f);
                   else m_fSplitScreenValue.UpdateMax(-3.0f, 0.0f);
@@ -167,6 +188,9 @@ void cPostProcessing::Move()
 
     // update separator
     this->__UpdateSeparator();
+    
+    m_Black.SetSize(coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
+    m_Black.Move();
 
     if(m_bOffsetActive)
     {
@@ -178,15 +202,15 @@ void cPostProcessing::Move()
             m_bOffsetActive = false;
     }
 
-
+    
     if(m_fFrameValue > 1.0f)
     {
         if(!g_pMenu->IsPaused()) m_fFrameAnimation.Update(1.0f);
 
         coreVector2 vPos = coreVector2(0.0f,0.0f);
-        if(STATIC_ISVALID(g_pGame) && g_bShiftMode)
+        if(STATIC_ISVALID(g_pGame) && g_fShiftMode)
         {
-            vPos += g_pGame->GetPlayer(0u)->GetPosition().xy() * 0.3f;
+            vPos = g_pGame->CalculateCamShift().xy() * 0.3f;
         }
     
         // 
@@ -258,6 +282,23 @@ void cPostProcessing::Recompile()
     }
 
 #endif
+}
+
+
+// ****************************************************************
+// 
+void cPostProcessing::Reset()
+{
+    // 
+    this->SetSplitScreen  (false);
+    this->SetFrameValue   (0.0f);
+    this->SetSaturationAll(1.0f);
+    this->SetChroma       (0.0f);
+
+    // 
+    m_fReset      = 1.0f;
+    m_fResetAngle = m_vDirectionGame.Angle();
+    std::memcpy(m_afResetOffset, m_afOffset, sizeof(m_afOffset));
 }
 
 

@@ -19,6 +19,9 @@
 
 // ****************************************************************
 // environment definitions
+#include "file/cConfig.h"
+
+
 #define ENVIRONMENT_MIX_FADE    (0u)   // 
 #define ENVIRONMENT_MIX_WIPE    (1u)   // 
 #define ENVIRONMENT_MIX_CURTAIN (2u)   // 
@@ -38,6 +41,7 @@ class cEnvironment final : public coreResourceRelation
 private:
     cBackground* m_pBackground;                          // current background instance (should never be NULL)
     cBackground* m_pOldBackground;                       // previous background instance (may be NULL)
+    cBackground* m_pTempBackground;                      // 
     coreInt32    m_iLastID;                              // 
 
     coreFrameBuffer m_FrameBuffer;                       // environment frame buffer used for transition mixing
@@ -92,11 +96,11 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 
     // set target transformation properties
-    inline void SetTargetDirection   (const coreVector2 vDirection, const coreFloat fStrength) {m_avDirection[1] = vDirection; m_afStrength[0] = fStrength; ASSERT(vDirection.IsNormalized())}
+    inline void SetTargetDirection   (const coreVector2 vDirection, const coreFloat fStrength) {m_avDirection[1] = vDirection; m_afStrength[0] = fStrength; ASSERT(vDirection.IsNormalized()) if(!g_CurConfig.Graphics.iRotation) m_avDirection[1] = ENVIRONMENT_DEFAULT_DIRECTION;}
     inline void SetTargetSide        (const coreVector2 vSide,      const coreFloat fStrength) {m_avSide     [1] = vSide;      m_afStrength[1] = fStrength;}
     inline void SetTargetSpeed       (const coreFloat   fSpeed,     const coreFloat fStrength) {m_afSpeed    [1] = fSpeed;     m_afStrength[2] = fStrength;}
     inline void SetTargetHeight      (const coreFloat   fHeight,    const coreFloat fStrength) {m_afHeight   [1] = fHeight;    m_afStrength[3] = fStrength;}
-    inline void SetTargetDirectionNow(const coreVector2 vDirection)                            {this->SetTargetDirection(vDirection, 0.0f); m_avDirection[0] = vDirection;}
+    inline void SetTargetDirectionNow(const coreVector2 vDirection)                            {this->SetTargetDirection(vDirection, 0.0f); m_avDirection[0] = vDirection; if(!g_CurConfig.Graphics.iRotation) m_avDirection[0] = ENVIRONMENT_DEFAULT_DIRECTION;}
     inline void SetTargetSideNow     (const coreVector2 vSide)                                 {this->SetTargetSide     (vSide,      0.0f); m_avSide     [0] = vSide;}
     inline void SetTargetSpeedNow    (const coreFloat   fSpeed)                                {this->SetTargetSpeed    (fSpeed,     0.0f); m_afSpeed    [0] = fSpeed;}
     inline void SetTargetHeightNow   (const coreFloat   fHeight)                               {this->SetTargetHeight   (fHeight,    0.0f); m_afHeight   [0] = fHeight;}
@@ -121,6 +125,9 @@ public:
 private:
     // reset with the resource manager
     void __Reset(const coreResourceReset eInit)final;
+
+    // 
+    void __ClearTransition();
 };
 
 

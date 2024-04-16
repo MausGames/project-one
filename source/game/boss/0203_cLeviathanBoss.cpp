@@ -688,7 +688,7 @@ void cLeviathanBoss::__MoveOwn()
 
                     if(iPack == pMission->GetArrowDir(0u))
                     {
-                        if(pEnemy->TakeDamage(pEnemy->GetMaxHealth() / 4, ELEMENT_NEUTRAL, vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+                        if(pEnemy->TakeDamage(pEnemy->GetMaxHealth() / 2, ELEMENT_NEUTRAL, vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()), true))
                         {
                             m_aiCounter[ARROW_ACTIVE] += 1;
 

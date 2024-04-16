@@ -13,7 +13,6 @@
 // TODO 1: transfer to Core Engine
 // TODO 5: should low quality option also affect ship models, or vegetation density, or sprite density, or FB resolution ?
 // TODO 5: don't input-check inactive input-sets in multiplayer
-// TODO 1: default input should differ between keyboard and joystick, and between sets
 // TODO 1: controller input mapping should use gamepad-actions instead of button-IDs
 // TODO 1: controller input mapping should be tied to the GUID
 // TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
@@ -21,6 +20,13 @@
 // TODO 2: some options, like mirror-mode, should only take affect if it is allowed
 // TODO 3: last-used input type might get disconnected, without reset
 // TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized to 0, but gets set to the set with the mouse-button when navigating menu with mouse
+// TODO 3: HRTF from core-config (improves spatial acuity with headphones, makes only sense with 3D sound)
+// TODO 3: vielleicht bei toggle fire-mode single-feuer solange bei aktivierung gedrückt gehalten wird
+// TODO 3: weitere optionen: particle effects (%)
+// TODO 1: test if disable rotation option works everywhere: tiger, zeroth, messier, p1 (blue and magenta), rutilus-rotation
+// TODO 3: background speed option % 50-200 (also into replay)
+// TODO 3: background rotation und speed in GAME menu verschieben, BackRotation, BackSpeed      GameRotation und HudRotation -> GameDirection HudDirection ?
+// TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
 
 
 // ****************************************************************
@@ -36,11 +42,14 @@
 #define CONFIG_GRAPHICS_FLASH        "Graphics", "Flash",                                (1)
 #define CONFIG_GRAPHICS_HIT_STOP     "Graphics", "HitStop",                              (1)
 #define CONFIG_GRAPHICS_CHROMA       "Graphics", "Chroma",                               (1)
+#define CONFIG_GRAPHICS_ROTATION     "Graphics", "Rotation",                             (1)
 
 #define CONFIG_AUDIO_EFFECT_VOLUME   "Audio",    "EffectVolume",                         (1.0f)
 #define CONFIG_AUDIO_AMBIENT_VOLUME  "Audio",    "AmbientVolume",                        (1.0f)
+#define CONFIG_AUDIO_MENU_VOLUME     "Audio",    "MenuVolume",                           (1.0f)
+#define CONFIG_AUDIO_QUALITY         "Audio",    "Quality",                              (1)
+#define CONFIG_AUDIO_MODE            "Audio",    "Mode",                                 (2)
 #define CONFIG_AUDIO_3D_SOUND        "Audio",    "3DSound",                              (1)
-// TODO 1: HRTF from core-config  (might improve headphone sound quality)
 
 #define CONFIG_INPUT_TYPE(p)         "Input",    PRINT("P%zu_Type",        (p)),         (p + INPUT_SETS_KEYBOARD)
 #define CONFIG_INPUT_RUMBLE(p)       "Input",    PRINT("P%zu_Rumble",      (p)),         (0)
@@ -117,6 +126,7 @@ struct sConfig final
         coreUint8 iFlash;        // 
         coreUint8 iHitStop;      // 
         coreUint8 iChroma;       // 
+        coreUint8 iRotation;     // 
     }
     Graphics;
 
@@ -124,6 +134,8 @@ struct sConfig final
     {
         coreFloat fEffectVolume;    // effect sound volume
         coreFloat fAmbientVolume;   // ambient sound volume
+        coreFloat fMenuVolume;      // menu sound volume
+        coreUint8 iQuality;         // 
         coreUint8 i3DSound;         // 
     }
     Audio;

@@ -2963,13 +2963,13 @@ void cMuscusMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        UNUSED STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, GEMINGA_ENEMIES_TELEPORT)
+        UNUSED STAGE_ADD_SQUAD(pSquad1, cCinderEnemy, GEMINGA_ENEMIES_TELEPORT)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 0.0f);
                 pEnemy->Configure(4, 0u, COLOR_SHIP_PURPLE);
-                pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
+                pEnemy->AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
             });
         });
 
@@ -2983,7 +2983,7 @@ void cMuscusMission::__SetupOwn()
             });
         });
 
-        STAGE_BOSS(m_Geminga, {60.0f, 120.0f, 180.0, 240.0f})
+        STAGE_BOSS(m_Geminga, {190.0f, 285.0f, 380.0, 475.0f})
     });
 
     // ################################################################

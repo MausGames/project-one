@@ -372,21 +372,18 @@ cGameMenu::cGameMenu()noexcept
     m_OptionType.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition());
     m_OptionType.SetSize     (coreVector2( 0.47f,0.03f));
     m_OptionType.SetAlignment(coreVector2(-1.00f,0.00f));
-    m_OptionType.SetEndless  (true);
     m_OptionType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_OptionMode.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_OptionMode.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition());
     m_OptionMode.SetSize     (m_OptionType.GetSize());
     m_OptionMode.SetAlignment(m_OptionType.GetAlignment());
-    m_OptionMode.SetEndless  (true);
     m_OptionMode.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_OptionDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_OptionDifficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[2].GetPosition());
     m_OptionDifficulty.SetSize     (m_OptionType.GetSize());
     m_OptionDifficulty.SetAlignment(m_OptionType.GetAlignment());
-    m_OptionDifficulty.SetEndless  (true);
     m_OptionDifficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_ArmoryHeader.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -529,21 +526,18 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryType.SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[0].GetPosition());
     m_ArmoryType.SetSize     (coreVector2( 0.47f,0.03f));
     m_ArmoryType.SetAlignment(coreVector2(-1.00f,0.00f));
-    m_ArmoryType.SetEndless  (true);
     m_ArmoryType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_ArmoryMode.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_ArmoryMode.SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[1].GetPosition());
     m_ArmoryMode.SetSize     (m_ArmoryType.GetSize());
     m_ArmoryMode.SetAlignment(m_ArmoryType.GetAlignment());
-    m_ArmoryMode.SetEndless  (true);
     m_ArmoryMode.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_ArmoryDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_ArmoryDifficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[2].GetPosition());
     m_ArmoryDifficulty.SetSize     (m_ArmoryType.GetSize());
     m_ArmoryDifficulty.SetAlignment(m_ArmoryType.GetAlignment());
-    m_ArmoryDifficulty.SetEndless  (true);
     m_ArmoryDifficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_ArmorySpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
@@ -606,14 +600,12 @@ cGameMenu::cGameMenu()noexcept
     m_DemoType.SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[0].GetPosition());
     m_DemoType.SetSize     (coreVector2( 0.47f,0.03f));
     m_DemoType.SetAlignment(coreVector2(-1.00f,0.00f));
-    m_DemoType.SetEndless  (true);
     m_DemoType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_DemoDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_DemoDifficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[1].GetPosition());
     m_DemoDifficulty.SetSize     (m_DemoType.GetSize());
     m_DemoDifficulty.SetAlignment(m_DemoType.GetAlignment());
-    m_DemoDifficulty.SetEndless  (true);
     m_DemoDifficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_DemoSpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
@@ -626,7 +618,6 @@ cGameMenu::cGameMenu()noexcept
     m_DemoStage.SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[3].GetPosition());
     m_DemoStage.SetSize     (m_DemoType.GetSize());
     m_DemoStage.SetAlignment(m_DemoType.GetAlignment());
-    m_DemoStage.SetEndless  (true);
     m_DemoStage.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_DemoStageIcon.DefineTexture(0u, "menu_helper.png");

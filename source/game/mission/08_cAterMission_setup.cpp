@@ -17,18 +17,6 @@ void cAterMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
-        {
-            if(pPlayer->IsEnemyLook()) pPlayer->TurnIntoPlayer();
-        });
-
-        STAGE_FINISH_NOW
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS})
-    {
         if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
         {
             STAGE_FINISH_NOW
@@ -108,7 +96,7 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // end
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_MISSION, 5u})
     {
         if(STAGE_BEGINNING)
         {
@@ -119,17 +107,33 @@ void cAterMission::__SetupOwn()
             iBonus2 = MAX(iBonus2, 1u);
         }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
+        if(m_Secret)
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
+        }
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_MISSION, 5u})
     {
-        if(STAGE_BEGINNING)
+        if(m_Secret)
         {
-            g_pGame->StartOutro(GAME_OUTRO_ENDING_NORMAL);
-            g_pGame->FadeMusic(0.16f);
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->StartOutro(GAME_OUTRO_ENDING_NORMAL);
+
+                g_MusicPlayer.SelectName("ending_normal.ogg");
+                g_MusicPlayer.Play();
+            }
         }
     });
 
@@ -137,17 +141,40 @@ void cAterMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
-        STAGE_BOSS(m_Eigengrau, {60.0f, 120.0f, 180.0, 240.0f})
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->AddStatus(PLAYER_STATUS_INVINCIBLE);
+        });
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    {
+        STAGE_BOSS(m_Eigengrau, {141.0f, 210.0f, 280.0f, 350.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    {
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE);
+        });
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION, 6u})
     {
         if(STAGE_BEGINNING)
         {
             g_pGame->StartOutro(GAME_OUTRO_ENDING_SECRET);
-            g_pGame->FadeMusic(0.16f);
         }
     });
 

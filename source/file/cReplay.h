@@ -89,6 +89,7 @@ public:
         coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                   // 
         coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                  // 
 
+        coreUint8  iConfigRotation;                                                          // 
         coreUint16 iConfigGameSpeed;                                                         // 
         coreUint16 iConfigUpdateFreq;                                                        // 
         coreUint16 iConfigVersion;                                                           // 

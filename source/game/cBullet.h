@@ -29,7 +29,7 @@
 // ****************************************************************
 // bullet definitions
 #define BULLET_SET_INIT         (16u)     // initial size when creating a new bullet set
-#define BULLET_SET_COUNT        (19u)     // 
+#define BULLET_SET_COUNT        (20u)     // 
 #define BULLET_SPEED_FACTOR     (30.0f)   // 
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
 #define BULLET_COLLISION_FACTOR (0.65f)   // (for enemy bullets) 
@@ -237,9 +237,6 @@ class cRayBullet final : public cBullet
 {
 private:
     coreFloat m_fScale;   // 
-    coreFloat m_fTilt;    // 
-    
-    coreVector2 m_vOldFlyDir;
 
 
 public:
@@ -249,11 +246,10 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f; m_fTilt = 0.0f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
 
     // 
     inline cRayBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
-    inline cRayBullet* ChangeTilt (const coreFloat fTilt)  {m_fTilt  = fTilt;  return this;}
 
     // change default color
     inline cRayBullet* MakeWhite  () {this->_MakeWhite  (0.8f); return this;}
@@ -406,6 +402,47 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
+};
+
+
+// ****************************************************************
+// final bullet class
+class cFinalBullet final : public cBullet
+{
+private:
+    coreFloat m_fScale;        // 
+    coreVector3 m_vFlyDir3D;   // 
+
+
+public:
+    cFinalBullet()noexcept;
+
+    ENABLE_COPY(cFinalBullet)
+    ASSIGN_ID(19, "Final")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
+
+    // 
+    inline cFinalBullet* SetTiltProperties(const coreVector3 vPosition, const coreVector3 vDirection) {this->SetPosition(vPosition); m_vFlyDir3D = vDirection; return this;}
+
+    // 
+    inline cFinalBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
+
+    // change default color
+    inline cFinalBullet* MakeWhite() {this->_MakeWhite(0.8f); return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
@@ -908,6 +945,10 @@ private:
 // tilt bullet class
 class cTiltBullet final : public cBullet
 {
+private:
+    coreVector3 m_vFlyDir3D;   // 
+
+
 public:
     cTiltBullet()noexcept;
 
@@ -916,6 +957,15 @@ public:
 
     // reset base properties
     inline void ResetProperties() {this->MakeWhite(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+
+    // 
+    inline cTiltBullet* SetTiltProperties(const coreVector3 vPosition, const coreVector3 vDirection) {this->SetPosition(vPosition); m_vFlyDir3D = vDirection; return this;}
+
+    // 
+    inline void SetFlyDir3D(const coreVector3 vFlyDir3D) {m_vFlyDir3D = vFlyDir3D;}
+
+    // 
+    inline const coreVector3& GetFlyDir3D()const {return m_vFlyDir3D;}
 
     // change default color
     inline cTiltBullet* MakeWhite  () {this->_MakeWhite  (0.1f); return this;}
@@ -930,7 +980,7 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_LIGHT_BULLET;}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_LIGHT_BULLET_THICK;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 

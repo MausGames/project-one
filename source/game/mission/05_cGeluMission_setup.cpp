@@ -275,7 +275,7 @@ void cGeluMission::__SetupOwn()
                      if(i < 72u) avForce[j] += vForceDir;
                 else if(i < 80u) avForce[j] += vForceDir.x * coreVector2::Direction(I_TO_F(j - 72u) * (0.25f*PI));
 
-                pSquad1->GetEnemy(j)->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
+                pSquad1->GetEnemy(j)->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()), false);
             }
 
             pBullet->Deactivate(true);
@@ -661,6 +661,12 @@ void cGeluMission::__SetupOwn()
             iOrderWall = aiBoxOrder[iOrderState];
         };
 
+        const auto nShakeFunc = []()
+        {
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+        };
+
         if(pSquad1->IsFinished())
         {
                  if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  6u)
@@ -746,7 +752,7 @@ void cGeluMission::__SetupOwn()
                 afOffTarget[0] = LERPBR(0.0f, fBase * 2.0f, CLAMP(m_fStageSubTime / 1.5f, 0.0f, 1.0f));
 
                 if(STAGE_SUBTIME_POINT(0.0f)) nFlashFunc(BIT(0u));
-                if(STAGE_SUBTIME_POINT(1.5f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                if(STAGE_SUBTIME_POINT(1.5f)) nShakeFunc();
             }
             else if(m_iStageSub == 3u)
             {
@@ -754,7 +760,7 @@ void cGeluMission::__SetupOwn()
                 afOffTarget[1] = LERPBR(0.0f,         fBase * 2.0f, CLAMP((m_fStageSubTime - 1.0f) / 1.5f, 0.0f, 1.0f));
 
                 if(STAGE_SUBTIME_POINT(1.0f)) nFlashFunc(BIT(1u));
-                if(STAGE_SUBTIME_POINT(1.0f) || STAGE_SUBTIME_POINT(2.5f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                if(STAGE_SUBTIME_POINT(1.0f) || STAGE_SUBTIME_POINT(2.5f)) nShakeFunc();
             }
             else if(m_iStageSub == 4u)
             {
@@ -763,7 +769,7 @@ void cGeluMission::__SetupOwn()
                 afOffTarget[3] = afOffTarget[2];
 
                 if(STAGE_SUBTIME_POINT(1.0f)) nFlashFunc(BIT(2u) + BIT(3u));
-                if(STAGE_SUBTIME_POINT(1.0f) || STAGE_SUBTIME_POINT(2.5f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                if(STAGE_SUBTIME_POINT(1.0f) || STAGE_SUBTIME_POINT(2.5f)) nShakeFunc();
             }
             else
             {
@@ -778,7 +784,7 @@ void cGeluMission::__SetupOwn()
                 if(m_iStageSub == 10u)
                 {
                     if(STAGE_SUBTIME_POINT(1.5f)) nFlashFunc(BIT(0u) + BIT(1u));
-                    if(STAGE_SUBTIME_POINT(3.0f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    if(STAGE_SUBTIME_POINT(3.0f)) nShakeFunc();
 
                     if(g_pGame->IsTask())
                     {
@@ -833,7 +839,7 @@ void cGeluMission::__SetupOwn()
                         afOffTarget[2] = afOffTarget[0];
                         afOffTarget[3] = afOffTarget[0];
 
-                        if(STAGE_SUBTIME_POINT(13.0f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                        if(STAGE_SUBTIME_POINT(13.0f)) nShakeFunc();
                     }
                 }
             }
@@ -919,7 +925,7 @@ void cGeluMission::__SetupOwn()
                                 if(iWall == i) pBullet->Deactivate(true);
                             });
 
-                            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                            nShakeFunc();
 
                             REMOVE_BIT(iActive, i)
                             if(!iActive)
@@ -989,7 +995,7 @@ void cGeluMission::__SetupOwn()
                     iWallBullets += 1u;
                 }
 
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
+                nShakeFunc();
             }
 
             if(iWallBullets == iTotalBullets)
@@ -1208,8 +1214,7 @@ void cGeluMission::__SetupOwn()
     {
         g_pGame->KillHelpers();
 
-        for(coreUintW i = 0u; i < POST_WALLS; ++i)
-            g_pPostProcessing->SetWallOffset(i, 0.0f);
+        g_pPostProcessing->Reset();
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -1668,6 +1673,7 @@ void cGeluMission::__SetupOwn()
                     iStompInvertNext = (iStompCount % 5u) == 0u;
 
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    //g_pSpecialEffects->PlaySound(iStompTarget->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
                 }
 
                 if(fStompTime >= 0.5f)
@@ -1738,7 +1744,7 @@ void cGeluMission::__SetupOwn()
             }
             else
             {
-                oFang.SetColor3((m_iStageSub == 19u) ? (COLOR_SHIP_YELLOW * 0.3f) : (coreVector3(1.0f,1.0f,1.0f) * 0.25f));
+                oFang.SetColor3((m_iStageSub == 19u) ? (COLOR_SHIP_YELLOW * 0.3f) : GELU_FANG_COLOR);
             }
 
             if((m_iStageSub >= 10u) && (m_iStageSub < 17u))
@@ -1751,7 +1757,7 @@ void cGeluMission::__SetupOwn()
 
                 if((iDarkState < ARRAY_SIZE(aiDarkOrder)) && (i == aiCorner[aiDarkOrder[iDarkState]]))
                 {
-                    oFang.SetColor3(oFang.GetColor3() * 0.5f);
+                    oFang.SetColor3(GELU_FANG_COLOR * 0.5f);
 
                     if(HAS_BIT(m_iTouchState, i))
                     {
@@ -2239,13 +2245,10 @@ void cGeluMission::__SetupOwn()
 
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
 
-                if(!pPlayer->HasStatus(PLAYER_STATUS_DEAD))
-                {
-                    const coreVector3 vPos = m_aOrbRaw[aiTarget[i]].GetPosition();
+                const coreVector3 vPos = m_aOrbRaw[aiTarget[i]].GetPosition();
 
-                    g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
-                    g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
-                }
+                g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
+                g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
             });
         }
         else
@@ -2267,13 +2270,15 @@ void cGeluMission::__SetupOwn()
                 }
             };
 
-            STAGE_FOREACH_PLAYER(pPlayer, i)
+            const sGameInput oEmptyInput = {};
+
+            STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
                 if(!pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) return;
 
                 const coreUint8   x      = (aiTarget[i] % 4u);
                 const coreUint8   y      = (aiTarget[i] / 4u);
-                const sGameInput* pInput = pPlayer->GetInput();
+                const sGameInput* pInput = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? &oEmptyInput : pPlayer->GetInput();
 
                 const coreVector2 vDiff1 = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();
 
@@ -3162,12 +3167,7 @@ void cGeluMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        if(STAGE_BEGINNING)
-        {
-            g_pEnvironment->SetTargetSpeedNow(0.0f);
-        }
-
-        STAGE_BOSS(m_Chol, {60.0f, 120.0f, 180.0, 240.0f})
+        STAGE_BOSS(m_Chol, {155.0f, 230.0f, 310.0, 385.0f})
     });
 
     // ################################################################

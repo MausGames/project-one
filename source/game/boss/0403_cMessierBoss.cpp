@@ -22,23 +22,18 @@
 // platten sollte spieler nur so wegdrehen, dass er mit 1 aktion wieder richtung boss schauen kann (außer wenn spieler neben boss fliegt, aber das is speziell)
 // time bubble hides stopping background movement
 // TODO 1: hard mode: in intro fliegt ein meteorit auf den bildschirm und crackt ihn
-// TODO 1: MAIN: medal goal
 // TODO 1: ACHIEVEMENT: name (), description (), destroy one big meteor / ###
+// TODO 1: MAIN: juiciness (move, rota, muzzle, effects)
 
 // TODO 1: lebenspunkte bei time-phase begrenzen (geben keine punkte, sollte somit als soft-clamp in takedamage eingebaut werden), aber heal-status mit factor<=0.0f erst umschlagen, und auflösen mit der welle (effekt muss es anzeigen)
 // TODO 1: art der rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
 
-    // TODO 1: spieler sollte bei start von plate-phase weggestoßen werden (oder ähnliches, damit er nicht den ersten bullet-angriff in die fresse bekommt, spieler is zu dem zeitpunkt nah dran)
-    // TODO 1: (vielleicht) in platten phase eine zweite sub-phase mit wave-bullets einbauen (vielleicht auch rotierenden platten, am ende kommt eine ausgleich-platte) (würd eigentlich gut kommen mit den anderen "bullet-sub-phasen" der anderen phasen)
-    // TODO 1: arrow-platten mechanik soll angriffe vom boss ablenken, vielleicht nicht durchgezogene linien
-    
-    // TODO 1: finale phase sollt kleine meteoriten verwenden, die auch auf boss zurasen und explodieren um sie zu erneuern
-
-// TODO 1: blaue geschosse hacken bei nem single-shot, weil der health-abhängig wert zu schnel lgeändert wird
-// TODO 1: uhr-werk effekt verbessern, allgemeine optik, fade-out am ende
+// TODO 1: blaue geschosse hacken bei nem single-shot, weil der health-abhängig wert zu schnell geändert wird
+// TODO 1: uhr-werk effekt verbessern: allgemeine optik (mittel-teil?, boss-glow?), fade-out am ende (mehr bewegung)
 // TODO 1: improve bullet-directions for time-slowdown phase (sometimes they cluster, maybe first identify the reason/origin)
 // TODO 1: eine cyan-bullet welle die nah beim boss war wurde normal weggeschleudert statt rotiert
-// TODO 1: cover sollte sich beim schwarzen loch drehen ?
+// TODO 1: cover sollte sich beim schwarzen loch drehen ? ja, BLENDBR
+// TODO 1: greatly reduce rotation when related option is disabled
 
 
 // ****************************************************************
@@ -80,7 +75,7 @@ cMessierBoss::cMessierBoss()noexcept
     this->SetOrientation(coreVector3(1.0f,1.0f,0.0f).Normalized());
 
     // configure the boss
-    this->Configure(6300, 0u, COLOR_SHIP_MAGENTA);
+    this->Configure(6400, 0u, COLOR_SHIP_MAGENTA);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_BOTTOM);
 
     // 
@@ -200,7 +195,7 @@ void cMessierBoss::__KillOwn(const coreBool bAnimated)
     });
 
     // 
-    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));
+    g_pPostProcessing->Reset();
 
     // 
     g_pGame->GetBulletManagerEnemy()->ResetOrder();
@@ -453,7 +448,7 @@ void cMessierBoss::__MoveOwn()
             m_avVector[METEOR_MOVE].zw(m_avVector[METEOR_MOVE].xy());
         });
 
-        if(this->GetCurHealth() < 5700)
+        if(this->GetCurHealth() < 5800)
         {
             PHASE_CHANGE_INC
         }
@@ -476,7 +471,7 @@ void cMessierBoss::__MoveOwn()
             m_avVector[METEOR_MOVE].zw(m_avVector[METEOR_MOVE].xy());
         });
 
-        if(this->GetCurHealth() < 5100)
+        if(this->GetCurHealth() < 5200)
         {
             PHASE_CHANGE_INC
 
@@ -518,7 +513,7 @@ void cMessierBoss::__MoveOwn()
             m_avVector[METEOR_MOVE].zw(LERP(coreVector2(-1.0f, m_avVector[METEOR_DATA].x), coreVector2(-0.2f, 1.0f), fTime));
         });
 
-        if(this->GetCurHealth() < 4400)
+        if(this->GetCurHealth() < 4500)
         {
             PHASE_CHANGE_INC
 
@@ -544,24 +539,12 @@ void cMessierBoss::__MoveOwn()
         {
             pMission->EnablePlate(0u, 0.0f, 0.0f, -0.25f, -0.25f);
             pMission->EnablePlate(1u, 0.0f, 0.0f, -0.25f, -0.25f);
-            //pMission->EnablePlate(3u, 0.0f, 0.0f, -0.25f, -0.25f);
 
             pMission->SetPlateRotated(0u, true);
             pMission->SetPlateRotated(1u, true);
-            //pMission->SetPlateRotated(3u, false);
 
             pMission->SetPlateDirection(0u, coreVector2( 1.0f,0.0f));
             pMission->SetPlateDirection(1u, coreVector2(-1.0f,0.0f));
-            //pMission->SetPlateDirection(3u, coreVector2(-1.0f,0.0f));
-
-            for(coreUintW i = 0u; i < MESSIER_ENEMIES_SMALL; ++i)
-            {
-           //     pSquad1->GetEnemy(i)->Resurrect();
-            }
-
-            m_avVector[METEOR_DATA].y = 0.0f;
-
-            g_pSpecialEffects->MacroExplosionColorSmall(this->GetPosition(), COLOR_ENERGY_MAGENTA);
         }
 
         if(PHASE_MAINTIME_POINT(5.0f))
@@ -569,28 +552,20 @@ void cMessierBoss::__MoveOwn()
             this->_ResurrectHelper(ELEMENT_YELLOW, false);
         }
 
-        PHASE_CONTROL_TICKER(1u, 0u, g_pGame->IsEasy() ? 1.0f : 1.5f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(1u, 0u, g_pGame->IsEasy() ? 0.8f : 1.3f, LERP_LINEAR)
         {
-            if(iTick == 0u)
-            {
-                g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-                {
-                    const coreVector2 vDiff = pPlayer->GetOldPos() - this->GetPosition().xy();
-                    pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
-                });
-                return;
-            }
-            
-            
             const coreVector2 vPos  = this->GetPosition().xy();
             const coreFloat   fBase = this->AimAtPlayerDual((iTick / 2u) % 2u).Angle();
 
-            for(coreUintW j = 7u; j--; )
+            for(coreUintW j = 9u; j--; )
             {
-                const coreVector2 vDir   = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 3.0f) * (g_pGame->IsEasy() ? 24.0f : 12.0f)) + fBase);
-                const coreFloat   fSpeed = 1.4f - ABS(I_TO_F(j - 3u)) * 0.1f;
+                if((iTick < 2u) && (j >= 3u + iTick) && (j < 6u - iTick)) continue;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed, this, vPos, vDir)->ChangeSize(1.7f);
+                const coreVector2 vDir   = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 4.0f) * (g_pGame->IsEasy() ? 22.0f : 13.0f)) + fBase);
+                const coreFloat   fSpeed = 1.4f - ABS(I_TO_F(j - 4u)) * 0.1f;
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed,        this, vPos, vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed - 0.1f, this, vPos, vDir)->ChangeSize(1.7f);
             }
         });
 
@@ -857,7 +832,10 @@ void cMessierBoss::__MoveOwn()
 
             if(iCurHealth <= 1000)
             {
-                this->_ResurrectHelper(ELEMENT_MAGENTA, true);
+                if(this->_ResurrectHelper(ELEMENT_MAGENTA, true))
+                {
+                    g_pGame->GetHelper(ELEMENT_MAGENTA)->SetPosition(coreVector3(-1.0f,1.0f,0.0f) * FOREGROUND_AREA3);
+                }
             }
         }
     }
@@ -1011,29 +989,23 @@ void cMessierBoss::__MoveOwn()
 
     if(m_iPhase >= 40u)
     {
-        m_avVector[PLATE_DATA].x += 0.5f * TIME    * (2.0f - STEP(3500.0f, 4400.0f, I_TO_F(this->GetCurHealth())));
+        m_avVector[PLATE_DATA].x += TIME * LERP(2.0f, 0.5f, STEP(3500.0f, 4500.0f, I_TO_F(this->GetCurHealth())));
 
         constexpr coreFloat fOffset = 0.625f * 1.5f;
 
-        const coreFloat fHeight1 = m_avVector[PLATE_DATA].x * -0.6f + fOffset;
-        const coreFloat fHeight2 = m_avVector[PLATE_DATA].x * -0.3f + fOffset;
-        const coreFloat fHeight3 = m_avVector[PLATE_DATA].x * -0.3f + fOffset * 2.0f;
+        const coreFloat fHeight1 = m_avVector[PLATE_DATA].x * -0.3f + fOffset;
+        const coreFloat fHeight2 = m_avVector[PLATE_DATA].x * -0.3f + fOffset * 2.0f;
 
         const coreFloat fReal1 = (fHeight1 > 0.0f) ? fHeight1 : FmodRange(fHeight1, -fOffset, fOffset);
         const coreFloat fReal2 = (fHeight2 > 0.0f) ? fHeight2 : FmodRange(fHeight2, -fOffset, fOffset);
-        const coreFloat fReal3 = (fHeight3 > 0.0f) ? fHeight3 : FmodRange(fHeight3, -fOffset, fOffset);
 
-        //pMission->SetPlateOffsetNow(0u, -fReal1);
-        pMission->SetPlateOffsetNow(1u, fReal3);
-        //pMission->SetPlateOffsetNow(3u, fReal3);
         pMission->SetPlateOffsetNow(0u, -fReal2);
+        pMission->SetPlateOffsetNow(1u,  fReal1);
 
         if(m_iPhase >= 41u)
         {
-            //if(!coreMath::IsNear(fReal1, 0.0f, 0.625f)) pMission->DisablePlate(0u, false);
-            if(!coreMath::IsNear(fReal3, 0.0f, 0.625f)) pMission->DisablePlate(1u, false);
-            //if(!coreMath::IsNear(fReal3, 0.0f, 0.625f)) pMission->DisablePlate(3u, false);
             if(!coreMath::IsNear(fReal2, 0.0f, 0.625f)) pMission->DisablePlate(0u, false);
+            if(!coreMath::IsNear(fReal1, 0.0f, 0.625f)) pMission->DisablePlate(1u, false);
         }
     }
 
@@ -1363,8 +1335,6 @@ void cMessierBoss::__MoveOwn()
     cHelper* pMagentaHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
     if(!pMagentaHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        pMagentaHelper->SetPosition(coreVector3(-1.0f,1.0f,0.0f) * FOREGROUND_AREA3);
-
         if(pMagentaHelper->GetLifeTime() >= 12.0f)
         {
             this->_KillHelper(ELEMENT_MAGENTA, true);

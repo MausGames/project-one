@@ -19,46 +19,23 @@
 // in stand-rotierender einzelteil-phase, alle 4 teile sollten nicht gleichzeitig in eine richtung feuern, weil man sonst nicht ausweichen kann
 // nur eine wand sollte sich auf den spieler zubewegen, zu viele seiten sind zu kompliziert (vor allem mit zusätzlichen geschossen) (is schon heavy in normaler wave), außerdem könnte einschlag nur in mitte sein weil teile sonst langsam verdeckt werden, und einzelteile würden sich beim abschuss komisch überlagern
 // einzelteil-phase sollt kohärente muster haben, damit die gefahr einfach einzuschätzen ist, vor allem weil der spieler die bewegung kontrolliert (er soll sich nicht so fühlen als hätte er keine kontrolle)
+// final big explosion is used to highlight that the boss is really finished now
 // TODO 1: hard mode: hitze und wasser
-// TODO 1: rotation von körper oder flügel signalisieren bestimmten angriff -> andere bosse auch
-// TODO 1: ram von boss und wings braucht flammen-wellen-effekt
-// TODO 1: outline vom body is dünner als von flügeln (wegen shape)
-// TODO 1: tod: gegner wird von seinen eigenen flügeln aufgespießt, tak-tak-tak-tak-boom
-// TODO 1: tod: fliegt in lava, kommt wieder raus
-// TODO 1: boss glüht nach dem einschlag in boden (und wand ?)
-// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
-// TODO 1: ACHIEVEMENT: name (), description (), 
-// TODO 1: mehrere einzelne einschläge schon während der background sich noch bewegt, dann bleibt er stehen und alle 5 schlagen nochmal ein
-// TODO 1: banner-anzeige bei finalem tod hat anderen text "Real Time Bonus" (Real farbig ? und separat rausstehend)
-// TODO 1: wellen beim sturmangriff sind zu ähnlich wie von sword, vielleicht kreis-wellen wie beim alten leviathan ?
-// TODO 1: orb-pad verlangsamen, dafür fliegen die spitzen manchmal nach oben ? oder boss fliegt herum ?
-// TODO 1: bei ersten way-blöcke von unten-oben, da sollte der von unten nach oben zeigen
-// TODO 1: während orb phase sollte boss sich langsam drehen
 // TODO 1: enum for the wingstate
-// TODO 1: better handle wing coloring, should always be the same as boss, but when they are detached and get a hit they get "their" color re-applied
-// TODO 1: check if wave-phase (2.) is too fast, if yes, then add a bit more delay between dives
-// TODO 1: wave-phase verwendet magenta bullets, direkt nach magenta way-phase
-// TODO 1: einschlag-spuren wird durch lava verdeckt
-// TODO 1: pause time during fake time-bonus (and hide all related interface items
-// TODO 1: remove fake time-bonus early with an effect (slash ?) when boss returns
-// TODO 1: in einzelteil-phase, vielleicht geschosse etwas mehr auseinander, aber dafür schnellere rotation in 2. sub-phase (1.0f*PI ? für die mittleren ?)
-// TODO 1: einzelteil-phase muss auch punkte geben, aber mit konstantem multiplier vom boss
-// TODO 1: wall-movement sollte smooth sein, besonders wenn man von ihr erwischt wird
-// TODO 1: man sollte erst schaden von der wall nehmen, wenn alle bullets da sind (so wie bei wave)
-// TODO 1: bei fake-death fliegen die einzelteile weg, bei resurrection sollen sie wieder zusammen fliegen (ein einem zug mit boss einflug)
-// TODO 1: vielleicht sollte in finaler phase der geschoss-lerp erst bei 50% health starten
-// TODO 1: flammen sound
+// TODO 1: pause time during fake time-bonus ? (and show it)
+
+// TODO 1: MAIN: foreshadow, sound
+// TODO 1: ACHIEVEMENT: name (), description (), 
+
+// TODO 1: wellen beim sturmangriff sind zu ähnlich wie von sword, vielleicht kreis-wellen wie beim alten leviathan ?
+
+// TODO 1: boss glüht nach dem einschlag in boden (und wand ?)
 // TODO 1: rotierende einzelteile kurz vorm abschuss brauchen einen weiter (glow) effekt, damit mans gscheit sieht
-// TODO 1: remove the remaining squishy movement in orb-phase (in sync with wave part)
-// TODO 1: wenn man die teile aus der wand schlägt, sollten sie zur seite fliegen, damit man nicht unabsichtlich glaubt man muss ihnen ausweichen
 // TODO 1: wenn einzelteile rotiert werden (zb. bei explosion) sollten sie geshiftet werden wie bei einzelteil-phase
-// TODO 1: im finale geht drehung los, bevor bewegung
-// TODO 1: view-bullets wurden von way-blöcken aufgehalten, und eigentlich sind beide rosa
-// TODO 1: vielleicht fliegt boss in erster phase auch rauf und runter (separat oder gemischt mit links-rechts)
-// TODO 1: helfer: einer springt bei wellen von der anderen seite raus, bei gitter fliegt einer seitlich runter
-// TODO 1: energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
+// TODO 1: ram von boss und wings braucht flammen-wellen-effekt
 
 // TODO 1: foreshadow: rast 1-2 mal (untersch waves) über schirm (above) mit einzelteilen
+// TODO 1: ein cyaner-effekt flog beim aktivieren der ORBs herum, nachdem das level gespielt wurde, vermutlich wird etwas nicht korrekt zurückgesetzt
 
 
 // ****************************************************************
@@ -67,10 +44,14 @@
 #define STORM_COUNT     (1u)
 #define PULL_COUNT      (2u)
 #define INCURSION_COUNT (3u)
+#define WAY_COUNT       (4u)
+#define CONE_COUNT      (5u)
 
 
 // ****************************************************************
 // vector identifier
+#define ENV_ROTATION     (0u)   // # re-used
+#define CHARGE_MOVE      (1u)   // # re-used
 #define START_VALUES_POS (0u)   // # uses 0u - 4u
 #define START_VALUES_DIR (5u)   // # uses 5u - 9u
 #define WALL_OFFSET      (10u)
@@ -80,29 +61,29 @@
 // ****************************************************************
 // constructor
 cCholBoss::cCholBoss()noexcept
-: m_aiWingState   {}
-, m_afWingTime    {}
-, m_avWingReturn  {}
-, m_iFireType     (0u)
-, m_bFireActive   (false)
-, m_fWebLevel     (0.0f)
-, m_fWebReverse   (0.0f)
-, m_iWebIndex     (0u)
-, m_iPathIndex    (1u)
-, m_iPathSide     (2u)
-, m_fTilt         (0.0f)
-, m_fFlap         (0.0f)
-, m_fPush         (0.0f)
-, m_fAnimation    (0.0f)
-, m_fResurrection (0.0f)
-
+: m_aiWingState  {}
+, m_afWingTime   {}
+, m_avWingReturn {}
+, m_fFireFade    (0.0f)
+, m_iFireType    (0u)
+, m_bFireActive  (false)
+, m_fWebLevel    (0.0f)
+, m_fWebReverse  (0.0f)
+, m_iWebIndex    (0u)
+, m_iPathIndex   (1u)
+, m_iPathSide    (2u)
+, m_fTilt        (0.0f)
+, m_fFlap        (0.0f)
+, m_fPush        (0.0f)
+, m_fAnimation   (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_boss_chol_body_high.md3");
     this->DefineModelLow ("ship_boss_chol_body_low.md3");
 
     // set object properties
-    this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.0f);
+    this->SetSize             (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
 
     // configure the boss
     this->Configure(5500, 0u, COLOR_SHIP_ORANGE);
@@ -111,12 +92,13 @@ cCholBoss::cCholBoss()noexcept
     // 
     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
     {
-        m_aWing[i].DefineModelHigh("ship_boss_chol_wing_high.md3");
-        m_aWing[i].DefineModelLow ("ship_boss_chol_wing_low.md3");
-        m_aWing[i].SetSize        (this->GetSize());
-        m_aWing[i].Configure      (10000, 0u, COLOR_SHIP_ORANGE);
-        m_aWing[i].AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
-        m_aWing[i].SetParent      (this);
+        m_aWing[i].DefineModelHigh     ("ship_boss_chol_wing_high.md3");
+        m_aWing[i].DefineModelLow      ("ship_boss_chol_wing_low.md3");
+        m_aWing[i].SetSize             (this->GetSize());
+        m_aWing[i].SetCollisionModifier(this->GetCollisionModifier());
+        m_aWing[i].Configure           (1, 0u, COLOR_SHIP_ORANGE);
+        m_aWing[i].AddStatus           (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET | ENEMY_STATUS_CHAIN);
+        m_aWing[i].SetParent           (this);
     }
 
     // 
@@ -167,8 +149,7 @@ void cCholBoss::__KillOwn(const coreBool bAnimated)
         pMission->DisableLine(i, bAnimated);
 
     // 
-    for(coreUintW i = 0u; i < POST_WALLS; ++i)
-        g_pPostProcessing->SetWallOffset(i, 0.0f);
+    g_pPostProcessing->Reset();
 
     // 
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -176,6 +157,9 @@ void cCholBoss::__KillOwn(const coreBool bAnimated)
         pPlayer->SetArea(PLAYER_AREA_DEFAULT);
         pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
     });
+
+    // 
+    g_pGame->GetInterface()->SetFakeEnd(false);
 
     // 
     this->__DisableFire(bAnimated);
@@ -209,55 +193,30 @@ void cCholBoss::__MoveOwn()
     // 
     if(m_iPhase == 0u)
     {
+        PHASE_CONTROL_TIMER(0u, 0.35f, LERP_BREAK)
+        {
+            const coreFloat fSpeed = 6.0f * (1.0f - fTime);
+
+            g_pEnvironment->SetTargetSpeedNow(fSpeed);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 1u)
+    {
         PHASE_CONTROL_TIMER(0u, 0.25f, LERP_LINEAR)
         {
-            const auto nImpactFunc = [](coreObject3D* OUTPUT pObject, const coreVector2 vPos, const coreVector3 vDir, const coreFloat fTime, const coreFloat fTimeBefore, const coreBool bBig)
-            {
-                const coreFloat   fHeight  = g_pEnvironment->RetrieveSafeHeight(vPos);
-                const coreVector3 vPoint   = coreVector3(vPos, fHeight + 8.0f);
-                const coreVector3 vPosFrom = vPoint - vDir * 150.0f;
-                const coreVector3 vPosTo   = vPoint;
+            this->__Impact(&m_aWing[0], coreVector2(-8.0f, 2.0f) * 5.0f, coreVector3(-0.5f,-1.0f,-2.5f).Normalized(), (fTime - 0.2f) * 6.0f, (fTimeBefore - 0.2f) * 6.0f, false);
+            this->__Impact(&m_aWing[1], coreVector2(-2.0f,-4.0f) * 5.0f, coreVector3(-1.0f,-0.5f,-2.5f).Normalized(), (fTime - 0.1f) * 6.0f, (fTimeBefore - 0.1f) * 6.0f, false);
+            this->__Impact(&m_aWing[2], coreVector2( 6.0f,-1.0f) * 5.0f, coreVector3(-1.5f,-1.0f,-2.5f).Normalized(), (fTime - 0.3f) * 6.0f, (fTimeBefore - 0.3f) * 6.0f, false);
+            this->__Impact(&m_aWing[3], coreVector2( 3.0f, 7.0f) * 5.0f, coreVector3(-1.0f,-1.5f,-2.5f).Normalized(), (fTime - 0.0f) * 6.0f, (fTimeBefore - 0.0f) * 6.0f, false);
+            this->__Impact(this,        coreVector2( 0.0f, 1.0f) * 5.0f, coreVector3(-1.0f,-1.0f,-2.5f).Normalized(), (fTime - 0.4f) * 6.0f, (fTimeBefore - 0.4f) * 6.0f, true);
 
-                pObject->SetPosition (LERP(vPosFrom, vPosTo, LERPBR(0.0f, 1.0f, CLAMP(fTime, 0.0f, 1.0f))));
-                pObject->SetDirection(vDir);
-
-                if(InBetween(1.0f, fTimeBefore, fTime))
-                {
-                    if(bBig) g_pSpecialEffects->MacroExplosionColorBig  (vPosTo, COLOR_ENERGY_ORANGE);
-                        else g_pSpecialEffects->MacroExplosionColorSmall(vPosTo, COLOR_ENERGY_ORANGE);
-
-                        
-                    const coreUintW i = 0u;
-                    // 
-                    const coreBool    bRotated   = i % 2u;
-                    const coreBool    bFlipped   = (i / 2u) % 2u;
-                    const coreVector3 vDecalPos  = coreVector3(vPos, fHeight);
-                    const coreVector2 vDecalSize = coreVector2(1.0f,1.0f) * (bBig ? 20.0f : 15.0f);
-                    const coreVector2 vDecalDir  = coreVector2(0.0f,1.0f);
-
-                    // load object resources
-                    coreObject3D* pObject2 = MANAGED_NEW(coreObject3D);
-                    pObject2->DefineModel  (Core::Manager::Object->GetLowQuad());
-                    pObject2->DefineTexture(0u, "effect_soot.png");
-                    pObject2->DefineProgram("effect_decal_single_program");
-
-                    // set object properties
-                    pObject2->SetSize     (coreVector3((bRotated ? vDecalSize.yx()       : vDecalSize),                            1.0f));
-                    pObject2->SetDirection(coreVector3((bRotated ? vDecalDir.Rotated90() : vDecalDir) * (bFlipped ? -1.0f : 1.0f), 0.0f));
-                    pObject2->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
-
-                    // add object to background or windscreen
-                    g_pEnvironment->GetBackground()->AddDecal(pObject2, vDecalPos, 8u, "effect_decal_single_inst_program", LIST_KEY);
-                }
-            };
-
-            nImpactFunc(&m_aWing[0], coreVector2(-8.0f,-1.0f) * 2.0f, coreVector3(-0.5f,-1.0f,-2.5f).Normalized(), (fTime - 0.0f)  * 6.0f, (fTimeBefore - 0.0f)  * 6.0f, false);
-            nImpactFunc(&m_aWing[1], coreVector2(-2.0f,-5.0f) * 2.0f, coreVector3(-1.0f,-0.5f,-2.5f).Normalized(), (fTime - 0.05f) * 6.0f, (fTimeBefore - 0.05f) * 6.0f, false);
-            nImpactFunc(&m_aWing[2], coreVector2( 6.0f, 2.0f) * 2.0f, coreVector3(-1.5f,-1.0f,-2.5f).Normalized(), (fTime - 0.1f)  * 6.0f, (fTimeBefore - 0.1f)  * 6.0f, false);
-            nImpactFunc(&m_aWing[3], coreVector2( 0.0f, 7.0f) * 2.0f, coreVector3(-1.0f,-1.5f,-2.5f).Normalized(), (fTime - 0.15f) * 6.0f, (fTimeBefore - 0.15f) * 6.0f, false);
-            nImpactFunc(this,        coreVector2( 0.0f, 1.0f) * 2.0f, coreVector3(-1.0f,-1.0f,-2.5f).Normalized(), (fTime - 0.4f)  * 6.0f, (fTimeBefore - 0.4f)  * 6.0f, true);
-
-            if(PHASE_TIME_AFTER(0.85f))
+            if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_INC
 
@@ -268,7 +227,7 @@ void cCholBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 1u)
+    else if(m_iPhase == 2u)
     {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
         {
@@ -304,18 +263,18 @@ void cCholBoss::__MoveOwn()
                 PHASE_CHANGE_INC
 
                 this->__EnableFire(0u);
-                // TODO 1: schnelle rotation danach, alle rotationen schnell
             }
         });
     }
 
     // ################################################################
     // 
-    else if(m_iPhase == 2u)
+    else if(m_iPhase == 3u)
     {
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(20u)
+            //PHASE_CHANGE_TO(70u)
         });
     }
 
@@ -323,7 +282,8 @@ void cCholBoss::__MoveOwn()
     // 
     else if(m_iPhase == 20u)
     {
-        const coreInt32 iLostHealth = this->GetLostHealth();
+        const coreInt32 iLostHealth    = this->GetLostHealth();
+        const coreInt32 iLostHealthOld = this->GetMaxHealth() - this->GetPreHealth();
 
         PHASE_CONTROL_TIMER(0u, 0.1f, LERP_LINEAR)
         {
@@ -333,11 +293,18 @@ void cCholBoss::__MoveOwn()
             }
             else
             {
+                const coreFloat fOldTime = m_avVector[TRANSITION_TIME].x;
                 m_avVector[TRANSITION_TIME].x = MAX0(m_avVector[TRANSITION_TIME].x - 0.4f * TIME);
 
                 m_fTilt = LERPS(0.0f*PI, 2.0f*PI, m_avVector[TRANSITION_TIME].x);
 
                 this->DefaultOrientate(m_fTilt);
+
+                if(InBetween(0.0f, m_avVector[TRANSITION_TIME].x, fOldTime) ||
+                   InBetween(0.5f, m_avVector[TRANSITION_TIME].x, fOldTime))
+                {
+                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.5f, SOUND_EFFECT_WOOSH);
+                }
 
                 if(m_avVector[TRANSITION_TIME].x <= 0.0f)
                 {
@@ -345,9 +312,13 @@ void cCholBoss::__MoveOwn()
                 }
             }
 
-            const coreVector2 vNewPos = coreVector2(0.6f * SIN(fTime * 2.0f*PI) * LERPS(0.0f, 1.0f, m_avVector[TRANSITION_TIME].x), 0.6f);
+            if(iLostHealth >= 1200) m_avVector[TRANSITION_TIME].y = MIN1(m_avVector[TRANSITION_TIME].y + 0.2f * TIME);
+
+            const coreVector2 vNewPos = coreVector2(0.0f,0.6f) + coreVector2(0.6f * SIN(fTime * (2.0f*PI)), 0.1f * SIN(fTime * (6.0f*PI)) * m_avVector[TRANSITION_TIME].y) * BLENDS(m_avVector[TRANSITION_TIME].x);
 
             this->SetPosition(coreVector3(vNewPos * FOREGROUND_AREA, 0.0f));
+
+            g_pEnvironment->SetTargetDirectionNow(vNewPos.Normalized());
 
             if(PHASE_FINISHED)
             {
@@ -357,11 +328,14 @@ void cCholBoss::__MoveOwn()
 
         if(iLostHealth < 2000)
         {
+            if(InBetween(1200, iLostHealthOld, iLostHealth))
+                m_aiCounter[WAY_COUNT] = 0;
+
             PHASE_CONTROL_TICKER(1u, 0u, 0.22f, LERP_LINEAR)
             {
-                const coreVector2 vDir   = StepRotated90(iTick % 4u);
+                const coreVector2 vDir   = StepRotated90(m_aiCounter[WAY_COUNT] % 4u);
                 const coreVector2 vBase  = (iLostHealth < 1200) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
-                const coreUintW   iStart = (iLostHealth < 1200) ? 0u : 12u;
+                const coreUintW   iStart = (iLostHealth < 1200) ? 0u : 12u;   // used for movement
 
                 for(coreUintW i = 0u; i < 6u; ++i)
                 {
@@ -374,26 +348,39 @@ void cCholBoss::__MoveOwn()
                     pMission->EnableWay(iStart + i,      -vPos,  vDir);
                     pMission->EnableWay(iStart + i + 6u,  vPos, -vDir);
                 }
+
+                m_aiCounter[WAY_COUNT] += 1;
+
+                if((iLostHealth >= 1200) && (m_aiCounter[WAY_COUNT] == 2))
+                {
+                    if(this->_ResurrectHelper(ELEMENT_BLUE, false))
+                    {
+                        g_pGame->GetHelper(ELEMENT_BLUE)->SetPosition(coreVector3(-2.5f * GELU_WAY_STEP, -1.3f - 1.0f * GELU_WAY_STEP, 0.0f) * FOREGROUND_AREA3);
+                    }
+                }
             });
         }
 
-        PHASE_CONTROL_TICKER(2u, 0u, 3.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(2u, 0u, g_pGame->IsEasy() ? 1.5f : 3.0f, LERP_LINEAR)
         {
             if((iTick % 4u) < 2u) return;
 
-            const coreVector2 vPos = this->GetPosition().xy();
+            const coreVector2 vPos  = this->GetPosition().xy();
+            const coreBool    bFlip = ((iTick % 4u) == 3u);
 
             for(coreUintW j = 40u; j--; )
             {
-                if((j % 2u) == (iTick % 2u)) continue;
+                if((j % 4u) < (g_pGame->IsEasy() ? 2u : 1u)) continue;
 
-                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f + (90.0f - 4.5f * 0.5f)));
-
-                const coreFloat fSpeed = ((j / 4u) % 2u) ? 1.2f : 1.0f;
+                const coreVector2 vDir   = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j + (bFlip ? 2u : 0u)) * 4.5f + 90.0f) * (bFlip ? -1.0f : 1.0f));
+                const coreFloat   fSpeed = 1.0f + 0.06f * (I_TO_F(j % 4u) - 1.0f);
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, fSpeed, this, vPos,  vDir)->ChangeSize(1.8f);
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, fSpeed, this, vPos, -vDir)->ChangeSize(1.8f);
             }
+
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_BLUE);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
     }
 
@@ -401,7 +388,7 @@ void cCholBoss::__MoveOwn()
     // 
     else if(m_iPhase == 30u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.6f, LERP_LINEAR)
+        PHASE_CONTROL_TIMER(0u, g_pGame->IsEasy() ? 0.35f : 0.6f, LERP_LINEAR)
         {
             const coreFloat fSide = (m_aiCounter[INCURSION_COUNT] & 0x04) ? -1.0f : 1.0f;
 
@@ -417,13 +404,13 @@ void cCholBoss::__MoveOwn()
 
             if(PHASE_TIME_BEFORE(0.5f))
             {
-                this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition * 3.0f, BLENDBR(fTime * 2.0f));
+                this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition * 3.0f, STEPBR(0.0f, 0.5f, fTime));
             }
             else
             {
                 const coreVector2 vNewPos = vTarget * 0.6f;
 
-                this->DefaultMoveLerp(vNewPos * 3.0f, vNewPos, BLENDB((fTime - 0.5f) * 2.0f));
+                this->DefaultMoveLerp(vNewPos * 3.0f, vNewPos, STEPB(0.5f, 1.0f, fTime));
                 this->SetDirection   (coreVector3(-vTarget, 0.0f));
             }
 
@@ -438,6 +425,16 @@ void cCholBoss::__MoveOwn()
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, fSpeed, this, vPos, vDir)->ChangeSize(1.7f);
                 }
+
+                if((m_aiCounter[INCURSION_COUNT] % 4) == 3)
+                {
+                    if(this->_ResurrectHelper(ELEMENT_MAGENTA, false))
+                    {
+                        g_pGame->GetHelper(ELEMENT_MAGENTA)->SetPosition(coreVector3(vTarget * 1.3f * FOREGROUND_AREA, 0.0f));
+                    }
+                }
+
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 2.0f, 1.0f, SOUND_SHIP_FLY);
             }
 
             if(PHASE_FINISHED)
@@ -514,12 +511,15 @@ void cCholBoss::__MoveOwn()
 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(3, 0.0f, this, vPos, vDir)->ChangeSize(1.5f)->AddStatus(BULLET_STATUS_GHOST);
 
-            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
+            m_aiCounter[CONE_COUNT] += 1;
+
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
         });
 
         for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
         {
-            if((m_aWing[i].GetLostHealth() > 50) && (m_aiWingState[i] < 41u))
+            if(!m_aWing[i].GetCurHealth() && (m_aiWingState[i] < 41u))   // instead of ReachedDeath
             {
                 this->__ChangeWingPull(i);
                 m_aWing[i].AddStatus(ENEMY_STATUS_GHOST);
@@ -528,6 +528,8 @@ void cCholBoss::__MoveOwn()
 
                 for(coreUintW j = 40u; j--; )
                 {
+                    if(g_pGame->IsEasy() && (j % 2u)) continue;
+
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) - 19.5f) * 4.5f);
 
                     const coreFloat fSpeed = ((j % 4u) < 2u) ? 0.7f : 0.5f;
@@ -542,11 +544,14 @@ void cCholBoss::__MoveOwn()
                     PHASE_CHANGE_INC
                 }
 
-                m_avVector[WALL_OFFSET].z = MAX0(m_avVector[WALL_OFFSET].z - 0.01f);
+                m_avVector[WALL_OFFSET].z = MAX0(m_avVector[WALL_OFFSET].z - 0.05f);
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_CYAN);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
             }
         }
 
-        m_avVector[WALL_OFFSET].z = MIN1(m_avVector[WALL_OFFSET].z + 0.04f * TIME);
+        m_avVector[WALL_OFFSET].z = MIN1(m_avVector[WALL_OFFSET].z + (0.05f + 0.01f * I_TO_F(m_aiCounter[PULL_COUNT])) * (g_pGame->IsEasy() ? 0.5f : 1.0f) * TIME);
     }
 
     // ################################################################
@@ -559,22 +564,28 @@ void cCholBoss::__MoveOwn()
         {
             PHASE_CHANGE_TO(100u)
 
+            for(coreUintW i = 0u; i < CHOL_WINGS; ++i) this->__RepairWing(i, 2500);
             for(coreUintW i = 0u; i < CHOL_WINGS; ++i) m_aWing[i].RemoveStatus(ENEMY_STATUS_GHOST);
-            for(coreUintW i = 0u; i < CHOL_WINGS; ++i) m_aWing[i].SetCurHealthPct(1.0f);
             for(coreUintW i = 1u; i < CHOL_WINGS; ++i) m_aWing[i].SetParent(&m_aWing[0]);
         });
 
         const coreFloat fPrev = m_avVector[WALL_OFFSET].z;
 
-        m_avVector[WALL_OFFSET].z = MAX0(m_avVector[WALL_OFFSET].z - fSpeed * TIME);
+        m_avVector[WALL_OFFSET].z -= fSpeed * TIME;
 
-        if((fPrev && !m_avVector[WALL_OFFSET].z) || ((m_iPhase != 43u) && m_avVector[WALL_OFFSET].z))
+        if(((fPrev > 0.0f) && (m_avVector[WALL_OFFSET].z <= 0.0f)) || ((m_iPhase != 43u) && (m_avVector[WALL_OFFSET].z > 0.0f)))
         {
-            m_avVector[WALL_OFFSET].z = 0.0f;
+            m_avVector[WALL_OFFSET].z = -1.0f;
 
             g_pGame->GetBulletManagerEnemy()->ClearBulletsTyped<cConeBullet>(true);
 
+            if(this->_ResurrectHelper(ELEMENT_ORANGE, true))
+            {
+                g_pGame->GetHelper(ELEMENT_ORANGE)->SetPosition(coreVector3(0.0f,-1.05f,0.0f) * FOREGROUND_AREA3);
+            }
+
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            g_pSpecialEffects->PlaySound(coreVector3(0.0f,-1.0f,0.0f) * FOREGROUND_AREA3, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
         }
     }
 
@@ -623,11 +634,18 @@ void cCholBoss::__MoveOwn()
 
             pFang->SetPosition(coreVector3((vOffset + coreVector2(0.0f, LERP(0.0f, I_TO_F(GELU_FANGS_DIMENSION) * GELU_FANG_STEP, ABS(COS(DelayTime(fStompTime, 0.5f, fDelay) * (1.0f*PI)))))) * FOREGROUND_AREA, 0.0f));
 
-            if(InBetween(0.5f, fStompTimePrev, fStompTime))
+            if(InBetween(0.5f, fStompTimePrev, fStompTime) && (i < 5u))
             {
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                g_pSpecialEffects->PlaySound(pFang->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
 
-                if(i == 2u) g_pSpecialEffects->MacroExplosionPhysicalColorBig(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, COLOR_FIRE_ORANGE);
+                if(i == 2u)
+                {
+                    g_pSpecialEffects->MacroExplosionPhysicalColorBig(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, COLOR_FIRE_ORANGE);
+                    g_pSpecialEffects->PlaySound(pFang->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_07);
+
+                    this->_ResurrectHelper(ELEMENT_RED, false);
+                }
             }
 
             if(i == 2u) fStuckTime = fStompTime;
@@ -650,6 +668,11 @@ void cCholBoss::__MoveOwn()
             for(coreUintW i = 0u; i < GELU_FANGS; ++i)
                 pMission->DisableFang(i, false);
 
+            this->ChangeToTop();
+
+            g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition(), coreVector2(0.0f,1.0f), COLOR_ENERGY_RED);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
+
             PHASE_CHANGE_INC
         }
     }
@@ -658,26 +681,34 @@ void cCholBoss::__MoveOwn()
     // 
     else if(m_iPhase == 51u)
     {
-        const coreFloat fSpeedMove  = MIN1(m_fPhaseTime);
-        const coreFloat fSpeedShoot = LERP(15.0f, 1.0f, this->GetCurHealthPct());
+        const coreFloat fSpeedMove  = MIN1(m_fPhaseTime * 3.0f);
+        const coreFloat fSpeedShoot = LERP(20.0f, 1.0f, STEP(0.0f, 0.5f, this->GetCurHealthPct()));
 
         this->DefaultMoveTarget(this->NearestPlayerDual((FMOD(m_fPhaseTime, 10.0f) < 5.0f) ? 1u : 0u)->GetPosition().xy(), LERP(0.0f, 20.0f, fSpeedMove), LERP(0.0f, 1.0f, fSpeedMove));
         this->DefaultOrientate (m_fPhaseTime * (2.0f*PI));
+
+        g_pEnvironment->SetTargetDirectionNow(this->GetPosition().xy().Normalized());
 
         PHASE_CONTROL_TICKER(0u, 0u, fSpeedShoot, LERP_LINEAR)
         {
             const coreVector2 vPos = this->GetPosition().xy();
             const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * GA);
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos,  vDir)             ->ChangeSize(1.4f);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos,  vDir.Rotated120())->ChangeSize(1.4f);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos, -vDir.Rotated60 ())->ChangeSize(1.4f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos, vDir)->ChangeSize(1.4f);
+
+            if(!g_pGame->IsEasy())
+            {
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos,  vDir.Rotated120())->ChangeSize(1.4f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos, -vDir.Rotated60 ())->ChangeSize(1.4f);
+            }
+
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_RED);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
-        if(this->ReachedDeath())
+        if(!this->GetCurHealth())   // instead of ReachedDeath
         {
-            this->Kill(true);      
-            this->_EndBoss();
+            PHASE_CHANGE_TO(110u)
         }
     }
 
@@ -686,14 +717,50 @@ void cCholBoss::__MoveOwn()
     else if(m_iPhase == 60u)
     {
         this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+        PHASE_CONTROL_PAUSE(0u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE + 1.0f))
+        {
+            PHASE_CHANGE_INC
+
+            for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
+            {
+                this->__ChangeWingResurrect1(i);
+                m_aWing[i].AddStatus(ENEMY_STATUS_GHOST);
+            }
+        });
     }
 
     // ################################################################
     // 
     else if(m_iPhase == 61u)
     {
+        this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+        PHASE_CONTROL_PAUSE(0u, 0.5f)
+        {
+            PHASE_CHANGE_INC
+
+            this->__ResurrectFake();
+
+            for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
+            {
+                this->__ChangeWingReset(i);
+                m_aWing[i].RemoveStatus(ENEMY_STATUS_GHOST);
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if((m_iPhase == 62u) || (m_iPhase == 112u))   // #
+    {
         PHASE_CONTROL_TIMER(0u, 0.4f, LERP_LINEAR)
         {
+            if(PHASE_TIME_POINT(0.5f) || PHASE_TIME_POINT(0.75f))
+            {
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.5f, SOUND_EFFECT_WOOSH);
+            }
+
             this->SetPosition (coreVector3(0.0f, ParaLerp(1.5f, 0.6f, 0.7f, BLENDB(MIN1(fTime * 2.0f))), 0.0f) * FOREGROUND_AREA3);
             this->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
 
@@ -705,13 +772,37 @@ void cCholBoss::__MoveOwn()
             if(PHASE_TIME_POINT(0.9f)) this->__DisableFire(true);
 
             if(PHASE_FINISHED)
-                PHASE_CHANGE_INC
+            {
+                if(m_iPhase == 112u)
+                {
+                    for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
+                    {
+                        m_aWing[i].Kill(true);
+                    }
+
+                    this->Kill(true);
+
+                    if(this->HasAllHelpers())
+                    {
+                        this->_CreateFragment(5u);
+                    }
+
+                    g_pSpecialEffects->CreateExplosion (this->GetPosition());
+                    g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
+                    g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                    g_pSpecialEffects->SlowScreen(4.0f);
+                }
+                else
+                {
+                    PHASE_CHANGE_INC
+                }
+            }
         });
     }
 
     // ################################################################
     // 
-    else if(m_iPhase == 62u)
+    else if(m_iPhase == 63u)
     {
         if(PHASE_BEGINNING2)
         {
@@ -719,8 +810,13 @@ void cCholBoss::__MoveOwn()
             this->__EnableFire(1u);
         }
 
-        PHASE_CONTROL_TIMER(0u, 0.8f, LERP_LINEAR)
+        PHASE_CONTROL_TIMER(0u, m_aiCounter[STORM_COUNT] ? 0.8f : 0.6f, LERP_LINEAR)
         {
+            if(PHASE_BEGINNING)
+            {
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 2.0f, 1.0f, SOUND_SHIP_FLY);
+            }
+
             coreVector2 vFrom, vTo;
             coreFloat fDelay;
             switch(m_aiCounter[STORM_COUNT])
@@ -759,37 +855,50 @@ void cCholBoss::__MoveOwn()
 
                     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
                     {
-                        this->__ChangeWingExplode(i);
+                        this->__ChangeWingExplode2(i);
                         m_aWing[i].AddStatus(ENEMY_STATUS_GHOST);
                     }
 
                     this->__DisableFire(true);
 
                     g_pSpecialEffects->MacroExplosionPhysicalColorBig(this->GetPosition(), COLOR_FIRE_ORANGE);
+                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
                 }
                 else
                 {
                     PHASE_RESET(0u)
                 }
+
+                if(m_aiCounter[STORM_COUNT] == 4)
+                {
+                    this->_ResurrectHelper(ELEMENT_GREEN, false);
+                }
             }
         });
 
-        PHASE_CONTROL_TICKER(1u, 0u, 30.0f, LERP_LINEAR)
+        if(!g_pGame->IsEasy())
         {
-            if((iTick % 5u) < 2u) return;
+            PHASE_CONTROL_TICKER(1u, 0u, 30.0f, LERP_LINEAR)
+            {
+                if((iTick % 5u) < 2u) return;
 
-            const coreVector2 vPos = this->GetPosition ().xy();
-            const coreVector2 vDir = this->GetDirection().xy().Rotated90();
+                const coreVector2 vPos = this->GetPosition ().xy();
+                const coreVector2 vDir = this->GetDirection().xy().Rotated90();
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, this, vPos,  vDir)->ChangeSize(1.7f);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, this, vPos, -vDir)->ChangeSize(1.7f);
-        });
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, this, vPos,  vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, this, vPos, -vDir)->ChangeSize(1.7f);
+
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            });
+        }
     }
 
     // ################################################################
     // 
     else if(m_iPhase == 70u)
     {
+        const coreFloat fCurHealthPct = this->GetCurHealthPct();
+
         if(PHASE_BEGINNING2)
         {
             this->__DisableFire(true);
@@ -800,17 +909,43 @@ void cCholBoss::__MoveOwn()
             pMission->GetOrb(0u)->SetPosition(coreVector3(HIDDEN_POS, 0.0f));   // because line 0 is enabled for a single frame
             pMission->SetLineMode(1u);
 
-            g_pEnvironment->SetTargetDirection(coreVector2(0.0f,-1.0f), 1.0f);
+            m_avVector[CHARGE_MOVE] = coreVector4(0.0f,0.0f,1.0f,0.0f);
         }
 
-        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
+        if(PHASE_MAINTIME_BEFORE(2.0f))
         {
-            this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,-0.8f), fTime);
-        });
+            this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,-0.8f), STEPS(0.0f, 2.0f, m_fPhaseTime));
+        }
+        else
+        {
+            m_avVector[CHARGE_MOVE].x  = MIN1(m_avVector[CHARGE_MOVE].x + 1.0f * TIME);
+            m_avVector[CHARGE_MOVE].y -= m_avVector[CHARGE_MOVE].x * 5.0f * TIME;
 
-        m_fWebReverse = MAX0(m_fWebReverse - 0.5f * TIME);
+            const coreFloat fSpeed  = m_avVector[CHARGE_MOVE].x * m_avVector[CHARGE_MOVE].z * LERP(80.0f, 60.0f, STEP(0.0f, 0.3f, fCurHealthPct));
+            coreVector2     vNewPos = this->GetPosition().xy() + coreVector2(0.0f, fSpeed * TIME);
 
-        const coreFloat   fSpeed  = LERP(1.0f, 1.3f, MIN1(m_fPhaseTime * 0.05f));
+            if(((vNewPos.y < -FOREGROUND_AREA.y * 1.5f) && (m_avVector[CHARGE_MOVE].z < 0.0f)) ||
+               ((vNewPos.y >  FOREGROUND_AREA.y * 1.5f) && (m_avVector[CHARGE_MOVE].z > 0.0f)))
+            {
+                vNewPos.x  = FmodRange(vNewPos.x + FOREGROUND_AREA.x * 0.5f, -FOREGROUND_AREA.x * 0.75f, FOREGROUND_AREA.x * 0.75f);
+                vNewPos.y -= FOREGROUND_AREA.y * 3.0f * m_avVector[CHARGE_MOVE].z;
+
+                m_avVector[CHARGE_MOVE].z = -1.0f;
+                this->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+            }
+
+            this->SetPosition     (coreVector3(vNewPos, 0.0f));
+            this->DefaultOrientate(m_avVector[CHARGE_MOVE].y);
+        }
+
+        if(fCurHealthPct <= 0.1f)
+        {
+            this->_ResurrectHelper(ELEMENT_CYAN, false);
+        }
+
+        m_fWebReverse = MAX0(m_fWebReverse - 0.5f * TIME);   // broken and not used anymore
+
+        const coreFloat   fSpeed  = LERP(1.0f, 1.3f, MIN1(m_fPhaseTime * 0.05f)) * (g_pGame->IsEasy() ? 0.5f : 0.8f);
         const coreFloat   fChange = LERPS(fSpeed, -1.0f, m_fWebReverse) * TIME;
         const coreVector2 vMove   = coreVector2(0.0f, -fChange) * FOREGROUND_AREA * 0.5f;
 
@@ -874,7 +1009,7 @@ void cCholBoss::__MoveOwn()
                 });
 
                 const coreVector3 vPos = pMission->GetOrb(s_aiTarget[0])->GetPosition();
-                ASSERT(s_aiTarget[0] == s_aiTarget[1])
+                ASSERT(!g_pGame->IsMulti() || (s_aiTarget[0] == s_aiTarget[1]))
 
                 g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
                 g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
@@ -888,11 +1023,13 @@ void cCholBoss::__MoveOwn()
                     s_aiTarget[iIndex] = iNewTarget;
             };
 
-            g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            const sGameInput oEmptyInput = {};
+
+            g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 if(!pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) return;
 
-                const sGameInput* pInput = pPlayer->GetInput();
+                const sGameInput* pInput = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? &oEmptyInput : pPlayer->GetInput();
 
                 const coreUintW iNextTarget = (s_aiTarget[i] + 1u) % GELU_ORBS;
                 const coreUintW iPrevTarget = s_aiTarget[i] ? (s_aiTarget[i] - 1u) : (GELU_ORBS - 1u);
@@ -947,12 +1084,19 @@ void cCholBoss::__MoveOwn()
                     });
                 }
 
-                if(pPlayer->GetPosition().y < FOREGROUND_AREA.y * -0.7f)
-                    m_fWebReverse = 1.0f;
+                if(pTarget->GetPosition().y < FOREGROUND_AREA.y * -0.6f)
+                {
+                    s_aiTarget[i] = (s_aiTarget[i] + 6u) % GELU_ORBS;
+
+                    const coreVector3 vPos = pMission->GetOrb(s_aiTarget[i])->GetPosition();
+
+                    g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
+                    g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
+                }
             });
         }
 
-        if(this->ReachedDeath())
+        if(!this->GetCurHealth())   // instead of ReachedDeath
         {
             PHASE_CHANGE_TO(60u)
 
@@ -962,7 +1106,10 @@ void cCholBoss::__MoveOwn()
                 pMission->DisableOrb(i, g_pForeground->IsVisiblePoint(pMission->GetOrb(i)->GetPosition().xy(), 1.3f));
 
             for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
-                this->__ChangeWingReset(i);
+            {
+                this->__ChangeWingExplode1(i);
+                m_aWing[i].AddStatus(ENEMY_STATUS_GHOST);
+            }
 
             g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
@@ -985,18 +1132,31 @@ void cCholBoss::__MoveOwn()
             this->SetPosition (coreVector3(vPos * FOREGROUND_AREA, 0.0f));
             this->SetDirection(coreVector3(vDir * -1.0f,           0.0f));
 
+            g_pEnvironment->SetTargetDirectionNow(vPos.InvertedX().Normalized());
+
+            if(PHASE_TIME_POINT(0.4f))
+            {
+                if(this->_ResurrectHelper(ELEMENT_PURPLE, true))
+                {
+                    g_pGame->GetHelper(ELEMENT_PURPLE)->SetPosition(coreVector3(m_vLastPosition * FOREGROUND_AREA, 0.0f));
+                }
+            }
+
             if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_TO(70u)
             }
         });
 
-        PHASE_CONTROL_TICKER(1u, 0u, 15.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(1u, 0u, g_pGame->IsEasy() ? 7.5f : 15.0f, LERP_LINEAR)
         {
-            const coreVector2 vPos = this->GetPosition ().xy();
+            const coreVector2 vPos = this->GetPosition().xy();
             const coreVector2 vDir = this->GetDirection().xy().InvertedX();
 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.1f, this, vPos, vDir)->ChangeSize(1.6f);
+
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_PURPLE);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
     }
 
@@ -1016,7 +1176,7 @@ void cCholBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.4f, LERP_SMOOTH)
         {
-            this->DefaultMoveLerp     (coreVector2(0.0f,1.7f), coreVector2(0.0f,0.6f), fTime);
+            this->DefaultMoveLerp     (coreVector2(0.0f,1.7f), coreVector2(0.0f,0.0f), fTime);
             this->DefaultOrientateLerp(0.0f*PI,                6.0f*PI,                fTime);
 
             if(PHASE_FINISHED)
@@ -1036,56 +1196,126 @@ void cCholBoss::__MoveOwn()
     // 
     else if(m_iPhase == 102u)
     {
-        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        PHASE_CONTROL_TIMER(0u, 0.7f, LERP_SMOOTH)
         {
-            PHASE_CHANGE_TO(80u)
+            this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.6f), fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(80u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 110u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            this->AddStatus(ENEMY_STATUS_GHOST);
+
+            this->_EndBoss();
+
+            this->ChangeToNormal();
+
+            g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
+            g_pSpecialEffects->MacroDestructionDark (this);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+
+            m_avVector[ENV_ROTATION].x = g_pEnvironment->GetDirection().Angle();
+        }
+
+        this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
+        {
+            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[ENV_ROTATION].x, 0.0f*PI, fTime)));
+        });
+
+        PHASE_CONTROL_PAUSE(1u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE + 1.0f))
+        {
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC
+
+                for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
+                {
+                    this->__ChangeWingResurrect2(i);
+                    m_aWing[i].AddStatus(ENEMY_STATUS_GHOST);
+                }
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 111u)
+    {
+        this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+        PHASE_CONTROL_PAUSE(0u, 0.5f)
+        {
+            PHASE_CHANGE_INC
+
+            this->RefreshColorAll(1.0f);
+
+            m_fFlap = 0.0f;
+
+            for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
+            {
+                this->__ChangeWingReset(i);
+            }
         });
     }
 
     // ################################################################
     // ################################################################
 
-    // 
-    if(m_fResurrection)
-    {
-        m_fResurrection.Update(-1.0f);
-        if(m_fResurrection <= 0.0f)
-        {
-            PHASE_CHANGE_TO(61u)
+    coreFloat& fWallCurrent = m_avVector[WALL_OFFSET].y;
+    coreFloat& fWallTarget  = m_avVector[WALL_OFFSET].z;
 
-            this->__ResurrectFake();
-        }
-    }
-
-
-    const coreVector2 vOffFrom  = 2.2f * FOREGROUND_AREA * coreVector2(0.0f, m_avVector[WALL_OFFSET].z);
+    const coreVector2 vOffFrom  = 2.2f * FOREGROUND_AREA * coreVector2(0.0f, fWallCurrent);
     const coreVector2 vAreaFrom = -FOREGROUND_AREA + vOffFrom;
 
     const coreVector2 vPlayerAreaFrom = PLAYER_AREA_DEFAULT.xy() + vOffFrom;
+    const coreVector2 vPlayerAreaTo   = PLAYER_AREA_DEFAULT.zw();
 
-    g_pPostProcessing->SetWallOffset(2u, m_avVector[WALL_OFFSET].z);
-
-    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    if(vPlayerAreaFrom < vPlayerAreaTo)
     {
-        pPlayer->SetArea(coreVector4(vPlayerAreaFrom, PLAYER_AREA_DEFAULT.zw()));
-    });
-
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        if(pPlayer->IsNormal())
+        g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            const coreVector2 vPos = pPlayer->GetPosition().xy();
-
-            if((vPos.y <= vPlayerAreaFrom.y + CORE_MATH_PRECISION) && m_avVector[WALL_OFFSET].z)
-            {
-                pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vPos);
-                m_avVector[WALL_OFFSET].z = 0.0f;
-            }
-        }
-    });
-
-    if(m_avVector[WALL_OFFSET].z)
+            pPlayer->SetArea(coreVector4(vPlayerAreaFrom, vPlayerAreaTo));
+        });
+    }
+    else
     {
+        fWallTarget = -1.0f;
+    }
+
+    const coreFloat fWallDiff = fWallTarget - fWallCurrent;
+    fWallCurrent = CLAMP01(fWallCurrent + SIGN(fWallDiff) * 0.9f * TIME * SmoothTowards(ABS(fWallDiff), 0.05f));
+    fWallTarget  = MAX(fWallTarget, -0.01f);
+
+    g_pPostProcessing->SetWallOffset(2u, fWallCurrent);
+
+    if(fWallCurrent)
+    {
+        if(m_aiCounter[CONE_COUNT] >= 20)
+        {
+            g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                if(pPlayer->IsNormal())
+                {
+                    const coreVector2 vPos = pPlayer->GetPosition().xy();
+
+                    if(vPos.y <= vPlayerAreaFrom.y + CORE_MATH_PRECISION)
+                    {
+                        pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vPos);
+                        fWallTarget = -1.0f;
+                    }
+                }
+            });
+        }
+
         g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
         {
             const coreVector2 vPos = pBullet->GetPosition().xy();
@@ -1098,12 +1328,20 @@ void cCholBoss::__MoveOwn()
 
     if(m_iPhase == 100u)
     {
-        const coreFloat fTarget = (1.0f - m_aWing[0].GetCurHealthPct()) * 12.0f;
+        const coreFloat fTarget = (1.0f - m_aWing[0].GetCurHealthPct()) * 3.05f;
         const coreFloat fDiff   = fTarget - m_fPush;
 
         m_fPush += SIGN(fDiff) * TIME * SmoothTowards(ABS(fDiff), 0.2f);
 
-        this->SetPosition(coreVector3(0.0f, 0.6f * FOREGROUND_AREA.y, 0.0f));
+        if(m_fPush >= 1.25f)
+        {
+            if(this->_ResurrectHelper(ELEMENT_YELLOW, true))
+            {
+                g_pGame->GetHelper(ELEMENT_YELLOW)->SetPosition(coreVector3(0.0f,0.0f,0.0f));
+            }
+        }
+
+        this->SetPosition(coreVector3(0.0f, 0.6f*0.0f * FOREGROUND_AREA.y, 0.0f));
     }
 
 
@@ -1117,7 +1355,7 @@ void cCholBoss::__MoveOwn()
     const coreFloat fFinalFlap = m_fFlap + 0.05f * SIN(m_fLifeTime * 3.0f);
 
     // 
-    const coreFloat fBottomWall = (m_avVector[WALL_OFFSET].z * 2.0f - 1.05f) * FOREGROUND_AREA.x;
+    const coreFloat fBottomWall = (fWallCurrent * 2.0f - 1.05f) * FOREGROUND_AREA.x;
 
     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
     {
@@ -1159,7 +1397,7 @@ void cCholBoss::__MoveOwn()
 
             case 2u:
                 {
-                    const coreFloat fTime = MIN(m_afWingTime[i] * 0.5f, 1.0f);
+                    const coreFloat fTime = MIN1(m_afWingTime[i] * 0.5f);
 
                     const coreVector3 vStartPos = m_avVector[START_VALUES_POS + i].xyz() * coreMatrix4::RotationZ(fTime * 1.0f*PI).m123();
                     const coreVector3 vStartDir = m_avVector[START_VALUES_DIR + i].xyz();
@@ -1195,6 +1433,7 @@ void cCholBoss::__MoveOwn()
                         this->__ChangeWingInc(i);
 
                         g_pSpecialEffects->CreateBlowColor(oWing.GetPosition(), -oWing.GetDirection(), SPECIAL_BLOW_SMALL, COLOR_ENERGY_WHITE);
+                        g_pSpecialEffects->PlaySound(oWing.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_12);
 
                         if(bThrow2)
                         {
@@ -1217,10 +1456,12 @@ void cCholBoss::__MoveOwn()
 
                         g_pSpecialEffects->CreateSplashColor(oWing.GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_WHITE);
                         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                        g_pSpecialEffects->PlaySound(oWing.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
 
                         if(bThrow2)
                         {
                             m_aWing[i].SetParent(NULL);
+                            this->__RepairWing(i, 50);
 
                             const coreVector2 vCorrection = oWing.GetDirection().xy() * ((vNewPos.y - fBottomWall) / oWing.GetDirection().y);
 
@@ -1259,7 +1500,7 @@ void cCholBoss::__MoveOwn()
             case 32u:
                 {
                     const coreVector3 vNewPos = LERPH3(coreVector3(m_avWingReturn[i].xy(), 0.0f), vPos3, MIN(m_afWingTime[i], 1.0f));
-                    const coreVector3 vNewDir = coreVector3(MapToAxis(coreVector2::Direction(LERPH3(m_avWingReturn[i].z, fAngle3, MIN(m_afWingTime[i], 1.0f))), vBodyDirNorm), 0.0f);   // # no rota
+                    const coreVector3 vNewDir = coreVector3(MapToAxis(coreVector2::Direction(LERPH3(m_avWingReturn[i].z, fAngle3, MIN1(m_afWingTime[i]))), vBodyDirNorm), 0.0f);   // # no rota
 
                     oWing.SetPosition (vNewPos);
                     oWing.SetDirection(vNewDir);
@@ -1274,8 +1515,8 @@ void cCholBoss::__MoveOwn()
             // pull
             case 41u:
                 {
-                    const coreVector2 vNewPos = oWing.GetPosition ().xy() + coreVector2(0.0f,80.0f) * TIME;
-                    const coreVector2 vNewDir = oWing.GetDirection().xy() * coreMatrix3::Rotation(10.0f * TIME).m12();   // # no rota
+                    const coreVector2 vNewPos = oWing.GetPosition ().xy() + coreVector2(((i % 2u) ? 50.0f : 60.0f) * fSide, 80.0f) * TIME;
+                    const coreVector2 vNewDir = oWing.GetDirection().xy() * coreMatrix3::Rotation(10.0f * TIME * fSide).m12();   // # no rota
 
                     oWing.SetPosition (coreVector3(vNewPos, 0.0f));
                     oWing.SetDirection(coreVector3(vNewDir, 0.0f));
@@ -1323,10 +1564,32 @@ void cCholBoss::__MoveOwn()
                 }
                 break;
 
-            // explode
+            // explode 1
             case 61u:
                 {
-                    const coreFloat   fTime  = MIN(m_afWingTime[i], 1.0f);
+                    const coreVector2 vNewPos = oWing.GetPosition ().xy() + oWing.GetPosition().xy().Normalized() * 80.0f * TIME;
+                    const coreVector2 vNewDir = oWing.GetDirection().xy() * coreMatrix3::Rotation(10.0f * TIME * -fSide).m12();   // # no rota
+
+                    oWing.SetPosition (coreVector3(vNewPos, 0.0f));
+                    oWing.SetDirection(coreVector3(vNewDir, 0.0f));
+
+                    if(vNewPos.y <= FOREGROUND_AREA.y * -1.5f)
+                    {
+                        this->__ChangeWingInc(i);
+                    }
+                }
+                break;
+
+            case 62u:
+                {
+                    // nothing
+                }
+                break;
+
+            // explode 2
+            case 71u:
+                {
+                    const coreFloat   fTime  = MIN1(m_afWingTime[i]);
                     const coreVector3 vForce = coreVector3(1.5f * fSide, (i % 2u) ? -0.3f : -5.0f, 0.0f).Normalized() * FOREGROUND_AREA3 * 3.0f;
 
                     const coreVector3 vNewPos = LERP(vPos3, vPos3 + vForce, fTime);
@@ -1342,9 +1605,40 @@ void cCholBoss::__MoveOwn()
                 }
                 break;
 
-            case 62u:
+            case 72u:
                 {
                     // nothing
+                }
+                break;
+
+            // resurrect 1
+            case 81u:
+                {
+                    const coreFloat fTime  = CLAMP01(m_afWingTime[i] - I_TO_F(i) * 0.3f);
+
+                    const coreVector2 vNewPos = coreVector2(((i % 2u) ? 1.0f : -1.0f) * ((i < 2u) ? 1.5f : 0.5f) * 0.4f, LERPBR(-1.5f, 1.7f, fTime)) * FOREGROUND_AREA;
+                    const coreVector2 vNewDir = coreVector2(0.0f,1.0f);
+                    const coreVector2 vNewOri = coreVector2::Direction((2.0f*PI) * m_afWingTime[i]);
+
+                    oWing.SetPosition   (coreVector3(vNewPos, 0.0f));
+                    oWing.SetDirection  (coreVector3(vNewDir, 0.0f));
+                    oWing.SetOrientation(OriRoundDir(vNewOri, vNewDir));
+                }
+                break;
+
+            // resurrect 2
+            case 91u:
+                {
+                    const coreFloat fTime  = CLAMP01(m_afWingTime[i] - I_TO_F(i) * 0.3f);
+                    const coreFloat fSide2 = (i % 2u) ? 1.0f : -1.0f;
+
+                    const coreVector2 vNewPos = coreVector2(LERPBR(-1.5f, 1.7f, fTime) * fSide2, (1.5f - I_TO_F(i)) * 0.4f) * FOREGROUND_AREA;
+                    const coreVector2 vNewDir = coreVector2(fSide2, 0.0f);
+                    const coreVector2 vNewOri = coreVector2::Direction((2.0f*PI) * m_afWingTime[i]);
+
+                    oWing.SetPosition   (coreVector3(vNewPos, 0.0f));
+                    oWing.SetDirection  (coreVector3(vNewDir, 0.0f));
+                    oWing.SetOrientation(OriRoundDir(vNewOri, vNewDir));
                 }
                 break;
 
@@ -1367,10 +1661,10 @@ void cCholBoss::__MoveOwn()
             {
                 const coreFloat fLocal = m_fPush - 0.0f;
 
-                coreVector2       vPos = coreVector2(1.07f * (TriangleWave(fLocal * 2.25f) * 2.0f - 1.0f) * ((i % 2u) ? 1.0f : -1.0f), (I_TO_F(i) - 1.5f) * 0.55f);
-                const coreVector2 vDir = coreVector2(0.0f, (i < 2u) ? 1.0f : -1.0f);
+                coreVector2       vPos = coreVector2((I_TO_F(i) - 1.5f) * 0.55f, 1.07f * (TriangleWave(fLocal * 2.125f + 0.125f) * 2.0f - 1.0f) * ((i % 2u) ? 1.0f : -1.0f));
+                const coreVector2 vDir = coreVector2((i < 2u) ? 1.0f : -1.0f, 0.0f);
 
-                vPos = LERPB(vPos * coreVector2(1.5f,1.0f), vPos, MIN1(m_fPhaseTime));
+                vPos += coreVector2(LERPB(SIGN(vPos.x), 0.0f, MIN1(m_fPhaseTime)), 0.0f);
 
                 oWing.SetPosition (coreVector3(vPos * FOREGROUND_AREA, 0.0f));
                 oWing.SetDirection(coreVector3(vDir,                   0.0f));
@@ -1379,20 +1673,20 @@ void cCholBoss::__MoveOwn()
             {
                 const coreFloat fLocal = m_fPush - 1.0f;
 
-                const coreFloat   fAngle = LERP(0.0f, (i == 0u || i == 3u) ? (-2.5f*PI) : (3.5f*PI), fLocal);
+                const coreFloat   fAngle = LERP(0.5f*PI, (i == 0u || i == 3u) ? (-2.5f*PI) : (3.5f*PI), fLocal);
                 const coreVector2 vRota  = coreVector2::Direction(fAngle);
 
                 const coreVector2 vPos = vRota * ((I_TO_F(i) - 1.5f) * 0.55f);
                 const coreVector2 vDir = vRota * ((i < 2u) ? -1.0f : 1.0f);
 
                 oWing.SetPosition (coreVector3(vPos * FOREGROUND_AREA, 0.0f));
-                oWing.SetDirection(coreVector3(vDir.InvertedY(),       0.0f));
+                oWing.SetDirection(coreVector3(vDir.InvertedX(),       0.0f));
             }
             else
             {
                 const coreFloat fLocal = MIN1(m_fPush - 2.0f);
 
-                const coreFloat   fFrom  = ((i == 1u || i == 3u) ? (-7.5f*PI) : (8.5f*PI)) * ((i < 2u) ? 1.0f : -1.0f);
+                const coreFloat   fFrom  = ((i == 1u || i == 3u) ? (-7.5f*PI) : (8.5f*PI)) * ((i < 2u) ? -1.0f : 1.0f);
                 const coreFloat   fTo    = vDir3.xy().Angle();
                 const coreFloat   fAngle = LERP(fFrom, fTo, fLocal);
                 const coreVector2 vRota  = coreVector2::Direction(fAngle);
@@ -1418,7 +1712,8 @@ void cCholBoss::__MoveOwn()
         {
             PHASE_CONTROL_TICKER(3u, 0u, 30.0f, LERP_LINEAR)
             {
-                if((iTick % 10u) < 6u) return;
+                if((iTick % 20u) < 15u) return;
+                if(g_pGame->IsEasy() && ((iTick % 40u) < 20u)) return;
 
                 for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
                 {
@@ -1427,6 +1722,8 @@ void cCholBoss::__MoveOwn()
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, this, vPos, vDir)->ChangeSize(1.6f);
                 }
+
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             });
         }
     }
@@ -1434,14 +1731,8 @@ void cCholBoss::__MoveOwn()
     // 
     if(m_Fire.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
-        if(m_bFireActive)
-        {
-            m_Fire.SetAlpha(MIN1(m_Fire.GetAlpha() + 3.0f * TIME));
-        }
-        else
-        {
-            m_Fire.SetAlpha(MAX0(m_Fire.GetAlpha() - 5.0f * TIME));
-        }
+        if(m_bFireActive) m_fFireFade.UpdateMin( 3.0f, 1.0f);
+                     else m_fFireFade.UpdateMax(-4.0f, 0.0f);
 
         if(m_iFireType == 0u)
         {
@@ -1457,6 +1748,7 @@ void cCholBoss::__MoveOwn()
 
         m_Fire.SetDirection  (this->GetDirection());
         m_Fire.SetOrientation(vBodyOri);
+        m_Fire.SetAlpha      (BLENDH3(m_fFireFade));
         m_Fire.Move();
 
         if(!m_Fire.GetAlpha()) this->__DisableFire(false);
@@ -1487,7 +1779,7 @@ void cCholBoss::__MoveOwn()
         const coreUintW iWall = pBullet->GetDamage() - 1;
         ASSERT(iWall == 2u)
 
-        const coreFloat fOffset = 1.07f - 2.2f * m_avVector[WALL_OFFSET].z;
+        const coreFloat fOffset = 1.07f - 2.2f * fWallCurrent;
         const coreFloat fSide   = (I_TO_F(iIndex) - 9.5f) / -10.0f;
 
         const coreVector2 vPos = -coreVector2(fSide, fOffset) * FOREGROUND_AREA;
@@ -1500,6 +1792,106 @@ void cCholBoss::__MoveOwn()
 
         ++iIndex;
     });
+    
+    
+    // 
+    cHelper* pYellowHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
+    if(!pYellowHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        if(pYellowHelper->GetLifeTime() >= 3.0f)
+        {
+            this->_KillHelper(ELEMENT_YELLOW, true);
+        }
+    }
+
+    // 
+    cHelper* pOrangeHelper = g_pGame->GetHelper(ELEMENT_ORANGE);
+    if(!pOrangeHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pOrangeHelper->GetPosition().xy() + coreVector2(35.0f * TIME, 0.0f);
+
+        pOrangeHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pOrangeHelper->GetPosition().xy(), 1.3f))
+        {
+            this->_KillHelper(ELEMENT_ORANGE, false);
+        }
+    }
+
+    // 
+    cHelper* pRedHelper = g_pGame->GetHelper(ELEMENT_RED);
+    if(!pRedHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreFloat fTime = pRedHelper->GetLifeTime() * 0.8f;
+
+        pRedHelper->SetPosition(coreVector3(-2.0f * GELU_FANG_STEP, 1.3f - 0.5f * SIN(fTime * (1.0f*PI)), 0.0f) * FOREGROUND_AREA3);
+
+        if(fTime >= 1.0f) this->_KillHelper(ELEMENT_RED, false);
+    }
+
+    // 
+    cHelper* pMagentaHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
+    if(!pMagentaHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pMagentaHelper->GetPosition().xy() + coreVector2(0.0f, -1.9f * BULLET_SPEED_FACTOR * TIME);
+
+        pMagentaHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pMagentaHelper->GetPosition().xy(), 1.3f))
+        {
+            this->_KillHelper(ELEMENT_MAGENTA, false);
+        }
+    }
+
+    // 
+    cHelper* pPurpleHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
+    if(!pPurpleHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pPurpleHelper->GetPosition().xy() + coreVector2(0.0f, 15.0f * TIME);
+
+        pPurpleHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pPurpleHelper->GetPosition().xy(), 1.3f))
+        {
+            this->_KillHelper(ELEMENT_PURPLE, false);
+        }
+    }
+
+    // 
+    cHelper* pBlueHelper = g_pGame->GetHelper(ELEMENT_BLUE);
+    if(!pBlueHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pBlueHelper->GetPosition().xy() + coreVector2(0.0f, 25.0f * TIME);
+
+        pBlueHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pBlueHelper->GetPosition().xy(), 1.7f))   // more
+        {
+            this->_KillHelper(ELEMENT_BLUE, false);
+        }
+    }
+
+    // 
+    cHelper* pCyanHelper = g_pGame->GetHelper(ELEMENT_CYAN);
+    if(!pCyanHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreFloat fTime = pCyanHelper->GetLifeTime() * 0.3f;
+
+        pCyanHelper->SetPosition(coreVector3(0.96f, LERP(1.3f, -1.3f, fTime), 0.0f) * FOREGROUND_AREA3);
+
+        if(fTime >= 1.0f) this->_KillHelper(ELEMENT_CYAN, false);
+    }
+
+    // 
+    cHelper* pGreenHelper = g_pGame->GetHelper(ELEMENT_GREEN);
+    if(!pGreenHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreFloat fTime = pGreenHelper->GetLifeTime() * 0.7f;
+
+        pGreenHelper->SetPosition(coreVector3(LERP(-1.3f, 1.3f, fTime), 0.5f, 0.0f) * FOREGROUND_AREA3);
+
+        if(fTime >= 1.0f) this->_KillHelper(ELEMENT_GREEN, false);
+    }
 }
 
 
@@ -1514,6 +1906,7 @@ void cCholBoss::__EnableFire(const coreUint8 iType)
     g_pGlow->BindObject(&m_Fire);
 
     // 
+    m_fFireFade   = 0.0f;
     m_iFireType   = iType;
     m_bFireActive = true;
 
@@ -1542,6 +1935,7 @@ void cCholBoss::__EnableFire(const coreUint8 iType)
         {
             g_pSpecialEffects->CreateBlowColor(m_aWing[i].GetPosition() + m_aWing[i].GetDirection() * 5.0f, -m_aWing[i].GetDirection(), SPECIAL_BLOW_BIG, COLOR_ENERGY_ORANGE);
         }
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FIRE_START);
     }
 }
 
@@ -1566,18 +1960,74 @@ void cCholBoss::__DisableFire(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cCholBoss::__RepairWing(const coreUintW iIndex, const coreInt32 iHealth)
+{
+    ASSERT(iIndex < CHOL_WINGS) 
+
+    // 
+    m_aWing[iIndex].SetMaxHealth(iHealth);
+    m_aWing[iIndex].SetCurHealth(iHealth);
+    m_aWing[iIndex].RefreshColor(1.0f);
+}
+
+
+// ****************************************************************
+// 
+void cCholBoss::__Impact(coreObject3D* OUTPUT pObject, const coreVector2 vPos, const coreVector3 vDir, const coreFloat fTime, const coreFloat fTimeBefore, const coreBool bBig)
+{
+    const coreFloat   fHeight  = g_pEnvironment->RetrieveSafeHeight(vPos);
+    const coreVector3 vPoint   = coreVector3(vPos, fHeight) - vDir * 2.0f;
+    const coreVector3 vPosFrom = vPoint - vDir * 150.0f;
+    const coreVector3 vPosTo   = vPoint;
+
+    pObject->SetPosition (LERPBR(vPosFrom, vPosTo, CLAMP01(fTime)));
+    pObject->SetDirection(vDir);
+
+    if(InBetween(1.0f, fTimeBefore, fTime))
+    {
+        if(bBig) g_pSpecialEffects->MacroExplosionColorBig  (vPosTo, COLOR_ENERGY_ORANGE);
+            else g_pSpecialEffects->MacroExplosionColorSmall(vPosTo, COLOR_ENERGY_ORANGE);
+
+        if(bBig) g_pSpecialEffects->PlaySound(vPosTo, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
+            else g_pSpecialEffects->PlaySound(vPosTo, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
+
+        const coreUintW i = 0u;
+        // 
+        const coreBool    bRotated   = i % 2u;
+        const coreBool    bFlipped   = (i / 2u) % 2u;
+        const coreVector3 vDecalPos  = coreVector3(vPos, fHeight);
+        const coreVector2 vDecalSize = coreVector2(1.0f,1.0f) * (bBig ? 20.0f : 15.0f);
+        const coreVector2 vDecalDir  = coreVector2(0.0f,1.0f);
+
+        // load object resources
+        coreObject3D* pObject2 = MANAGED_NEW(coreObject3D);
+        pObject2->DefineModel  (Core::Manager::Object->GetLowQuad());
+        pObject2->DefineTexture(0u, "effect_soot.png");
+        pObject2->DefineProgram("effect_decal_single_program");
+
+        // set object properties
+        pObject2->SetSize     (coreVector3((bRotated ? vDecalSize.yx()       : vDecalSize),                            1.0f));
+        pObject2->SetDirection(coreVector3((bRotated ? vDecalDir.Rotated90() : vDecalDir) * (bFlipped ? -1.0f : 1.0f), 0.0f));
+        pObject2->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
+
+        // add object to background or windscreen
+        g_pEnvironment->GetBackground()->AddDecal(pObject2, vDecalPos, 8u, "effect_decal_single_inst_program", LIST_KEY);
+    }
+}
+
+
+// ****************************************************************
+// 
 void cCholBoss::__ResurrectFake()
 {
     // 
-    this->SetMaxHealth(1200);
-    this->SetCurHealth(1200);
+    this->SetMaxHealth(1400);
+    this->SetCurHealth(1400);
     this->RefreshColorAll(1.0f);
 
     // 
-    m_fResurrection = 0.0f;
-
-    // 
     g_pGame->GetInterface()->ShowBoss(this, true);
+    g_pGame->GetInterface()->SetFakeEnd(false);
 }
 
 
@@ -1586,18 +2036,32 @@ void cCholBoss::__ResurrectFake()
 void cCholBoss::__KillFake()
 {
     // 
-    const coreFloat  fTimeShifted = g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe();
-    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted, g_pGame->GetCurMission()->GetMedalGoal());
+    g_pGame->GetInterface()->ShowScore(57300u, MEDAL_BRONZE, MEDAL_TYPE_BOSS);
+    g_pGame->GetInterface()->SetFakeEnd(true);
 
     // 
-    g_pGame->GetInterface()->ShowScore(iBonus, 1u, MEDAL_TYPE_BOSS);
+    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SPECIAL_SOUND_MEDAL(MEDAL_BRONZE));
 
     // 
-    m_fResurrection = INTERFACE_BANNER_DURATION_SCORE + 1.0f;
+    g_pGame->RepairPlayer();
+
+    // 
+    g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetScoreTable()->TransferChain();
+    });
+    g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->StartRolling(pPlayer->GetInput()->vMove);
+    });
+
+    // 
     m_aiCounter[DEATH_COUNT] += 1u;
 
     // 
-    g_pSpecialEffects->MacroDestructionDark(this);
+    g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
+    g_pSpecialEffects->MacroDestructionDark (this);
+    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
 
     // 
     this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));

@@ -60,9 +60,9 @@ public:
 protected:
     // 
     coreBool    _IsOwnerDarkShading()const;
-    coreBool    _IsOwnerProjectOne ()const;
+    coreBool    _IsOwnerRainbow    ()const;
     coreVector3 _GetEnergyColor    ()const;
-    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet) {this->_TrackBullet(); if(this->_IsOwnerProjectOne()) ptBullet->SetColor3(this->_GetEnergyColor()); else ptBullet->MakeWhite(); return ptBullet;}
+    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet) {this->_TrackBullet(); if(this->_IsOwnerRainbow()) ptBullet->SetColor3(this->_GetEnergyColor()); else ptBullet->MakeWhite(); return ptBullet;}
 
     // 
     void _TrackBullet();
@@ -246,6 +246,33 @@ public:
 private:
     // execute own routines
     void __ShootOwn()final;
+};
+
+
+// ****************************************************************
+// final weapon class
+class cFinalWeapon final : public cWeapon
+{
+private:
+    coreBool m_bBurst;   // 
+
+
+public:
+    cFinalWeapon()noexcept;
+
+    DISABLE_COPY(cFinalWeapon)
+    ASSIGN_ID(11, "Final Weapon")
+
+    // get object properties
+    inline coreVector3 GetColorEnergy()const final {return COLOR_ENERGY_WHITE;}
+    inline coreVector3 GetColorShip  ()const final {return COLOR_SHIP_WHITE;}
+    inline coreUint8   GetElement    ()const final {return ELEMENT_WHITE;}
+
+
+private:
+    // execute own routines
+    void __ReleaseOwn(const coreUint8 iMode)final;
+    void __ShootOwn  ()final;
 };
 
 

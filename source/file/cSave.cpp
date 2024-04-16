@@ -7,7 +7,6 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
-#include "cConfig.h"
 
 
 // ****************************************************************
@@ -324,6 +323,10 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
         pHeader->oProgress.bFirstPlay = false;
         if(!g_bDemoVersion) ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_EXTRA)
     }
+
+#if defined(_CORE_DEBUG_)
+    std::memset(pHeader->oProgress.aiFragment, 1, sizeof(pHeader->oProgress.aiFragment));
+#endif
     
     
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_MIRRORMORE))  g_CurConfig.Game.iMirrorMode = 0u;

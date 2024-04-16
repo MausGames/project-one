@@ -537,6 +537,13 @@ private:
 // dark background class
 class cDarkBackground final : public cBackground
 {
+public:
+    // 
+    static constexpr const coreVector3 Color  = coreVector3(0.5f,0.5f,0.5f);
+    static constexpr const coreVector3 Color2 = coreVector3(0.8f,0.8f,0.8f);
+    static constexpr const coreVector2 Icon   = coreVector2(0.0f,0.5f);
+
+
 private:
     coreBatchList m_Block;                    // 
     coreObject3D  m_aBlockRaw[DARK_BLOCKS];   // 
@@ -549,6 +556,9 @@ private:
 
     coreFlow m_fDissolve;                     // 
     coreFlow m_afFade[DARK_BLOCKS];           // 
+
+    coreVector3 m_vColor;                     // 
+    coreVector3 m_vColor2;                    // 
 
     coreSoundPtr m_pBaseSound;                // base sound-effect
 
@@ -563,7 +573,7 @@ public:
     ~cDarkBackground()final;
 
     DISABLE_COPY(cDarkBackground)
-    ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f), coreVector3(0.8f,0.8f,0.8f), coreVector2(0.0f,0.5f))
+    ASSIGN_ID(8, "Dark")
 
     // 
     void Dissolve();
@@ -573,10 +583,14 @@ public:
     inline void FlashLightning() {m_fLightningFlash = 1.0f;}
 
     // 
-    inline void SetBlockHeight(const coreUintW iIndex, const coreFloat   fHeight) {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetPosition(coreVector3(m_aBlockRaw[iIndex].GetPosition().xy(), DARK_HEIGHT + fHeight));}
-    inline void SetBlockColor (const coreUintW iIndex, const coreVector3 vColor)  {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetColor3  (vColor * m_aBlockRaw[iIndex].GetAlpha());}
+    inline void SetColor      (const coreVector3 vColor, const coreVector3 vColor2) {m_vColor = vColor; m_vColor2 = vColor2;}
+    inline void SetBlockHeight(const coreUintW   iIndex, const coreFloat   fHeight) {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetPosition(coreVector3(m_aBlockRaw[iIndex].GetPosition().xy(), DARK_HEIGHT + fHeight));}
+    inline void SetBlockColor (const coreUintW   iIndex, const coreVector3 vColor)  {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetColor3  (vColor * m_aBlockRaw[iIndex].GetAlpha());}
 
     // 
+    inline coreVector3      GetColor            ()const final                 {return m_vColor;}
+    inline coreVector3      GetColor2           ()const final                 {return m_vColor2;}
+    inline coreVector2      GetIcon             ()const final                 {return cDarkBackground::Icon;}
     inline coreVector2      GetBlockPosition    (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().xy() - cDarkBackground::__GetCameraPos();}
     inline coreVector2      GetBlockPositionNorm(const coreUintW iIndex)const {return this->GetBlockPosition(iIndex) / (coreVector2(I_TO_F(DARK_BLOCKS_X - 1u), I_TO_F(DARK_BLOCKS_Y - 1u)) / 2.0f * DARK_DETAIL);}
     inline const coreFloat& GetBlockHeight      (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().z;}
@@ -607,7 +621,9 @@ private:
 class cStomachBackground final : public cBackground
 {
 private:
-    cHeadlight m_Headlight;   // 
+    cHeadlight m_Headlight;      // 
+
+    coreSoundPtr m_pBaseSound;   // base sound-effect
 
 
 public:
@@ -617,12 +633,16 @@ public:
     DISABLE_COPY(cStomachBackground)
     ASSIGN_ID_EX(51, "Stomach", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
 
+    // 
+    inline cHeadlight* GetHeadlight() {return &m_Headlight;}
+
 
 private:
     // execute own routines
     void __InitOwn       ()final;
     void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
+    void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
 };
 

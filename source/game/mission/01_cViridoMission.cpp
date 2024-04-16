@@ -12,36 +12,39 @@
 // ****************************************************************
 // constructor
 cViridoMission::cViridoMission()noexcept
-: m_Ball           (VIRIDO_BALLS)
-, m_BallTrail      (VIRIDO_BALLS * VIRIDO_TRAILS)
-, m_apPaddleOwner  {}
-, m_Barrier1       (VIRIDO_BARRIERS_FIRST)
-, m_Barrier2       (VIRIDO_BARRIERS_SECOND)
-, m_apBarrierOwner {}
-, m_avBarrierPos   {}
-, m_avBarrierDir   {}
-, m_bBarrierSlow   (false)
-, m_bBarrierClamp  (true)
-, m_Laser          (VIRIDO_LASERS)
-, m_LaserWave      (VIRIDO_LASERS)
-, m_apLaserOwner   {}
-, m_avLaserPos     {}
-, m_avLaserDir     {}
-, m_afLaserTick    {}
-, m_bLaserCross    (true)
-, m_Shadow         (VIRIDO_SHADOWS)
-, m_apShadowOwner  {}
-, m_iShadowType    (0u)
-, m_Bean           (VIRIDO_BEANS)
-, m_BeanWave       (VIRIDO_BEANS)
-, m_aiDrumCount    {}
-, m_aiDrumIndex    {}
-, m_fPoleCount     (0.0f)
-, m_iPoleIndex     (UINT8_MAX)
-, m_iRealState     (0u)
-, m_iStickyState   (0u)
-, m_iBounceState   (0u)
-, m_fAnimation     (0.0f)
+: m_Ball            (VIRIDO_BALLS)
+, m_BallTrail       (VIRIDO_BALLS * VIRIDO_TRAILS)
+, m_apPaddleOwner   {}
+, m_Barrier1        (VIRIDO_BARRIERS_FIRST)
+, m_Barrier2        (VIRIDO_BARRIERS_SECOND)
+, m_apBarrierOwner  {}
+, m_avBarrierPos    {}
+, m_avBarrierDir    {}
+, m_bBarrierSlow    (false)
+, m_bBarrierClamp   (true)
+, m_bBarrierReflect (true)
+, m_Laser           (VIRIDO_LASERS)
+, m_LaserWave       (VIRIDO_LASERS)
+, m_apLaserOwner    {}
+, m_avLaserPos      {}
+, m_avLaserDir      {}
+, m_afLaserTick     {}
+, m_bLaserCross     (true)
+, m_Shadow          (VIRIDO_SHADOWS)
+, m_apShadowOwner   {}
+, m_iShadowType     (0u)
+, m_Hint            (VIRIDO_HINTS)
+, m_aiHintBarrier   {}
+, m_Bean            (VIRIDO_BEANS)
+, m_BeanWave        (VIRIDO_BEANS)
+, m_aiDrumCount     {}
+, m_aiDrumIndex     {}
+, m_fPoleCount      (0.0f)
+, m_iPoleIndex      (UINT8_MAX)
+, m_iRealState      (0u)
+, m_iStickyState    (0u)
+, m_iBounceState    (0u)
+, m_fAnimation      (0.0f)
 {
     // 
     m_apBoss[0] = &m_Torus;
@@ -164,6 +167,28 @@ cViridoMission::cViridoMission()noexcept
     }
 
     // 
+    m_Hint.DefineProgram("effect_energy_flat_invert_inst_program");
+    {
+        for(coreUintW i = 0u; i < VIRIDO_HINTS_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pHint = &m_aHintRaw[i];
+            pHint->DefineModel  ("object_arrow.md3");
+            pHint->DefineTexture(0u, "effect_energy.png");
+            pHint->DefineProgram("effect_energy_flat_invert_program");
+
+            // set object properties
+            pHint->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
+            pHint->SetColor3 (COLOR_ENERGY_BLUE);
+            pHint->SetTexSize(coreVector2(0.5f,0.2f) * 1.2f);
+            pHint->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Hint.BindObject(pHint);
+        }
+    }
+
+    // 
     m_Bean    .DefineProgram("effect_energy_flat_inst_program");
     m_BeanWave.DefineProgram("effect_energy_flat_inst_program");
     {
@@ -226,6 +251,7 @@ cViridoMission::cViridoMission()noexcept
     g_pGlow->BindList(&m_Barrier2);
     g_pGlow->BindList(&m_Laser);
     g_pGlow->BindList(&m_LaserWave);
+    g_pGlow->BindList(&m_Hint);
     g_pGlow->BindList(&m_Bean);
     //g_pGlow->BindList(&m_BeanWave);
 
@@ -249,6 +275,7 @@ cViridoMission::~cViridoMission()
     g_pGlow->UnbindList(&m_Barrier2);
     g_pGlow->UnbindList(&m_Laser);
     g_pGlow->UnbindList(&m_LaserWave);
+    g_pGlow->UnbindList(&m_Hint);
     g_pGlow->UnbindList(&m_Bean);
     //g_pGlow->UnbindList(&m_BeanWave);
 
@@ -258,6 +285,7 @@ cViridoMission::~cViridoMission()
     for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i) this->DisableBarrier(i, false);
     for(coreUintW i = 0u; i < VIRIDO_LASERS;   ++i) this->DisableLaser  (i, false);
     for(coreUintW i = 0u; i < VIRIDO_SHADOWS;  ++i) this->DisableShadow (i, false);
+    for(coreUintW i = 0u; i < VIRIDO_HINTS;    ++i) this->DisableHint   (i, false);
     for(coreUintW i = 0u; i < VIRIDO_BEANS;    ++i) this->DisableBean   (i, false);
     this->DisableTarget(false);
 }
@@ -512,6 +540,40 @@ void cViridoMission::DisableShadow(const coreUintW iIndex, const coreBool bAnima
 
 // ****************************************************************
 // 
+void cViridoMission::EnableHint(const coreUintW iIndex, const coreUintW iBarrier)
+{
+    ASSERT(iIndex < VIRIDO_HINTS)
+    coreObject3D& oHint = m_aHintRaw[iIndex];
+
+    // 
+    WARN_IF(oHint.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableHint(iIndex, false);
+
+    // 
+    m_aiHintBarrier[iIndex] = iBarrier;
+
+    // 
+    oHint.SetAlpha  (0.0f);
+    oHint.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cViridoMission::DisableHint(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < VIRIDO_HINTS)
+    coreObject3D& oHint = m_aHintRaw[iIndex];
+
+    // 
+    if(!oHint.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    if(!bAnimated) oHint.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// 
 void cViridoMission::EnableBean(const coreUintW iIndex)
 {
     ASSERT(iIndex < VIRIDO_BEANS)
@@ -699,6 +761,12 @@ void cViridoMission::SetBarrierScale(const coreUintW iIndex, const coreFloat fSc
 // 
 void cViridoMission::__RenderOwnUnder()
 {
+    DEPTH_PUSH
+
+    // 
+    m_Hint.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Hint);
+
     DEPTH_PUSH
 
     glDepthMask(false);
@@ -982,19 +1050,27 @@ void cViridoMission::__MoveOwnAfter()
                             return;
                         }
                     }
-                
-                    // 
-                    coreVector2 vNormal = oBarrier.GetDirection().xy();
-                    if(SameDirection(-pBullet->GetFlyDir(), vNormal))
+
+                    if(m_bBarrierReflect)
                     {
-                        vNormal = (vNormal + vNormal.Rotated90() * Core::Rand->Float(-0.1f, 0.1f)).Normalized();
+                        // 
+                        coreVector2 vNormal = oBarrier.GetDirection().xy();
+                        if(SameDirection(-pBullet->GetFlyDir(), vNormal))
+                        {
+                            vNormal = (vNormal + vNormal.Rotated90() * Core::Rand->Float(-0.1f, 0.1f)).Normalized();
+                        }
+
+                        // 
+                        pBullet->Reflect(&oBarrier, vIntersection, vNormal);
+
+                        // 
+                        g_pGame->PlayReflectSound(coreVector3(vIntersection, 0.0f));
                     }
-
-                    // 
-                    pBullet->Reflect(&oBarrier, vIntersection, vNormal);
-
-                    // 
-                    g_pGame->PlayReflectSound(coreVector3(vIntersection, 0.0f));
+                    else
+                    {
+                        // 
+                        pBullet->Deactivate(true);
+                    }
                 }
             });
             
@@ -1227,6 +1303,35 @@ void cViridoMission::__MoveOwnAfter()
 
     // 
     m_Shadow.MoveNormal();
+
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_HINTS; ++i)
+    {
+        coreObject3D& oHint = m_aHintRaw[i];
+        if(!oHint.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        const coreUintW iIndex = m_aiHintBarrier[i];
+        ASSERT(iIndex < VIRIDO_BARRIERS)
+
+        const coreVector2 vBasePos   = m_aBarrierRaw[iIndex].GetPosition ().xy();
+        const coreVector2 vBaseDir   = m_aBarrierRaw[iIndex].GetDirection().xy();
+        const coreFloat   fBaseAlpha = m_aBarrierRaw[iIndex].GetAlpha();
+
+        // 
+        if(!m_aBarrierRaw[iIndex].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) this->DisableHint(i, false);
+
+        // 
+        const coreFloat fOffset = I_TO_F(i) * (1.0f/8.0f);
+
+        // 
+        oHint.SetPosition (coreVector3(vBasePos - vBaseDir * 7.0f, 0.0f));
+        oHint.SetDirection(coreVector3(vBaseDir,                   0.0f));
+        oHint.SetAlpha    (fBaseAlpha * 0.5f);
+        oHint.SetTexOffset(coreVector2(FRACT(0.6f * m_fAnimation + fOffset), 0.0f));
+    }
+
+    // 
+    m_Hint.MoveNormal();
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_BEANS; ++i)

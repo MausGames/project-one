@@ -256,7 +256,7 @@ void cIntroMission::__SetupOwn()
         coreBool bBack  = false;
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-                 if((i >=  0u && i < 12u) && !pEnemy->HasStatus(ENEMY_STATUS_DEAD)) bFront = true;
+                 if((            i < 12u) && !pEnemy->HasStatus(ENEMY_STATUS_DEAD)) bFront = true;
             else if((i >= 12u && i < 24u) && !pEnemy->HasStatus(ENEMY_STATUS_DEAD)) bBack  = true;
         });
 

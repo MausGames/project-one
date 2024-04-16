@@ -39,6 +39,8 @@
 // TODO 3: manual graphics are not updated when changing resolution during pause in intro mission
 // TODO 3: manual/tutorial might react strange on inverted and toggled firing mode, because iActionHold is inspected
 // TODO 1: wenn P1 oder Eigengrau besiegt wird, beim ersten mal kommen immer credits, danach kommen keine bei single segment und single mission, aber immer bei arcade
+// TODO 1: add 3 different pearl-pitch tracks (wave, boss, p1) and reset state properly
+// TODO 3: flash-teleportation (mission, boss, p1) should be by the player doing the most damage, not the last attacker
 
 
 // ****************************************************************
@@ -77,6 +79,8 @@
 #define VIRIDO_SHADOWS_ENEMY        (20u)                                             // 
 #define VIRIDO_SHADOWS              (VIRIDO_SHADOWS_ENEMY + MISSION_PLAYERS)          // 
 #define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
+#define VIRIDO_HINTS                (12u)                                             // 
+#define VIRIDO_HINTS_RAWS           (VIRIDO_HINTS)                                    // 
 #define VIRIDO_BEANS                (16u)                                             // 
 #define VIRIDO_BEANS_RAWS           (VIRIDO_BEANS * 2u)                               // 
 #define VIRIDO_DRUMS                (2u)                                              // 
@@ -146,6 +150,7 @@
 #define GELU_SHINES_RAWS            (GELU_SHINES)                                     // 
 #define GELU_DROPS                  (8u)                                              //                             
 #define GELU_DROPS_RAWS             (GELU_DROPS)                                      //                             
+#define GELU_FANG_COLOR             (coreVector3(1.0f,1.0f,1.0f) * 0.25f)             // 
 #define GELU_FANG_STEP              (0.44f)                                           // 
 #define GELU_WAY_STEP               (0.36f)                                           // 
 #define GELU_POSITIONS              (MAX(GELU_FANGS, GELU_WAYS))                      // 
@@ -489,6 +494,7 @@ private:
     coreVector2   m_avBarrierDir  [VIRIDO_BARRIERS];        // 
     coreBool      m_bBarrierSlow;                           // 
     coreBool      m_bBarrierClamp;                          // 
+    coreBool      m_bBarrierReflect;                        // 
 
     coreBatchList m_Laser;                                  // 
     coreBatchList m_LaserWave;                              // 
@@ -503,6 +509,10 @@ private:
     coreObject3D  m_aShadowRaw   [VIRIDO_SHADOWS_RAWS];     // 
     const cShip*  m_apShadowOwner[VIRIDO_SHADOWS];          // 
     coreUint32    m_iShadowType;                            // 
+
+    coreBatchList m_Hint;                                   // 
+    coreObject3D  m_aHintRaw     [VIRIDO_HINTS_RAWS];       // 
+    coreUint8     m_aiHintBarrier[VIRIDO_HINTS_RAWS];       // 
 
     coreBatchList m_Bean;                                   // 
     coreBatchList m_BeanWave;                               // 
@@ -554,6 +564,10 @@ public:
     void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableHint (const coreUintW iIndex, const coreUintW iBarrier);
+    void DisableHint(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableBean (const coreUintW iIndex);
     void DisableBean(const coreUintW iIndex, const coreBool bAnimated);
 
@@ -570,9 +584,10 @@ public:
     void EndPoleDance  (const coreBool bAnimated);
 
     // 
-    void        SetBarrierScale(const coreUintW iIndex, const coreFloat fScale);
-    inline void SetBarrierSlow (const coreBool bSlow)  {m_bBarrierSlow  = bSlow;}
-    inline void SetBarrierClamp(const coreBool bClamp) {m_bBarrierClamp = bClamp;}
+    void        SetBarrierScale  (const coreUintW iIndex, const coreFloat fScale);
+    inline void SetBarrierSlow   (const coreBool bSlow)    {m_bBarrierSlow    = bSlow;}
+    inline void SetBarrierClamp  (const coreBool bClamp)   {m_bBarrierClamp   = bClamp;}
+    inline void SetBarrierReflect(const coreBool bReflect) {m_bBarrierReflect = bReflect;}
 
     // 
     inline void SetLaserCross(const coreBool bCross) {m_bLaserCross = bCross;}
@@ -670,8 +685,8 @@ private:
     coreObject3D m_aDemoRange[2];                     // 
     coreFlow     m_fDemoRangeAnim;                    // 
 
-    coreTexturePtr m_apTexCache[9];                   // 
-    coreSoundPtr   m_pNightmareSound;                 // 
+    coreDummyPtr m_apResCache[23];                    // 
+    coreSoundPtr m_pNightmareSound;                   // 
 
     coreFlow m_fAnimation;                            // animation value
 
@@ -1290,10 +1305,14 @@ public:
     // 
     void StartSwing(const coreFloat fSpeed);
     void StopSwing();
+    inline void SetSwingSpeed(const coreFloat fSpeed) {ASSERT(m_fSwingStart >= 1.0f) m_fSwingSpeed = fSpeed;}
 
     // 
     void CatchObject  (const coreUintW iIndex, cShip* pObject);
     void UncatchObject(const coreUintW iIndex);
+
+    // 
+    inline const coreFloat& GetStarLength(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return m_afStarLength[iIndex];}
 
     // 
     inline cSnow*        GetSnow       ()                            {return &m_Snow;}
@@ -1341,6 +1360,7 @@ private:
     coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];           // 
     coreUint64    m_iPearlActive;                            // 
     coreUint64    m_iPearlHidden;                            // 
+    coreUint8     m_iPearlPitch;                             // 
 
     coreObject3D m_aZombie[MUSCUS_ZOMBIES];                  // 
 
@@ -1393,6 +1413,9 @@ public:
     inline coreBool IsPearlValidAny()const                       {return (m_iPearlActive != 0u);}
 
     // 
+    coreFloat RetrievePearlPitch();
+
+    // 
     void StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, const cShip* pTarget);
 
     // 
@@ -1431,6 +1454,8 @@ private:
     cTurf    m_Turf;                // 
     coreBool m_bTurfState;          // 
 
+    coreBool m_Secret;              // 
+
 
 public:
     cAterMission()noexcept;
@@ -1442,6 +1467,9 @@ public:
     // 
     void RequestInnerMission(const coreInt32 iID);
     void LoadInnerMission   (const coreInt32 iID);
+
+    // 
+    inline void LaunchSecret() {m_Secret = true;}
 
     // 
     inline RETURN_NONNULL cMission* GetInnerMission()const {ASSERT(m_pInnerMission) return m_pInnerMission;}

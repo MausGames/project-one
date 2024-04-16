@@ -15,6 +15,7 @@
 // TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 // TODO 4: check and cleanup transformation functions
 // TODO 3: merge WasDamaged in cShip and cEnemy
+// TODO 2: ReachedDeath könnte übersprungen werden, wenn nicht geprüft wird, während es passiert
 
 
 // ****************************************************************

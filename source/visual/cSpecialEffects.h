@@ -137,10 +137,13 @@ enum eSoundEffect : coreUint8
     SOUND_MENU_SUB_IN,
     SOUND_MENU_SUB_OUT,
 
+    SOUND_EFFECT_CHARGE_IN,
+    SOUND_EFFECT_CHARGE_OUT,
     SOUND_EFFECT_DUST,
     SOUND_EFFECT_ERROR,
     SOUND_EFFECT_FIRE_START,
-    SOUND_EFFECT_SHAKE,   // bomb, laser
+    SOUND_EFFECT_PEARL,
+    SOUND_EFFECT_SHAKE,
     SOUND_EFFECT_WOOSH,
 
     SOUND_PLACEHOLDER,
@@ -192,7 +195,7 @@ private:
     coreUintW    m_iCurExplosion;                           // 
 
     coreSoundPtr         m_apSound[SOUND_MAX];              // 
-    coreUint64           m_aiSoundGuard[1];                 // (to reduce multiple same sound-effects within one frame) 
+    coreUint64           m_aiSoundGuard[2];                 // (to reduce multiple same sound-effects within one frame) 
     coreList<cSoundData> m_aSoundData;                      // 
 
     coreTimer m_ShakeTimer;                                 // 
@@ -231,7 +234,7 @@ public:
     // EXPOSE particle classes for own effects at certain locations
 
     // create centered particle splash
-    void CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor, const coreBool bDeep = false, const coreBool bLock = false);
+    void CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor, const coreBool bDeep = false, const coreBool bLock = false, const coreFloat fSize = 1.0f, const coreFloat fSpeed = 1.0f);
     void CreateSplashDark (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum,                           const coreBool bDeep = false, const coreBool bLock = false);
     void CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
     void CreateSplashFire (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
@@ -314,6 +317,9 @@ public:
     void MacroEruptionDarkBig            (const coreVector3 vPosition, const coreVector2 vDirection);
     void MacroDestructionColor           (const coreObject3D* pObject, const coreVector3 vColor);
     void MacroDestructionDark            (const coreObject3D* pObject);
+
+    // 
+    inline coreParticleSystem* GetParticleColor() {return &m_aParticleColor[0];}
 
 
 private:

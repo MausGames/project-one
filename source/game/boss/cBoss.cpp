@@ -37,7 +37,6 @@ cBoss::cBoss()noexcept
     this->AddStatus(ENEMY_STATUS_BOSS);
     this->AddStatus(ENEMY_STATUS_SINGLE);
     this->AddStatus(ENEMY_STATUS_IMMORTAL);
-    this->AddStatus(ENEMY_STATUS_WORTHLESS);
 
     // 
     g_pGame->GetEnemyManager()->BindEnemy(this);
@@ -278,15 +277,21 @@ void cBoss::_KillHelper(const coreUint8 iElement, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cBoss::_CreateFragment(const coreUint8 iType)
+void cBoss::_CreateFragment(const coreUint8 iType, const coreVector2 vPosition)
 {
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
     const coreUintW iBossIndex    = 0u;
 
-    if(!HAS_BIT(g_pSave->GetHeader().oProgress.aiFragment[iMissionIndex], iBossIndex))
+    if(!HAS_BIT(g_pSave->GetHeader().oProgress.aiFragment[iMissionIndex], iBossIndex) || (iType == 8u))
     {
-        g_pGame->GetItemManager()->AddItem<cFragmentItem>(this->GetPosition().xy(), iType, iMissionIndex, iBossIndex);
+        g_pGame->GetItemManager()->AddItem<cFragmentItem>(vPosition, iType, iMissionIndex, iBossIndex);
     }
+}
+
+void cBoss::_CreateFragment(const coreUint8 iType)
+{
+    // 
+    this->_CreateFragment(iType, this->GetPosition().xy());
 }
 
 

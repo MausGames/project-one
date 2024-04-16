@@ -14,6 +14,7 @@
 cHeadlight::cHeadlight()noexcept
 : m_Flicker  (coreTimer(1.0f, 10.0f, 7u))
 , m_iShatter (0u)
+, m_fBlend   (0.0f)
 , m_iDefault (0xFFu)
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
@@ -88,6 +89,13 @@ void cHeadlight::Update()
             // 
             m_Spot.SetAlpha((m_iShatter == HEADLIGHT_TYPE_ON) ? 1.0f : 0.0f);
         }
+    }
+
+    if(m_fBlend)
+    {
+        // 
+        m_fBlend.UpdateMin(1.0f, 2.0f);
+        m_Spot.SetAlpha(BLENDH3(2.0f - m_fBlend));
     }
 
     if(!m_aSpotCommand.empty() || !m_aPointCommand.empty())

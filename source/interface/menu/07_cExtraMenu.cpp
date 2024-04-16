@@ -66,7 +66,7 @@ cExtraMenu::cExtraMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_EXTRA_FRAGMENTS; ++i)
     {
-        const coreVector2 vDir  = coreVector2(1.0f,1.0f).Normalized();
+        const coreVector2 vDir  = FRAGMENT_DIRECTION;
         const coreVector2 vPos  = MapToAxisInv(FRAGMENT_POSITION(i), vDir) * 0.35f;
         const coreVector2 vSize = g_aFragmentData[i].vSize * 0.35f * ((i == 8u) ? 1.1f : 1.0f);
 
@@ -350,7 +350,7 @@ void cExtraMenu::Move()
             else if(m_Credits.IsClicked())
             {
                 // 
-                pCreditRoll->Start();
+                pCreditRoll->Start(CREDIT_TYPE_MENU);
 
                 // 
                 g_pMenu->ShiftSurface(this, SURFACE_EXTRA_CREDITS, 3.0f, 1u);
@@ -588,11 +588,13 @@ void cExtraMenu::__UpdateStats()
 
     for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i)
     {
-        const coreObjectEnable eEnabled = (i < iIndex) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+        const coreBool         bVisible = (i < iIndex);
+        const coreObjectEnable eEnabled = bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
-        m_aStatsName [i].SetEnabled(eEnabled);
-        m_aStatsValue[i].SetEnabled(eEnabled);
-        m_aStatsLine [i].SetEnabled(eEnabled);
+        m_aStatsName [i].SetEnabled  (eEnabled);
+        m_aStatsValue[i].SetEnabled  (eEnabled);
+        m_aStatsLine [i].SetEnabled  (eEnabled);
+        m_aStatsLine [i].SetFocusable(bVisible);
     }
 
     m_StatsBox.SetMaxOffset(0.05f * I_TO_F(iIndex) - m_StatsBox.GetSize().y);

@@ -2149,6 +2149,8 @@ void cHarenaMission::__SetupOwn()
                     pChild->SetPosition(pEnemy->GetPosition());
 
                     aiVector[iIndex] = vDir.PackFloat2x16();
+
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                 }
             }
             else if(i == 5u)
@@ -2164,6 +2166,8 @@ void cHarenaMission::__SetupOwn()
 
                         aiVector[iIndex] = coreVector2(((I_TO_F(j) / 20.0f) + CORE_MATH_PRECISION) * (2.0f*PI) * ((s_iTick % 3u) ? 1.0f : -1.0f), 0.0f).PackFloat2x16();
                     }
+
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                 }
             }
 
@@ -2283,8 +2287,12 @@ void cHarenaMission::__SetupOwn()
                    (vPos.y < -FOREGROUND_AREA.y * 1.3f) ||
                    (vPos.y >  FOREGROUND_AREA.y * 1.3f))
                 {
-                    if(pEnemy->GetLifeTime() >= 1.0f) nReturnChildFunc(pEnemy, i, false);
+                    if(fLifeTime >= 1.0f) nReturnChildFunc(pEnemy, i, false);
                 }
+            }
+            else if(iType == 2u)
+            {
+                if(fLifeTime >= 19.0f) nReturnChildFunc(pEnemy, i, true);
             }
 
             const coreUint8 iState = nGetState(i);

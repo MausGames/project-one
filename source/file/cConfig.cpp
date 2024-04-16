@@ -103,6 +103,7 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
     // 
     pConfig->Audio.fEffectVolume  = MAX(pConfig->Audio.fEffectVolume,  0.0f);
     pConfig->Audio.fAmbientVolume = MAX(pConfig->Audio.fAmbientVolume, 0.0f);
+    pConfig->Audio.fMenuVolume    = MAX(pConfig->Audio.fMenuVolume,    0.0f);
 }
 
 
@@ -144,10 +145,13 @@ void LoadConfig()
     g_OldConfig.Graphics.iFlash      = Core::Config->GetInt(CONFIG_GRAPHICS_FLASH);
     g_OldConfig.Graphics.iHitStop    = Core::Config->GetInt(CONFIG_GRAPHICS_HIT_STOP);
     g_OldConfig.Graphics.iChroma     = Core::Config->GetInt(CONFIG_GRAPHICS_CHROMA);
+    g_OldConfig.Graphics.iRotation   = Core::Config->GetInt(CONFIG_GRAPHICS_ROTATION);
 
     // read audio values
     g_OldConfig.Audio.fEffectVolume  = Core::Config->GetFloat(CONFIG_AUDIO_EFFECT_VOLUME);
     g_OldConfig.Audio.fAmbientVolume = Core::Config->GetFloat(CONFIG_AUDIO_AMBIENT_VOLUME);
+    g_OldConfig.Audio.fMenuVolume    = Core::Config->GetFloat(CONFIG_AUDIO_MENU_VOLUME);
+    g_OldConfig.Audio.iQuality       = Core::Config->GetInt  (CONFIG_AUDIO_QUALITY);
     g_OldConfig.Audio.i3DSound       = Core::Config->GetInt  (CONFIG_AUDIO_3D_SOUND);
 
     // read input values
@@ -176,8 +180,8 @@ void LoadConfig()
     // 
     Core::Audio->SetSoundVolume(1.0f);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_EFFECT);
-    Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_MENU);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
+    Core::Audio->SetTypeVolume(g_OldConfig.Audio.fMenuVolume,    SOUND_MENU);
 
     // forward values to the current structure
     g_CurConfig = g_OldConfig;
@@ -214,10 +218,13 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_FLASH,      g_OldConfig.Graphics.iFlash);
     Core::Config->SetInt(CONFIG_GRAPHICS_HIT_STOP,   g_OldConfig.Graphics.iHitStop);
     Core::Config->SetInt(CONFIG_GRAPHICS_CHROMA,     g_OldConfig.Graphics.iChroma);
+    Core::Config->SetInt(CONFIG_GRAPHICS_ROTATION,   g_OldConfig.Graphics.iRotation);
 
     // write audio values
     Core::Config->SetFloat(CONFIG_AUDIO_EFFECT_VOLUME,  g_OldConfig.Audio.fEffectVolume);
     Core::Config->SetFloat(CONFIG_AUDIO_AMBIENT_VOLUME, g_OldConfig.Audio.fAmbientVolume);
+    Core::Config->SetFloat(CONFIG_AUDIO_MENU_VOLUME,    g_OldConfig.Audio.fMenuVolume);
+    Core::Config->SetInt  (CONFIG_AUDIO_QUALITY,        g_OldConfig.Audio.iQuality);
     Core::Config->SetInt  (CONFIG_AUDIO_3D_SOUND,       g_OldConfig.Audio.i3DSound);
 
     // write input values
@@ -243,6 +250,7 @@ void SaveConfig()
     // 
     Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,          g_OldConfig.Graphics.iRender);
     Core::Config->SetBool(CORE_CONFIG_GRAPHICS_TEXTURETRILINEAR, g_OldConfig.Graphics.iRender ? true : false);
+    Core::Config->SetInt (CORE_CONFIG_AUDIO_RESAMPLERINDEX,      BIT(g_OldConfig.Audio.iQuality));   // 1, 2, 4
 
     // save configuration file
     Core::Config->Save();

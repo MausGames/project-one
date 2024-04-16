@@ -94,7 +94,7 @@ void cHelper::Configure(const coreUint8 iElement)
 // render the helper
 void cHelper::Render()
 {
-    if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD) && !HAS_FLAG(m_iStatus, HELPER_STATUS_BOTTOM) && !HAS_FLAG(m_iStatus, HELPER_STATUS_TOP))
     {
         // 
         cLodObject::RenderHighObject(this);
@@ -112,8 +112,32 @@ void cHelper::RenderBefore()
             g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(m_pShield);
         }
 
-        // 
-        m_Wind.Render();
+        glDepthMask(false);
+        {
+            // 
+            m_Wind.Render();
+        }
+        glDepthMask(true);
+
+        if(HAS_FLAG(m_iStatus, HELPER_STATUS_BOTTOM))
+        {
+            // 
+            cLodObject::RenderHighObject(this);
+            g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(this);
+        }
+    }
+}
+
+void cHelper::RenderAfter()
+{
+    if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
+    {
+        if(HAS_FLAG(m_iStatus, HELPER_STATUS_TOP))
+        {
+            // 
+            g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(this);   // # depth-test disabled
+            cLodObject::RenderHighObject(this);
+        }
     }
 }
 
@@ -179,6 +203,9 @@ void cHelper::Resurrect(const coreBool bSmooth)
     if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, HELPER_STATUS_DEAD)
 
+    const coreBool bBottom = HAS_FLAG(m_iStatus, HELPER_STATUS_BOTTOM);
+    const coreBool bTop    = HAS_FLAG(m_iStatus, HELPER_STATUS_TOP);
+
     // 
     m_fLifeTime       = 0.0f;
     m_fLifeTimeBefore = 0.0f;
@@ -197,7 +224,7 @@ void cHelper::Resurrect(const coreBool bSmooth)
 
     // add ship to global shadow and outline
     cShadow::GetGlobalContainer()->BindObject(this);
-    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+    if(!bBottom && !bTop) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
 
     // add ship to the game
     this->_Resurrect();
@@ -211,6 +238,9 @@ void cHelper::Kill(const coreBool bAnimated)
     // kill helper
     if(HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD)) return;
     ADD_FLAG(m_iStatus, HELPER_STATUS_DEAD)
+
+    const coreBool bBottom = HAS_FLAG(m_iStatus, HELPER_STATUS_BOTTOM);
+    const coreBool bTop    = HAS_FLAG(m_iStatus, HELPER_STATUS_TOP);
 
     // 
     this->DisableShield(bAnimated);
@@ -227,7 +257,7 @@ void cHelper::Kill(const coreBool bAnimated)
 
     // remove ship from global shadow and outline
     cShadow::GetGlobalContainer()->UnbindObject(this);
-    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+    if(!bBottom && !bTop) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
 
     // remove ship from the game
     this->_Kill(bAnimated);

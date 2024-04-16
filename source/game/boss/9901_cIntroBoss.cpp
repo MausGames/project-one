@@ -333,7 +333,7 @@ void cIntroBoss::__MoveOwn()
                 }
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 0.8f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE);
             }
         });
     }
@@ -374,7 +374,7 @@ void cIntroBoss::__MoveOwn()
 
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 5u, COLOR_ENERGY_YELLOW);
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY * 0.5f);
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.8f, 1.0f, SOUND_PLACEHOLDER);
         }
 
         if(this->GetCurHealth() < 600)
@@ -406,7 +406,7 @@ void cIntroBoss::__MoveOwn()
 
         vCircleData.y += vCircleData.x * 0.8f * TIME;
 
-        const coreFloat   fLen = LERP(0.0f, 0.8f, 0.5f + 0.5f * SIN(vCircleData.y * (0.25f*PI) - (0.5f*PI))) + LERPBR(0.0f, 1.4f * SQRT2, CLAMP01(vCircleData.z - 1.0f));
+        const coreFloat   fLen = LERP(0.0f, 0.8f, 0.5f + 0.5f * SIN(vCircleData.y * (0.125f*PI) - (0.5f*PI))) + LERPBR(0.0f, 1.4f * SQRT2, CLAMP01(vCircleData.z - 1.0f));
         const coreVector2 vDir = coreVector2::Direction(vCircleData.y * (1.0f*PI));
         const coreVector2 vPos = vDir * fLen * FOREGROUND_AREA;
 
@@ -443,7 +443,7 @@ void cIntroBoss::__MoveOwn()
             const coreFloat   fValue = COS(fTime * (2.0f*PI));
             const coreVector2 vBase  = StepRotated90(m_aiCounter[SWING_SIDE] % 4);
             const coreVector2 vDir   = MapToAxis(coreVector2(fValue, LERP(-0.5f, 0.0f, ABS(fValue))).Normalized(), vBase);
-            const coreVector2 vPos   = vBase * (1.25f - 0.1f * SIN(fTime * (1.0f*PI))) + vDir * 0.3f;
+            const coreVector2 vPos   = vBase * (1.25f - 0.15f * BLENDB(MIN(fTime, 1.0f - fTime, 0.2f) * 5.0f)) + vDir * 0.29f;
 
             this->SetPosition (coreVector3(vPos, 0.0f) * FOREGROUND_AREA3);
             this->SetDirection(coreVector3(vDir, 0.0f));

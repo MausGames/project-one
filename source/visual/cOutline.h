@@ -17,16 +17,17 @@
 
 // ****************************************************************
 // outline definitions
-#define OUTLINE_STYLE_FULL          (0u)   // full outlining style
-#define OUTLINE_STYLE_DIRECT        (1u)   // directional interpolated outlining style
-#define OUTLINE_STYLE_FLAT_FULL     (2u)   // 
-#define OUTLINE_STYLE_FLAT_DIRECT   (3u)   // 
-#define OUTLINE_STYLE_BULLET_FULL   (4u)   // 
-#define OUTLINE_STYLE_BULLET_DIRECT (5u)   // 
-#define OUTLINE_STYLE_LIGHT         (6u)   // 
-#define OUTLINE_STYLE_LIGHT_THICK   (7u)   // 
-#define OUTLINE_STYLE_LIGHT_BULLET  (8u)   // 
-#define OUTLINE_STYLES              (9u)   // 
+#define OUTLINE_STYLE_FULL               (0u)    // full outlining style
+#define OUTLINE_STYLE_DIRECT             (1u)    // directional interpolated outlining style
+#define OUTLINE_STYLE_FLAT_FULL          (2u)    // 
+#define OUTLINE_STYLE_FLAT_DIRECT        (3u)    // 
+#define OUTLINE_STYLE_FLAT_THICK         (4u)    // 
+#define OUTLINE_STYLE_BULLET_FULL        (5u)    // 
+#define OUTLINE_STYLE_BULLET_DIRECT      (6u)    // 
+#define OUTLINE_STYLE_LIGHT              (7u)    // 
+#define OUTLINE_STYLE_LIGHT_THICK        (8u)    // 
+#define OUTLINE_STYLE_LIGHT_BULLET_THICK (9u)    // 
+#define OUTLINE_STYLES                   (10u)   // 
 
 #define OUTLINE_THICKNESS       (0.35f)
 #define OUTLINE_THICKNESS_THICK (0.8f)

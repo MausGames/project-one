@@ -303,6 +303,8 @@ coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 i
         case SDL_CONTROLLER_BUTTON_PADDLE3:       return FIGURE_INVALID;
         case SDL_CONTROLLER_BUTTON_PADDLE4:       return FIGURE_INVALID;
         case SDL_CONTROLLER_BUTTON_TOUCHPAD:      return coreVector2(5.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_LEFTTRIGGER:       return coreVector2(2.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_RIGHTTRIGGER:      return coreVector2(3.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
         default:                                  return FIGURE_INVALID;
         }
     }

@@ -649,6 +649,8 @@ void cRutilusMission::__RenderOwnBottom()
     }
     glEnable(GL_DEPTH_TEST);
 
+    DEPTH_PUSH
+
     // 
     m_Plate.Render();   // # depth test with each other
 

@@ -261,7 +261,7 @@ cNevoMission::cNevoMission()noexcept
     if(g_bDemoVersion)
     {
         // 
-        constexpr const coreChar* apcTex[] =
+        constexpr const coreChar* apcName[] =
         {
             "default_normal.png",
             "environment_animal_diff.png",
@@ -271,12 +271,28 @@ cNevoMission::cNevoMission()noexcept
             "environment_dust_diff.png",
             "environment_earth_diff.png",
             "environment_particle_02.png",
-            "environment_sea.png"
+            "environment_sea.png",
+
+            "environment_animal_01.md3",
+            "environment_animal_02.md3",
+            "environment_sea_01.md3",
+            "environment_sea_02.md3",
+            "environment_sea_03.md3",
+            "environment_sea_04.md3",
+            "object_cube_ice.md3",
+
+            "effect_decal_single_program",
+            "effect_decal_single_inst_program",
+            "environment_under_program",
+            "object_ground_program",
+            "object_ground_inst_program",
+            "object_wave_program",
+            "object_wave_inst_program"
         };
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_apTexCache); ++i)
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_apResCache); ++i)
         {
-            m_apTexCache[i] = Core::Manager::Resource->Get<coreTexture>(apcTex[i]);
-            STATIC_ASSERT(ARRAY_SIZE(m_apTexCache) == ARRAY_SIZE(apcTex))
+            m_apResCache[i] = Core::Manager::Resource->Get<coreResourceDummy>(apcName[i]);
+            STATIC_ASSERT(ARRAY_SIZE(m_apResCache) == ARRAY_SIZE(apcName))
         }
 
         // 
@@ -808,8 +824,6 @@ void cNevoMission::SetTileStyle(const coreUintW iIndex, const coreUint8 iStyle)
 // 
 void cNevoMission::__RenderOwnBottom()
 {
-    //DEPTH_PUSH
-
     glDisable(GL_DEPTH_TEST);
     {
         // 
@@ -862,8 +876,12 @@ void cNevoMission::__RenderOwnOver()
         m_BlastLine.Render();
         m_Blast    .Render();
 
+#if defined(_P1_UNUSED_)
+
         // 
         m_BlockWave.Render();
+
+#endif
     }
     glEnable(GL_DEPTH_TEST);
 
@@ -947,8 +965,8 @@ void cNevoMission::__MoveOwnAfter()
         coreObject3D* pBlast = (*m_Blast.List())[i];
         if(!pBlast->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        const coreVector2 vBaseDir = m_aBombRaw[i].GetDirection().xy();
         const coreVector2 vBasePos = m_aBombRaw[i].GetPosition ().xy();
+        const coreVector2 vBaseDir = m_aBombRaw[i].GetDirection().xy();
 
         // 
         m_afBlastTime[i].Update(1.0f);

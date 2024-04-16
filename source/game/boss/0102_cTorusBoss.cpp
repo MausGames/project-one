@@ -24,9 +24,10 @@
 // TODO 1: hard mode: all object behaviors increase, gelber angriff is undurchdringbar (7 statt 3 geschosse)
 // TODO 1: hard mode: neue beschwörung die nicht zerstört werden kann (vielleicht finaler ball kann nicht zerstört werden)
 // TODO 1: purple helper shield wird unter laser gezeichnet
-// TODO 1: MAIN: medal goal (nochmal prüfen, nichts abziehen), regular score, sound, background rota/speed
+// TODO 1: MAIN: medal goal (nochmal prüfen, nichts abziehen), explosion (verbessern: schneller, mit kleiner explosion um drehung anzustoßen), regular score, sound, background rota/speed
 // TODO 1: ACHIEVEMENT: name (), description (), fly through the hole without touching the boss
 // TODO 1: schilde reflektieren manchmal an falscher stelle, vielleicht old-pos issue, wenn sie zurück in die mitte teleportiert werden ? sollte überall gehandelt werden wo old-pos new-pos objekte berechnet werden
+// TODO 1: purple helper sollte immer bei Nth laser kommen
 
 
 // ****************************************************************
@@ -693,7 +694,7 @@ void cTorusBoss::__MoveOwn()
                 this->RemoveStatus(ENEMY_STATUS_DAMAGING);
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
 
                 this->__EnableDriver(MIN(coreMath::BitScanFwd(~m_iDriverActive), TORUS_DRIVERS - 1u), this->GetPosition().xy(), -this->GetPosition().xy().Normalized());
 
@@ -731,7 +732,7 @@ void cTorusBoss::__MoveOwn()
         if(InBetweenExt(0.5f, FRACT(fPrevGrind), FRACT(m_avVector[GRIND_VALUE].x)) == 1)
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
 
             if(F_TO_SI(m_avVector[GRIND_VALUE].x) % 2 == m_aiCounter[TURRET_DIR])
             {
@@ -775,7 +776,7 @@ void cTorusBoss::__MoveOwn()
            (InBetweenExt(1.5f + (1.0f/3.0f), FMOD(fPrevGrind, 2.0f), FMOD(m_avVector[GRIND_VALUE].x, 2.0f)) == 1))
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
 
             this->__EnableGunner(F_TO_UI(m_avVector[GRIND_VALUE].x + 0.5f) % TORUS_GUNNERS, this->GetPosition().xy());
         }
@@ -787,7 +788,7 @@ void cTorusBoss::__MoveOwn()
         if(InBetweenExt(0.5f, FRACT(fPrevGrind), FRACT(m_avVector[GRIND_VALUE].x)) == 1)
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
 
             if(this->GetCurHealth() < 2800)
             {
@@ -976,6 +977,16 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 120u)
     {
+        if(PHASE_BEGINNING2)
+        {
+            m_avVector[TUMBLE_DIRECTION].z = g_pEnvironment->GetDirection().Angle();
+        }
+
+        PHASE_CONTROL_TIMER(1u, 0.5f, LERP_BREAK)
+        {
+            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fTime)));
+        });
+
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
         {
             if(PHASE_BEGINNING)
@@ -1158,7 +1169,7 @@ void cTorusBoss::__MoveOwn()
                     this->SetPosition(coreVector3(-0.9f * FOREGROUND_AREA.x, 0.0f, this->GetPosition().z));
 
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
                 }
                 else
                 {
@@ -1292,7 +1303,7 @@ void cTorusBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                this->Kill(false);
+                this->Kill(true);
 
                 if(this->HasAllHelpers())
                 {
@@ -1336,7 +1347,7 @@ void cTorusBoss::__MoveOwn()
 
     if(pMission->GetBarrier(0u)->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
-        m_avVector[BARRIER_ANGLE].x += 1.0f * TIME;
+        m_avVector[BARRIER_ANGLE].x += 0.8f * TIME;
 
         for(coreUintW i = 0u; i < TORUS_BARRIERS; ++i)
         {
@@ -1702,7 +1713,7 @@ void cTorusBoss::__MoveOwn()
     m_Emitter.SetPosition   (this->GetPosition   ());
     m_Emitter.SetDirection  (this->GetDirection  ());
     m_Emitter.SetOrientation(this->GetOrientation());
-    m_Emitter.SetAlpha      (MAX(m_aTimer[7].GetValue(CORE_TIMER_GET_NORMAL) * 2.0f - 1.0f, 0.0f));
+    m_Emitter.SetAlpha      (MAX0(m_aTimer[7].GetValue(CORE_TIMER_GET_NORMAL) * 2.0f - 1.0f));
     m_Emitter.SetTexOffset  (coreVector2(-0.1f,-0.4f) * m_fAnimation);
     m_Emitter.SetEnabled    (m_aiCounter[EMIT_STATUS] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Emitter.Move();

@@ -527,6 +527,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: adjust (and fix!) snow for all weapons
     // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
     // TODO 1: ACHIEVEMENT: name (), description (), clean the whole screen before destroying the last enemy
+    // TODO 1: letzter enemy soll ganzen schnee zerstören, kein ausblenden
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2029,6 +2030,7 @@ void cCalorMission::__SetupOwn()
 
                     g_pSpecialEffects->CreateSplashColor(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE);
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    g_pSpecialEffects->PlaySound(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
                 }
             }
         }
@@ -2467,6 +2469,28 @@ void cCalorMission::__SetupOwn()
         STAGE_FINISH_NOW
     });
 
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!this->IsStarEnabled(0u))
+        {
+            // 
+            g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+            {
+                this->EnableStar(i, pPlayer, coreVector2(0.0f,0.0f));
+                this->SetStarLength(i, 0.0f);
+            });
+
+            // 
+            this->StartSwing(1.0f);
+        }
+
+        STAGE_FINISH_NOW
+    });
+
+
     // ################################################################
     // wait for play
     STAGE_MAIN({TAKE_ALWAYS, 5u})
@@ -2478,7 +2502,7 @@ void cCalorMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Zeroth, {60.0f, 120.0f, 180.0, 240.0f})
+        STAGE_BOSS(m_Zeroth, {155.0f, 230.0f, 310.0, 385.0f})
     });
 
     // ################################################################

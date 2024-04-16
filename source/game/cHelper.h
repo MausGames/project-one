@@ -16,7 +16,9 @@
 enum eHelperStatus : coreUint8
 {
     HELPER_STATUS_DEAD   = 0x01u,   // completely removed from the game
-    HELPER_STATUS_HIDDEN = 0x02u    // 
+    HELPER_STATUS_HIDDEN = 0x02u,   // 
+    HELPER_STATUS_BOTTOM = 0x04u,   // 
+    HELPER_STATUS_TOP    = 0x08u    // 
 };
 
 
@@ -52,6 +54,7 @@ public:
     // render and move the helper
     void Render      ()final;
     void RenderBefore();
+    void RenderAfter ();
     void Move        ()final;
 
     // control life and death

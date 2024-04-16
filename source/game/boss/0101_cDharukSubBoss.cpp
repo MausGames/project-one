@@ -23,6 +23,7 @@
 // ****************************************************************
 // vector identifier
 #define STILL_ROTATION (0u)
+#define STILL_MOVE     (1u)
 
 
 // ****************************************************************
@@ -33,7 +34,8 @@ cDharukSubBoss::cDharukSubBoss()noexcept
 , m_Boomerang        (DHARUK_BOOMERANGS)
 , m_BoomerangTrail   (DHARUK_BOOMERANGS * DHARUK_TRAILS)
 , m_afBoomerangValue {}
-, m_fVisibility      (1.0f)
+, m_afVisibility     {}
+, m_bHelperEvent     (false)
 , m_iPackedDir       (0u)
 , m_fAnimation       (0.0f)
 {
@@ -192,13 +194,6 @@ void cDharukSubBoss::__MoveOwn()
     // 
     this->_UpdateBoss();
 
-    if(this->ReachedDeath())
-    {
-        this->__DisableDuplicate(true);
-        g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_RED);
-        this->Kill(false);   
-    }
-
     // 
     const coreVector2 avOldBasePos  [2] = {this->GetPosition   ().xy(),         m_Duplicate.GetPosition   ().xy()};
     const coreFloat   afOldBaseAngle[2] = {this->GetDirection  ().xy().Angle(), m_Duplicate.GetDirection  ().xy().Angle()};
@@ -207,6 +202,9 @@ void cDharukSubBoss::__MoveOwn()
     // 
     m_fAnimation.UpdateMod(0.2f, 10.0f);
 
+    // 
+    m_bHelperEvent = false;
+
     // ################################################################
     // 
     if(m_iPhase == 0u)
@@ -214,6 +212,12 @@ void cDharukSubBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.32f, LERP_LINEAR)
         {
             if(PHASE_BEGINNING) this->AddStatus(ENEMY_STATUS_GHOST);
+
+            const auto nEffectFunc = [](const coreVector2 vPosition, const coreVector2 vDirection)
+            {
+                g_pSpecialEffects->CreateBlowColor(coreVector3(vPosition, 0.0f), coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+                g_pSpecialEffects->PlaySound(coreVector3(vPosition, 0.0f), 1.0f, 1.0f, SOUND_SHIP_FLY);
+            };
 
             constexpr coreVector2 vFrom1 = coreVector2(-1.5f, 0.7f);
             constexpr coreVector2 vFrom2 = coreVector2( 0.9f, 1.5f);
@@ -236,9 +240,9 @@ void cDharukSubBoss::__MoveOwn()
             else if(PHASE_TIME_BEFORE(fSpeed12)) this->DefaultMoveLerp(vFrom2, vTo2, (fTime - fSpeed1)  * RCP(fSpeed2));
             else                                 this->DefaultMoveLerp(vFrom3, vTo3, (fTime - fSpeed12) * RCP(fSpeed3));
 
-                 if(PHASE_TIME_POINT(0.0f))     g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo1 - vFrom1).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
-            else if(PHASE_TIME_POINT(fSpeed1))  g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo2 - vFrom2).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
-            else if(PHASE_TIME_POINT(fSpeed12)) g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo3 - vFrom3).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+                 if(PHASE_TIME_POINT(0.0f))     nEffectFunc(this->GetPosition().xy(), (vTo1 - vFrom1).Normalized());
+            else if(PHASE_TIME_POINT(fSpeed1))  nEffectFunc(this->GetPosition().xy(), (vTo2 - vFrom2).Normalized());
+            else if(PHASE_TIME_POINT(fSpeed12)) nEffectFunc(this->GetPosition().xy(), (vTo3 - vFrom3).Normalized());
 
             this->DefaultRotateLerp(1.0f*PI, 19.0f*PI, fTime);
 
@@ -315,6 +319,11 @@ void cDharukSubBoss::__MoveOwn()
             this->DefaultMoveLerp  (m_vLastPosition, coreVector2(0.0f, -DHARUK_OUTSIDE), fTime);
             this->DefaultRotateLerp(1.0f*PI,         5.0f*PI,                            fTime);
 
+            if(PHASE_TIME_POINT(0.5f))
+            {
+                g_pSpecialEffects->PlaySound(coreVector3(0.0f,0.0f,0.0f), 1.0f, 1.0f, SOUND_SHIP_FLY);
+            }
+
             if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_INC
@@ -330,34 +339,37 @@ void cDharukSubBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.5f * 0.65f, LERP_LINEAR)
         {
-            if(PHASE_BEGINNING)
-            {
-                if(!m_aiCounter[CURRENT_ITERATION])
-                    this->__BecomeInvisible();
-
-                m_fDuplicateValue = 5.0f;
-            }
-
             coreFloat fSide;
-            switch(m_aiCounter[TELEPORT_COUNT] % 5)
+            switch(m_aiCounter[TELEPORT_COUNT] % (g_pGame->IsEasy() ? 4 : 5))
             {
             default: ASSERT(false)
-            case 0: fSide = -2.0f; break;
+            case 0: fSide = -1.0f; break;
             case 1: fSide =  1.0f; break;
             case 2: fSide = -1.0f; break;
-            case 3: fSide =  2.0f; break;
+            case 3: fSide =  1.0f; break;
             case 4: fSide =  0.0f; break;
             }
-            fSide *= 0.3f;
+            fSide *= 0.6f;
+
+            if(PHASE_BEGINNING)
+            {
+                this->__BecomeInvisible1();
+                this->__BecomeInvisible2();
+
+                m_fDuplicateValue = 5.0f;
+
+                const coreVector2 vSound = MapStepRotated90(coreVector2(fSide, 0.0f), m_aiCounter[TELEPORT_COUNT] % 4);
+                g_pSpecialEffects->PlaySound(coreVector3(vSound, 0.0f), 1.0f, 1.0f, SOUND_SHIP_FLY);
+            }
 
             this->DefaultMoveLerp  (coreVector2(fSide, DHARUK_OUTSIDE), coreVector2(fSide, -DHARUK_OUTSIDE), fTime);
             this->DefaultRotateLerp(5.0f*PI,                            13.0f*PI,                            fTime);
 
-            if(m_aiCounter[CURRENT_ITERATION])
-            {
-                constexpr coreBool abFlip[] = {false, false, true, false, true, true};
-                if(abFlip[m_aiCounter[TELEPORT_COUNT] % ARRAY_SIZE(abFlip)]) this->InvertY();
-            }
+            //if(m_aiCounter[CURRENT_ITERATION])
+            //{
+            //    constexpr coreBool abFlip[] = {false, false, true, false, true, true};
+            //    if(abFlip[m_aiCounter[TELEPORT_COUNT] % ARRAY_SIZE(abFlip)]) this->InvertY();
+            //}
 
             this->ToAxis(StepRotated90(m_aiCounter[TELEPORT_COUNT] % 4));
 
@@ -373,6 +385,11 @@ void cDharukSubBoss::__MoveOwn()
                     PHASE_AGAIN
 
                     m_aiCounter[TELEPORT_COUNT] += 1;
+
+                    if(m_aiCounter[TELEPORT_COUNT] == 2u)
+                    {
+                        m_bHelperEvent = true;
+                    }
                 }
             }
         });
@@ -380,12 +397,18 @@ void cDharukSubBoss::__MoveOwn()
         PHASE_CONTROL_TICKER(1u, 0u, 12.0f, LERP_LINEAR)
         {
             if((iTick % 3u) < 1u) return;
+            if(g_pGame->IsEasy() && ((iTick % 6u) < 3u)) return;
 
-            const coreVector2 vPos = this->GetPosition().xy();
+            const coreVector2 vPos = this->GetPosition().xy() * (m_aiCounter[CURRENT_ITERATION] ? -1.0f : 1.0f);
             const coreVector2 vDir = StepRotated90(m_aiCounter[TELEPORT_COUNT] % 4).Rotated90();
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.3f, this, vPos,  vDir)->ChangeSize(1.6f);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.3f, this, vPos, -vDir)->ChangeSize(1.6f);
+            const coreFloat fSpeed = ((iTick % 3u) == 2u) ? 1.4f : 1.3f;
+
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, fSpeed, this, vPos,  vDir)->ChangeSize(1.6f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, fSpeed, this, vPos, -vDir)->ChangeSize(1.6f);
+
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_MAGENTA);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
     }
 
@@ -407,7 +430,7 @@ void cDharukSubBoss::__MoveOwn()
     // 
     else if(m_iPhase == 120u)
     {
-        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : 1.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, g_pGame->IsEasy() ? 2u : 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : 1.0f, LERP_LINEAR)
         {
             if(iTick < DHARUK_BOOMERANGS)
             {
@@ -425,6 +448,8 @@ void cDharukSubBoss::__MoveOwn()
     // 
     else if(m_iPhase == 121u)
     {
+        m_avVector[STILL_MOVE].y = MIN1(m_avVector[STILL_MOVE].y + 0.2f * TIME);
+
         if(this->GetCurHealth() < 1000)
         {
             PHASE_CHANGE_INC
@@ -439,8 +464,10 @@ void cDharukSubBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2 && !m_aiCounter[CURRENT_ITERATION])
         {
-            this->__EnableSummon(this->GetPosition().xy().InvertedY());
+            this->__EnableSummon(coreVector2(0.0f, -this->GetPosition().y));
         }
+
+        m_avVector[STILL_MOVE].y = MAX0(m_avVector[STILL_MOVE].y - 1.0f * TIME);
 
         coreBool bDisabled = true;
 
@@ -457,7 +484,9 @@ void cDharukSubBoss::__MoveOwn()
             if(coreMath::IsNear(vDiff.x, 0.0f, 1.0f) && coreMath::IsNear(vDiff.y, 0.0f, CORE_MATH_PRECISION))
             {
                 this->__DisableBoomerang(i, true);
-                m_Summon.SetSize(m_Summon.GetSize() + coreVector3(1.3f,1.3f,1.3f));
+                m_Summon.SetSize(m_Summon.GetSize() + coreVector3(1.3f,1.3f,1.3f) * (g_pGame->IsEasy() ? 3.0f : 1.0f));
+
+                g_pSpecialEffects->PlaySound(m_Summon.GetPosition(), 0.7f, 1.5f, SOUND_ENEMY_EXPLOSION_10);
             }
         }
 
@@ -481,6 +510,8 @@ void cDharukSubBoss::__MoveOwn()
             {
                 this->__EnableDuplicate();
                 this->__DisableSummon(true);
+
+                g_pSpecialEffects->PlaySound(m_Summon.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
             }
 
             const coreFloat fAlpha = MIN(fTime * 10.0f, 1.0f);
@@ -543,6 +574,11 @@ void cDharukSubBoss::__MoveOwn()
             }
         }
 
+        m_avVector[STILL_MOVE].x += 0.5f * TIME;
+
+        const coreFloat fSide = SIN(m_avVector[STILL_MOVE].x) * BLENDS(m_avVector[STILL_MOVE].y) * 10.0f;
+
+        this->SetPosition (coreVector3(fSide, this->GetPosition().yz()));
         this->SetDirection(coreVector3(coreVector2::Direction(-vRota.y), 0.0f));
 
         m_avVector[STILL_ROTATION].xyz(vRota);
@@ -556,39 +592,64 @@ void cDharukSubBoss::__MoveOwn()
     m_Duplicate.SetPosition   (-this->GetPosition   ());
     m_Duplicate.SetDirection  (-this->GetDirection  ());
     m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
-    m_Duplicate.SetTexOffset  (coreVector2(0.0f, m_fAnimation * -0.5f));
+    m_Duplicate.SetTexOffset  (coreVector2(0.0f, FRACT(m_fAnimation * -0.5f)));
 
-    if(m_fDuplicateValue > -0.5f) m_fDuplicateValue = MAX0(m_fDuplicateValue - 4.0f * TIME);
-    m_Duplicate.SetAlpha((m_fDuplicateValue > -0.5f) ? MIN1(m_fDuplicateValue) : 1.0f);
-
-    if(m_fVisibility < -0.5f)
+    if(g_pForeground->IsVisiblePoint(this->GetPosition().xy(), 1.1f))
     {
-        if(g_pForeground->IsVisiblePoint(this->GetPosition().xy(), 1.1f))
+        g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
         {
-            g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
-            {
-                const coreVector2 vPos = pPlayer->GetPosition ().xy();
-                const coreVector2 vDir = pPlayer->GetDirection().xy();
-                const coreVector2 vTan = vDir.Rotated90();
+            const coreVector2 vPos = pPlayer->GetPosition ().xy();
+            const coreVector2 vDir = pPlayer->GetDirection().xy();
+            const coreVector2 vTan = vDir.Rotated90();
 
+            if(m_afVisibility[0] < -0.5f)
+            {
                 const coreVector2 vDiff = this->GetPosition().xy() - (vPos + vDir * -16.0f);
                 const coreFloat   fLen  = coreVector2::Dot(vDiff, vDir) * 0.29f;
                 const coreFloat   fSide = coreVector2::Dot(vDiff, vTan);
 
-                if(ABS(fSide) < fLen)
+                if((ABS(fSide) < fLen) || pPlayer->WasDamaged())
                 {
-                    m_fVisibility = 0.0f;
+                    m_afVisibility[0] = 0.0f;
                 }
-            });
+            }
+
+            if(m_afVisibility[1] < -0.5f)
+            {
+                const coreVector2 vDiff = m_Duplicate.GetPosition().xy() - (vPos + vDir * -16.0f);
+                const coreFloat   fLen  = coreVector2::Dot(vDiff, vDir) * 0.29f;
+                const coreFloat   fSide = coreVector2::Dot(vDiff, vTan);
+
+                if((ABS(fSide) < fLen) || pPlayer->WasDamaged())
+                {
+                    m_afVisibility[1] = 0.0f;
+                }
+            }
+        });
+
+        if(m_afVisibility[0] < -0.5f)
+        {
+            if(this->WasDamaged())
+            {
+                m_afVisibility[0] = 0.0f;
+            }
         }
     }
 
-    if(m_fVisibility > -0.5f)
+    if(m_afVisibility[0] > -0.5f)
     {
-        m_fVisibility = MIN1(m_fVisibility + 4.0f * TIME);
+        m_afVisibility[0] = MIN1(m_afVisibility[0] + 10.0f * TIME);
 
-        this->SetAlpha(LERPS(0.0f, 1.0f, m_fVisibility));
+        this->SetAlpha(BLENDH3(m_afVisibility[0]));
         this->RemoveStatus(ENEMY_STATUS_HIDDEN);
+    }
+
+    if(m_afVisibility[1] > -0.5f)
+    {
+        m_afVisibility[1] = MIN1(m_afVisibility[1] + 10.0f * TIME);
+
+        m_Duplicate.SetAlpha(BLENDH3(m_afVisibility[1]));
+        m_Duplicate.RemoveStatus(ENEMY_STATUS_HIDDEN);
     }
 
     // 
@@ -619,7 +680,7 @@ void cDharukSubBoss::__MoveOwn()
             m_aDuplicateRaw[i].SetPosition   (coreVector3(vNewPos,   0.0f));
             m_aDuplicateRaw[i].SetDirection  (coreVector3(vNewDir,   0.0f));
             m_aDuplicateRaw[i].SetOrientation(coreVector3(vNewOri.x, 0.0f, vNewOri.y));
-            m_aDuplicateRaw[i].SetTexOffset  (coreVector2(0.0f, m_fAnimation * -0.5f));
+            m_aDuplicateRaw[i].SetTexOffset  (coreVector2(0.0f, FRACT(m_fAnimation * -0.5f)));
             m_aDuplicateRaw[i].Move();
 
             const coreFloat fAlpha = (i < DHARUK_TRAILS) ? this->GetAlpha() : m_Duplicate.GetAlpha();
@@ -669,7 +730,7 @@ void cDharukSubBoss::__MoveOwn()
         pBoomerang->SetPosition (coreVector3(vNewPos, 0.0f));
         pBoomerang->SetDirection(coreVector3(vNewDir, 0.0f));
         pBoomerang->SetAlpha    ((m_afBoomerangValue[i] > -0.5f) ? MIN1(m_afBoomerangValue[i]) : MIN1(pBoomerang->GetAlpha() + 10.0f * TIME));
-        pBoomerang->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+        pBoomerang->SetTexOffset(coreVector2(0.0f, FRACT(m_fAnimation * 0.5f)));
 
         for(coreUintW j = 0u; j < DHARUK_TRAILS; ++j)
         {
@@ -683,7 +744,7 @@ void cDharukSubBoss::__MoveOwn()
             pTrail->SetPosition (coreVector3(vNewPos2, 0.0f));
             pTrail->SetDirection(coreVector3(vNewDir2, 0.0f));
             pTrail->SetAlpha    (pBoomerang->GetAlpha() * (0.15f + 0.2f * I_TO_F(j + 1u)));
-            pTrail->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+            pTrail->SetTexOffset(coreVector2(0.0f, FRACT(m_fAnimation * 0.5f)));
         }
     }
 
@@ -710,6 +771,19 @@ void cDharukSubBoss::__MoveOwn()
         // 
         g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_RED);
     });
+
+    if(this->ReachedDeath())
+    {
+        this->__DisableDuplicate(true);
+
+        g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_RED);
+        g_pSpecialEffects->MacroDestructionColor(this, COLOR_ENERGY_RED);
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+
+        this->Kill(false);
+
+        g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+    }
 }
 
 
@@ -761,7 +835,12 @@ void cDharukSubBoss::__DisableDuplicate(const coreBool bAnimated)
         m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
+    if(bAnimated)
+    {
+        g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
+        g_pSpecialEffects->MacroDestructionColor(&m_Duplicate, COLOR_ENERGY_RED);
+        g_pSpecialEffects->PlaySound(m_Duplicate.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+    }
 }
 
 
@@ -795,6 +874,7 @@ void cDharukSubBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2
 
     // 
     g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPosition, 0.0f), vDirection, COLOR_ENERGY_RED);
+    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
 }
 
 

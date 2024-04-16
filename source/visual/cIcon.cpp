@@ -54,6 +54,7 @@ cIcon::cIcon()noexcept
 // 
 void cIcon::Update()
 {
+    coreFloat fScale = 1.0f;
     if(STATIC_ISVALID(g_pGame))
     {
         const cPlayer* pPlayer = g_pGame->GetPlayer(m_iIndex);
@@ -64,6 +65,8 @@ void cIcon::Update()
             m_aRangeRaw[i].DefineModel(pPlayer->GetRangeModel ());
             m_aRangeRaw[i].SetColor3  (pPlayer->GetEnergyColor().Processed(MIN, 1.0f));
         }
+
+        fScale = pPlayer->GetRangeScale();
     }
     else
     {
@@ -93,7 +96,7 @@ void cIcon::Update()
             // 
             for(coreUintW i = 0u; i < ICON_VARIATIONS; ++i)
             {
-                m_aRangeRaw[i].SetSize(coreVector3(1.0f,1.0f,1.0f) * 27.0f);
+                m_aRangeRaw[i].SetSize(coreVector3(1.0f,1.0f,1.0f) * 27.0f * fScale);
             }
             m_Range.MoveNormal();
 
@@ -103,7 +106,7 @@ void cIcon::Update()
             // 
             for(coreUintW i = 0u; i < ICON_VARIATIONS; ++i)
             {
-                m_aRangeRaw[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * 22.0f);
+                m_aRangeRaw[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * 22.0f * fScale);
                 m_aRangeRaw[i].SetTexOffset(coreVector2(0.0f,1.0f) * (((!i || !g_pMenu->IsPaused()) ? m_fAnimation.ToFloat() : m_fStorage) + (I_TO_F(i) / I_TO_F(ICON_VARIATIONS))));
             }
             m_Range.MoveNormal();

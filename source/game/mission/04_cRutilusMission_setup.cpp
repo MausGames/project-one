@@ -537,6 +537,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
     // TODO 1: MAIN: task-check, regular score, sound
     // TODO 1: ACHIEVEMENT: name (), description (), beat the segment without every turning your ship manually
+    // TODO 1: greatly reduce rotation when related option is disabled
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iCoreIndex = 61u;
@@ -1011,7 +1012,7 @@ void cRutilusMission::__SetupOwn()
             pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
         });
 
-        g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));
+        g_pPostProcessing->Reset();
 
         this->DisableCapsule(false);
 
@@ -1056,6 +1057,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: ACHIEVEMENT: name (), description (), survive 60 seconds in the matrix phase without destroying an enemy (ähnlich zu tower) / destroy 10 enemies from within the bubble, or while being slowed down
     // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble (?)
     // TODO 1:  #### vielleicht gerade gegner-angriffe (wenn sich bubble bewegt)
+    // TODO 1: background sollte selben winkel wie die items zum einsammeln haben
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData   = 6u;
@@ -1916,6 +1918,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
     // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
     // TODO 1: ACHIEVEMENT: name (), description (), keep all magenta enemies alive and flying around until the very end
+    // TODO 1: meteoriten sollten unterschiedliche explosionen haben abhängig von größe (vielleicht nur pitch)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -3063,7 +3066,7 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_BOSS(m_Messier, {60.0f, 120.0f, 180.0, 240.0f})
+        STAGE_BOSS(m_Messier, {145.0f, 215.0f, 290.0, 360.0f})
     });
 
     // ################################################################

@@ -266,9 +266,6 @@ void cMenu::Move()
                 if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
-                    this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
-
-                    // 
                     switch(g_pGame->GetOutroType())
                     {
                     default: ASSERT(false)
@@ -278,43 +275,46 @@ void cMenu::Move()
                     case GAME_OUTRO_ENDING_NORMAL: m_SummaryMenu.ShowEndingNormal(); break;
                     case GAME_OUTRO_ENDING_SECRET: m_SummaryMenu.ShowEndingSecret(); break;
                     }
+
+                    // 
+                    this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
                 }
                 else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
                     // 
-                    this->ChangeSurface(SURFACE_DEFEAT, 0.0f);
-
-                    // 
                     if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
                                            else m_DefeatMenu.ShowGameOver();
+
+                    // 
+                    this->ChangeSurface(SURFACE_DEFEAT, 0.0f);
                 }
                 else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
                 {
                     if(g_pGame->GetKind() == GAME_KIND_ALL)
                     {
                         // 
-                        this->ChangeSurface(SURFACE_FINISH, 0.0f);
+                        m_FinishMenu.ShowThankYou();
 
                         // 
-                        m_FinishMenu.ShowThankYou();
+                        this->ChangeSurface(SURFACE_FINISH, 0.0f);
                     }
                     else
                     {
-                        // 
-                        this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
-
                         // 
                         m_BridgeMenu.ReturnMenu(SURFACE_GAME, false, false);
 
                         // 
                         m_GameMenu.ChangeSurface((g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_MISSION : SURFACE_GAME_SEGMENT, 0.0f);
                         m_GameMenu.LoadValues();
+
+                        // 
+                        this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
                     }
                 }
                 else if((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && g_MenuInput.bPause) || Core::System->GetWinFocusLost())
                 {
                     // 
-                    m_PauseMenu.ResetNavigator();   // # first
+                    m_PauseMenu.ResetNavigator();
 
                     // 
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
@@ -341,22 +341,22 @@ void cMenu::Move()
         {
             if(m_TitleMenu.GetStatus())
             {
+                // 
+                m_MainMenu.ResetNavigator();
+
                 if(m_BridgeMenu.HasUnlocks())
                 {
                     // 
-                    this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+                    m_BridgeMenu.ShowUnlocks();
 
                     // 
-                    m_BridgeMenu.ShowUnlocks();
+                    this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
                 }
                 else
                 {
                     // switch to main menu
                     this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 0u);
                 }
-
-                // 
-                m_MainMenu.ResetNavigator();
             }
         }
         break;
@@ -365,56 +365,56 @@ void cMenu::Move()
         {
             if(m_MainMenu.GetStatus() == 1)
             {
-                // switch to game menu
-                this->ShiftSurface(this, SURFACE_GAME, 3.0f, 1u, false, true);
-
                 // 
                 m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_OPTION), 0.0f);
                 m_GameMenu.LoadValues();
                 m_GameMenu.ResetNavigator();
+
+                // switch to game menu
+                this->ShiftSurface(this, SURFACE_GAME, 3.0f, 1u, false, true);
             }
             else if(m_MainMenu.GetStatus() == 2)
             {
-                // switch to score menu
-                this->ShiftSurface(this, SURFACE_SCORE, 3.0f, 1u);
-
                 // 
                 m_ScoreMenu.LoadMissions();
+
+                // switch to score menu
+                this->ShiftSurface(this, SURFACE_SCORE, 3.0f, 1u);
             }
             else if(m_MainMenu.GetStatus() == 3)
             {
-                // switch to replay menu
-                this->ShiftSurface(this, SURFACE_REPLAY, 3.0f, 1u);
-
                 // 
                 m_ReplayMenu.LoadOverview();
+
+                // switch to replay menu
+                this->ShiftSurface(this, SURFACE_REPLAY, 3.0f, 1u);
             }
             else if(m_MainMenu.GetStatus() == 4)
             {
-                // switch to extra menu
-                this->ShiftSurface(this, SURFACE_EXTRA, 3.0f, 1u);
-
                 // 
                 m_ExtraMenu.ChangeSurface(SURFACE_EXTRA_PROGRESS, 0.0f);
                 m_ExtraMenu.LoadMissions();
+
+                // switch to extra menu
+                this->ShiftSurface(this, SURFACE_EXTRA, 3.0f, 1u);
             }
             else if(m_MainMenu.GetStatus() == 5)
             {
-                // switch to config menu
-                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f, 1u);
-
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
                 m_ConfigMenu.LoadValues();
                 m_ConfigMenu.ResetNavigator();
+
+                // switch to config menu
+                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f, 1u);
             }
             else if(m_MainMenu.GetStatus() == 6)
             {
+                // 
+                m_CreditRoll.Start(CREDIT_TYPE_MENU);
+
                 // switch to credits menu
                 this->ShiftSurface(this, SURFACE_CREDITS, 3.0f, 1u);
-
-                // 
-                m_CreditRoll.Start();
             }
         }
         break;
@@ -424,10 +424,10 @@ void cMenu::Move()
             if(m_GameMenu.GetStatus() == 1)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_BRIDGE, 1.0f, 0u);
+                m_BridgeMenu.EnterGame(!g_pSave->GetHeader().oProgress.bFirstPlay);
 
                 // 
-                m_BridgeMenu.EnterGame(!g_pSave->GetHeader().oProgress.bFirstPlay);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 1.0f, 0u);
 
                 // 
                 this->__StartGame();
@@ -458,10 +458,10 @@ void cMenu::Move()
             if(m_ReplayMenu.GetStatus() == 1)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_BRIDGE, 1.0f, 0u);
+                m_BridgeMenu.EnterGame(true);
 
                 // 
-                m_BridgeMenu.EnterGame(true);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 1.0f, 0u);
 
                 // 
                 g_pReplay->CreateGame();
@@ -511,10 +511,10 @@ void cMenu::Move()
             else if(m_PauseMenu.GetStatus() == 2)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+                m_BridgeMenu.UseRestart(true);
 
                 // 
-                m_BridgeMenu.UseRestart(true);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
 
                 // 
                 Core::Audio->CancelSound(SOUND_EFFECT);
@@ -522,21 +522,21 @@ void cMenu::Move()
             }
             else if(m_PauseMenu.GetStatus() == 3)
             {
-                // switch to config menu
-                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f, 1u);
-
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
                 m_ConfigMenu.LoadValues();
                 m_ConfigMenu.ResetNavigator();
+
+                // switch to config menu
+                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f, 1u);
             }
             else if(m_PauseMenu.GetStatus() == 4)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, true, true);
 
                 // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, true, true);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
 
                 // 
                 Core::Audio->CancelSound(SOUND_EFFECT);
@@ -562,18 +562,18 @@ void cMenu::Move()
             else if(m_SummaryMenu.GetStatus() == 2)
             {
                 // 
-                this->ChangeSurface(SURFACE_FINISH, 0.0f);
+                m_CreditRoll.Start((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_ENDING_NORMAL) ? CREDIT_TYPE_NORMAL : CREDIT_TYPE_SECRET);
 
                 // 
-                m_FinishMenu.ShowThankYou();
+                this->ChangeSurface(SURFACE_CREDITS, 0.0f);
             }
             else if(m_SummaryMenu.GetStatus() == 3)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+                m_BridgeMenu.UseRestart(false);
 
                 // 
-                m_BridgeMenu.UseRestart(false);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
             }
         }
         break;
@@ -583,18 +583,18 @@ void cMenu::Move()
             if(m_DefeatMenu.GetStatus() == 1)
             {
                 // 
-                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                m_BridgeMenu.UseContinue();
 
                 // 
-                m_BridgeMenu.UseContinue();
+                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
             }
             else if(m_DefeatMenu.GetStatus() == 2)
             {
                 // 
-                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
 
                 // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
             }
         }
         break;
@@ -604,10 +604,10 @@ void cMenu::Move()
             if(m_FinishMenu.GetStatus())
             {
                 // 
-                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
 
                 // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
             }
         }
         break;
@@ -657,10 +657,23 @@ void cMenu::Move()
 
     case SURFACE_CREDITS:
         {
-            if(m_CreditRoll.GetFinished() || g_MenuInput.bCancel)
+            const coreBool bInMenu = (m_CreditRoll.GetType() == CREDIT_TYPE_MENU);
+
+            if(m_CreditRoll.GetFinished() || (bInMenu && g_MenuInput.bCancel))
             {
-                // return to previous menu
-                this->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u);
+                if(bInMenu)
+                {
+                    // return to previous menu
+                    this->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u);
+                }
+                else
+                {
+                    // 
+                    m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+
+                    // 
+                    this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                }
             }
         }
         break;
@@ -747,6 +760,7 @@ coreBool cMenu::IsPaused()const
            (this->GetCurSurface() != SURFACE_SUMMARY) &&
            (this->GetCurSurface() != SURFACE_DEFEAT)  &&
            (this->GetCurSurface() != SURFACE_FINISH)  &&
+           (this->GetCurSurface() != SURFACE_CREDITS) &&
            (this->GetCurSurface() != SURFACE_BRIDGE || m_BridgeMenu.GetPaused()) && STATIC_ISVALID(g_pGame);
 }
 
@@ -1036,7 +1050,7 @@ void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const cor
 
 // ****************************************************************
 // 
-void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
+void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSound)
 {
     ASSERT(pSwitchBox)
 
@@ -1060,7 +1074,7 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
     UpdateArrowFunc(pSwitchBox->GetArrow(0u), pSwitchBox->GetEndless() ? ~0u : 0u);
     UpdateArrowFunc(pSwitchBox->GetArrow(1u), pSwitchBox->GetEndless() ? ~0u : (pSwitchBox->GetNumEntries() - 1u));
     
-    
+
     // 
     const coreBool bArrowLeft  = pSwitchBox->GetArrow(0u)->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
     const coreBool bArrowRight = pSwitchBox->GetArrow(1u)->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
@@ -1068,7 +1082,7 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
     if(iUserSwitch)
     {
         // 
-        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);
+        if(bSound) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);
     }
     else if(bArrowLeft || bArrowRight)
     {
@@ -1218,8 +1232,10 @@ void cMenu::__StartGame()
     STATIC_NEW(g_pGame, oOptions, piMissionList, iNumMissions)
     g_pGame->LoadMissionID(iMissionID, iTakeFrom, iTakeTo);
 
+#if !defined(_CORE_EMSCRIPTEN_)
     // 
     if(!g_bDemoVersion) g_pReplay->StartRecording();
+#endif
 }
 
 

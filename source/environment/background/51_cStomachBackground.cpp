@@ -75,6 +75,12 @@ cStomachBackground::~cStomachBackground()
 // 
 void cStomachBackground::__InitOwn()
 {
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_stomach.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
 }
 
 
@@ -82,6 +88,12 @@ void cStomachBackground::__InitOwn()
 // 
 void cStomachBackground::__ExitOwn()
 {
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -95,6 +107,18 @@ void cStomachBackground::__RenderOwnAfter()
         m_Headlight.Render();
     }
     glEnable(GL_DEPTH_TEST);
+}
+
+
+// ****************************************************************
+// 
+void cStomachBackground::__MoveOwn()
+{
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+    {
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    }
 }
 
 

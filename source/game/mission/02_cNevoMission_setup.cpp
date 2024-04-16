@@ -1412,9 +1412,10 @@ void cNevoMission::__SetupOwn()
     // enemies are either distributed with 0.2f or 0.5f
     // TASK: some enemies can and should be killed from a different side
     // TASK: never look too long into the same direction
+    // TODO 1: hardmode: hidden arrow
     // TODO 1: hardmode: arrow change direction with tick (visible display), though this is already in the final boss
     // TODO 1: hardmode: jeder gegner hat zwei pfeile (consistent mit der gruppe)
-    // TODO 1: 6x6 puzzle anpassen (falls nötig), einzelne pfeile anpassen (falls nötig) (vielleicht auch shiften oder aufteilen oder rotiert infinity nach rechts oder chess-aufteilung (um sie von der kleinen davor zu unterscheiden!))
+    // TODO 1: 6x6 puzzle anpassen (falls nötig) (JA, WAR SPIELER FEEDBACK, DASS ES ZU PUZZLY IST, the weakest part of the demo), einzelne pfeile anpassen (falls nötig) (vielleicht auch shiften oder aufteilen oder rotiert infinity nach rechts oder chess-aufteilung (um sie von der kleinen davor zu unterscheiden!))
     // TODO 1: MAIN: task-check, hard idea, regular score, badges, sound, background rota/speed
     // TODO 1: ACHIEVEMENT: name (), description (), finish the stage without turning more than N times
     // TODO 1: leichter angriff auf easy, vielleicht der einzel-schuss, und auf normal gibts multi-schuss
@@ -1651,42 +1652,42 @@ void cNevoMission::__SetupOwn()
             else if(STAGE_SUB(12u))
             {
                 STAGE_RESURRECT(pSquad1, 80u, 115u)
-                nEnableArrowFunc( 2u,  80u, 3u);
-                nEnableArrowFunc( 3u,  81u, 0u);
-                nEnableArrowFunc( 4u,  82u, 2u);
-                nEnableArrowFunc( 5u,  83u, 0u);
+                nEnableArrowFunc( 2u,  80u, 2u);
+                nEnableArrowFunc( 3u,  81u, 2u);
+                nEnableArrowFunc( 4u,  82u, 0u);
+                nEnableArrowFunc( 5u,  83u, 2u);
                 nEnableArrowFunc( 6u,  84u, 3u);
-                nEnableArrowFunc( 7u,  85u, 0u);
+                nEnableArrowFunc( 7u,  85u, 3u);
                 nEnableArrowFunc( 8u,  86u, 2u);
-                nEnableArrowFunc( 9u,  87u, 1u);
-                nEnableArrowFunc(10u,  88u, 2u);
-                nEnableArrowFunc(11u,  89u, 0u);
-                nEnableArrowFunc(12u,  90u, 1u);
-                nEnableArrowFunc(13u,  91u, 1u);
-                nEnableArrowFunc(14u,  92u, 3u);
-                nEnableArrowFunc(15u,  93u, 3u);
-                nEnableArrowFunc(16u,  94u, 3u);
-                nEnableArrowFunc(17u,  95u, 0u);
-                nEnableArrowFunc(18u,  96u, 3u);
-                nEnableArrowFunc(19u,  97u, 3u);
-                nEnableArrowFunc(20u,  98u, 2u);
-                nEnableArrowFunc(21u,  99u, 1u);
-                nEnableArrowFunc(22u, 100u, 1u);
-                nEnableArrowFunc(23u, 101u, 0u);
-                nEnableArrowFunc(24u, 102u, 1u);
-                nEnableArrowFunc(25u, 103u, 1u);
-                nEnableArrowFunc(26u, 104u, 3u);
-                nEnableArrowFunc(27u, 105u, 0u);
-                nEnableArrowFunc(28u, 106u, 2u);
-                nEnableArrowFunc(29u, 107u, 3u);
-                nEnableArrowFunc(30u, 108u, 3u);
+                nEnableArrowFunc( 9u,  87u, 2u);
+                nEnableArrowFunc(10u,  88u, 0u);
+                nEnableArrowFunc(11u,  89u, 2u);
+                nEnableArrowFunc(12u,  90u, 3u);
+                nEnableArrowFunc(13u,  91u, 3u);
+                nEnableArrowFunc(14u,  92u, 1u);
+                nEnableArrowFunc(15u,  93u, 1u);
+                nEnableArrowFunc(16u,  94u, 0u);
+                nEnableArrowFunc(17u,  95u, 2u);
+                nEnableArrowFunc(18u,  96u, 1u);
+                nEnableArrowFunc(19u,  97u, 1u);
+                nEnableArrowFunc(20u,  98u, 3u);
+                nEnableArrowFunc(21u,  99u, 3u);
+                nEnableArrowFunc(22u, 100u, 0u);
+                nEnableArrowFunc(23u, 101u, 3u);
+                nEnableArrowFunc(24u, 102u, 3u);
+                nEnableArrowFunc(25u, 103u, 3u);
+                nEnableArrowFunc(26u, 104u, 1u);
+                nEnableArrowFunc(27u, 105u, 1u);
+                nEnableArrowFunc(28u, 106u, 0u);
+                nEnableArrowFunc(29u, 107u, 2u);
+                nEnableArrowFunc(30u, 108u, 0u);
                 nEnableArrowFunc(31u, 109u, 0u);
-                nEnableArrowFunc(32u, 110u, 2u);
+                nEnableArrowFunc(32u, 110u, 1u);
                 nEnableArrowFunc(33u, 111u, 1u);
-                nEnableArrowFunc(34u, 112u, 2u);
-                nEnableArrowFunc(35u, 113u, 1u);
-                nEnableArrowFunc(36u, 114u, 2u);
-                nEnableArrowFunc(37u, 115u, 1u);
+                nEnableArrowFunc(34u, 112u, 0u);
+                nEnableArrowFunc(35u, 113u, 2u);
+                nEnableArrowFunc(36u, 114u, 0u);
+                nEnableArrowFunc(37u, 115u, 0u);
             }
         }
 

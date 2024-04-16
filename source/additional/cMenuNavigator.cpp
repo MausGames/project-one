@@ -199,6 +199,8 @@ void cMenuNavigator::Move()
         {
             if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_HOLD)) abPress[0] = true;
             if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_HOLD)) abPress[1] = true;
+            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,       CORE_INPUT_HOLD)) abPress[0] = true;
+            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER,      CORE_INPUT_HOLD)) abPress[1] = true;
             if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_B,             CORE_INPUT_HOLD)) abPress[2] = true;
         }
 
@@ -235,6 +237,8 @@ void cMenuNavigator::Move()
 void cMenuNavigator::Update()
 {
     if(!TIME) return;
+    
+    Core::Debug->InspectValue("left", Core::Input->GetJoystickButton(0u, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS));
 
     if(!s_bJoystick)
     {
@@ -281,8 +285,8 @@ void cMenuNavigator::Update()
 
             if(!m_aTab.empty())
             {
-                const coreBool bShoulderLeft  = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_PRESS);
-                const coreBool bShoulderRight = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS);
+                const coreBool bShoulderLeft  = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS);
+                const coreBool bShoulderRight = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER, CORE_INPUT_PRESS);
 
                 if(bShoulderLeft || bShoulderRight)
                 {
@@ -578,7 +582,7 @@ void cMenuNavigator::GlobalUpdate()
     {
         // 
         s_vMouseMove += Core::Input->GetMouseRelative().xy() * Core::System->GetResolution();
-        if(s_vMouseMove.LengthSq() > POW2(20.0f))
+        if(s_vMouseMove.LengthSq() > POW2(30.0f))
         {
             s_bJoystick = false;
         }

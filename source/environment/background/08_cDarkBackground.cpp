@@ -18,6 +18,8 @@ cDarkBackground::cDarkBackground()noexcept
 , m_iIndexOffset    (0u)
 , m_fDissolve       (-1.0f)
 , m_afFade          {}
+, m_vColor          (cDarkBackground::Color)
+, m_vColor2         (cDarkBackground::Color2)
 , m_fLightningFlash (0.0f)
 {
     // 
@@ -222,7 +224,7 @@ void cDarkBackground::__MoveOwn()
     // adjust volume of the base sound-effect
     if(m_pBaseSound->EnableRef(this))
     {
-        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this) * (1.0f - STEP(0.0f, 10.0f, m_fDissolve)));
     }
 
     // 

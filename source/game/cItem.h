@@ -11,6 +11,7 @@
 #define _P1_GUARD_ITEM_H_
 
 // TODO 4: lifetime should be handled in base class
+// TODO 1: fragment sollte in die mitte fliegen wenn zu nah am rand (zeroth, chol)
 
 
 // ****************************************************************
@@ -82,6 +83,9 @@ public:
 
     // 
     void LoseItems();
+
+    // 
+    inline cItem* GetItem(const coreUintW iIndex)const {ASSERT(iIndex < m_apItemList.size()) return m_apItemList.at(iIndex);}
 
     // 
     inline coreUintW GetNumItems      ()const {return m_apItemList.size();}

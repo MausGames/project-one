@@ -1130,7 +1130,7 @@ void cViridoMission::__SetupOwn()
                 if(i == iBigIndex)
                 {
                     pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.8f);
-                    pEnemy->Configure(200, 0u, COLOR_SHIP_ORANGE);
+                    pEnemy->Configure(200 + 20, 0u, COLOR_SHIP_ORANGE);
                 }
                 else
                 {
@@ -1166,7 +1166,7 @@ void cViridoMission::__SetupOwn()
                 this->DisableShadow(i, true);
         }
 
-        const coreFloat fEasySpeed = (g_pGame->IsEasy() ? 0.4f : 1.0f);
+        const coreFloat fEasySpeed = (g_pGame->IsEasy() ? 0.4f : 0.9f);
 
         if(STAGE_CLEARED)
         {
@@ -1526,7 +1526,7 @@ void cViridoMission::__SetupOwn()
                             g_pSpecialEffects->CreateBlastSphere(pEnemy->GetPosition(), 4.0f, 2.0f, COLOR_ENERGY_WHITE);
                             g_pSpecialEffects->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 
-                            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
 
                             if(++iBigShakeNum == 2u)
                             {
@@ -2214,7 +2214,7 @@ void cViridoMission::__SetupOwn()
             if(!pBean->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
             const coreFloat fTime   = 1.3f + I_TO_F(i) * 0.5f + (i ? 2.0f : 0.5f) - m_fStageSubTime * (i ? 1.05f : 0.8f);
-            const coreFloat fOffset = i ? (vBasePos.x * ((i % 2u) ? -1.0f : 0.5f) + LERP(-0.5f, 0.5f, (I_TO_F((i * 3u) % VIRIDO_BEANS) / I_TO_F(VIRIDO_BEANS - 1u)))) : vBasePos.x;
+            const coreFloat fOffset = i ? (vBasePos.x * ((i % 2u) ? -1.0f : 0.5f) * 0.8f + LERP(-0.5f, 0.5f, (I_TO_F((i * 3u) % VIRIDO_BEANS) / I_TO_F(VIRIDO_BEANS - 1u)))) : vBasePos.x;
             const coreFloat fHeight = LERPBR(-1.3f, 1.3f, STEP(-1.3f, 1.3f, fTime));
 
             if(fTime < -1.3f) this->DisableBean(i, false);

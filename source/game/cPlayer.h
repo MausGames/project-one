@@ -32,7 +32,8 @@
 #define PLAYER_EQUIP_SUPPORTS      (EQUIP_SUPPORTS)     // 
 #define PLAYER_LIVES               (LIVES)              // 
 #define PLAYER_COLLISION_MIN       (0.2f)               // 
-#define PLAYER_SIZE_FACTOR         (1.15f * m_fScale)   // 
+#define PLAYER_SIZE_FACTOR         (1.15f)              // 
+#define PLAYER_SIZE_FACTOR_EXT     (1.15f * m_fScale)   // 
 #define PLAYER_AREA_FACTOR         (1.06f)              // 
 #define PLAYER_RANGE_SIZE          (1.04f)              // 
 #define PLAYER_WIND_SIZE           (4.5f)               // 
@@ -76,7 +77,7 @@ enum ePlayerStatus : coreUint16
     PLAYER_STATUS_INVINCIBLE     = 0x0008u,   // 
     PLAYER_STATUS_HEALER         = 0x0010u,   // 
     PLAYER_STATUS_TOP            = 0x0020u,   // 
-    PLAYER_STATUS_KEEP_RANGE     = 0x0040u,   // 
+    PLAYER_STATUS_KEEP_RANGE     = 0x0040u,   // TODO 1: still used ?
     PLAYER_STATUS_REPAIRED       = 0x0080u,   // 
     PLAYER_STATUS_NO_INPUT_MOVE  = 0x0100u,   // disable player movement (user controls only)
     PLAYER_STATUS_NO_INPUT_SHOOT = 0x0200u,   // disable player weapons
@@ -120,6 +121,7 @@ private:
     coreFloat   m_fScale;                                     // 
     coreFloat   m_fThrust;                                    // 
     coreFloat   m_fTilt;                                      // 
+    coreBool    m_bRainbow;                                   // 
 
     coreProtect<coreFloat> m_fMoveSpeed;                      // 
     coreProtect<coreFloat> m_fShootSpeed;                     // 
@@ -140,6 +142,7 @@ private:
 
     coreProtect<coreInt32> m_iMaxShield;                      // 
     coreProtect<coreInt32> m_iCurShield;                      // 
+    coreProtect<coreInt32> m_iPreShield;                      // 
 
     cDataTable  m_DataTable;                                  // 
     cScoreTable m_ScoreTable;                                 // 
@@ -148,6 +151,7 @@ private:
     coreProgramPtr m_pDarkProgram;                            // 
     coreFlow       m_fAnimation;                              // 
     coreUint16     m_iLook;                                   // 
+    coreFloat      m_fRangeScale;                             // 
     coreVector3    m_vMenuColor;                              // 
     coreVector3    m_vLedColor;                               // 
 
@@ -157,6 +161,7 @@ private:
     coreFloat   m_fSmoothTilt;                                // 
     coreFlow    m_fRangeValue;                                // 
     coreFlow    m_fArrowValue;                                // 
+    coreFlow    m_fBubbleValue;                               // 
     coreFlow    m_fCircleValue;                               // 
     coreUint8   m_iLastMove;                                  // 
 
@@ -174,6 +179,7 @@ private:
     
     coreFlow m_fHitDelay;
     coreFloat m_fBoost;
+    coreBool  m_bWasDamaged;
 
 
 public:
@@ -232,7 +238,7 @@ public:
     inline coreBool IsFeeling    ()const {return (m_fFeelTime   >  PLAYER_NO_FEEL);}
     inline coreBool IsIgnoring   ()const {return (m_fIgnoreTime >  PLAYER_NO_IGNORE);}
     inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
-    inline coreBool IsProjectOne ()const {return (GET_BITVALUE(m_iLook, 4u, 0u) == 2u);}
+    inline coreBool IsRainbow    ()const {return (m_bRainbow);}
     inline coreBool IsEnemyLook  ()const {return (m_apWeapon[0]->GetID() == cEnemyWeapon::ID);}
 
     // 
@@ -240,7 +246,7 @@ public:
     void DisableRange  ();
     void EnableArrow   ();
     void DisableArrow  ();
-    void EnableWind    (const coreVector2 vDirection);
+    void EnableWind    (const coreVector2 vDirection = coreVector2(0.0f,0.0f));
     void DisableWind   ();
     void EnableBubble  ();
     void DisableBubble ();
@@ -253,6 +259,7 @@ public:
 
     // 
     inline const coreModelPtr& GetRangeModel ()const {return m_Range.GetModel();}
+    inline const coreFloat&    GetRangeScale ()const {return m_fRangeScale;}
     inline       coreVector3   GetEnergyColor()const {return m_Range.GetColor3() * (1.0f/1.1f);}
     inline const coreVector3&  GetMenuColor  ()const {return m_vMenuColor;}
     inline const coreVector3&  GetLedColor   ()const {return m_vLedColor;}
@@ -282,6 +289,7 @@ public:
     inline void SetScale     (const coreFloat   fScale)      {m_fScale      = fScale;}
     inline void SetThrust    (const coreFloat   fThrust)     {m_fThrust     = fThrust;}
     inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
+    inline void SetRainbow   (const coreBool    bRainbow)    {m_bRainbow    = bRainbow;}
     inline void SetMoveSpeed (const coreFloat   fMoveSpeed)  {m_fMoveSpeed  = fMoveSpeed;}
     inline void SetShootSpeed(const coreFloat   fShootSpeed) {m_fShootSpeed = fShootSpeed;}
     inline void SetAnimSpeed (const coreFloat   fAnimSpeed)  {m_fAnimSpeed  = fAnimSpeed;}
@@ -304,7 +312,9 @@ public:
     inline       coreInt32    GetMaxShield   ()const {return m_iMaxShield;}
     inline       coreInt32    GetCurShield   ()const {return m_iCurShield;}
     inline       coreFloat    GetCurShieldPct()const {return I_TO_F(m_iCurShield) / I_TO_F(m_iMaxShield);}   // # normal division
-
+    inline       coreInt32    GetPreShield   ()const {return m_iPreShield;}
+    inline       coreFloat    GetPreShieldPct()const {return I_TO_F(m_iPreShield) / I_TO_F(m_iMaxShield);}   // # normal division
+    
     // 
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,                                                          F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject,                                                   F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
@@ -317,24 +327,28 @@ public:
 
         m_Dot       .SetPosition(vPosition);
         m_Range     .SetPosition(vPosition);
-        m_Arrow     .SetPosition(vPosition + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR);
+        m_Arrow     .SetPosition(vPosition + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR_EXT);
         m_Wind      .SetPosition(vPosition);
         m_Bubble    .SetPosition(vPosition);
         m_aShield[0].SetPosition(vPosition);
         m_aShield[1].SetPosition(vPosition);
-        m_Exhaust   .SetPosition(vPosition - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR));
+        m_Exhaust   .SetPosition(vPosition - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR_EXT));
     }
     void SetDirection(const coreVector3 vDirection)
     {
         this->coreObject3D::SetDirection(vDirection);
 
-        m_Arrow  .SetPosition(this->GetPosition() + vDirection * 6.2f * PLAYER_SIZE_FACTOR);
-        m_Exhaust.SetPosition(this->GetPosition() - vDirection * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR));
+        m_Arrow  .SetPosition(this->GetPosition() + vDirection * 6.2f * PLAYER_SIZE_FACTOR_EXT);
+        m_Exhaust.SetPosition(this->GetPosition() - vDirection * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR_EXT));
         
         m_Arrow  .SetDirection(vDirection);
         m_Exhaust.SetDirection(vDirection);
     }
     // coreObject3D::Move in teleport
+    
+    inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {ASSERT(false) return false;}
+    inline coreBool ReachedHealthPct(const coreFloat fHealthPct)const {ASSERT(false) return false;}
+    inline const coreBool& WasDamaged()const {return m_bWasDamaged;}
 
 
 private:

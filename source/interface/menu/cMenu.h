@@ -46,6 +46,7 @@
 // TODO 4: why do I have ChangeLanguage for switch-boxes, what does it do, should I add it to the engine instead?
 // TODO 4: switch more menus to SetHighlightColor, which is more efficient
 // TODO 3: scroll-box sometimes moves down and up when moving/wrapping across menu with navigator, this is related to line interaction
+// TODO 2: this->ChangeSurface(XXX, 0.0f) mit timeless wrappen
 
 
 // ****************************************************************
@@ -222,12 +223,16 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_FLASHEFFECTS,
     ENTRY_VIDEO_HITSTOPEFFECTS,
     ENTRY_VIDEO_CHROMAEFFECTS,
+    ENTRY_VIDEO_ROTATIONEFFECTS,
     ENTRY_VIDEO,
 
     ENTRY_AUDIO_GLOBALVOLUME = ENTRY_VIDEO,
     ENTRY_AUDIO_MUSICVOLUME,
     ENTRY_AUDIO_EFFECTVOLUME,
     ENTRY_AUDIO_AMBIENTVOLUME,
+    ENTRY_AUDIO_MENUVOLUME,
+    ENTRY_AUDIO_QUALITY,
+    ENTRY_AUDIO_MODE,
     ENTRY_AUDIO_3DSOUND,
     ENTRY_AUDIO,
 
@@ -272,6 +277,7 @@ enum eEntry : coreUint8
 #define ICON_TIMES        (__ICON(u8"\uF00D"))
 #define ICON_POWER_OFF    (__ICON(u8"\uF011"))
 #define ICON_REFRESH      (__ICON(u8"\uF021"))
+#define ICON_LOCK         (__ICON(u8"\uF023"))
 #define ICON_ARROW_LEFT   (__ICON(u8"\uF060"))
 #define ICON_ARROW_RIGHT  (__ICON(u8"\uF061"))
 #define ICON_ARROW_UP     (__ICON(u8"\uF062"))
@@ -288,7 +294,7 @@ enum eEntry : coreUint8
 #define ICON_REDO_ALT     (__ICON(u8"\uF2F9"))
 #define ICON_SHIELD_ALT   (__ICON(u8"\uF3ED"))
 #define ICON_BURN         (__ICON(u8"\uF46A"))
-#define ICON_FEATHER_ALT  (__ICON(u8"\uF56B"))
+#define ICON_FEATHER_ALT  (__ICON(u8"\uF56B")
 
 
 // ****************************************************************
@@ -742,6 +748,7 @@ private:
     cGuiObject m_aLine    [ENTRY_MAX];         // 
     cGuiLabel  m_aCueInput[INPUT_KEYS];        // 
     cGuiLabel  m_aCueRota [2];                 // 
+    cGuiLabel  m_aCueLock [3];                 // 
 
     cGuiLabel       m_Description;             // 
     const coreChar* m_apcDescKey[ENTRY_MAX];   // 
@@ -757,10 +764,14 @@ private:
     cGuiSwitchBox m_FlashEffects;
     cGuiSwitchBox m_HitStopEffects;
     cGuiSwitchBox m_ChromaEffects;
+    cGuiSwitchBox m_RotationEffects;
     cGuiSwitchBox m_GlobalVolume;
     cGuiSwitchBox m_MusicVolume;
     cGuiSwitchBox m_EffectVolume;
     cGuiSwitchBox m_AmbientVolume;
+    cGuiSwitchBox m_MenuVolume;
+    cGuiSwitchBox m_AudioQuality;
+    cGuiSwitchBox m_AudioMode;
     cGuiSwitchBox m_3DSound;
     cGuiSwitchBox m_Language;
     cGuiSwitchBox m_TextSize;
@@ -1250,7 +1261,7 @@ public:
     static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreBool bGrow = true);
     static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor);
     static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused);
-    static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox);
+    static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSound = true);
     static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract, const coreVector3 vFocusColor);
     static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract);
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);

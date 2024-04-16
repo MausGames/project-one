@@ -31,6 +31,7 @@
 #define BOSS_COUNTERS (16u)   // 
 #define BOSS_VECTORS  (12u)   // 
 
+#define BOSS_PLAYERS  (PLAYERS)        // 
 #define BOSS_HELPERS  (HELPERS - 1u)   // 
 
 
@@ -97,6 +98,7 @@
 #define ZEROTH_LIMB_HEAD          (0u)                                         // 
 #define ZEROTH_LIMB_TAIL          (3u)                                         // 
 #define ZEROTH_RADIUS             (8.0f)                                       // 
+#define ZEROTH_RADIUS_BULLET      (2.0f)                                       // 
 #define ZEROTH_SPEED_SLOW         (8.0f)                                       // 
 #define ZEROTH_SPEED_FAST         (16.0f)                                      // 
 #define ZEROTH_LASER_SIZE         (coreVector3(1.7f,45.0f,1.7f))               // 
@@ -104,11 +106,12 @@
 #define ZEROTH_LASERWAVE_SIZE     (coreVector3(3.0f,22.5f,3.0f))               // 
 #define ZEROTH_LASERWAVE_TEXSIZE  (coreVector2(0.5f,1.5f))                     // 
 
-#define GEMINGA_ENEMIES_TELEPORT  (8u)                                         // 
+#define GEMINGA_ENEMIES_TELEPORT  (4u)                                         // 
 #define GEMINGA_ENEMIES_LEGION    (10u)                                        // 
 
 #define PROJECTONE_SHIELDS        (HELPERS - 1u)                               // 
 #define PROJECTONE_CLONES         (5u)                                         // 
+#define PROJECTONE_FRAGMENTS      (FRAGMENTS - 1u)                             // 
 #define PROJECTONE_ENEMIES_METEOR (8u)                                         // 
 #define PROJECTONE_ENEMIES_LEGION (4u)                                         // 
 #define PROJECTONE_COLL_SCALE     (1.1f)                                       // 
@@ -232,6 +235,7 @@ protected:
     void     _KillHelper     (const coreUint8 iElement, const coreBool bAnimated);
 
     // 
+    void _CreateFragment(const coreUint8 iType, const coreVector2 vPosition);
     void _CreateFragment(const coreUint8 iType);
 
     // 
@@ -312,7 +316,8 @@ private:
 
     coreObject3D m_Summon;                                      // 
 
-    coreFloat m_fVisibility;                                    // 
+    coreFlow m_afVisibility[2];                                 // 
+    coreBool m_bHelperEvent;                                    // 
 
     coreUint8 m_iPackedDir;                                     // 
     coreFlow  m_fAnimation;                                     // animation value
@@ -323,6 +328,9 @@ public:
 
     DISABLE_COPY(cDharukSubBoss)
     ASSIGN_ID_EX(101, "DHARUK", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
+
+    // 
+    inline const coreBool& GetHelperEvent()const {return m_bHelperEvent;}
 
 
 private:
@@ -346,7 +354,8 @@ private:
     void __DisableSummon(const coreBool bAnimated);
 
     // 
-    inline void __BecomeInvisible() {m_fVisibility = -1.0f; this->SetAlpha(0.0f); this->AddStatus(ENEMY_STATUS_HIDDEN);}
+    inline void __BecomeInvisible1() {m_afVisibility[0] = -1.0f; this      ->SetAlpha(0.0f); this      ->AddStatus(ENEMY_STATUS_HIDDEN);}
+    inline void __BecomeInvisible2() {m_afVisibility[1] = -1.0f; m_Duplicate.SetAlpha(0.0f); m_Duplicate.AddStatus(ENEMY_STATUS_HIDDEN);}
 
     // 
     coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
@@ -897,6 +906,7 @@ private:
     coreVector3 m_avWingReturn[CHOL_WINGS];   // 
 
     coreModelPtr m_apFireModel[2];            // 
+    coreFlow     m_fFireFade;                 // 
     coreUint8    m_iFireType;                 // 
     coreBool     m_bFireActive;               // 
 
@@ -912,7 +922,6 @@ private:
     coreFloat m_fPush;                        // 
 
     coreFlow m_fAnimation;                    // 
-    coreFlow m_fResurrection;                 // 
 
 
 public:
@@ -937,16 +946,25 @@ private:
     void __DisableFire(const coreBool bAnimated);
 
     // 
-    inline void __ChangeWing       (const coreUintW iIndex, const coreUint8 iState) {ASSERT(iIndex < CHOL_WINGS) m_aiWingState[iIndex] = iState; m_afWingTime[iIndex] = 0.0f;}
-    inline void __ChangeWingInc    (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, m_aiWingState[iIndex] + 1u);}
-    inline void __ChangeWingReset  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  0u);}
-    inline void __ChangeWingIntro  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  1u);}
-    inline void __ChangeWingThrow1 (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 11u);}
-    inline void __ChangeWingThrow2 (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 21u);}
-    inline void __ChangeWingReturn (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 31u);}
-    inline void __ChangeWingPull   (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 41u);}
-    inline void __ChangeWingSpike  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 51u);}
-    inline void __ChangeWingExplode(const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 61u);}
+    inline void __ChangeWing          (const coreUintW iIndex, const coreUint8 iState) {ASSERT(iIndex < CHOL_WINGS) m_aiWingState[iIndex] = iState; m_afWingTime[iIndex] = 0.0f;}
+    inline void __ChangeWingInc       (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, m_aiWingState[iIndex] + 1u);}
+    inline void __ChangeWingReset     (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  0u);}
+    inline void __ChangeWingIntro     (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  1u);}
+    inline void __ChangeWingThrow1    (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 11u);}
+    inline void __ChangeWingThrow2    (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 21u);}
+    inline void __ChangeWingReturn    (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 31u);}
+    inline void __ChangeWingPull      (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 41u);}
+    inline void __ChangeWingSpike     (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 51u);}
+    inline void __ChangeWingExplode1  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 61u);}
+    inline void __ChangeWingExplode2  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 71u);}
+    inline void __ChangeWingResurrect1(const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 81u);}
+    inline void __ChangeWingResurrect2(const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 91u);}
+
+    // 
+    void __RepairWing(const coreUintW iIndex, const coreInt32 iHealth);
+
+    // 
+    void __Impact(coreObject3D* OUTPUT pObject, const coreVector2 vPos, const coreVector3 vDir, const coreFloat fTime, const coreFloat fTimeBefore, const coreBool bBig);
 
     // 
     void __ResurrectFake();
@@ -1001,8 +1019,15 @@ private:
     coreObject3D m_Laser;                       // 
     coreObject3D m_LaserWave;                   // 
     coreVector2  m_vLaserDir;                   // 
+    coreFlow     m_fLaserTime;                  // 
+    coreUint8    m_iLaserLimb;                  // 
 
-    cCustomEnemy m_aIce[ZEROTH_ICES];           // 
+    coreObject3D m_Indicator;                   // 
+
+    cCustomEnemy m_aIce        [ZEROTH_ICES];   // 
+    coreBool     m_abIcePreview[ZEROTH_ICES];   // 
+
+    coreVector2 m_vGlobalDir;                   // 
 
     coreFlow m_fAnimation;                      // 
 
@@ -1029,15 +1054,19 @@ private:
     void __MoveOwn       ()final;
 
     // 
-    void __EnableLaser (const coreUintW iLimb);
+    void __EnableLaser (const coreUintW iLimb, const coreBool bAnimated);
     void __DisableLaser(const coreBool bAnimated);
+    void __BeginLaser  ();
 
     // 
-    void __CreateCube (const coreVector2 vPosition, const coreVector2 vDirection);
+    void __CreateCube (const coreVector2 vPosition, const coreVector2 vDirection, const coreBool bPreview);
     void __DestroyCube(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void __SetLimbValue(const coreUintW iIndex, const coreFloat fValue);
+
+    //
+    void __SetIndicator(const coreFloat fValue, const coreVector3 vColor = coreVector3(0.0f,0.0f,0.0f));
 };
 
 
@@ -1063,19 +1092,23 @@ private:
 class cGemingaBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_InsideTop;            // 
-    cCustomEnemy m_InsideBottom;         // 
-    cCustomEnemy m_Top;                  // 
-    cCustomEnemy m_Bottom;               // 
+    cCustomEnemy m_InsideTop;          // 
+    cCustomEnemy m_InsideBottom;       // 
+    cCustomEnemy m_Top;                // 
+    cCustomEnemy m_Bottom;             // 
 
-    cDharukSubBoss m_Dharuk;             // 
+    cDharukSubBoss m_Dharuk;           // 
 
-    coreFloat m_fMouthAngle;             // 
+    coreFloat m_fMouthAngle;           // 
 
-    coreSpline2 m_ChangePath;            // 
-    coreSpline2 m_aPackPath[3];          // 
+    coreSpline2 m_ChangePath;          // 
+    coreSpline2 m_aPackPath[4];        // 
 
-    coreTexturePtr m_apStomachTex[14];   // (textures are the slowest to load) 
+    coreParticleEffect m_SuckEffect;   // 
+
+    coreSoundPtr m_pVacuumSound;       // 
+
+    coreDummyPtr m_apResCache[25];     // 
 
 
 public:
@@ -1120,72 +1153,93 @@ private:
 // Project One boss class
 class cProjectOneBoss final : public cBoss
 {
+public:
+    // 
+    static constexpr const coreVector3 Color  = coreVector3(1.0f,1.0f,1.0f);
+    static constexpr const coreVector3 Color2 = coreVector3(1.0f,1.0f,1.0f);
+    static constexpr const coreVector2 Icon   = coreVector2(0.0f,0.5f);
+
+
 private:
-    cCustomEnemy m_aShield[PROJECTONE_SHIELDS];   // 
+    cCustomEnemy m_aShield  [PROJECTONE_SHIELDS];     // 
+    cCustomEnemy m_aClone   [PROJECTONE_CLONES];      // 
+    coreObject3D m_aFragment[PROJECTONE_FRAGMENTS];   // 
 
-    cCustomEnemy m_aClone[PROJECTONE_CLONES];     // 
+    coreObject3D m_Range;                             // 
+    coreObject3D m_Arrow;                             // 
+    coreObject3D m_Wind;                              // 
+    coreObject3D m_Bubble;                            // 
+    coreObject3D m_Exhaust;                           // 
 
-    coreObject3D m_Range;                         // 
-    coreObject3D m_Arrow;                         // 
-    coreObject3D m_Wind;                          // 
-    coreObject3D m_Bubble;                        // 
-    coreObject3D m_Exhaust;                       // 
+    coreFloat m_fSmoothThrust;                        // 
 
-    coreFlow m_fThrust;                           // 
+    coreVector2 m_vOldDir;                            // 
+    coreFlow    m_fArrowValue;                        // 
 
-    coreVector2 m_vOldDir;                        // 
-    coreFlow    m_fArrowValue;                    // 
+    coreSpline2 m_HelperPath;                         // 
+    coreUint8   m_iHelperState;                       // 
 
-    coreSpline2 m_HelperPath;                     // 
-    coreUint8   m_iHelperState;                   // 
+    coreVector3 m_vLevelColor;                        // 
 
-    coreVector3 m_vLevelColor;                    // 
+    coreFlow m_fAnimation;                            // 
 
-    coreFlow m_fAnimation;                        // 
+    coreFlow    m_fWaveValue;                         // 
+    coreVector3 m_vColorFrom;                         // 
+    coreVector3 m_vColorTo;                           // 
 
-    coreFlow    m_fWaveValue;                     // 
-    coreVector3 m_vColorFrom;                     // 
-    coreVector3 m_vColorTo;                       // 
+    coreFlow  m_fPatternValue;                        // 
+    coreFlow  m_fPatternStrength;                     // 
+    coreUint8 m_iPatternType;                         // 
 
-    coreFlow  m_fPatternValue;                    // 
-    coreFlow  m_fPatternStrength;                 // 
-    coreUint8 m_iPatternType;                     // 
-
-    coreFlow m_fFinalLerp;                        // 
-
-    coreBool m_bDead;                             // 
+    coreBool m_bDead;                                 // 
 
     // yellow
-    coreFlow m_fFangTime;                         // 
+    coreFlow m_fFangTime;                             // 
+
+    // orange
+    coreUint8   m_iSlowdown;                          // 
+    coreFloat   m_fPushForce;                         // 
+    coreVector2 m_vPushDir;                           // 
+
+    // red
+    coreFlow m_fPearlFlash;                           // 
 
     // magenta
-    coreFlow  m_fPlateTime;                       // 
-    coreUint8 m_iMeteorDir;                       // 
-    coreFloat m_fGameAngle;                       // 
+    coreFlow  m_fPlateTime;                           // 
+    coreUint8 m_iMeteorDir;                           // 
+    coreUint8 m_iBulletTick;                          // 
+    coreFloat m_fGameAngle;                           // 
 
     // purple
-    coreSpline2 m_aPurplePath[2];                 // 
+    coreSpline2 m_aPurplePath[2];                     // 
 
     // blue
-    coreFloat   m_fPushForce;                     // 
-    coreVector2 m_vPushDir;                       // 
+    coreVector2 m_vGlobalDir;                         // 
+    coreVector2 m_vBoulderDir;                        // 
+
+    // cyan
+    coreFlow m_fArrowRota;                            // 
+
+    // white
+    coreFlow m_fFinalValue;                           // 
+    coreFlow m_fFinalLerp;                            // 
 
 
 public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(801, "P1")
+    ASSIGN_ID(801, "???")
 
     // get object properties
     inline coreVector3     GetColor    ()const final {return m_vLevelColor;}
     inline coreVector3     GetColor2   ()const final {return m_vLevelColor;}
-    inline coreVector2     GetIcon     ()const final {return coreVector2(-1.0f,-1.0f);}
+    inline coreVector2     GetIcon     ()const final {return cProjectOneBoss::Icon;}
     inline const coreChar* GetMusicName()const final {return "boss_08_intro.ogg";}
 
     // 
-    static void CalcColor    (const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor);
-    static void CalcColorLerp(const coreFloat fValue, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor);
+    static void CalcColor    (const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvLedColor);
+    static void CalcColorLerp(const coreFloat fValue, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvLedColor);
 
 
 private:
@@ -1207,6 +1261,10 @@ private:
     void __MoveGreen  ();
     void __MoveWhite  ();
     void __MoveIntro  ();
+
+    // 
+    void __EnableFragment (const coreUintW iIndex);
+    void __DisableFragment(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void __ShowArrow();
@@ -1235,8 +1293,9 @@ private:
     void __SwitchColor (const coreUintW iIndex, const coreBool bWave);
 
     // 
-    void __StartMission(const coreUintW iIndex);
-    void __EndMission  (const coreBool bAnimated, const coreBool bReturn);
+    void __RequestMission(const coreUintW iIndex);
+    void __StartMission  (const coreUintW iIndex);
+    void __EndMission    (const coreBool bAnimated, const coreBool bReturn);
 
     // 
     void __EndExplosion(const coreBool bClear);
@@ -1255,6 +1314,8 @@ private:
     cLodObject m_aLayer[EIGENGRAU_LAYERS];           // 
     coreObject3D m_Range;
     coreObject3D m_RangePlayer;
+    
+    coreObject3D m_aArrow[BOSS_PLAYERS];            // 
 
     cCustomEnemy m_aParasite[EIGENGRAU_PARASITES];   // 
     cCustomEnemy m_aFollower[EIGENGRAU_FOLLOWERS];   // 
@@ -1276,16 +1337,20 @@ private:
     
     coreFloat m_fRotaSpeed;
     
+    coreFloat m_fAttackSpeed;
+    
     coreUint16 m_iBurstTick;
     
     coreSpline2 m_PlayerPath;
+
+    coreSoundPtr m_pHeartSound;                       // 
 
 
 public:
     cEigengrauBoss()noexcept;
 
     DISABLE_COPY(cEigengrauBoss)
-    ASSIGN_ID_EX(802, "EIGENGRAU", COLOR_MENU_WHITE, COLOR_MENU_WHITE, coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(802, "EIGENGRAU", COLOR_MENU_WHITE, COLOR_MENU_WHITE, coreVector2(0.0f,0.5f))
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_99.ogg";}
@@ -1306,6 +1371,9 @@ private:
     cBullet* __AddBullet     (const coreInt32 iDamage, const coreFloat fSpeed, const coreVector3 vPos, const coreVector3 vDir);
     void     __AddBulletLine (const coreInt32 iDamage, const coreFloat fSpeed, const coreVector2 vLinePos, const coreVector2 vLineDir);
     void     __AddBulletBurst();
+
+    // 
+    void __PhaseChange();
 
     // 
     void __ResurrectParasite(const coreUintW iIndex);
