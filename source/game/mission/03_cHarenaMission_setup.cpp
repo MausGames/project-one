@@ -116,7 +116,7 @@ void cHarenaMission::__SetupOwn()
             {
                 cEnemy* pCurrent = pSquad2->GetEnemy(i);
 
-                if(HAS_FLAG(pCurrent->GetStatus(), ENEMY_STATUS_DEAD))
+                if(pCurrent->HasStatus(ENEMY_STATUS_DEAD))
                 {
                     iTakeStart = i + 1u;
                     iTakeAlive = iTakeAlive + 1u;
@@ -327,7 +327,7 @@ void cHarenaMission::__SetupOwn()
                 }
             }
 
-            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
+            if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))
             {
                 iTakeStart = MIN(iTakeStart, i);
                 iTakeAlive = iTakeAlive - 1;
@@ -514,14 +514,14 @@ void cHarenaMission::__SetupOwn()
                 bClearedEarly = false;
             }
 
-            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && !afHeight[i])
+            if(pEnemy->HasStatus(ENEMY_STATUS_GHOST) && !afHeight[i])
             {
                 pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
                 pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
             }
 
             const coreFloat fVisibility = CLAMP((54.0f - afHeight[i]) * 0.2f, pEnemy->GetAlpha() / 0.8f, 1.0f);
-            const coreBool  bGhost      = HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST);
+            const coreBool  bGhost      = pEnemy->HasStatus(ENEMY_STATUS_GHOST);
 
             pEnemy->SetSize (coreVector3(1.0f,1.0f,1.0f) * fVisibility * (bGhost ? 1.0f : 1.3f));
             pEnemy->SetAlpha(fVisibility * (bGhost ? 0.8f : 1.0f));
@@ -637,7 +637,7 @@ void cHarenaMission::__SetupOwn()
                     for(coreUintW j = 0u; j < iNumEnemies; ++j)
                     {
                         if(++iSingle >= iNumEnemies) iSingle = 0u;
-                        if(!HAS_FLAG(pSquad1->GetEnemy(iSingle)->GetStatus(), ENEMY_STATUS_DEAD)) break;
+                        if(!pSquad1->GetEnemy(iSingle)->HasStatus(ENEMY_STATUS_DEAD)) break;
                     }
 
                     iBig = BIT(iSingle);
@@ -786,7 +786,7 @@ void cHarenaMission::__SetupOwn()
     // spikes from the ground and such
     // funken beim spawnen von gegner lenkt zu sehr ab
     // ring-wave, or cone-shaped from center sucked
-    // trying to let player move from a soon-to-be-spike to a soon-to-be-no-spike feels shit and hard to use, the time difference needs to be greatly extended which reduces pacing, a jump like in mario is missing (to create player-induced short invincibility from spikes)
+    // trying to let player move from a soon-to-be-spike to a soon-to-be-no-spike feels bad and hard to use, the time difference needs to be greatly extended which reduces pacing, a jump like in mario is missing (to create player-induced short invincibility from spikes)
     // sägezahn pacing (schnell langsam schnell)
     // gegner spawnen in stacheln, dadurch wird mögliche kollision mit spieler vermieden
     // gegner spawning muss schönes muster und delay haben
@@ -990,7 +990,7 @@ void cHarenaMission::__SetupOwn()
                 {
                     STAGE_FOREACH_ENEMY(pSquad1, pEnemy, j)
                     {
-                        if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST)) return;
+                        if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST)) return;
 
                         const coreVector2 vDiff = pEnemy->GetPosition().xy() - pBoard->GetPosition().xy();
 
@@ -1052,7 +1052,7 @@ void cHarenaMission::__SetupOwn()
 
             pEnemy->SetPosition(coreVector3(nToPositionFunc(iColumn, iRow), 0.0f));
 
-            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
                 pEnemy->SetSize(coreVector3(0.0f,0.0f,0.0f));
             }

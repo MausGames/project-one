@@ -150,7 +150,8 @@ void cRayWeapon::__ShootOwn()
     this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos - vTan*1.5f, vDir));
 
     // play bullet sound-effect
-    m_pBulletSound->PlayPosition(NULL, 1.0f, 0.5f, false, SOUND_EFFECT, m_pOwner->GetPosition());
+    if(m_pBulletSound.IsUsable()) m_pBulletSound->PlayPosition(NULL, 1.0f, 0.5f, false, SOUND_EFFECT, m_pOwner->GetPosition());
+    // TODO: all sounds checks
 }
 
 
@@ -382,4 +383,31 @@ void cTeslaWeapon::__ShootOwn()
 
     // play bullet sound-effect
     m_pBulletSound->PlayPosition(NULL, 1.0f, 1.0f, false, SOUND_EFFECT, m_pOwner->GetPosition());
+}
+
+
+// ****************************************************************
+// constructor
+cEnemyWeapon::cEnemyWeapon()noexcept
+{
+    // set base fire-rate
+    m_CooldownTimer.SetSpeed(10.0f);
+}
+
+
+// ****************************************************************
+// shoot with the enemy weapon
+void cEnemyWeapon::__ShootOwn()
+{
+    // 
+    const coreVector2 vPos  = m_pOwner->GetPosition().xy();
+    const coreFloat   fBase = m_pOwner->GetDirection().xy().Angle();
+
+    // 
+    for(coreUintW j = 5u; j--; )
+    {
+        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 2.0f) * 5.0f) + fBase);
+
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cViewBullet>(1, 2.4f, m_pOwner, vPos, vDir))->ChangeSize(1.5f);
+    }
 }

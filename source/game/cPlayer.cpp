@@ -28,6 +28,7 @@ cPlayer::cPlayer()noexcept
 , m_fLightningAngle (0.0f)
 , m_fDesaturate     (0.0f)
 , m_fAnimation      (0.0f)
+, m_iLook           (0u)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -138,22 +139,26 @@ cPlayer::~cPlayer()
 void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
 {
     // select appearance type
-    const coreChar* pcModelHigh;
-    const coreChar* pcModelLow;
+    coreHashString sModelHigh;
+    coreHashString sModelLow;
     switch(iShipType)
     {
     default: ASSERT(false)
-    case PLAYER_SHIP_ATK: pcModelHigh = "ship_player_atk_high.md3"; pcModelLow = "ship_player_atk_low.md3"; break;
-    case PLAYER_SHIP_DEF: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
-    case PLAYER_SHIP_P1:  pcModelHigh = "ship_projectone.md3";      pcModelLow = "ship_projectone.md3";     break;
+    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; break;
+    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; break;
+    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone.md3";      sModelLow = "ship_projectone.md3";     break;
     }
 
     // load models
-    this->DefineModelHigh(pcModelHigh);
-    this->DefineModelLow (pcModelLow);
+    this->DefineModelHigh(sModelHigh);
+    this->DefineModelLow (sModelLow);
 
     // set color
     this->SetBaseColor(vColor);
+
+    // 
+    SET_BITVALUE(m_iLook, 4u, 0u, iShipType)
+    SET_BITVALUE(m_iLook, 8u, 4u, m_iBaseColor)
 }
 
 
@@ -177,8 +182,13 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
     case cWaveWeapon ::ID: m_apWeapon[iIndex] = new cWaveWeapon (); break;
     case cTeslaWeapon::ID: m_apWeapon[iIndex] = new cTeslaWeapon(); break;
     case cAntiWeapon ::ID: m_apWeapon[iIndex] = new cAntiWeapon (); break;
+    case cEnemyWeapon::ID: m_apWeapon[iIndex] = new cEnemyWeapon(); break;
     }
     m_apWeapon[iIndex]->SetOwner(this);
+
+    // 
+    SET_BITVALUE(m_iLook, 4u, 12u, iID)
+    STATIC_ASSERT(PLAYER_EQUIP_WEAPONS == 1u)
 
 #if defined(_CORE_DEBUG_)
 
@@ -679,6 +689,41 @@ void cPlayer::EndIgnoring()
 
 // ****************************************************************
 // 
+void cPlayer::TurnIntoEnemy()
+{
+    ASSERT(!this->IsEnemyLook())
+    
+    
+    this->DefineModelHigh("ship_enemy_warrior_high.md3");
+    this->DefineModelLow ("ship_enemy_warrior_low.md3");
+    this->DefineTexture  (0u, "ship_enemy.png");
+    
+    this->SetBaseColor(COLOR_SHIP_MAGENTA);           
+    SAFE_DELETE(m_apWeapon[0])
+    m_apWeapon[0] = new cEnemyWeapon();
+    m_apWeapon[0]->SetOwner(this);
+    //this->EquipWeapon(0u, cEnemyWeapon::ID);           // <- bad overwrite
+    this->ActivateNormalShading();           
+    
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::TurnIntoPlayer()
+{
+    ASSERT(this->IsEnemyLook())
+
+    this->DefineTexture  (0u, "ship_player.png");
+
+    this->Configure(GET_BITVALUE(m_iLook, 4u, 0u), coreVector4::UnpackUnorm4x8(GET_BITVALUE(m_iLook, 8u, 4u)).xyz());
+    this->EquipWeapon(0u, GET_BITVALUE(m_iLook, 4u, 12u));
+    this->ActivateDarkShading();
+}
+
+
+// ****************************************************************
+// 
 void cPlayer::EnableWind(const coreVector2& vDirection)
 {
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
@@ -786,58 +831,7 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
 
 // ****************************************************************
 // 
-coreVector2 cPlayer::CalcMove()const
-{
-    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
-    {
-        // move the ship
-        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
-
-        // restrict movement to the foreground area
-        vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);
-        vNewPos.y = CLAMP(vNewPos.y, m_vArea.y, m_vArea.w);
-
-        return vNewPos - this->GetPosition().xy();
-    }
-
-    return coreVector2(0.0f,0.0f);
-}
-
-static coreFloat fBoost = 0.0f;
-// ****************************************************************
-// 
-coreFloat cPlayer::CalcMoveSpeed()const
-{
-    if(
-            HAS_BIT(m_pInput->iActionPress, 0u)   // to make movement during quickshots easier
-    || 
-    HAS_BIT(m_pInput->iActionRelease, 0u)   // to make emergency evasion maneuvers easier
-    ) fBoost = 1.0f;
-    else 
-        fBoost = MAX(fBoost - 10.0f * TIME, 0.0f);
-    
-    // 
-    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, fBoost) : LERPH3(50.0f, 70.0f, fBoost));
-    return m_fSpeed * fModifier;
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::__EquipShield()
-{
-    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
-
-    // 
-    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-    this->SetMaxHealth(PLAYER_SHIELD);
-}
-
-
-// ****************************************************************
-// 
-coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit)
+coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit)
 {
     ASSERT(pObject && pvIntersection && pbFirstHit)
 
@@ -889,6 +883,55 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
         }
     }
     return false;
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cPlayer::CalcMove()const
+{
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    {
+        // move the ship
+        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
+
+        // restrict movement to the foreground area
+        vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);
+        vNewPos.y = CLAMP(vNewPos.y, m_vArea.y, m_vArea.w);
+
+        return vNewPos - this->GetPosition().xy();
+    }
+
+    return coreVector2(0.0f,0.0f);
+}
+
+
+// ****************************************************************
+// 
+coreFloat cPlayer::CalcMoveSpeed()const
+{
+    static coreFloat fBoost = 0.0f;
+    if(HAS_BIT(m_pInput->iActionPress,   0u) ||   // to make movement during quickshots easier
+       HAS_BIT(m_pInput->iActionRelease, 0u))     // to make emergency evasion maneuvers easier
+        fBoost = 1.0f;
+    else fBoost = MAX(fBoost - 10.0f * TIME, 0.0f);
+
+    // 
+    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, fBoost) : LERPH3(50.0f, 70.0f, fBoost));
+    return m_fSpeed * fModifier;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::__EquipShield()
+{
+    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
+    // 
+    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
+    this->SetMaxHealth(PLAYER_SHIELD);
 }
 
 

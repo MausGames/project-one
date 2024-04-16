@@ -1324,9 +1324,9 @@ void cRutilusMission::__SetupOwn()
             const cEnemy*   pParent = pSquad1->GetEnemy(iIndex);
             coreVector2&    vMove   = avMove[iIndex];
 
-            if(HAS_FLAG(pParent->GetStatus(), ENEMY_STATUS_DEAD))
+            if(pParent->HasStatus(ENEMY_STATUS_DEAD))
             {
-                if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                 {
                     pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
 

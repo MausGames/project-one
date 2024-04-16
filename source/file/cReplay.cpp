@@ -14,8 +14,8 @@
 cReplay::cReplay()noexcept
 : m_Header      {}
 , m_aSnapshot   {}
-, m_aaPacket    {{}}
-, m_aInput      {{}}
+, m_aaPacket    {}
+, m_aInput      {}
 , m_iCurFrame   (0u)
 , m_aiCurPacket {}
 , m_iStatus     (REPLAY_STATUS_DISABLED)
@@ -586,5 +586,5 @@ coreUint64 cReplay::__GenerateChecksum(const sHeader& oHeader)
 {
     // 
     STATIC_ASSERT(offsetof(sHeader, iChecksum) == sizeof(sHeader) - sizeof(sHeader::iChecksum))
-    return coreHashMurmur64A(r_cast<const coreByte*>(&oHeader), sizeof(sHeader) - sizeof(sHeader::iChecksum));
+    return coreHashMurmur64(r_cast<const coreByte*>(&oHeader), sizeof(sHeader) - sizeof(sHeader::iChecksum));
 }

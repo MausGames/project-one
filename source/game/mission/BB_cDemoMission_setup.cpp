@@ -263,7 +263,7 @@ void cDemoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
         {
-            if(m_apLaserOwner[i] && HAS_FLAG(m_apLaserOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apLaserOwner[i] && m_apLaserOwner[i]->HasStatus(ENEMY_STATUS_DEAD))
                 this->DisableLaser(i, true);
         }
 
@@ -575,7 +575,7 @@ void cDemoMission::__SetupOwn()
             {
                 cEnemy* pCurrent = pSquad2->GetEnemy(i);
 
-                if(HAS_FLAG(pCurrent->GetStatus(), ENEMY_STATUS_DEAD))
+                if(pCurrent->HasStatus(ENEMY_STATUS_DEAD))
                 {
                     iTakeStart = i + 1u;
                     iTakeAlive = iTakeAlive + 1u;
@@ -786,7 +786,7 @@ void cDemoMission::__SetupOwn()
                 }
             }
 
-            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
+            if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))
             {
                 iTakeStart = MIN(iTakeStart, i);
                 iTakeAlive = iTakeAlive - 1;
@@ -963,7 +963,7 @@ void cDemoMission::__SetupOwn()
 
             if(HAS_BIT(iLight, i))
             {
-                if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                 {
                     pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
                 }
@@ -1217,7 +1217,7 @@ void cDemoMission::__SetupOwn()
 
             if(bComplete)
             {
-                if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
+                if(pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
                 {
                     pEnemy->SetBaseColor(COLOR_SHIP_BLUE);
                     pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);

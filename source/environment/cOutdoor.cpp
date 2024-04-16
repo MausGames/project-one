@@ -460,10 +460,10 @@ FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPositio
 
         // retrieve and check height at current position
         const coreFloat fCurHeight = this->RetrieveHeight(vOutput.xy());
-        if(fCurHeight > vOutput.z)
+        if(vOutput.z < fCurHeight)
         {
             // intersection found, step back to improve precision
-            vOutput += vRayDirection * (2.0f * (fCurHeight - vOutput.z) * RCP(vRayDirection.z));
+            vOutput += vRayDirection * ((fCurHeight - vOutput.z) * RCP(vRayDirection.z));   // # Z is negative
             break;
         }
 

@@ -126,8 +126,9 @@ cGameMenu::cGameMenu()noexcept
         for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j)
         {
             const coreBool    bBoss = (j == MENU_GAME_STAGES-1u);//MISSION_SEGMENT_IS_BOSS(j);
-            const coreVector2 vPos  = coreVector2((I_TO_F(j) - 3.5f) * 0.05f + (bBoss ? 0.025f : 0.0f), m_aMissionName[i].GetPosition().y);//bBoss ? coreVector2(0.0f, -0.07f * (I_TO_F(j / 6u) * 2.0f - 1.5f)) : coreVector2(0.07f * (I_TO_F(j % 6u) - 2.0f), -0.07f * (I_TO_F(j / 6u) * 2.0f - 2.5f));
-            const coreVector2 vSize = bBoss ? coreVector2(0.1f,0.05f)                                   : coreVector2(0.05f,0.05f);
+            const coreBool    bSpecial = (i == 0u || i == 8u);
+            const coreVector2 vPos  = coreVector2(bSpecial ? 0.0f : ((I_TO_F(j) - 3.5f) * 0.05f + (bBoss ? 0.025f : 0.0f)), m_aMissionName[i].GetPosition().y);//bBoss ? coreVector2(0.0f, -0.07f * (I_TO_F(j / 6u) * 2.0f - 1.5f)) : coreVector2(0.07f * (I_TO_F(j % 6u) - 2.0f), -0.07f * (I_TO_F(j / 6u) * 2.0f - 2.5f));
+            const coreVector2 vSize = bSpecial ? coreVector2(0.4f,0.05f) : (bBoss ? coreVector2(0.1f,0.05f)                                   : coreVector2(0.05f,0.05f));
 
             m_aaStage[i][j].Construct    (MENU_BUTTON, MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
             m_aaStage[i][j].DefineProgram("menu_border_program");
@@ -238,7 +239,7 @@ cGameMenu::cGameMenu()noexcept
     //this->BindObject(SURFACE_GAME_TRAINING, &m_StageArea);
 
     //for(coreUintW i = 0u; i < MENU_GAME_STAGES; ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aStage[i]);
-    for(coreUintW i = 0u; i < 7u/*MENU_GAME_MISSIONS*/; ++i) for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j) this->BindObject(SURFACE_GAME_TRAINING, &m_aaStage[i][j]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j) this->BindObject(SURFACE_GAME_TRAINING, &m_aaStage[i][j]);
     this->BindObject(SURFACE_GAME_TRAINING, &m_aStageCursor);
 
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryBackground);

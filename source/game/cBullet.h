@@ -30,7 +30,7 @@
 #define BULLET_SET_COUNT        (16u)     // 
 #define BULLET_SPEED_FACTOR     (30.0f)   // 
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
-#define BULLET_COLLISION_FACTOR (1.0f)//(0.75f)   // (for enemy bullets) TODO: collision bug, spear bullets where hitting player only after they passed
+#define BULLET_COLLISION_FACTOR (0.9f)//(0.75f)   // (for enemy bullets) TODO: collision bug, spear bullets where hitting player only after they passed
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
@@ -39,7 +39,9 @@ enum eBulletStatus : coreUint8
     BULLET_STATUS_READY     = 0x01u,   // bullet is ready to be created
     BULLET_STATUS_ACTIVE    = 0x02u,   // bullet is currently flying around, doing stuff (no checking required, is managed)
     BULLET_STATUS_PENETRATE = 0x04u,   // 
-    BULLET_STATUS_GHOST     = 0x08u    // 
+    BULLET_STATUS_IMMORTAL  = 0x08u,   // 
+    BULLET_STATUS_GHOST     = 0x10u    // 
+    
             // TODO: penetrate is set in constructor, move to weapon, and create status-reset similar to enemy-manager
 };
 
@@ -90,6 +92,11 @@ public:
     inline cBullet* ChangeTexSize(const coreFloat fFactor) {this->SetTexSize(this->GetTexSize() * fFactor); return this;}
 
     // 
+    inline void     AddStatus   (const coreInt32 iStatus)      {ADD_FLAG       (m_iStatus, iStatus)}
+    inline void     RemoveStatus(const coreInt32 iStatus)      {REMOVE_FLAG    (m_iStatus, iStatus)}
+    inline coreBool HasStatus   (const coreInt32 iStatus)const {return HAS_FLAG(m_iStatus, iStatus);}
+
+    // set object properties
     inline void SetDamage (const coreInt32    iDamage)  {m_iDamage  = iDamage;}
     inline void SetSpeed  (const coreFloat    fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}
     inline void SetFade   (const coreFloat    fFade)    {m_fFade    = fFade;}
@@ -868,7 +875,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
             // check current bullet status
             T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
-            if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
+            if(pBullet->HasStatus(BULLET_STATUS_READY))
             {
                 // prepare bullet and add to active list
                 pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
@@ -978,7 +985,7 @@ template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nF
         FOR_EACH(it, *oBulletActive.List())
         {
             T* pBullet = d_cast<T*>(*it);
-            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
+            if(!pBullet->HasStatus(BULLET_STATUS_ACTIVE)) continue;
 
             // 
             nFunction(pBullet);

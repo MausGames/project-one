@@ -281,7 +281,7 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
         {
-            if(m_apBarrierOwner[i] && HAS_FLAG(m_apBarrierOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apBarrierOwner[i] && m_apBarrierOwner[i]->HasStatus(ENEMY_STATUS_DEAD))
                 this->DisableBarrier(i, true);
         }
 
@@ -409,7 +409,7 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
         {
-            if(m_apLaserOwner[i] && HAS_FLAG(m_apLaserOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apLaserOwner[i] && m_apLaserOwner[i]->HasStatus(ENEMY_STATUS_DEAD))
                 this->DisableLaser(i, true);
         }
 
@@ -673,9 +673,9 @@ void cViridoMission::__SetupOwn()
 
         const coreBool bCleared = STAGE_CLEARED;
 
-             if(HAS_FLAG(pPlayer1->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 1u;
-        else if(HAS_FLAG(pPlayer2->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 0u;
-        else if(bCleared)                                            iPlayerTarget = 1u - iPlayerTarget;
+             if(pPlayer1->HasStatus(PLAYER_STATUS_DEAD)) iPlayerTarget = 1u;
+        else if(pPlayer2->HasStatus(PLAYER_STATUS_DEAD)) iPlayerTarget = 0u;
+        else if(bCleared)                                iPlayerTarget = 1u - iPlayerTarget;
 
              if(bCleared)      vPlayerLerp = I_TO_F(iPlayerTarget);
         else if(iPlayerTarget) vPlayerLerp = MIN(vPlayerLerp + 1.0f*TIME, 1.0f);
@@ -834,7 +834,7 @@ void cViridoMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
         {
-            if(pEnemy->ReachedDeath() && ((i < 2u) || HAS_FLAG(pSquad2->GetEnemy(i ^ 0x01u)->GetStatus(), ENEMY_STATUS_DEAD)))
+            if(pEnemy->ReachedDeath() && ((i < 2u) || pSquad2->GetEnemy(i ^ 0x01u)->HasStatus(ENEMY_STATUS_DEAD)))
             {
                 cEnemy* pParent = pSquad1->GetEnemy((i < 2u) ? i : ((i+2u) / 2u));
                 pParent->Kill(true);
@@ -1286,7 +1286,7 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < VIRIDO_SHADOWS; ++i)
         {
-            if(m_apShadowOwner[i] && HAS_FLAG(m_apShadowOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apShadowOwner[i] && m_apShadowOwner[i]->HasStatus(ENEMY_STATUS_DEAD))
                 this->DisableShadow(i, true);
         }
 
@@ -1883,7 +1883,7 @@ void cViridoMission::__SetupOwn()
                     if(iChiefNum == 8u) if(pSquad1->GetNumEnemiesAlive() == 1u) nCreateChiefFunc();
                 }
             }
-            else if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
+            else if(!pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
             {
                 if(STAGE_TICK_TIME((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))
                 {
@@ -2032,7 +2032,7 @@ void cViridoMission::__SetupOwn()
 
                         for(coreUintW i = 32u; i < 52u; ++i)
                         {
-                            if(!HAS_FLAG(pSquad1->GetEnemy(i)->GetStatus(), ENEMY_STATUS_DEAD) && !HAS_BIT(iStateGhost, i))
+                            if(!pSquad1->GetEnemy(i)->HasStatus(ENEMY_STATUS_DEAD) && !HAS_BIT(iStateGhost, i))
                             {
                                 ADD_BIT(iStateGhost, i)
                                 aiSnakeIndex[0] = i;
@@ -2090,7 +2090,7 @@ void cViridoMission::__SetupOwn()
 
                 if(HAS_BIT(iStateActive, i))
                 {
-                    if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                    if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                     {
                         pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
                         pEnemy->SetAlpha    (1.0f);
@@ -2106,7 +2106,7 @@ void cViridoMission::__SetupOwn()
                 }
                 else
                 {
-                    if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                    if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                     {
                         pEnemy->SetBaseColor(COLOR_SHIP_GREY);
                         pEnemy->SetAlpha    (0.0f);

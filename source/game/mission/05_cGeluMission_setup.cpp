@@ -404,37 +404,22 @@ void cGeluMission::__SetupOwn()
     {
         STAGE_WAVE("ZWEIUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // geometry falls together and forms safe spots
-    // multiple blocks on each side forming the pattern
-    // movement into flight direction e.g. v| |v
-    // single block pairs trying to crush, with shake to indicate (mario) (visible, not fully retracted)
-    // vertical, hotizontal
-    // freie stelle bewegt sich herum (reihe spalte)
-    // 
-    // coming from left and right with safe-spot in the middle
-    // open up top-bottom, create single stomps from top and bottom (sonic endboss)
-    // pressing together again, and opening up cross space
-    // horizontal line goes away, force player to attack enemies from above
-    // moving rocks up and down infinite with holes
-    // am ende kannst du blöcke zerstören!
-    // 
-    // in doppel-tunnel kommen schnell gegner von allen 4 seiten mit seiten-angriff
-    // in einzel-tunnel kommen schnell gegner von oben, hollow knight, geschosse kommen von oben abwechselnd links rechts
-    // 
-    // gegner sind oben bei letzter phase
-    // bei kreuz-phase kommen einzelne gegner, dann zwei gegner nebeneinander (einfache drehung)
-    // 
-    // gegner am anfang sollten den spieler nie in die enge treiben, den säulen auszuweichen ist anstrengend genug
+    // gegner am anfang sollten den spieler nie in die enge treiben, den säulen auszuweichen ist anstrengend genug (TODO: das wird derzeit nicht gemacht)
     // erste säule gegenüber von erster gegnerwelle
     // kreuz-tunnel, erster gegner muss seitlich anfangen, letzter gegner oben, nach doppel-gegner nicht zurück zum vorherigen
-    // TODO: beim start von letzter phase wackelt einmal alles bevor es sich bewegt
-    // TODO: damage on crush
+    // TODO: beim start von letzter phase wackelt einmal alles bevor es sich bewegt ?
+    // TODO: damage on crush, no movement between blocks, where to move when crushed ?
     // TODO: badge: one (single) stomp contains a special enemy to attack or item to collect like Dr Robotnik, in the 2. block to appear
-    // TODO: final phase should switch to 10101 at middle
+    // TODO: final phase should switch from 110110110 to 10101 pattern at middle
     // TODO: blöcke müssen echte gegner sein, für bonus punkte und handling von pulse etc
     // TODO: move shake (and color management if not yet) to mission code, it's only visual
+    // TODO: maybe focus on tunnel fight and remove stomping part (removes Sonic-endboss badge), though the side-move part is also boring
+    // TODO: maybe switch each phase to making the area more smaller, and opening it up to a cross and movement
+    // TODO: maybe blocks trying to crush you get immediately attackable
+    // TODO: create better fang model with low-detail version
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = 0.44f;
@@ -455,7 +440,7 @@ STAGE_START_HERE
             pPath2->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 100u)                      
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 65u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -464,20 +449,22 @@ STAGE_START_HERE
             });
         });
 
-        STAGE_GET_START(13u)
-            STAGE_GET_FLOAT(fStompDelay, fStompDelay = 5.0f)
+        STAGE_GET_START(9u)
             STAGE_GET_FLOAT(fStompTime)
             STAGE_GET_UINT (iStompCount)
             STAGE_GET_UINT (iStompTarget)
             STAGE_GET_UINT (iStompTargetNext)
             STAGE_GET_FLOAT(fChangeDelay)
             STAGE_GET_FLOAT(fOffsetTotal)
-            STAGE_GET_UINT (iOffsetCount)
             STAGE_GET_UINT (iOffsetTick)
-            STAGE_GET_VEC2_ARRAY(avShakePos, 2u)
+            STAGE_GET_UINT (iOffsetSpawn)
+            STAGE_GET_UINT (iShakeState)
         STAGE_GET_END
 
-        const auto nPositionFunc = [](const coreUintW iIndex)
+        iShakeState = 0u;
+        STATIC_ASSERT(GELU_FANGS <= sizeof(iShakeState)*8u)
+
+        const auto nFangPositionFunc = [](const coreUintW iIndex)
         {
             ASSERT(iIndex < GELU_FANGS)
 
@@ -487,33 +474,27 @@ STAGE_START_HERE
             return coreVector2(I_TO_F(X) - 2.0f, I_TO_F(Y) - 2.0f) * 0.44f;
         };
 
-        const auto nSetFangPosition = [&](const coreUintW iIndex, const coreVector2 vOffset)
+        const auto nSetFangPositionFunc = [&](const coreUintW iIndex, const coreVector2 vOffset)
         {
             ASSERT(iIndex < GELU_FANGS)
 
-            m_aFangRaw[iIndex].SetPosition(coreVector3((nPositionFunc(iIndex) + vOffset) * FOREGROUND_AREA, 0.0f));
+            m_aFangRaw[iIndex].SetPosition(coreVector3((nFangPositionFunc(iIndex) + vOffset) * FOREGROUND_AREA, 0.0f));
         };
 
-        const auto nSetFangPositionDual = [&](const coreUintW iIndex, const coreVector2 vOffset)
+        const auto nSetFangPositionDualFunc = [&](const coreUintW iIndex, const coreVector2 vOffset)
         {
-            nSetFangPosition(                    iIndex,  vOffset);
-            nSetFangPosition((GELU_FANGS - 1u) - iIndex, -vOffset);
+            nSetFangPositionFunc(                    iIndex,  vOffset);
+            nSetFangPositionFunc((GELU_FANGS - 1u) - iIndex, -vOffset);
         };
 
         const auto nTakeTimeFunc = [this](const coreFloat fDelay, const coreFloat fOffset, const coreBool bShake = true)
         {
-            if(bShake && ((m_fStageSubTimeBefore - fOffset) < fDelay) && ((m_fStageSubTime - fOffset) >= fDelay))
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            const coreFloat fOld = m_fStageSubTimeBefore - fOffset;
+            const coreFloat fNew = m_fStageSubTime       - fOffset;
 
-            return CLAMP((m_fStageSubTime - fOffset) * RCP(fDelay), 0.0f, 1.0f);
-        };
+            if(bShake && InBetween(fDelay, fOld, fNew)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
 
-        std::memset(avShakePos, 0, sizeof(coreVector2) * 2u);
-        const auto nShakeFunc = [&](const coreUintW iShakeIndex, const coreUintW iFangIndex)
-        {
-            ASSERT(iShakeIndex < 2u)
-
-            avShakePos[iShakeIndex] = nPositionFunc(iFangIndex) * FOREGROUND_AREA;
+            return CLAMP(fNew * RCP(fDelay), 0.0f, 1.0f);
         };
 
         if(STAGE_CLEARED)
@@ -533,7 +514,7 @@ STAGE_START_HERE
             else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 37u, 37u)
             else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 38u, 39u)
             else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 40u, 59u)
-            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 60u, 69u)
+            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 60u, 64u)
             else if(STAGE_SUB(17u)) STAGE_DELAY_START
         }
 
@@ -555,8 +536,8 @@ STAGE_START_HERE
 
             for(coreUintW i = 0u; i < GELU_FANGS_DIMENSION; ++i)
             {
-                nSetFangPositionDual(i,                        vPos1 - vUp);
-                nSetFangPositionDual(i + GELU_FANGS_DIMENSION, vPos2 - vUp);
+                nSetFangPositionDualFunc(i,                        vPos1 - vUp);
+                nSetFangPositionDualFunc(i + GELU_FANGS_DIMENSION, vPos2 - vUp);
             }
         }
         else if(m_iStageSub == 7u)
@@ -574,18 +555,18 @@ STAGE_START_HERE
             {
                 if(!fTime1)
                 {
-                    nShakeFunc(0u, 4u);
-                    nShakeFunc(1u, GELU_FANGS - 5u);
+                    ADD_BIT(iShakeState,                     GELU_FANGS_DIMENSION)
+                    ADD_BIT(iShakeState, (GELU_FANGS - 1u) - GELU_FANGS_DIMENSION)
                 }
                 else if(!fTime2)
                 {
-                    nShakeFunc(0u, 1u);
-                    nShakeFunc(1u, GELU_FANGS - 2u);
+                    ADD_BIT(iShakeState,                     (GELU_FANGS_DIMENSION + 3u))
+                    ADD_BIT(iShakeState, (GELU_FANGS - 1u) - (GELU_FANGS_DIMENSION + 3u))
                 }
                 else if(!fTime3)
                 {
-                    nShakeFunc(0u, 2u);
-                    nShakeFunc(1u, GELU_FANGS - 3u);
+                    ADD_BIT(iShakeState,                     (GELU_FANGS_DIMENSION + 2u))
+                    ADD_BIT(iShakeState, (GELU_FANGS - 1u) - (GELU_FANGS_DIMENSION + 2u))
                 }
             }
 
@@ -597,12 +578,12 @@ STAGE_START_HERE
 
                 for(coreUintW i = 0u; i < GELU_FANGS_DIMENSION; ++i)
                 {
-                    nSetFangPositionDual(i * GELU_FANGS_DIMENSION,      ((i == 0u) ? coreVector2(0.0f,0.0f) : -vPos1));
-                    nSetFangPositionDual(i * GELU_FANGS_DIMENSION + 1u, ((i == 4u) ? coreVector2(0.0f,0.0f) : -vPos2));
+                    nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION,      ((i == 0u) ? coreVector2(0.0f,0.0f) : -vPos1));
+                    nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION + 1u, ((i == 4u) ? coreVector2(0.0f,0.0f) : -vPos2));
                 }
                 for(coreUintW i = 0u; i < 2u; ++i)
                 {
-                    nSetFangPositionDual(i * GELU_FANGS_DIMENSION + 2u, -vPos3);
+                    nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION + 2u, -vPos3);
                 }
             }
             else if(fTime5 <= 0.0f)
@@ -611,8 +592,8 @@ STAGE_START_HERE
 
                 for(coreUintW i = 0u; i < GELU_FANGS_DIMENSION; ++i)
                 {
-                    nSetFangPositionDual(i + GELU_FANGS_DIMENSION, ((i <  3u) ? -vPos : coreVector2(0.0f,0.0f)));
-                    nSetFangPositionDual(i,                        ((i >= 2u) ?  vPos : coreVector2(0.0f,0.0f)));
+                    nSetFangPositionDualFunc(i + GELU_FANGS_DIMENSION, ((i <  3u) ? -vPos : coreVector2(0.0f,0.0f)));
+                    nSetFangPositionDualFunc(i,                        ((i >= 2u) ?  vPos : coreVector2(0.0f,0.0f)));
                 }
             }
             else
@@ -621,12 +602,12 @@ STAGE_START_HERE
 
                 for(coreUintW i = 0u; i < GELU_FANGS_DIMENSION; ++i)
                 {
-                    nSetFangPositionDual(i * GELU_FANGS_DIMENSION,      (i <  3u) ? -vPos : coreVector2(0.0f,0.0f));
-                    nSetFangPositionDual(i * GELU_FANGS_DIMENSION + 1u, (i >= 2u) ?  vPos : coreVector2(0.0f,0.0f));
+                    nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION,      (i <  3u) ? -vPos : coreVector2(0.0f,0.0f));
+                    nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION + 1u, (i >= 2u) ?  vPos : coreVector2(0.0f,0.0f));
                 }
                 for(coreUintW i = 0u; i < 2u; ++i)
                 {
-                    nSetFangPositionDual(i * GELU_FANGS_DIMENSION + 2u, HIDDEN_POS);
+                    nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION + 2u, HIDDEN_POS);
                 }
             }
         }
@@ -638,10 +619,10 @@ STAGE_START_HERE
 
             for(coreUintW i = 0u; i < GELU_FANGS_DIMENSION; ++i)
             {
-                nSetFangPositionDual(i * GELU_FANGS_DIMENSION + 1u, (i <  3u) ? -vPos : coreVector2(0.0f,0.0f));
-                nSetFangPositionDual(i * GELU_FANGS_DIMENSION,      (i >= 2u) ?  vPos : coreVector2(0.0f,0.0f));
+                nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION + 1u, (i <  3u) ? -vPos : coreVector2(0.0f,0.0f));
+                nSetFangPositionDualFunc(i * GELU_FANGS_DIMENSION,      (i >= 2u) ?  vPos : coreVector2(0.0f,0.0f));
 
-                nSetFangPosition(i * GELU_FANGS_DIMENSION + 2u, HIDDEN_POS);
+                nSetFangPositionFunc(i * GELU_FANGS_DIMENSION + 2u, HIDDEN_POS);
             }
         }
         else if(m_iStageSub == 16u)
@@ -650,55 +631,60 @@ STAGE_START_HERE
             {
                 for(coreUintW i = 0u; i < GELU_FANGS; ++i)
                 {
-                    nSetFangPosition(i, coreVector2(0.0f,0.0f));
+                    nSetFangPositionFunc(i, coreVector2(0.0f,0.0f));
 
-                    const coreFloat fNewSide = (m_aFangRaw[i].GetPosition().x + (((i % GELU_FANGS_DIMENSION) < 2u) ? 0.0f : (1.0f * fStep)) * FOREGROUND_AREA.x) * (((i / GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f);
+                    const coreVector2 vPos   = m_aFangRaw[i].GetPosition().xy();
+                    const coreFloat   fShift = (((i / GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f) * (vPos.x + (((i % GELU_FANGS_DIMENSION) < 2u) ? 0.0f : (fStep * FOREGROUND_AREA.x)));
 
-                    m_aFangRaw[i].SetPosition(coreVector3(fNewSide, m_aFangRaw[i].GetPosition().y, 0.0f));
+                    m_aFangRaw[i].SetPosition(coreVector3(fShift, vPos.y, 0.0f));
                 }
             }
 
             const coreFloat fSpeed = LERP(0.0f, 0.5f, MIN(m_fStageSubTime, 1.0f)) * TIME;
 
-            const coreFloat fOffsetTotalOld = fOffsetTotal;
+            const coreFloat fOffsetTotalPrev = fOffsetTotal;
             fOffsetTotal += fSpeed;
 
-            if(F_TO_UI((fOffsetTotalOld / fStep) * 1.0f) != F_TO_UI((fOffsetTotal / fStep) * 1.0f))
+            if(F_TO_UI(fOffsetTotalPrev * RCP(fStep)) != F_TO_UI(fOffsetTotal * RCP(fStep)))
             {
                 iOffsetTick += 1u;
+
                 if((iOffsetTick % 3u) != 0u)
                 {
                     for(coreUintW i = 0u; i < GELU_FANGS_DIMENSION; ++i)
                     {
-                        const coreUintW iIndex = i * GELU_FANGS_DIMENSION + ((GELU_FANGS_DIMENSION - 1u) - (iOffsetCount % GELU_FANGS_DIMENSION));
-                        m_aFangRaw[iIndex].SetPosition(coreVector3(((i % 2u) ? -1.0f : 1.0f) * fStep * -3.0f * FOREGROUND_AREA.x, m_aFangRaw[iIndex].GetPosition().y, 0.0f));
+                        const coreFloat fShift = ((i % 2u) ? -1.0f : 1.0f) * -3.0f * fStep * FOREGROUND_AREA.x;
+                        const coreUintW iIndex = i * GELU_FANGS_DIMENSION + ((GELU_FANGS_DIMENSION - 1u) - (iOffsetSpawn % GELU_FANGS_DIMENSION));
+
+                        m_aFangRaw[iIndex].SetPosition(coreVector3(fShift, m_aFangRaw[iIndex].GetPosition().y, 0.0f));
                     }
 
-                    iOffsetCount += 1u;
+                    iOffsetSpawn += 1u;
                 }
-                else 
+                else if((iOffsetTick % 6u) == 3u)
                 {
                     STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
                     {
-                        if((iOffsetTick % 6u) == ((i < 65u) ? 3u : 0u))
-                        {
-                            pEnemy->SetPosition(coreVector3(((((i - 60u) % GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f) * fStep * -3.0f * FOREGROUND_AREA.x, (I_TO_F((i - 60u) % GELU_FANGS_DIMENSION) - 2.0f) * fStep * FOREGROUND_AREA.y, 0.0f));
-                        }
+                        const coreFloat fShift  = (((i - 60u) % 2u) ? -1.0f : 1.0f) * -3.0f * fStep * FOREGROUND_AREA.x;
+                        const coreFloat fHeight = (I_TO_F(i - 60u) - 2.0f) * fStep * FOREGROUND_AREA.y;
+
+                        pEnemy->SetPosition(coreVector3(fShift, fHeight, 0.0f));
                     });
                 }
             }
 
             for(coreUintW i = 0u; i < GELU_FANGS; ++i)
             {
-                const coreVector2 vPos = m_aFangRaw[i].GetPosition().xy() + coreVector2((((i / GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f) * fSpeed * FOREGROUND_AREA.x, 0.0f);
+                const coreFloat fMove = (((i / GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f) * fSpeed * FOREGROUND_AREA.x;
 
-                m_aFangRaw[i].SetPosition(coreVector3(vPos, 0.0f));
+                m_aFangRaw[i].SetPosition(m_aFangRaw[i].GetPosition() + coreVector3(fMove, 0.0f, 0.0f));
             }
+
             STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
             {
-                const coreVector2 vPos = pEnemy->GetPosition().xy() + coreVector2(((((i - 60u) % GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f) * fSpeed * FOREGROUND_AREA.x, 0.0f);
+                const coreFloat fMove = (((i - 60u) % 2u) ? -1.0f : 1.0f) * fSpeed * FOREGROUND_AREA.x;
 
-                pEnemy->SetPosition(coreVector3(vPos, 0.0f));
+                pEnemy->SetPosition(pEnemy->GetPosition() + coreVector3(fMove, 0.0f, 0.0f));
             });
         }
         else if(m_iStageSub == 17u)
@@ -720,114 +706,101 @@ STAGE_START_HERE
 
             if(std::none_of(m_aFangRaw, m_aFangRaw + GELU_FANGS, [](const cLodObject& oFang) {return oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE);}))
             {
-                STAGE_DELAY_END;
+                STAGE_DELAY_END
             }
         }
 
-        if((m_iStageSub >= 1u) && (m_iStageSub <= 7u))
+        if(m_iStageSub < 8u)
         {
-            if(m_iStageSub < 7u) fStompDelay -= 1.0f * TIME;
-            
-            if(iStompCount == 0u && fStompDelay < 0.5f/0.9f && !fStompTime) nShakeFunc(0u, iStompCount + ((iStompCount % 2u) ? 0u : (4u * GELU_FANGS_DIMENSION)));
-
-            if(fStompDelay <= 0.0f)
+            if(STAGE_TIME_BETWEEN(4.0f, 5.0f))
             {
-                const coreFloat fStompTimeOld = fStompTime;
+                ADD_BIT(iShakeState, (4u * GELU_FANGS_DIMENSION) - GELU_FANGS_DIMENSION)
+            }
+            else if(STAGE_TIME_AFTER(5.0f) && ((m_iStageSub < 7u) || fStompTime))
+            {
+                const coreBool bUpsideDown = (iStompCount % 2u);
+
+                const coreFloat fStompTimePrev = fStompTime;
                 fStompTime += 0.9f * TIME;
 
-                if((fStompTimeOld < 0.5f) && (fStompTime >= 0.5f))
+                if(InBetween(0.5f, fStompTimePrev, fStompTime))
                 {
+                    const coreFloat fSide = g_pGame->FindPlayerDual(iStompCount % 2u)->GetPosition().x / FOREGROUND_AREA.x;
+
+                    iStompTargetNext = CLAMP(F_TO_UI((fSide + 1.1f) / fStep), 0u, GELU_FANGS_DIMENSION - 1u);
+
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                    
-                        iStompTargetNext = MIN(F_TO_UI((g_pGame->FindPlayerDual(iStompCount % 2u)->GetPosition().x / 1.1f + FOREGROUND_AREA.x) / (fStep / 1.1f * FOREGROUND_AREA.x)), GELU_FANGS_DIMENSION - 1u);
                 }
-                    
-                if((m_iStageSub < 7u) && (fStompTime >= 0.5f)) nShakeFunc(0u, iStompTargetNext + ((iStompCount % 2u) ? (4u * GELU_FANGS_DIMENSION) : 0u));
-                
-                const coreUint32 iCurTarget = iStompTarget;
+
+                if(fStompTime >= 0.5f)
+                {
+                    ADD_BIT(iShakeState, iStompTargetNext + (bUpsideDown ? (4u * GELU_FANGS_DIMENSION) : 0u))
+                }
 
                 if(fStompTime >= 1.2f)
                 {
-                    fStompDelay  = 0.001f;
                     fStompTime   = 0.0f;
-                    iStompCount += 1u;
-                    
+                    iStompCount  = iStompCount + 1u;
                     iStompTarget = iStompTargetNext;
                 }
-                
-                const coreBool bUpsideDown = (iStompCount % 2u);
 
-                const coreVector2 vPos1 = LERP(coreVector2(0.0f, 3.0f * fStep * (bUpsideDown ? -1.0f : 1.0f)), coreVector2(0.0f,0.0f), 1.0f - ABS(SIN(DelayTime(fStompTime, 0.5f, 0.2f) * (1.0f*PI) + (0.5f*PI))));
+                const coreVector2 vFrom = coreVector2(0.0f, 3.0f * fStep * (bUpsideDown ? -1.0f : 1.0f));
+                const coreVector2 vTo   = coreVector2(0.0f, 0.0f);
+                const coreVector2 vPos  = LERP(vTo, vFrom, ABS(COS(DelayTime(fStompTime, 0.5f, 0.2f) * (1.0f*PI))));
 
                 for(coreUintW i = 0u; i < GELU_FANGS_DIMENSION; ++i)
                 {
-                    nSetFangPosition(iCurTarget + i * GELU_FANGS_DIMENSION, (i == (bUpsideDown ? 4u : 0u)) ? coreVector2(0.0f,0.0f) : vPos1);
-                }
-            }
-        }
+                    const coreBool bStill = (i == (bUpsideDown ? 4u : 0u));
 
-        if(m_iStageSub <= 7u)
-        {
-            for(coreUintW j = 0u; j < GELU_FANGS; ++j)
-            {
-                m_aFangRaw[j].SetColor3(coreVector3(0.5f,0.5f,0.5f));
-            }
-            for(coreUintW i = 0u; i < 2u; ++i)
-            {
-                if(!avShakePos[i].IsNull())
-                {
-                    cLodObject* pFang  = NULL;
-                    coreFloat   fLenSq = FLT_MAX;
-
-                    for(coreUintW j = 0u; j < GELU_FANGS; ++j)
-                    {
-                        const coreFloat fCurLenSq = (m_aFangRaw[j].GetPosition().xy() - avShakePos[i]).LengthSq();
-                        if(fCurLenSq < fLenSq)
-                        {
-                            // 
-                            pFang  = &m_aFangRaw[j];
-                            fLenSq = fCurLenSq;
-                        }
-                    }
-
-                    pFang->SetPosition(coreVector3(pFang->GetPosition().xy() + coreVector2(SIN(m_fStageTime * (32.0f*PI)) * 0.5f, 0.0f), 0.0f));
-                    pFang->SetColor3(COLOR_SHIP_ORANGE);
+                    nSetFangPositionFunc(iStompTargetNext + i * GELU_FANGS_DIMENSION, bStill ? vTo : vFrom);
+                    nSetFangPositionFunc(iStompTarget     + i * GELU_FANGS_DIMENSION, bStill ? vTo : vPos);
                 }
             }
         }
 
         for(coreUintW i = 0u; i < GELU_FANGS; ++i)
         {
-            // TODO: lod low
-
             cLodObject& oFang = m_aFangRaw[i];
             if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-            cPlayer::TestCollision(PLAYER_TEST_ALL, &oFang, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pFang, const coreVector3& vIntersection, const coreBool bFirstHit)
+            if(HAS_BIT(iShakeState, i))
             {
-                const coreVector2 vDiff = AlongCrossNormal(pPlayer->GetOldPos() - pFang->GetPosition().xy());
-                const coreVector2 vAbs  = vDiff.Processed(ABS);
-                const coreVector2 vPos  = pPlayer->GetPosition().xy() * vAbs.yx() + pFang->GetPosition().xy() * vAbs + pFang->GetCollisionRange().xy() * vDiff;
-
-                if(coreVector2::Dot(vDiff, pPlayer->GetMove()) > 0.0f) return;
-
-                pPlayer->SetPosition(coreVector3(vPos, 0.0f));
-            });
-
-            const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet, const coreObject3D* pFang, const coreVector3& vIntersection, const coreBool bFirstHit)
+                oFang.SetPosition(oFang.GetPosition() + coreVector3(Core::Rand->Float(-0.5f, 0.5f), 0.0f, 0.0f));   // TODO: remove random
+                oFang.SetColor3  (COLOR_SHIP_ORANGE);
+            }
+            else
             {
-                pBullet->Deactivate(true);
+                oFang.SetColor3(coreVector3(0.5f,0.5f,0.5f));
+            }
 
-                if(m_iStageSub == 17u) this->DisableFang(i, true);
-            };
-            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oFang, nBulletWayCollFunc);
-            Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  &oFang, nBulletWayCollFunc);
+            oFang.ActivateModelLowOnly();   // copied from group "direction blocks"
+            {
+                cPlayer::TestCollision(PLAYER_TEST_ALL, &oFang, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pFang, const coreVector3& vIntersection, const coreBool bFirstHit)
+                {
+                    const coreVector2 vDiff = AlongCrossNormal(pPlayer->GetOldPos() - pFang->GetPosition().xy());
+                    const coreVector2 vAbs  = vDiff.Processed(ABS);
+                    const coreVector2 vPos  = pPlayer->GetPosition().xy() * vAbs.yx() + pFang->GetPosition().xy() * vAbs + pFang->GetCollisionRange().xy() * vDiff;
+
+                    if(coreVector2::Dot(vDiff, pPlayer->GetMove()) > 0.0f) return;
+
+                    pPlayer->SetPosition(coreVector3(vPos, 0.0f));
+                });
+
+                const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet, const coreObject3D* pFang, const coreVector3& vIntersection, const coreBool bFirstHit)
+                {
+                    pBullet->Deactivate(true);
+
+                    if(m_iStageSub == 17u) this->DisableFang(i, true);
+                };
+                Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oFang, nBulletWayCollFunc);
+                Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  &oFang, nBulletWayCollFunc);
+            }
+            oFang.ActivateModelDefault();
         }
-
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i == 30u) ? 0.4f : ((i == 31u) ? 0.6f : 0.8f), (i < 25u) ? (0.2f * I_TO_F(i % 5u) + ((i < 5u) ? 4.0f : 0.0f)) : ((i == 30u) ? 3.0f : ((i < 40u || i >= 60u) ? 0.0f : (0.4f * I_TO_F(i - 40u)))))
+            STAGE_LIFETIME(pEnemy, (i == 30u) ? 0.4f : ((i == 31u) ? 0.6f : 0.8f), (i < 25u) ? (0.2f * I_TO_F(i % 5u) + ((i < 5u) ? 4.0f : 0.0f)) : ((i < 40u) ? ((i == 30u) ? 3.0f : 0.0f) : ((i < 60u) ? (0.4f * I_TO_F(i - 40u)) : 0.0f)))
 
             const coreSpline2* pPath = (i < 10u) ? pPath2 : pPath1;
 
@@ -868,15 +841,6 @@ STAGE_START_HERE
                 case 8u: pEnemy->Rotate90 (); break;
                 case 9u:                      break;
                 }
-
-                if(STAGE_TICK_LIFETIME(15.0f, 0.0f))
-                {
-                    const coreVector2 vPos = pEnemy->GetPosition ().xy();
-                    const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
-
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.6f);
-                }
             }
             else if(i < 60u)
             {
@@ -884,18 +848,19 @@ STAGE_START_HERE
                 const coreVector2 vOffset = coreVector2(((i - 40u) % 2u) ? -0.18f : 0.18f, 0.0f);
 
                 pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
-
-                if(STAGE_TICK_LIFETIME(15.0f, 0.0f))
-                {
-                    const coreVector2 vPos = pEnemy->GetPosition ().xy();
-                    const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
-
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.6f);
-                }
             }
             else
             {
+                // nothing
+            }
+
+            if((i >= 30u && i < 60u) && STAGE_TICK_LIFETIME(15.0f, 0.0f))
+            {
+                const coreVector2 vPos = pEnemy->GetPosition ().xy();
+                const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.6f);
             }
         });
 
@@ -1612,7 +1577,7 @@ STAGE_START_HERE
 
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
-                if(!HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_NO_INPUT_MOVE)) return;
+                if(!pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) return;
 
                 const coreUint8   x      = (aiTarget[i] % 4u);
                 const coreUint8   y      = (aiTarget[i] / 4u);

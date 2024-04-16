@@ -194,7 +194,7 @@ void cCalorMission::__SetupOwn()
 
             if((i < 28u) ? afRecover[i] : (iTrail >= 8u))
             {
-                if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                 {
                     pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
                     pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
@@ -202,7 +202,7 @@ void cCalorMission::__SetupOwn()
             }
             else
             {
-                if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && (fDistSq < 9.0f))
+                if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST) && (fDistSq < 9.0f))
                 {
                     pEnemy->SetBaseColor(COLOR_SHIP_GREY);
                     pEnemy->AddStatus   (ENEMY_STATUS_GHOST);
@@ -478,7 +478,7 @@ void cCalorMission::__SetupOwn()
 
             fRotation = FMOD(fRotation + m_afLoadPower[0] * 0.7f * TIME, 2.0f*PI);
 
-            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
+            if(pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
             {
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
                 const coreVector2 vOffset = coreVector2(0.0f,0.0f);
@@ -851,6 +851,7 @@ void cCalorMission::__SetupOwn()
     // TODO: wave where middle bullets faster than outer bullets, or left-right faster than up-down, then invert
     // TODO: helfer is in mitte ?
     // TODO: similar to zelda water boss https://youtu.be/HRQXOCU8OWA?t=1005
+    // TODO: tunnel to follow
     STAGE_MAIN({TAKE_ALWAYS, 8u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1226,7 +1227,7 @@ void cCalorMission::__SetupOwn()
         STATIC_ASSERT(CALOR_STARS == 2u)
 
         coreBool bLastCatch = false;
-        if(pSquad1->IsFinished() && (pSquad2->GetNumEnemiesAlive() == 1u) && HAS_FLAG(m_Boulder.GetStatus(), ENEMY_STATUS_DEAD))
+        if(pSquad1->IsFinished() && (pSquad2->GetNumEnemiesAlive() == 1u) && m_Boulder.HasStatus(ENEMY_STATUS_DEAD))
         {
             STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
             {

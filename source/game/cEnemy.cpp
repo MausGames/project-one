@@ -14,6 +14,7 @@
 cEnemy::cEnemy()noexcept
 : m_fLifeTime       (0.0f)
 , m_fLifeTimeBefore (0.0f)
+, m_iLastAttacker   (0u)
 {
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
@@ -99,6 +100,10 @@ void cEnemy::Move()
 // reduce current health
 coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker)
 {
+    // 
+    const coreBool bCoop = (pAttacker && STATIC_ISVALID(g_pGame) && g_pGame->GetCoop());
+    m_iLastAttacker = bCoop ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
+
     // forward to parent
     if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
@@ -107,7 +112,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         if(iDamage > 0)
         {
             // 
-            const coreInt32 iPower = (pAttacker && STATIC_ISVALID(g_pGame) && g_pGame->GetCoop()) ? 1 : GAME_PLAYERS;
+            const coreInt32 iPower = (bCoop || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
             const coreInt32 iTaken = this->_TakeDamage(iDamage * iPower, iElement, vImpact) / iPower;
             ASSERT(!(this->GetMaxHealth() % iPower))
 
@@ -296,6 +301,16 @@ void cEnemy::ResetProperties()
 
 // ****************************************************************
 // 
+cPlayer* cEnemy::LastAttacker()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->GetPlayer(m_iLastAttacker);
+}
+
+
+// ****************************************************************
+// 
 cPlayer* cEnemy::NearestPlayerSide()const
 {
     // 
@@ -406,7 +421,7 @@ void cEnemyManager::Render()
     // render all additional enemies
     FOR_EACH(it, m_apAdditional)
     {
-        if(HAS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
+        if((*it)->HasStatus(ENEMY_STATUS_DEAD))
             continue;
 
         (*it)->Render();
@@ -436,7 +451,7 @@ void cEnemyManager::Render()
     /* */                                                             \
     const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                \
     {                                                                 \
-        if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))          \
+        if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))                      \
             return;                                                   \
                                                                       \
         pEnemy->f();                                                  \

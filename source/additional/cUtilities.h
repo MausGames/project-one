@@ -69,15 +69,6 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 
 
 // ****************************************************************
-// 
-template <typename T> inline FUNC_LOCAL T LerpSmoothRev(const T& x, const T& y, const coreFloat s)
-{
-    return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
-                         LERPB(x, (x + y) * 0.5f,        s * 2.0f);
-}
-
-
-// ****************************************************************
 // value range helper-functions
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {
@@ -89,6 +80,15 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreInt32 InB
 {
     return (a <= b) ? (((x >= a) && (x < b)) ?  1 : 0) :   // [a,b)
                       (((x >= b) && (x < a)) ? -1 : 0);    // [b,a)
+}
+
+
+// ****************************************************************
+// 
+template <typename T> inline FUNC_LOCAL T LerpSmoothRev(const T& x, const T& y, const coreFloat s)
+{
+    return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
+                         LERPB(x, (x + y) * 0.5f,        s * 2.0f);
 }
 
 
@@ -109,6 +109,7 @@ template <typename T, typename S, typename R> inline FUNC_LOCAL T ParaLerp(const
     return LERPB(x, y + A * 0.5f, s * 2.0f) - (A * s);
 }
 
+// TODO: bounce lerp
 
 // ****************************************************************
 // 

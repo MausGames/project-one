@@ -866,7 +866,7 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
     if(vOldHit.IsNull()) vOldHit = vIntersect;
     else
     {
-    gtScrewYou:
+    gtAgain:
 
         // 
         const coreVector3 vDiff = vIntersect - vOldHit;
@@ -922,7 +922,7 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
 
             // 
             vOldHit = vNewHit;
-            goto gtScrewYou;
+            goto gtAgain;
         }
     }
 

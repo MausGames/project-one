@@ -134,7 +134,7 @@ void cShieldManager::ClearShields(const coreBool bAnimated)
 // 
 void cShieldManager::BindEnemy(cEnemy* pEnemy)
 {
-    ASSERT(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_SHIELDED))
+    ASSERT(!pEnemy->HasStatus(ENEMY_STATUS_SHIELDED))
 
     // 
     coreUintW i = 0u;
@@ -163,7 +163,7 @@ void cShieldManager::BindEnemy(cEnemy* pEnemy)
 // 
 void cShieldManager::UnbindEnemy(cEnemy* pEnemy)
 {
-    if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_SHIELDED)) return;
+    if(!pEnemy->HasStatus(ENEMY_STATUS_SHIELDED)) return;
 
     // 
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)

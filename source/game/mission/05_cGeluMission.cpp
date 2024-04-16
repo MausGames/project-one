@@ -35,8 +35,8 @@ cGeluMission::cGeluMission()noexcept
         {
             // load object resources
             cLodObject* pFang = &m_aFangRaw[i];
-            pFang->DefineModelHigh("object_cube_smooth.md3");
-            pFang->DefineModelLow ("object_cube_smooth.md3");
+            pFang->DefineModelHigh("object_fang.md3");
+            pFang->DefineModelLow ("object_fang.md3");
             pFang->DefineTexture  (0u, "ship_enemy.png");
             pFang->DefineProgram  ("object_ship_glow_program");
 
@@ -172,9 +172,10 @@ void cGeluMission::DisableFang(const coreUintW iIndex, const coreBool bAnimated)
     if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
+    oFang.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     if(bAnimated) g_pSpecialEffects->MacroDestructionDark(&oFang);
-        
-        oFang.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -356,27 +357,7 @@ void cGeluMission::__MoveOwnAfter()
         cLodObject& oFang = m_aFangRaw[i];
         if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        //coreFloat fScale;
-        //if(m_afOrbTime[i] > 0.0f)
-        //{
-        //    // 
-        //    m_afOrbTime[i].UpdateMin(2.0f, 2.0f);
-        //    fScale = LERPH5(2.0f, 1.0f, m_afOrbTime[i] - 1.0f);
-        //}
-        //else
-        //{
-        //    // 
-        //    m_afOrbTime[i].UpdateMax(-2.0f, -2.0f);
-        //    fScale = LERPH5(1.0f, 2.0f, -m_afOrbTime[i] - 1.0f);
-//
-        //    // 
-        //    if(m_afOrbTime[i] <= -2.0f) this->DisableOrb(i, false);
-        //}
-
-        // 
-        //oFang.SetSize     (coreVector3(2.5f,2.5f,2.5f) * fScale);
-        //oFang.SetAlpha    (2.0f - fScale);
-        //oFang.SetTexOffset(coreVector2(0.0f, FRACT(-2.4f * m_fAnimation)));
+        // nothing
     }
 
     // 

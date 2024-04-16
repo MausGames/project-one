@@ -44,7 +44,7 @@ void cBullet::Move()
     this->__MoveOwn();
 
     // deactivate bullet when leaving the defined area
-    if((m_fFlyTime >= 0.5f) && !g_pForeground->IsVisibleObject(this))
+    if((m_fFlyTime >= 0.5f) && !HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) && !g_pForeground->IsVisibleObject(this))
         this->Deactivate(false);
 
     // move the 3d-object
@@ -92,7 +92,8 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2& vImpact)
     REMOVE_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
-    if(bAnimated) this->__ImpactOwn(vImpact);
+    if(bAnimated && (!HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) || g_pForeground->IsVisibleObject(this)))
+        this->__ImpactOwn(vImpact);
 
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -285,10 +286,10 @@ void cBulletManager::Move()
             cBullet* pBullet = d_cast<cBullet*>(*it);
 
             // check current bullet status
-            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
+            if(!pBullet->HasStatus(BULLET_STATUS_ACTIVE))
             {
                 // clean up bullet and make ready again
-                pBullet->SetStatus(pBullet->GetStatus() | BULLET_STATUS_READY);
+                pBullet->AddStatus(BULLET_STATUS_READY);
                 DYN_REMOVE(it, *pBulletActive->List())
             }
             else

@@ -221,6 +221,28 @@ public:
 
 
 // ****************************************************************
+// enemy weapon class
+class cEnemyWeapon final : public cWeapon
+{
+public:
+    cEnemyWeapon()noexcept;
+
+    DISABLE_COPY(cEnemyWeapon)
+    ASSIGN_ID(10, "Enemy Weapon")
+
+    // get object properties
+    inline coreVector3 GetColorEnergy()const final {return COLOR_ENERGY_MAGENTA;}
+    inline coreVector3 GetColorShip  ()const final {return COLOR_SHIP_MAGENTA;}
+    inline coreUint8   GetElement    ()const final {return ELEMENT_MAGENTA;}
+
+
+private:
+    // execute own routines
+    void __ShootOwn()final;
+};
+
+
+// ****************************************************************
 // constructor
 constexpr cWeapon::cWeapon()noexcept
 : m_CooldownTimer (coreTimer(1.0f, 1.0f, 0u))

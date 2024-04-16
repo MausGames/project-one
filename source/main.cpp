@@ -527,7 +527,7 @@ static void DebugGame()
         {
             g_pGame->GetEnemyManager()->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
             {
-                pEnemy->TakeDamage(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_BOSS) ? 500 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+                pEnemy->TakeDamage(pEnemy->HasStatus(ENEMY_STATUS_BOSS) ? 500 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
             });
         }
     }
@@ -545,9 +545,9 @@ static void DebugGame()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
         if(STATIC_ISVALID(g_pGame) &&
-           (!g_pGame->GetCurMission()->GetBoss(0u) || HAS_FLAG(g_pGame->GetCurMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD)) &&
-           (!g_pGame->GetCurMission()->GetBoss(1u) || HAS_FLAG(g_pGame->GetCurMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD)) &&
-           (!g_pGame->GetCurMission()->GetBoss(2u) || HAS_FLAG(g_pGame->GetCurMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD)))
+           (!g_pGame->GetCurMission()->GetBoss(0u) || g_pGame->GetCurMission()->GetBoss(0u)->HasStatus(ENEMY_STATUS_DEAD)) &&
+           (!g_pGame->GetCurMission()->GetBoss(1u) || g_pGame->GetCurMission()->GetBoss(1u)->HasStatus(ENEMY_STATUS_DEAD)) &&
+           (!g_pGame->GetCurMission()->GetBoss(2u) || g_pGame->GetCurMission()->GetBoss(2u)->HasStatus(ENEMY_STATUS_DEAD)))
         {
             c_cast<coreUintW&>(g_pGame->GetCurMission()->GetCurSegmentIndex()) = MISSION_NO_SEGMENT;
             g_pGame->GetCurMission()->SkipStage();

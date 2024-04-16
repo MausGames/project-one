@@ -114,7 +114,7 @@ void cErrorMission::__SetupOwn()
 
             //const coreUintW i = pSquad1->GetIndex(pEnemy);
 
-            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
                 //const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 //const coreVector2 vDir = pEnemy->GetDirection().xy();
@@ -173,7 +173,7 @@ void cErrorMission::__SetupOwn()
             {
                 if(HAS_BIT(iState, i))
                 {
-                    if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                    if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                     {
                         //pEnemy->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.2f);//0.8f);
                         pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
@@ -189,7 +189,7 @@ void cErrorMission::__SetupOwn()
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.2f, pEnemy, vPos - 1.0f*vTan, vDir)->ChangeSize(1.2f);
                     }
                 }
-                else if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                else if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                 {
                     //pEnemy->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 0.0f);//1.5f);
                     pEnemy->SetBaseColor(COLOR_SHIP_GREY);
@@ -329,7 +329,7 @@ void cErrorMission::__SetupOwn()
                     pJunk->SetPosition(pEnemy->GetPosition());
                     pJunk->Resurrect();
 
-                    avFlyDir[iIndex] = coreVector2::Direction(I_TO_F(j % iCount) * (2.0f/I_TO_F(iCount)) * PI);
+                    avFlyDir[iIndex] = coreVector2::Direction(I_TO_F(j % iCount) * (2.0f * RCP(I_TO_F(iCount))) * PI);
                     afFlySpeed[iIndex] = 200.0f;
 
                     SET_BIT(aiType[0], iIndex, iType & 0x01u)
@@ -1574,7 +1574,7 @@ void UnusedWaves()
             const coreFloat   fPower  = coreVector2::Dot(vTarget, vShootDir);
             const coreFloat   fSign   = (fPower > 0.0f) ? coreVector2::Dot(vTarget, vShootDir.Rotated90()) : coreVector2::Dot(vTarget, -vShootDir.Rotated90());
 
-            // sudden turn of enemy after moving to a certain threshold is shit, either use it as wall, or constantly rotate  
+            // sudden turn of enemy after moving to a certain threshold is bad, either use it as wall, or constantly rotate  
 
             vShootDir = coreVector2::Direction(vShootDir.Angle() + MIN(ABS(fPower) * 5.0f, 1.0f) * SIGN(fSign) * 2.0f * TIME);
 

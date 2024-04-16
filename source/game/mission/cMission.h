@@ -72,6 +72,7 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
 #define NEVO_BLOCKS                 (12u)                                             // 
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
+#define NEVO_SHELTERS               (2u)                                              // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 #define HARENA_SPIKES               (36u)                                             // 
@@ -119,7 +120,7 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t))                              STAGE_FINISH_NOW}
 
 #define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
-#define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(HAS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
+#define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if((e).HasStatus(ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(this->_UpdateWait()) STAGE_FINISH_NOW}}
 
 #define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
@@ -170,7 +171,7 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
     UNUSED const coreFloat fLifeTimeBeforeBase = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset; \
     UNUSED coreFloat       fLifeTime           = fLifeTimeBase;                                       \
     UNUSED coreFloat       fLifeTimeBefore     = fLifeTimeBeforeBase;                                 \
-    UNUSED const coreBool  bIsDead             = HAS_FLAG((e)->GetStatus(), ENEMY_STATUS_DEAD);
+    UNUSED const coreBool  bIsDead             = (e)->HasStatus(ENEMY_STATUS_DEAD);
 
 #define STAGE_BRANCH(x,y)                      ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
@@ -492,14 +493,21 @@ private:
     const cShip*  m_apArrowOwner[NEVO_ARROWS];        // 
     coreUint8     m_aiArrowDir  [NEVO_ARROWS];        // 
 
-    coreObject3D m_Beam;                              // 
-    coreObject3D m_BeamShelter;                       // 
-
     coreBatchList m_Block;                            // 
     coreBatchList m_BlockWave;                        // 
     coreObject3D  m_aBlockRaw   [NEVO_BLOCKS_RAWS];   // 
     const cShip*  m_apBlockOwner[NEVO_BLOCKS];        // 
     coreFloat     m_afBlockScale[NEVO_BLOCKS];        // 
+
+    cLodObject   m_aShelter    [NEVO_SHELTERS];       // 
+    coreObject3D m_aShelterBack[NEVO_SHELTERS];       // 
+
+    coreObject3D m_Beam;                              // 
+    coreVector2  m_vBeamPos;                          // 
+    coreVector2  m_vBeamDir;                          // 
+    coreFloat    m_fBeamWidth;                        // 
+    coreFloat    m_fBeamSpeed;
+    coreFlow     m_fBeamTime;                         // 
 
     cLodObject  m_Container;                          // 
     coreVector2 m_vForce;                             // 
@@ -538,8 +546,19 @@ public:
     void DisableBlock(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableShelter (const coreUintW iIndex);
+    void DisableShelter(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableBeam();
+    void DisableBeam(const coreBool bAnimated);
+
+    // 
     void EnableContainer (const coreVector2& vPosition);
     void DisableContainer(const coreBool bAnimated);
+
+    // 
+    void FadeBeam(const coreBool bEnable, const coreFloat fTime);
 
     // 
     inline void SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}

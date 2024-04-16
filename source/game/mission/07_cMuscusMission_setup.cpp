@@ -600,7 +600,7 @@ void cMuscusMission::__SetupOwn()
 
             if(HAS_BIT(iLight, i))
             {
-                if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                 {
                     pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
                 }
@@ -665,6 +665,7 @@ void cMuscusMission::__SetupOwn()
     // geschosse von beiden seiten der gegner, gehen mit gegner mit um "wand" zu bauen
     // pacifist ? -> attack on old position when spawning ?   ODER MITTE
     // shared damage ?
+    // (maybe movement in pulses)
     // TODO: general solution to properly override direction
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
@@ -1130,9 +1131,284 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
-    // <REPLACE>                                                       
+    // trade places with others
+    // disable bullets of attacking enemies when jumping into them, otherwise unavoidable
+    // man kann die position des spielers kontrollieren
+    // first enemies should be far enough away to introduce teleport
+    // enemies can be in a line to show multi-jump
+    // high speed killing with correct rotation -> COOP (double-ended left right, you can start from each side)
+    // zu komplexe highspeed-gruppen hatten schlechtes feeling, max zwei rotations-richtungen
+    // in highspeed-gruppe gegner müssen weit genug auseinander sein (zur seite), um nicht unabsichtlich mehrere hintereinander anzugreifen
+    // vor zweiter highspeed-gruppe, gegner müssen so angeordnet sein, dass man in einer guten ecke startet
+    // last two shooting enemies are near each other, to make first teleport risky
+    // TODO: interface icons ersetzen sich auch (+ continue) -> general icon implementation
+    // TODO: different teleport-colors for each player ? (yellow + orange ? or ship colors, or weapon colors)
+    // TODO: badge: follow all paths correctly -> auf COOP achten
+    // TODO: transformed player should not kill other (transforming) enemy for coop -> IMMORTAL and do custom handling
+    // TODO: in the bullet-wave phase, maybe move enemies more far away, to force player rotation (same distance like first groups ?)
+    // TODO: gegner in schussrichtung drehen
     STAGE_MAIN({TAKE_ALWAYS, 12u})
     {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath2)
+        {
+            pPath2->Reserve(2u);
+            pPath2->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath2->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 96u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(4, COLOR_SHIP_PURPLE);
+            });
+        });
+
+        STAGE_ADD_SQUAD(pSquad2, cWarriorEnemy, 7u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
+            });
+        });
+
+        STAGE_GET_START(28u)
+            STAGE_GET_VEC2_ARRAY(avPosStorage, 14u)
+        STAGE_GET_END
+
+        const auto nTeleportFunc = [](const cEnemy* pEnemy, const coreBool bTransform)
+        {
+            if(pEnemy->ReachedDeath())
+            {
+                cPlayer* pPlayer = pEnemy->LastAttacker();
+                if(pPlayer->IsDarkShading())
+                {
+                    const coreVector3 vPos  = pPlayer->GetPosition();
+                    const coreVector3 vDiff = pEnemy ->GetPosition() - vPos;
+                    const coreUintW   iNum  = F_TO_UI(vDiff.Length() / 1.9f);
+
+                    for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum))), 10.0f, 1u, COLOR_ENERGY_YELLOW);
+
+                    pPlayer->SetPosition(pEnemy->GetPosition());
+
+                    if(bTransform)
+                    {
+                        pPlayer->TurnIntoEnemy();
+                        g_pSpecialEffects->MacroExplosionColorBig(pPlayer->GetPosition(), COLOR_ENERGY_MAGENTA);
+                    }
+                }
+            }
+        };
+
+        const auto nReturnFunc = []()
+        {
+            STAGE_FOREACH_PLAYER(pPlayer, i)
+            {
+                if(pPlayer->IsEnemyLook())
+                {
+                    pPlayer->TurnIntoPlayer();
+                    g_pSpecialEffects->MacroExplosionDarkBig(pPlayer->GetPosition());
+                }
+            });
+        };
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  1u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  2u,  9u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 14u, 21u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 10u, 13u)   // # easier in code
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad2,  0u,  0u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad2,  1u,  3u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 22u, 35u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad2,  4u,  4u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 36u, 39u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 40u, 41u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 42u, 45u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 46u, 47u)
+            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad2,  5u,  6u)
+            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 48u, 95u)
+
+            if(m_iStageSub == 3u)
+            {
+                pSquad1->GetEnemy(14u)->SetPosition(coreVector3(-0.7f,-0.7f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(15u)->SetPosition(coreVector3(-0.7f, 0.3f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(16u)->SetPosition(coreVector3( 0.7f, 0.3f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(17u)->SetPosition(coreVector3( 0.7f,-0.3f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(18u)->SetPosition(coreVector3(-0.3f,-0.3f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(19u)->SetPosition(coreVector3(-0.3f, 0.7f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(20u)->SetPosition(coreVector3( 0.3f, 0.7f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(21u)->SetPosition(coreVector3( 0.3f,-0.7f,0.0f) * FOREGROUND_AREA3);
+            }
+            else if(m_iStageSub == 7u)
+            {
+                pSquad1->GetEnemy(22u)->SetPosition(coreVector3( 0.7f,-0.7f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(23u)->SetPosition(coreVector3( 0.7f, 0.0f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(24u)->SetPosition(coreVector3(-0.7f, 0.0f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(25u)->SetPosition(coreVector3(-0.7f, 0.7f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(26u)->SetPosition(coreVector3( 0.5f, 0.7f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(27u)->SetPosition(coreVector3( 0.5f, 0.2f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(28u)->SetPosition(coreVector3(-0.3f, 0.2f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(29u)->SetPosition(coreVector3(-0.3f, 0.5f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(30u)->SetPosition(coreVector3(-0.0f, 0.5f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(31u)->SetPosition(coreVector3(-0.0f,-0.5f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(32u)->SetPosition(coreVector3( 0.3f,-0.5f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(33u)->SetPosition(coreVector3( 0.3f,-0.2f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(34u)->SetPosition(coreVector3(-0.5f,-0.2f,0.0f) * FOREGROUND_AREA3);
+                pSquad1->GetEnemy(35u)->SetPosition(coreVector3(-0.5f,-0.7f,0.0f) * FOREGROUND_AREA3);
+            }
+            else if((m_iStageSub >= 9u) && (m_iStageSub <= 13u))
+            {
+                cEnemy* pDummy = pSquad1->GetEnemy(0u);
+
+                coreVector2 vDir;
+                switch(m_iStageSub)
+                {
+                default: ASSERT(false)
+                case  9u: vDir = coreVector2( 0.0f, 1.0f); break;
+                case 10u: vDir = coreVector2( 0.0f,-1.0f); break;
+                case 11u: vDir = coreVector2(-1.0f, 0.0f); break;
+                case 12u: vDir = coreVector2( 1.0f, 0.0f); break;
+                case 13u: vDir = coreVector2( 0.0f,-1.0f); break;
+                }
+
+                for(coreUintW i = 0u; i < 40u; ++i)
+                {
+                    const coreVector2 vPos = (vDir * -1.2f + vDir.Rotated90() * ((I_TO_F(i) - 19.5f) * 0.055f)) * FOREGROUND_AREA;
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.2f, pDummy, vPos, vDir)->ChangeSize(1.5f);
+                }
+            }
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, (i < 48u) ? 0.8f : 1.0f, (i < 48u) ? 0.0f : (1.0f + 0.1f * I_TO_F(i - 48u)))
+
+            if(i < 14u)
+            {
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((i < 2u) ? ((i % 2u) ? 0.45f : -0.45f) : ((I_TO_F((i - 2u) % 4u) - 1.5f) * 0.45f), 0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                     if(i <  2u) {}
+                else if(i <  6u) pEnemy->Rotate90 ();
+                else if(i < 10u) pEnemy->Rotate270();
+                else if(i < 14u) pEnemy->Rotate180();
+            }
+            else if(i < 36u)
+            {
+                coreVector2& vPosStorage = avPosStorage[i % 14u];
+                if(STAGE_TAKEOFF) vPosStorage = pEnemy->GetPosition().xy();
+
+                const coreFloat fTime = LERPB(0.0f, 1.0f, MIN(fLifeTime * 2.0f, 1.0f));
+
+                pEnemy->SetPosition      (coreVector3(vPosStorage * fTime, 0.0f));
+                pEnemy->DefaultRotateLerp(0.0f*PI, 2.0f*PI, fTime);
+
+                if(STAGE_LIFETIME_AFTER(0.4f))
+                {
+                    if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
+                    {
+                        pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
+                    }
+                }
+                else
+                {
+                    if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
+                    {
+                        pEnemy->AddStatus(ENEMY_STATUS_GHOST);
+                    }
+                }
+            }
+            else if(i < 48u)
+            {
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((i < 40u || (i >= 42u && i < 46u)) ? ((I_TO_F(i % 4u) - 1.5f) * 0.3f) : ((i % 2u) ? -0.8f : -0.5f), 0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                     if(i < 40u) pEnemy->Rotate180();
+                else if(i < 42u) {}
+                else if(i < 46u) pEnemy->Rotate90 ();
+                else if(i < 48u) pEnemy->Rotate270();
+            }
+            else
+            {
+                STAGE_REPEAT(pPath2->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f,-1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(((i - 48u) * 8u) % 11u) - 5.0f) * 0.2f, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+            }
+
+            nTeleportFunc(pEnemy, false);
+        });
+
+        const coreBool bTransform = (m_iStageSub >= 13u) && (pSquad2->GetNumEnemiesAlive() < (g_pGame->GetCoop() ? 2u : 1u));
+
+        STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.8f, 0.0f)
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2((i < 4u) ? -0.7f : ((i < 5u) ? 0.9f : ((i % 2u) ? -0.3f : 0.3f)), 0.0f);
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                 if(i < 1u) {}
+            else if(i < 2u) pEnemy->Rotate90 ();
+            else if(i < 3u) pEnemy->Rotate180();
+            else if(i < 4u) pEnemy->Rotate270();
+            else if(i < 7u) {}
+
+            nTeleportFunc(pEnemy, bTransform);
+
+            if(STAGE_LIFETIME_AFTER(0.3f) && STAGE_TICK_LIFETIME(5.0f, 0.0f))
+            {
+                const coreVector2 vPos  = pEnemy->GetPosition().xy();
+                const coreFloat   fBase = pEnemy->AimAtPlayerSideRev().Angle();
+
+                for(coreUintW j = 5u; j--; )
+                {
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 2.0f) * 5.0f) + fBase);
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.2f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
+                }
+            }
+
+            if(pEnemy->ReachedDeath())
+            {
+                g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cViewBullet>([&](cViewBullet* OUTPUT pBullet)
+                {
+                    if(pBullet->GetOwner() == pEnemy) pBullet->Deactivate(true);
+                });
+            }
+        });
+
+        if((m_iStageSub < 5u) && STAGE_TICK_FREE(6.0f, 0.0f))
+        {
+            cEnemy* pDummy = pSquad1->GetEnemy(0u);
+
+            const coreVector2 vPos = coreVector2(1.0f,0.0f) * FOREGROUND_AREA * -1.2f;
+            const coreVector2 vDir = coreVector2(1.0f,0.0f);
+
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.2f, pDummy, vPos.Rotated90(), vDir.Rotated90())->ChangeSize(1.5f);
+        }
+
+        if(STAGE_CLEARED) nReturnFunc();
+
         STAGE_WAVE("HUNDERTUNDEINS", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 

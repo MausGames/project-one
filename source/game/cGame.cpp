@@ -540,8 +540,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(m_aPlayer[1].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(m_aPlayer[0].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(vPosition.x)
@@ -556,8 +556,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(m_aPlayer[1].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(m_aPlayer[0].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(iIndex < GAME_PLAYERS)
@@ -769,7 +769,7 @@ void cGame::__HandleDefeat()
             cPlayer* pPlayer = &m_aPlayer[i];
 
             // 
-            const coreBool bDefeated = HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
+            const coreBool bDefeated = pPlayer->HasStatus(PLAYER_STATUS_DEAD);
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
@@ -849,7 +849,7 @@ void cGame::__HandlePacifist()
         // 
         this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            if(!pPlayer->IsRolling()) m_fPacifistDamage.Update(GAME_PACIFIST_DAMAGE / I_TO_F(m_bCoop ? GAME_PLAYERS : 1u));
+            if(!pPlayer->IsRolling()) m_fPacifistDamage.Update(GAME_PACIFIST_DAMAGE * RCP(I_TO_F(m_bCoop ? GAME_PLAYERS : 1u)));
         });
 
         // 
@@ -892,14 +892,14 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DAMAGING))
-                        if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
+                        if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
                 // 
                 pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
             }
 
-            if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
                 // 
                 const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
@@ -912,7 +912,7 @@ void cGame::__HandleCollisions()
             }
         }
         
-        if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST)) pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+        if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST)) pPlayer->SetInterrupt(PLAYER_INTERRUPT);
     });
 
     // 
@@ -928,7 +928,7 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_GHOST))
+            if(!pBullet->HasStatus(BULLET_STATUS_GHOST))
             {
                 // 
                 pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
@@ -948,14 +948,14 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && !HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_GHOST))
+            if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
             {
                 // 
                 const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
 
                 if(iTaken)
                 {
-                    if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    if(pBullet->HasStatus(BULLET_STATUS_PENETRATE))
                     {
                         // 
                         pBullet->SetDamage(pBullet->GetDamage() - iTaken);
@@ -974,7 +974,7 @@ void cGame::__HandleCollisions()
                     g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
                 }
 
-                if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
+                if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
                 {
                     // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
                     if(!pEnemy->ReachedDeath())
@@ -1001,7 +1001,7 @@ void cGame::__HandleCollisions()
 
                 if(iTaken)
                 {
-                    if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    if(pBullet->HasStatus(BULLET_STATUS_PENETRATE))
                     {
                         // 
                         pBullet->SetDamage(pBullet->GetDamage() - iTaken);
