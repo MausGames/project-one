@@ -43,8 +43,8 @@ void cGlow::Update()
             FOR_EACH(it, this->GetListSet())
                 (*it)->Render();
 
-            // always render special-effects
-            g_pSpecialEffects->Render(false);
+            // render special-effects
+            g_pSpecialEffects->Render();
         }
         m_Blur.End();
     }

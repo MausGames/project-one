@@ -50,7 +50,15 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
     cMuscusMission ::ID,
     cAterMission   ::ID
 };
+
+static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
+{
+    cIntroMission ::ID,
+    cViridoMission::ID
+};
+
 #define GAME_MISSION_LIST_DEFAULT (__GAME_MISSION_LIST_DEFAULT), ARRAY_SIZE(__GAME_MISSION_LIST_DEFAULT)
+#define GAME_MISSION_LIST_MAIN    (__GAME_MISSION_LIST_MAIN),    ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
 
 
 // ****************************************************************

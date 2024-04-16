@@ -39,6 +39,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_amemasu_tooth.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_amemasu_tooth.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_dharuk_boomerang.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_dharuk_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3", false);
@@ -47,12 +48,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_quad.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_triangle.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);

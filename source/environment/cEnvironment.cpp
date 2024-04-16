@@ -104,6 +104,10 @@ void cEnvironment::Render()
         }
         else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
     }
+
+    // 
+    Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
+    Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 }
 
 
@@ -157,12 +161,11 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
 
     // delete possible old background
     m_MixObject.DefineTexture(0u, NULL);
+    m_MixObject.DefineTexture(1u, NULL);
     SAFE_DELETE(m_pOldBackground)
 
-    // 
-    if(!fTransitionSpeed) SAFE_DELETE(m_pBackground)
-
     // make current to old
+    if(!fTransitionSpeed) SAFE_DELETE(m_pBackground)
     m_pOldBackground = m_pBackground;
 
     // create new background

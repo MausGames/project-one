@@ -604,7 +604,7 @@ public:
     cZerothBoss()noexcept;
 
     DISABLE_COPY(cZerothBoss)
-    ASSIGN_ID(603, "")
+    ASSIGN_ID(603, "???")
 
 
 private:

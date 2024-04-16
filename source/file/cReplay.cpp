@@ -47,7 +47,7 @@ void cReplay::StartRecording()
     this->Clear();
 
     // 
-    m_Header.iPreMagic       = REPLAY_FILE_MAGIC;
+    m_Header.iMagic          = REPLAY_FILE_MAGIC;
     m_Header.iVersion        = REPLAY_FILE_VERSION;
     m_Header.iExecutableHash = cReplay::__CalculateExecutableHash();
     m_Header.iStartTimestamp = std::time(NULL);
@@ -59,7 +59,6 @@ void cReplay::StartRecording()
     m_Header.iNumMissions    = g_pGame->GetNumMissions();
     m_Header.iNumBosses      = REPLAY_BOSSES;
     m_Header.iNumWaves       = REPLAY_WAVES;
-    m_Header.iPostMagic      = REPLAY_FILE_MAGIC;
     ASSERT(m_Header.iNumStreams <= REPLAY_STREAMS)
 
     // 
@@ -292,10 +291,9 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
 
     // 
     std::memcpy(&m_Header, pHeader->GetData(), sizeof(sHeader));
-    WARN_IF((m_Header.iPreMagic  != REPLAY_FILE_MAGIC)   ||
-            (m_Header.iVersion   != REPLAY_FILE_VERSION) ||
-            (m_Header.iPostMagic != REPLAY_FILE_MAGIC)   ||
-            (pHeader->GetSize()  != sizeof(sHeader)))
+    WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)   ||
+            (m_Header.iVersion  != REPLAY_FILE_VERSION) ||
+            (pHeader->GetSize() != sizeof(sHeader)))
     {
         Core::Log->Warning("Replay (%s) is not a valid replay-file!", pcPath);
         return false;

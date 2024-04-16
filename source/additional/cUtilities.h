@@ -34,13 +34,6 @@
 // 
 #define LIST_KEY (CORE_MEMORY_SHARED)
 
-// 
-#define EXECUTE_ONCE(c)                              \
-{                                                    \
-    static coreBool s_bWasExecuted = false;          \
-    if(!s_bWasExecuted) {{c} s_bWasExecuted = true;} \
-}
-
 
 // ****************************************************************
 // angle difference helper-function
@@ -167,19 +160,31 @@ inline FUNC_LOCAL coreBool IsHorizontal(const coreVector2& v)
 inline FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
 {
     ASSERT(!v.IsNull())
-    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
+    return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);
 }
 
 inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
 {
     ASSERT(!v.IsNull())
+    return UnpackDirection(PackDirection(v)) * coreVector2(ABS(v.x), ABS(v.y));
+}
+
+inline FUNC_LOCAL coreVector2 AlongCrossNormal(const coreVector2& v)
+{
+    ASSERT(v.IsNormalized())
+    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
+}
+
+inline FUNC_LOCAL coreVector2 AlongStarNormal(const coreVector2& v)
+{
+    ASSERT(v.IsNormalized())
     return UnpackDirection(PackDirection(v));
 }
 
 
 // ****************************************************************
 // 
-inline FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const coreVector2 vAxis)
+inline FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const coreVector2& vAxis)
 {
     return (vVector.x * vAxis.Rotated90()) +
            (vVector.y * vAxis);

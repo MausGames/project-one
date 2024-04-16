@@ -568,12 +568,12 @@ void cAmemasuBoss::__MoveOwn()
                 }
             }
 
-            const coreVector2 vAim = this->AimAtPlayer(pFollow);
+            const coreVector2 vAim = this->AimAtPlayer(pFollow).Normalized();
 
-            if(coreVector2::Dot(vCur, vAim.Normalized()) <= (1.0f / SQRT2))// && coreMath::IsNear(m_fMouthAngle, 0.0f))
+            if(coreVector2::Dot(vCur, vAim) <= (1.0f / SQRT2))// && coreMath::IsNear(m_fMouthAngle, 0.0f))
             {
                 vPrev = vCur;
-                vCur  = AlongCross(vAim);
+                vCur  = AlongCrossNormal(vAim);
                 fTurn = 0.0f;
             }
 
@@ -582,14 +582,14 @@ void cAmemasuBoss::__MoveOwn()
             this->SetOrientation(coreVector3(this->GetDirection().xy().Rotated90(), 0.0f));
             //this->SetOrientation(coreVector3(0.0f, this->GetDirection().yx().Rotated90()));
 
-            //this->SetDirection  (coreVector3(vAim.Normalized(),             0.0f));
-            //this->SetOrientation(coreVector3(vAim.Normalized().Rotated90(), 0.0f));
+            //this->SetDirection  (coreVector3(vAim,             0.0f));
+            //this->SetOrientation(coreVector3(vAim.Rotated90(), 0.0f));
 
 
             PHASE_CONTROL_TICKER(1u, 0u, 12.0f, LERP_LINEAR)
             {
                 if(iTick & 0x04u) return;
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.1f, this, this->GetPosition().xy(), vAim.Normalized())->ChangeSize(1.3f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.1f, this, this->GetPosition().xy(), vAim)->ChangeSize(1.3f);
             });
 
 

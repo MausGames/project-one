@@ -13,10 +13,16 @@
 // constructor
 cForeground::cForeground()noexcept
 : m_mViewProj (coreMatrix4::Identity())
+, m_bTarget   (false)
 {
-    // create foreground frame buffer (texture with alpha)
-    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
-    m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    // create foreground frame buffer (with alpha)
+    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
+    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+    m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+
+    // create resolved texture (with alpha)
+    m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
+    m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 
     this->__CalculateViewProj();
@@ -27,19 +33,15 @@ cForeground::cForeground()noexcept
 // start foreground aggregation
 void cForeground::Start()
 {
-    // switch back to default frame buffer
-    coreFrameBuffer::EndDraw();
-
-    // set foreground camera, light and view
-    Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
-    Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
-    Core::Graphics->SetView  (g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
+    // fill foreground frame buffer
+    m_FrameBuffer.StartDraw();
+    m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
 
     // adjust blending function (to correctly aggregate alpha values)
     glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
 
-    // clear color buffer
-    glClear(GL_COLOR_BUFFER_BIT);
+    // 
+    m_bTarget = true;
 }
 
 
@@ -47,25 +49,39 @@ void cForeground::Start()
 // end foreground aggregation
 void cForeground::End()
 {
-    // copy default frame buffer to texture (faster than dedicated multisampled FBO, but only once)
-    m_FrameBuffer.GetColorTarget(0u).pTexture->CopyFrameBuffer();
-
-    // explicitly invalidate color and depth buffer
-    if(CORE_GL_SUPPORT(ARB_invalidate_subdata))
-    {
-        constexpr GLenum aiAttachment[] = {GL_COLOR, GL_DEPTH};
-        glInvalidateFramebuffer(GL_FRAMEBUFFER, ARRAY_SIZE(aiAttachment), aiAttachment);
-    }
-
-    // also clear color buffer on screen shake or scaling
-    if(g_pSpecialEffects->GetShakeStrength() || (g_CurConfig.Game.iGameScale < 100u))
-        glClear(GL_COLOR_BUFFER_BIT);
-
-    // reset view
-    Core::Graphics->SetView(Core::System->GetResolution(), Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
+    // 
+    m_bTarget = false;
 
     // reset blending function
     glBlendFunc(FOREGROUND_BLEND_DEFAULT);
+
+    // resolve frame buffer to texture
+    m_FrameBuffer.Blit      (CORE_FRAMEBUFFER_TARGET_COLOR, &m_ResolvedTexture);
+    m_FrameBuffer.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
+}
+
+
+// ****************************************************************
+// 
+coreBool cForeground::IsVisiblePoint(const coreVector2& vPosition, const coreFloat fFactor)const
+{
+    // 
+    return ((ABS(vPosition.x) < FOREGROUND_AREA.x * fFactor) &&
+            (ABS(vPosition.y) < FOREGROUND_AREA.y * fFactor));
+}
+
+
+// ****************************************************************
+// 
+coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
+{
+    // 
+    const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());
+    const coreFloat   fRange        = pObject->GetModel().IsUsable() ? (pObject->GetModel()->GetBoundingRange() * pObject->GetSize()).Max() : 0.0f;
+
+    // 
+    return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRange) &&
+            (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f + fRange));
 }
 
 
@@ -73,8 +89,8 @@ void cForeground::End()
 // reset with the resource manager
 void cForeground::__Reset(const coreResourceReset eInit)
 {
-    if(eInit) {m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL); this->__CalculateViewProj();}
-         else {m_FrameBuffer.Delete();}
+    if(eInit) {m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED); m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL); this->__CalculateViewProj();}
+         else {m_FrameBuffer.Delete();                                                        m_ResolvedTexture.Delete();}
 }
 
 

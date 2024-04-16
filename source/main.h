@@ -52,7 +52,7 @@
 // TODO: check for 16-bit shader usage
 // TODO: program enable has to be checked (if(x.Enable()){}) everywhere
 // TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware, it is recommended to remove it for compression purposes, but always test to be sure
-// TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
+// TODO: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
@@ -69,6 +69,7 @@
 // TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO: remove game_icon.png from resource-index if not required anymore
 // TODO: scissor out center when rendering fullscreen effects (e.g. water vignetting)
+// TODO: brown bullet, directional
 
 
 // ****************************************************************
@@ -110,12 +111,12 @@
 // color values
 #define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
 #define COLOR_MENU_BLACK     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
-#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f)) 
-#define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f)) 
-#define COLOR_MENU_RED       (coreVector3(1.000f, 0.275f, 0.275f)) 
-#define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f)) 
-#define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f)) 
-#define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f)) 
+#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO: improve 
+#define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f))   // TODO: improve 
+#define COLOR_MENU_RED       (coreVector3(1.000f, 0.275f, 0.275f))   // TODO: improve 
+#define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO: improve 
+#define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))   // TODO: improve 
+#define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))   // TODO: improve 
 #define COLOR_MENU_BRONZE    (coreVector3(0.925f, 0.663f, 0.259f))
 #define COLOR_MENU_SILVER    (coreVector3(0.855f, 0.855f, 0.878f))
 #define COLOR_MENU_GOLD      (coreVector3(1.000f, 0.859f, 0.000f))
@@ -181,6 +182,7 @@ enum eType : coreInt32
 
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,
+    TYPE_VIRIDO_BARRIER,
     TYPE_NEVO_CONTAINER,
 
     TYPE_DHARUK_BOOMERANG,
@@ -190,15 +192,15 @@ enum eType : coreInt32
 // attack elements
 enum eElement : coreUint8
 {
-    ELEMENT_WHITE = 1u,   // 
-    ELEMENT_YELLOW,       // speed (ray) 
-    ELEMENT_ORANGE,       // fire
-    ELEMENT_RED,          // (antimatter) 
-    ELEMENT_PURPLE,       // power (pulse) 
-    ELEMENT_BLUE,         // homing (tesla) 
-    ELEMENT_CYAN,         // 
-    ELEMENT_GREEN,        // (wave) 
-    ELEMENT_NEUTRAL       // 
+    ELEMENT_WHITE = 1u,
+    ELEMENT_YELLOW,
+    ELEMENT_ORANGE,
+    ELEMENT_RED,
+    ELEMENT_PURPLE,
+    ELEMENT_BLUE,
+    ELEMENT_CYAN,
+    ELEMENT_GREEN,
+    ELEMENT_NEUTRAL
 };
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
@@ -269,13 +271,11 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
 #include "game/cPlayer.h"
-#include "game/cTheater.h"
 #include "game/cGame.h"
 
 extern cForeground*  const g_pForeground;    // main foreground object
 extern cEnvironment* const g_pEnvironment;   // main environment object
 extern cMenu*        const g_pMenu;          // main menu object
-extern cTheater*     const g_pTheater;       // main theater object
 extern cGame*        const g_pGame;          // main game object
 
 

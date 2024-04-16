@@ -56,10 +56,12 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
         m_aPlayer[1].SetInput(&g_aGameInput[1]);
 
+        // 
+        m_aPlayer[0].SetArea(coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f)));
+        m_aPlayer[1].SetArea(coreVector4(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA));
 
-        m_aPlayer[0].SetArea(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f));
-        m_aPlayer[1].SetArea(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA);
-
+        // 
+        g_pPostProcessing->SetSplitScreen(true);
 
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
@@ -87,7 +89,8 @@ cGame::~cGame()
     g_pWindscreen->ClearAdds(true);
 
     // 
-    g_pPostProcessing->SetSaturation(1.0f);
+    g_pPostProcessing->SetSaturationAll(1.0f);
+    g_pPostProcessing->SetSplitScreen  (false);
 
     // 
     g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
@@ -149,7 +152,7 @@ void cGame::Render()
     __DEPTH_LEVEL_OVER
     {
         // render special-effects
-        g_pSpecialEffects->Render(true);
+        g_pSpecialEffects->Render();
 
         // render high-priority bullet manager
         m_BulletManagerEnemy.Render();   // TODO: below attack ? to be consistent with over ? rename all 3 stages ? 
@@ -186,12 +189,12 @@ void cGame::Move()
 
         // move all enemies
         m_EnemyManager.Move();
+
+        // move the bullet managers
+        m_BulletManagerPlayer.Move();
+        m_BulletManagerEnemy .Move();
     }
     m_pCurMission->MoveAfter();
-
-    // move the bullet managers
-    m_BulletManagerPlayer.Move();
-    m_BulletManagerEnemy .Move();
 
     // 
     m_ChromaManager.Move();
@@ -290,6 +293,7 @@ void cGame::LoadNextMission()
     if(m_iCurMissionIndex == m_iNumMissions - 1u)
     {
         // TODO
+        ASSERT(false)
     }
     else
     {
@@ -326,22 +330,16 @@ void cGame::StartIntro()
     // 
     m_fTimeInOut = -GAME_INTRO_DELAY;
 
-    if(m_bCoop)
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
     {
-        // reset all available players
-        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        {
-            m_aPlayer[i].Kill(false);
-            m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u)), -100.0f));
-            m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
-        }
-    }
-    else
-    {
-        // reset only the first player
-        m_aPlayer[0].Kill(false);
-        m_aPlayer[0].Resurrect(coreVector2(0.0f,-100.0f));
-        m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+        // 
+        m_aPlayer[i].Kill(false);
+        m_aPlayer[i].Resurrect();
+        m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+
+        // 
+        const coreFloat fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
+        m_aPlayer[i].SetPosition(coreVector3(fSide, -140.0f, 0.0f));
     }
 }
 
@@ -434,6 +432,8 @@ void cGame::OffsetDepthLevel(const coreFloat fOffset)const
 // 
 cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 {
+    // TODO: should use side for target, not nearest   
+
     // 
     if(!m_bCoop) return &m_aPlayer[0];
 
@@ -522,6 +522,7 @@ coreBool cGame::__HandleIntro()
 
                 // fly player animated into the game field
                 pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, vPos));
+                pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
             });
@@ -550,6 +551,7 @@ coreBool cGame::__HandleOutro()
 
             // fly player animated out of the game field
             pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, fPos, pPlayer->GetPosition().z));
+            pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
             pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
             pPlayer->UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
         });
@@ -565,8 +567,7 @@ void cGame::__HandleDefeat()
 {
     if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     {
-        coreBool  bDefeated = true;
-        coreFloat fFeelTime = 0.0f;
+        coreBool bAllDefeated = true;
 
         // 
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -574,14 +575,14 @@ void cGame::__HandleDefeat()
             const cPlayer& oPlayer = m_aPlayer[i];
 
             // 
-            bDefeated = bDefeated && CONTAINS_FLAG(oPlayer.GetStatus(), PLAYER_STATUS_DEAD);
-            fFeelTime = MAX(fFeelTime, oPlayer.GetFeelTime());
+            const coreBool bDefeated = CONTAINS_FLAG(oPlayer.GetStatus(), PLAYER_STATUS_DEAD);
+            bAllDefeated = bAllDefeated && bDefeated;
+
+            // 
+            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - oPlayer.GetFeelTime(), 0.0f, 1.0f));
         }
 
-        // 
-        g_pPostProcessing->SetSaturation(bDefeated ? 0.0f : (1.0f - MIN(fFeelTime, 1.0f)));
-
-        if(bDefeated)
+        if(bAllDefeated)
         {
             if(m_pCurMission->GetID() == cIntroMission::ID)
             {
@@ -654,24 +655,21 @@ void cGame::__HandleCollisions()
 
         // 
         const coreVector2 vDir = (pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalized();
-        pPlayer->SetForce(vDir * 80.0f);
+        pPlayer->SetForce    (vDir * 100.0f);
+        pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
-
-        pPlayer->Interrupt(1.0f);
-
-
-        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        // 
         g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
 
 
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection);
-
     });
 
     // 
     cPlayer::TestCollision(TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        if(!bFirstHit) return;  
+        if(!bFirstHit) return;
 
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
@@ -685,27 +683,29 @@ void cGame::__HandleCollisions()
     // 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
+        if(!bFirstHit) return;
+
         // 
-        if(!IN_FOREGROUND_AREA(vIntersection, 1.1f)) return;
+        if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
-
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
+        // 
+        if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
         {
-            pBullet->Reflect(pEnemy);
-            return;
+            // 
+            pBullet->Deactivate(true, vIntersection.xy());
+
+            // 
+            g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+        }
+        else
+        {
+            // 
+            pBullet->Reflect(pEnemy, vIntersection.xy());
         }
 
 
-        // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(true, vIntersection.xy());
-
-        // 
-        g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
-
-
-        //const coreVector2 fDiff   = vIntersection.xy() - pBullet->GetPosition().xy();
-        //const coreFloat   fOffset = pBullet->GetCollisionRange().y - coreVector2::Dot(fDiff, pBullet->GetDirection().xy());
+        //const coreVector2 vDiff   = vIntersection.xy() - pBullet->GetPosition().xy();
+        //const coreFloat   fOffset = pBullet->GetCollisionRange().y - coreVector2::Dot(vDiff, pBullet->GetDirection().xy());
         //pBullet->SetPosition(pBullet->GetPosition() - fOffset * pBullet->GetDirection());
 
 
@@ -746,18 +746,10 @@ void cGame::__ClearAll(const coreBool bAnimated)
         m_aPlayer[i].Kill(bAnimated);
 
     // 
-    m_EnemyManager.ClearEnemies(bAnimated);
-
-    // 
+    m_EnemyManager       .ClearEnemies(bAnimated);
     m_BulletManagerPlayer.ClearBullets(bAnimated);
     m_BulletManagerEnemy .ClearBullets(bAnimated);
-
-    // 
-    m_ChromaManager.ClearChromas(bAnimated);
-
-    // 
-    m_ItemManager.ClearItems(bAnimated);
-
-    // 
-    m_ShieldManager.ClearShields(bAnimated);
+    m_ChromaManager      .ClearChromas(bAnimated);
+    m_ItemManager        .ClearItems  (bAnimated);
+    m_ShieldManager      .ClearShields(bAnimated);
 }

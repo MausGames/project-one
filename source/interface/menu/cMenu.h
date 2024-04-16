@@ -100,7 +100,7 @@
 
 #define SURFACE_PAUSE_DEFAULT   (0u)
 
-#define SURFACE_SUMMARY_RECAP   (0u)
+#define SURFACE_SUMMARY_NORMAL  (0u)
 #define SURFACE_SUMMARY_BEGIN   (1u)
 
 #define SURFACE_DEFEAT_CONTINUE (0u)
@@ -490,8 +490,6 @@ private:
     coreLabel m_TotalValue;                                         // 
     coreLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
 
-    coreLabel m_BonusValue;                                         // 
-
     coreUint32 m_iFinalScore;                                       // (just for display) 
     coreFlow   m_fIntroTimer;                                       // 
     coreFlow   m_fOutroTimer;                                       // 
@@ -509,7 +507,7 @@ public:
     void Move  ()final;
 
     // 
-    void ShowRecap();
+    void ShowNormal();
     void ShowBegin();
 };
 

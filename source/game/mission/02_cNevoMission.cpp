@@ -104,21 +104,21 @@ void cNevoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Nautilus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_Nautilus)
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Amemasu, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_Amemasu)
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Leviathan, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_Leviathan)
     });
 
     // ################################################################
@@ -189,18 +189,20 @@ void cNevoMission::__MoveOwnAfter()
             // 
             Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
             {
+                if(!bFirstHit) return;
+
                 // 
-                //pBullet->Deactivate(true, vIntersection.xy());
-                pBullet->Reflect(pContainer);
+                pBullet->Reflect(pContainer, vIntersection.xy());
             });
 
             // 
-            Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
-            {
-                // 
-                //pBullet->Deactivate(true, vIntersection.xy());
-                pBullet->Reflect(pContainer);
-            });
+            //Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+            //{
+            //    if(!bFirstHit) return;
+            //
+            //    // 
+            //    pBullet->Reflect(pContainer);
+            //});
         }
         m_Container.ActivateModelDefault();
     }

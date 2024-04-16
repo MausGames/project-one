@@ -58,7 +58,7 @@ public:
     // 
     struct sHeader final
     {
-        coreUint32 iPreMagic;                                                           // 
+        coreUint32 iMagic;                                                           // 
         coreUint32 iVersion;                                                            // 
         coreChar   acName[REPLAY_NAME_LENTH];                                           // 
 
@@ -98,7 +98,7 @@ public:
         coreUint32 aaaiActionsBoss  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_BOSSES];   // 
         coreUint32 aaaiActionsWave  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_WAVES];    // 
 
-        coreUint32 iPostMagic;                                                          // 
+        coreUint64 iChecksum;                                                           // TODO: use  
     };
 
     // 

@@ -12,6 +12,8 @@
 // ****************************************************************
 // constructor
 cPostProcessing::cPostProcessing()noexcept
+: m_fSplitScreenValue (0.0f)
+, m_bSplitScreen      (false)
 {
     // load post-processing shader-programs
     m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
@@ -19,36 +21,30 @@ cPostProcessing::cPostProcessing()noexcept
     m_pProgramDebug     = Core::Manager::Resource->Get<coreProgram>("full_post_debug_program");
     this->Recompile();
 
-    // create side-objects
-    this->__Reset(CORE_RESOURCE_RESET_INIT);
-
-    // create watermark
-    m_Watermark.Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_Watermark.SetPosition (coreVector2(-0.01f, 0.015f));
-    m_Watermark.SetDirection(coreVector2( 1.0f,  0.0f));
-    m_Watermark.SetCenter   (coreVector2( 0.5f, -0.5f));
-    m_Watermark.SetAlignment(coreVector2(-1.0f,  1.0f));
-    m_Watermark.SetText     ("Project One (@MausGames - work in progress)");
-    m_Watermark.Move();
-
-    // reset side-object opacity
-    this->SetSideOpacity(0.0f);
-
-    // 
-    this->SetSaturation(1.0f);
-    this->SetValue     (1.0f);
-
-    // 
+    // create interiors
     this->UpdateLayout();
-    this->Move();
+
+    // create wallpapers
+    this->__UpdateWall();
+
+    // create separator
+    m_Separator.DefineProgram("default_2d_program");
+    m_Separator.DefineTexture(0u, "default_white.png");
+    m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
+
+    // 
+    this->SetWallOpacity  (0.0f);
+    this->SetSaturationAll(1.0f);
+    this->SetValueAll     (1.0f);
+    this->SetBorderAll    (0.0f);
 }
 
 
 // ****************************************************************
-// apply post-processing
-void cPostProcessing::Apply()
+// render post-processing
+void cPostProcessing::Render()
 {
-    // switch back to default frame buffer (again)
+    // switch back to default frame buffer
     coreFrameBuffer::EndDraw();
 
     // select between debug, distorted or simple shader-program
@@ -57,26 +53,43 @@ void cPostProcessing::Apply()
                                   else this->DefineProgram(m_pProgramSimple);
 
     // bind all required frame buffers
-    this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture);
-    this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
-    this->DefineTexture(POST_TEXTURE_UNIT_GLOW,        g_pGlow       ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
-    this->DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
+    for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+    {
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture);
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_GLOW,        g_pGlow       ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
+    }
 
-    glDisable(GL_DEPTH_TEST);
+    // clear color buffer on screen shake or scaling
+    if(!coreMath::IsNear(this->GetPosition().x, 0.0f) || !coreMath::IsNear(this->GetPosition().y, 0.0f) ||
+       !coreMath::IsNear(this->GetSize    ().x, 1.0f) || !coreMath::IsNear(this->GetSize    ().y, 1.0f))
+        glClear(GL_COLOR_BUFFER_BIT);
+
     glDisable(GL_BLEND);
     {
-        // post-process
-        this->Render();
+        // render interiors (post-process)
+        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+            m_aInterior[i].Render(this->GetProgram());
 
-        // render side-objects
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSideArea); ++i) m_aSideArea[i].Render();
+        // render wallpapers
+        for(coreUintW i = 0u; i < POST_WALLS; ++i)
+            m_aWall[i].Render();
     }
-    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
-    // render watermark
-    if(g_MenuInput.bScreenshot)
-        m_Watermark.Render();
+    // render separator
+    if(m_fSplitScreenValue)
+        m_Separator.Render();
+
+    // 
+    for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+    {
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_GLOW,        NULL);
+        m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  NULL);
+    }
 
     // invalidate all frame buffers (# not cGlow and cDistortion, because of incremental rendering and pause)
     if(!g_pMenu->IsPaused())
@@ -84,10 +97,22 @@ void cPostProcessing::Apply()
         g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
         g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
     }
-    this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
-    this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);
-    this->DefineTexture(POST_TEXTURE_UNIT_GLOW,        NULL);
-    this->DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  NULL);
+}
+
+
+// ****************************************************************
+// move post-processing
+void cPostProcessing::Move()
+{
+    // 
+    if(m_bSplitScreen) m_fSplitScreenValue.UpdateMin( 3.0f, 1.0f);
+                  else m_fSplitScreenValue.UpdateMax(-3.0f, 0.0f);
+
+    // update interiors
+    this->__UpdateInterior();
+
+    // update separator
+    this->__UpdateSeparator();
 }
 
 
@@ -142,19 +167,23 @@ void cPostProcessing::UpdateLayout()
     // 
     this->SetSize     (vSize);
     this->SetDirection(vDirection);
+
+    // 
+    this->__UpdateInterior();
 }
 
 
 // ****************************************************************
-// set side-object opacity
-void cPostProcessing::SetSideOpacity(const coreFloat fValue)
+// set wallpaper opacity
+void cPostProcessing::SetWallOpacity(const coreFloat fOpacity)
 {
     // change color instead of transparency (blending is disabled)
-    const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * CLAMP(fValue, 0.0f, 1.0f);
+    ASSERT((fOpacity >= 0.0f) && (fOpacity <= 1.0f))
+    const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * fOpacity;
 
-    // update all relevant side-objects
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSideArea); ++i) m_aSideArea[i].SetColor3(vColor);
-    m_Watermark.SetColor3(vColor * MENU_CONTRAST_WHITE);
+    // 
+    for(coreUintW i = 0u; i < POST_WALLS; ++i)
+        m_aWall[i].SetColor3(vColor);
 }
 
 
@@ -162,26 +191,88 @@ void cPostProcessing::SetSideOpacity(const coreFloat fValue)
 // reset with the resource manager
 void cPostProcessing::__Reset(const coreResourceReset eInit)
 {
-    if(eInit)
+    if(eInit) this->__UpdateWall();
+}
+
+
+// ****************************************************************
+// update interiors
+void cPostProcessing::__UpdateInterior()
+{
+    if(m_bSplitScreen)
     {
-        const coreVector2& vResolution = Core::System->GetResolution();
+        // 
+        m_aInterior[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
-        // place objects left-right or top-down depending on window aspect ratio
-        const coreVector2 vFlip = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSideArea); ++i)
+        // 
+        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
         {
-            const coreFloat fSide = (i ? 1.0f : -1.0f);
-
-            // create side-objects
-            m_aSideArea[i].DefineProgram("menu_border_direct_program");
-            m_aSideArea[i].DefineTexture(0u, "menu_background_black.png");
-            m_aSideArea[i].SetPosition  (vFlip * (fSide *  0.1f));
-            m_aSideArea[i].SetSize      (coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f);
-            m_aSideArea[i].SetDirection (vFlip * (fSide *  coreVector2(-1.0f,1.0f)));
-            m_aSideArea[i].SetCenter    (vFlip * (fSide *  0.5f));
-            m_aSideArea[i].SetAlignment (vFlip * (fSide * -1.0f));
-            m_aSideArea[i].SetTexOffset (coreVector2(0.1f, 0.0f));
-            m_aSideArea[i].Move();
+            m_aInterior[i].SetPosition (this->GetPosition ());
+            m_aInterior[i].SetSize     (this->GetSize     () * coreVector2(0.5f,1.0f));
+            m_aInterior[i].SetDirection(this->GetDirection());
+            m_aInterior[i].SetAlignment(this->GetDirection().Rotated90() * coreVector2(1.0f,-1.0f) * (i ? 1.0f : -1.0f));
+            m_aInterior[i].SetTexSize  (coreVector2(0.5f,1.0f));
+            m_aInterior[i].SetTexOffset(coreVector2(i ? 0.5f : 0.0f, 0.0f));
+            m_aInterior[i].Move();
         }
+    }
+    else
+    {
+        // 
+        m_aInterior[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+        // 
+        m_aInterior[0].SetPosition (this->GetPosition ());
+        m_aInterior[0].SetSize     (this->GetSize     ());
+        m_aInterior[0].SetDirection(this->GetDirection());
+        m_aInterior[0].SetAlignment(coreVector2(0.0f,0.0f));
+        m_aInterior[0].SetTexSize  (coreVector2(1.0f,1.0f));
+        m_aInterior[0].SetTexOffset(coreVector2(0.0f,0.0f));
+        m_aInterior[0].Move();
+    }
+}
+
+
+// ****************************************************************
+// update wallpapers
+void cPostProcessing::__UpdateWall()
+{
+    // place objects left-right or top-down depending on window aspect ratio
+    const coreVector2& vResolution = Core::System->GetResolution();
+    const coreVector2  vFlip       = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
+    const coreVector2  vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
+
+    // 
+    for(coreUintW i = 0u; i < POST_WALLS; ++i)
+    {
+        const coreFloat fSide = (i ? 1.0f : -1.0f);
+
+        m_aWall[i].DefineProgram("menu_border_direct_program");
+        m_aWall[i].DefineTexture(0u, "menu_background_black.png");
+        m_aWall[i].SetPosition  (vFlip * (fSide *  0.1f));
+        m_aWall[i].SetSize      (vSize);
+        m_aWall[i].SetDirection (vFlip * (fSide *  coreVector2(-1.0f,1.0f)));
+        m_aWall[i].SetCenter    (vFlip * (fSide *  0.5f));
+        m_aWall[i].SetAlignment (vFlip * (fSide * -1.0f));
+        m_aWall[i].SetTexOffset (coreVector2(0.1f, 0.0f));
+        m_aWall[i].Move();
+    }
+}
+
+
+// ****************************************************************
+// update separator
+void cPostProcessing::__UpdateSeparator()
+{
+    if(m_fSplitScreenValue)
+    {
+        // 
+        const coreFloat fValue = (m_fSplitScreenValue == 1.0f) ? 1.0f : LERPB(0.0f, 1.0f, m_fSplitScreenValue);
+
+        // 
+        m_Separator.SetSize     (coreVector2(LERP(0.1f, 0.01f, fValue), 1.0f));
+        m_Separator.SetDirection(this->GetDirection());
+        m_Separator.SetAlpha    (LERP(0.0f, 0.8f, fValue));
+        m_Separator.Move();
     }
 }

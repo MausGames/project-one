@@ -12,7 +12,6 @@
 
 // TODO: #define FOREGROUND_AREA_FULL (FOREGROUND_AREA * 1.1f)
 // TODO: FOREGROUND_AREA_REV without RCP
-// TODO: switch back to multisampled framebuffer, to improve quality on Nvidia GPUs
 
 
 // ****************************************************************
@@ -20,8 +19,6 @@
 #define FOREGROUND_AREA (coreVector2(41.5f,41.5f))   // area range for the foreground plane (+/-, needs to be adapted after camera height change)
 
 #define FOREGROUND_AREA3 (coreVector3(FOREGROUND_AREA, 1.0f))
-
-#define IN_FOREGROUND_AREA(p,f) ((ABS((p).x) < FOREGROUND_AREA.x * (f)) && (ABS((p).y) < FOREGROUND_AREA.y * (f)))
 
 #define FOREGROUND_BLEND_DEFAULT (GL_SRC_ALPHA), (GL_ONE_MINUS_SRC_ALPHA)   // default blending mode  (A*x + (1-A)*y)
 #define FOREGROUND_BLEND_SUM     (GL_SRC_ALPHA), (GL_ONE)                   // additive blending mode (A*x +       y)
@@ -33,8 +30,11 @@
 class cForeground final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_FrameBuffer;   // foreground frame buffer (only texture, in FBO for fast clear)
-    coreMatrix4     m_mViewProj;     // foreground view-projection matrix
+    coreFrameBuffer m_FrameBuffer;       // foreground frame buffer (multisampled)
+    coreFrameBuffer m_ResolvedTexture;   // resolved texture
+
+    coreMatrix4 m_mViewProj;             // foreground view-projection matrix
+    coreBool    m_bTarget;               // 
 
 
 public:
@@ -47,14 +47,21 @@ public:
     void End();
 
     // clear frame buffer
-    inline void Clear() {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void Clear() {m_ResolvedTexture.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_ResolvedTexture;}
+
+    // 
+    inline const coreBool& IsTarget()const {return m_bTarget;}
 
     // project world-position into screen-space
     inline FUNC_LOCAL coreVector2 Project3D(const coreVector3& vPosition)const {return vPosition.xy() * (CAMERA_POSITION.z * RCP(CAMERA_POSITION.z - vPosition.z));}
     inline FUNC_LOCAL coreVector2 Project2D(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
+
+    // 
+    coreBool IsVisiblePoint (const coreVector2& vPosition, const coreFloat fFactor = 1.1f)const;
+    coreBool IsVisibleObject(const coreObject3D* pObject)const;
 
 
 private:

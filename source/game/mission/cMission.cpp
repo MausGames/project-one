@@ -141,6 +141,12 @@ void cMission::SkipStage()
 
     // 
     g_pGame->GetShieldManager()->ClearShields(true);
+
+
+    
+    m_nCollPlayerEnemy  = NULL;
+    m_nCollPlayerBullet = NULL;
+    m_nCollEnemyBullet  = NULL;
 }
 
 
@@ -189,7 +195,7 @@ void cMission::DeactivateWave()
         const coreFloat fTime  = MAX(g_pGame->GetTimeTable()->GetTimeWave(g_pGame->GetCurMissionIndex(), m_iCurWaveIndex), 0.0f);
         const coreFloat fScore = MAX(1000.0f * (1.0f - fTime * RCP(30.0f)), 0.0f);
 
-        const coreVector3 vPos = cEnemy::GetLastDamaged() ? cEnemy::GetLastDamaged()->GetPosition() : coreVector3(0.0f,0.0f,0.0f);
+        //const coreVector3 vPos = cEnemy::GetLastDamaged() ? cEnemy::GetLastDamaged()->GetPosition() : coreVector3(0.0f,0.0f,0.0f);
 
         //g_pGame->GetCombatText()->AddBonus(F_TO_UI(fScore), vPos);
         //g_pGame->GetCombatText()->AddBonus(F_TO_UI(fScore), coreVector3(0.0f,0.0f,0.0f));  

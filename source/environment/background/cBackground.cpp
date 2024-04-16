@@ -154,6 +154,7 @@ void cBackground::Move()
     if(m_pOutdoor)
     {
         m_pOutdoor->SetFlyOffset(g_pEnvironment->GetFlyOffset());
+        m_pOutdoor->SetTransform(g_pEnvironment->GetFlyOffset(), g_pEnvironment->GetSideOffset(), g_pEnvironment->GetDirection());
         m_pOutdoor->Move();
     }
 

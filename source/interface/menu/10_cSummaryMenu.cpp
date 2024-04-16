@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cSummaryMenu::cSummaryMenu()noexcept
-: coreMenu      (2u, SURFACE_SUMMARY_RECAP)
+: coreMenu      (2u, SURFACE_SUMMARY_NORMAL)
 , m_iFinalScore (0u)
 , m_fIntroTimer (0.0f)
 , m_fOutroTimer (0.0f)
@@ -65,25 +65,19 @@ cSummaryMenu::cSummaryMenu()noexcept
         m_aTotalPart[j].SetColor3   (COLOR_MENU_WHITE);
     }
 
-    m_BonusValue.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_BonusValue.SetPosition(coreVector2(0.0f,0.0f));
-    m_BonusValue.SetColor3  (COLOR_MENU_WHITE);
-
     // bind menu objects
-    this->BindObject(SURFACE_SUMMARY_RECAP, &m_Background);
+    this->BindObject(SURFACE_SUMMARY_NORMAL, &m_Background);
 
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_RECAP, &m_aTitle[i]);
-    this->BindObject(SURFACE_SUMMARY_RECAP, &m_TotalTitle);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_RECAP, &m_aValue[i]);
-    this->BindObject(SURFACE_SUMMARY_RECAP, &m_TotalValue);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aTitle[i]);
+    this->BindObject(SURFACE_SUMMARY_NORMAL, &m_TotalTitle);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aValue[i]);
+    this->BindObject(SURFACE_SUMMARY_NORMAL, &m_TotalValue);
 
     for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
     {
-        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_RECAP, &m_aaPart[i][j]);
-        this->BindObject(SURFACE_SUMMARY_RECAP, &m_aTotalPart[j]);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aaPart[i][j]);
+        this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aTotalPart[j]);
     }
-
-    this->BindObject(SURFACE_SUMMARY_BEGIN, &m_BonusValue);
 }
 
 
@@ -110,7 +104,7 @@ void cSummaryMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_SUMMARY_RECAP:
+    case SURFACE_SUMMARY_NORMAL:
         {
             // 
             constexpr coreFloat fSpinFrom = (0.5f + 0.4f * I_TO_F(MENU_SUMMARY_ENTRIES));
@@ -188,40 +182,30 @@ void cSummaryMenu::Move()
             // 
             m_fIntroTimer.Update(1.0f);
 
-
-            
-
-            // 
-            m_BonusValue.SetAlpha  (m_BonusValue.GetAlpha() * CLAMP(4.0f - m_fIntroTimer, 0.0f, 1.0f));
-            m_BonusValue.SetEnabled((m_fIntroTimer >= 2.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-
-            // 
-            m_BonusValue.SetText(PRINT("%07.0f", I_TO_F(m_iFinalScore) * CLAMP(m_fIntroTimer - 2.0f, 0.0f, 1.0f)));
-
-
             if(m_iState == SUMMARY_INTRO)
             {
-                g_pPostProcessing->SetValue(CLAMP(2.0f - m_fIntroTimer, 0.0f, 1.0f));
+                // 
+                g_pPostProcessing->SetValueAll(CLAMP(4.0f - m_fIntroTimer, 0.0f, 1.0f));
 
-                if(m_fIntroTimer >= 4.0f)
+                if(m_fIntroTimer >= 5.0f)
                 {
                     // 
                     m_iStatus = 1;
 
+                    // 
                     m_iState = SUMMARY_OUTRO;
 
-                    
-                g_pPostProcessing->SetSaturation(1.0f);
-                g_pPostProcessing->SetValue     (1.0f);
-
-
+                    // 
                     g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
 
-                    // prevent flickering  
+                    // 
+                    g_pPostProcessing->SetSaturationAll(1.0f);
+                    g_pPostProcessing->SetValueAll     (1.0f);
+
+                    // prevent flickering (# render function)
                     g_pGlow->Clear();
                 }
             }
-
         }
         break;
 
@@ -234,7 +218,7 @@ void cSummaryMenu::Move()
 
 // ****************************************************************
 // 
-void cSummaryMenu::ShowRecap()
+void cSummaryMenu::ShowNormal()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
@@ -287,7 +271,7 @@ void cSummaryMenu::ShowRecap()
     }
 
     // 
-    this->ChangeSurface(SURFACE_SUMMARY_RECAP, 0.0f);
+    this->ChangeSurface(SURFACE_SUMMARY_NORMAL, 0.0f);
 }
 
 
@@ -302,12 +286,6 @@ void cSummaryMenu::ShowBegin()
     m_fIntroTimer = 0.0f;
     m_fOutroTimer = 0.0f;
     m_iState      = SUMMARY_INTRO;
-
-    // 
-    g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        m_iFinalScore += pPlayer->GetScoreTable()->GetScoreMission(g_pGame->GetCurMissionIndex());
-    });
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.0f);

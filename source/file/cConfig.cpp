@@ -221,7 +221,7 @@ void UpdateInput()
             oMap.vMove = Core::Input->GetJoystickRelativeL(iJoystickID);
 
             // restrict movement input to the 8 base directions
-            if(!oMap.vMove.IsNull()) oMap.vMove = AlongStar(oMap.vMove);
+            if(!oMap.vMove.IsNull()) oMap.vMove = AlongStarNormal(oMap.vMove);
 
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
@@ -236,7 +236,7 @@ void UpdateInput()
         {
             // 
             const coreVector2& vGame  = g_pPostProcessing->GetDirection();
-            const coreVector2  vHud   = coreVector2(0.0f,1.0f).InvertedX(); 
+            const coreVector2  vHud   = coreVector2(0.0f,1.0f).InvertedX();   // TODO 
             const coreVector2  vFinal = MapToAxis(vGame, vHud);
             ASSERT(vFinal.IsNormalized())
 
@@ -287,6 +287,7 @@ void UpdateInput()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
        Core::Input->GetKeyboardButton(CORE_INPUT_KEY(BACKSPACE),   CORE_INPUT_PRESS) ||
        Core::Input->GetMouseButton   (CORE_INPUT_RIGHT,            CORE_INPUT_PRESS)) g_MenuInput.bCancel     = true;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS)) g_MenuInput.bPause      = true;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
+       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PAUSE),       CORE_INPUT_PRESS)) g_MenuInput.bPause      = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS)) g_MenuInput.bScreenshot = true;
 }

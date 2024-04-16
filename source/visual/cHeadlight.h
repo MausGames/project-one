@@ -11,9 +11,10 @@
 #define _P1_GUARD_HEADLIGHT_H_
 
 // TODO: make darkness configurable
-// TODO: reduce black (0,0,0) area in light textures
-// TODO: up and down flickering
+// TODO: reduce black/transparent (0,0,0) color-areas in light-textures
+// TODO: slow up and down glowing
 // TODO: old flickering effect and sound
+// TODO: activation-animation (e.g. for player or boss spot-lights)
 
 
 // ****************************************************************

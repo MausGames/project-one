@@ -216,8 +216,14 @@ void cVausBoss::__MoveOwn()
         {
             PHASE_CHANGE_INC
 
-            m_aCompanion[0].Resurrect(coreVector2(-1.8f * FOREGROUND_AREA.x, 0.0f), coreVector2( 1.0f,0.0f));
-            m_aCompanion[1].Resurrect(coreVector2( 1.8f * FOREGROUND_AREA.x, 0.0f), coreVector2(-1.0f,0.0f));
+            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCompanion); ++i)
+            {
+                const coreFloat fSide = i ? 1.0f : -1.0f;
+
+                m_aCompanion[i].Resurrect();
+                m_aCompanion[i].SetPosition (coreVector3( fSide * 1.8f * FOREGROUND_AREA.x, 0.0f, 0.0f));
+                m_aCompanion[i].SetDirection(coreVector3(-fSide,                            0.0f, 0.0f));
+            }
 
             pMission->EnablePaddle(1u, &m_aCompanion[0]);
             pMission->EnablePaddle(2u, &m_aCompanion[1]);
@@ -345,6 +351,7 @@ static coreVector2 vTestOldPos = coreVector2(0.0f,0.0f);
 // 
 void cVausBoss::__UpdateBreakout()
 {
+#if 0
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
     coreObject3D*   pBall    = pMission->GetBall(0u);
     cEnemySquad*    pSquad   = pMission->GetEnemySquad(0u);
@@ -763,6 +770,7 @@ void cVausBoss::__UpdateBreakout()
 
 
     vTestOldPos = pBall->GetPosition().xy();
+#endif
 }
 
 

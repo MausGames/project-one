@@ -23,7 +23,6 @@ STATIC_MEMORY(cPostProcessing, g_pPostProcessing)
 STATIC_MEMORY(cForeground,     g_pForeground)
 STATIC_MEMORY(cEnvironment,    g_pEnvironment)
 STATIC_MEMORY(cMenu,           g_pMenu)
-STATIC_MEMORY(cTheater,        g_pTheater)
 STATIC_MEMORY(cGame,           g_pGame)
 
 static coreUint64 m_iOldPerfTime = 0u;   // last measured high-precision time value
@@ -68,7 +67,6 @@ void CoreApp::Init()
     STATIC_NEW(g_pForeground)
     STATIC_NEW(g_pEnvironment)
     STATIC_NEW(g_pMenu)
-    STATIC_NEW(g_pTheater)
 }
 
 
@@ -80,7 +78,6 @@ void CoreApp::Exit()
     STATIC_DELETE(g_pGame)
 
     // delete and exit main components
-    STATIC_DELETE(g_pTheater)
     STATIC_DELETE(g_pMenu)
     STATIC_DELETE(g_pEnvironment)
     STATIC_DELETE(g_pForeground)
@@ -128,16 +125,21 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Environment");
         Core::Debug->MeasureStart("Foreground");
         {
-            if(STATIC_ISVALID(g_pGame) || g_pTheater->IsActive() || g_pWindscreen->IsActive())
+            if(STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive() || g_pWindscreen->IsActive())
             {
                 // create foreground frame buffer
                 g_pForeground->Start();
                 {
-                    // render the theater
-                    g_pTheater->Render();
-
-                    // render the game
-                    if(STATIC_ISVALID(g_pGame)) g_pGame->Render();
+                    if(STATIC_ISVALID(g_pGame))
+                    {
+                        // render the game
+                        g_pGame->Render();
+                    }
+                    else
+                    {
+                        // render special-effects
+                        g_pSpecialEffects->Render();
+                    }
 
                     // 
                     g_pWindscreen->Render();
@@ -152,15 +154,16 @@ void CoreApp::Render()
         }
         Core::Debug->MeasureEnd("Foreground");
     }
-    Core::Debug->MeasureStart("Post Processing");
+
+    glDisable(GL_DEPTH_TEST);
     {
-        // apply post-processing
-        g_pPostProcessing->Apply();
-    }
-    Core::Debug->MeasureEnd("Post Processing");
-    Core::Debug->MeasureStart("Interface");
-    {
-        glDisable(GL_DEPTH_TEST);
+        Core::Debug->MeasureStart("Post Processing");
+        {
+            // render post-processing
+            g_pPostProcessing->Render();
+        }
+        Core::Debug->MeasureEnd("Post Processing");
+        Core::Debug->MeasureStart("Interface");
         {
             // render the overlay separately
             if(STATIC_ISVALID(g_pGame)) g_pGame->RenderOverlay();
@@ -168,9 +171,9 @@ void CoreApp::Render()
             // render the menu
             g_pMenu->Render();
         }
-        glEnable(GL_DEPTH_TEST);
+        Core::Debug->MeasureEnd("Interface");
     }
-    Core::Debug->MeasureEnd("Interface");
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -199,9 +202,6 @@ void CoreApp::Move()
             // move the environment
             g_pEnvironment->Move();
 
-            // move the theater
-            //g_pTheater->Move();
-
             // move the game
             if(STATIC_ISVALID(g_pGame)) g_pGame->Move();
 
@@ -210,6 +210,9 @@ void CoreApp::Move()
 
             // move special-effects
             g_pSpecialEffects->Move();
+
+            // move post-processing
+            g_pPostProcessing->Move();
         }
 
         // update the music-player
@@ -328,7 +331,7 @@ static void DebugGame()
             const coreUint8 iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
             const coreBool  bCoop       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD);
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, iDifficulty, bCoop, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetSideOpacity(1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, iDifficulty, bCoop, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -494,5 +497,10 @@ static void DebugGame()
     if(STATIC_ISVALID(g_pGame))
     {
         Core::Debug->InspectValue("Bullets", coreUint32(g_pGame->GetBulletManagerPlayer()->GetNumBullets() + g_pGame->GetBulletManagerEnemy()->GetNumBullets()));
+        Core::Debug->InspectValue("Enemies", coreUint32(Core::Manager::Object->GetObjectList(TYPE_ENEMY).size()));
     }
+
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_PRESS)) g_pSpecialEffects->CreateBlastSphere  (coreVector3(0.0f,0.0f,0.0f),                              SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_ENERGY_BLUE, 0.75f));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(U), CORE_INPUT_PRESS)) g_pSpecialEffects->CreateBlastQuad    (coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_ENERGY_BLUE, 0.75f));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(I), CORE_INPUT_PRESS)) g_pSpecialEffects->CreateBlastTriangle(coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_ENERGY_BLUE, 0.75f));
 }

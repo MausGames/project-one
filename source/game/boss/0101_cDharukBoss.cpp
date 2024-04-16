@@ -437,7 +437,7 @@ void cDharukBoss::__MoveOwn()
                 const coreVector2 vBossPos = m_aiCounter[CURRENT_ITERATION] ? this->GetPosition().xy() : this->GetPosition().xy().InvertedY();
                 const coreVector2 vDiff    = vBossPos - pBoomerang->GetPosition().xy();
 
-                if(coreMath::IsNear(vDiff, coreVector2(0.0f,0.0f), coreVector2(1.0f, CORE_MATH_PRECISION)))
+                if(coreMath::IsNear(vDiff.x, 0.0f, 1.0f) && coreMath::IsNear(vDiff.y, 0.0f, CORE_MATH_PRECISION))
                     this->__DisableBoomerang(i, true);
             }
 

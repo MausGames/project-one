@@ -851,14 +851,9 @@ void cConfigMenu::__UpdateInterface()
 
     // 
     g_pPostProcessing->UpdateLayout();
-    g_pPostProcessing->Move();
 
-    if(STATIC_ISVALID(g_pGame))
-    {
-        // 
-        g_pGame->GetInterface()->UpdateLayout();
-        g_pGame->GetInterface()->Move();
-    }
+    // 
+    if(STATIC_ISVALID(g_pGame)) g_pGame->GetInterface()->UpdateLayout();
 }
 
 

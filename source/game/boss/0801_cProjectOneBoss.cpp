@@ -104,7 +104,7 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.5f)
         {
-            PHASE_CHANGE_TO(10u)
+            PHASE_CHANGE_TO(20u)
         });
     }
 
@@ -159,6 +159,64 @@ void cProjectOneBoss::__MoveOwn()
             if(PHASE_FINISHED)
                 PHASE_CHANGE_TO(10u)
         });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 20u)
+    {
+        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+        {
+            PHASE_CONTROL_TICKER(0u, 0u, 10.0f, LERP_LINEAR)
+            {
+                const coreVector2 vPos = this->GetPosition().xy();
+                //const coreVector2 vDir = this->AimAtPlayer().Normalized();
+
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(Core::Rand->Float(-90.0f, 90.0f) + 180.0f));
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>    (5, 1.0f + 0.2f * 3.0f, this, vPos, vDir)->ChangeSize(1.2f);
+
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>   (5, 1.0f + 0.2f * 0.0f, this, vPos, vDir)->ChangeSize(1.2f);
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>    (5, 1.0f + 0.2f * 1.0f, this, vPos, vDir)->ChangeSize(1.3f);
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.0f + 0.2f * 2.0f, this, vPos, vDir)->ChangeSize(1.1f);
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>    (5, 1.0f + 0.2f * 3.0f, this, vPos, vDir)->ChangeSize(1.2f);
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>     (5, 1.0f + 0.2f * 4.0f, this, vPos, vDir)->ChangeSize(1.5f);
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 1.0f + 0.2f * 5.0f, this, vPos, vDir)->ChangeSize(1.2f);
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>    (5, 1.0f + 0.2f * 6.0f, this, vPos, vDir)->ChangeSize(1.2f);
+
+                /*
+                 const coreUintW   iInc = MIN(iTick / 2u, 36u);
+
+                for(coreUintW i = 36u - iInc, ie = 36u + iInc; i < ie; ++i)
+                {
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 5.0f + 60.0f));
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>   (5, 1.0f + 0.2f * 0.0f, this, vPos, vDir)->ChangeSize(1.2f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>    (5, 1.0f + 0.2f * 1.0f, this, vPos, vDir)->ChangeSize(1.3f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.0f + 0.2f * 2.0f, this, vPos, vDir)->ChangeSize(1.1f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>    (5, 1.0f + 0.2f * 3.0f, this, vPos, vDir)->ChangeSize(1.2f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>     (5, 1.0f + 0.2f * 4.0f, this, vPos, vDir)->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 1.0f + 0.2f * 5.0f, this, vPos, vDir)->ChangeSize(1.2f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>    (5, 1.0f + 0.2f * 6.0f, this, vPos, vDir)->ChangeSize(1.2f);
+                }
+                */
+            });
+
+            const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
+
+            g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([&](cFlipBullet* OUTPUT pBullet)
+            {
+                //vPlayerPos
+
+            });
+
+            g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                if(pPlayer->IsFeeling()) pPlayer->Kill(false);
+            });
+
+            this->SetPosition(coreVector3(vPlayerPos.x, 0.8f * FOREGROUND_AREA.y, 0.0f));
+        }
     }
 
     // startest mit rotation nach links, l‰dt strahl auf, schieﬂt strahl, sinusbewegung nach rechts bis ende

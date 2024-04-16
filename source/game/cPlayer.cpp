@@ -12,20 +12,18 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_apWeapon   {}
-, m_pInput     (&g_TotalInput)
-, m_avArea     {-FOREGROUND_AREA, FOREGROUND_AREA}
-, m_vForce     (coreVector2(0.0f,0.0f))
-, m_fFeelTime  (PLAYER_NO_FEEL)
-, m_fRollTime  (0.0f)
-, m_iFeelType  (0u)
-, m_iRollDir   (PLAYER_NO_ROLL)
-
-, m_fInterrupt (0.0f)
-, m_fLightningTime (0.0f)
-, m_bLightningSide (false)
-
-, m_fAnimation (0.0f)
+: m_apWeapon        {}
+, m_pInput          (&g_TotalInput)
+, m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA))
+, m_vForce          (coreVector2(0.0f,0.0f))
+, m_fRollTime       (0.0f)
+, m_fFeelTime       (PLAYER_NO_FEEL)
+, m_iRollDir        (PLAYER_NO_ROLL)
+, m_iFeelType       (0u)
+, m_fInterrupt      (0.0f)
+, m_fLightningTime  (0.0f)
+, m_fLightningAngle (0.0f)
+, m_fAnimation      (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -90,15 +88,6 @@ cPlayer::cPlayer()noexcept
     m_Exhaust.SetColor4    (coreVector4(COLOR_FIRE_BLUE, 0.7f));
     m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
     m_Exhaust.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
-
-
-    pTest = new coreObject3D();
-    pTest->DefineModel  ("object_sphere.md3");
-    pTest->DefineTexture(0u, "effect_energy.png");
-    pTest->DefineProgram("effect_energy_flat_spheric_program");
-    pTest->SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
-    pTest->SetTexSize   (coreVector2(5.0f,5.0f));
-    //pTest->SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -112,9 +101,6 @@ cPlayer::~cPlayer()
     // delete weapon objects
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         SAFE_DELETE(m_apWeapon[i])
-
-
-    SAFE_DELETE(pTest)
 }
 
 
@@ -215,9 +201,6 @@ void cPlayer::Render()
         {
             g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);
             m_Wind.Render();
-        //glDepthFunc(GL_ALWAYS);
-        //pTest->Render();
-        //glDepthFunc(GL_LEQUAL);
         }
 
         if(g_bDebugOutput)
@@ -242,27 +225,6 @@ void cPlayer::Move()
 
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
-
-        m_fInterrupt.UpdateMax(-1.0f, 0.0f);
-
-        if(m_fInterrupt)
-        {
-            m_fLightningTime.Update(10.0f);
-            if(m_fLightningTime >= 1.0f)
-            {
-                m_fLightningTime -= 1.0f;
-
-                // 
-                m_bLightningSide = !m_bLightningSide;
-                coreVector2 vDir = coreVector2::Rand();
-                            vDir = coreVector2(m_bLightningSide ? ABS(vDir.x) : -ABS(vDir.x), vDir.y);
-
-                // 
-                g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL + 1.0f, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
-            }
-        }
-
-
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
             coreVector2 vNewDir = this->GetDirection().xy();
@@ -274,7 +236,7 @@ void cPlayer::Move()
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
-            this->SetDirection(coreVector3(AlongCross(vNewDir), 0.0f));
+            this->SetDirection(coreVector3(AlongCrossNormal(vNewDir), 0.0f));
         }
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
@@ -312,15 +274,15 @@ void cPlayer::Move()
             // apply external forces
             if(!m_vForce.IsNull())
             {
-                vNewPos  += m_vForce * Core::System->GetTime();
-                m_vForce *= FrictionFactor(3.0f);
+                vNewPos  += AlongStar(m_vForce) * Core::System->GetTime();
+                m_vForce *= FrictionFactor(8.0f);
             }
 
             // restrict movement to the foreground area
-                 if(vNewPos.x < m_avArea[0].x) {vNewPos.x = m_avArea[0].x; m_vForce.x =  ABS(m_vForce.x);}
-            else if(vNewPos.x > m_avArea[1].x) {vNewPos.x = m_avArea[1].x; m_vForce.x = -ABS(m_vForce.x);}
-                 if(vNewPos.y < m_avArea[0].y) {vNewPos.y = m_avArea[0].y; m_vForce.y =  ABS(m_vForce.y);}
-            else if(vNewPos.y > m_avArea[1].y) {vNewPos.y = m_avArea[1].y; m_vForce.y = -ABS(m_vForce.y);}
+                 if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
+            else if(vNewPos.x > m_vArea.z) {vNewPos.x = m_vArea.z; m_vForce.x = -ABS(m_vForce.x);}
+                 if(vNewPos.y < m_vArea.y) {vNewPos.y = m_vArea.y; m_vForce.y =  ABS(m_vForce.y);}
+            else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
             const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
@@ -375,14 +337,6 @@ void cPlayer::Move()
             m_Wind.Move();
         }
 
-
-        pTest->SetAlpha(m_fRollTime);
-        pTest->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 3.0f * (1.0f - m_fRollTime));
-
-        pTest->SetPosition (this->GetPosition());
-        pTest->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
-        pTest->Move();
-
         if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
@@ -401,6 +355,25 @@ void cPlayer::Move()
             m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.1f));
             m_Bubble.Move();
         }
+
+        // 
+        m_fInterrupt.UpdateMax(-1.0f, 0.0f);
+        if(m_fInterrupt)
+        {
+            // 
+            m_fLightningTime.Update(10.0f);
+            if(m_fLightningTime >= 1.0f)
+            {
+                m_fLightningTime -= 1.0f;
+
+                // 
+                m_fLightningAngle = FMOD(m_fLightningAngle + DEG_TO_RAD(145.0f), DEG_TO_RAD(360.0f));
+                const coreVector2 vDir = coreVector2::Direction(m_fLightningAngle);
+
+                // 
+                g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
+            }
+        }
     }
 
     // 
@@ -416,7 +389,7 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
+coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
     // 
     if(iDamage > 0)
@@ -426,32 +399,32 @@ coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         m_ScoreTable.ReduceCombo();
 
         // 
-        if(STATIC_ISVALID(g_pGame)) g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            if(pPlayer != this) pPlayer->StartFeeling(PLAYER_FEEL_TIME, 1u);
-        });
+        const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);
 
-        // 
-        if(this->_TakeDamage(1, iElement, vImpact))
+        if(m_iCurHealth)
         {
+            // 
+            if(!this->IsDarkShading()) this->RefreshColor();
+
+            // 
+            this->StartFeeling(PLAYER_FEEL_TIME, 0u);
+        }
+        else
+        {
+            // 
             this->Kill(true);
-            return true;
         }
 
-        // 
-        if(!this->IsDarkShading()) this->RefreshColor();
-
-        // 
-        this->StartFeeling(PLAYER_FEEL_TIME, 0u);
+        return iTaken;
     }
 
-    return false;
+    return 0;
 }
 
 
 // ****************************************************************
 // add player to the game
-void cPlayer::Resurrect(const coreVector2& vPosition)
+void cPlayer::Resurrect()
 {
     // resurrect player
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
@@ -461,8 +434,11 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     cShadow::GetGlobalContainer()->BindObject(this);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
 
+    // enable collision
+    this->ChangeType(TYPE_PLAYER);
+
     // add ship to the game
-    this->_Resurrect(vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
+    this->_Resurrect();
 }
 
 
@@ -487,11 +463,10 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->DisableBubble();
     this->UpdateExhaust(0.0f);
 
-
-    m_fInterrupt = 0.0f;
-    m_fLightningTime = 0.0f;
-    m_bLightningSide = false;
-
+    // 
+    m_fInterrupt      = 0.0f;
+    m_fLightningTime  = 0.0f;
+    m_fLightningAngle = 0.0f;
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -500,6 +475,9 @@ void cPlayer::Kill(const coreBool bAnimated)
     // remove ship from global shadow and outline
     cShadow::GetGlobalContainer()->UnbindObject(this);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+
+    // disable collision
+    this->ChangeType(0);
 
     // remove ship from the game
     this->_Kill(bAnimated);

@@ -28,11 +28,13 @@
 
 // ****************************************************************
 // mission specific definitions
-#define VIRIDO_BALLS      (2u)                                    // 
-#define VIRIDO_TRAILS     (4u)                                    // 
-#define VIRIDO_BALLS_RAWS (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
-#define VIRIDO_PADDLES    (3u)                                    // 
-#define VIRIDO_BALL_SPEED (1.5f)                                  // 
+#define VIRIDO_TRAILS        (4u)                                    // 
+#define VIRIDO_BALLS         (2u)                                    // 
+#define VIRIDO_BALLS_RAWS    (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
+#define VIRIDO_PADDLES       (3u)                                    // 
+#define VIRIDO_BARRIERS      (8u)                                    // 
+#define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
+#define VIRIDO_BALL_SPEED    (1.5f)                                  // 
 
 
 // ****************************************************************
@@ -42,7 +44,7 @@
 
 #define STAGE_FINISH_NOW                {this->SkipStage();}
 #define STAGE_FINISH_AFTER(t)           {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
-#define STAGE_BOSS(e,p,d)               {if(STAGE_BEGINNING) (e).Resurrect((p) * FOREGROUND_AREA, (d)); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
+#define STAGE_BOSS(e)                   {if(STAGE_BEGINNING) (e).Resurrect(); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE                      {if(STAGE_BEGINNING) this->ActivateWave(); if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
 
 #define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
@@ -68,26 +70,24 @@
 
 #define STAGE_GET_START(c)              {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} UNUSED coreUintW iDataIndex = 0u; UNUSED constexpr coreUintW iCurDataSize = (c);
 #define STAGE_GET_END                   {ASSERT(iDataIndex == iCurDataSize)}
-#define STAGE_GET_INT(n,...)            coreInt32&   n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT(n,...)           coreUint32&  n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT(n,...)          coreFloat&   n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2(n,...)           coreVector2& n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3(n,...)           coreVector3& n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4(n,...)           coreVector4& n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_INT_ARRAY(n,c,...)    coreInt32*   n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT_ARRAY(n,c,...)   coreUint32*  n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT_ARRAY(n,c,...)  coreFloat*   n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2_ARRAY(n,c,...)   coreVector2* n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3_ARRAY(n,c,...)   coreVector3* n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4_ARRAY(n,c,...)   coreVector4* n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_INT(n,...)            coreInt32&   OUTPUT n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT(n,...)           coreUint32&  OUTPUT n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT(n,...)          coreFloat&   OUTPUT n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2(n,...)           coreVector2& OUTPUT n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3(n,...)           coreVector3& OUTPUT n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4(n,...)           coreVector4& OUTPUT n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_INT_ARRAY(n,c,...)    coreInt32*   OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT_ARRAY(n,c,...)   coreUint32*  OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT_ARRAY(n,c,...)  coreFloat*   OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2_ARRAY(n,c,...)   coreVector2* OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3_ARRAY(n,c,...)   coreVector3* OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4_ARRAY(n,c,...)   coreVector4* OUTPUT n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 
 #define STAGE_LIFETIME(e,m,a)                                                                     \
     UNUSED const coreFloat fLifeSpeed      = (m);                                                 \
     UNUSED const coreFloat fLifeOffset     = (a);                                                 \
     UNUSED coreFloat       fLifeTime       = (e)->GetLifeTime()       * fLifeSpeed - fLifeOffset; \
-    UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset; \
-    if(!CONTAINS_FLAG(e->GetStatus(), ENEMY_STATUS_DEAD)) e->SetEnabled((fLifeTime >= 0.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE); \
-    if(e->GetPosition().xy() > coreVector2(1000.0f,1000.0f)) e->SetPosition(coreVector3(1000.0f,1000.0f,0.0f));
+    UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset;
 
 #define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                 {if(STAGE_BRANCH(x, x)) {}}
@@ -249,23 +249,28 @@ public:
 class cViridoMission final : public cMission
 {
 private:
-    cDharukBoss m_Dharuk;                           // 
-    cTorusBoss  m_Torus;                            // 
-    cVausBoss   m_Vaus;                             // 
+    cDharukBoss m_Dharuk;                                   // 
+    cTorusBoss  m_Torus;                                    // 
+    cVausBoss   m_Vaus;                                     // 
 
-    coreBatchList m_Ball;                           // 
-    coreBatchList m_BallTrail;                      // 
-    coreObject3D  m_aBallRaw[VIRIDO_BALLS_RAWS];    // 
+    coreBatchList m_Ball;                                   // 
+    coreBatchList m_BallTrail;                              // 
+    coreObject3D  m_aBallRaw[VIRIDO_BALLS_RAWS];            // 
 
-    coreObject3D m_aPaddle      [VIRIDO_PADDLES];   // 
-    coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
-    const cShip* m_apOwner      [VIRIDO_PADDLES];   // 
+    coreObject3D m_aPaddle      [VIRIDO_PADDLES];           // 
+    coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];           // 
+    const cShip* m_apPaddleOwner[VIRIDO_PADDLES];           // 
 
-    coreUint8 m_iRealState;                         // 
-    coreUint8 m_iStickyState;                       // (only between first ball and first paddle) 
-    coreUint8 m_iBounceState;                       // 
+    coreBatchList m_Barrier;                                // 
+    coreObject3D  m_aBarrierRaw   [VIRIDO_BARRIERS_RAWS];   // 
+    const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
+    coreUint8     m_aiBarrierDir  [VIRIDO_BARRIERS];        // 
 
-    coreFlow m_fAnimation;                          // animation value
+    coreUint8 m_iRealState;                                 // 
+    coreUint8 m_iStickyState;                               // (only between first ball and first paddle) 
+    coreUint8 m_iBounceState;                               // 
+
+    coreFlow m_fAnimation;                                  // animation value
 
 
 public:
@@ -282,6 +287,10 @@ public:
     // 
     void EnablePaddle (const coreUintW iIndex, const cShip* pOwner);
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
+    void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     inline void             MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}

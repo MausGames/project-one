@@ -43,7 +43,7 @@ void cBullet::Move()
     this->__MoveOwn();
 
     // deactivate bullet when leaving the defined area
-    if(!IN_FOREGROUND_AREA(this->GetPosition(), BULLET_AREA_FACTOR) && (m_fFlyTime >= 1.0f))
+    if((m_fFlyTime >= 0.5f) && !g_pForeground->IsVisibleObject(this))
         this->Deactivate(false);
 
     // move the 3d-object
@@ -109,16 +109,64 @@ void cBullet::Deactivate(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cBullet::Reflect(const coreObject3D* pObject)
+void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal)
 {
-    // 
-    this->Reflect((this->GetPosition().xy() - pObject->GetPosition().xy()).Normalized());
-}
+    ASSERT(pObject)
 
-void cBullet::Reflect(const coreVector2& vNormal)
-{
+    coreVector2 vHit = vIntersection;
+
     // 
+    const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * Core::System->GetTime());
+
+    // increase intersection precision
+    coreFloat fHitDistance = 0.0f;
+    coreUint8 iHitCount    = 1u;
+    if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
+    {
+        vHit = vRayPos + m_vFlyDir * fHitDistance;
+    }
+    else
+    {
+        const coreVector2 vBackupRayDir = (pObject->GetPosition().xy() - vHit).Normalized();
+
+        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vBackupRayDir, 0.0f), &fHitDistance, &iHitCount))
+        {
+            vHit = vHit + vBackupRayDir * fHitDistance;
+
+            const coreVector2 vRayPos2 = vRayPos + vBackupRayDir * fHitDistance;
+
+            iHitCount = 1u;
+            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos2, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
+            {
+                vHit = vRayPos2 + m_vFlyDir * fHitDistance;
+            }
+        }
+    }
+    ASSERT(pObject->GetModel()->GetNumClusters())
+
+
+
+    const coreVector2 vHitDiff = vHit - this->GetPosition().xy();
+    const coreFloat   fHitProj = coreVector2::Dot(vHitDiff, m_vFlyDir);
+    const coreVector2 vNewPos  = this->GetPosition().xy() + m_vFlyDir * fHitProj;   // TODO: name   
+
+    // 
+    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vNewPos - m_vFlyDir * (m_fSpeed * Core::System->GetTime())) - pObject->GetPosition().xy()).Normalized() : vForceNormal;
+    if(coreVector2::Dot(m_vFlyDir, vNormal) >= 0.0f) return;
+
+    // 
+    ASSERT(vNormal.IsNormalized())
     m_vFlyDir = coreVector2::Reflect(m_vFlyDir, vNormal);
+
+    // 
+    this->SetPosition(coreVector3(vNewPos - m_vFlyDir * fHitProj, 0.0f));
+
+    // 
+    this->__ReflectOwn();
+
+
+    // move the 3d-object
+    this->coreObject3D::Move();   // for direction (and other) changes
 }
 
 
@@ -270,6 +318,7 @@ void cBulletManager::ClearBullets(const coreBool bAnimated)
 // ****************************************************************
 // constructor
 cRayBullet::cRayBullet()noexcept
+: m_fFade (0.0f)
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
@@ -299,6 +348,21 @@ void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
 
 
 // ****************************************************************
+// 
+void cRayBullet::__ReflectOwn()
+{
+    // 
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, 0.0f));   // move to tip, to account for resetting the length
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // 
+    m_fFade = 0.0f;
+    this->SetSize (coreVector3(3.7f,0.0f,3.7f) * 0.5f);
+    this->SetAlpha(0.0f);
+}
+
+
+// ****************************************************************
 // move the ray bullet
 void cRayBullet::__MoveOwn()
 {
@@ -309,6 +373,11 @@ void cRayBullet::__MoveOwn()
     // update animation
     m_fAnimation.Update(0.4f);
     this->SetTexOffset(coreVector2(0.35f, m_fAnimation));
+
+    // 
+    m_fFade.UpdateMin(1.0f, 1.0f);
+    this->SetSize (coreVector3(3.7f, 3.7f * MIN(m_fFade * 12.0f, 1.0f), 3.7f) * 0.5f);
+    this->SetAlpha(MIN(m_fFade * 15.0f, 1.0f));
 }
 
 

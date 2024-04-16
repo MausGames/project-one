@@ -19,15 +19,15 @@
 // TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO: shift spear-bullet collision like ray-bullet
 // TODO: bullet -> to POD-type with single parent object
+// TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently
 
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT      (16u)     // initial size when creating a new bullet set
-#define BULLET_SET_COUNT     (16u)     // 
-#define BULLET_AREA_FACTOR   (1.2f)    // size factor for foreground area where the bullet remains active
-#define BULLET_SPEED_FACTOR  (30.0f)   // 
-#define BULLET_DEPTH_FACTOR  (0.8f)    // 
+#define BULLET_SET_INIT     (16u)     // initial size when creating a new bullet set
+#define BULLET_SET_COUNT    (16u)     // 
+#define BULLET_SPEED_FACTOR (30.0f)   // 
+#define BULLET_DEPTH_FACTOR (0.8f)    // 
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
@@ -75,22 +75,21 @@ public:
     void Deactivate(const coreBool bAnimated);
 
     // 
-    void Reflect(const coreObject3D* pObject);
-    void Reflect(const coreVector2&  vNormal);
+    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
     inline cBullet* ChangeSize (const coreFloat fFactor) {this->SetSize (this->GetSize () * fFactor); return this;}
     inline cBullet* ChangeAlpha(const coreFloat fFactor) {this->SetAlpha(this->GetAlpha() * fFactor); return this;}
 
-
+     
     inline void SetDamage(const coreInt32    iDamage) {m_iDamage = iDamage;}
-    inline void SetSpeed (const coreFloat    fSpeed)  {m_fSpeed  = fSpeed;}
+    inline void SetSpeed (const coreFloat    fSpeed)  {m_fSpeed  = fSpeed;} //  * BULLET_SPEED_FACTOR  
     inline void SetFlyDir(const coreVector2& vFlyDir) {m_vFlyDir = vFlyDir;}
-
+     
 
     // get object properties
     inline const coreInt32&   GetDamage ()const {return m_iDamage;}
-    inline const coreFloat&   GetSpeed  ()const {return m_fSpeed;}
+    inline const coreFloat&   GetSpeed  ()const {return m_fSpeed;} //  * BULLET_SPEED_FACTOR  
     inline       cShip*       GetOwner  ()const {return m_pOwner;}
     inline const coreUint8&   GetElement()const {return m_iElement;}
     inline const coreFloat&   GetFlyTime()const {return m_fFlyTime;}
@@ -125,6 +124,7 @@ protected:
 private:
     // own routines for derived classes (render functions executed by manager)
     virtual void __ImpactOwn      (const coreVector2& vImpact) {}
+    virtual void __ReflectOwn     ()                           {}
     virtual void __RenderOwnBefore()                           {}
     virtual void __RenderOwnAfter ()                           {}
     virtual void __MoveOwn        ()                           {}
@@ -197,6 +197,10 @@ public:
 // ray bullet class
 class cRayBullet final : public cBullet
 {
+private:
+    coreFlow m_fFade;   // 
+
+
 public:
     cRayBullet()noexcept;
 
@@ -204,7 +208,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(3.7f,3.7f,3.7f) * 0.5f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(3.7f,0.0f,3.7f) * 0.5f); m_fAnimation = 0.09f; m_fFade = 0.0f;}
 
     // change default color
     inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -224,8 +228,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 

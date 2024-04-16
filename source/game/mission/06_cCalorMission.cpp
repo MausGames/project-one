@@ -44,21 +44,21 @@ void cCalorMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Fenrir, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_Fenrir)
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Shelob, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_Shelob)
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Zeroth, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_Zeroth)
     });
 
     // ################################################################

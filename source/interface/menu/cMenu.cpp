@@ -90,7 +90,7 @@ void cMenu::Move()
 
                     // 
                     if(g_pGame->GetOutroType()) m_SummaryMenu.ShowBegin();
-                                           else m_SummaryMenu.ShowRecap();
+                                           else m_SummaryMenu.ShowNormal();
                 }
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
@@ -484,7 +484,7 @@ void cMenu::__StartGame()
 {
     // 
     ASSERT(!STATIC_ISVALID(g_pGame))
-    STATIC_NEW(g_pGame, m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_DEFAULT)
+    STATIC_NEW(g_pGame, m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_MAIN)
     g_pGame->LoadNextMission();
 
     // 

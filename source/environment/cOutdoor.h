@@ -130,6 +130,7 @@ public:
 
     // set object properties
     void SetFlyOffset(const coreFloat fFlyOffset);
+    void SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOffset, const coreVector2& vDirection);
 
     // get object properties
     inline const coreUint32& GetVertexOffset()const {return m_iVertexOffset;}

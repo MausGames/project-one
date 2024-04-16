@@ -297,7 +297,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * 2.0f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
                 pEnemy->Configure(120, COLOR_SHIP_RED, true);
             });
         });
@@ -419,8 +419,8 @@ void cIntroMission::__SetupOwn()
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.3f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(0.9f,-1.2f), coreVector2(0.5f,-1.0f).Normalized(), 1.5f);
+            pPath1->AddNode(coreVector2(0.3f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.9f,-1.3f), coreVector2(0.5f,-1.0f).Normalized(), 1.5f);
             pPath1->Refine();
         });
 
@@ -429,6 +429,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->Configure(1000, COLOR_SHIP_RED, true);
+
                 pEnemy->Resurrect();
             });
         });
@@ -445,7 +446,7 @@ void cIntroMission::__SetupOwn()
             if(STAGE_LIFETIME_AFTER(pPath1->GetTotalDistance())) pEnemy->Kill(false);
         });
 
-        STAGE_BOSS(m_ProjectOne, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_ProjectOne)
     });
 
     // ################################################################
