@@ -1778,8 +1778,8 @@ void cCalorMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
-            pPlayer->SetArea      (vArea);
-            pPlayer->UpdateExhaust(fExaust);
+            pPlayer->SetArea  (vArea);
+            pPlayer->SetThrust(fExaust);
 
             if(fExaust > 0.05f)
             {
@@ -1964,9 +1964,9 @@ void cCalorMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
-            pPlayer->SetArea      (PLAYER_AREA_DEFAULT);
-            pPlayer->UpdateExhaust(0.0f);
-            pPlayer->RemoveStatus (PLAYER_STATUS_NO_INPUT_TURN);
+            pPlayer->SetArea     (PLAYER_AREA_DEFAULT);
+            pPlayer->SetThrust   (0.0f);
+            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
         });
 
         STAGE_FINISH_NOW

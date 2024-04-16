@@ -95,6 +95,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: hard mode: reflektierte geschosse verursachen schaden
     // TODO 1: ray-ray kollision für bullets verwenden
     // TODO 1: drum shield needs blink!
+    // TODO 1: ich konnte durch schräge schilde von unten durchschießen, und durch die großen rotierenden schilden (wenn ich direkt am schild hänge)
     // TODO 1: MAIN: task-check, regular score, badges, sound
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -322,7 +323,7 @@ void cViridoMission::__SetupOwn()
                 if(!oBarrier.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
                 coreVector3 vIntersection;
-                if(Core::Manager::Object->TestCollision(pHelper, &oBarrier, &vIntersection))
+                if(Core::Manager::Object->TestCollision(pHelper, &oBarrier, &vIntersection))   // TODO 1: barrier können infinity-position haben hier (floating-point exception)
                 {
                     if(coreVector2::Dot(vHelperMove, oBarrier.GetDirection().xy()) < 0.0f)
                     {
@@ -1489,7 +1490,7 @@ void cViridoMission::__SetupOwn()
 
                     if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
                     {
-                        pHelper->SetPosition(coreVector3(LERP(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-0.8f), SIN(fWait * PI)) * FOREGROUND_AREA, 0.0f));
+                        pHelper->SetPosition(coreVector3(LERP(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-0.8f), SIN(MIN1(fWait / fEasySpeed) * PI)) * FOREGROUND_AREA, 0.0f));
                     }
                 }
                 else
@@ -1894,6 +1895,8 @@ void cViridoMission::__SetupOwn()
                 {
                     if(++iStuckNum >= ARRAY_SIZE(aiStuck)) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
                     else g_pGame->GetCombatText()->DrawProgress(iStuckNum, ARRAY_SIZE(aiStuck), pEnemy->GetPosition());
+
+                    g_pSpecialEffects->MacroEruptionColorBig(pEnemy->GetPosition(), -pEnemy->GetDirection().xy(), COLOR_ENERGY_RED);
                 }
 
                 coreFloat& fTime = STAGE_SINK_FLOAT(afSpeed[i % iNumData]);
@@ -2215,7 +2218,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_PLAYER(pPlayer, j)
             {
                 const coreVector2 vDiff = pBean->GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(vDiff.LengthSq() < POW2(7.0f))
+                if(vDiff.LengthSq() < POW2(8.0f))
                 {
                     this->DisableBean(i, true);
 

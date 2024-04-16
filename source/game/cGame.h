@@ -128,21 +128,22 @@ struct sMissionData final
     const coreChar* pcName;   // 
     coreVector3     vColor;   // 
     coreVector2     vIcon;    // 
+    const coreChar* pcBoss;   // 
 };
 
 static constexpr sMissionData g_aMissionData[] =
 {
-    {cIntroMission  ::ID, cIntroMission  ::Name, cCloudBackground  ::Color, cCloudBackground  ::Icon},
-    {cViridoMission ::ID, cViridoMission ::Name, cGrassBackground  ::Color, cGrassBackground  ::Icon},
-    {cNevoMission   ::ID, cNevoMission   ::Name, cSeaBackground    ::Color, cSeaBackground    ::Icon},
-    {cHarenaMission ::ID, cHarenaMission ::Name, cDesertBackground ::Color, cDesertBackground ::Icon},
-    {cRutilusMission::ID, cRutilusMission::Name, cSpaceBackground  ::Color, cSpaceBackground  ::Icon},
-    {cGeluMission   ::ID, cGeluMission   ::Name, cVolcanoBackground::Color, cVolcanoBackground::Icon},
-    {cCalorMission  ::ID, cCalorMission  ::Name, cSnowBackground   ::Color, cSnowBackground   ::Icon},
-    {cMuscusMission ::ID, cMuscusMission ::Name, cMossBackground   ::Color, cMossBackground   ::Icon},
-    {cAterMission   ::ID, cAterMission   ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon},
-    {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon},   // #
-    {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon}    // #
+    {cIntroMission  ::ID, cIntroMission  ::Name, cCloudBackground  ::Color, cCloudBackground  ::Icon, cIntroBoss     ::Name},
+    {cViridoMission ::ID, cViridoMission ::Name, cGrassBackground  ::Color, cGrassBackground  ::Icon, cTorusBoss     ::Name},
+    {cNevoMission   ::ID, cNevoMission   ::Name, cSeaBackground    ::Color, cSeaBackground    ::Icon, cLeviathanBoss ::Name},
+    {cHarenaMission ::ID, cHarenaMission ::Name, cDesertBackground ::Color, cDesertBackground ::Icon, cTigerBoss     ::Name},
+    {cRutilusMission::ID, cRutilusMission::Name, cSpaceBackground  ::Color, cSpaceBackground  ::Icon, cMessierBoss   ::Name},
+    {cGeluMission   ::ID, cGeluMission   ::Name, cVolcanoBackground::Color, cVolcanoBackground::Icon, cCholBoss      ::Name},
+    {cCalorMission  ::ID, cCalorMission  ::Name, cSnowBackground   ::Color, cSnowBackground   ::Icon, cZerothBoss    ::Name},
+    {cMuscusMission ::ID, cMuscusMission ::Name, cMossBackground   ::Color, cMossBackground   ::Icon, cGemingaBoss   ::Name},
+    {cAterMission   ::ID, cAterMission   ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon, cProjectOneBoss::Name},
+    {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon, cVausBoss      ::Name},   // #
+    {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon, cNautilusBoss  ::Name}    // #
 };
 
 

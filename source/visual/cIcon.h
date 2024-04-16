@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_ICON_H_
 #define _P1_GUARD_ICON_H_
 
-// NOTE: no instancing, because color is out-of-range
+// TODO 1: optimize this, it uses quite a lot of CPU (OpenGL), even in release (e.g. separat list for outline and/or no batch for normal rendering) (eigener super-dicker outline shader)
 
 
 // ****************************************************************
@@ -33,6 +33,8 @@ private:
 
     coreBatchList m_Range;                        // 
     coreObject3D  m_aRangeRaw[ICON_VARIATIONS];   // 
+
+    coreModelPtr m_pDefaultModel;                 // 
 
     coreUintW m_iIndex;                           // 
     coreFlow  m_fAnimation;                       // 

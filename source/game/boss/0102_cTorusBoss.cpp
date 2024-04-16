@@ -24,6 +24,7 @@
 // TODO 1: hard mode: all object behaviors increase, gelber angriff is undurchdringbar (7 statt 3 geschosse)
 // TODO 1: purple helper shield wird unter laser gezeichnet
 // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
+// TODO 1: schilde reflektieren manchmal an falscher stelle, vielleicht old-pos issue, wenn sie zurück in die mitte teleportiert werden ? sollte überall gehandelt werden wo old-pos new-pos objekte berechnet werden
 
 
 // ****************************************************************
@@ -477,7 +478,7 @@ void cTorusBoss::__MoveOwn()
                 this->AddStatus(ENEMY_STATUS_GHOST);
                 this->ChangeToBottom();
 
-                m_pFireSound->PlayPosition(this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,100.0f,0.0f));
+                g_pSpecialEffects->ExternPlayPosition(m_pFireSound, this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,100.0f,0.0f));
             }
 
             if(PHASE_TIME_BEFORE(0.85f))
@@ -509,7 +510,7 @@ void cTorusBoss::__MoveOwn()
 
             if(m_pFireSound->EnableRef(this))
             {
-                m_pFireSound->SetSource(this->GetPosition());
+                g_pSpecialEffects->ExternSetSource(m_pFireSound, this->GetPosition());
                 m_pFireSound->SetVolume(MAX0(SIN(STEP(0.0f, 0.57f, fTime) * (1.0f*PI))));
             }
 
@@ -542,7 +543,7 @@ void cTorusBoss::__MoveOwn()
         {
             if(PHASE_BEGINNING)
             {
-                m_pWooshSound->PlayPosition(this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,0.0f,0.0f));
+                g_pSpecialEffects->ExternPlayPosition(m_pWooshSound, this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,0.0f,0.0f));
             }
 
             if(PHASE_TIME_POINT(0.5f))
@@ -651,6 +652,7 @@ void cTorusBoss::__MoveOwn()
 
                     m_aiCounter[CRASH_COUNT] += 1;
 
+                    g_pSpecialEffects->CreateSplashColor(this->GetPosition() + coreVector3(8.0f * AlongCrossNormal(this->GetPosition().xy()), 0.0f), 25.0f, 10u, COLOR_ENERGY_WHITE);
                     g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
                 }
             });
@@ -979,7 +981,7 @@ void cTorusBoss::__MoveOwn()
                 pMission->EnableShadow(0u, this, m_avVector[JUMP_TARGET].xy(), false);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
 
-                m_pWooshSound->PlayPosition(this, 0.0f, 1.5f, true, SOUND_EFFECT, this->GetPosition());
+                g_pSpecialEffects->ExternPlayPosition(m_pWooshSound, this, 0.0f, 1.5f, true, SOUND_EFFECT, this->GetPosition());
             }
 
             const coreFloat   fSin    = SIN(fTime * (1.0f*PI));
@@ -992,7 +994,7 @@ void cTorusBoss::__MoveOwn()
 
             if(m_pWooshSound->EnableRef(this))
             {
-                m_pWooshSound->SetSource(this->GetPosition());
+                g_pSpecialEffects->ExternSetSource(m_pWooshSound, this->GetPosition());
                 m_pWooshSound->SetVolume(MAX0(fSin) * 0.8f);
             }
 
@@ -1267,7 +1269,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 151u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.3f)
+        PHASE_CONTROL_PAUSE(0u, 0.35f)
         {
             PHASE_CHANGE_INC
         });
@@ -1818,7 +1820,7 @@ void cTorusBoss::__MoveOwn()
                 iCount += 1u;
         }
 
-        if(iCount < 2u) this->_KillHelper(ELEMENT_PURPLE, true);
+        if(iCount < 1u) this->_KillHelper(ELEMENT_PURPLE, true);
     }
 
     // 

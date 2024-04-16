@@ -40,13 +40,14 @@ cPauseMenu::cPauseMenu()noexcept
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
     // 
-    m_Navigator.BindObject(&m_ResumeButton,  &m_ExitButton,    NULL, &m_RestartButton, NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_RestartButton, &m_ResumeButton,  NULL, &m_ConfigButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ConfigButton,  &m_RestartButton, NULL, &m_ExitButton,    NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,    &m_ConfigButton,  NULL, &m_ResumeButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ResumeButton,  &m_ExitButton,    NULL, &m_RestartButton, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_RestartButton, &m_ResumeButton,  NULL, &m_ConfigButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ConfigButton,  &m_RestartButton, NULL, &m_ExitButton,    NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,    &m_ConfigButton,  NULL, &m_ResumeButton,  NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.AssignFirst(&m_ResumeButton);
-    m_Navigator.AssignMenu(this);
+    m_Navigator.AssignMenu (this);
+    m_Navigator.ShowIcon   (true);
 
     // bind menu objects
     this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ResumeButton);
@@ -77,9 +78,6 @@ void cPauseMenu::Move()
             {
                 // 
                 m_iStatus = 1;
-
-                // 
-                m_Navigator.ResetFirst();
             }
             else if(m_RestartButton.IsClicked())
             {
@@ -135,4 +133,19 @@ void cPauseMenu::DeactivateFirstPlay()
 {
     // 
     m_RestartButton.SetOverride(0);
+}
+
+
+// ****************************************************************
+// 
+void cPauseMenu::ResetNavigator()
+{
+    // 
+    m_Navigator.ResetFirst();
+
+    // 
+    cMenu::ClearButtonTime(&m_ResumeButton);
+    cMenu::ClearButtonTime(&m_RestartButton);
+    cMenu::ClearButtonTime(&m_ConfigButton);
+    cMenu::ClearButtonTime(&m_ExitButton);
 }

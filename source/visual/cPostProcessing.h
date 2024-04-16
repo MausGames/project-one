@@ -36,7 +36,7 @@
 #define POST_BORDERS            (3u)
 #define POST_CHROMA_FACTOR      (0.01f)
 #define POST_DEFAULT_BORDER_MIN (0.2f)
-#define POST_DEFAULT_BORDER_MAX (0.7f)
+#define POST_DEFAULT_BORDER_MAX (0.8f)
 
 
 // ****************************************************************

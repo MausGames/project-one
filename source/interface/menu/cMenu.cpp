@@ -10,10 +10,13 @@
 
 coreVector3 cMenu::m_vHighlightColor = COLOR_MENU_WHITE;
 coreVector3 cMenu::m_vButtonColor    = COLOR_MENU_WHITE;
-cGuiButton* cMenu::m_pCurButton      = NULL;
-cGuiButton* cMenu::m_pNewButton      = NULL;
+cGuiButton* cMenu::m_apCurButton[2]  = {};
+cGuiButton* cMenu::m_apNewButton[2]  = {};
 cGuiButton* cMenu::m_pCurTab         = NULL;
 cGuiButton* cMenu::m_pNewTab         = NULL;
+cGuiObject* cMenu::m_pCurLine        = NULL;
+cGuiObject* cMenu::m_pNewLine        = NULL;
+coreMap<const void*, cMenu::sButtonData> cMenu::s_aButtonData = {};
 
 
 // ****************************************************************
@@ -53,6 +56,7 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_DEFEAT,  &m_DefeatMenu);
     this->BindObject(SURFACE_FINISH,  &m_FinishMenu);
     this->BindObject(SURFACE_BRIDGE,  &m_BridgeMenu);
+    this->BindObject(SURFACE_CREDITS, &m_CreditRoll);
 
     // 
     m_aFrameBuffer[0].AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
@@ -95,7 +99,8 @@ cMenu::cMenu()noexcept
     m_TransitionTime.SetTimeID(0);
 
     // 
-    cFigure::GlobalInit();
+    cFigure       ::GlobalInit();
+    cMenuNavigator::GlobalInit();
 }
 
 
@@ -144,15 +149,26 @@ void cMenu::Render()
         
         if(((m_iTransitionState <= 1u) && !m_pTransitionMenu->GetTransition().GetStatus()) && iForceA != 0xFFu)
         {
+            g_MenuInput = {};
+            Core::Input->ClearMouseButton(CORE_INPUT_LEFT);
+            
             Timeless([&]()
             {
                 const coreUint8 iPrev = m_pTransitionMenu->GetCurSurface();
+                const coreBool  bMove = (m_pTransitionMenu != this)           &&
+                                        (m_pTransitionMenu != &m_IntroMenu)   &&
+                                        (m_pTransitionMenu != &m_SummaryMenu) &&
+                                        (m_pTransitionMenu != &m_DefeatMenu)  &&
+                                        (m_pTransitionMenu != &m_FinishMenu)  &&
+                                        (m_pTransitionMenu != &m_BridgeMenu);
 
                 m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);   // TODO 1: calls move for both old and new
-                //m_pTransitionMenu->coreMenu::Move();
+                if(bMove) m_pTransitionMenu->Move();
+
                 nRenderFunc(2u, m_pTransitionMenu);
-                
+
                 m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);   // TODO 1: calls move for both old and new
+                if(bMove) m_pTransitionMenu->Move();
             });
         }
         if(m_iTransitionState < 1u && iForceB != 0xFFu)
@@ -207,9 +223,9 @@ void cMenu::Move()
     if(!Core::Manager::Resource->IsLoading())   // TODO 1: hier wegen sync mit environment-change   
         m_TransitionTime.Update(1.0f);
 
-    // 
-    if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO) && !DEFINED(_CORE_DEBUG_))
-        Core::Input->ClearButtonAll();
+    //     damit nicht dinge angeklickt werden (sowohl maus als auch controller)(switch-boxen verändern) während sie noch nicht sichtbar sind
+    if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO))
+        Core::Input->ClearMouseButtonAll();
 
     // 
     m_MsgBox.Move();   // # clears input
@@ -277,12 +293,15 @@ void cMenu::Move()
                         m_BridgeMenu.ReturnMenu(SURFACE_GAME, false, false);
 
                         // 
-                        m_GameMenu.ChangeSurface((g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_STANDARD : SURFACE_GAME_TRAINING, 0.0f);
+                        m_GameMenu.ChangeSurface((g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_MISSION : SURFACE_GAME_SEGMENT, 0.0f);
                         m_GameMenu.LoadValues();
                     }
                 }
                 else if((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && g_MenuInput.bPause) || Core::System->GetWinFocusLost())
                 {
+                    // 
+                    m_PauseMenu.ResetNavigator();   // # first
+
                     // 
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
 
@@ -325,9 +344,8 @@ void cMenu::Move()
                 this->ShiftSurface(this, SURFACE_GAME, 3.0f, 1u, false, true);
 
                 // 
-                m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD), 0.0f);
+                m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_OPTION), 0.0f);
                 m_GameMenu.LoadValues();
-                m_GameMenu.LoadValuesDemo();
                 m_GameMenu.ResetNavigator();
             }
             else if(m_MainMenu.GetStatus() == 2)
@@ -364,6 +382,14 @@ void cMenu::Move()
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
                 m_ConfigMenu.LoadValues();
                 m_ConfigMenu.ResetNavigator();
+            }
+            else if(m_MainMenu.GetStatus() == 6)
+            {
+                // switch to credits menu
+                this->ShiftSurface(this, SURFACE_CREDITS, 3.0f, 1u);
+
+                // 
+                m_CreditRoll.Start();
             }
         }
         break;
@@ -599,6 +625,16 @@ void cMenu::Move()
         }
         break;
 
+    case SURFACE_CREDITS:
+        {
+            if(m_CreditRoll.GetFinished() || g_MenuInput.bCancel)
+            {
+                // return to previous menu
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u);
+            }
+        }
+        break;
+
     default:
         ASSERT(false)
         break;
@@ -620,7 +656,7 @@ void cMenu::Move()
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
     {
         //m_PauseLayer.SetAlpha    (0.25f);
-        m_PauseLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
+        m_PauseLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));   // TODO 1: check if menu rotation is correct
         //m_PauseLayer.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
     }
     else
@@ -636,28 +672,21 @@ void cMenu::Move()
     m_PauseLayer.Move();
     
     
-    if(m_pCurButton != m_pNewButton)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_apCurButton); ++i)
     {
-        if(m_pCurButton)
+        if(m_apCurButton[i] != m_apNewButton[i])
         {
-            //m_pCurButton->SetSize(m_pCurButton->GetSize() / 1.1f);
-            //m_pCurButton->Move();
+            m_apCurButton[i] = m_apNewButton[i];
+            if(m_apCurButton[i])
+            {
+                if(TIME) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
+            }
         }
-        m_pCurButton = m_pNewButton;
-        if(m_pCurButton)
-        {
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
-            //m_pCurButton->SetSize(m_pCurButton->GetSize() * 1.1f);
-            //m_pCurButton->Move();
-        }
+        m_apNewButton[i] = NULL;
     }
-    m_pNewButton = NULL;
     
     if(m_pCurTab != m_pNewTab)
     {
-        if(m_pCurTab)
-        {
-        }
         m_pCurTab = m_pNewTab;
         if(m_pCurTab)
         {
@@ -665,6 +694,17 @@ void cMenu::Move()
         }
     }
     m_pNewTab = NULL;
+    
+    if(m_pCurLine != m_pNewLine)
+    {
+        m_pCurLine = m_pNewLine;
+        if(m_pCurLine)
+        {
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_LINE);
+        }
+    }
+    m_pNewLine = NULL;
+
     // TODO 1: tooltip has a delay
 }
 
@@ -699,8 +739,8 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
     {
         //iForceA = bUpdateFrom ? pMenu->GetCurSurface() : 0xFFu;
         //iForceB = bUpdateTo   ? iNewSurface            : 0xFFu;
-        iForceA = (iCurSurface != SURFACE_INTRO) ? iCurSurface : 0xFFu;
-        iForceB = (iCurSurface != SURFACE_INTRO) ? iNewSurface : 0xFFu;
+        iForceA = ((pMenu != this) || iCurSurface != SURFACE_INTRO) ? iCurSurface : 0xFFu;
+        iForceB = ((pMenu != this) || iCurSurface != SURFACE_INTRO) ? iNewSurface : 0xFFu;
 
         // 
         m_TransitionTime.Play(CORE_TIMER_PLAY_RESET);
@@ -790,10 +830,11 @@ void cMenu::ChangeTab(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface)
     ASSERT(pMenu)
 
     // 
-    pMenu->ChangeSurface(iNewSurface, 0.0f);
-
-    // 
-    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_TAB);
+    if(pMenu->ChangeSurface(iNewSurface, 0.0f))
+    {
+        // 
+        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_TAB);
+    }
 }
 
 
@@ -813,19 +854,25 @@ void cMenu::ClearScreen()
 
 // ****************************************************************
 // 
+const coreChar* cMenu::GetMissionLetters(const coreUintW iMissionIndex)
+{
+    // 
+    switch(iMissionIndex)
+    {
+    case  9u: return "X1";
+    case 10u: return "X2";
+    default:  return coreData::ToChars(iMissionIndex);
+    }
+}
+
+
+// ****************************************************************
+// 
 const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
-    const coreChar* pcMissionLetter;
-    switch(iMissionIndex)
-    {
-    case  9u: pcMissionLetter = "X1";                             break;
-    case 10u: pcMissionLetter = "X2";                             break;
-    default:  pcMissionLetter = coreData::ToChars(iMissionIndex); break;
-    }
-
-    // 
-    const coreChar* pcSegmentLetter = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? "B" : coreData::ToChars(iSegmentIndex + 1u);
+    const coreChar* pcMissionLetter = cMenu::GetMissionLetters(iMissionIndex);
+    const coreChar* pcSegmentLetter = (iSegmentIndex == 6u) ? "X" : MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? "B" : coreData::ToChars(iSegmentIndex + 1u);
 
     // 
     return PRINT("%s-%s", pcMissionLetter, pcSegmentLetter);
@@ -834,24 +881,57 @@ const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const co
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor)
+void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow)
 {
     ASSERT(pButton)
 
+    if(!s_aButtonData.count_bs(pButton))
+    {
+        sButtonData oNewData;
+        oNewData.vPosition  = pButton->GetPosition();
+        oNewData.vSize      = pButton->GetSize();
+        oNewData.vTexOffset = pButton->GetTexOffset();
+        oNewData.fTime      = 0.0f;
+        oNewData.bGrow      = false;
+
+        s_aButtonData.emplace_bs(pButton, oNewData);
+    }
+    sButtonData& oData = s_aButtonData.at_bs(pButton);
+    
+         if(bFocused)            oData.bGrow = true;
+    else if(oData.fTime >= 1.0f) oData.bGrow = false;
+    
+    if(oData.bGrow) oData.fTime.UpdateMin( 20.0f, 1.0f);
+               else oData.fTime.UpdateMax(-20.0f, 0.0f);
+
     // select visible strength
-    const coreFloat   fLight = bFocused ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
-    const coreVector3 vColor = bFocused ? vFocusColor       : COLOR_MENU_WHITE;
+    const coreFloat   fLight = LERPH3(MENU_LIGHT_IDLE,  MENU_LIGHT_ACTIVE, oData.fTime);
+    const coreVector3 vColor = LERPH3(COLOR_MENU_WHITE, vFocusColor,       oData.fTime);
 
     // set button and caption color
                               pButton              ->SetColor3(vColor * fLight);
     if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * fLight);
+            
+    if(bGrow)
+    {
+        const coreVector2 vBasePos = coreVector2(pButton->GetAlignment().x ? oData.vPosition.x : pButton->GetPosition().x, pButton->GetAlignment().y ? oData.vPosition.y : pButton->GetPosition().y);
+        const coreFloat   fScale   = LERPH3(1.0f, 1.1f, oData.fTime);
+
+        pButton->SetPosition     (vBasePos - oData.vSize * pButton->GetAlignment() * 0.5f * (fScale - 1.0f));
+        pButton->SetSize         (oData.vSize * fScale);
+        pButton->SetTexOffset    (oData.vTexOffset + (pButton->GetSize() - oData.vSize) * -0.5f);
+        pButton->SetFocusModifier(oData.vSize / pButton->GetSize());
+        pButton->Move();
+    }
+
 
     // 
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
     
     if(bFocused)
     {
-        m_pNewButton = pButton;
+        if(m_apNewButton[0]) m_apNewButton[1] = m_apNewButton[0];
+        m_apNewButton[0] = pButton;
     }
     
     if(pButton->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS))
@@ -860,10 +940,10 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
     }
 }
 
-void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused)
+void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreBool bGrow)
 {
     // 
-    cMenu::UpdateButton(pButton, bFocused, m_vButtonColor);
+    cMenu::UpdateButton(pButton, bFocused, m_vButtonColor, bGrow);
 }
 
 
@@ -873,13 +953,39 @@ void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const cor
 {
     ASSERT(pTab)
 
+    if(!s_aButtonData.count_bs(pTab))
+    {
+        sButtonData oNewData;
+        oNewData.vPosition  = pTab->GetPosition();
+        oNewData.vSize      = pTab->GetSize();
+        oNewData.vTexOffset = pTab->GetTexOffset();
+        oNewData.fTime      = 0.0f;
+        oNewData.bGrow      = false;
+
+        s_aButtonData.emplace_bs(pTab, oNewData);
+    }
+    sButtonData& oData = s_aButtonData.at_bs(pTab);
+
+         if(bLocked || bFocused) oData.bGrow = true;
+    else if(oData.fTime >= 1.0f) oData.bGrow = false;
+    
+    if(oData.bGrow) oData.fTime.UpdateMin( 20.0f, 1.0f);
+               else oData.fTime.UpdateMax(-20.0f, 0.0f);
+
     // select visible strength
-    const coreFloat   fLight = (bLocked || bFocused) ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
-    const coreVector3 vColor = (bLocked || bFocused) ? vFocusColor       : COLOR_MENU_WHITE;
+    const coreFloat   fLight = LERPH3(MENU_LIGHT_IDLE,  MENU_LIGHT_ACTIVE, oData.fTime);
+    const coreVector3 vColor = LERPH3(COLOR_MENU_WHITE, vFocusColor,       oData.fTime);
 
     // set button and caption color
                            pTab              ->SetColor3(vColor * fLight);
     if(pTab->GetCaption()) pTab->GetCaption()->SetColor3(vColor * fLight);
+    
+    const coreFloat fScale = LERPH3(1.0f, 1.2f, oData.fTime);
+    
+    pTab->SetSize     (oData.vSize * coreVector2(1.0f, fScale));
+    pTab->SetPosition (oData.vPosition - oData.vSize * pTab->GetAlignment() * 0.5f * (fScale - 1.0f) + coreVector2(0.0f, (pTab->GetSize().y - oData.vSize.y) * 0.5f));
+    pTab->SetTexOffset(oData.vTexOffset + coreVector2(0.0f, (pTab->GetSize().y - oData.vSize.y) * -1.0f));
+    pTab->Move();
 
     // 
     if(pTab->GetOverride() < 0) pTab->SetAlpha(pTab->GetAlpha() * 0.5f);
@@ -902,6 +1008,19 @@ void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const cor
 void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
 {
     ASSERT(pSwitchBox)
+
+    //if(!s_aButtonData.count_bs(pSwitchBox))
+    //{
+    //    sButtonData oNewData;
+    //    oNewData.vPosition  = pSwitchBox->GetCaption()->GetPosition();
+    //    oNewData.vSize      = pSwitchBox->GetSize();
+    //    oNewData.vTexOffset = pSwitchBox->GetTexOffset();
+    //    oNewData.fTime      = 0.0f;
+    //    oNewData.bGrow      = false;
+//
+    //    s_aButtonData.emplace_bs(pSwitchBox, oNewData);
+    //}
+    //sButtonData& oData = s_aButtonData.at_bs(pSwitchBox);
 
     const auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEndIndex)
     {
@@ -938,6 +1057,46 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
         // 
         g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_DISABLED);
     }
+    
+    //if(iUserSwitch)
+    //{
+    //    if(bArrowLeft)
+    //    {
+    //        oData.fTime = 1.0f;
+    //        oData.bGrow = false;
+    //    }
+    //    else if(bArrowRight)
+    //    {
+    //        oData.fTime = 1.0f;
+    //        oData.bGrow = true;
+    //    }
+    //}
+//
+    //oData.fTime.UpdateMax(-3.0f, 0.0f);
+    //pSwitchBox->GetCaption()->SetPosition(oData.vPosition + coreVector2(LERPBR(0.0f, 0.005f, oData.fTime) * (oData.bGrow ? 1.0f : -1.0f), 0.0f));
+    //pSwitchBox->GetCaption()->Move();
+}
+
+
+// ****************************************************************
+// 
+void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const coreVector3 vFocusColor)
+{
+    if(!TIME) return;   // for transitions
+    if(!pLine->GetAlpha()) return;
+
+    if(bInteract) pLine->Interact();
+    pLine->SetColor3(pLine->IsFocused() ? vFocusColor : coreVector3(1.0f,1.0f,1.0f));
+    
+    if(pLine->IsFocused())
+    {
+        m_pNewLine = pLine;
+    }
+}
+
+void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract)
+{
+    cMenu::UpdateLine(pLine, bInteract, m_vHighlightColor);
 }
 
 
@@ -975,6 +1134,22 @@ void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal
 
     // 
     pObject->SetEnabled((iMedal != MEDAL_NONE) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// 
+void cMenu::ClearButtonTime(const cGuiButton* pButton)
+{
+    if(s_aButtonData.count_bs(pButton))
+    {
+        sButtonData& oData = s_aButtonData.at_bs(pButton);
+
+        oData.fTime = 0.0f;
+        oData.bGrow = false;
+        
+        // TODO 1: größe des objekts sollte auch resettet werden, wegen gamepad-cursor size-init
+    }
 }
 
 

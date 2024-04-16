@@ -64,7 +64,7 @@ public:
         coreUint32 iShiftBadAdded;                // TODO 1 (aber nicht bei mission oder segment ende, sollte in echtzeit aktualisiert werden) 
         coreUint64 iMovesMade;                    // TODO 1 (+table) 
         coreUint32 iTurnsMade;                    // TODO 1 (+table) 
-        coreUint32 iRollsMade;                    // TODO 1 (+table) 
+        coreUint32 iRollsMade;                    // TODO 1 (+table) TODO 1: remove 
         coreUint64 iBulletsShot;                  // TODO 1 (+table) 
         coreUint64 iChromaCollected;              // TODO 1: remove 
         coreUint32 iItemsCollected;               // TODO 1: remove 
@@ -102,7 +102,7 @@ public:
         coreUint32 iShiftBadAdded;                // TODO 1 (aber nicht bei mission oder segment ende, sollte in echtzeit aktualisiert werden) 
         coreUint64 iMovesMade;                    // TODO 1 (+table) 
         coreUint32 iTurnsMade;                    // TODO 1 (+table) 
-        coreUint32 iRollsMade;                    // TODO 1 (+table) 
+        coreUint32 iRollsMade;                    // TODO 1 (+table) TODO 1: remove 
         coreUint64 iBulletsShot;                  // TODO 1 (+table) 
         coreUint64 iChromaCollected;              // TODO 1: remove 
         coreUint32 iItemsCollected;               // TODO 1: remove 
@@ -115,8 +115,8 @@ public:
     struct sOptions final
     {
         coreChar  acName[SAVE_NAME_LENGTH];                        // 
-        coreUint8 iStandard;                                       // 
-        coreUint8 iTraining;                                       // 
+        coreUint8 iMission;                                        // 
+        coreUint8 iSegment;                                        // 
         coreUint8 iType;                                           // 
         coreUint8 iMode;                                           // 
         coreUint8 iDifficulty;                                     // 

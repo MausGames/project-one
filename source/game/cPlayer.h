@@ -23,6 +23,7 @@
 // TODO 3: all player bullets get destroyed with death
 // TODO 1: make sure player receives final combo or chain at the end of segment
 // TODO 1: check what variables and states need to be reset on player kill
+// TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
 
 
 // ****************************************************************
@@ -113,6 +114,7 @@ private:
 
     coreVector2 m_vForce;                                     // 
     coreFloat   m_fScale;                                     // 
+    coreFloat   m_fThrust;                                    // 
     coreFloat   m_fTilt;                                      // 
 
     coreProtect<coreFloat> m_fMoveSpeed;                      // 
@@ -147,6 +149,7 @@ private:
 
     coreVector2 m_vOldDir;                                    // 
     coreVector2 m_vSmoothOri;                                 // 
+    coreFloat   m_fSmoothThrust;                              // 
     coreFloat   m_fSmoothTilt;                                // 
     coreFlow    m_fRangeValue;                                // 
     coreFlow    m_fArrowValue;                                // 
@@ -228,19 +231,20 @@ public:
     inline coreBool IsEnemyLook  ()const {return (m_apWeapon[0]->GetID() == cEnemyWeapon::ID);}
 
     // 
-    void EnableRange  ();
-    void DisableRange ();
-    void EnableArrow  ();
-    void DisableArrow ();
-    void EnableWind   (const coreVector2 vDirection);
-    void DisableWind  ();
-    void EnableBubble ();
-    void DisableBubble();
-    void EnableShield ();
-    void DisableShield();
-    void EnableCircle ();
-    void DisableCircle();
-    void UpdateExhaust(const coreFloat fStrength);
+    void EnableRange   ();
+    void DisableRange  ();
+    void EnableArrow   ();
+    void DisableArrow  ();
+    void EnableWind    (const coreVector2 vDirection);
+    void DisableWind   ();
+    void EnableBubble  ();
+    void DisableBubble ();
+    void EnableShield  ();
+    void DisableShield ();
+    void EnableCircle  ();
+    void DisableCircle ();
+    void EnableExhaust ();
+    void DisableExhaust();
 
     // 
     inline const coreModelPtr& GetRangeModel ()const {return m_Range.GetModel();}
@@ -270,11 +274,12 @@ public:
     inline void SetInput     (const sGameInput* pInput)      {m_pInput      = pInput;}
     inline void SetArea      (const coreVector4 vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
     inline void SetForce     (const coreVector2 vForce)      {m_vForce      = vForce;}
+    inline void SetScale     (const coreFloat   fScale)      {m_fScale      = fScale;}
+    inline void SetThrust    (const coreFloat   fThrust)     {m_fThrust     = fThrust;}
+    inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetMoveSpeed (const coreFloat   fMoveSpeed)  {m_fMoveSpeed  = fMoveSpeed;}
     inline void SetShootSpeed(const coreFloat   fShootSpeed) {m_fShootSpeed = fShootSpeed;}
     inline void SetAnimSpeed (const coreFloat   fAnimSpeed)  {m_fAnimSpeed  = fAnimSpeed;}
-    inline void SetScale     (const coreFloat   fScale)      {m_fScale      = fScale;}
-    inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
     inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
     inline void SetMaxShield (const coreInt32   iMaxShield)  {m_iMaxShield  = iMaxShield;}
@@ -284,11 +289,11 @@ public:
     inline const sGameInput*  GetInput       ()const {ASSERT(m_pInput) return m_pInput;}
     inline const coreVector4& GetArea        ()const {return m_vArea;}
     inline const coreVector2& GetForce       ()const {return m_vForce;}
+    inline const coreFloat&   GetScale       ()const {return m_fScale;}
+    inline const coreFloat&   GetTilt        ()const {return m_fTilt;}
     inline       coreFloat    GetMoveSpeed   ()const {return m_fMoveSpeed;}
     inline       coreFloat    GetShootSpeed  ()const {return m_fShootSpeed;}
     inline const coreFloat&   GetAnimSpeed   ()const {return m_fAnimSpeed;}
-    inline const coreFloat&   GetScale       ()const {return m_fScale;}
-    inline const coreFloat&   GetTilt        ()const {return m_fTilt;}
     inline const coreFloat&   GetInterrupt   ()const {return m_fInterrupt;}
     inline const coreFloat&   GetDesaturate  ()const {return m_fDesaturate;}
     inline       coreInt32    GetMaxShield   ()const {return m_iMaxShield;}

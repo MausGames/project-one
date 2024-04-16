@@ -1069,7 +1069,7 @@ void cNevoMission::__MoveOwnAfter()
 
         // 
         oArrow.SetAlpha    (m_afArrowAlpha[i] * fActive);
-        oArrow.SetTexOffset(coreVector2(0.6f * m_fAnimation + fOffset, 0.0f));
+        oArrow.SetTexOffset(coreVector2(FRACT(0.6f * m_fAnimation + fOffset), 0.0f));
     }
 
     // 

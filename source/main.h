@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.1.1 (https://www.maus-games.at)                             |//
+//| Project One v0.1.3 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -102,6 +102,7 @@
 // TODO 1: alle sound-effekte bei denen man was einsammeln soll, prüfen ob pitch-inkrement verwendet werden soll
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
 // TODO 4: MIN1, MAX0, CLAMP01, BLEND* everywhere possible
+// TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 
 
 // ****************************************************************
@@ -149,6 +150,7 @@
 #define SHIELD_MAX           (255u)
 #define SHIELD_INVINCIBLE    (1000u)
 #define BADGES               (3u)
+#define FRAGMENTS            (9u)
 #define WEAPONS              (6u)
 #define SUPPORTS             (2u)
 #define EQUIP_WEAPONS        (1u)
@@ -343,7 +345,7 @@ class cMission;
 
 // ****************************************************************
 // game headers
-extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 resolution
+extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 
 extern coreFloat       g_fGameRate;         // 
 extern coreVector2     g_vHudDirection;     // 
 extern coreBool        g_bTiltMode;         // 

@@ -47,6 +47,8 @@ private:
     std::function<void(coreInt32, coreInt32)> m_nCallback;   // 
     coreVector2 m_vCurMouse;                                 // 
 
+    coreVector2 m_vBoxSize;                                  // 
+
     coreFlow  m_fFade;                                       // 
     coreUint8 m_iMsgType;                                    // 
     coreUint8 m_iInputType;                                  // 
@@ -139,10 +141,10 @@ template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nC
     m_Msg.SetText(pcText);
 
     // 
-    m_Box.SetSize(coreVector2(0.0f,0.0f));
+    m_vBoxSize = coreVector2(0.0f,0.0f);
     m_Msg.RetrieveDesiredSize([this](const coreVector2 vSize)
     {
-        m_Box.SetSize(coreVector2(MAX(vSize.x + 0.1f, 0.55f), 0.25f));
+        m_vBoxSize = coreVector2(MAX(vSize.x + 0.1f, 0.55f), 0.25f);
     });
 
     // 

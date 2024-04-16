@@ -93,6 +93,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: die geschosse über scraps können zerstört werden ohne die scraps, wenn außerhalb des sichtfelds, weil beides unterschiedliche interaction-ranges haben (remove hiding for rotating scraps?)
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top) (die finalen wellen könnten sonst verwirren)
     // TODO 1: MAIN: regular score, sound, background rota/speed
+    // TODO 1: items abschießen sollte kombo beibehalten (ÜBERALL)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;
@@ -526,6 +527,8 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: flipswitch galaxy, || =, mit blink delay wie bei rot+blau blöcke in Mario 3D World (achtung: laser könnten so ähnlich sein wie bomben beim endboss)
     // TODO 1: hardmode: flipswitch galaxy: blocking tiles moving around, lasers blocking movement between tiles
     // TODO 1: adjust enemy movement patterns
+    // TODO 1: anderes enabled-pattern bei finaler phase, das aktuelle is viel zu leicht, vielleicht alles disabled ?
+    // TODO 1: vielleicht doch auch leichte angriffe auf easy, nur N schuss pro sub-phaes ?
     // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
@@ -1009,6 +1012,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: bomben schießen geschosse bei explosion, gekruzt oder entlang strahl
     // TODO 1: hardmode: bomben können angegriffen werden und vorzeitig explodieren, oder blockieren einfach nur angriffe
     // TODO 1: increase safe-block (artificially) in bomb-hail phase (quad-test)
+    // TODO 1: blaue kugerl bei wand-bomben sind schwer zu bekommen, sub-stage check hilft aber nicht, weil bomben ja in nächster phase explodieren können
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
@@ -1364,18 +1368,6 @@ void cNevoMission::__SetupOwn()
             });
         }
 
-        cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
-
-        if(STAGE_BEGINNING) pBackground->GetOutdoor()->LerpHeight(0.2f, -17.0f);
-
-        const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
-
-        pBackground->SetGroundDensity(1u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
-        pBackground->SetGroundDensity(2u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
-        pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
-        pBackground->SetGroundDensity(4u, STEP(0.5f, 1.0f, fEnvLerp));
-        pBackground->SetGroundDensity(5u, STEP(0.5f, 1.0f, fEnvLerp));
-
         STAGE_WAVE(2u, "2-3", {45.0f, 65.0f, 90.0f, 110.0f})   // NEUN
     });
 
@@ -1395,22 +1387,6 @@ void cNevoMission::__SetupOwn()
             this->DisableChip(i, false);
 
         this->DisableTrend(false);
-
-        STAGE_FINISH_NOW
-    });
-
-    // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 3u, 4u, 5u})
-    {
-        cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
-
-        pBackground->GetOutdoor()->LerpHeightNow(0.2f, -17.0f);
-        pBackground->SetGroundDensity(1u, 0.0f);
-        pBackground->SetGroundDensity(2u, 0.0f);
-        pBackground->SetGroundDensity(3u, 0.0f);
-        pBackground->SetGroundDensity(4u, 1.0f);
-        pBackground->SetGroundDensity(5u, 1.0f);
 
         STAGE_FINISH_NOW
     });
@@ -1437,6 +1413,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: jeder gegner hat zwei pfeile (consistent mit der gruppe)
     // TODO 1: 6x6 puzzle anpassen (falls nötig), einzelne pfeile anpassen (falls nötig) (vielleicht auch shiften oder aufteilen oder rotiert infinity nach rechts oder chess-aufteilung (um sie von der kleinen davor zu unterscheiden!))
     // TODO 1: MAIN: task-check, hard idea, regular score, badges, sound, background rota/speed
+    // TODO 1: leichter angriff auf easy, vielleicht der einzel-schuss, und auf normal gibts multi-schuss
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fDistance = 1.1f;
@@ -1886,6 +1863,18 @@ void cNevoMission::__SetupOwn()
             pBullet->AddStatus(BULLET_STATUS_GHOST);
         });
 
+        cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
+
+        if(STAGE_BEGINNING) pBackground->GetOutdoor()->LerpHeight(0.2f, -17.0f);
+
+        const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
+
+        pBackground->SetGroundDensity(1u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(2u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(4u, STEP(0.5f, 1.0f, fEnvLerp));
+        pBackground->SetGroundDensity(5u, STEP(0.5f, 1.0f, fEnvLerp));
+
         STAGE_WAVE(3u, "2-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ZEHN
     });
 
@@ -1897,6 +1886,22 @@ void cNevoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
             this->DisableArrow(i, false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u})
+    {
+        cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetOutdoor()->LerpHeightNow(0.2f, -17.0f);
+        pBackground->SetGroundDensity(1u, 0.0f);
+        pBackground->SetGroundDensity(2u, 0.0f);
+        pBackground->SetGroundDensity(3u, 0.0f);
+        pBackground->SetGroundDensity(4u, 1.0f);
+        pBackground->SetGroundDensity(5u, 1.0f);
 
         STAGE_FINISH_NOW
     });

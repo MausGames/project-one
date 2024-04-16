@@ -119,6 +119,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_PLAYER_TURN,          "player_turn.wav");
     nLoadSoundFunc(SOUND_PLAYER_INTERRUPT,     "player_interrupt.wav");
     nLoadSoundFunc(SOUND_PLAYER_REPAIR,        "player_repair.wav");
+    nLoadSoundFunc(SOUND_PLAYER_CANCEL,        "player_cancel.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_01,   "enemy_explosion_01.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_02,   "enemy_explosion_02.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_03,   "enemy_explosion_03.wav");
@@ -426,7 +427,10 @@ void cSpecialEffects::MoveAlways()
 void cSpecialEffects::Update()
 {
     // 
-    for(coreUintW i = 0u; i < SPECIAL_ICONS; ++i)
+    const coreUintW iNum = (STATIC_ISVALID(g_pGame) && g_pGame->IsMulti()) ? SPECIAL_ICONS : 1u;
+
+    // 
+    for(coreUintW i = 0u; i < iNum; ++i)
         m_aIcon[i].Update();
 }
 
@@ -983,6 +987,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_PLAYER_TURN:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_PLAYER_INTERRUPT:     fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_PLAYER_REPAIR:        fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_PLAYER_CANCEL:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_01:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_02:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_03:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
@@ -1090,6 +1095,35 @@ void cSpecialEffects::StopSound(const eSoundEffect eSoundIndex)
 
     // 
     if(pSound->EnableRef(this)) pSound->Stop();
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::ExternPlayPosition(const coreSoundPtr& pSound, const void* pRef, const coreFloat fVolume, const coreFloat fPitch, const coreBool bLoop, const coreUint8 iType, const coreVector3 vPosition)
+{
+    // TODO 1: muss position speichern (und bei SetSource aktualisieren), falls position nie aktualisiert wird, damit man zwischen beidem hin-und-her schalten kann ohne issues   -> coreMap<ALuint, coreVector3>
+    // TODO 1: + in echtzeit herum-schalten, mit cached state (single bool global)
+    // aber was is mit allen anderen sound-effekten ? hier in der klasse
+    // vielleicht einfach nur echtzeit-aktualisierung handlen
+    
+    // 
+    const coreVector3 vReal = g_CurConfig.Audio.i3DSound ? vPosition : Core::Audio->GetListenerPosition();
+
+    // 
+    pSound->PlayPosition(pRef, fVolume, fPitch, bLoop, iType, vReal);
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::ExternSetSource(const coreSoundPtr& pSound, const coreVector3 vPosition)
+{
+    // 
+    const coreVector3 vReal = g_CurConfig.Audio.i3DSound ? vPosition : Core::Audio->GetListenerPosition();
+
+    // 
+    pSound->SetSource(vReal);
 }
 
 

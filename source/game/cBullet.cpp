@@ -453,8 +453,8 @@ cRayBullet::cRayBullet()noexcept
 void cRayBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    if(m_fTilt) g_pSpecialEffects->CreateSplashColor(this->GetPosition(),        60.0f, 5u, this->GetColor3());
-           else g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, 1u, this->GetColor3());
+    if(m_fTilt) g_pSpecialEffects->CreateSplashColor(this->GetPosition(),        60.0f, 5u,             this->GetColor3());
+           else g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -472,7 +472,7 @@ void cRayBullet::__ReflectOwn()
     this->SetAlpha(0.0f);
 
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, 1u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -947,7 +947,7 @@ void cTriangleBullet::__MoveOwn()
     // update animation
     m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
+    this->SetTexOffset(coreVector2(0.0f, FRACT(m_fAnimation * 0.625f)));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -994,7 +994,7 @@ void cFlipBullet::__MoveOwn()
     // update animation
     m_fAnimation.UpdateMod(-0.2f * m_fAnimSpeed, -8.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (9.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(m_fAnimation * 0.625f, 0.0f));
+    this->SetTexOffset(coreVector2(FRACT(m_fAnimation * 0.625f), 0.0f));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -1040,7 +1040,7 @@ void cQuadBullet::__MoveOwn()
     // update animation
     m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
+    this->SetTexOffset(coreVector2(0.0f, FRACT(m_fAnimation * 0.625f)));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -1137,7 +1137,7 @@ void cCardBullet::__MoveOwn()
 
     // update animation
     m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
+    this->SetTexOffset(coreVector2(0.0f, FRACT(m_fAnimation * 0.625f)));
 
     // update fade
     m_fFade.Update(1.0f);

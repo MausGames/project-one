@@ -1516,7 +1516,7 @@ void cLeviathanBoss::__MoveOwn()
         
         if(m_pFireSound->EnableRef(this))
         {
-            m_pFireSound->SetSource(coreVector3(vCenter / I_TO_F(coreMath::PopCount(m_iRayState)), 0.0f));
+            g_pSpecialEffects->ExternSetSource(m_pFireSound, coreVector3(vCenter / I_TO_F(coreMath::PopCount(m_iRayState)), 0.0f));
             m_pFireSound->SetVolume(1.0f);
         }
 
@@ -1879,7 +1879,7 @@ void cLeviathanBoss::__BeginRay(const coreUintW iIndex)
     // 
     if(!m_iRayState)
     {
-        m_pFireSound->PlayPosition(this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,0.0f,0.0f));
+        g_pSpecialEffects->ExternPlayPosition(m_pFireSound, this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,0.0f,0.0f));
         g_pSpecialEffects->PlaySound(this->__GetPart(iIndex)->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FIRE_START);
     }
 

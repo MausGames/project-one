@@ -54,6 +54,9 @@
 // TODO 1: post-processing fehlt und farben sind anders
 // TODO 1: die seiten sollen anders verschwinden, vielleicht sollen gegner drüber fliegen bevor sie ganz weg sind (hellsinker hat das auch beim finale)
 // TODO 1: kid ikarus https://www.youtube.com/watch?v=PnMWJlCAGug
+// TODO 1: spieler kann selbst seiten-teile weg-schießen
+// TODO 1: lang-gezogene partikel in flugrichtung !
+// TODO 1: rolle bei phasen-wechseln
 
 
 // ****************************************************************

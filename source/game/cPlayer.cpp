@@ -17,6 +17,7 @@ cPlayer::cPlayer()noexcept
 , m_vArea           (PLAYER_AREA_DEFAULT)
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fScale          (1.0f)
+, m_fThrust         (0.0f)
 , m_fTilt           (0.0f)
 , m_fMoveSpeed      (1.0f)
 , m_fShootSpeed     (1.0f)
@@ -39,6 +40,7 @@ cPlayer::cPlayer()noexcept
 , m_vLedColor       (coreVector3(1.0f,1.0f,1.0f))
 , m_vOldDir         (coreVector2(0.0f,1.0f))
 , m_vSmoothOri      (coreVector2(0.0f,0.0f))
+, m_fSmoothThrust   (0.0f)
 , m_fSmoothTilt     (0.0f)
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
@@ -401,8 +403,15 @@ void cPlayer::Move()
             else if(vNewPos.x > m_vArea.z) {vNewPos.x = m_vArea.z; m_vForce.x = -ABS(m_vForce.x);}
                  if(vNewPos.y < m_vArea.y) {vNewPos.y = m_vArea.y; m_vForce.y =  ABS(m_vForce.y);}
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
+            
+            const coreFloat fThrust = coreVector2::Dot(vDiff, this->GetDirection().xy()) - m_fSmoothThrust;
+            m_fSmoothThrust = m_fSmoothThrust + SIGN(fThrust) * (30.0f * TIME * SmoothTowards(ABS(fThrust), 1.0f));
         }
-        else m_vSmoothOri = coreVector2(0.0f,0.0f);
+        else
+        {
+            m_vSmoothOri    = coreVector2(0.0f,0.0f);
+            m_fSmoothThrust = 0.0f;
+        }
 
         // 
         if(m_fRollTime >= 1.0f) this->EndRolling();
@@ -494,6 +503,11 @@ void cPlayer::Move()
             m_vOldDir = this->GetDirection().xy();
             this->ShowArrow(0u);
         }
+
+        // 
+        const coreFloat fFullThrust = MAX(m_fThrust, MAX0(m_fSmoothThrust) * 0.055f);
+             if( fFullThrust && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->EnableExhaust();
+        else if(!fFullThrust &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableExhaust();
 
         // 
         m_Dot.SetPosition(this->GetPosition());
@@ -609,6 +623,21 @@ void cPlayer::Move()
             m_Circle.SetAlpha    (LERPBR(0.0f, 1.0f, m_fCircleValue));
             m_Circle.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
             m_Circle.Move();
+        }
+
+        if(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL))
+        {
+            // 
+            const coreFloat   fLen   = fFullThrust * 40.0f;
+            const coreFloat   fWidth = 1.0f - fFullThrust * 0.25f;
+            const coreVector3 vSize  = coreVector3(fWidth, fLen, fWidth) * (0.6f * PLAYER_SIZE_FACTOR);
+
+            // 
+            m_Exhaust.SetPosition (this->GetPosition() - this->GetDirection() * (vSize.y + 4.0f * PLAYER_SIZE_FACTOR));
+            m_Exhaust.SetSize     (vSize);
+            m_Exhaust.SetDirection(this->GetDirection());
+            m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
+            m_Exhaust.Move();
         }
 
         // 
@@ -834,11 +863,12 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->DisableBubble();
     this->DisableShield();
     this->DisableCircle();
-    this->UpdateExhaust(0.0f);
+    this->DisableExhaust();
 
     // 
-    m_vArea  = PLAYER_AREA_DEFAULT;
-    m_vForce = coreVector2(0.0f,0.0f);
+    m_vArea   = PLAYER_AREA_DEFAULT;
+    m_vForce  = coreVector2(0.0f,0.0f);
+    m_fThrust = 0.0f;
 
     // 
     m_fMoveSpeed  = 1.0f;
@@ -851,12 +881,13 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fLightningAngle = 0.0f;
 
     // 
-    m_vOldDir      = coreVector2(0.0f,1.0f);
-    m_vSmoothOri   = coreVector2(0.0f,0.0f);
-    m_fSmoothTilt  = 0.0f;
-    m_fRangeValue  = 0.0f;
-    m_fArrowValue  = 0.0f;
-    m_fCircleValue = 0.0f;
+    m_vOldDir       = coreVector2(0.0f,1.0f);
+    m_vSmoothOri    = coreVector2(0.0f,0.0f);
+    m_fSmoothThrust = 0.0f;
+    m_fSmoothTilt   = 0.0f;
+    m_fRangeValue   = 0.0f;
+    m_fArrowValue   = 0.0f;
+    m_fCircleValue  = 0.0f;
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -1219,23 +1250,25 @@ void cPlayer::DisableCircle()
 
 // ****************************************************************
 // 
-void cPlayer::UpdateExhaust(const coreFloat fStrength)
+void cPlayer::EnableExhaust()
 {
-    // 
-    const coreFloat fLen  = fStrength * 40.0f;
-    const coreFloat fSize = 1.0f - fStrength * 0.25f;
+    WARN_IF(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableExhaust();
 
     // 
-         if( fStrength && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->BindObject  (&m_Exhaust);
-    else if(!fStrength &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->UnbindObject(&m_Exhaust);
+    m_Exhaust.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Exhaust);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableExhaust()
+{
+    if(!m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
-    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f * PLAYER_SIZE_FACTOR);
-    m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
-    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR));
-    m_Exhaust.SetDirection(this->GetDirection());
-    m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-    m_Exhaust.Move();
+    m_Exhaust.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Exhaust);
 }
 
 

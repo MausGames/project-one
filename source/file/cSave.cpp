@@ -225,8 +225,8 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     pHeader->oOptions.acName[SAVE_NAME_LENGTH - 1u] = '\0';
 
     // 
-    pHeader->oOptions.iStandard   = CLAMP(pHeader->oOptions.iStandard,   0u, SAVE_MISSIONS      -1u);
-    pHeader->oOptions.iTraining   = CLAMP(pHeader->oOptions.iTraining,   0u, (SAVE_MISSIONS      -3u) * (SAVE_SEGMENTS-1u));   // TODO 1: fix
+    pHeader->oOptions.iMission    = CLAMP(pHeader->oOptions.iMission,    0u, SAVE_MISSIONS      -1u);
+    pHeader->oOptions.iSegment    = CLAMP(pHeader->oOptions.iSegment,    0u, (SAVE_MISSIONS      -3u) * (SAVE_SEGMENTS-1u));   // TODO 1: fix
     pHeader->oOptions.iType       = CLAMP(pHeader->oOptions.iType,       0u, GAME_TYPE_MAX      -1u);
     pHeader->oOptions.iMode       = CLAMP(pHeader->oOptions.iMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->oOptions.iDifficulty = CLAMP(pHeader->oOptions.iDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);

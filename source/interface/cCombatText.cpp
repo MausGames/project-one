@@ -32,7 +32,7 @@ cCombatText::cCombatText()noexcept
         m_aMarker[i].Construct (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
         m_aMarker[i].SetAlpha  (0.0f);
         m_aMarker[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        m_aMarker[i].SetRectify(false);
+        m_aMarker[i].SetRectify(false);   // # might move around with target
 
         // 
         m_aMarkerBack[i].DefineTexture(0u, "effect_headlight_point.png");

@@ -29,7 +29,7 @@
 #define INTERFACE_BANNER_SPEED_OPEN       (1.0f)           // 
 #define INTERFACE_BANNER_ANIMATION        (2.9f)           // animation duration
 #define INTERFACE_BANNER_DURATION_MISSION (3.7f)           // 
-#define INTERFACE_BANNER_DURATION_BOSS    (3.0f)           // display duration (with fading)  
+#define INTERFACE_BANNER_DURATION_BOSS    (3.7f)           // display duration (with fading)  
 #define INTERFACE_BANNER_DURATION_SCORE   (5.0f)           // 
 #define INTERFACE_BANNER_DURATION_ALERT   (3.5f)           // 
 
@@ -123,6 +123,7 @@ private:
 
     coreFlow m_fAnimation;                          // 
     coreFlow m_fRotation;                           // 
+    coreFlow m_fShake;                              // 
 
     coreBool m_bVisible;                            // visibility status
     coreFlow m_fAlphaAll;                           // overall alpha value (except for banner)
@@ -187,6 +188,9 @@ private:
 
     // 
     void __PrepareBanner();
+
+    // 
+    static inline coreBool __IsFlipped() {return IsHorizontal(MapToAxis(Core::System->GetResolution(), g_vHudDirection));}
 };
 
 

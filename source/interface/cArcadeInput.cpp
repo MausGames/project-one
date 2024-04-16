@@ -12,25 +12,37 @@
 // ****************************************************************
 // constructor
 cArcadeInput::cArcadeInput()noexcept
-: m_iTextLength  (0u)
-, m_fMove        (0.0f)
-, m_iOldGlyph    (0u)
-, m_iNewGlyph    (0u)
-, m_fCursorAngle (0.0f)
-, m_bFinished    (false)
+: m_iTextLength (0u)
+, m_iCurGlyph   (0u)
+, m_bFinished   (false)
 {
+    // 
+    this->SetAlpha(0.0f);   // due to late initialization
+
+    // 
+    m_Background.DefineTexture(0u, "menu_background_black.png");
+    m_Background.DefineProgram("menu_grey_program");
+    m_Background.SetSize      (coreVector2(1.0f,1.0f));
+    m_Background.SetTexSize   (coreVector2(1.2f,1.2f));
+
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
     {
-        const coreFloat X = I_TO_F(i % ARCADE_COLUMNS) - I_TO_F(ARCADE_COLUMNS - 1u) * 0.5f;
-        const coreFloat Y = I_TO_F(i / ARCADE_COLUMNS) * -1.0f;
+        const coreUintW iCol = i % ARCADE_COLUMNS;
+        const coreUintW iRow = i / ARCADE_COLUMNS;
 
-        m_aButton[i].DefineTexture   (0u, "default_black.png");
-        m_aButton[i].DefineProgram   ("default_2d_program");
+        const coreFloat X = I_TO_F(iCol) - I_TO_F(ARCADE_COLUMNS - 1u) * 0.5f;
+        const coreFloat Y = I_TO_F(iRow) * -1.0f;
+
+        m_aButton[i].DefineProgram   ("menu_color_program");
         m_aButton[i].SetPosition     (coreVector2(X, Y)      *  0.08f);
         m_aButton[i].SetSize         (coreVector2(1.0f,1.0f) *  0.07f);
+        m_aButton[i].SetColor3       (COLOR_MENU_BLACK);
         m_aButton[i].SetFocusModifier(coreVector2(1.0f,1.0f) * (0.08f/0.07f));
         m_aButton[i].SetFocusable    (true);
+
+        m_Navigator.BindObject(&m_aButton[i], &m_aButton[((iRow + ARCADE_ROWS - 1u) % ARCADE_ROWS) * ARCADE_COLUMNS + iCol], &m_aButton[iRow * ARCADE_COLUMNS + ((iCol + ARCADE_COLUMNS - 1u) % ARCADE_COLUMNS)],
+                                              &m_aButton[((iRow + 1u)               % ARCADE_ROWS) * ARCADE_COLUMNS + iCol], &m_aButton[iRow * ARCADE_COLUMNS + ((iCol + 1u)                  % ARCADE_COLUMNS)], MENU_TYPE_DEFAULT);
     }
 
     // 
@@ -64,12 +76,6 @@ cArcadeInput::cArcadeInput()noexcept
     }
 
     // 
-    m_Cursor.DefineTexture(0u, "menu_mission.png");
-    m_Cursor.DefineProgram("default_2d_program");
-    m_Cursor.SetSize      (coreVector2(1.0f,1.0f) * 0.08f);
-    m_Cursor.SetTexSize   (coreVector2(0.5f,0.5f));
-
-    // 
     m_Text.Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
     m_Text.SetPosition(coreVector2(0.0f,0.2f));
     m_Text.SetColor3  (COLOR_MENU_WHITE);
@@ -80,6 +86,10 @@ cArcadeInput::cArcadeInput()noexcept
 // render the arcade input
 void cArcadeInput::Render()
 {
+    // 
+    m_Background.SetAlpha(this->GetAlpha() * 0.5f);
+    m_Background.Render();
+
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
     {
@@ -95,12 +105,11 @@ void cArcadeInput::Render()
     }
 
     // 
-    m_Text.SetAlpha(this->GetAlpha());   // # swapped
+    m_Text.SetAlpha(this->GetAlpha());
     m_Text.Render();
 
     // 
-    m_Cursor.SetAlpha(this->GetAlpha());
-    m_Cursor.Render();
+    m_Navigator.Render();
 }
 
 
@@ -112,6 +121,9 @@ void cArcadeInput::Move()
     m_bFinished = false;
 
     // 
+    m_Navigator.Update();
+
+    // 
     const coreChar cChar = TO_UPPER(Core::Input->GetKeyboardChar());
 
     // 
@@ -121,7 +133,7 @@ void cArcadeInput::Move()
         m_aButton[i].Interact();
 
         // 
-        if(m_aButton[i].IsClicked() || (g_MenuInput.bAccept && (m_iNewGlyph == i)) || (g_acArcadeGlyph[i] == cChar))
+        if(m_aButton[i].IsClicked() || (g_MenuInput.bAccept && (m_iCurGlyph == i)) || (g_acArcadeGlyph[i] == cChar))
         {
             // 
             if(cChar) this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cChar));
@@ -150,11 +162,14 @@ void cArcadeInput::Move()
                     this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cGlyph));
                 }
             }
+
+            // 
+            if(!m_bFinished) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
             break;
         }
 
         // 
-        if(m_aButton[i].IsFocused() && (m_iNewGlyph != i))
+        if(m_aButton[i].IsFocused() && (m_iCurGlyph != i))
         {
             this->__MoveCursor(i);
             break;
@@ -165,27 +180,26 @@ void cArcadeInput::Move()
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
     {
         const coreFloat   fLight = ((g_acArcadeGlyph[i] == ARCADE_COMMAND_DEL) ? m_sTextValue.empty() : (m_sTextValue.length() >= m_iTextLength)) ? MENU_LIGHT_IDLE : MENU_LIGHT_ACTIVE;
-        const coreVector3 vColor = (m_iNewGlyph == i) ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE;
+        const coreVector3 vColor = (m_iCurGlyph == i) ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE;
 
         m_aGlyph[i].SetColor3(vColor * fLight);
     }
 
     // 
-    if(m_fMove < 1.0f)
-    {
-        m_fMove.UpdateMin(10.0f, 1.0f);
-        m_Cursor.SetPosition(LERPB(m_aGlyph[m_iOldGlyph].GetPosition(), m_aGlyph[m_iNewGlyph].GetPosition(), m_fMove));
-    }
-
-    // 
-    m_fCursorAngle.UpdateMod(2.0f, 2.0f*PI);
-    m_Cursor.SetDirection(coreVector2::Direction(m_fCursorAngle));
+    if(!cMenuNavigator::IsUsingJoystick()) m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
 
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].Move();
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aGlyph [i].Move();
-    m_Cursor.Move();
-    m_Text  .Move();
+    m_Text.Move();
+
+    // 
+    m_Background.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));   // TODO 1: check if menu rotation is correct
+    m_Background.Move();
+
+    // 
+    m_Navigator.SetAlpha(this->GetAlpha());
+    m_Navigator.Move();
 }
 
 
@@ -205,10 +219,22 @@ void cArcadeInput::Start(const coreChar* pcTemplate, const coreUint8 iLength)
     m_iTextLength   = iLength;
 
     // 
-    m_iNewGlyph = m_sTextTemplate.empty() ? 0u : cArcadeInput::__RetrieveGlyphIndex(m_sTextTemplate[0]);
+    m_iCurGlyph = m_sTextTemplate.empty() ? 0u : cArcadeInput::__RetrieveGlyphIndex(m_sTextTemplate[0]);
 
     // 
-    m_Cursor.SetPosition(m_aGlyph[m_iNewGlyph].GetPosition());
+    m_Navigator.ForceCurrent(&m_aButton[m_iCurGlyph]);
+}
+
+
+// ****************************************************************
+// 
+void cArcadeInput::Clear()
+{
+    // 
+    m_Text.SetText("");
+
+    // 
+    m_sTextValue = "";
 }
 
 
@@ -219,7 +245,11 @@ void cArcadeInput::__MoveCursor(const coreUintW iNewGylph)
     ASSERT(iNewGylph < ARCADE_GLYPHS)
 
     // 
-    m_fMove     = 0.0f;
-    m_iOldGlyph = m_iNewGlyph;
-    m_iNewGlyph = iNewGylph;
+    m_iCurGlyph = iNewGylph;
+
+    // 
+    m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
+
+    // 
+    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
 }

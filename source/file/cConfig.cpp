@@ -12,6 +12,7 @@ sConfig    g_CurConfig               = {};
 sConfig    g_OldConfig               = {};
 sGameInput g_aGameInput[INPUT_TYPES] = {};
 sGameInput g_TotalInput              = {};
+coreUint8  g_iTotalType              = UINT8_MAX;
 sMenuInput g_MenuInput               = {};
 
 static coreBool s_abFireToggle[INPUT_TYPES + 1u] = {};
@@ -327,6 +328,9 @@ void UpdateInput()
         g_TotalInput.iActionPress   |= oMap.iActionPress;
         g_TotalInput.iActionRelease |= oMap.iActionRelease;
         g_TotalInput.iActionHold    |= oMap.iActionHold;
+
+        // 
+        if(!oMap.vMove.IsNull() || oMap.iActionPress) g_iTotalType = i;
 
         // 
         if(i >= INPUT_SETS_KEYBOARD)

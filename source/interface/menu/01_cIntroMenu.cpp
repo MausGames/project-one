@@ -182,10 +182,10 @@ void cIntroMenu::StartIntro()
             cGuiButton* pUp   = m_apLanguageButton.get_valuelist().at((i + ie - 1u) % ie);
             cGuiButton* pDown = m_apLanguageButton.get_valuelist().at((i + 1u)      % ie);
 
-            m_Navigator.BindObject(m_apLanguageButton.get_valuelist().at(i), pUp, NULL, pDown, NULL, NULL, MENU_TYPE_DEFAULT);
+            m_Navigator.BindObject(m_apLanguageButton.get_valuelist().at(i), pUp, NULL, pDown, NULL, MENU_TYPE_DEFAULT);
         }
         m_Navigator.AssignFirst(m_apLanguageButton.front());
-        m_Navigator.AssignMenu(this);
+        m_Navigator.AssignMenu (this);
 
         // 
         this->BindObject(SURFACE_INTRO_LANGUAGE, &m_Navigator);

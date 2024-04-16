@@ -21,16 +21,30 @@ cMenuNavigator::cMenuNavigator()noexcept
 , m_iFirst       (MENUNAVIGATOR_INVALID)
 , m_iBack        (MENUNAVIGATOR_INVALID)
 , m_bPressed     (false)
+, m_bGrabbed     (false)
+, m_fGrabTime    (1.0f)
 , m_vMouseOffset (coreVector2(0.0f,0.0f))
+, m_vCurPos      (HIDDEN_POS)
+, m_vCurSize     (coreVector2(0.0f,0.0f))
+, m_bShowIcon    (false)
 , m_pMenu        (NULL)
 {
     // 
     this->DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
     this->DefineProgram("default_2d_program");
-    this->SetSize      (coreVector2(0.065f,0.065f));
+    this->SetSize      (coreVector2(0.07f,0.07f));
     this->SetTexSize   (ICON_TEXSIZE);
 
     m_aObject.emplace(NULL);
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
+    {
+        m_aCursor[i].DefineTexture(0u, "menu_cursor.png");
+        m_aCursor[i].DefineProgram("default_2d_program");
+        m_aCursor[i].SetDirection (StepRotated90(i).InvertedX());
+        m_aCursor[i].SetSize      (coreVector2(1.0f,1.0f) * 0.035f);
+    }
 
     // 
     m_aPrompt[0].SetKey(SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
@@ -43,23 +57,37 @@ cMenuNavigator::cMenuNavigator()noexcept
 // 
 void cMenuNavigator::Render()
 {
-    if(!s_bJoystick) return;
-
     // 
-    if(m_aTab.size() >= 2u)
+    if(m_pCurObject)
     {
-        m_aPrompt[0].Render();
-        m_aPrompt[1].Render();
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
+        {
+            m_aCursor[i].SetAlpha(this->GetAlpha() * 0.6f);
+            m_aCursor[i].Render();
+        }
     }
 
-    // 
-    if(m_iBack != MENUNAVIGATOR_INVALID)
+    if(s_bJoystick)
     {
-        m_aPrompt[2].Render();
-    }
+        // 
+        if(m_aTab.size() >= 2u)
+        {
+            m_aPrompt[0].SetAlpha(this->GetAlpha());
+            m_aPrompt[0].Render();
+            m_aPrompt[1].SetAlpha(this->GetAlpha());
+            m_aPrompt[1].Render();
+        }
 
-    // 
-    this->coreObject2D::Render();
+        // 
+        if(m_iBack != MENUNAVIGATOR_INVALID)
+        {
+            m_aPrompt[2].SetAlpha(this->GetAlpha());
+            m_aPrompt[2].Render();
+        }
+
+        // 
+        if(m_bShowIcon) this->cGuiObject::Render();
+    }
 }
 
 
@@ -67,16 +95,53 @@ void cMenuNavigator::Render()
 // 
 void cMenuNavigator::Move()
 {
+    if(m_bGrabbed) m_fGrabTime.UpdateMax(-20.0f, 0.0f);
+              else m_fGrabTime.UpdateMin( 20.0f, 1.0f);
+
     if(m_pCurObject)
     {
         const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
-        const coreVector2 vOffset     = coreVector2(m_pCurObject->GetSize().x * -0.5f - 0.025f, 0.0f);
         const coreVector2 vResolution = Core::System->GetResolution();
 
-        this->SetPosition (vPosition * RCP(vResolution.Min()) + vOffset);
+        const coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) * RCP(vResolution.Min());
+        const coreVector2 vNewSize = m_pCurObject->GetSize();
+
+        if(m_vCurPos == HIDDEN_POS)
+        {
+            m_vCurPos  = vNewPos;
+            m_vCurSize = vNewSize;
+        }
+        else
+        {
+            const coreVector2 vDiff = vNewPos - m_vCurPos;
+            if(!vDiff.IsNull())
+            {
+                m_vCurPos = m_vCurPos + vDiff.Normalized() * (10.0f * TIME * SmoothTowards(vDiff.Length(), 0.5f));
+            }
+
+            const coreVector2 vDiff2 = vNewSize - m_vCurSize;
+            if(!vDiff2.IsNull())
+            {
+                m_vCurSize = m_vCurSize + vDiff2.Normalized() * (10.0f * TIME * SmoothTowards(vDiff2.Length(), 0.5f));
+            }
+        }
+
+        const coreVector2 vOffset = coreVector2(m_vCurSize.x * -0.5f - 0.03f, 0.0f);
+
+        this->SetPosition (m_vCurPos + vOffset);
         this->SetDirection(coreVector2::Direction(1.2f * coreFloat(Core::System->GetTotalTime()))); // TODO 1: should go faster when confirming something
 
-        if(TIME) Core::Input->SetMousePosition((vPosition + m_vMouseOffset) / vResolution);
+        // 
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
+        {
+            m_aCursor[i].SetPosition(m_vCurPos + (m_vCurSize * 0.5f + LERP(0.002f, 0.005f, (0.5f + 0.5f * SIN(coreFloat(Core::System->GetTotalTime()) * (2.0f*PI)))) * m_fGrabTime) * StepRotated90X(i) * SQRT2);
+        }
+
+        if(TIME)
+        {
+            const coreBool bInScroll = std::any_of(m_apScroll.begin(), m_apScroll.end(), [](const coreObject2D* A) {return A->IsFocused();});
+            Core::Input->SetMousePosition(bInScroll ? MENUNAVIGATOR_IGNORE_MOUSE : ((vPosition + m_vMouseOffset) / vResolution));   // for focus
+        }
 
         m_pCurObject->SetFocused(m_pCurObject->IsFocusable());
 
@@ -87,6 +152,13 @@ void cMenuNavigator::Move()
         Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
     }
 
+    if(!m_pCurObject)
+    {
+        m_vCurPos  = HIDDEN_POS;
+        m_vCurSize = coreVector2(0.0f,0.0f);
+        m_bGrabbed = false;
+    }
+
     if(m_pCurObject)
     {
         this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -94,6 +166,14 @@ void cMenuNavigator::Move()
     else
     {
         this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
+    {
+        m_aCursor[i].SetColor3 (m_bGrabbed ? g_pMenu->GetHighlightColor() : coreVector3(1.0f,1.0f,1.0f));
+        m_aCursor[i].SetEnabled(this->GetEnabled());
+        m_aCursor[i].Move();
     }
 
     if(s_bJoystick)
@@ -117,27 +197,24 @@ void cMenuNavigator::Move()
         {
             m_aPrompt[0].SetPosition(coreVector2(-0.43f,0.43f));
             m_aPrompt[0].SetSize    (coreVector2(0.1f,0.1f) * (abPress[0] ? 0.8f : 1.0f));
-            m_aPrompt[0].SetAlpha   (this->GetAlpha());
             m_aPrompt[0].Move();
 
             m_aPrompt[1].SetPosition(coreVector2(0.43f,0.43f));
             m_aPrompt[1].SetSize    (coreVector2(0.1f,0.1f) * (abPress[1] ? 0.8f : 1.0f));
-            m_aPrompt[1].SetAlpha   (this->GetAlpha());
             m_aPrompt[1].Move();
         }
 
         // 
         if(m_iBack != MENUNAVIGATOR_INVALID)
         {
-            m_aPrompt[2].SetPosition(GetTranslationArea(*this->__ToObject(m_iBack)) + coreVector2(0.03f,-0.03f));
+            m_aPrompt[2].SetPosition(MapToAxis(GetTranslationArea(*this->__ToObject(m_iBack)), g_vHudDirection) + coreVector2(0.03f,-0.03f));
             m_aPrompt[2].SetSize    (coreVector2(0.07f,0.07f) * (abPress[2] ? 0.8f : 1.0f));
-            m_aPrompt[2].SetAlpha   (this->GetAlpha());
             m_aPrompt[2].Move();
         }
     }
 
     // 
-    this->coreObject2D::Move();
+    this->cGuiObject::Move();
 
     if(!this->GetAlpha()) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, false);
 }
@@ -159,7 +236,8 @@ void cMenuNavigator::Update()
     coreBool bNewPressed = false;
     const auto nPressFunc = [&]()
     {
-        if(!m_bPressed && !bNewPressed) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, true);
+        if(!g_pMenu->IsShifting())
+            if(!m_bPressed && !bNewPressed) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, true);
         bNewPressed = true;
     };
 
@@ -167,13 +245,14 @@ void cMenuNavigator::Update()
     {
         m_aiLock    .resize(Core::Input->GetJoystickNum(), 0xFFu);
         m_aiLastPack.resize(Core::Input->GetJoystickNum(), 8u);
+        m_aAutomatic.resize(Core::Input->GetJoystickNum(), coreTimer(1.0f, 10.0f, 0u));
     }
 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
         const coreVector2 vRelative = Core::Input->GetJoystickRelativeL(i);
 
-        const coreVector2 vMove = vRelative.IsNull() ? vRelative : AlongCross(vRelative);
+        const coreVector2 vMove = vRelative.IsNull() ? coreVector2(0.0f,0.0f) : AlongCross(vRelative);
         const coreUint8   iPack = PackDirection(vMove);
 
         if(vRelative.IsNull() && !Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD))
@@ -184,7 +263,6 @@ void cMenuNavigator::Update()
         if(s_bJoystick && !m_pCurObject && (m_iFirst == MENUNAVIGATOR_INVALID))
         {
             REMOVE_BIT(m_aiLock[i], 0u)
-            REMOVE_BIT(m_aiLock[i], 1u)
         }
 
         if(!HAS_BIT(m_aiLock[i], 0u))
@@ -215,16 +293,18 @@ void cMenuNavigator::Update()
 
                     coreObject2D* pCurTab = m_aTab.get_keylist()[iCurTab];
 
-                    m_pMenu->ChangeSurface(m_aTab.at(pCurTab).iSurface, 0.0f);
+                    cMenu::ChangeTab(m_pMenu, m_aTab.at(pCurTab).iSurface);
 
                     if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_NODE))
                     {
-                        m_pCurObject = this->__ToObject(m_aObject.at(pCurTab).iMoveDown);
+                        m_pCurObject = this->__ToObject(m_aTab.at(pCurTab).iFallDown);
 
-                        for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && m_pCurObject && !m_pCurObject->GetAlpha(); ++j)
+                        for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && m_pCurObject && !cMenuNavigator::IsValid(m_pCurObject); ++j)
                         {
-                            const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
-                            m_pCurObject = this->__ToObject(iFallback ? iFallback : m_aObject.at(m_pCurObject).iMoveDown);
+                            const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveDown;
+                            if(!iFallback) break;
+
+                            m_pCurObject = this->__ToObject(iFallback);
                         }
                     }
                     else if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_ROOT))
@@ -238,16 +318,22 @@ void cMenuNavigator::Update()
 
             if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS))
             {
-                coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
+                const coreBool bOldGrabbed = m_bGrabbed;
 
-                if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_HOLD))
+                if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS))
                 {
-                    m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox);
-                    nPressFunc();
+                    m_bGrabbed = !m_bGrabbed;
                 }
+                if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS) && m_bGrabbed)
+                {
+                    g_MenuInput.bCancel = false;
+                    m_bGrabbed = false;
+                }
+
+                if(bOldGrabbed != m_bGrabbed) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
             }
 
-            if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_MOVE))
+            if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_MOVE) || (HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS) && m_bGrabbed))
             {
                 coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
 
@@ -255,69 +341,83 @@ void cMenuNavigator::Update()
                 else if(iPack == 6u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
             }
 
-            if((iPack != m_aiLastPack[i]) && (iPack != 8u))
+            if((iPack != m_aiLastPack[i]) || (iPack == 8u) || m_bGrabbed)
             {
-                if(!HAS_BIT(m_aiLock[i], 1u))
+                m_aAutomatic[i].Pause();
+                m_aAutomatic[i].SetValue(CORE_SWITCHBOX_DELAY);
+            }
+
+            if((iPack != 8u) && !m_bGrabbed && (m_aAutomatic[i].Update(1.0f) || !m_aAutomatic[i].GetStatus()))
+            {
+                coreObject2D* pNewObject = NULL;
+
+                // TODO 1: erlaub schräge eingabe hier, für arcade input
+
+                switch(iPack)
                 {
-                    ADD_BIT(m_aiLock[i], 1u)
+                default: ASSERT(false)
+                case 0u: pNewObject = this->__ToObject(oEntry.iMoveUp);    break;
+                case 2u: pNewObject = this->__ToObject(oEntry.iMoveLeft);  break;
+                case 4u: pNewObject = this->__ToObject(oEntry.iMoveDown);  break;
+                case 6u: pNewObject = this->__ToObject(oEntry.iMoveRight); break;
+                }
 
-                    coreObject2D* pNewObject = NULL;
-
-                    switch(iPack)
+                if(m_pMenu && HAS_FLAG(m_aObject.at(pNewObject).eType, MENU_TYPE_TAB_NODE) && (m_aObject.at(pNewObject).iSurface != m_pMenu->GetCurSurface()))
+                {
+                    for(coreUintW j = 0u, je = m_aTab.size(); j < je; ++j)
                     {
-                    default: ASSERT(false)
-                    case 0u: pNewObject = this->__ToObject(oEntry.iMoveUp);    break;
-                    case 2u: pNewObject = this->__ToObject(oEntry.iMoveLeft);  break;
-                    case 4u: pNewObject = this->__ToObject(oEntry.iMoveDown);  break;
-                    case 6u: pNewObject = this->__ToObject(oEntry.iMoveRight); break;
-                    }
-
-                    for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && pNewObject && !pNewObject->GetAlpha(); ++j)
-                    {
-                        const coreUint8 iFallback = m_aObject.at(pNewObject).iMoveFallback;
-                        if(iFallback)
-                        {
-                            pNewObject = this->__ToObject(iFallback);
-                        }
-                        else
+                        if(m_aTab.get_valuelist()[j].iSurface == m_pMenu->GetCurSurface())
                         {
                             switch(iPack)
                             {
                             default: ASSERT(false)
-                            case 0u: pNewObject = this->__ToObject(m_aObject.at(pNewObject).iMoveUp);    break;
-                            case 2u: pNewObject = this->__ToObject(m_aObject.at(pNewObject).iMoveLeft);  break;
-                            case 4u: pNewObject = this->__ToObject(m_aObject.at(pNewObject).iMoveDown);  break;
-                            case 6u: pNewObject = this->__ToObject(m_aObject.at(pNewObject).iMoveRight); break;
+                            case 0u: pNewObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallUp);    break;
+                            case 2u: pNewObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallLeft);  break;
+                            case 4u: pNewObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallDown);  break;
+                            case 6u: pNewObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallRight); break;
                             }
-                        }
-                    }
-
-                    //if(!m_pCurObject && !pNewObject)
-                    //{
-                    //    FOR_EACH(it, m_aObject.get_keylist())
-                    //    {
-                    //        if((*it) && (*it)->GetAlpha())
-                    //        {
-                    //            pNewObject = (*it);
-                    //            break;
-                    //        }
-                    //    }
-                    //}
-
-                    if(pNewObject && pNewObject->GetAlpha())
-                    {
-                        m_pCurObject = pNewObject;
-
-                        if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_AUTO_CLICK))
-                        {
-                            nPressFunc();
+                            break;
                         }
                     }
                 }
-            }
-            else
-            {
-                REMOVE_BIT(m_aiLock[i], 1u)
+
+                for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && pNewObject && !cMenuNavigator::IsValid(pNewObject); ++j)
+                {
+                    coreObject2D* A;
+                    switch(iPack)
+                    {
+                    default: ASSERT(false)
+                    case 0u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveUp);    break;
+                    case 2u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveLeft);  break;
+                    case 4u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveDown);  break;
+                    case 6u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveRight); break;
+                    }
+                    pNewObject = A;
+                }
+
+                //if(!m_pCurObject && !pNewObject)
+                //{
+                //    FOR_EACH(it, m_aObject.get_keylist())
+                //    {
+                //        if((*it) && (*it)->GetAlpha())
+                //        {
+                //            pNewObject = (*it);
+                //            break;
+                //        }
+                //    }
+                //}
+
+                if(pNewObject && cMenuNavigator::IsValid(pNewObject))
+                {
+                    m_pCurObject = pNewObject;
+
+                    if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_AUTO_CLICK))
+                    {
+                        nPressFunc();
+                    }
+                }
+                
+                m_aAutomatic[i].Play(CORE_TIMER_PLAY_CURRENT);
             }
 
             m_aiLastPack[i] = iPack;
@@ -328,12 +428,16 @@ void cMenuNavigator::Update()
     {
         m_pCurObject = this->__ToObject((m_iStore != MENUNAVIGATOR_INVALID) ? m_iStore : m_iFirst);
 
-        for(coreUintW i = 0u, ie = m_aObject.size(); (i < ie) && m_pCurObject && !m_pCurObject->GetAlpha(); ++i)
+        if(m_pMenu && HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_NODE) && (m_aObject.at(m_pCurObject).iSurface != m_pMenu->GetCurSurface()))
         {
-            const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
-            if(!iFallback) break;
-
-            m_pCurObject = this->__ToObject(iFallback);
+            for(coreUintW j = 0u, je = m_aTab.size(); j < je; ++j)
+            {
+                if(m_aTab.get_valuelist()[j].iSurface == m_pMenu->GetCurSurface())
+                {
+                    m_pCurObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallDown);
+                    break;
+                }
+            }
         }
     }
 
@@ -349,12 +453,13 @@ void cMenuNavigator::Update()
 
     if(!s_bJoystick) std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
 
-    if(m_pCurObject && m_pCurObject->GetAlpha())
+    if(m_pCurObject && cMenuNavigator::IsValid(m_pCurObject))
     {
         const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
         const coreVector2 vResolution = Core::System->GetResolution();
 
-        Core::Input->SetMousePosition((vPosition + m_vMouseOffset) / vResolution);
+        const coreBool bInScroll = std::any_of(m_apScroll.begin(), m_apScroll.end(), [](const coreObject2D* A) {return A->IsFocused();});
+        Core::Input->SetMousePosition(bInScroll ? MENUNAVIGATOR_IGNORE_MOUSE : (vPosition + m_vMouseOffset) / vResolution);   // for focus and click
     }
     else if(s_bJoystick)
     {
@@ -372,14 +477,13 @@ void cMenuNavigator::Update()
 
 // ****************************************************************
 // 
-void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, coreObject2D* pFallback, const eMenuType eType)
+void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, const eMenuType eType, const coreUint8 iSurface)
 {
     // 
-    if(!m_aObject.count(pUp))       m_aObject.emplace(pUp);
-    if(!m_aObject.count(pLeft))     m_aObject.emplace(pLeft);
-    if(!m_aObject.count(pDown))     m_aObject.emplace(pDown);
-    if(!m_aObject.count(pRight))    m_aObject.emplace(pRight);
-    if(!m_aObject.count(pFallback)) m_aObject.emplace(pFallback);
+    if(!m_aObject.count(pUp))    m_aObject.emplace(pUp);
+    if(!m_aObject.count(pLeft))  m_aObject.emplace(pLeft);
+    if(!m_aObject.count(pDown))  m_aObject.emplace(pDown);
+    if(!m_aObject.count(pRight)) m_aObject.emplace(pRight);
 
     // 
     sMenuEntry oEntry;
@@ -387,8 +491,8 @@ void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreOb
     oEntry.iMoveLeft     = this->__ToIndex(pLeft);
     oEntry.iMoveDown     = this->__ToIndex(pDown);
     oEntry.iMoveRight    = this->__ToIndex(pRight);
-    oEntry.iMoveFallback = this->__ToIndex(pFallback);
     oEntry.eType         = eType;
+    oEntry.iSurface      = iSurface;
 
     // 
     m_aObject[pObject] = oEntry;
@@ -401,6 +505,43 @@ void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreOb
     }
     
     if(pObject) pObject->SetAlpha(0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cMenuNavigator::BindSurface(coreObject2D* pTab, const coreUint8 iSurface, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight)
+{
+    ASSERT(m_aTab.count(pTab))
+
+    sMenuTab oTab;
+    oTab.iSurface   = iSurface;
+    oTab.iFallUp    = this->__ToIndex(pUp);
+    oTab.iFallLeft  = this->__ToIndex(pLeft);
+    oTab.iFallDown  = this->__ToIndex(pDown);
+    oTab.iFallRight = this->__ToIndex(pRight);
+
+    m_aTab.at(pTab) = oTab;
+}
+
+
+// ****************************************************************
+// 
+void cMenuNavigator::BindScroll(coreObject2D* pScroll)
+{
+    m_apScroll.insert(pScroll);
+}
+
+
+// ****************************************************************
+// 
+void cMenuNavigator::GlobalInit()
+{
+    if(Core::Input->GetJoystickNum())
+    {
+        s_bJoystick     = true;
+        s_iJoystickType = Core::Input->GetJoystickGamepadType(0);
+    }
 }
 
 

@@ -19,6 +19,8 @@
 // TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 // TODO 2: some options, like mirror-mode, should only take affect if it is allowed
+// TODO 3: last-used input type might get disconnected, without reset
+// TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized with special value, but gets set to the set with the mouse-button when navigating menu with mouse
 
 
 // ****************************************************************
@@ -38,8 +40,6 @@
 #define CONFIG_AUDIO_AMBIENT_VOLUME "Audio",    "AmbientVolume",                        (1.0f)
 #define CONFIG_AUDIO_3D_SOUND       "Audio",    "3DSound",                              (1)
 // TODO 1: HRTF from core-config  (might improve headphone sound quality)
-// TODO 1: turn effect
-// TODO 1: shooting effect
 
 #define CONFIG_INPUT_TYPE(p)        "Input",    PRINT("P%zu_Type",      (p)),           (p + INPUT_SETS_KEYBOARD)
 #define CONFIG_INPUT_RUMBLE(p)      "Input",    PRINT("P%zu_Rumble",    (p)),           (0)
@@ -57,7 +57,7 @@
 #define CONFIG_GAME_HUD_ROTATION    "Game",     "HudRotation",                          (0)
 #define CONFIG_GAME_HUD_SCALE       "Game",     "HudScale",                             (100)
 #define CONFIG_GAME_HUD_TYPE        "Game",     "HudType",                              (0)
-#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (0)//((60)//(120) TODO 1: 120 makes it slow in menu, on debug
+#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (0)
 #define CONFIG_GAME_VERSION         "Game",     "Version",                              (0)
 #define CONFIG_GAME_MIRROR_MODE     "Game",     "MirrorMode",                           (0)
 
@@ -179,6 +179,7 @@ extern sConfig    g_CurConfig;                 // current and active configurati
 extern sConfig    g_OldConfig;                 // handle for old values
 extern sGameInput g_aGameInput[INPUT_TYPES];   // mapped game input values (ready for direct use)
 extern sGameInput g_TotalInput;                // combination of all mapped game input values from all available input sets
+extern coreUint8  g_iTotalType;                // 
 extern sMenuInput g_MenuInput;                 // 
 
 

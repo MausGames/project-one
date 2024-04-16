@@ -11,12 +11,9 @@
 #define _P1_GUARD_MENUNAVIGATOR_H_
 
 // TODO 4: cleanup, even header members and functions
-// TODO 1: add button descriptions (at bottom) and for tabs
-// TODO 1: improve cursor graphics (gamepad, also mouse?)
 // TODO 3: allow selecting the current tab when going below bottom, instead of skipping it
 // TODO 1: allow hiding cursor (e.g. for world-map)
 // TODO 1: correctly handle button-remapping feature
-// TODO 1: auto-move bei gedrückt-halten, aber mit niedrigerer geschwindigkeit
 // TODO 3: when changing input for keyboard+mouse, you can use the joystick to map the left mouse-button
 
 
@@ -40,48 +37,63 @@ ENABLE_BITWISE(eMenuType)
 
 // ****************************************************************
 // 
-class cMenuNavigator final : public coreObject2D
+class cMenuNavigator final : public cGuiObject
 {
 private:
     // 
     struct sMenuEntry final
     {
-        coreUint8 iMoveUp;         // 
-        coreUint8 iMoveLeft;       // 
-        coreUint8 iMoveDown;       // 
-        coreUint8 iMoveRight;      // 
-        coreUint8 iMoveFallback;   // 
-        eMenuType eType;           // 
+        coreUint8 iMoveUp;      // 
+        coreUint8 iMoveLeft;    // 
+        coreUint8 iMoveDown;    // 
+        coreUint8 iMoveRight;   // 
+        eMenuType eType;        // 
+        coreUint8 iSurface;     // 
     };
 
     struct sMenuTab final
     {
-        coreUint8 iSurface;   // 
+        coreUint8 iSurface;     // 
+        coreUint8 iFallUp;      // 
+        coreUint8 iFallLeft;    // 
+        coreUint8 iFallDown;    // 
+        coreUint8 iFallRight;   // 
     };
 
 
 private:
-    coreMap<coreObject2D*, sMenuEntry> m_aObject;   // 
-    coreMap<coreObject2D*, sMenuTab>   m_aTab;      // 
+    coreMap<coreObject2D*, sMenuEntry> m_aObject;    // 
+    coreMap<coreObject2D*, sMenuTab>   m_aTab;       // 
+    coreSet<coreObject2D*>             m_apScroll;   // 
 
-    coreObject2D* m_pCurObject;                     // 
-    coreUint8 m_iStore;                             // 
-    coreUint8 m_iFirst;                             // 
-    coreUint8 m_iBack;                              // 
+    coreObject2D* m_pCurObject;                      // 
+    coreUint8 m_iStore;                              // 
+    coreUint8 m_iFirst;                              // 
+    coreUint8 m_iBack;                               // 
 
-    coreBool m_bPressed;                            // 
-    coreList<coreUint8> m_aiLock;                   // (0 = all | 1 = move) 
-    coreList<coreUint8> m_aiLastPack;
+    coreBool m_bPressed;                             // 
+    coreBool m_bGrabbed;                             // 
+    coreFlow m_fGrabTime;                            // 
+    coreList<coreUint8> m_aiLock;                    // 
+    coreList<coreUint8> m_aiLastPack;                // 
 
-    coreVector2 m_vMouseOffset;                     // 
+    coreList<coreTimer> m_aAutomatic;                // 
 
-    coreMenu* m_pMenu;                              // 
+    coreVector2 m_vMouseOffset;                      // 
 
-    cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];       // 
+    coreVector2 m_vCurPos;                           // 
+    coreVector2 m_vCurSize;                          // 
+    coreBool    m_bShowIcon;                         // 
 
-    static coreVector2 s_vMouseMove;                // 
-    static coreBool    s_bJoystick;                 // 
-    static coreUint8   s_iJoystickType;             // 
+    cGuiObject m_aCursor[4];                         // 
+
+    coreMenu* m_pMenu;                               // 
+
+    cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];        // 
+
+    static coreVector2 s_vMouseMove;                 // 
+    static coreBool    s_bJoystick;                  // 
+    static coreUint8   s_iJoystickType;              // 
 
 
 public:
@@ -97,20 +109,32 @@ public:
     void Update();
 
     // 
-    void BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, coreObject2D* pFallback, const eMenuType eType);
+    void BindObject (coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, const eMenuType eType, const coreUint8 iSurface = 0u);
+    void BindSurface(coreObject2D* pTab, const coreUint8 iSurface, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight);
+    void BindScroll (coreObject2D* pScroll);
 
     // 
-    inline void AssignMenu   (coreMenu*     pMenu)                          {ASSERT(pMenu)                    m_pMenu  = pMenu;}
-    inline void AssignSurface(coreObject2D* pTab, const coreUint8 iSurface) {ASSERT(m_aTab   .count(pTab))    m_aTab.at(pTab).iSurface = iSurface;}
-    inline void AssignFirst  (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iFirst = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
-    inline void AssignBack   (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iBack  = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
-    inline void ResetFirst   ()                                             {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID;}
+    inline void AssignMenu (coreMenu*     pMenu)                          {ASSERT(pMenu)                    m_pMenu  = pMenu;}
+    inline void AssignFirst(coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iFirst = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
+    inline void AssignBack (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iBack  = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
+    inline void ResetFirst ()                                             {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID; m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f);}
 
     // 
-    inline void SetCurrent(coreObject2D* pObject) {ASSERT(m_aObject.count(pObject)) m_pCurObject = pObject;}
+    inline void ShowIcon(const coreBool bStatus) {m_bShowIcon = bStatus;}
 
     // 
+    inline void OverrideCurrent(coreObject2D* pObject) {ASSERT(m_aObject.count(pObject)) m_pCurObject = pObject;}
+    inline void ForceCurrent   (coreObject2D* pObject) {this->OverrideCurrent(pObject); m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f);}
+
+    // 
+    static void GlobalInit();
     static void GlobalUpdate();
+
+    // 
+    static inline const coreBool& IsUsingJoystick() {return s_bJoystick;}
+
+    // 
+    static inline coreBool IsValid(const coreObject2D* pObject) {ASSERT(pObject) return (pObject->GetAlpha() && pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL));}
 
 
 private:

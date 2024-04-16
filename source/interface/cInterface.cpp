@@ -80,6 +80,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 , m_fAlertStart     (INTERFACE_INVALID_START)
 , m_fAnimation      (0.0f)
 , m_fRotation       (0.0f)
+, m_fShake          (0.0f)
 , m_bVisible        (false)
 , m_fAlphaAll       (0.0f)
 , m_fAlphaBoss      (0.0f)
@@ -161,10 +162,10 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 
     for(coreUintW i = 0u; i < INTERFACE_HELPERS; ++i)
     {
-        m_aHelper[i].DefineTexture(0u, "menu_helper_small.png");
+        m_aHelper[i].DefineTexture(0u, "menu_helper_small_12.png");
         m_aHelper[i].DefineProgram("default_2d_program");
-        m_aHelper[i].SetTexSize   (coreVector2(0.25f,0.5f));
-        m_aHelper[i].SetTexOffset (coreVector2(0.25f,0.5f) * coreVector2(I_TO_F(i % 4u), I_TO_F(i / 4u)));
+        m_aHelper[i].SetTexSize   (coreVector2(0.25f,0.25f));
+        m_aHelper[i].SetTexOffset (coreVector2(0.25f,0.25f) * coreVector2(I_TO_F(i % 4u), I_TO_F(i / 4u)));
 
         m_aHelperWave[i].DefineTexture(0u, m_aHelper[i].GetTexture(0u));
         m_aHelperWave[i].DefineProgram(m_aHelper[i].GetProgram  ());
@@ -195,7 +196,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBannerIcon); ++i)
     {
-        m_aBannerIcon[i].DefineTexture(0u, "menu_helper_big.png");
+        m_aBannerIcon[i].DefineTexture(0u, "menu_helper_big_02.png");
         m_aBannerIcon[i].DefineProgram("default_2d_program");
         m_aBannerIcon[i].SetPosition(coreVector2(0.0f, 0.0f));
         m_aBannerIcon[i].SetSize    (coreVector2(1.0f, 1.0f) * (i ? 0.35f : 0.45f));
@@ -207,6 +208,8 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBannerText[0].SetColor3(COLOR_MENU_INSIDE * 0.75f);
     m_aBannerText[1].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
     m_aBannerText[1].SetColor3(COLOR_MENU_INSIDE * 0.75f);
+    m_aBannerText[2].DefineTexture(2u, "menu_background_black.png");
+    m_aBannerText[3].DefineTexture(2u, "menu_background_black.png");
 
     m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aStoryText[0].SetColor3(COLOR_MENU_INSIDE);
@@ -369,7 +372,7 @@ void cInterface::Move()
 
     // 
     m_fAnimation.UpdateMod(6.0f*PI, 2.0f*PI);
-    const coreFloat fDanger = 0.5f + 0.5f * SIN(m_fAnimation);
+    const coreFloat fDanger = g_CurConfig.Graphics.iFlash ? (0.5f + 0.5f * SIN(m_fAnimation)) : 0.0f;
 
     // 
     m_fRotation.UpdateMod(1.0f, 2.0f*PI);
@@ -384,7 +387,7 @@ void cInterface::Move()
     this->UpdateSpacing();   // TODO 1: sollte nicht ständig aufgerufen werden
     
     
-    const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (IsHorizontal(Core::System->GetResolution()) ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
+    const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (cInterface::__IsFlipped() ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
     const coreVector2 vAdd  = coreVector2((vFlip.x < 0.0f) ? 0.02f : 0.0f, (vFlip.y < 0.0f) ? 0.02f : 0.0f);
     
     const auto nFlipFunc = [&](const coreVector2 vBasePos, const coreObject2D* pObject)
@@ -413,7 +416,8 @@ void cInterface::Move()
                        else oView.fSpin2 = 0.0f;
 
             // set shield bar size
-            const coreFloat fPercent = pPlayer->GetCurShieldPct() * oView.fSpin2;
+            const coreFloat fBase    = pPlayer->GetCurShieldPct();
+            const coreFloat fPercent = fBase * oView.fSpin2;
             const coreFloat fWidth   = oView.aShieldBar[0].GetSize().x - 0.01f;
             oView.aShieldBar[1].SetSize     (coreVector2(fPercent * fWidth, oView.aShieldBar[1].GetSize().y));
             oView.aShieldBar[1].SetTexSize  (coreVector2(fPercent, 1.0f));
@@ -426,7 +430,7 @@ void cInterface::Move()
             oView.aShieldBar[2].SetTexOffset(coreVector2((oView.aShieldBar[2].GetAlignment().x < 0.0f) ? 0.0f : fPercent, 1.0f));
 
             // set shield bar color
-            const coreVector3 vColor = LERP((pPlayer->GetEnergyColor() * 2.3f) * 0.95f * 0.95f + ((fPercent <= 0.2f) ? (fDanger * 0.5f) : 0.0f), coreVector3(1.0f,1.0f,1.0f), fBump);
+            const coreVector3 vColor = LERP((pPlayer->GetEnergyColor() * 2.3f) * 0.95f * 0.95f + ((fBase <= 0.2f) ? (fDanger * 0.5f) : 0.0f), coreVector3(1.0f,1.0f,1.0f), fBump);
             oView.aShieldBar[1].SetColor3(vColor * 1.0f);
             oView.aShieldBar[2].SetColor3(vColor * 0.3f);
 
@@ -486,7 +490,7 @@ void cInterface::Move()
         const coreFloat fImmuneValue = BLENDB(1.0f - oView.fImmuneTime);
 
         // 
-        oView.oImmune.SetPosition(GetTranslationArea(oView.aLife[2]) + coreVector2(0.0f, 0.05f * fImmuneValue));
+        oView.oImmune.SetPosition(MapToAxis(GetTranslationArea(oView.aLife[2]), g_vHudDirection) + coreVector2(0.0f, 0.05f * fImmuneValue));
         oView.oImmune.SetEnabled (oView.fImmuneTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
         // set player transparency
@@ -521,7 +525,8 @@ void cInterface::Move()
                     else m_fBossSpin = 0.0f;
 
         // set health bar size
-        const coreFloat fPercent = pBoss->GetCurHealthPct() * m_fBossSpin;
+        const coreFloat fBase    = pBoss->GetCurHealthPct();
+        const coreFloat fPercent = fBase * m_fBossSpin;
         const coreFloat fWidth   = m_aBossHealthBar[0].GetSize().x - 0.01f;
         m_aBossHealthBar[1].SetPosition(coreVector2(fWidth * (fPercent-1.0f) * 0.5f, m_aBossHealthBar[1].GetPosition().y));
         m_aBossHealthBar[1].SetSize    (coreVector2(fWidth *  fPercent,              m_aBossHealthBar[1].GetSize    ().y));
@@ -533,7 +538,7 @@ void cInterface::Move()
         m_aBossHealthBar[2].SetTexSize  (coreVector2(fRev,     1.0f));
         m_aBossHealthBar[2].SetTexOffset(coreVector2(fPercent, 1.0f));
 
-        const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), cShip::TransformColorFactor(pBoss->GetCurHealthPct())) + ((fPercent <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
+        const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), cShip::TransformColorFactor(fBase)) + ((fBase <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
         m_aBossHealthBar[1].SetColor3(vColor * 1.0f);
         m_aBossHealthBar[2].SetColor3(vColor * 0.3f);
 
@@ -772,7 +777,7 @@ void cInterface::Move()
 
         coreVector2 vBasePos = coreVector2(-0.013f - 0.02f * SIN(fBump * (1.0f*PI)), m_aHelper[i].GetAlignment().y ? (0.011f + I_TO_F(INTERFACE_HELPERS - i - 1u) * 0.06f) : ((I_TO_F(INTERFACE_HELPERS - i - 1u) - I_TO_F(INTERFACE_HELPERS - 1u) * 0.5f) * 0.06f));
         
-        if(!IsHorizontal(Core::System->GetResolution()) && m_aHelper[i].GetAlignment().y) vBasePos = vBasePos.yx();
+        if(!cInterface::__IsFlipped() && m_aHelper[i].GetAlignment().y) vBasePos = vBasePos.yx();
         
         // 
         m_aHelper[i].SetPosition (nFlipFunc(vBasePos, &m_aHelper[i]));
@@ -874,14 +879,28 @@ void cInterface::Move()
         m_BannerBar.SetTexOffset(coreVector2(1.0f,1.0f) * (fBanner * 0.15f));
 
         // animate banner text
-        const coreFloat fTextOffset = (fAnimation + 2.0f) * 0.024f;
+        const coreFloat fTextOffset = (fAnimation + 2.0f) * 0.034f;
         m_aBannerText[0].SetPosition(coreVector2( fTextOffset,  0.029f));
         m_aBannerText[1].SetPosition(coreVector2(-fTextOffset, -0.029f));
 
         // 
         if(m_iBannerType == INTERFACE_BANNER_TYPE_ALERT)
         {
-            m_aBannerText[3].SetColor3(COLOR_MENU_INSIDE * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, fDanger));
+            m_aBannerText[3].SetColor3(COLOR_MENU_INSIDE * LERP(MENU_LIGHT_ACTIVE, MENU_LIGHT_IDLE, fDanger));
+
+            m_fShake.Update(30.0f);
+            if(m_fShake >= 1.0f)
+            {
+                m_fShake = FRACT(m_fShake);
+                m_aBannerText[3].SetPosition(coreVector2::Rand(1.0f) * (g_CurConfig.Graphics.iShake ? 0.0015f : 0.0f));   // only on/off
+            }
+        }
+
+        // 
+        if((m_iBannerType == INTERFACE_BANNER_TYPE_MISSION) || (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS))
+        {
+            m_aBannerText[2].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
+            m_aBannerText[3].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
         }
 
         // 
@@ -895,8 +914,8 @@ void cInterface::Move()
         // set banner transparency
         const coreFloat fBannerAlpha = BLENDH3(fVisibility) * MENU_INSIDE_ALPHA;
         m_BannerShadow  .SetAlpha(fBannerAlpha * 0.7f);
-        m_aBannerIcon[0].SetAlpha(fBannerAlpha * 0.3f);
-        m_aBannerIcon[1].SetAlpha(fBannerAlpha * 0.6f);
+        m_aBannerIcon[0].SetAlpha(fBannerAlpha * 0.6f);
+        m_aBannerIcon[1].SetAlpha(fBannerAlpha * 0.8f);
         m_aBannerText[0].SetAlpha(fBannerAlpha * 0.2f);
         m_aBannerText[1].SetAlpha(fBannerAlpha * 0.2f);
         m_aBannerText[2].SetAlpha(fBannerAlpha);
@@ -987,6 +1006,8 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
         // realign objects as mission banner
         m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_3,  MENU_OUTLINE_SMALL);
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
+        m_aBannerText[2].DefineProgram("menu_swipe_program");
+        m_aBannerText[3].DefineProgram("menu_swipe_program");
 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.06f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
@@ -999,7 +1020,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     }
 
     // 
-    m_aBannerIcon[0].SetColor3   (g_pEnvironment->GetBackground()->GetColor() * 0.6f);
+    m_aBannerIcon[0].SetColor3   (g_pEnvironment->GetBackground()->GetColor() * 0.8f);
     m_aBannerIcon[0].SetTexOffset(g_pEnvironment->GetBackground()->GetIcon ());
     m_aBannerIcon[1].SetColor3   (g_pEnvironment->GetBackground()->GetColor() * 0.8f);
     m_aBannerIcon[1].SetTexOffset(g_pEnvironment->GetBackground()->GetIcon ());
@@ -1050,6 +1071,8 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
         // realign objects as boss banner
         m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_3,  MENU_OUTLINE_SMALL);
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
+        m_aBannerText[2].DefineProgram("menu_swipe_program");
+        m_aBannerText[3].DefineProgram("menu_swipe_program");
 
         if(bEigengrau)
         {
@@ -1280,7 +1303,7 @@ void cInterface::UpdateLayout()
     const coreVector2 vCenter = coreVector2(0.5f,0.5f) - (g_CurConfig.Game.iHudType ? coreVector2(1.0f,1.0f) : Core::System->GetResolution().yx().MinRatio()) * 0.005f;
     // TODO 1: option 0.5f-0.45f, handle aspect ratio (for outside) (also up-down)
     
-    const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (IsHorizontal(Core::System->GetResolution()) ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
+    const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (cInterface::__IsFlipped() ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
     const coreVector2 vAdd  = coreVector2((vFlip.x < 0.0f) ? 0.02f : 0.0f, (vFlip.y < 0.0f) ? 0.02f : 0.0f);
 
     // 
@@ -1404,10 +1427,10 @@ void cInterface::UpdateLayout()
 void cInterface::UpdateSpacing()
 {
     
-    const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (IsHorizontal(Core::System->GetResolution()) ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
+    const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (cInterface::__IsFlipped() ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
     const coreVector2 vAdd  = coreVector2((vFlip.x < 0.0f) ? 0.02f : 0.0f, (vFlip.y < 0.0f) ? 0.02f : 0.0f);
     
-    const coreFloat fShift = -vAdd.y + LERPS(-0.005f, -0.04f, ((g_CurConfig.Game.iHudType == 1u) || !IsHorizontal(Core::System->GetResolution())) ? m_fAlphaBoss.ToFloat() : 0.0f);
+    const coreFloat fShift = -vAdd.y + LERPS(-0.005f, -0.04f, ((g_CurConfig.Game.iHudType == 1u) || !cInterface::__IsFlipped()) ? m_fAlphaBoss.ToFloat() : 0.0f);
     
     const auto nSetSpacingFunc = [&](coreObject2D* OUTPUT pObject, const coreFloat fOffset)
     {

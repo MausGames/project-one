@@ -379,14 +379,16 @@ void cCholBoss::__MoveOwn()
 
             const coreVector2 vPos = this->GetPosition().xy();
 
-            for(coreUintW j = 36u; j--; )
+            for(coreUintW j = 40u; j--; )
             {
                 if((j % 2u) == (iTick % 2u)) continue;
 
-                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 5.0f + 87.5f));
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f + (90.0f - 4.5f * 0.5f)));
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,  vDir)->ChangeSize(1.7f);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos, -vDir)->ChangeSize(1.7f);
+                const coreFloat fSpeed = ((j / 4u) % 2u) ? 1.2f : 1.0f;
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, fSpeed, this, vPos,  vDir)->ChangeSize(1.8f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, fSpeed, this, vPos, -vDir)->ChangeSize(1.8f);
             }
         });
     }

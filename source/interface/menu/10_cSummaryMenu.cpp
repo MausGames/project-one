@@ -194,11 +194,12 @@ cSummaryMenu::cSummaryMenu()noexcept
     
 
     // 
-    m_Navigator.BindObject(NULL,             &m_RestartButton, NULL, &m_ExitButton, NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_RestartButton, NULL,             NULL, &m_ExitButton, NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,    &m_RestartButton, NULL, NULL,          NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(NULL,             &m_RestartButton, NULL, &m_ExitButton, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_RestartButton, NULL,             NULL, &m_ExitButton, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,    &m_RestartButton, NULL, NULL,          NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.AssignMenu(this);
+    m_Navigator.ShowIcon  (true);
 
     // bind menu objects
     this->BindObject(SURFACE_SUMMARY_MISSION_COOP, &m_BackgroundCoop);

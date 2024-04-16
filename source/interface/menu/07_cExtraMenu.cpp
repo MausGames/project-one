@@ -53,56 +53,43 @@ cExtraMenu::cExtraMenu()noexcept
     m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
-    m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y); 
-    m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
+    m_BackButton.SetSize      (coreVector2( 0.07f,0.07f));
+    m_BackButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
-
-    m_TrophyHeader.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_TrophyHeader.SetPosition    (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.21f,-0.045f));
-    m_TrophyHeader.SetColor3      (COLOR_MENU_WHITE);
-    m_TrophyHeader.SetTextLanguage("UNKNOWN");   // TODO 1: "EXTRA_TROPHIES"
 
     m_ProgressArea.DefineTexture(0u, "menu_detail_04.png");
     m_ProgressArea.DefineTexture(1u, "menu_background_black.png");
     m_ProgressArea.DefineProgram("menu_inner_program");
-    m_ProgressArea.SetPosition  (coreVector2(m_TrophyHeader.GetPosition().x, m_Background.GetPosition().y));
-    m_ProgressArea.SetSize      (coreVector2(m_Background.GetSize().y, 0.43f));
+    m_ProgressArea.SetPosition  (m_Background.GetPosition());
+    m_ProgressArea.SetSize      (coreVector2(m_Background.GetSize().y, 0.2f));
     m_ProgressArea.SetDirection (coreVector2(1.0f,0.0f));
 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFragment); ++i)
+    constexpr coreVector2 aaFragmentData[][2] =
     {
-        m_aFragment[i].DefineTexture(0u, Core::Manager::Resource->Load<coreTexture>("fragments.png", CORE_RESOURCE_UPDATE_AUTO, "data/textures/fragments.png", CORE_TEXTURE_LOAD_NO_COMPRESS));
-        m_aFragment[i].DefineProgram("menu_grey_program");
-        m_aFragment[i].SetPosition  (m_Background.GetPosition() + coreVector2(-0.22f,0.0f));
-        m_aFragment[i].SetSize      (coreVector2(0.25f,0.25f));
-        m_aFragment[i].SetDirection (coreVector2(1.0f,1.0f).Normalized());
-    }
+        {coreVector2(  0.0f,1024.0f - 516.0f),  coreVector2(452.0f,517.0f)},
+        {coreVector2(252.0f,1024.0f - 453.0f),  coreVector2(524.0f,454.0f)},
+        {coreVector2(638.0f,1024.0f - 328.0f),  coreVector2(388.0f,329.0f)},
+        {coreVector2(  0.0f,1024.0f - 1023.0f), coreVector2(372.0f,370.0f)},
+        {coreVector2(  0.0f,1024.0f - 1023.0f), coreVector2(520.0f,647.0f)},
+        {coreVector2(439.0f,1024.0f - 783.0f),  coreVector2(588.0f,533.0f)},
+        {coreVector2(378.0f,1024.0f - 1023.0f), coreVector2(648.0f,329.0f)},
+        {coreVector2(760.0f,1024.0f - 837.0f),  coreVector2(264.0f,369.0f)},
+        {coreVector2(250.0f,1024.0f - 773.0f),  coreVector2(524.0f,524.0f)}
+    };
+    STATIC_ASSERT(ARRAY_SIZE(aaFragmentData) == MENU_EXTRA_FRAGMENTS)
 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrophy); ++i)
+    for(coreUintW i = 0u; i < MENU_EXTRA_FRAGMENTS; ++i)
     {
-        const coreVector2 vPos  = coreVector2(I_TO_F(i % 4u) - 1.5f, -I_TO_F(i / 4u) + 2.0f) * 0.095f + coreVector2(0.0f,0.07f);
+        const coreVector2 vDir  = coreVector2(1.0f,1.0f).Normalized();
+        const coreVector2 vPos  = MapToAxisInv(aaFragmentData[i][0] + aaFragmentData[i][1] * 0.5f - 512.0f, vDir) / 1024.0f * 0.35f;
+        const coreVector2 vSize = aaFragmentData[i][1] / 1024.0f * 0.35f;
 
-        m_aTrophy[i].DefineTexture(0u, "environment_clouds_grey.png");
-        m_aTrophy[i].DefineProgram("menu_grey_program");
-        m_aTrophy[i].SetPosition  (m_ProgressArea.GetPosition() + vPos);
-        m_aTrophy[i].SetSize      (coreVector2(0.07f,0.07f));
+        m_aFragment[i].DefineTexture(0u, PRINT("fragment_0%zu.png", i + 1u));
+        m_aFragment[i].DefineProgram("menu_single_program");
+        m_aFragment[i].SetPosition  (vPos + m_ProgressArea.GetPosition());
+        m_aFragment[i].SetSize      (vSize);
+        m_aFragment[i].SetDirection (vDir);
     }
-
-    m_TrophyName.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_TrophyName.SetPosition(m_ProgressArea.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f,0.155f));
-    m_TrophyName.SetColor3  (COLOR_MENU_WHITE);
-    m_TrophyName.SetText("One Color Clear");               
-
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrophyDescription); ++i)
-    {
-        m_aTrophyDescription[i].Construct  (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aTrophyDescription[i].SetPosition(m_ProgressArea.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f, 0.105f - 0.03f*I_TO_F(i)));
-        m_aTrophyDescription[i].SetColor3  (COLOR_MENU_WHITE);
-        m_aTrophyDescription[i].SetText("Lorem ipsum dolor sit amet");               
-    }
-    m_aTrophyDescription[0].SetText("Hold a combo multiplier of");               
-    m_aTrophyDescription[1].SetText("x10 for at least 20 seconds.");               
-    m_aTrophyDescription[2].SetText("Lorem ipsum dolor sit amet");               
 
     for(coreUintW i = 0u; i < MENU_EXTRA_FILTERS; ++i)
     {
@@ -112,19 +99,20 @@ cExtraMenu::cExtraMenu()noexcept
         m_aFilterLine[i].SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f, -0.05f - 0.05f*I_TO_F(i)));
         m_aFilterLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
         m_aFilterLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
+        m_aFilterLine[i].SetFocusable (true);
     }
 
-    m_Mission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Mission.SetPosition(m_aFilterLine[0].GetPosition());
-    m_Mission.SetSize    (coreVector2(0.47f,0.03f));
-    m_Mission.SetEndless (true);
-    m_Mission.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+    m_FilterMission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_FilterMission.SetPosition(m_aFilterLine[0].GetPosition());
+    m_FilterMission.SetSize    (coreVector2(0.47f,0.03f));
+    m_FilterMission.SetEndless (true);
+    m_FilterMission.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_Segment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Segment.SetPosition(m_aFilterLine[1].GetPosition());
-    m_Segment.SetSize    (m_Mission.GetSize());
-    m_Segment.SetEndless (true);
-    m_Segment.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+    m_FilterSegment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_FilterSegment.SetPosition(m_aFilterLine[1].GetPosition());
+    m_FilterSegment.SetSize    (m_FilterMission.GetSize());
+    m_FilterSegment.SetEndless (true);
+    m_FilterSegment.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i)
     {
@@ -132,7 +120,6 @@ cExtraMenu::cExtraMenu()noexcept
         m_aStatsName[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.075f - 0.05f*I_TO_F(i + MENU_EXTRA_FILTERS)));
         m_aStatsName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aStatsName[i].SetColor3   (COLOR_MENU_WHITE);
-        m_aStatsName[i].SetText(PRINT("TEST %zu", i));
 
         m_aStatsValue[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aStatsValue[i].SetPosition (coreVector2(-1.0f,1.0f) * m_aStatsName[i].GetPosition());
@@ -145,25 +132,18 @@ cExtraMenu::cExtraMenu()noexcept
         m_aStatsLine[i].SetPosition  (coreVector2(0.0f, m_aStatsName[i].GetPosition().y));
         m_aStatsLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
         m_aStatsLine[i].SetTexOffset (coreVector2(I_TO_F(i + MENU_EXTRA_FILTERS)*0.09f, 0.0f));
+        m_aStatsLine[i].SetFocusable (true);
     }
-    m_aStatsName[0].SetTextLanguage("STAT_TIME_PLAYED");
-    m_aStatsName[1].SetTextLanguage("STAT_SCORE_GAINED");
-    m_aStatsName[2].SetTextLanguage("STAT_MISSIONS_DONE");
-    m_aStatsName[3].SetTextLanguage("STAT_BOSSES_DONE");
-    m_aStatsName[4].SetTextLanguage("STAT_WAVES_DONE");
-    
 
-    m_StatsBox.SetPosition (m_Background.GetPosition() + coreVector2(0.0f,-0.05f));
-    m_StatsBox.SetSize     (coreVector2(m_Background.GetSize().x, 0.55f));
-    m_StatsBox.SetMaxOffset(0.05f * I_TO_F(MENU_EXTRA_STATS) - m_StatsBox.GetSize().y);
+    m_StatsBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.0625f));
+    m_StatsBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.575f));
     for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i) m_StatsBox.BindObject(&m_aStatsLine [i]);
     for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i) m_StatsBox.BindObject(&m_aStatsName [i]);
     for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i) m_StatsBox.BindObject(&m_aStatsValue[i]);
-    
 
     for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i)
     {
-        m_aOtherName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aOtherName[i].Construct   (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
         m_aOtherName[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.075f - 0.1f*I_TO_F(i)));
         m_aOtherName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aOtherName[i].SetColor3   (COLOR_MENU_WHITE);
@@ -177,7 +157,6 @@ cExtraMenu::cExtraMenu()noexcept
     }
     m_aOtherName[0].SetTextLanguage("EXTRA_PASSWORD");
     m_aOtherName[1].SetTextLanguage("EXTRA_CREDITS");
-    m_aOtherName[2].SetTextLanguage("EXTRA_CREDITS2");
 
     m_Password.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_Password.SetPosition (coreVector2(-1.00f,1.00f) * m_aOtherName[0].GetPosition());
@@ -191,25 +170,41 @@ cExtraMenu::cExtraMenu()noexcept
     m_Credits.SetAlignment(m_Password.GetAlignment());
     m_Credits.GetCaption()->SetTextLanguage("WATCH");
 
-    m_Credits2.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Credits2.SetPosition (coreVector2(-1.00f,1.00f) * m_aOtherName[2].GetPosition());
-    m_Credits2.SetSize     (m_Password.GetSize());
-    m_Credits2.SetAlignment(m_Password.GetAlignment());
-    m_Credits2.GetCaption()->SetTextLanguage("WATCH");
+    m_PasswordHeader.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
+    m_PasswordHeader.SetPosition    (coreVector2(0.0f,0.3f));
+    m_PasswordHeader.SetColor3      (COLOR_MENU_WHITE);
+    m_PasswordHeader.SetTextLanguage("ENTER_PASSWORD");
 
     // 
-    m_Navigator.BindObject(&m_ProgressTab, &m_BackButton, &m_OtherTab,    &m_BackButton, &m_StatsTab,    NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    m_Navigator.BindObject(&m_StatsTab,    &m_BackButton, &m_ProgressTab, &m_BackButton, &m_OtherTab,    NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    m_Navigator.BindObject(&m_OtherTab,    &m_BackButton, &m_StatsTab,    &m_BackButton, &m_ProgressTab, NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_ProgressTab, &m_BackButton, &m_OtherTab,    &m_FilterMission, &m_StatsTab,    MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_StatsTab,    &m_BackButton, &m_ProgressTab, &m_FilterMission, &m_OtherTab,    MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_OtherTab,    &m_BackButton, &m_StatsTab,    &m_FilterMission, &m_ProgressTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
 
-    m_Navigator.AssignSurface(&m_ProgressTab,  SURFACE_EXTRA_PROGRESS);
-    m_Navigator.AssignSurface(&m_StatsTab,    SURFACE_EXTRA_STATS);
-    m_Navigator.AssignSurface(&m_OtherTab,    SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_aFragment[8], &m_ProgressTab, NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_PROGRESS);
 
-    m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.AssignFirst(&m_BackButton);
-    m_Navigator.AssignBack(&m_BackButton);
-    m_Navigator.AssignMenu(this);
+    m_Navigator.BindObject(&m_FilterMission, &m_StatsTab,       NULL, &m_FilterSegment, NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_EXTRA_STATS);
+    m_Navigator.BindObject(&m_FilterSegment, &m_FilterMission,  NULL, &m_aStatsLine[0], NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_EXTRA_STATS);
+
+    for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i)
+    {
+        m_Navigator.BindObject(&m_aStatsLine[i], (i == 0u)                    ? s_cast<coreObject2D*>(&m_FilterSegment) : &m_aStatsLine[(i + MENU_EXTRA_STATS - 1u) % MENU_EXTRA_STATS], NULL,
+                                                 (i == MENU_EXTRA_STATS - 1u) ? s_cast<coreObject2D*>(&m_BackButton)    : &m_aStatsLine[(i + 1u)                    % MENU_EXTRA_STATS], NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_STATS);
+    }
+
+    m_Navigator.BindObject(&m_Password, &m_OtherTab, NULL, &m_Credits,    NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Credits,  &m_Password, NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
+
+    m_Navigator.BindObject(&m_BackButton, &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, &m_FilterMission, NULL, MENU_TYPE_DEFAULT);
+
+    m_Navigator.BindSurface(&m_ProgressTab, SURFACE_EXTRA_PROGRESS, &m_aFragment[8],                      NULL, &m_aFragment[8],  NULL);
+    m_Navigator.BindSurface(&m_StatsTab,    SURFACE_EXTRA_STATS,    &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, &m_FilterMission, NULL);
+    m_Navigator.BindSurface(&m_OtherTab,    SURFACE_EXTRA_OTHER,    &m_Credits,                           NULL, &m_Password,      NULL);
+
+    m_Navigator.BindScroll(&m_StatsBox);
+
+    m_Navigator.AssignFirst(&m_FilterMission);
+    m_Navigator.AssignBack (&m_BackButton);
+    m_Navigator.AssignMenu (this);
 
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_EXTRA_PASSWORD; ++i)
@@ -225,33 +220,28 @@ cExtraMenu::cExtraMenu()noexcept
         if(i == SURFACE_EXTRA_OTHER)    this->BindObject(i, &m_OtherTab);
 
         this->BindObject(i, &m_BackButton);
-        this->BindObject(i, &m_Navigator);
     }
 
     this->BindObject(SURFACE_EXTRA_PROGRESS, &m_ProgressArea);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFragment);          ++i) this->BindObject(SURFACE_EXTRA_PROGRESS, &m_aFragment[i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrophy);            ++i) this->BindObject(SURFACE_EXTRA_PROGRESS, &m_aTrophy  [i]);
-    this->BindObject(SURFACE_EXTRA_PROGRESS, &m_TrophyHeader);
-    this->BindObject(SURFACE_EXTRA_PROGRESS, &m_TrophyName);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrophyDescription); ++i) this->BindObject(SURFACE_EXTRA_PROGRESS, &m_aTrophyDescription[i]);
+    for(coreUintW i = 0u; i < MENU_EXTRA_FRAGMENTS; ++i) this->BindObject(SURFACE_EXTRA_PROGRESS, &m_aFragment[i]);
 
     for(coreUintW i = 0u; i < MENU_EXTRA_FILTERS; ++i) this->BindObject(SURFACE_EXTRA_STATS, &m_aFilterLine[i]);
     this->BindObject(SURFACE_EXTRA_STATS, &m_StatsBox);
-    //for(coreUintW i = 0u; i < MENU_EXTRA_STATS;   ++i) this->BindObject(SURFACE_EXTRA_STATS, &m_aStatsLine [i]);
-    //for(coreUintW i = 0u; i < MENU_EXTRA_STATS;   ++i) this->BindObject(SURFACE_EXTRA_STATS, &m_aStatsName [i]);
-    //for(coreUintW i = 0u; i < MENU_EXTRA_STATS;   ++i) this->BindObject(SURFACE_EXTRA_STATS, &m_aStatsValue[i]);
-    this->BindObject(SURFACE_EXTRA_STATS, &m_Mission);
-    this->BindObject(SURFACE_EXTRA_STATS, &m_Segment);
+    this->BindObject(SURFACE_EXTRA_STATS, &m_FilterMission);
+    this->BindObject(SURFACE_EXTRA_STATS, &m_FilterSegment);
 
-    for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS;  ++i) this->BindObject(SURFACE_EXTRA_OTHER, &m_aOtherLine [i]);
-    for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS;  ++i) this->BindObject(SURFACE_EXTRA_OTHER, &m_aOtherName [i]);
+    for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) this->BindObject(SURFACE_EXTRA_OTHER, &m_aOtherLine[i]);
+    for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) this->BindObject(SURFACE_EXTRA_OTHER, &m_aOtherName[i]);
 
     this->BindObject(SURFACE_EXTRA_OTHER, &m_Password);
     this->BindObject(SURFACE_EXTRA_OTHER, &m_Credits);
-    this->BindObject(SURFACE_EXTRA_OTHER, &m_Credits2);
+
+    for(coreUintW i = 0u; i < SURFACE_EXTRA_PASSWORD; ++i) this->BindObject(i, &m_Navigator);
 
     this->BindObject(SURFACE_EXTRA_PASSWORD, g_pMenu->GetArcadeInput());
-    this->BindObject(SURFACE_EXTRA_CREDITS,  g_pMenu->GetCreditRoll ());
+    this->BindObject(SURFACE_EXTRA_PASSWORD, &m_PasswordHeader);
+
+    this->BindObject(SURFACE_EXTRA_CREDITS, g_pMenu->GetCreditRoll());
 }
 
 
@@ -279,55 +269,73 @@ void cExtraMenu::Move()
     {
     case SURFACE_EXTRA_PROGRESS:
         {
-
+            if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
+            {
+                // 
+                m_iStatus = 1;
+            }
         }
         break;
 
     case SURFACE_EXTRA_STATS:
         {
-            // 
-            if(m_Mission.GetUserSwitch())
-                this->LoadSegments(m_Mission.GetCurIndex());
-
-            const coreUint64 iTimePlayed = g_pSave->GetHeader().oGlobalStats.iTimePlayed / 1000u;
-
-            #define PRINT_EXT(...)   (coreData::Print(__VA_ARGS__))
-            
-            // 
-            m_aStatsValue[0].SetText(PRINT_EXT("%llud %lluh %llum %llus", (iTimePlayed / 86400u), (iTimePlayed / 3600u) % 24u, (iTimePlayed / 60u) % 60u, iTimePlayed % 60u));
-            m_aStatsValue[1].SetText(PRINT_EXT("%'llu", g_pSave->GetHeader().oGlobalStats.iScoreGained));
-            m_aStatsValue[2].SetText(PRINT_EXT("%'u",  g_pSave->GetHeader().oGlobalStats.iMissionsDone));
-            m_aStatsValue[3].SetText(PRINT_EXT("%'u",  g_pSave->GetHeader().oGlobalStats.iBossesDone));
-            m_aStatsValue[4].SetText(PRINT_EXT("%'u",  g_pSave->GetHeader().oGlobalStats.iWavesDone));
+            if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
+            {
+                // 
+                m_iStatus = 1;
+            }
 
             // 
-            cMenu::UpdateSwitchBox(&m_Mission);
-            cMenu::UpdateSwitchBox(&m_Segment);
+            if(m_FilterMission.GetUserSwitch())
+                this->LoadSegments(m_FilterMission.GetCurIndex());
+
+            // 
+            if(m_FilterMission.GetUserSwitch() || m_FilterSegment.GetUserSwitch())
+                this->__UpdateStats();
+
+            // 
+            cMenu::UpdateSwitchBox(&m_FilterMission);
+            cMenu::UpdateSwitchBox(&m_FilterSegment);
+
+            // 
+            for(coreUintW i = 0u; i < MENU_EXTRA_FILTERS; ++i) cMenu::UpdateLine(&m_aFilterLine[i], true);
+            for(coreUintW i = 0u; i < MENU_EXTRA_STATS;   ++i) cMenu::UpdateLine(&m_aStatsLine [i], false);
+
+            // 
+            m_FilterMission.GetCaption()->SetColor3((m_FilterMission.GetCurValue() < ARRAY_SIZE(g_aMissionData)) ? g_aMissionData[m_FilterMission.GetCurValue()].vColor : COLOR_MENU_WHITE);
         }
         break;
 
     case SURFACE_EXTRA_OTHER:
         {
-            // 
-            if(m_Password.IsClicked())
+            if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
+                // 
+                m_iStatus = 1;
+            }
+            else if(m_Password.IsClicked())
+            {
+                // 
                 pArcadeInput->Start("", 16u);
-                
+
+                // 
                 g_pMenu->ShiftSurface(this, SURFACE_EXTRA_PASSWORD, 3.0f, 1u);
             }
-
-            // 
-            if(m_Credits.IsClicked())
+            else if(m_Credits.IsClicked())
             {
+                // 
                 pCreditRoll->Start();
-                
+
+                // 
                 g_pMenu->ShiftSurface(this, SURFACE_EXTRA_CREDITS, 3.0f, 1u);
             }
 
             // 
             cMenu::UpdateButton(&m_Password, m_Password.IsFocused());
             cMenu::UpdateButton(&m_Credits,  m_Credits .IsFocused());
-            cMenu::UpdateButton(&m_Credits2, m_Credits2.IsFocused());
+
+            // 
+            for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true);
         }
         break;
 
@@ -335,14 +343,53 @@ void cExtraMenu::Move()
         {
             if(pArcadeInput->GetFinished())
             {
-                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f, 2u);
+                // 
+                const coreChar*  pcText = pArcadeInput->GetText();
+                const coreUint64 iHash  = coreHashXXH64(pcText);
+
+                if(pcText && pcText[0])
+                {
+                    coreBool bSuccess = true;
+
+                    // 
+                    switch(iHash)
+                    {
+                    case 687168210730402184u:   // BLAU
+                        {
+                            for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
+                            {
+                                g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 6u);
+                            }
+                        }
+                        break;
+
+                    default:
+                        bSuccess = false;
+                        break;
+                    }
+
+                    // 
+                    pArcadeInput->Clear();
+
+                    // 
+                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, bSuccess ? SOUND_MENU_MSGBOX_YES : SOUND_MENU_MSGBOX_NO);
+                }
+                else
+                {
+                    // 
+                    g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f, 2u);
+                }
             }
         }
         break;
 
     case SURFACE_EXTRA_CREDITS:
         {
-            
+            if(pCreditRoll->GetFinished() || g_MenuInput.bCancel)
+            {
+                // 
+                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f, 2u);
+            }
         }
         break;
 
@@ -351,22 +398,13 @@ void cExtraMenu::Move()
         break;
     }
 
-    if(m_BackButton.IsClicked() || g_MenuInput.bCancel)   // TODO 1: can cancel out of password and credits
-    {
-        // 
-        m_iStatus = 1;
-    }
-
     // 
     cMenu::UpdateTab(&m_ProgressTab, (this->GetCurSurface() == SURFACE_EXTRA_PROGRESS), m_ProgressTab.IsFocused());
     cMenu::UpdateTab(&m_StatsTab,    (this->GetCurSurface() == SURFACE_EXTRA_STATS),    m_StatsTab   .IsFocused());
-    cMenu::UpdateTab(&m_OtherTab,    (this->GetCurSurface() == SURFACE_EXTRA_OTHER),    m_OtherTab   .IsFocused());
+    cMenu::UpdateTab(&m_OtherTab,    (this->GetCurSurface() >= SURFACE_EXTRA_OTHER),    m_OtherTab   .IsFocused());   // # all
 
     // 
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
-
-    // 
-    //if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }
 
 
@@ -375,18 +413,24 @@ void cExtraMenu::Move()
 void cExtraMenu::LoadMissions()
 {
     // 
-    const coreUintW iOldEntry = m_Mission.GetCurIndex();
-    m_Mission.ClearEntries();
+    m_FilterMission.ClearEntries();
 
     // 
-    m_Mission.AddEntry("Global", 0u);   // TODO 1: language
-    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i) m_Mission.AddEntry(g_aMissionData[i].pcName, 0u);
+    m_FilterMission.AddEntryLanguage("GAME_GLOBAL", 255u);
+    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i)
+    {
+        const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < 9u) ? 1u : 0u);
+
+        if(iAdvance) m_FilterMission.AddEntry(g_aMissionData[i].pcName, i);
+    }
 
     // 
-    m_Mission.SelectIndex((iOldEntry < m_Mission.GetNumEntries()) ? iOldEntry : 0u);
-    
-    
-    this->LoadSegments(m_Mission.GetCurIndex());
+    m_FilterMission.SelectIndex(0u);
+
+    // 
+    this->LoadSegments(m_FilterMission.GetCurIndex());
+    this->__UpdateStats();
+    m_StatsBox.SetCurOffset(0.0f);
 }
 
 
@@ -395,27 +439,129 @@ void cExtraMenu::LoadMissions()
 void cExtraMenu::LoadSegments(const coreUintW iIndex)
 {
     // 
-    const coreUintW iOldEntry = m_Segment.GetCurIndex();
-    m_Segment.ClearEntries();
-    
-    const coreUintW iMissionIndex = iIndex - 1u;
+    const coreUintW iOldEntry = m_FilterSegment.GetCurIndex();
+    m_FilterSegment.ClearEntries();
 
     // 
     if(iIndex)
     {
-        m_Segment.AddEntry("Adventure", 0u);   // TODO 1: language
-        for(coreUintW i = 0u; i < 7u; ++i)
+        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+        for(coreUintW i = 0u; i < 6u; ++i)
         {
-            m_Segment.AddEntry(cMenu::GetSegmentLetters(iMissionIndex, i), 0u);
+            m_FilterSegment.AddEntry(PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetSegmentLetters(iIndex - 1u, i)), i);
         }
-        m_Segment.SetOverride(0);
+        m_FilterSegment.SetOverride(0);
     }
     else
     {
-        for(coreUintW i = 0u; i < 8u; ++i) m_Segment.AddEntry("All", 0u);
-        m_Segment.SetOverride(-1);
+        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+        m_FilterSegment.SetOverride(-1);
     }
 
     // 
-    m_Segment.SelectIndex((iOldEntry < m_Segment.GetNumEntries()) ? iOldEntry : 0u);
+    m_FilterSegment.SelectIndex((iOldEntry < m_FilterSegment.GetNumEntries()) ? iOldEntry : 0u);
+}
+
+
+// ****************************************************************
+// 
+void cExtraMenu::__UpdateStats()
+{
+    coreUintW iIndex = 0u;
+
+    const auto nSetStatFunc = [&] <typename... A> (const coreHashString& sTextKey, const coreChar* pcFormat, A&&... vArgs)
+    {
+        ASSERT(iIndex < MENU_EXTRA_STATS)
+
+        m_aStatsName [iIndex].SetTextLanguage(sTextKey);
+        m_aStatsValue[iIndex].SetText(PRINT(pcFormat, std::forward<A>(vArgs)...));
+
+        iIndex += 1u;
+    };
+
+    const coreUint8 iMissionValue = m_FilterMission.GetCurValue();
+    const coreUint8 iSegmentValue = m_FilterSegment.GetCurValue();
+
+    if(iMissionValue == 255u)
+    {
+        const auto&      oStats      = g_pSave->GetHeader().oGlobalStats;
+        const coreUint64 iTimePlayed = oStats.iTimePlayed / 1000u;
+
+        nSetStatFunc("STAT_TIME_PLAYED",            "%llud %lluh %llum %llus", (iTimePlayed / 86400u), (iTimePlayed / 3600u) % 24u, (iTimePlayed / 60u) % 60u, iTimePlayed % 60u);
+        nSetStatFunc("STAT_SCORE_GAINED",           "%'llu",                   oStats.iScoreGained);
+        nSetStatFunc("STAT_MISSIONS_DONE",          "%'u",                     oStats.iMissionsDone);
+        nSetStatFunc("STAT_BOSSES_DONE",            "%'u",                     oStats.iBossesDone);
+        nSetStatFunc("STAT_WAVES_DONE",             "%'u",                     oStats.iWavesDone);
+        nSetStatFunc("STAT_ENEMIES_DONE",           "%'u",                     oStats.iEnemiesDone);
+        nSetStatFunc("STAT_DAMAGE_GIVEN",           "%'llu",                   oStats.iDamageGiven);
+        nSetStatFunc("STAT_DAMAGE_TAKEN",           "%'u",                     oStats.iDamageTaken);
+        nSetStatFunc("STAT_CONTINUES_USED",         "%'u",                     oStats.iContinuesUsed);
+        nSetStatFunc("STAT_REPAIRS_USED",           "%'u",                     oStats.iRepairsUsed);
+        nSetStatFunc("STAT_SHIFTS_GOOD_ADDED",      "%'u",                     oStats.iShiftGoodAdded);
+        nSetStatFunc("STAT_SHIFTS_BAD_ADDED",       "%'u",                     oStats.iShiftBadAdded);
+        nSetStatFunc("STAT_MOVES_MADE",             "%'llu",                   oStats.iMovesMade);
+        nSetStatFunc("STAT_TURNS_MADE",             "%'u",                     oStats.iTurnsMade);
+        nSetStatFunc("STAT_BULLETS_SHOT",           "%'llu",                   oStats.iBulletsShot);
+        nSetStatFunc("STAT_MEDALS_EARNED_BRONZE",   "%'u",                     oStats.aiMedalsEarned[MEDAL_BRONZE]);
+        nSetStatFunc("STAT_MEDALS_EARNED_SILVER",   "%'u",                     oStats.aiMedalsEarned[MEDAL_SILVER]);
+        nSetStatFunc("STAT_MEDALS_EARNED_GOLD",     "%'u",                     oStats.aiMedalsEarned[MEDAL_GOLD]);
+        nSetStatFunc("STAT_MEDALS_EARNED_PLATINUM", "%'u",                     oStats.aiMedalsEarned[MEDAL_PLATINUM]);
+        nSetStatFunc("STAT_MEDALS_EARNED_DARK",     "%'u",                     oStats.aiMedalsEarned[MEDAL_DARK]);
+        nSetStatFunc("STAT_MEDALS_EARNED",          "%'u",                     oStats.aiMedalsEarned[MEDAL_BRONZE] + oStats.aiMedalsEarned[MEDAL_SILVER] + oStats.aiMedalsEarned[MEDAL_GOLD] + oStats.aiMedalsEarned[MEDAL_PLATINUM] + oStats.aiMedalsEarned[MEDAL_DARK]);
+        nSetStatFunc("STAT_BADGES_EARNED",          "%'u",                     oStats.iBadgesEarned);
+    }
+    else
+    {
+        const auto&     oStats      = (iSegmentValue == 255u) ? g_pSave->GetHeader().aLocalStatsMission[iMissionValue] : g_pSave->GetHeader().aaLocalStatsSegment[iMissionValue][iSegmentValue];
+        const coreInt32 iBestShift  = coreInt32(oStats.iTimeBestShiftBad)  - coreInt32(oStats.iTimeBestShiftGood);
+        const coreInt32 iWorstShift = coreInt32(oStats.iTimeWorstShiftBad) - coreInt32(oStats.iTimeWorstShiftGood);
+        const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  10.0f);
+        const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), 10.0f);
+
+        nSetStatFunc("STAT_SCORE_BEST",             "%'u",      oStats.iScoreBest);
+        nSetStatFunc("STAT_SCORE_WORST",            "%'u",      oStats.iScoreWorst);
+        nSetStatFunc("STAT_SCORE_TOTAL",            "%'llu",    oStats.iScoreTotal);
+        nSetStatFunc("STAT_TIME_BEST_SHIFTED",      "%.1f %+d", fBestTime, iBestShift);
+        nSetStatFunc("STAT_TIME_BEST_RAW",          "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBest),  10.0f));
+        nSetStatFunc("STAT_TIME_WORST_SHIFTED",     "%.1f %+d", fWorstTime, iWorstShift);
+        nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), 10.0f));
+        nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), 10.0f));
+        if(iSegmentValue != 255u)
+        {
+            const coreBool bBoss = MISSION_SEGMENT_IS_BOSS(iSegmentValue);
+
+            if(bBoss) nSetStatFunc("STAT_MAX_CHAIN", "%'u",    oStats.iMaxSeries);
+                 else nSetStatFunc("STAT_MAX_COMBO", "x%u.%u", 1u + oStats.iMaxSeries / 10u, oStats.iMaxSeries % 10u);
+        }
+        nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
+        nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
+        nSetStatFunc("STAT_DAMAGE_GIVEN",           "%'llu",    oStats.iDamageGiven);
+        nSetStatFunc("STAT_DAMAGE_TAKEN",           "%'u",      oStats.iDamageTaken);
+        nSetStatFunc("STAT_CONTINUES_USED",         "%'u",      oStats.iContinuesUsed);
+        nSetStatFunc("STAT_REPAIRS_USED",           "%'u",      oStats.iRepairsUsed);
+        nSetStatFunc("STAT_SHIFTS_GOOD_ADDED",      "%'u",      oStats.iShiftGoodAdded);
+        nSetStatFunc("STAT_SHIFTS_BAD_ADDED",       "%'u",      oStats.iShiftBadAdded);
+        nSetStatFunc("STAT_MOVES_MADE",             "%'llu",    oStats.iMovesMade);
+        nSetStatFunc("STAT_TURNS_MADE",             "%'u",      oStats.iTurnsMade);
+        nSetStatFunc("STAT_BULLETS_SHOT",           "%'llu",    oStats.iBulletsShot);
+        nSetStatFunc("STAT_MEDALS_EARNED_BRONZE",   "%'u",      oStats.aiMedalsEarned[MEDAL_BRONZE]);
+        nSetStatFunc("STAT_MEDALS_EARNED_SILVER",   "%'u",      oStats.aiMedalsEarned[MEDAL_SILVER]);
+        nSetStatFunc("STAT_MEDALS_EARNED_GOLD",     "%'u",      oStats.aiMedalsEarned[MEDAL_GOLD]);
+        nSetStatFunc("STAT_MEDALS_EARNED_PLATINUM", "%'u",      oStats.aiMedalsEarned[MEDAL_PLATINUM]);
+        nSetStatFunc("STAT_MEDALS_EARNED_DARK",     "%'u",      oStats.aiMedalsEarned[MEDAL_DARK]);
+        nSetStatFunc("STAT_MEDALS_EARNED",          "%'u",      oStats.aiMedalsEarned[MEDAL_BRONZE] + oStats.aiMedalsEarned[MEDAL_SILVER] + oStats.aiMedalsEarned[MEDAL_GOLD] + oStats.aiMedalsEarned[MEDAL_PLATINUM] + oStats.aiMedalsEarned[MEDAL_DARK]);
+        nSetStatFunc("STAT_BADGES_EARNED",          "%'u",      oStats.iBadgesEarned);
+    }
+
+    for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i)
+    {
+        const coreObjectEnable eEnabled = (i < iIndex) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+
+        m_aStatsName [i].SetEnabled(eEnabled);
+        m_aStatsValue[i].SetEnabled(eEnabled);
+        m_aStatsLine [i].SetEnabled(eEnabled);
+    }
+
+    m_StatsBox.SetMaxOffset(0.05f * I_TO_F(iIndex) - m_StatsBox.GetSize().y);
+    m_StatsBox.Move();
 }

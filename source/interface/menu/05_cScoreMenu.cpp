@@ -36,7 +36,7 @@ cScoreMenu::cScoreMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
-    for(coreUintW i = 0u; i < MENU_EXTRA_FILTERS; ++i)
+    for(coreUintW i = 0u; i < MENU_SCORE_FILTERS; ++i)
     {
         m_aFilterLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aFilterLine[i].DefineTexture(1u, "menu_background_black.png");
@@ -46,22 +46,22 @@ cScoreMenu::cScoreMenu()noexcept
         m_aFilterLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
 
-    m_Mission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Mission.SetPosition(m_aFilterLine[0].GetPosition());
-    m_Mission.SetSize    (coreVector2(0.47f,0.03f));
-    m_Mission.SetEndless (true);
-    m_Mission.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+    m_FilterMission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_FilterMission.SetPosition(m_aFilterLine[0].GetPosition());
+    m_FilterMission.SetSize    (coreVector2(0.47f,0.03f));
+    m_FilterMission.SetEndless (true);
+    m_FilterMission.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_Segment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Segment.SetPosition(m_aFilterLine[1].GetPosition());
-    m_Segment.SetSize    (m_Mission.GetSize());
-    m_Segment.SetEndless (true);
-    m_Segment.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+    m_FilterSegment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_FilterSegment.SetPosition(m_aFilterLine[1].GetPosition());
+    m_FilterSegment.SetSize    (m_FilterMission.GetSize());
+    m_FilterSegment.SetEndless (true);
+    m_FilterSegment.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
     {
         m_aRank[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-        m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.075f - 0.05f*I_TO_F(i + MENU_EXTRA_FILTERS)));
+        m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.075f - 0.05f*I_TO_F(i + MENU_SCORE_FILTERS)));
         m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aRank[i].SetColor3   (COLOR_MENU_WHITE);
         m_aRank[i].SetText     (coreData::ToChars(i + 1u));
@@ -83,7 +83,7 @@ cScoreMenu::cScoreMenu()noexcept
         m_aLine[i].DefineProgram("menu_inner_program");
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aRank[i].GetPosition().y));
         m_aLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
-        m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i + MENU_EXTRA_FILTERS)*0.09f, 0.0f));
+        m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i + MENU_SCORE_FILTERS)*0.09f, 0.0f));
     }
 
     m_ScoreBox.SetPosition (m_Background.GetPosition() + coreVector2(0.0f,-0.05f));
@@ -95,10 +95,13 @@ cScoreMenu::cScoreMenu()noexcept
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aScore[i]);
 
     // 
-    m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
+
+    m_Navigator.BindScroll(&m_ScoreBox);
+
     m_Navigator.AssignFirst(&m_BackButton);
-    m_Navigator.AssignBack(&m_BackButton);
-    m_Navigator.AssignMenu(this);
+    m_Navigator.AssignBack (&m_BackButton);
+    m_Navigator.AssignMenu (this);
 
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_SCORE_MAX; ++i)
@@ -109,7 +112,7 @@ cScoreMenu::cScoreMenu()noexcept
         this->BindObject(i, &m_Navigator);
     }
 
-    for(coreUintW i = 0u; i < MENU_EXTRA_FILTERS; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aFilterLine[i]);
+    for(coreUintW i = 0u; i < MENU_SCORE_FILTERS; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aFilterLine[i]);
 
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_ScoreBox);
     //for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aLine [i]);
@@ -117,8 +120,8 @@ cScoreMenu::cScoreMenu()noexcept
     //for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aName [i]);
     //for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aScore[i]);
 
-    this->BindObject(SURFACE_SCORE_DEFAULT, &m_Mission);
-    this->BindObject(SURFACE_SCORE_DEFAULT, &m_Segment);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_FilterMission);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_FilterSegment);
 }
 
 
@@ -139,12 +142,12 @@ void cScoreMenu::Move()
     case SURFACE_SCORE_DEFAULT:
         {
             // 
-            if(m_Mission.GetUserSwitch())
-                this->LoadSegments(m_Mission.GetCurIndex());
+            if(m_FilterMission.GetUserSwitch())
+                this->LoadSegments(m_FilterMission.GetCurIndex());
 
             // 
-            cMenu::UpdateSwitchBox(&m_Mission);
-            cMenu::UpdateSwitchBox(&m_Segment);
+            cMenu::UpdateSwitchBox(&m_FilterMission);
+            cMenu::UpdateSwitchBox(&m_FilterSegment);
         }
         break;
 
@@ -164,9 +167,6 @@ void cScoreMenu::Move()
 
     // 
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
-
-    // 
-    //if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }
 
 
@@ -175,18 +175,22 @@ void cScoreMenu::Move()
 void cScoreMenu::LoadMissions()
 {
     // 
-    const coreUintW iOldEntry = m_Mission.GetCurIndex();
-    m_Mission.ClearEntries();
+    m_FilterMission.ClearEntries();
 
     // 
-    m_Mission.AddEntry("Global", 0u);   // TODO 1: language
-    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i) m_Mission.AddEntry(g_aMissionData[i].pcName, 0u);
+    m_FilterMission.AddEntryLanguage("GAME_GLOBAL", 255u);
+    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i)
+    {
+        const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < 9u) ? 1u : 0u);
+
+        if(iAdvance) m_FilterMission.AddEntry(g_aMissionData[i].pcName, 0u);
+    }
 
     // 
-    m_Mission.SelectIndex((iOldEntry < m_Mission.GetNumEntries()) ? iOldEntry : 0u);
-    
-    
-    this->LoadSegments(m_Mission.GetCurIndex());
+    m_FilterMission.SelectIndex(0u);
+
+    // 
+    this->LoadSegments(m_FilterMission.GetCurIndex());
 }
 
 
@@ -195,28 +199,25 @@ void cScoreMenu::LoadMissions()
 void cScoreMenu::LoadSegments(const coreUintW iIndex)
 {
     // 
-    const coreUintW iOldEntry = m_Segment.GetCurIndex();
-    m_Segment.ClearEntries();
-    
-    const coreUintW iMissionIndex = iIndex - 1u;
-
+    const coreUintW iOldEntry = m_FilterSegment.GetCurIndex();
+    m_FilterSegment.ClearEntries();
 
     // 
     if(iIndex)
     {
-        m_Segment.AddEntry("Adventure", 0u);   // TODO 1: language
-        for(coreUintW i = 0u; i < 7u; ++i)
+        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+        for(coreUintW i = 0u; i < 6u; ++i)
         {
-            m_Segment.AddEntry(cMenu::GetSegmentLetters(iMissionIndex, i), 0u);
+            m_FilterSegment.AddEntry(PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetSegmentLetters(iIndex - 1u, i)), i);
         }
-        m_Segment.SetOverride(0);
+        m_FilterSegment.SetOverride(0);
     }
     else
     {
-        for(coreUintW i = 0u; i < 8u; ++i) m_Segment.AddEntry("All", 0u);
-        m_Segment.SetOverride(-1);
+        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+        m_FilterSegment.SetOverride(-1);
     }
 
     // 
-    m_Segment.SelectIndex((iOldEntry < m_Segment.GetNumEntries()) ? iOldEntry : 0u);
+    m_FilterSegment.SelectIndex((iOldEntry < m_FilterSegment.GetNumEntries()) ? iOldEntry : 0u);
 }

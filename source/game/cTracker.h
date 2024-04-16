@@ -24,11 +24,13 @@ enum eTrackerStatus : coreUint8
 class cTracker final : public cShip
 {
 private:
+    coreFlow m_fThrust;       // 
+
+    coreFlow m_fAnimation;    // 
+
     coreObject3D m_Range;     // 
     coreObject3D m_Wind;      // 
     coreObject3D m_Exhaust;   // 
-
-    coreFlow m_fAnimation;    // 
 
 
 public:
@@ -49,11 +51,15 @@ public:
     void Kill     (const coreBool bAnimated);
 
     // 
-    void EnableRange  ();
-    void DisableRange ();
-    void EnableWind   ();
-    void DisableWind  ();
-    void UpdateExhaust(const coreFloat fStrength);
+    void EnableRange   ();
+    void DisableRange  ();
+    void EnableWind    ();
+    void DisableWind   ();
+    void EnableExhaust ();
+    void DisableExhaust();
+
+    // 
+    inline void SetThrust(const coreFloat fThrust) {m_fThrust = fThrust;}
 };
 
 

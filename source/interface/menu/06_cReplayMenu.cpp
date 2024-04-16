@@ -86,10 +86,11 @@ cReplayMenu::cReplayMenu()noexcept
     }
 
     // 
-    m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
+
     m_Navigator.AssignFirst(&m_BackButton);
-    m_Navigator.AssignBack(&m_BackButton);
-    m_Navigator.AssignMenu(this);
+    m_Navigator.AssignBack (&m_BackButton);
+    m_Navigator.AssignMenu (this);
 
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_REPLAY_MAX; ++i)
@@ -206,9 +207,6 @@ void cReplayMenu::Move()
     // 
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
 
-    // 
-    //if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
-    
     
     
     m_PageLine.Interact();

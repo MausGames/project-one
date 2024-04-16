@@ -283,6 +283,15 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_tree_03_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_03_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_rain.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_rain.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
+    Core::Manager::Resource->Load<coreTexture>("fragment_01.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_01.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_02.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_02.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_03.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_03.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_04.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_04.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_05.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_05.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_06.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_06.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_07.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_07.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_08.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_08.png");
+    Core::Manager::Resource->Load<coreTexture>("fragment_09.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_09.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_luna.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_luna.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
@@ -298,14 +307,21 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
     Core::Manager::Resource->Load<coreTexture>("menu_badge.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_badge.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_cursor.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_cursor.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_01.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_01.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_02.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_04.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_04.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_helper_big.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_helper_small.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_small.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper_big_02.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big_02.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper_big_04.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big_04.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper_big_06.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big_06.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper_small_08.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_small_08.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper_small_12.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_small_12.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment.png");
     Core::Manager::Resource->Load<coreTexture>("menu_medal.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_medal.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("menu_segment_boss.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_segment_boss.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("menu_segment_wave.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_segment_wave.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
     Core::Manager::Resource->Load<coreTexture>("menu_worldmap.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_worldmap.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png", CORE_TEXTURE_LOAD_NEAREST);
@@ -464,6 +480,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_border.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_border_direct.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("menu_color.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_color.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_free.vert",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_free.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("menu_free.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_free.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_grey.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
@@ -579,6 +597,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("menu_sub_out.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/menu_sub_out.wav");
     Core::Manager::Resource->Load<coreSound>("menu_switch_disabled.wav", CORE_RESOURCE_UPDATE_AUTO, "data/sounds/menu_switch_disabled.wav");
     Core::Manager::Resource->Load<coreSound>("menu_switch_enabled.wav",  CORE_RESOURCE_UPDATE_AUTO, "data/sounds/menu_switch_enabled.wav");
+    Core::Manager::Resource->Load<coreSound>("player_cancel.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_cancel.wav");
     Core::Manager::Resource->Load<coreSound>("player_explosion.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_explosion.wav");
     Core::Manager::Resource->Load<coreSound>("player_feel.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_feel.wav");
     Core::Manager::Resource->Load<coreSound>("player_interrupt.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_interrupt.wav");
@@ -1208,6 +1227,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_color_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("default_2d.vert")
         ->AttachShader("menu_color.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_free_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_free.vert")
+        ->AttachShader("menu_free.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_grey_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

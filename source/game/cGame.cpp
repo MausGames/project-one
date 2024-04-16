@@ -1093,7 +1093,7 @@ coreBool cGame::__HandleIntro()
                 pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, vPos));
                 pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-                pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
+                pPlayer->SetThrust     (LERPB(1.0f, 0.0f, fTime));
             });
 
             // 
@@ -1135,7 +1135,7 @@ coreBool cGame::__HandleOutro()
                 pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, fPos, pPlayer->GetPosition().z));
                 pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-                pPlayer->UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+                pPlayer->SetThrust     ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
             }
             else
             {
@@ -1154,7 +1154,7 @@ coreBool cGame::__HandleOutro()
             m_Tracker.SetPosition   (coreVector3(m_Tracker.GetPosition().x, fPos, m_Tracker.GetPosition().z));
             m_Tracker.SetDirection  (coreVector3(0.0f,1.0f,0.0f));
             m_Tracker.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-            m_Tracker.UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+            m_Tracker.SetThrust     ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
         }
         
     }

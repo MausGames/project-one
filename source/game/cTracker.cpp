@@ -12,9 +12,9 @@
 // ****************************************************************
 // constructor
 cTracker::cTracker()noexcept
+: m_fThrust    (0.0f)
+, m_fAnimation (0.0f)
 {
-   // COLOR_PLAYER_GREEN
-
     // load object resources
     this->DefineModelHigh("ship_projectone_high.md3");
     this->DefineModelLow ("ship_projectone_low.md3");
@@ -132,6 +132,10 @@ void cTracker::Move()
         // move the 3d-object
         this->coreObject3D::Move();
 
+        // 
+             if( m_fThrust && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->EnableExhaust();
+        else if(!m_fThrust &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableExhaust();
+
         if(m_Range.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
@@ -154,6 +158,22 @@ void cTracker::Move()
             m_Wind.SetAlpha    (this->GetAlpha());
             m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.3f));
             m_Wind.Move();
+        }
+
+        if(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            const coreFloat   fLen   = m_fThrust * 40.0f;
+            const coreFloat   fWidth = 1.0f - m_fThrust * 0.25f;
+            const coreVector3 vSize  = coreVector3(fWidth, fLen, fWidth) * (0.6f * this->GetSize().x);
+
+            // 
+            m_Exhaust.SetPosition (this->GetPosition() - this->GetDirection() * (vSize.y + 4.0f * this->GetSize().x));
+            m_Exhaust.SetSize     (vSize);
+            m_Exhaust.SetDirection(this->GetDirection());
+            m_Exhaust.SetAlpha    (this->GetAlpha());
+            m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
+            m_Exhaust.Move();
         }
     }
 
@@ -190,7 +210,10 @@ void cTracker::Kill(const coreBool bAnimated)
     // 
     this->DisableRange();
     this->DisableWind();
-    this->UpdateExhaust(0.0f);
+    this->DisableExhaust();
+
+    // 
+    m_fThrust = 0.0f;
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -241,6 +264,9 @@ void cTracker::EnableWind()
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableWind();
 
     // 
+    m_Wind.SetAlpha(0.0f);
+
+    // 
     m_Wind.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     g_pGlow->BindObject(&m_Wind);
 }
@@ -260,21 +286,26 @@ void cTracker::DisableWind()
 
 // ****************************************************************
 // 
-void cTracker::UpdateExhaust(const coreFloat fStrength)
+void cTracker::EnableExhaust()
 {
-    // 
-    const coreFloat fLen  = fStrength * 40.0f;
-    const coreFloat fSize = 1.0f - fStrength * 0.25f;
+    WARN_IF(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableExhaust();
 
     // 
-         if( fStrength && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->BindObject  (&m_Exhaust);
-    else if(!fStrength &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->UnbindObject(&m_Exhaust);
+    m_Exhaust.SetAlpha(0.0f);
 
     // 
-    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f * this->GetSize().x);
-    m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
-    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * this->GetSize().x));
-    m_Exhaust.SetDirection(this->GetDirection());
-    m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-    m_Exhaust.Move();
+    m_Exhaust.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Exhaust);
+}
+
+
+// ****************************************************************
+// 
+void cTracker::DisableExhaust()
+{
+    if(!m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Exhaust.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Exhaust);
 }

@@ -16,9 +16,9 @@ coreList<coreUint8>      cFigure::s_apTexBase  = {};
 // constructor
 cFigure::cFigure()noexcept
 : m_iBase    (SDL_CONTROLLER_TYPE_UNKNOWN)
-, m_iBaseRef (SDL_CONTROLLER_TYPE_UNKNOWN - 1)
+, m_iBaseRef (UINT8_MAX)
 , m_iKey     (SDL_CONTROLLER_BUTTON_INVALID)
-, m_iKeyRef  (SDL_CONTROLLER_BUTTON_INVALID - 1)
+, m_iKeyRef  (INT16_MAX)
 {
     // 
     this->DefineProgram("default_2d_program");
@@ -98,6 +98,15 @@ void cFigure::Move()
 
     // 
     this->cGuiObject::Move();
+}
+
+
+// ****************************************************************
+// 
+void cFigure::SetBaseAsType(const coreUint8 iType)
+{
+    // 
+    this->SetBase((iType < INPUT_SETS_KEYBOARD) ? FIGURE_BASE_KEYBOARD : Core::Input->GetJoystickGamepadType(iType - INPUT_SETS_KEYBOARD));
 }
 
 

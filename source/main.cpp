@@ -53,12 +53,10 @@ void CoreApp::Init()
     Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
 
     // set listener to default values
-    Core::Audio->SetListener(LISTENER_POSITION * 0.0f, LISTENER_VELOCITY, coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
+    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
     // load configuration
     LoadConfig();
-
-    //coreData::SymlinkCreate("test", "data");
 
     // load available music files
     //g_MusicPlayer.AddMusicFolder ("data/music",              "*.ogg");

@@ -1073,6 +1073,8 @@ private:
     coreObject3D m_Bubble;                        // 
     coreObject3D m_Exhaust;                       // 
 
+    coreFlow m_fThrust;                           // 
+
     coreVector2 m_vOldDir;                        // 
     coreFlow    m_fArrowValue;                    // 
 
@@ -1115,7 +1117,7 @@ public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(801, "ONE")
+    ASSIGN_ID(801, "P1")
 
     // get object properties
     inline coreVector3     GetColor    ()const final {return m_vLevelColor;}
@@ -1155,15 +1157,16 @@ private:
     void __EndFeeling  ();
 
     // 
-    void __EnableRange  ();
-    void __DisableRange ();
-    void __EnableArrow  ();
-    void __DisableArrow ();
-    void __EnableWind   ();
-    void __DisableWind  ();
-    void __EnableBubble ();
-    void __DisableBubble();
-    void __UpdateExhaust(const coreFloat fStrength);
+    void __EnableRange   ();
+    void __DisableRange  ();
+    void __EnableArrow   ();
+    void __DisableArrow  ();
+    void __EnableWind    ();
+    void __DisableWind   ();
+    void __EnableBubble  ();
+    void __DisableBubble ();
+    void __EnableExhaust ();
+    void __DisableExhaust();
 
     // 
     void __SetEnergyColor(const coreVector3 vColor);

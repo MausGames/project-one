@@ -39,6 +39,7 @@
 // TODO 1: hard: alle 8 colors, spieler muss in der letzten phase doch angreifen
 // TODO 1: bullet vorkommen sollten möglichst gleichmäßig sein
 // TODO 1: soll der boss selbst auch bunt werden ?
+// TODO 1: background sollte schneller sein, um die intensität zu erhöhen
 
 // yellow:
 // spikes sollten so lang aktiv sein, dass es für den spieler wichtig ist seine position dem auf-und-ab der spikes anzupassen
@@ -183,7 +184,8 @@
 // ****************************************************************
 // constructor
 cProjectOneBoss::cProjectOneBoss()noexcept
-: m_vOldDir          (coreVector2(0.0f,-1.0f))
+: m_fThrust          (0.0f)
+, m_vOldDir          (coreVector2(0.0f,-1.0f))
 , m_fArrowValue      (0.0f)
 , m_iHelperState     (0u)
 , m_vLevelColor      (coreVector3(1.0f,1.0f,1.0f))
@@ -392,7 +394,10 @@ void cProjectOneBoss::__KillOwn(const coreBool bAnimated)
     this->__DisableArrow();
     this->__DisableWind();
     this->__DisableBubble();
-    this->__UpdateExhaust(0.0f);
+    this->__DisableExhaust();
+
+    // 
+    m_fThrust = 0.0f;
 
     // 
     m_vOldDir     = coreVector2(0.0f,-1.0f);
@@ -853,6 +858,10 @@ void cProjectOneBoss::__MoveOwn()
             if(m_Wind .IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableWind ();
         }
 
+        // 
+             if( m_fThrust && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__EnableExhaust();
+        else if(!m_fThrust &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableExhaust();
+
         if(m_Range.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
@@ -908,6 +917,22 @@ void cProjectOneBoss::__MoveOwn()
             m_Bubble.SetDirection(coreVector3(vDir, 0.0f));
             m_Bubble.SetTexOffset(m_Bubble.GetTexOffset() - 0.2f * TIME * m_Bubble.GetDirection().xy());
             m_Bubble.Move();
+        }
+
+        if(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            const coreFloat   fLen   = m_fThrust * 40.0f;
+            const coreFloat   fWidth = 1.0f - m_fThrust * 0.25f;
+            const coreVector3 vSize  = coreVector3(fWidth, fLen, fWidth) * (0.6f * this->GetSize().x);
+
+            // 
+            m_Exhaust.SetPosition (this->GetPosition() - this->GetDirection() * (vSize.y + 4.0f * this->GetSize().x));
+            m_Exhaust.SetSize     (vSize);
+            m_Exhaust.SetDirection(this->GetDirection());
+            m_Exhaust.SetAlpha    (this->GetAlpha());
+            m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
+            m_Exhaust.Move();
         }
 
         // 
@@ -4062,6 +4087,9 @@ void cProjectOneBoss::__EnableWind()
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableWind();
 
     // 
+    m_Wind.SetAlpha(0.0f);
+
+    // 
     m_Wind.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     g_pGlow->BindObject(&m_Wind);
 }
@@ -4108,23 +4136,28 @@ void cProjectOneBoss::__DisableBubble()
 
 // ****************************************************************
 // 
-void cProjectOneBoss::__UpdateExhaust(const coreFloat fStrength)
+void cProjectOneBoss::__EnableExhaust()
 {
-    // 
-    const coreFloat fLen  = fStrength * 40.0f;
-    const coreFloat fSize = 1.0f - fStrength * 0.25f;
+    WARN_IF(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableExhaust();
 
     // 
-         if( fStrength && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->BindObject  (&m_Exhaust);
-    else if(!fStrength &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->UnbindObject(&m_Exhaust);
+    m_Exhaust.SetAlpha(0.0f);
 
     // 
-    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f * this->GetSize().x);
-    m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
-    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * this->GetSize().x));
-    m_Exhaust.SetDirection(this->GetDirection());
-    m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-    m_Exhaust.Move();
+    m_Exhaust.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Exhaust);
+}
+
+
+// ****************************************************************
+// 
+void cProjectOneBoss::__DisableExhaust()
+{
+    if(!m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Exhaust.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Exhaust);
 }
 
 

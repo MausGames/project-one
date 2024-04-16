@@ -25,6 +25,7 @@ private:
     cGuiButton m_aArrow[2];   // 
     cGuiButton m_Cursor;      // 
 
+    coreFloat m_fCurOffset;   // 
     coreFloat m_fMaxOffset;   // 
 
     coreBool  m_bDrag;        // 
@@ -43,6 +44,7 @@ public:
     void Move  ()final;
 
     // 
+    inline void SetCurOffset(const coreFloat fCurOffset) {m_fCurOffset = fCurOffset; this->SetOffset(coreVector2(0.0f, m_fCurOffset));}
     inline void SetMaxOffset(const coreFloat fMaxOffset) {m_fMaxOffset = fMaxOffset;}
 };
 

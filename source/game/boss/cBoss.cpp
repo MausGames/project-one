@@ -199,7 +199,7 @@ void cBoss::_UpdateBoss()
     
                     pHelper->Kill(true);
     
-                    g_pGame->GetCombatText()->DrawText("???", pHelper->GetPosition(), COLOR_MENU_INSIDE);
+                    g_pGame->GetCombatText()->DrawText(Core::Language->GetString("UNKNOWN"), pHelper->GetPosition(), COLOR_MENU_INSIDE);
 
                     g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_HELPER);
 

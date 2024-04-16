@@ -374,6 +374,8 @@ void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, 
     // 
     ASSERT(pOwner)
     m_apBarrierOwner[iIndex] = pOwner;
+    m_avBarrierPos  [iIndex] = HIDDEN_POS;
+    m_avBarrierDir  [iIndex] = coreVector2(0.0f,1.0f);
 
     // 
     oBarrier.SetDirection(coreVector3(vDirection, 0.0f));
@@ -427,6 +429,8 @@ void cViridoMission::EnableLaser(const coreUintW iIndex, const cShip* pOwner)
     // 
     ASSERT(pOwner)
     m_apLaserOwner[iIndex] = pOwner;
+    m_avLaserPos  [iIndex] = HIDDEN_POS;
+    m_avLaserDir  [iIndex] = coreVector2(0.0f,1.0f);
 
     // 
     pLaser->SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -933,6 +937,7 @@ void cViridoMission::__MoveOwnAfter()
             g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
             {
                 if(coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy()) > 0.0f) return;
+                if((m_avBarrierPos[i] - oBarrier.GetPosition().xy()).LengthSq() >= POW2(20.0f)) return;       
                 
                 const coreVector2 vNewPos = pBullet->GetPosition().xy() + pBullet->GetFlyDir() * pBullet->GetCollisionRadius();
                 const coreVector2 vOldPos = pBullet->GetPosition().xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * BULLET_SPEED_FACTOR * TIME);
@@ -949,7 +954,8 @@ void cViridoMission::__MoveOwnAfter()
                 const coreFloat fDotOld = coreVector2::Dot(vDiffOld, vOldRayDir.Rotated90());
             
                 // 
-                if((SIGN(fDot) != SIGN(fDotOld))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    && (ABS(coreVector2::Dot(vDiff, vRayDir)) < (oBarrier.GetCollisionRange().x + pBullet->GetCollisionRange().x)))   // to handle teleportation
+                if((SIGN(fDot) != SIGN(fDotOld))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&
+                    (ABS(coreVector2::Dot(vDiff,    vRayDir))    < (oBarrier.GetCollisionRange().x + pBullet->GetCollisionRange().x)))   // to handle teleportation
                 {
                     const coreVector2 vIntersection = vRayPos + vRayDir * coreVector2::Dot(vDiff, vRayDir);
 

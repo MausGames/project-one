@@ -2509,6 +2509,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: hardmode: no arrows visible, maybe under exception (timed, blinking, when disabled)
     // TODO 1: I somehow got crushed in DDR part, when I was on the left game-border and turned
     // TODO 1: add dance fail condition ? (m_iTouchState & m_iWayVisible) && (m_iWayGhost & m_iWayVisible)
+    // TODO 1: I got hit in dance part, even though I was in the middle, when I moved between two blocks vertically and switched   -> vielleicht nur 1 linie, ändert aber nix am issue für andere stellen ?
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {

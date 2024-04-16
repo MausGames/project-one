@@ -13,6 +13,7 @@
 // constructor
 cMsgBox::cMsgBox()noexcept
 : m_vCurMouse  (coreVector2(0.0f,0.0f))
+, m_vBoxSize   (coreVector2(0.0f,0.0f))
 , m_fFade      (0.0f)
 , m_iMsgType   (0u)
 , m_iInputType (0u)
@@ -46,9 +47,9 @@ cMsgBox::cMsgBox()noexcept
     m_No.GetCaption()->SetText(ICON_TIMES);
 
     // 
-    m_Navigator.BindObject(NULL,   NULL, &m_Yes, NULL, &m_No, NULL,  MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_Yes, NULL, NULL,   NULL, &m_No, &m_No, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_No,  NULL, &m_Yes, NULL, NULL,  NULL,  MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(NULL,   NULL, &m_Yes, NULL, &m_No, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_Yes, NULL, NULL,   NULL, &m_No, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_No,  NULL, &m_Yes, NULL, NULL,  MENU_TYPE_DEFAULT);
 }
 
 
@@ -103,7 +104,9 @@ void cMsgBox::Move()
     this->coreFullscreen::Move();
 
     // 
-    m_Box.SetAlpha(m_fFade);
+    m_Box.SetSize     (m_vBoxSize * LERPB(0.8f, 1.0f, m_fFade));
+    m_Box.SetTexOffset((m_Box.GetSize() - m_vBoxSize) * -0.5f);
+    m_Box.SetAlpha    (m_fFade);
     m_Box.Move();
 
     // 
@@ -166,7 +169,7 @@ void cMsgBox::Move()
     }
 
     // 
-    if(m_nCallback || (m_iMsgType == MSGBOX_TYPE_MAPPING))
+    if(!cMenuNavigator::IsUsingJoystick() || m_nCallback || (m_iMsgType == MSGBOX_TYPE_MAPPING))
     {
         Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
         for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)

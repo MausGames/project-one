@@ -44,6 +44,9 @@ cIcon::cIcon()noexcept
             m_Range.BindObject(pRange);
         }
     }
+
+    // 
+    m_pDefaultModel = Core::Manager::Resource->Get<coreModel>("object_cube_top.md3");
 }
 
 
@@ -64,12 +67,10 @@ void cIcon::Update()
     }
     else
     {
-        const coreModelPtr pModel = Core::Manager::Resource->Get<coreModel>("object_cube_top.md3");
-
         // 
         for(coreUintW i = 0u; i < ICON_VARIATIONS; ++i)
         {
-            m_aRangeRaw[i].DefineModel(pModel);
+            m_aRangeRaw[i].DefineModel(m_pDefaultModel);
             m_aRangeRaw[i].SetColor3  (COLOR_PLAYER_BLUE.Processed(MIN, 1.0f));
         }
     }

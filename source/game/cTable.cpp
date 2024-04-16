@@ -379,7 +379,7 @@ void cScoreTable::CancelCooldown()
     if(m_iCurCombo || m_iCurChain)
     {
         m_pOwner->ShowCircle();
-        // TODO 1: sound
+        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
     }
 
     // 

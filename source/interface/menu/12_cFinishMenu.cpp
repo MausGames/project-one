@@ -64,10 +64,11 @@ cFinishMenu::cFinishMenu()noexcept
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
     // 
-    m_Navigator.BindObject(&m_SteamButton, &m_ExitButton,  NULL, &m_ExitButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,  &m_SteamButton, NULL, &m_SteamButton, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_SteamButton, &m_ExitButton,  NULL, &m_ExitButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,  &m_SteamButton, NULL, &m_SteamButton, NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.AssignFirst(&m_SteamButton);
+    m_Navigator.ShowIcon   (true);
 
     // bind menu objects
     this->BindObject(SURFACE_FINISH_DEFAULT, &m_Background);

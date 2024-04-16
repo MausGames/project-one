@@ -21,7 +21,6 @@
 #define FIGURE_SCALE_GAMEPAD  (coreVector2(0.125f,0.25f))                   // 
 
 
-
 // ****************************************************************
 // 
 class cFigure final : public cGuiObject
@@ -50,6 +49,9 @@ public:
     // 
     inline void SetBase(const coreUint8 iBase) {m_iBase = iBase;}
     inline void SetKey (const coreInt16 iKey)  {m_iKey  = iKey;}
+
+    // 
+    void SetBaseAsType(const coreUint8 iType);
 
     // 
     static void GlobalInit();

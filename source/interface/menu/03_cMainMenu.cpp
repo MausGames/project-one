@@ -42,6 +42,11 @@ cMainMenu::cMainMenu()noexcept
     m_SteamButton.SetSize      (m_StartButton.GetSize());
     m_SteamButton.GetCaption()->SetTextLanguage("TO_STEAM");
 
+    m_CreditsButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_CreditsButton.DefineProgram("menu_border_program");
+    m_CreditsButton.SetSize      (m_StartButton.GetSize());
+    m_CreditsButton.GetCaption()->SetTextLanguage("CREDITS");
+
     m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ExitButton.DefineProgram("menu_border_program");
     m_ExitButton.SetSize      (m_StartButton.GetSize());
@@ -50,22 +55,24 @@ cMainMenu::cMainMenu()noexcept
     // 
     if(g_bDemoVersion)
     {
-        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ConfigButton, &m_StartButton,  NULL, &m_SteamButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_SteamButton,  &m_ConfigButton, NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ExitButton,   &m_SteamButton,  NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_StartButton,   &m_ExitButton,    NULL, &m_ConfigButton,  NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ConfigButton,  &m_StartButton,   NULL, &m_SteamButton,   NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_SteamButton,   &m_ConfigButton,  NULL, &m_CreditsButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_CreditsButton, &m_SteamButton,   NULL, &m_ExitButton,    NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExitButton,    &m_CreditsButton, NULL, &m_StartButton,   NULL, MENU_TYPE_DEFAULT);
     }
     else
     {
-        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ReplayButton, &m_ScoreButton,  NULL, &m_ExtraButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ReplayButton, &m_ScoreButton,  NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
     }
 
     m_Navigator.AssignFirst(&m_StartButton);
+    m_Navigator.ShowIcon   (true);
 
     // bind menu objects
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartButton);
@@ -74,6 +81,7 @@ cMainMenu::cMainMenu()noexcept
     {
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_SteamButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_CreditsButton);
     }
     else
     {
@@ -147,6 +155,11 @@ void cMainMenu::Move()
                 // 
                 SDL_OpenURL("https://store.steampowered.com/app/1624320/Eigengrau/");
             }
+            else if(m_CreditsButton.IsClicked())
+            {
+                // 
+                m_iStatus = 6;
+            }
             else if(m_ExitButton.IsClicked())
             {
                 // 
@@ -158,13 +171,14 @@ void cMainMenu::Move()
             }
 
             // 
-            cMenu::UpdateButton(&m_StartButton,  m_StartButton .IsFocused());
-            cMenu::UpdateButton(&m_ScoreButton,  m_ScoreButton .IsFocused());
-            cMenu::UpdateButton(&m_ReplayButton, m_ReplayButton.IsFocused());
-            cMenu::UpdateButton(&m_ExtraButton,  m_ExtraButton .IsFocused());
-            cMenu::UpdateButton(&m_ConfigButton, m_ConfigButton.IsFocused());
-            cMenu::UpdateButton(&m_SteamButton,  m_SteamButton .IsFocused());
-            cMenu::UpdateButton(&m_ExitButton,   m_ExitButton  .IsFocused());
+            cMenu::UpdateButton(&m_StartButton,   m_StartButton  .IsFocused());
+            cMenu::UpdateButton(&m_ScoreButton,   m_ScoreButton  .IsFocused());
+            cMenu::UpdateButton(&m_ReplayButton,  m_ReplayButton .IsFocused());
+            cMenu::UpdateButton(&m_ExtraButton,   m_ExtraButton  .IsFocused());
+            cMenu::UpdateButton(&m_ConfigButton,  m_ConfigButton .IsFocused());
+            cMenu::UpdateButton(&m_SteamButton,   m_SteamButton  .IsFocused());
+            cMenu::UpdateButton(&m_CreditsButton, m_CreditsButton.IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,    m_ExitButton   .IsFocused());
         }
         break;
 

@@ -51,7 +51,7 @@ void cIntroMission::__MoveOwnAfter()
     // 
     g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        const coreUint8 iType = g_CurConfig.Input.aiType[i];
+        const coreUint8 iType = (g_pGame->IsMulti() || (g_iTotalType >= INPUT_SETS)) ? g_CurConfig.Input.aiType[i] : g_iTotalType;
         const auto&     oSet  = g_CurConfig.Input.aSet[iType];
 
         // 
@@ -88,6 +88,12 @@ void cIntroMission::__MoveOwnAfter()
         };
 
         // 
+        const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+        const coreVector2 vHud   = g_vHudDirection;
+        const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+        ASSERT(vFinal.IsNormalized())
+
+        // 
         for(coreUintW j = 0u; j < INTRO_MANUALS; ++j)
         {
             coreFlow& fTime = m_aafManualTime[i][j];
@@ -99,7 +105,7 @@ void cIntroMission::__MoveOwnAfter()
                 // 
                 m_aaManual[i][j].SetPosition(avOffset[j] * 0.1f);
                 m_aaManual[i][j].SetSize    (coreVector2(0.1f,0.1f) * (abPress[j] ? 0.8f : 1.0f));
-                m_aaManual[i][j].SetCenter  (g_pForeground->Project2D(pPlayer->GetPosition()));
+                m_aaManual[i][j].SetCenter  (MapToAxisInv(g_pForeground->Project2D(pPlayer->GetPosition()), vFinal));
                 m_aaManual[i][j].SetAlpha   (BLENDH3(MIN1(fTime)));
                 m_aaManual[i][j].SetEnabled (fTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
                 m_aaManual[i][j].Move();

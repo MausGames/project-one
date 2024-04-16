@@ -70,6 +70,7 @@ enum eSoundEffect : coreUint8
     SOUND_PLAYER_TURN,
     SOUND_PLAYER_INTERRUPT,
     SOUND_PLAYER_REPAIR,
+    SOUND_PLAYER_CANCEL,
 
     SOUND_ENEMY_EXPLOSION_01,
     SOUND_ENEMY_EXPLOSION_02,
@@ -267,6 +268,10 @@ public:
     // 
     void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex);
     void StopSound(const eSoundEffect eSoundIndex);
+
+    // 
+    void ExternPlayPosition(const coreSoundPtr& pSound, const void* pRef, const coreFloat fVolume, const coreFloat fPitch, const coreBool bLoop, const coreUint8 iType, const coreVector3 vPosition);
+    void ExternSetSource   (const coreSoundPtr& pSound, const coreVector3 vPosition);
 
     // 
     void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs);
