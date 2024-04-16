@@ -79,6 +79,7 @@
 // TODO: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
 // TODO: check for and prevent accumulation of small rounding errors: incremental matrix rotation
 // TODO: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
+// TODO: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
 
 
 // ****************************************************************

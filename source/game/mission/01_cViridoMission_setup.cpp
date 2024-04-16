@@ -336,7 +336,7 @@ void cViridoMission::__SetupOwn()
     // cut with laser through everything
     // the delay when rays "appear" is important, not when they "stop" 
     // rays should not come from below, first segments main direction is upwards 
-    // 1,2 coming from upper left, 3, 4 coming from upper right 
+    // 1, 2 coming from upper left, 3, 4 coming from upper right 
     // 1 starts right to left, 2 starts left to right, 3 starts right to left, 4 starts left to right 
     // enemies on the line spawn in the middle of the line 
     // first two patterns have no single equal line 

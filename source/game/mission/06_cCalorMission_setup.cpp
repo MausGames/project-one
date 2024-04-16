@@ -31,27 +31,33 @@ void cCalorMission::__SetupOwn()
 
     // ################################################################
     // evade being attacked
+    // twist, reagieren mehrmals auf geshcosse
+    // reagieren auf explosionen
+    // schießen wärend sie farbe haben, an alte position vom spieler
+    // spawn like a wave
     STAGE_MAIN
     {
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 6u)
+        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 36u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(50, COLOR_SHIP_ORANGE);
-                //pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+                pEnemy->Configure(4, COLOR_SHIP_ORANGE);
 
                 pEnemy->Resurrect();
-                
-                
-                pEnemy->SetPosition(coreVector3((I_TO_F(i) - 2.5f) * 0.2f, 0.3f, 0.0f) * FOREGROUND_AREA3);
+
+
+                pEnemy->SetPosition(coreVector3((I_TO_F(i % 6u) - 2.5f) * 0.1f, I_TO_F(i / 6u) * 0.1f, 0.0f) * FOREGROUND_AREA3);
+
+                pEnemy->SetPosition(coreVector3(0.0f,0.0f,0.0f) * FOREGROUND_AREA3);
             });
         });
 
 
-        STAGE_GET_START(24u)
-            STAGE_GET_VEC2_ARRAY (avTargetPos, 6u)
-            STAGE_GET_FLOAT_ARRAY(afEnergy,    6u)
-            STAGE_GET_FLOAT_ARRAY(afRecover,   6u)
+        STAGE_GET_START(36u * 6u)
+            STAGE_GET_VEC2_ARRAY (avSourcePos, 36u)
+            STAGE_GET_VEC2_ARRAY (avTargetPos, 36u)
+            STAGE_GET_FLOAT_ARRAY(afEnergy,    36u)
+            STAGE_GET_FLOAT_ARRAY(afRecover,   36u)
         STAGE_GET_END
 
 
@@ -61,60 +67,75 @@ void cCalorMission::__SetupOwn()
 
             if(STAGE_TAKEOFF)
             {
-                avTargetPos[i] = pEnemy->GetPosition().xy();
+                avSourcePos[i] = avTargetPos[i] = pEnemy->GetPosition().xy();
             }
 
             const cBullet* pBullet = g_pGame->GetBulletManagerPlayer()->FindBullet(pEnemy->GetPosition().xy());
             if(pBullet)
             {
-                const coreVector2 vDiff = avTargetPos[i] - pBullet->GetPosition().xy();
+                const coreVector2 vDiff = avTargetPos[i] - (pBullet->GetPosition().xy() + pBullet->GetFlyMove());
                 const coreFloat   fLen  = vDiff.Length();
-                
-                if(fLen < 20.0f)
+
+                //if(fLen < 20.0f)
+                if(fLen < 10.0f)
                 {
-                    coreVector2 vCurPos = avTargetPos[i] + vDiff.Normalized() * MAX(20.0f - fLen, 0.0f);
-                    
-                    //vCurPos.x = CLAMP(vCurPos.x, -1.0f * FOREGROUND_AREA.x, 1.0f * FOREGROUND_AREA.x);
-                    //vCurPos.y = CLAMP(vCurPos.y, -1.0f * FOREGROUND_AREA.y, 1.0f * FOREGROUND_AREA.y);
-                    
-                    avTargetPos[i].x = vCurPos.x;
+                    const coreFloat A = 50.0f;
+                    const coreFloat B = 3.0f;
+
+                    const coreVector2 vDiff2 = coreVector2::Direction(I_TO_F(i) / 36.0f * 2.0f*PI);
+
+                    //const coreFloat fPower = CLAMP(MAX(1.0f - fLen/20.0f, 0.0f) * A + afEnergy[i], 0.0f, A / B) * MAX(1.0f - afRecover[i] * 3.0f, 0.0f);
+                    //coreVector2 vCurPos = avTargetPos[i] + fPower * (vDiff2 * 2.0f);//(vDiff.Normalized() * LERP(pBullet->GetFlyDir().Rotated90().Processed(ABS), coreVector2(1.0f,1.0f), 0.00f)).Normalized();
+                    const coreFloat fPower = afEnergy[i] ? 0.0f : ((A / B) * (I_TO_F((i % 3u)+1u) * 0.5f));
+                    coreVector2 vCurPos = avTargetPos[i] + fPower * vDiff2;//(vDiff.Normalized() * LERP(pBullet->GetFlyDir().Rotated90().Processed(ABS), coreVector2(1.0f,1.0f), 0.00f)).Normalized();
+
+                    afEnergy[i] -= fPower * B;
+
+                    avTargetPos[i] = vCurPos;
                 }
             }
-                    
-                    
-                    STAGE_FOREACH_ENEMY(pSquad1, pEnemy2, j)
-                    {
-                        if(pEnemy == pEnemy2) return;
 
-                        const coreVector2 vDiff  = avTargetPos[i] - avTargetPos[j];
-                        const coreFloat   fPower = POW2(pEnemy->GetCollisionRadius() * 2.0f) - vDiff.LengthSq();
+            if(afEnergy[i])
+            {
+                const coreFloat fPrevRecover = afRecover[i];
 
-                        if((fPower > 0.0f) && !vDiff.IsNull())
-                        {
-                            constexpr coreVector2 vBase = coreVector2(0.0f,0.0f);
+                afRecover[i] += 1.0f * Core::System->GetTime();
+                if(afRecover[i] >= 1.0f)
+                {
+                    avTargetPos[i] = avSourcePos[i];
 
-                            const coreFloat A = (avTargetPos[i] - vBase).LengthSq();
-                            const coreFloat B = (avTargetPos[j] - vBase).LengthSq();
+                    afEnergy [i] = 0.0f;
+                    afRecover[i] = 0.0f;
+                }
 
-                            const coreVector2 vPush = vDiff.Normalized() * (fPower * Core::System->GetTime());
+                if((fPrevRecover < 0.3f) && (afRecover[i] >= 0.3f))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = pEnemy->AimAtPlayerSide().Normalized();
 
-                            if(A > B) avTargetPos[i] = avTargetPos[i] + vPush;
-                                 else avTargetPos[j] = avTargetPos[j] - vPush;
-                        }
-                    });
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
+                }
+            }
 
-//sind grau und werden farbig nachdem sie ausgewichen sind
-// fixe bewegungen wie die wellen bei moses, teilen saich auf, abhängig von schussrichtung(!) und gehen dnan wieder zusammen, reagieren erneut mit leichtem delay, sind ghost wärend grau
-// twist, reagieren mehrmals auf geshcosse
-// reagieren auf explosionen
-// schießen wärend sie farbe haben, an alte position vom spieler
-// spawn like a wave
+            if(afEnergy[i])
+            {
+                if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                {
+                    pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
+                    pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
+                }
+            }
+            else
+            {
+                if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                {
+                    pEnemy->SetBaseColor(COLOR_SHIP_GREY);
+                    pEnemy->AddStatus   (ENEMY_STATUS_GHOST);
+                }
+            }
 
-            avTargetPos[i].x = CLAMP(avTargetPos[i].x, -1.0f * FOREGROUND_AREA.x, 1.0f * FOREGROUND_AREA.x);
-            avTargetPos[i].y = CLAMP(avTargetPos[i].y, -1.0f * FOREGROUND_AREA.y, 1.0f * FOREGROUND_AREA.y);
 
-            pEnemy->DefaultMoveSmooth(coreVector2(avTargetPos[i].x, pEnemy->GetPosition().y) / FOREGROUND_AREA, 30.0f, 20.0f);
-            
+            pEnemy->DefaultMoveSmooth(coreVector2(avTargetPos[i]) / FOREGROUND_AREA, 150.0f, 12.0f);
         });
 
         STAGE_WAVE("SECHSUNDSIEBZIG", {20.0f, 30.0f, 40.0f, 50.0f})

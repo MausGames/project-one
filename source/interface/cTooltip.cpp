@@ -21,9 +21,9 @@ cTooltip::cTooltip()noexcept
     this->DefineTexture(0u, "default_white.png");
 
     // set object properties
-    this->SetPosition (TOOLTIP_CURSOR_OFFSET);
-    this->SetAlignment(coreVector2(TOOLTIP_CURSOR_OFFSET.x ? SIGN(TOOLTIP_CURSOR_OFFSET.x) : 0.0f,
-                                   TOOLTIP_CURSOR_OFFSET.y ? SIGN(TOOLTIP_CURSOR_OFFSET.y) : 0.0f));
+    this->SetPosition (TOOLTIP_TARGET_OFFSET);
+    this->SetAlignment(coreVector2(TOOLTIP_TARGET_OFFSET.x ? SIGN(TOOLTIP_TARGET_OFFSET.x) : 0.0f,
+                                   TOOLTIP_TARGET_OFFSET.y ? SIGN(TOOLTIP_TARGET_OFFSET.y) : 0.0f));
     this->SetColor3   (COLOR_MENU_BLACK);
 
     // create text lines
@@ -169,6 +169,6 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines)) + TOOLTIP_BORDER_SIZE + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) * fFactor);
 
     // set text line position
-    const coreVector2 vBase = (this->GetSize() * this->GetAlignment() + (TOOLTIP_BORDER_SIZE - this->GetSize()) * m_aLine[0].GetAlignment()) * 0.5f + TOOLTIP_CURSOR_OFFSET;
+    const coreVector2 vBase = (this->GetSize() * this->GetAlignment() + (TOOLTIP_BORDER_SIZE - this->GetSize()) * m_aLine[0].GetAlignment()) * 0.5f + TOOLTIP_TARGET_OFFSET;
     for(coreUintW i = 0u; i < m_iNumLines; ++i) m_aLine[i].SetPosition(coreVector2(vBase.x, vBase.y - TOOLTIP_LINE_HEIGHT * I_TO_F(i)));
 }

@@ -175,7 +175,7 @@ void cMenu::Move()
         m_TransitionTime.Update(1.0f);
 
     // 
-    if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO))
+    if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO) && !DEFINED(_CORE_DEBUG_))
         Core::Input->ClearButtonAll();
 
     // 

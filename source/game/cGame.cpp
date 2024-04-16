@@ -517,6 +517,7 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
     if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
+    ASSERT(vPosition.x)
     return &m_aPlayer[(vPosition.x > 0.0f) ? 1u : 0u];
 }
 

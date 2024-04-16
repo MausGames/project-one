@@ -195,7 +195,7 @@ void CoreApp::Render()
 void CoreApp::Move()
 {
     // reshape and resize game
-    if(Core::System->GetWinSizeChanged()) ReshapeGame();
+    //if(Core::System->GetWinSizeChanged()) ReshapeGame();
 
     // lock frame rate and override frame time
     LockFramerate();

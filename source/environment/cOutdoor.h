@@ -16,6 +16,7 @@
 // TODO: outdoor parameters are reset on engine-reset !!!    
 // TODO: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file
 // TODO: get max height of outdoor model and use for first step in RetrieveIntersect
+// TODO: attach function, then calling destructor will crash, implement detach function (>engine)
 
 
 // ****************************************************************

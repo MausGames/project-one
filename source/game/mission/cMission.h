@@ -22,11 +22,12 @@
 
 // ****************************************************************
 // mission definitions
-#define MISSION_BOSSES      (BOSSES)   // default number of bosses per mission
-#define MISSION_WAVES       (WAVES)    // 
-#define MISSION_NO_BOSS     (0xFFu)    // no boss currently active (error-value)
-#define MISSION_NO_WAVE     (0xFFu)    // 
-#define MISSION_NO_SEGMENT  (0xFFu)    // 
+#define MISSION_PLAYERS     (PLAYERS)   // 
+#define MISSION_BOSSES      (BOSSES)    // default number of bosses per mission
+#define MISSION_WAVES       (WAVES)     // 
+#define MISSION_NO_BOSS     (0xFFu)     // no boss currently active (error-value)
+#define MISSION_NO_WAVE     (0xFFu)     // 
+#define MISSION_NO_SEGMENT  (0xFFu)     // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
@@ -35,19 +36,20 @@
 
 // ****************************************************************
 // mission specific definitions
-#define VIRIDO_TRAILS        (4u)                                    // 
-#define VIRIDO_BALLS         (2u)                                    // 
-#define VIRIDO_BALLS_RAWS    (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
-#define VIRIDO_PADDLES       (3u)                                    // 
-#define VIRIDO_BARRIERS      (15u)                                   // 
-#define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
-#define VIRIDO_LASERS        (4u)                                    // 
-#define VIRIDO_LASERS_RAWS   (VIRIDO_LASERS * 2u)                    // 
-#define VIRIDO_SHADOWS       (16u)                                   // 
-#define VIRIDO_SHADOWS_RAWS  (VIRIDO_SHADOWS)                        // 
-#define VIRIDO_BALL_SPEED    (1.5f)                                  // 
+#define VIRIDO_TRAILS               (4u)                                              // 
+#define VIRIDO_BALLS                (2u)                                              // 
+#define VIRIDO_BALLS_RAWS           (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))             // 
+#define VIRIDO_PADDLES              (3u)                                              // 
+#define VIRIDO_BARRIERS             (15u)                                             // 
+#define VIRIDO_BARRIERS_RAWS        (VIRIDO_BARRIERS)                                 // 
+#define VIRIDO_LASERS               (4u)                                              // 
+#define VIRIDO_LASERS_RAWS          (VIRIDO_LASERS * 2u)                              // 
+#define VIRIDO_SHADOWS              (16u)                                             // 
+#define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
+#define VIRIDO_BALL_SPEED           (1.5f)                                            // 
 
-#define RUTILUS_TELEPORTER   (2u)                                    // 
+#define RUTILUS_TELEPORTER          (2u)                                              // 
+#define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
 
 
 // ****************************************************************
@@ -447,16 +449,17 @@ private:
 class cRutilusMission final : public cMission
 {
 private:
-    cQuaternionBoss m_Quaternion;                     // 
-    cSarosBoss      m_Saros;                          // 
-    cMessierBoss    m_Messier;                        // 
+    cQuaternionBoss m_Quaternion;                          // 
+    cSarosBoss      m_Saros;                               // 
+    cMessierBoss    m_Messier;                             // 
 
-    coreObject3D m_aTeleporter    [RUTILUS_TELEPORTER];   // 
-    coreVector2  m_avTeleporterPos[RUTILUS_TELEPORTER];   // 
+    coreObject3D m_aTeleporter     [RUTILUS_TELEPORTER];   // 
+    coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
+    coreUint8    m_iTeleporterActive;                      // 
 
-    coreUint8 m_iMoveFlip;                            // 
+    coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
 
-    coreFlow m_fAnimation;                            // animation value
+    coreFlow m_fAnimation;                                 // animation value
 
 
 public:
@@ -467,8 +470,11 @@ public:
     ASSIGN_ID(4, "Rutilus")
 
     // 
-    void EnableTeleporter (const coreUintW iIndex, const coreVector2& vPosition);
+    void EnableTeleporter (const coreUintW iIndex);
     void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
 
 
 private:
@@ -479,8 +485,7 @@ private:
     void __MoveOwnAfter ()final;
 
     // 
-    static coreUint8   __GetFlipType     (const coreVector2& vOldDir, const coreVector2& vNewDir);
-    static coreVector2 __GetFlipDirection(const coreVector2& vDir, const coreUint8 iType);
+    void __LineEffect(const coreUintW iIndex)const;
 };
 
 

@@ -454,7 +454,7 @@ void cGameMenu::Move()
 
     // 
     if(m_CancelButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_CancelButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
-    if(m_BackButton  .IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton  ), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    if(m_BackButton  .IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton),   TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }
 
 
