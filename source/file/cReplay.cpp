@@ -36,7 +36,7 @@ void cReplay::CreateGame()
     oOptions.iType        = m_Header.iOptionType;
     oOptions.iMode        = m_Header.iOptionMode;
     oOptions.iDifficulty  = m_Header.iOptionDifficulty;
-    oOptions.iFlags       = GAME_FLAG_TASK;
+    oOptions.iFlags       = GAME_FLAG_TASK | GAME_FLAG_FRAGMENT;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         oOptions.aiShield[i] = m_Header.aaiOptionShield[i];
@@ -115,6 +115,9 @@ void cReplay::StartPlayback()
     m_iCurFrame = 0u;
     m_iStatus   = REPLAY_STATUS_PLAYBACK;
 
+    // 
+    g_pSave->SetIgnore(true);
+
     Core::Log->Info("Replay playback started");
 }
 
@@ -183,6 +186,9 @@ void cReplay::EndPlayback()
 
     // 
     m_iStatus = REPLAY_STATUS_DISABLED;
+
+    // 
+    g_pSave->SetIgnore(false);
 
     Core::Log->Info("Replay playback ended");
 }
@@ -345,10 +351,13 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     }
 
     // 
-    pHeaderFile->Decompress();
+    WARN_IF(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(&m_Header), sizeof(sHeader)) != CORE_OK)
+    {
+        Core::Log->Warning("Replay (%s) could not be decompressed!", pcPath);
+        return false;
+    }
 
     // 
-    std::memcpy(&m_Header, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
     WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)   ||
             (m_Header.iVersion  != REPLAY_FILE_VERSION) ||
             (m_Header.iChecksum != cReplay::__GenerateChecksum(m_Header)))
@@ -546,7 +555,7 @@ coreBool cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piS
 cReplay::sPacket cReplay::__Pack(const sPacketRaw& oPacket)
 {
     ASSERT((oPacket.iFrame <= BITLINE(22u)) && (oPacket.iType <= BITLINE(2u)) && (oPacket.iValue <= BITLINE(5u)))
-    STATIC_ASSERT(INPUT_KEYS_ACTION <= 5u)
+    //STATIC_ASSERT(INPUT_KEYS_ACTION <= 5u)
 
     // 
     sPacket oOutput = {};

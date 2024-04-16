@@ -22,8 +22,10 @@
 // TODO 1: clean up code (also in mission)
 // TODO 1: gelbe und blaue farbe is weird
 // TODO 1: hard mode: all object behaviors increase, gelber angriff is undurchdringbar (7 statt 3 geschosse)
+// TODO 1: hard mode: neue beschwörung die nicht zerstört werden kann (vielleicht finaler ball kann nicht zerstört werden)
 // TODO 1: purple helper shield wird unter laser gezeichnet
-// TODO 1: MAIN: task-check, regular score, sound, background rota/speed
+// TODO 1: MAIN: medal goal (nochmal prüfen, nichts abziehen), regular score, sound, background rota/speed
+// TODO 1: ACHIEVEMENT: name (), description (), fly through the hole without touching the boss
 // TODO 1: schilde reflektieren manchmal an falscher stelle, vielleicht old-pos issue, wenn sie zurück in die mitte teleportiert werden ? sollte überall gehandelt werden wo old-pos new-pos objekte berechnet werden
 
 
@@ -1292,9 +1294,14 @@ void cTorusBoss::__MoveOwn()
             {
                 this->Kill(false);
 
+                if(this->HasAllHelpers())
+                {
+                    this->_CreateFragment(1u);
+                }
+
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
-                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 0.8f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
                 g_pSpecialEffects->SlowScreen(4.0f);
 
                 // load object resources

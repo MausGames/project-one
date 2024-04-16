@@ -25,6 +25,7 @@
 // TODO 1: white flash on impact of white helper ?
 // TODO 1: different phases should map to the general feeling and behavior of the same-colored bosses ?
 // TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: ACHIEVEMENT: name (), description (), beat all sub-bosses in the correct order (levels), finish the final phase without shooting and without getting hit
 // TODO 1: hard mode: add another mechanic to each sub-stage
 // TODO 1: alle objekte aller missionen müssen mit animation disabled werden, auch post-processing, auch spieler status und speed (eigene funktion ?)
 // TODO 1: next mission needs to be requested as early as possible (when helper starts flying into center)
@@ -40,6 +41,7 @@
 // TODO 1: bullet vorkommen sollten möglichst gleichmäßig sein
 // TODO 1: soll der boss selbst auch bunt werden ?
 // TODO 1: background sollte schneller sein, um die intensität zu erhöhen
+// TODO 1: make sure menu is always in the boss-color, even on rainbow-mode
 
 // yellow:
 // spikes sollten so lang aktiv sein, dass es für den spieler wichtig ist seine position dem auf-und-ab der spikes anzupassen

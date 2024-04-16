@@ -30,6 +30,7 @@
 // the classical rotating hole attack was too similar to the rotating lines, but the lines are more versatile
 // gegner die spawnen brauchen eine incentive um angegriffen zu werden (entweder sind sie unausweichlich, oder greifen selbst an)
 // TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: ACHIEVEMENT: name (), description (), 
 // TODO 1: fix glow on extended viewport
 // TODO 1: fix player-arrow when looking up or down
 // TODO 1: make sure background movement is correctly handled (coop), interpolated (maybe nothing to do), and is big enough

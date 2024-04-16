@@ -88,6 +88,15 @@ void cMission::Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 
 // ****************************************************************
 // 
+void cMission::Open()
+{
+    // 
+    g_pSave->EditLocalStatsMission()->iCountStart += 1u;
+}
+
+
+// ****************************************************************
+// 
 void cMission::Close()
 {
     // 
@@ -137,6 +146,12 @@ void cMission::Close()
         g_pSave->EditLocalStatsMission()->iTimeWorstShifted   = iTimeShiftedUint;
         g_pSave->EditLocalStatsMission()->iTimeWorstShiftGood = g_pGame->GetTimeTable()->GetShiftGoodMission(iMissionIndex);
         g_pSave->EditLocalStatsMission()->iTimeWorstShiftBad  = g_pGame->GetTimeTable()->GetShiftBadMission (iMissionIndex);
+    }
+
+    // 
+    if(g_CurConfig.Game.iGameSpeed >= 200u)
+    {
+        ADD_BIT(g_pSave->EditLocalStatsMission()->iFeat, FEAT_TWOHUNDRED)
     }
 
     // 
@@ -237,6 +252,7 @@ void cMission::SkipStage()
 
     // 
     m_iBadgeGiven = 0u;
+    STATIC_ASSERT(BADGES <= sizeof(m_iBadgeGiven)*8u)
 
     // 
     m_nCollPlayerEnemy  = NULL;
@@ -316,6 +332,21 @@ void cMission::ActivateWave(const coreUintW iIndex, const coreChar* pcName)
 
     // 
     g_pGame->GetInterface()->ShowWave(pcName);
+    
+    
+    if(!g_pGame->IsTask())
+    {
+        // 
+        g_pGame->GetTimeTable()->AddShiftGood(10u);
+
+        // 
+        g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+           pPlayer->GetDataTable()->EditCounterTotal  ()->iShiftGoodAdded += 10u;
+           pPlayer->GetDataTable()->EditCounterMission()->iShiftGoodAdded += 10u;
+           pPlayer->GetDataTable()->EditCounterSegment()->iShiftGoodAdded += 10u;
+        });
+    }
 }
 
 void cMission::DeactivateWave()
@@ -328,10 +359,6 @@ void cMission::DeactivateWave()
     // 
     coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex];
     iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 2u);
-
-    
-    // TODO 1: war eigentlich gedacht, falls der spieler ALT+F4 verwendet obwohl er die  bedingung erfuellt hat
-    //if(iMissionIndex == 1u) g_pSave->EditProgress()->bFirstPlay = false;
 
     // 
     this->__CloseSegment();
@@ -374,29 +401,37 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
     ADD_BIT(m_iBadgeGiven, iIndex)
 
     // 
-    const coreUint32 iBonus = cGame::CalcBonusBadge(iBadge);
-
-    // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         pPlayer->GetDataTable()->GiveBadge(iIndex);
     });
 
     // 
-    g_pGame->GetTimeTable()->AddShiftGood(iBonus);
-    
-    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    const coreUint32 iBonus = cGame::CalcBonusBadge(iBadge);
+    if(iBonus)
     {
-       pPlayer->GetDataTable()->EditCounterTotal  ()->iShiftGood += iBonus;
-       pPlayer->GetDataTable()->EditCounterMission()->iShiftGood += iBonus;
-       pPlayer->GetDataTable()->EditCounterSegment()->iShiftGood += iBonus;
-    });
+        // 
+        g_pGame->GetTimeTable()->AddShiftGood(iBonus);
 
-    // 
-    g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
+        // 
+        g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+           pPlayer->GetDataTable()->EditCounterTotal  ()->iShiftGoodAdded += iBonus;
+           pPlayer->GetDataTable()->EditCounterMission()->iShiftGoodAdded += iBonus;
+           pPlayer->GetDataTable()->EditCounterSegment()->iShiftGoodAdded += iBonus;
+        });
 
-    // 
-    g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
+        // 
+        g_pSave->EditGlobalStats      ()->iShiftGoodAdded += iBonus;
+        g_pSave->EditLocalStatsMission()->iShiftGoodAdded += iBonus;
+        g_pSave->EditLocalStatsSegment()->iShiftGoodAdded += iBonus;
+
+        // 
+        g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
+
+        // 
+        g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
+    }
 }
 
 
@@ -425,20 +460,6 @@ void cMission::__OpenSegment()
 
     // 
     g_pSave->EditLocalStatsSegment()->iCountStart += 1u;
-    
-    
-    
-    if(!g_pGame->IsTask())
-    {
-        g_pGame->GetTimeTable()->AddShiftGood(10u, iMissionIndex, m_iCurSegmentIndex);
-    
-        g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-           pPlayer->GetDataTable()->EditCounterTotal  ()->iShiftGood += 10u;
-           pPlayer->GetDataTable()->EditCounterMission()->iShiftGood += 10u;
-           pPlayer->GetDataTable()->EditCounterSegment()->iShiftGood += 10u;
-        });
-    }
 }
 
 
@@ -503,6 +524,12 @@ void cMission::__CloseSegment()
     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SPECIAL_SOUND_MEDAL(iMedal));
 
     // 
+    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->StartRolling(pPlayer->GetInput()->vMove);
+    });
+
+    // 
     g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_END(iMissionIndex, m_iCurSegmentIndex));
 
     // 
@@ -543,21 +570,19 @@ void cMission::__CloseSegment()
     }
 
     // 
+    if(g_CurConfig.Game.iGameSpeed >= 200u)
+    {
+        ADD_BIT(g_pSave->EditLocalStatsSegment()->iFeat, FEAT_TWOHUNDRED)
+    }
+
+    // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        ADD_FLAG(g_pSave->EditProgress()->aiFragment[iMissionIndex], pPlayer->GetDataTable()->GetFragmentAll(iMissionIndex))
-        ADD_FLAG(g_pSave->EditProgress()->aiBadge   [iMissionIndex], pPlayer->GetDataTable()->GetBadgeAll   (iMissionIndex))
+        ADD_FLAG(g_pSave->EditProgress()->aiBadge[iMissionIndex], pPlayer->GetDataTable()->GetBadgeAll(iMissionIndex))
     });
 
     // 
     g_pSave->SaveFile();
-
-    
-    
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        pPlayer->StartRolling(pPlayer->GetInput()->vMove);
-    });
 }
 
 

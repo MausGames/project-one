@@ -51,17 +51,24 @@ void cIntroMission::__MoveOwnAfter()
     // 
     g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        const coreUint8 iType = (g_pGame->IsMulti() || (g_iTotalType >= INPUT_SETS)) ? g_CurConfig.Input.aiType[i] : g_iTotalType;
+        if((pPlayer->GetInput() != &g_TotalInput) && (P_TO_UI(pPlayer->GetInput() - g_aGameInput) >= INPUT_SETS)) return;   // # skip replay
+
+        const coreUint8 iType = g_pGame->IsMulti() ? g_CurConfig.Input.aiType[i] : g_iTotalType;
         const auto&     oSet  = g_CurConfig.Input.aSet[iType];
+        const coreUint8 iMode = g_CurConfig.Input.aiControlMode[i];
 
         // 
-        cConfigMenu::PrintFigure(&m_aaManual[i][0], iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveUp    : SDL_CONTROLLER_BUTTON_DPAD_UP);
-        cConfigMenu::PrintFigure(&m_aaManual[i][1], iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveLeft  : SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-        cConfigMenu::PrintFigure(&m_aaManual[i][2], iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-        cConfigMenu::PrintFigure(&m_aaManual[i][3], iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveRight : SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-        cConfigMenu::PrintFigure(&m_aaManual[i][4], iType, oSet.aiAction[0]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][5], iType, oSet.aiAction[1]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][6], iType, oSet.aiAction[2]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][0],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveUp    : SDL_CONTROLLER_BUTTON_DPAD_UP);
+        cConfigMenu::PrintFigure(&m_aaManual[i][1],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveLeft  : SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+        cConfigMenu::PrintFigure(&m_aaManual[i][2],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+        cConfigMenu::PrintFigure(&m_aaManual[i][3],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveRight : SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+        cConfigMenu::PrintFigure(&m_aaManual[i][4],  iType, oSet.aiAction[0]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][5],  iType, oSet.aiAction[1]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][6],  iType, oSet.aiAction[2]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][7],  iType, oSet.aiAction[3]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][8],  iType, oSet.aiAction[4]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][9],  iType, oSet.aiAction[5]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][10], iType, oSet.aiAction[6]);
 
         // 
         constexpr coreVector2 avOffset[] =
@@ -72,7 +79,11 @@ void cIntroMission::__MoveOwnAfter()
             coreVector2( 1.0f, 0.0f),
             coreVector2( 1.0f, 0.0f),
             coreVector2(-1.0f, 0.5f),
-            coreVector2( 1.0f, 0.5f)
+            coreVector2( 1.0f, 0.5f),
+            coreVector2( 0.0f, 1.0f),
+            coreVector2(-1.0f, 0.0f),
+            coreVector2( 0.0f,-1.0f),
+            coreVector2( 1.0f, 0.0f),
         };
 
         // 
@@ -84,7 +95,27 @@ void cIntroMission::__MoveOwnAfter()
             (pPlayer->GetInput()->vMove.x > 0.0f),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_LEFT)),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_RIGHT))
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_RIGHT)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_UP)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_LEFT)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_DOWN)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_RIGHT))
+        };
+
+        // 
+        const coreUint8 aiModeBits[] =
+        {
+            0xFFu,
+            0xFFu,
+            0xFFu,
+            0xFFu,
+            BIT(0u),
+            BIT(0u),
+            BIT(0u),
+            BIT(1u),
+            BIT(1u),
+            BIT(1u),
+            BIT(1u)
         };
 
         // 
@@ -107,7 +138,7 @@ void cIntroMission::__MoveOwnAfter()
                 m_aaManual[i][j].SetSize    (coreVector2(0.1f,0.1f) * (abPress[j] ? 0.8f : 1.0f));
                 m_aaManual[i][j].SetCenter  (MapToAxisInv(g_pForeground->Project2D(pPlayer->GetPosition()), vFinal));
                 m_aaManual[i][j].SetAlpha   (BLENDH3(MIN1(fTime)));
-                m_aaManual[i][j].SetEnabled (fTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                m_aaManual[i][j].SetEnabled ((fTime && HAS_BIT(aiModeBits[j], iMode)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
                 m_aaManual[i][j].Move();
             }
         }

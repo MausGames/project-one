@@ -110,9 +110,9 @@ public:
     // get object properties
     inline       coreInt32    GetMaxHealth   ()const {return m_iMaxHealth;}
     inline       coreInt32    GetCurHealth   ()const {return m_iCurHealth;}
-    inline       coreFloat    GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
+    inline       coreFloat    GetCurHealthPct()const {return I_TO_F(m_iCurHealth) / I_TO_F(m_iMaxHealth);}   // # normal division
     inline       coreInt32    GetPreHealth   ()const {return m_iPreHealth;}
-    inline       coreFloat    GetPreHealthPct()const {return I_TO_F(m_iPreHealth) * RCP(I_TO_F(m_iMaxHealth));}
+    inline       coreFloat    GetPreHealthPct()const {return I_TO_F(m_iPreHealth) / I_TO_F(m_iMaxHealth);}   // # normal division
     inline       coreInt32    GetLostHealth  ()const {return m_iMaxHealth - m_iCurHealth;}
     inline const coreVector2& GetOldPos      ()const {return m_vOldPos;}
     inline       coreVector2  GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}

@@ -95,14 +95,22 @@ cMainMenu::cMainMenu()noexcept
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
     #endif
 
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraNew);
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_Navigator);
 
     // 
     coreSet<coreObject2D*>* pObjectSet = this->GetObjectSet(SURFACE_MAIN_DEFAULT);
-    for(coreUintW i = 0u, ie = pObjectSet->size() - 1u; i < ie; ++i)
+    for(coreUintW i = 0u, ie = pObjectSet->size() - 3u; i < ie; ++i)
     {
         (*pObjectSet)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
     }
+
+    m_ExtraNew.SetPosition(m_ExtraButton.GetPosition() + m_ExtraButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
+    m_ExtraNew.SetIndex   (NEW_MAIN_EXTRA);
+
+    m_ConfigNew.SetPosition(m_ConfigButton.GetPosition() + m_ConfigButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
+    m_ConfigNew.SetIndex   (NEW_MAIN_CONFIG);
 
     // 
     this->DeactivateFirstPlay();
@@ -144,11 +152,17 @@ void cMainMenu::Move()
             {
                 // 
                 m_iStatus = 4;
+
+                // 
+                m_ExtraNew.Ressolve();
             }
             else if(m_ConfigButton.IsClicked())
             {
                 // 
                 m_iStatus = 5;
+
+                // 
+                m_ConfigNew.Ressolve();
             }
             else if(m_SteamButton.IsClicked())
             {

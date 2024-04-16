@@ -7,14 +7,16 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
+#include "cConfig.h"
 
 
 // ****************************************************************
 // constructor
 cSave::cSave()noexcept
-: m_Header {}
-, m_sPath  (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save%s." SAVE_FILE_EXTENSION, g_bDemoVersion ? "_demo" : "")))
-, m_iToken (0u)
+: m_Header  {}
+, m_sPath   (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save%s." SAVE_FILE_EXTENSION, g_bDemoVersion ? "_demo" : "")))
+, m_iToken  (0u)
+, m_bIgnore (false)
 {
     // 
     this->LoadFile();
@@ -37,58 +39,103 @@ cSave::~cSave()
 // 
 RETURN_NONNULL cSave::sGlobalStats* cSave::EditGlobalStats()
 {
-    // 
-    return &m_Header.oGlobalStats;
-}
-
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUintW iMissionIndex)
-{
-    // 
-    ASSERT(iMissionIndex < REPLAY_MISSIONS)
-    return &m_Header.aLocalStatsMission[iMissionIndex];
-}
-
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission()
-{
-    // 
-    ASSERT(STATIC_ISVALID(g_pGame))
-    return this->EditLocalStatsMission(g_pGame->GetCurMissionIndex());
-}
-
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
-{
-    // 
-    if(iSegmentIndex != MISSION_NO_SEGMENT)
+    if(!m_bIgnore)
     {
-        ASSERT(iMissionIndex < REPLAY_MISSIONS)
-        ASSERT(iSegmentIndex < REPLAY_SEGMENTS)
-        return &m_Header.aaLocalStatsSegment[iMissionIndex][iSegmentIndex];
+        // 
+        return &m_Header.oGlobalStats;
     }
 
-    WARN_IF(false) {}
+    // 
+    static sGlobalStats s_GlobalStatsDummy;
+    return &s_GlobalStatsDummy;
+}
+
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex)
+{
+    if(!m_bIgnore)
+    {
+        // 
+        ASSERT(iMissionIndex < REPLAY_MISSIONS)
+        return &m_Header.aaaaLocalStatsMission[iType][iMode][iDifficulty][iMissionIndex];
+    }
 
     // 
     static sLocalStats s_LocalStatsDummy;
     return &s_LocalStatsDummy;
 }
 
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUintW iMissionIndex)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditLocalStatsMission(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), iMissionIndex);
+}
+
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditLocalStatsMission(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), g_pGame->GetCurMissionIndex());
+}
+
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    if(!m_bIgnore)
+    {
+        // 
+        if(iSegmentIndex != MISSION_NO_SEGMENT)
+        {
+            ASSERT(iMissionIndex < REPLAY_MISSIONS)
+            ASSERT(iSegmentIndex < REPLAY_SEGMENTS)
+            return &m_Header.aaaaaLocalStatsSegment[iType][iMode][iDifficulty][iMissionIndex][iSegmentIndex];
+        }
+
+        WARN_IF(false) {}
+    }
+
+    // 
+    static sLocalStats s_LocalStatsDummy;
+    return &s_LocalStatsDummy;
+}
+
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditLocalStatsSegment(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), iMissionIndex, iSegmentIndex);
+}
+
 RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->EditLocalStatsSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    return this->EditLocalStatsSegment(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 RETURN_NONNULL cSave::sOptions* cSave::EditOptions()
 {
+    if(!m_bIgnore)
+    {
+        // 
+        return &m_Header.oOptions;
+    }
+
     // 
-    return &m_Header.oOptions;
+    static sOptions s_OptionsDummy;
+    return &s_OptionsDummy;
 }
 
 RETURN_NONNULL cSave::sProgress* cSave::EditProgress()
 {
+    if(!m_bIgnore)
+    {
+        // 
+        return &m_Header.oProgress;
+    }
+
     // 
-    return &m_Header.oProgress;
+    static sProgress s_ProgressDummy;
+    return &s_ProgressDummy;
 }
 
 
@@ -126,29 +173,39 @@ void cSave::SaveFile()
     m_Header.iSaveCount     = m_Header.iSaveCount + 1u;
 
     // 
-    coreByte* pHeaderData = new coreByte[sizeof(sHeader)];
-    std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
+    Core::Manager::Resource->DetachFunction(m_iToken);
 
     // 
-    //Core::Manager::Resource->DetachFunction(m_iToken);   // TODO 1: memory leak of pHeaderData
+    static coreByte s_aHeaderData[sizeof(sHeader)];
+    std::memcpy(s_aHeaderData, &m_Header, sizeof(sHeader));
 
-    m_iToken = Core::Manager::Resource->AttachFunction([=, this]()
+    m_iToken = Core::Manager::Resource->AttachFunction([this]()
     {
         // 
         coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));
 
         // 
-        sHeader* pHeader   = r_cast<sHeader*>(pHeaderData);
+        sHeader* pHeader   = r_cast<sHeader*>(s_aHeaderData);
         pHeader->iChecksum = cSave::__GenerateChecksum(*pHeader);
 
         // 
+        coreByte*  pCompressedData;
+        coreUint32 iCompressedSize;
+        if(coreData::Compress(s_aHeaderData, sizeof(sHeader), &pCompressedData, &iCompressedSize) != CORE_OK)
+        {
+            pCompressedData = s_aHeaderData;
+            iCompressedSize = sizeof(sHeader);
+        }
+
+        // 
         coreArchive oArchive;
-        oArchive.CreateFile("header", pHeaderData, sizeof(sHeader))->Compress();
+        oArchive.CreateFile("header", pCompressedData, iCompressedSize);
 
         // 
         WARN_IF(oArchive.Save(m_sPath.c_str()) != CORE_OK)
         {
-
+            Core::Log->Warning("Save (%s) could not be saved", m_sPath.c_str());
+            return CORE_OK;
         }
 
         Core::Log->Info("Save (%s) saved", m_sPath.c_str());
@@ -168,6 +225,7 @@ void cSave::Clear()
     m_Header.iMagic               = SAVE_FILE_MAGIC;
     m_Header.iVersion             = SAVE_FILE_VERSION;
     m_Header.oProgress.bFirstPlay = true;
+    ADD_BIT_EX(m_Header.oProgress.aiNew, NEW_MAIN_CONFIG)
 
     // 
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
@@ -200,10 +258,12 @@ coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, const coreChar* pcPath)
     }
 
     // 
-    pHeaderFile->Decompress();
+    if(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(pHeader), sizeof(sHeader)) != CORE_OK)
+    {
+        std::memcpy(pHeader, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
+    }
 
     // 
-    std::memcpy(pHeader, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
     WARN_IF((pHeader->iMagic    != SAVE_FILE_MAGIC)   ||
             (pHeader->iVersion  != SAVE_FILE_VERSION) ||
             (pHeader->iChecksum != cSave::__GenerateChecksum(*pHeader)))
@@ -225,12 +285,9 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     pHeader->oOptions.acName[SAVE_NAME_LENGTH - 1u] = '\0';
 
     // 
-    pHeader->oOptions.iMission    = CLAMP(pHeader->oOptions.iMission,    0u, SAVE_MISSIONS      -1u);
-    pHeader->oOptions.iSegment    = CLAMP(pHeader->oOptions.iSegment,    0u, (SAVE_MISSIONS      -3u) * (SAVE_SEGMENTS-1u));   // TODO 1: fix
     pHeader->oOptions.iType       = CLAMP(pHeader->oOptions.iType,       0u, GAME_TYPE_MAX      -1u);
     pHeader->oOptions.iMode       = CLAMP(pHeader->oOptions.iMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->oOptions.iDifficulty = CLAMP(pHeader->oOptions.iDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);
-    // TODO 1: flags ?
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
         pHeader->oOptions.aiShield[i] = CLAMP(pHeader->oOptions.aiShield[i], 0u, SHIELD_MAX);
@@ -241,13 +298,36 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     // 
     for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
     {
-        pHeader->oProgress.aiAdvance     [i] = CLAMP(pHeader->oProgress.aiAdvance     [i], 0u, SAVE_SEGMENTS);
-        pHeader->oProgress.aiMedalMission[i] = CLAMP(pHeader->oProgress.aiMedalMission[i], 0u, SAVE_MEDALS-1u);
-        for(coreUintW j = 0u; j < SAVE_SEGMENTS; ++j)
+        pHeader->oProgress.aiAdvance[i] = CLAMP(pHeader->oProgress.aiAdvance[i], 0u, SAVE_SEGMENTS);
+    }
+    for(coreUintW i = 0u; i < SAVE_TYPES; ++i)
+    {
+        for(coreUintW j = 0u; j < SAVE_MODES; ++j)
         {
-            pHeader->oProgress.aaiMedalSegment[i][j] = CLAMP(pHeader->oProgress.aaiMedalSegment[i][j], 0u, SAVE_MEDALS-1u);
+            for(coreUintW k = 0u; k < SAVE_DIFFICULTIES; ++k)
+            {
+                for(coreUintW l = 0u; l < SAVE_MISSIONS; ++l)
+                {
+                    pHeader->oProgress.aaaaiMedalMission[i][j][k][l] = CLAMP(pHeader->oProgress.aaaaiMedalMission[i][j][k][l], 0u, SAVE_MEDALS-1u);
+                    for(coreUintW m = 0u; m < SAVE_SEGMENTS; ++m)
+                    {
+                        pHeader->oProgress.aaaaaiMedalSegment[i][j][k][l][m] = CLAMP(pHeader->oProgress.aaaaaiMedalSegment[i][j][k][l][m], 0u, SAVE_MEDALS-1u);
+                    }
+                }
+            }
         }
     }
+
+    // handle players which use ALT+F4 after finishing the intro mission
+    if(pHeader->oProgress.bFirstPlay && pHeader->oProgress.aiAdvance[1])
+    {
+        pHeader->oProgress.bFirstPlay = false;
+        if(!g_bDemoVersion) ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_EXTRA)
+    }
+    
+    
+    if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_MIRRORMORE))  g_CurConfig.Game.iMirrorMode = 0u;
+    if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_GAMESPEEDUP)) g_CurConfig.Game.iGameSpeed  = MIN(g_CurConfig.Game.iGameSpeed, 100u);
 }
 
 

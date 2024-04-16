@@ -97,6 +97,22 @@ coreVector3 cWeapon::_GetEnergyColor()const
 
 
 // ****************************************************************
+// 
+void cWeapon::_TrackBullet()
+{
+    // 
+    m_pOwner->GetDataTable()->EditCounterTotal  ()->iBulletsShot += 1u;
+    m_pOwner->GetDataTable()->EditCounterMission()->iBulletsShot += 1u;
+    m_pOwner->GetDataTable()->EditCounterSegment()->iBulletsShot += 1u;
+
+    // 
+    g_pSave->EditGlobalStats      ()->iBulletsShot += 1u;
+    g_pSave->EditLocalStatsMission()->iBulletsShot += 1u;
+    g_pSave->EditLocalStatsSegment()->iBulletsShot += 1u;
+}
+
+
+// ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
 : m_bBurst  (false)

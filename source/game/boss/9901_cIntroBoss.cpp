@@ -18,6 +18,7 @@
 // TODO 1: das erste fragment bekommt man im intro (die mitte der tafel, das viereck), und saugt einen ein und zerstört das schiff, und erzeugt eine graue kopie (Eigengrau) -> erst dann bekommt man blauen schein und quad, auch health-icon anders
 // TODO 1: improve intro and outro (including fragment collection)
 // TODO 1: MAIN: task-check, fragment, regular score, outro, sound
+// TODO 1: ACHIEVEMENT: name (), description (), keep enemy on sword alive until it gets thrown away
 
 
 // ****************************************************************
@@ -332,7 +333,7 @@ void cIntroBoss::__MoveOwn()
                 }
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 0.8f, SOUND_EFFECT_SHAKE);
             }
         });
     }
@@ -605,10 +606,17 @@ void cIntroBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                g_pGame->GetItemManager()->AddItem<cFragmentItem>(this->GetPosition().xy());
+                this->_CreateFragment(0u);
 
-                g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
+                //g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
+                
+                
+
+                g_pSpecialEffects->CreateExplosion (this->GetPosition());
+                g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->SlowScreen(4.0f);
 
                 PHASE_CHANGE_INC
             }

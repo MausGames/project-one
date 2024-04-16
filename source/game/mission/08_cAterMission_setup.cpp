@@ -105,7 +105,7 @@ void cAterMission::__SetupOwn()
 
         STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
     });
-#if 0
+
     // ################################################################
     // end
     STAGE_MAIN({TAKE_MISSION})
@@ -132,7 +132,7 @@ void cAterMission::__SetupOwn()
             g_pGame->FadeMusic(0.16f);
         }
     });
-#endif
+
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS, 6u})

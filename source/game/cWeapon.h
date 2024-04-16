@@ -62,7 +62,10 @@ protected:
     coreBool    _IsOwnerDarkShading()const;
     coreBool    _IsOwnerProjectOne ()const;
     coreVector3 _GetEnergyColor    ()const;
-    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet)const {if(this->_IsOwnerProjectOne()) ptBullet->SetColor3(this->_GetEnergyColor()); else ptBullet->MakeWhite(); return ptBullet;}
+    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet) {this->_TrackBullet(); if(this->_IsOwnerProjectOne()) ptBullet->SetColor3(this->_GetEnergyColor()); else ptBullet->MakeWhite(); return ptBullet;}
+
+    // 
+    void _TrackBullet();
 
 
 private:

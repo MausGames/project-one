@@ -17,6 +17,7 @@
 // TODO 4: use index instead of pointer for order-list ?
 // TODO 2: also invert with mirror mode (like interface, maybe move outside ?) (even more, like summary and continue menu) (should it be a 3rd option ? Off, Light, Full)
 // TODO 1: alle stellen mit DrawProgress und vielleicht DrawCountdown (1, 2, 3, ...) brauchen sound effect
+// TODO 5: size-bump für critical (https://youtu.be/mfr7mGW6Z2U?t=17)
 
 
 // ****************************************************************

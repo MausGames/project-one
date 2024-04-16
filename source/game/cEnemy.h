@@ -107,6 +107,9 @@ public:
     void ApplyScore();
 
     // 
+    void TrackEnemy();
+
+    // 
     void RefreshColorAll(const coreFloat fFactor);
     void RefreshColorAll();
     void InvokeBlinkAll ();
@@ -530,6 +533,21 @@ private:
     // execute own routines
     void __ResurrectOwn()final;
     void __KillOwn     (const coreBool bAnimated)final;
+};
+
+
+// ****************************************************************
+// core enemy class
+class cCoreEnemy final : public cEnemy
+{
+public:
+    cCoreEnemy()noexcept;
+
+    ENABLE_COPY(cCoreEnemy)
+    ASSIGN_ID(10, "Core")
+
+    // get object properties
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_PLACEHOLDER;}
 };
 
 

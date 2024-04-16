@@ -96,7 +96,7 @@ void cScrollBox::Move()
         const coreFloat fMousePos = MapToAxis(Core::Input->GetMousePosition() * (Core::System->GetResolution() / g_vGameResolution), g_vHudDirection).y;
 
         // 
-        coreFloat fWheel = Core::Input->GetMouseWheel();
+        coreFloat fWheel = TIME ? Core::Input->GetMouseWheel() : 0.0f;
 
         // 
         const coreBool  bMouseWheel = (fWheel != 0.0f);
@@ -132,7 +132,7 @@ void cScrollBox::Move()
             m_bDrag      = true;
             m_fDragValue = fMousePos - m_Cursor.GetPosition().y;
         }
-        else if(Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_RELEASE))
+        else if(!Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
         {
             m_bDrag      = false;
             m_fDragValue = 0.0f;
@@ -160,7 +160,7 @@ void cScrollBox::Move()
                 {
                     const coreVector2 vTarget = pObject->GetPosition();
                     const coreVector2 vDiff   = vTarget - this->GetPosition();
-                    const coreFloat   fShift  = MAX0(ABS(vDiff.y) - (this->GetSize().y - pObject->GetSize().y) * 0.5f) * SIGN(vDiff.y);
+                    const coreFloat   fShift  = MAX0(ABS(vDiff.y) - (this->GetSize().y - pObject->GetSize().y * SCROLL_FOCUS_FACTOR) * 0.5f) * SIGN(vDiff.y);
 
                     m_fCurOffset = CLAMP(this->GetOffset().y - fShift, 0.0f, m_fMaxOffset);
 
@@ -170,7 +170,7 @@ void cScrollBox::Move()
         }
 
         // 
-        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * (30.0f * TIME))));
+        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 5.0f : 20.0f) * TIME))));
 
         // 
         m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y * RCP(m_fMaxOffset))));

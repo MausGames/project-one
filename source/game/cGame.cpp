@@ -26,9 +26,10 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_fTimeInOut          (0.0f)
 , m_fMusicFade          (0.0f)
 , m_fMusicSpeed         (0.0f)
+, m_fMusicVolume        (1.0f)
 , m_fHitDelay           (0.0f)
 , m_bDefeatDelay        (false)
-, m_iContinues          (GAME_CONTINUES)
+, m_iContinues          ((g_bDemoVersion || !g_pSave->GetHeader().oProgress.bFirstPlay) ? GAME_CONTINUES : 0u)
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (GAME_OUTRO_MISSION)
@@ -140,6 +141,8 @@ cGame::~cGame()
     
     if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg"))   // TODO 1: condition for finale in demo
         g_MusicPlayer.Stop();
+    
+    m_fMusicVolume = 1.0f;
 }
 
 
@@ -534,7 +537,7 @@ void cGame::MoveAlways()
         if(!m_fMusicFade) g_MusicPlayer.Stop();
     }
 
-    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * (g_pMenu->IsPaused() ? 0.3f : 1.0f) * MUSIC_VOLUME);
+    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * (g_pMenu->IsPaused() ? 0.3f : 1.0f) * m_fMusicVolume * MUSIC_VOLUME);
 }
 
 
@@ -587,8 +590,11 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
         // 
         m_bDefeatDelay = false;
 
-        // 
-        g_pSave->EditLocalStatsMission()->iCountStart += 1u;
+        if((m_Options.iKind == GAME_KIND_ALL) || (m_Options.iKind == GAME_KIND_MISSION))
+        {
+            // 
+            m_pCurMission->Open();
+        }
     }
 
     Core::Log->Info("Mission (%s) created", m_pCurMission->GetName());
@@ -649,9 +655,6 @@ void cGame::StartIntro()
         m_aPlayer[i].Kill(false);
         m_aPlayer[i].Resurrect();
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);   // TODO 1: handle combination with gameplay code
-
-        // 
-        m_aPlayer[i].ActivateNormalShading();   // TODO 1: move to where the fragment is collected ?
 
         // 
         const coreFloat fSide = this->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
@@ -742,8 +745,8 @@ void cGame::UseContinue()
 {
     ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
 
-    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
-    const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();
+    const coreUintW iMissionIndex = m_iCurMissionIndex;
+    const coreUintW iSegmentIndex = m_pCurMission->GetCurSegmentIndex();
 
     // 
     this->LoadMissionID(m_pCurMission->GetID(), iSegmentIndex, m_pCurMission->GetTakeTo());
@@ -831,23 +834,23 @@ void cGame::RepairPlayer()
     }
 
     // 
-    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
-        if(pPlayer->HasStatus(PLAYER_STATUS_DEAD))
+        if(m_aPlayer[i].HasStatus(PLAYER_STATUS_DEAD))
         {
-            pPlayer->Resurrect();
+            m_aPlayer[i].Resurrect();
 
-            pPlayer->SetDesaturate(PLAYER_DESATURATE);
-            pPlayer->StartFeeling (PLAYER_FEEL_TIME_REPAIR, 0u);
+            m_aPlayer[i].SetDesaturate(PLAYER_DESATURATE);
+            m_aPlayer[i].StartFeeling (PLAYER_FEEL_TIME_REPAIR, 0u);
 
-            pPlayer->SetCurHealth(1);
-            pPlayer->AddStatus   (PLAYER_STATUS_REPAIRED);
+            m_aPlayer[i].SetCurHealth(1);
+            m_aPlayer[i].AddStatus   (PLAYER_STATUS_REPAIRED);
 
-            m_CombatText.DrawText(Core::Language->GetString("LUCKY"), pPlayer->GetPosition(), COLOR_MENU_INSIDE);
+            m_CombatText.DrawText(Core::Language->GetString("LUCKY"), m_aPlayer[i].GetPosition(), COLOR_MENU_INSIDE);
 
             m_bDefeatDelay = false;
         }
-    });
+    }
 }
 
 
@@ -989,9 +992,10 @@ coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
     switch(iBadge)
     {
     default: ASSERT(false)
-    case BADGE_HARD:   return 5u;
-    case BADGE_NORMAL: return 5u;
-    case BADGE_EASY:   return 5u;
+    case BADGE_ACHIEVEMENT: return 0u;
+    case BADGE_HARD:        return 5u;
+    case BADGE_NORMAL:      return 5u;
+    case BADGE_EASY:        return 5u;
     }
 }
 
@@ -1087,6 +1091,7 @@ coreBool cGame::__HandleIntro()
                 if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
                 {
                     g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, pPlayer->GetEnergyColor());
+                    g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
                 }
 
                 // fly player animated into the game field
@@ -1120,9 +1125,10 @@ coreBool cGame::__HandleOutro()
     if(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO) || HAS_FLAG(m_iStatus, GAME_STATUS_FINISHED))
     {
         // 
+        const coreFloat fOldTime = m_fTimeInOut;
         m_fTimeInOut.Update(1.0f);
 
-        this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             if((m_iOutroType == GAME_OUTRO_MISSION) || (m_iOutroType == GAME_OUTRO_SEGMENT) || (m_iOutroType == GAME_OUTRO_BEGINNING))
             {
@@ -1136,6 +1142,12 @@ coreBool cGame::__HandleOutro()
                 pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->SetThrust     ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+
+                // 
+                if(g_pForeground->IsVisiblePoint(pPlayer->GetPosition().xy()) && InBetween(i ? 0.16f : 0.0f, fOldTime, m_fTimeInOut))
+                {
+                    g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                }
             }
             else
             {
@@ -1155,6 +1167,12 @@ coreBool cGame::__HandleOutro()
             m_Tracker.SetDirection  (coreVector3(0.0f,1.0f,0.0f));
             m_Tracker.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
             m_Tracker.SetThrust     ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+
+            // 
+            if(InBetween(2.5f, fOldTime, m_fTimeInOut))
+            {
+                g_pSpecialEffects->PlaySound(m_Tracker.GetPosition(), 1.0f, 0.8f, SOUND_SHIP_FLY);
+            }
         }
         
     }
@@ -1350,9 +1368,6 @@ void cGame::__HandleCollisions()
                     }
 
                     // 
-                    //g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
-
-                    // 
                     if(!pEnemy->ReachedDeath()) this->PlayHitSound(vIntersection);
                 }
 
@@ -1374,20 +1389,31 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3 vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_ITEM, TYPE_BULLET_PLAYER, [this](const cItem* pItem, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
+        if(m_bVisibleCheck && !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+        if(bFirstHit)
+        {
+            if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
+            {
+                // 
+                pBullet->Reflect(pItem, vIntersection.xy());
+
+                // 
+                this->PlayReflectSound(vIntersection);
+            }
+        }
+    });
+
+    // 
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3 vIntersection, const coreBool bFirstHit)
+    {
+        if(pItem->GetLifeTime() < 1.0f) return;
+
+        // 
         pItem->Collect(pPlayer);
-
-        // 
-        pPlayer->GetDataTable()->EditCounterTotal  ()->iItemsCollected += 1u;
-        pPlayer->GetDataTable()->EditCounterMission()->iItemsCollected += 1u;
-        pPlayer->GetDataTable()->EditCounterSegment()->iItemsCollected += 1u;
-
-        // 
-        g_pSave->EditGlobalStats      ()->iItemsCollected += 1u;
-        g_pSave->EditLocalStatsMission()->iItemsCollected += 1u;
-        g_pSave->EditLocalStatsSegment()->iItemsCollected += 1u;
     });
 }
 

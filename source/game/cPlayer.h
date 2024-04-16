@@ -55,10 +55,14 @@
 #define PLAYER_NO_FEEL   (-100.0f)   // 
 #define PLAYER_NO_IGNORE (-100.0f)   // 
 
-#define PLAYER_ACTION_SHOOT(i,j) ((i) * WEAPON_MODES + (j))
-#define PLAYER_ACTION_TURN_LEFT  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
-#define PLAYER_ACTION_TURN_RIGHT (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
-#define PLAYER_ACTION_ROLL       (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
+#define PLAYER_ACTION_SHOOT(i,j)  ((i) * WEAPON_MODES + (j))
+#define PLAYER_ACTION_TURN_LEFT   (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
+#define PLAYER_ACTION_TURN_RIGHT  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
+#define PLAYER_ACTION_ROLL        (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
+#define PLAYER_ACTION_SHOOT_UP    (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 2u)
+#define PLAYER_ACTION_SHOOT_LEFT  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 3u)
+#define PLAYER_ACTION_SHOOT_DOWN  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 4u)
+#define PLAYER_ACTION_SHOOT_RIGHT (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 5u)
 
 #define PLAYER_AREA_DEFAULT (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
 
@@ -154,6 +158,7 @@ private:
     coreFlow    m_fRangeValue;                                // 
     coreFlow    m_fArrowValue;                                // 
     coreFlow    m_fCircleValue;                               // 
+    coreUint8   m_iLastMove;                                  // 
 
     coreObject3D m_Dot;                                       // 
     coreObject3D m_Range;                                     // 
@@ -298,7 +303,7 @@ public:
     inline const coreFloat&   GetDesaturate  ()const {return m_fDesaturate;}
     inline       coreInt32    GetMaxShield   ()const {return m_iMaxShield;}
     inline       coreInt32    GetCurShield   ()const {return m_iCurShield;}
-    inline       coreFloat    GetCurShieldPct()const {return I_TO_F(m_iCurShield) * RCP(I_TO_F(m_iMaxShield));}
+    inline       coreFloat    GetCurShieldPct()const {return I_TO_F(m_iCurShield) / I_TO_F(m_iMaxShield);}   // # normal division
 
     // 
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,                                                          F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void

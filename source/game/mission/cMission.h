@@ -35,7 +35,10 @@
 // TODO 4: change fangs back from cLodObject to coreObject3D, if lod not required (other objects as well ? (low == high))
 // TODO 3: delay sollte zeit anhalten
 // TODO 3: hail should only use one batchlist, both can be merged
-// TODO 3: cMission::Close() sollte auch nach dem finalen/secret boss aufgerufen werden
+// TODO 3: cMission::Close() sollte auch nach dem finalen/secret boss aufgerufen werden (mission und/oder segment ?)
+// TODO 3: manual graphics are not updated when changing resolution during pause in intro mission
+// TODO 3: manual/tutorial might react strange on inverted and toggled firing mode, because iActionHold is inspected
+// TODO 1: wenn P1 oder Eigengrau besiegt wird, beim ersten mal kommen immer credits, danach kommen keine bei single segment und single mission, aber immer bei arcade
 
 
 // ****************************************************************
@@ -166,7 +169,7 @@
 #define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
 #define MUSCUS_ZOMBIES              (3u)                                              // 
 
-#define INTRO_MANUALS               (7u)                                              // 
+#define INTRO_MANUALS               (11u)                                             // 
 
 
 // ****************************************************************
@@ -356,6 +359,7 @@ public:
     void Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo);
 
     // 
+    void Open();
     void Close();
 
     // render and move the mission
@@ -906,6 +910,8 @@ private:
     coreObject3D m_aArea[RUTILUS_AREAS];                   // 
     coreFlow     m_fAreaTime;                              // 
     coreFloat    m_fAreaScale;                             // 
+    coreFloat    m_fAreaSpeed;                             // 
+    coreBool     m_bAreaUpdate;                            // 
 
     coreObject3D m_Safe;                                   // 
     coreFlow     m_fSafeTime;                              // 
@@ -934,6 +940,8 @@ private:
     coreObject3D m_aCapsuleWave[4];                        // 
 
     coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
+
+    coreUint8 m_aiWarnDir[MISSION_PLAYERS];                // 
 
     coreUint32 m_aiRegisterID   [RUTILUS_AREA_REGISTRY];   // 
     coreFloat  m_afRegisterSpeed[RUTILUS_AREA_REGISTRY];   // 
@@ -999,7 +1007,8 @@ public:
 
     // 
     inline void SetAreaPosition(const coreVector2 vPosition) {m_aArea[0].SetPosition(coreVector3(vPosition, 0.0f));}
-    inline void SetAreaScale   (const coreFloat   fScale)    {m_fAreaScale = fScale;}
+    inline void SetAreaScale   (const coreFloat   fScale)    {m_fAreaScale  = fScale;}
+    inline void SetAreaUpdate  (const coreBool    bUpdate)   {m_bAreaUpdate = bUpdate;}
 
     // 
     inline void SetWavePosition (const coreVector2 vPosition)  {m_vWavePos = vPosition;}
@@ -1009,8 +1018,9 @@ public:
     inline void SetWavePower    (const coreFloat   fPower)     {m_fWavePower = fPower;}
 
     // 
-    inline coreBool GetWavePull   ()const {return HAS_BIT(m_iWaveData, 0u);}
-    inline coreBool GetWaveDelayed()const {return HAS_BIT(m_iWaveData, 1u);}
+    inline const coreFloat& GetAreaSpeed  ()const {return m_fAreaSpeed;}
+    inline coreBool         GetWavePull   ()const {return HAS_BIT(m_iWaveData, 0u);}
+    inline coreBool         GetWaveDelayed()const {return HAS_BIT(m_iWaveData, 1u);}
 
     // 
     inline coreObject3D* GetTock(const coreUintW iIndex) {ASSERT(iIndex < RUTILUS_TOCKS) return &m_aTockRaw[iIndex * 2u];}

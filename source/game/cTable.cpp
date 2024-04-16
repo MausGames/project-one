@@ -53,7 +53,7 @@ void cDataTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iS
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
 
     m_aiFragment[iMissionIndex] = 0u;   // reset whole mission
-    SET_BITVALUE(m_aiBadge[iMissionIndex], BADGES, BADGES * iSegmentIndex, 0u)
+    SET_BITVALUE(m_aiBadge[iMissionIndex], TABLE_BADGES, TABLE_BADGES * iSegmentIndex, 0u)
 }
 
 void cDataTable::RevertSegment()
@@ -125,9 +125,12 @@ void cDataTable::GiveMedalMission(const coreUint8 iMedal, const coreUintW iMissi
     g_pSave->EditLocalStatsMission()->aiMedalsEarned[iMedal] += 1u;
     g_pSave->EditLocalStatsSegment()->aiMedalsEarned[iMedal] += 1u;
 
-    // 
-    coreUint8& iMedalMission = g_pSave->EditProgress()->aiMedalMission[iMissionIndex];
-    iMedalMission = MAX(iMedalMission, iMedal);
+    if(STATIC_ISVALID(g_pGame))
+    {
+        // 
+        coreUint8& iMedalMission = g_pSave->EditProgress()->aaaaiMedalMission[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex];
+        iMedalMission = MAX(iMedalMission, iMedal);
+    }
 }
 
 void cDataTable::GiveMedalMission(const coreUint8 iMedal)
@@ -150,9 +153,12 @@ void cDataTable::GiveMedalSegment(const coreUint8 iMedal, const coreUintW iMissi
     g_pSave->EditLocalStatsMission(iMissionIndex)               ->aiMedalsEarned[iMedal] += 1u;
     g_pSave->EditLocalStatsSegment(iMissionIndex, iSegmentIndex)->aiMedalsEarned[iMedal] += 1u;
 
-    // 
-    coreUint8& iMedalSegment = g_pSave->EditProgress()->aaiMedalSegment[iMissionIndex][iSegmentIndex];
-    iMedalSegment = MAX(iMedalSegment, iMedal);
+    if(STATIC_ISVALID(g_pGame))
+    {
+        // 
+        coreUint8& iMedalSegment = g_pSave->EditProgress()->aaaaaiMedalSegment[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex][iSegmentIndex];
+        iMedalSegment = MAX(iMedalSegment, iMedal);
+    }
 }
 
 void cDataTable::GiveMedalSegment(const coreUint8 iMedal)
@@ -176,6 +182,12 @@ void cDataTable::GiveFragment(const coreUintW iMissionIndex, const coreUintW iBo
     g_pSave->EditGlobalStats      ()                                                  ->iFragmentsEarned += 1u;
     g_pSave->EditLocalStatsMission(iMissionIndex)                                     ->iFragmentsEarned += 1u;
     g_pSave->EditLocalStatsSegment(iMissionIndex, MISSION_BOSS_TO_SEGMENT(iBossIndex))->iFragmentsEarned += 1u;
+
+    if(STATIC_ISVALID(g_pGame))
+    {
+        // 
+        ADD_BIT(g_pSave->EditProgress()->aiFragment[iMissionIndex], iBossIndex)
+    }
 }
 
 void cDataTable::GiveFragment()
@@ -191,10 +203,10 @@ void cDataTable::GiveFragment()
 void cDataTable::GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
-    ASSERT(iBadgeIndex   < BADGES)
+    ASSERT(iBadgeIndex   < TABLE_BADGES)
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
-    ADD_BIT(m_aiBadge[iMissionIndex], iBadgeIndex + BADGES * iSegmentIndex)
+    ADD_BIT(m_aiBadge[iMissionIndex], iBadgeIndex + TABLE_BADGES * iSegmentIndex)
 
     // 
     g_pSave->EditGlobalStats      ()                            ->iBadgesEarned += 1u;

@@ -219,5 +219,9 @@ void cCrashManager::__DisableObject(cLodObject* OUTPUT pObject, const coreBool b
     pObject->DefineTexture  (0u, NULL);
 
     // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(pObject->GetPosition());
+    if(bAnimated)
+    {
+        g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(pObject->GetPosition());
+        g_pSpecialEffects->PlaySound(pObject->GetPosition(), 0.6f, 0.8f, SOUND_ENEMY_EXPLOSION_02);
+    }
 }

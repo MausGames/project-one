@@ -102,6 +102,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
     // TODO 1: position patterns in finaler phase können noch etwas mehr variieren
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumData = 16u;
@@ -525,6 +526,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: hardmode: snow is created all the time (snowing, avalanche)
     // TODO 1: adjust (and fix!) snow for all weapons
     // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), clean the whole screen before destroying the last enemy
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -958,6 +960,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: helper sollte eher irgendwo draußen sein, und ziel is empty, sonst glaubt spieler man muss den helper anschießen
     // TODO 1: reduce medal time in easy ? also in other wave/bosses ?
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), create a prison with a maximum size of 4x4 bullets (2x2 inside volume)
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1580,6 +1583,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: hardmode: man wird regelmäßig raufgeschleudert
     // TODO 1: change 1.2f to 1.3f ?
     // TODO 1: MAIN: task-check, regular score, badges, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), destroy all enemies while shooting down
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2003,6 +2007,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: wenn boss attackiert wird sollte keine chain akkumuliert werden, sondern punkte absolut (*5) gutgeschrieben werden (lösen mit Dharuk)
     // TODO 1: die objekte zum abschießen schauen noch etwas zu langweilig aus, vielleicht 1-2 waves die nachfliegen
     // TODO 1: MAIN: task-check, regular score, extra score (boss), badges, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         
@@ -2474,6 +2479,16 @@ void cCalorMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Zeroth, {60.0f, 120.0f, 180.0, 240.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################

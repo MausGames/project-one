@@ -36,13 +36,16 @@
 // TODO 3: leichtes wackeln des texts wenn sich switch-box ändert
 // TODO 3: welle, wenn button/switchbox gedrückt wird
 // TODO 3: anderes: ganzes menü wackelt/shifted wenn man tab ändert, tabs verändern höhe, buttons ändern größe bei selection
-// TODO 3: GetWinFocusLost to force pause should only take effect when pause is actually allowed, save and apply state
+// TODO 3: GetWinFocusLost to force pause should only take effect when pause is actually allowed, save and apply state, but reset state if focus comes back before applying pause
 // TODO 1: re-position everything after resolution-change
 // TODO 3: menu sound response is super-confused with gamepad-input, related to having fokus on multiple sub-menus (unnecessary button-fokus sound -> catch initial focusing), and being able to focus disabled buttons (active tab, save button)
 // TODO 3: de-couple interface-class and display in options when game is not running (for HUD type option)
 // TODO 3: bigger effect, when password is correct (maybe not text, but a fullscreen effect)
 // TODO 3: wenn zwischen borderless und windowed gewechselt wird mit Desktop resolution, wird im size-change-event das 0:0 überschrieben und der save-button bleibt aktiv
 // TODO 3: wenn im windowed mode die resolution zu groß ist, wird sie geclamped und der save-button bleibt aktiv
+// TODO 4: why do I have ChangeLanguage for switch-boxes, what does it do, should I add it to the engine instead?
+// TODO 4: switch more menus to SetHighlightColor, which is more efficient
+// TODO 3: scroll-box sometimes moves down and up when moving/wrapping across menu with navigator, this is related to line interaction
 
 
 // ****************************************************************
@@ -57,17 +60,19 @@
 #define MENU_GAME_PLAYERS             (PLAYERS)
 #define MENU_GAME_MISSIONS            (11u)
 #define MENU_GAME_SEGMENTS            (6u)
-#define MENU_GAME_ARCADES             (3u)
+#define MENU_GAME_ARCADES             (1u)
 #define MENU_GAME_OPTIONS             (3u)
 #define MENU_GAME_ARMORIES            (6u)
 #define MENU_GAME_DEMOS               (5u)
 #define MENU_GAME_ARMORY_MEDALS       (6u + 1u)
-#define MENU_GAME_ARMORY_BADGES       (WAVES * BADGES)
+#define MENU_GAME_ARMORY_BADGES       (BADGES - 3u)
+#define MENU_GAME_ARMORY_BADGES_ALL   (MENU_GAME_ARMORY_BADGES * WAVES)
+#define MENU_GAME_ARMORY_HELPERS      (8u)
 #define MENU_SCORE_FILTERS            (2u)
 #define MENU_SCORE_ENTRIES            (20u)
 #define MENU_REPLAY_ENTRIES           (12u)
 #define MENU_EXTRA_FRAGMENTS          (FRAGMENTS)
-#define MENU_EXTRA_FILTERS            (2u)
+#define MENU_EXTRA_FILTERS            (3u)
 #define MENU_EXTRA_STATS              (27u)
 #define MENU_EXTRA_OTHERS             (2u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
@@ -146,7 +151,6 @@ enum eSurface : coreUint8
 
     SURFACE_GAME_MISSION = 0u,
     SURFACE_GAME_SEGMENT,
-    SURFACE_GAME_ARCADE,
     SURFACE_GAME_OPTION,
     SURFACE_GAME_ARMORY,
     SURFACE_GAME_DEMO,
@@ -196,9 +200,9 @@ enum eSurface : coreUint8
     SURFACE_BRIDGE_RETURN_1,
     SURFACE_BRIDGE_RETURN_2,
     SURFACE_BRIDGE_INPUT,
-    SURFACE_BRIDGE_UNLOCK,
     SURFACE_BRIDGE_CONTINUE,
     SURFACE_BRIDGE_RESTART,
+    SURFACE_BRIDGE_UNLOCK,
     SURFACE_BRIDGE_MAX
 };
 
@@ -217,6 +221,7 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_SHAKEEFFECTS,
     ENTRY_VIDEO_FLASHEFFECTS,
     ENTRY_VIDEO_HITSTOPEFFECTS,
+    ENTRY_VIDEO_CHROMAEFFECTS,
     ENTRY_VIDEO,
 
     ENTRY_AUDIO_GLOBALVOLUME = ENTRY_VIDEO,
@@ -229,27 +234,33 @@ enum eEntry : coreUint8
     ENTRY_INPUT_TYPE = ENTRY_AUDIO,
     ENTRY_INPUT_RUMBLE,
     ENTRY_INPUT_FIREMODE,
+    ENTRY_INPUT_CONTROLMODE,
+    ENTRY_INPUT_ACTION4,
+    ENTRY_INPUT_ACTION5,
+    ENTRY_INPUT_ACTION6,
+    ENTRY_INPUT_ACTION7,
+    ENTRY_INPUT_ACTION1,
+    ENTRY_INPUT_ACTION2,
+    ENTRY_INPUT_ACTION3,
+    ENTRY_INPUT_ACTION8,
     ENTRY_INPUT_MOVEUP,
     ENTRY_INPUT_MOVELEFT,
     ENTRY_INPUT_MOVEDOWN,
     ENTRY_INPUT_MOVERIGHT,
-    ENTRY_INPUT_ACTION1,
-    ENTRY_INPUT_ACTION2,
-    ENTRY_INPUT_ACTION3,
-    ENTRY_INPUT_ACTION4,
     ENTRY_INPUT,
 
     ENTRY_GAME_LANGUAGE = ENTRY_INPUT,
     ENTRY_GAME_TEXTSIZE,
+    ENTRY_GAME_COMBATTEXT,
     ENTRY_GAME_GAMEROTATION,
     ENTRY_GAME_GAMESCALE,
     ENTRY_GAME_GAMESPEED,
+    ENTRY_GAME_MIRRORMODE,
     ENTRY_GAME_HUDROTATION,
     ENTRY_GAME_HUDSCALE,
     ENTRY_GAME_HUDTYPE,
     ENTRY_GAME_UPDATEFREQ,
     ENTRY_GAME_VERSION,
-    ENTRY_GAME_MIRRORMODE,
     ENTRY_MAX
 };
 
@@ -355,6 +366,9 @@ private:
     cGuiButton m_CreditsButton;   // credits button
     cGuiButton m_ExitButton;      // exit button
 
+    cNewIndicator m_ExtraNew;
+    cNewIndicator m_ConfigNew;
+
     cMenuNavigator m_Navigator;
 
 
@@ -390,7 +404,6 @@ private:
 
     cGuiButton m_MissionTab;                                      // 
     cGuiButton m_SegmentTab;                                      // 
-    cGuiButton m_ArcadeTab;                                       // 
 
     cGuiButton m_StartButtonArmory;                               // start button   
     cGuiButton m_StartButtonDemo;                                 // start button   
@@ -402,43 +415,37 @@ private:
 
     cGuiLabel m_OptionState;                                      // 
 
-    cGuiLabel  m_MissionHeader;                                   // 
-    cGuiLabel  m_aMissionName    [MENU_GAME_MISSIONS];            // 
-    cGuiLabel  m_aMissionTitle   [MENU_GAME_MISSIONS];            // 
-    cGuiLabel  m_aMissionScore   [MENU_GAME_MISSIONS];            // 
-    cGuiLabel  m_aMissionTime    [MENU_GAME_MISSIONS];            // 
-    cGuiObject m_aMissionFragment[MENU_GAME_MISSIONS];            // 
-    cGuiObject m_aMissionBadge   [MENU_GAME_MISSIONS];            // 
-    cGuiLabel  m_aMissionBadgeNum[MENU_GAME_MISSIONS];            // 
-    cGuiObject m_aMissionIcon    [MENU_GAME_MISSIONS];            // 
-    cGuiObject m_aMissionMedal   [MENU_GAME_MISSIONS];            // 
-    cGuiObject m_aMissionLine    [MENU_GAME_MISSIONS];            // 
-    cScrollBox m_MissionBox;                                      // 
-    coreFlow   m_fMissionTime;                                    // 
+    cGuiLabel  m_aMissionName  [MENU_GAME_MISSIONS];              // 
+    cGuiLabel  m_aMissionScore [MENU_GAME_MISSIONS];              // 
+    cGuiLabel  m_aMissionTime  [MENU_GAME_MISSIONS];              // 
+    cGuiObject m_aMissionIcon  [MENU_GAME_MISSIONS];              // 
+    cGuiObject m_aMissionMedal [MENU_GAME_MISSIONS];              // 
+    cGuiObject m_aMissionLine  [MENU_GAME_MISSIONS];              // 
+    cGuiButton m_aMissionButton[MENU_GAME_MISSIONS];              // 
 
-    cGuiLabel  m_SegmentHeader;                                   // 
-    cGuiLabel  m_aSegmentName     [MENU_GAME_MISSIONS];           // 
-    cGuiLabel  m_aSegmentNumber    [MENU_GAME_MISSIONS];           // 
-    cGuiObject m_aSegmentIconSmall[MENU_GAME_MISSIONS];           // 
-    cGuiObject m_aSegmentLine     [MENU_GAME_MISSIONS];           // 
+    cGuiLabel  m_aSegmentName  [MENU_GAME_MISSIONS];              // 
+    cGuiLabel  m_aSegmentNumber[MENU_GAME_MISSIONS];              // 
+    cGuiObject m_aSegmentLine  [MENU_GAME_MISSIONS];              // 
 
     cGuiObject m_aaSegmentTile[MENU_GAME_MISSIONS][MENU_GAME_SEGMENTS];   // 
+    cGuiObject m_aaSegmentBack[MENU_GAME_MISSIONS][MENU_GAME_SEGMENTS];   // 
     cGuiObject m_aSegmentCursor    [2];                           // 
     coreUint8  m_aiSegmentSelection[2];                           // 
+    cScrollBox m_SegmentBox;                                      // 
 
     cGuiObject m_SegmentArea;                                     // 
     cGuiObject m_SegmentMedal;                                    // 
     cGuiObject m_SegmentFragment;                                 // 
-    cGuiObject m_aSegmentBadge    [BADGES];                       // 
-    cGuiObject m_aSegmentBadgeWave[BADGES];                       // 
+    cGuiObject m_aSegmentBadge    [MENU_GAME_ARMORY_BADGES];      // 
+    cGuiObject m_aSegmentBadgeWave[MENU_GAME_ARMORY_BADGES];      // 
     cGuiLabel  m_aSegmentTitle    [2];                            // 
     cGuiLabel  m_aSegmentScore    [2];                            // 
     cGuiLabel  m_aSegmentTime     [2];                            // 
     cGuiLabel  m_aSegmentMaxSeries[2];                            // 
-    cGuiObject m_SegmentIcon;                                     // 
+    cGuiObject m_SegmentIconBig;                                  // 
 
-    cGuiLabel  m_ArcadeHeader;                                    // 
     cGuiLabel  m_aArcadeName[MENU_GAME_ARCADES];                  // 
+    cGuiObject m_aArcadeBack[MENU_GAME_ARCADES];                  // 
     cGuiObject m_aArcadeLine[MENU_GAME_ARCADES];                  // 
 
     cGuiButton m_ArcadeComplete;                                  // 
@@ -456,20 +463,19 @@ private:
     cGuiObject m_aArmoryLine[MENU_GAME_ARMORIES];                 // 
 
     cGuiObject m_ArmoryArea;                                      // 
-    cGuiObject m_aArmoryMedal    [MENU_GAME_ARMORY_MEDALS];       // 
-    cGuiObject m_aArmoryMedalBack[MENU_GAME_ARMORY_MEDALS];       // 
+    cGuiObject m_aArmoryMedal[MENU_GAME_ARMORY_MEDALS];           // 
+    cGuiObject m_ArmoryMedalBack;                                 // 
     cGuiObject m_ArmoryFragment;                                  // 
-    cGuiObject m_aArmoryBadge     [MENU_GAME_ARMORY_BADGES];      // 
-    cGuiObject m_aArmoryBadgeWave [MENU_GAME_ARMORY_BADGES];      // 
-    cGuiObject m_aArmoryBadgeBack1[BADGES];                       // 
-    cGuiObject m_aArmoryBadgeBack2[BADGES];                       // 
-    cGuiLabel  m_aArmoryBadgeDesc [BADGES];                       // 
-    cGuiLabel  m_aArmoryBadgeNum  [MENU_GAME_SEGMENTS];           // 
-    cGuiLabel  m_aArmoryTitle     [2];                            // 
-    cGuiLabel  m_aArmoryScore     [2];                            // 
-    cGuiLabel  m_aArmoryTime      [2];                            // 
-    cGuiLabel  m_aArmoryMaxSeries [2];                            // 
-    cGuiObject m_ArmoryIcon;                                      // 
+    cGuiObject m_aArmoryBadge    [MENU_GAME_ARMORY_BADGES_ALL];   // 
+    cGuiObject m_aArmoryBadgeWave[MENU_GAME_ARMORY_BADGES_ALL];   // 
+    cGuiObject m_aArmoryBadgeBack[MENU_GAME_ARMORY_BADGES];       // 
+    cGuiLabel  m_aArmoryBadgeDesc[MENU_GAME_ARMORY_BADGES];       // 
+    cGuiObject m_aArmoryHelper   [MENU_GAME_ARMORY_HELPERS];      // 
+    cGuiLabel  m_aArmoryTitle    [2];                             // 
+    cGuiLabel  m_aArmoryScore    [2];                             // 
+    cGuiLabel  m_aArmoryTime     [2];                             // 
+    cGuiLabel  m_aArmoryMaxSeries[2];                             // 
+    cGuiObject m_ArmoryIconBig;                                   // 
 
     cGuiSwitchBox m_ArmoryType;                                   // 
     cGuiSwitchBox m_ArmoryMode;                                   // 
@@ -487,12 +493,18 @@ private:
     cGuiSwitchBox m_DemoDifficulty;                               // 
     cGuiSwitchBox m_DemoSpeed;                                    // 
     cGuiSwitchBox m_DemoStage;                                    // 
+    cGuiObject    m_DemoStageIcon;                                // 
     cGuiSwitchBox m_aDemoShield[MENU_GAME_PLAYERS];               // 
     cGuiLabel     m_aDemoPlayer[MENU_GAME_PLAYERS];               // 
 
     coreUint8 m_iCurPage;                                         // 
-    coreUintW m_aiCurIndex [3];                                   // 
-    coreUintW m_aiCurIndex2[3];                                   // 
+    coreUintW m_aiCurIndex[4];                                    // 
+
+    coreUint8 m_iBaseType;                                        // 
+    coreUint8 m_iBaseMode;                                        // 
+    coreUint8 m_iBaseDifficulty;                                  // 
+
+    cNewIndicator m_SpeedNew;
 
     cMenuNavigator m_NavigatorMain;
     cMenuNavigator m_NavigatorOption;
@@ -533,12 +545,19 @@ public:
 
 private:
     // 
+    void __LoadUnlocks();
+
+    // 
+    void __RefreshBase();
+
+    // 
     void __SelectMission(const coreUintW iMissionIndex);
     void __SelectSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 
     // 
     void __PrepareMission(const coreUintW iMissionIndex);
     void __PrepareSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void __PrepareArcade ();
 };
 
 
@@ -639,9 +658,12 @@ private:
     cGuiObject m_aFragment[MENU_EXTRA_FRAGMENTS];   // 
 
     cGuiObject m_aFilterLine[MENU_EXTRA_FILTERS];   // 
+    cGuiObject m_FilterIcon;                        // 
 
     cGuiSwitchBox m_FilterMission;                  // 
     cGuiSwitchBox m_FilterSegment;                  // 
+    cGuiSwitchBox m_FilterType;                     // 
+    cGuiSwitchBox m_FilterDifficulty;               // 
 
     cGuiLabel  m_aStatsName [MENU_EXTRA_STATS];     // 
     cGuiLabel  m_aStatsValue[MENU_EXTRA_STATS];     // 
@@ -690,6 +712,7 @@ private:
         cGuiSwitchBox oType;
         cGuiSwitchBox oRumble;
         cGuiSwitchBox oFireMode;
+        cGuiSwitchBox oControlMode;
         cGuiButton    oMoveUp;
         cGuiButton    oMoveLeft;
         cGuiButton    oMoveDown;
@@ -733,6 +756,7 @@ private:
     cGuiSwitchBox m_ShakeEffects;
     cGuiSwitchBox m_FlashEffects;
     cGuiSwitchBox m_HitStopEffects;
+    cGuiSwitchBox m_ChromaEffects;
     cGuiSwitchBox m_GlobalVolume;
     cGuiSwitchBox m_MusicVolume;
     cGuiSwitchBox m_EffectVolume;
@@ -740,21 +764,26 @@ private:
     cGuiSwitchBox m_3DSound;
     cGuiSwitchBox m_Language;
     cGuiSwitchBox m_TextSize;
+    cGuiSwitchBox m_CombatText;
     cGuiSwitchBox m_GameRotation;
     cGuiSwitchBox m_GameScale;
     cGuiSwitchBox m_GameSpeed;
+    cGuiSwitchBox m_MirrorMode;
     cGuiSwitchBox m_HudRotation;
     cGuiSwitchBox m_HudScale;
     cGuiSwitchBox m_HudType;
     cGuiSwitchBox m_UpdateFreq;
     cGuiSwitchBox m_Version;
-    cGuiSwitchBox m_MirrorMode;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
+    cScrollBox   m_InputBox;
     cGuiButton   m_SwapInput;
 
     coreUintW                      m_iCurMonitorIndex;
     coreMap<coreUintW, coreString> m_asCurResolution;
+
+    cNewIndicator m_GameNew;
+    cNewIndicator m_MirrorModeNew;
 
     cMenuNavigator m_Navigator;
 
@@ -773,7 +802,7 @@ public:
     void SaveValues();
 
     // 
-    inline void ResetNavigator() {m_Navigator.ResetFirst();}
+    void ResetNavigator();
 
     // convert input key to readable string                 
     static void PrintFigure(cFigure* OUTPUT pFigure, const coreUint8 iType, const coreInt16 iKey);
@@ -792,10 +821,11 @@ private:
     void __LoadResolutions(const coreUintW iMonitorIndex);
     void __LoadFrequencies(const coreUintW iMonitorIndex);
     void __LoadInputs();
+    void __LoadUnlocks();
 
     // 
     inline cGuiButton& __RetrieveInputButton  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oMoveUp)                                         + iKeyIndex);}
-    inline cFigure&    __RetrieveInputFigure  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oFigureMoveUp)                                     + iKeyIndex);}
+    inline cFigure&    __RetrieveInputFigure  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oFigureMoveUp)                                   + iKeyIndex);}
     inline coreInt16&  __RetrieveInputCurValue(const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < INPUT_TYPES)        && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[g_CurConfig.Input.aiType[iPlayerIndex]].iMoveUp) + iKeyIndex);}
     inline coreInt16&  __RetrieveInputDirValue(const coreUintW iType,        const coreUintW iKeyIndex) {ASSERT((iType        < INPUT_SETS)         && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[iType].iMoveUp)                                  + iKeyIndex);}
 
@@ -859,7 +889,8 @@ private:
 
     cGuiLabel m_aTitle[2];                                          // 
 
-    cGuiLabel m_aHeader[2];                                         // 
+    cGuiLabel  m_aHeader[2];                                        // 
+    cGuiObject m_Icon;                                              // 
 
     cGuiObject m_MedalMission;                                      // 
     cGuiObject m_aMedalSegment[MENU_SUMMARY_MEDALS];                // 
@@ -1053,19 +1084,24 @@ private:
 class cBridgeMenu final : public coreMenu
 {
 private:
-    cGuiLabel m_InputHeader;          // 
+    cGuiLabel m_InputHeader;     // 
 
-    cGuiLabel  m_UnlockHeader;        // 
-    cGuiLabel  m_UnlockName;          // 
-    cGuiLabel  m_UnlockDescription;   // 
-    cGuiObject m_UnlockIcon;          // 
+    cGuiLabel  m_UnlockHeader;   // 
+    cGuiLabel  m_UnlockName;     // 
+    cGuiLabel  m_UnlockDesc;     // 
+    cGuiObject m_UnlockIcon;     // 
+    cGuiObject m_UnlockBack;     // 
 
-    coreFlow m_fReturnTimer;          // 
-    coreBool m_bReturnState;          // 
+    coreFlow m_fReturnTimer;     // 
+    coreBool m_bReturnState;     // 
 
-    coreUint8 m_iTarget;              // 
-    coreBool  m_bPaused;              // 
-    coreBool  m_bFade;                // 
+    coreUint8 m_iTarget;         // 
+    coreBool  m_bPaused;         // 
+    coreBool  m_bFade;           // 
+
+    coreUintW m_iUnlockIndex;    // 
+    coreFlow  m_fUnlockTime;     // 
+    coreUint8 m_iUnlockState;    // 
 
 
 public:
@@ -1079,12 +1115,16 @@ public:
     // 
     void EnterGame  (const coreBool bFade);
     void ReturnMenu (const coreUint8 iTarget, const coreBool bPaused, const coreBool bFade);
-    void ShowUnlock ();
     void UseContinue();
     void UseRestart (const coreBool bPaused);
 
     // 
-    coreBool RequiresUnlock()const;
+    void     ShowUnlocks(const coreFloat fTimeOffset = 0.0f);
+    coreBool HasUnlocks();
+    void     ApplyUnlocks();
+
+    // 
+    void SetHighlightColor(const coreVector3 vColor);
 
     // 
     inline coreUint8 GetTarget()const {return m_iTarget;}
@@ -1145,6 +1185,8 @@ private:
     coreTimer m_TransitionTime;          // 
     coreUint8 m_iTransitionState;        // 
     coreMenu* m_pTransitionMenu;         // 
+    
+    coreBool m_bStarted;
 
     static coreVector3 m_vHighlightColor;       // 
     static coreVector3 m_vButtonColor;       // 
@@ -1212,7 +1254,7 @@ public:
     static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract, const coreVector3 vFocusColor);
     static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract);
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
-    static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);
+    static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType, const coreBool bHide = true);
     
     static void ClearButtonTime(const cGuiButton* pButton);
 

@@ -93,6 +93,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: die geschosse über scraps können zerstört werden ohne die scraps, wenn außerhalb des sichtfelds, weil beides unterschiedliche interaction-ranges haben (remove hiding for rotating scraps?)
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top) (die finalen wellen könnten sonst verwirren)
     // TODO 1: MAIN: regular score, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), beat the wave while destroying fewer than 10 enemy bullets
     // TODO 1: items abschießen sollte kombo beibehalten (ÜBERALL)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -530,6 +531,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: anderes enabled-pattern bei finaler phase, das aktuelle is viel zu leicht, vielleicht alles disabled ?
     // TODO 1: vielleicht doch auch leichte angriffe auf easy, nur N schuss pro sub-phaes ?
     // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iSingleIndex = 60u;
@@ -1014,6 +1016,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: increase safe-block (artificially) in bomb-hail phase (quad-test)
     // TODO 1: blaue kugerl bei wand-bomben sind schwer zu bekommen, sub-stage check hilft aber nicht, weil bomben ja in nächster phase explodieren können
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), survive 5 blasts of the final phase without getting hit
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 58u)
@@ -1413,6 +1416,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: jeder gegner hat zwei pfeile (consistent mit der gruppe)
     // TODO 1: 6x6 puzzle anpassen (falls nötig), einzelne pfeile anpassen (falls nötig) (vielleicht auch shiften oder aufteilen oder rotiert infinity nach rechts oder chess-aufteilung (um sie von der kleinen davor zu unterscheiden!))
     // TODO 1: MAIN: task-check, hard idea, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), finish the stage without turning more than N times
     // TODO 1: leichter angriff auf easy, vielleicht der einzel-schuss, und auf normal gibts multi-schuss
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
@@ -1936,6 +1940,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: 3 rotieren vom center nach außen
     // TODO 1: move stuff from here (and Leviathan) into grow-bullet ?
     // TODO 1: MAIN: regular score, auf boss übertragen (general, easy, coop), sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     // TODO 1: badge durch big wurde nicht erkannt, in dem moment wo ich getroffen wurde, kann es sein, dass OldPos+FlyMove dann kaputt sind wenn die zeit einfriert ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
@@ -2770,7 +2775,6 @@ void cNevoMission::__SetupOwn()
 
             this->EnableRanges();
         }
-
         else if(STAGE_TIME_POINT(6.7f))
         {
             g_pPostProcessing->SetChroma(1.5f);
@@ -2782,9 +2786,27 @@ void cNevoMission::__SetupOwn()
         }
         else if(STAGE_TIME_POINT(7.0f))
         {
-            g_pPostProcessing->SetChroma(0.0f);
+            pTracker->Resurrect();
+            pTracker->EnableWind();
+            pTracker->EnableRange();
+            pTracker->SetPosition (coreVector3(0.0f, 0.0f,0.0f));
+            pTracker->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+
+            g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
 
             this->DisableRanges(false);
+        }
+        else if(STAGE_TIME_POINT(7.3f))
+        {
+            pTracker->Kill(false);
+
+            g_pGame->GetInterface()->ShowFragment(INTERFACE_FRAGMENT_TYPE_SHOW);
+        }
+        else if(STAGE_TIME_POINT(7.6f))
+        {
+            g_pPostProcessing->SetChroma(0.0f);
+
+            g_pGame->GetInterface()->ShowFragment(INTERFACE_FRAGMENT_TYPE_HIDE);
 
             g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
             g_pEnvironment->SetTargetSpeedNow(6.0f);
@@ -2803,7 +2825,7 @@ void cNevoMission::__SetupOwn()
 
             m_Leviathan.ResurrectDemo();
         }
-        else if(STAGE_TIME_AFTER(7.4f))
+        else if(STAGE_TIME_AFTER(8.0f))
         {
             if(m_Leviathan.HasStatus(ENEMY_STATUS_DEAD))
                 STAGE_FINISH_NOW
@@ -2815,6 +2837,16 @@ void cNevoMission::__SetupOwn()
     if(!g_bDemoVersion) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Leviathan, {180.0f, 270.0f, 360.0, 450.0f})
+    });
+
+    // ################################################################
+    // 
+    if(!g_bDemoVersion) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################

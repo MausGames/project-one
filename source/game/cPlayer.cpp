@@ -45,6 +45,7 @@ cPlayer::cPlayer()noexcept
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
 , m_fCircleValue    (0.0f)
+, m_iLastMove       (8u)
 
 , m_fHitDelay (0.0f)
 , m_fBoost    (0.0f)
@@ -363,21 +364,39 @@ void cPlayer::Move()
 
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
+            const coreVector2 vOldDir = this->GetDirection().xy();
+            
             coreVector2 vNewDir = this->GetDirection().xy();
 
             // 
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))
-                vNewDir = -vNewDir.Rotated90();
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT))
-                vNewDir =  vNewDir.Rotated90();
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))   vNewDir = -vNewDir.Rotated90();
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT))  vNewDir =  vNewDir.Rotated90();
 
+            
+            const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, g_pPostProcessing->GetDirection()));
+            
             // 
-#if defined(_CORE_DEBUG_)
-            //if(vNewDir != this->GetDirection().xy()) g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_TURN);
-#endif
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f), vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f), vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f), vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f), vOldDir2));
 
             // set new direction
             this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
+
+            // 
+            if(vNewDir != vOldDir)
+            {
+                // 
+                m_DataTable.EditCounterTotal  ()->iTurnsMade += 1u;
+                m_DataTable.EditCounterMission()->iTurnsMade += 1u;
+                m_DataTable.EditCounterSegment()->iTurnsMade += 1u;
+
+                // 
+                g_pSave->EditGlobalStats      ()->iTurnsMade += 1u;
+                g_pSave->EditLocalStatsMission()->iTurnsMade += 1u;
+                g_pSave->EditLocalStatsSegment()->iTurnsMade += 1u;
+            }
         }
 
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
@@ -404,13 +423,31 @@ void cPlayer::Move()
                  if(vNewPos.y < m_vArea.y) {vNewPos.y = m_vArea.y; m_vForce.y =  ABS(m_vForce.y);}
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
             
-            const coreFloat fThrust = coreVector2::Dot(vDiff, this->GetDirection().xy()) - m_fSmoothThrust;
-            m_fSmoothThrust = m_fSmoothThrust + SIGN(fThrust) * (30.0f * TIME * SmoothTowards(ABS(fThrust), 1.0f));
+            const coreFloat fThrust = coreVector2::Dot(vDiff, this->GetDirection().xy()) * RCP(m_fAnimSpeed) - m_fSmoothThrust;
+            m_fSmoothThrust = m_fSmoothThrust + SIGN(fThrust) * (30.0f * TIME * SmoothTowards(ABS(fThrust), 1.0f) * m_fAnimSpeed);
+
+            // 
+            const coreUint8 iNewMove = PackDirection(m_pInput->vMove);
+            if((iNewMove != m_iLastMove) && (iNewMove != 8u))
+            {
+                // 
+                m_DataTable.EditCounterTotal  ()->iMovesMade += 1u;
+                m_DataTable.EditCounterMission()->iMovesMade += 1u;
+                m_DataTable.EditCounterSegment()->iMovesMade += 1u;
+
+                // 
+                g_pSave->EditGlobalStats      ()->iMovesMade += 1u;
+                g_pSave->EditLocalStatsMission()->iMovesMade += 1u;
+                g_pSave->EditLocalStatsSegment()->iMovesMade += 1u;
+            }
+            m_iLastMove = iNewMove;
         }
         else
         {
-            m_vSmoothOri    = coreVector2(0.0f,0.0f);
-            m_fSmoothThrust = 0.0f;
+            m_vSmoothOri    = coreVector2(0.0f,0.0f);   // TODO 1: smooth ?
+            m_fSmoothThrust = 0.0f;                     // TODO 1: smooth ? 
+
+            m_iLastMove = 8u;
         }
 
         // 
@@ -724,9 +761,15 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
         const coreUint16 iShift = g_pGame->IsMulti() ? 2u : 3u;
         g_pGame->GetTimeTable()->AddShiftBad(iShift);
 
-        m_DataTable.EditCounterTotal  ()->iShiftBad += iShift;
-        m_DataTable.EditCounterMission()->iShiftBad += iShift;
-        m_DataTable.EditCounterSegment()->iShiftBad += iShift;
+        // 
+        m_DataTable.EditCounterTotal  ()->iShiftBadAdded += iShift;
+        m_DataTable.EditCounterMission()->iShiftBadAdded += iShift;
+        m_DataTable.EditCounterSegment()->iShiftBadAdded += iShift;
+
+        // 
+        g_pSave->EditGlobalStats      ()->iShiftBadAdded += iShift;
+        g_pSave->EditLocalStatsMission()->iShiftBadAdded += iShift;
+        g_pSave->EditLocalStatsSegment()->iShiftBadAdded += iShift;
 
         // 
         g_pGame->GetCombatText()->DrawShift(iShift, this->GetPosition());
@@ -747,6 +790,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
                 // 
                 if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.1f);
+                g_pSpecialEffects->RumblePlayer(this, 0.25f, 250u);
             }
             else
             {
@@ -756,6 +800,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
                 // 
                 if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.2f);
+                g_pSpecialEffects->RumblePlayer(this, 0.5f, 250u);
             }
 
             // 
@@ -768,6 +813,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
             // 
             if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(1.5f);
+            g_pSpecialEffects->RumblePlayer(this, 0.5f, 500u);
         }
 
         // 
@@ -888,6 +934,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fRangeValue   = 0.0f;
     m_fArrowValue   = 0.0f;
     m_fCircleValue  = 0.0f;
+    m_iLastMove     = 8u;
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -1386,7 +1433,6 @@ coreVector2 cPlayer::CalcMove()
 // 
 coreFloat cPlayer::CalcMoveSpeed()
 {
-    
     //if(HAS_BIT(m_pInput->iActionPress,   0u) ||   // to make movement during quickshots easier
     //   HAS_BIT(m_pInput->iActionRelease, 0u))     // to make emergency evasion maneuvers easier
     //    s_fBoost = 1.0f;
@@ -1398,7 +1444,7 @@ coreFloat cPlayer::CalcMoveSpeed()
     // 
     //const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost));
     //const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, m_fBoost) : LERPH3(50.0f, 70.0f, m_fBoost);
-    const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? ((m_fBoost) ? 50.0f : 20.0f) : 50.0f;
+    const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) ? ((m_fBoost) ? 50.0f : 20.0f) : 50.0f;
     return m_fMoveSpeed * fModifier;
 }
 

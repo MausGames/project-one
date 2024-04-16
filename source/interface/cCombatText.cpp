@@ -254,44 +254,65 @@ void cCombatText::Move()
 // 
 void cCombatText::DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
-    // 
-    this->__DrawLabel(coreData::ToChars(iValue), vPosition, bBig, COLOR_MENU_INSIDE, COMBAT_TYPE_SCORE);
+    if(HAS_BIT(g_CurConfig.Game.iCombatText, 0u))
+    {
+        // 
+        this->__DrawLabel(coreData::ToChars(iValue), vPosition, bBig, COLOR_MENU_INSIDE, COMBAT_TYPE_SCORE);
+    }
 }
 
 void cCombatText::DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
-    // 
-    this->__DrawLabel(coreData::ToChars(iValue), vPosition, bBig, COLOR_MENU_GREEN, COMBAT_TYPE_EXTRA);
+    if(HAS_BIT(g_CurConfig.Game.iCombatText, 0u))
+    {
+        // 
+        this->__DrawLabel(coreData::ToChars(iValue), vPosition, bBig, COLOR_MENU_GREEN, COMBAT_TYPE_EXTRA);
+    }
 }
 
 void cCombatText::DrawChain(const coreUint32 iValue, const coreVector3 vPosition)
 {
-    // 
-    this->__DrawLabel(coreData::ToChars(iValue), vPosition, true, COLOR_MENU_BLUE, COMBAT_TYPE_CHAIN);
+    if(HAS_BIT(g_CurConfig.Game.iCombatText, 0u))
+    {
+        // 
+        this->__DrawLabel(coreData::ToChars(iValue), vPosition, true, COLOR_MENU_BLUE, COMBAT_TYPE_CHAIN);
+    }
 }
 
 void cCombatText::DrawShift(const coreUint32 iValue, const coreVector3 vPosition)
 {
-    // 
-    this->__DrawLabel(PRINT("+%u", iValue), vPosition, true, COLOR_MENU_RED, COMBAT_TYPE_SHIFT);
+    if(HAS_BIT(g_CurConfig.Game.iCombatText, 0u))
+    {
+        // 
+        this->__DrawLabel(PRINT("+%u", iValue), vPosition, true, COLOR_MENU_RED, COMBAT_TYPE_SHIFT);
+    }
 }
 
 void cCombatText::DrawProgress(const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition)
 {
-    // 
-    this->__DrawLabel(PRINT("%u/%u", iCurrent, iTotal), vPosition, true, COLOR_MENU_YELLOW, COMBAT_TYPE_PROGRESS);
+    if(HAS_BIT(g_CurConfig.Game.iCombatText, 1u))
+    {
+        // 
+        this->__DrawLabel(PRINT("%u/%u", iCurrent, iTotal), vPosition, true, COLOR_MENU_YELLOW, COMBAT_TYPE_PROGRESS);
+    }
 }
 
 void cCombatText::DrawCountdown(const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition)
 {
-    // 
-    this->__DrawLabel(coreData::ToChars(iTotal - iCurrent), vPosition, true, COLOR_MENU_YELLOW, COMBAT_TYPE_COUNTDOWN);
+    if(HAS_BIT(g_CurConfig.Game.iCombatText, 1u))
+    {
+        // 
+        this->__DrawLabel(coreData::ToChars(iTotal - iCurrent), vPosition, true, COLOR_MENU_YELLOW, COMBAT_TYPE_COUNTDOWN);
+    }
 }
 
 void cCombatText::DrawText(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor)
 {
-    // 
-    this->__DrawLabel(pcText, vPosition, true, vColor, COMBAT_TYPE_TEXT);
+    if(HAS_BIT(g_CurConfig.Game.iCombatText, 1u))
+    {
+        // 
+        this->__DrawLabel(pcText, vPosition, true, vColor, COMBAT_TYPE_TEXT);
+    }
 }
 
 
@@ -311,7 +332,7 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
     m_BadgeBack.SetAlpha (0.0f);
 
     // 
-    m_BadgeLabel.SetText  (PRINT("-%u", iValue));
+    m_BadgeLabel.SetText  (HAS_BIT(g_CurConfig.Game.iCombatText, 2u) ? PRINT("-%u", iValue) : "");
     m_BadgeLabel.SetCenter(vOnScreen);
     m_BadgeLabel.SetAlpha (0.0f);
 
@@ -326,6 +347,8 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
 void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor)
 {
     ASSERT(iIndex < COMBAT_MARKERS)
+
+    if(!HAS_BIT(g_CurConfig.Game.iCombatText, 3u)) return;
 
     // 
     const coreVector2 vOnScreen = cCombatText::__TransformPosition(vPosition);
@@ -480,7 +503,7 @@ coreVector2 cCombatText::__RestrictCenter(const coreVector2 vPosition, const cor
 {
     if(g_bTiltMode)
     {
-        const coreVector2 vRealBorder = Core::System->GetResolution().MaxRatio() * 0.5f - (0.5f - COMBAT_BORDER);
+        const coreVector2 vRealBorder = Core::System->GetResolution().HighRatio() * 0.5f - (0.5f - COMBAT_BORDER);
 
         return coreVector2(CLAMP(vCenter.x, -vRealBorder.x - vPosition.x + vSize.x * 0.5f, vRealBorder.x - vPosition.x - vSize.x * 0.5f),
                            CLAMP(vCenter.y, -vRealBorder.y - vPosition.y + vSize.y * 0.5f, vRealBorder.y - vPosition.y - vSize.y * 0.5f));

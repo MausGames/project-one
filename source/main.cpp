@@ -58,6 +58,9 @@ void CoreApp::Init()
     // load configuration
     LoadConfig();
 
+    // 
+    InitAchievements();
+
     // load available music files
     //g_MusicPlayer.AddMusicFolder ("data/music",              "*.ogg");
     //g_MusicPlayer.AddMusicArchive("data/archives/pack1.cfa", "data/music/*.ogg");
@@ -339,6 +342,9 @@ void CoreApp::Move()
     Core::Debug->MeasureEnd("Move");
 
     // 
+    CheckAchievements();
+
+    // 
     UpdateListener();
 
     // debug and test game
@@ -567,7 +573,7 @@ static void DebugGame()
             oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
             oOptions.iMode       = GAME_MODE_STANDARD;
             oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_NORMAL;
-            oOptions.iFlags      = GAME_FLAG_TASK;
+            oOptions.iFlags      = GAME_FLAG_TASK | GAME_FLAG_FRAGMENT;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;
@@ -795,6 +801,17 @@ static void DebugGame()
         //}
         
         if(STATIC_ISVALID(g_pGame)) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+        
+        //if(STATIC_ISVALID(g_pGame) && g_pGame->GetCurMission()->GetCurBoss())
+        //{
+        //    c_cast<coreUint8&>(g_pGame->GetCurMission()->GetCurBoss()->GetHelperHit()) = 0xFFu;
+        //}
+        
+        if(STATIC_ISVALID(g_pGame))
+        {
+            for(coreUintW i = 0u; i < FRAGMENTS; ++i)
+                g_pGame->GetItemManager()->AddItem<cFragmentItem>(coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.7f, (I_TO_F(i / 3u) - 1.0f) * 0.7f) * FOREGROUND_AREA, i, 0u, 0u);
+        }
     }
     
     Core::Debug->InspectValue("Fly Offset", g_pEnvironment->GetFlyOffset());

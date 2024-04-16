@@ -76,6 +76,7 @@
 #define TIGER_STINGS_SIDE         (32u)                                        // 
 #define TIGER_WEAPONS             (5u)                                         // 
 #define TIGER_SUBS                (5u)                                         // 
+#define TIGER_AIMS                (5u)                                         // 
 #define TIGER_DAMAGE              (70)                                         // 
 
 #define MESSIER_SHELLS            (2u)                                         // 
@@ -87,6 +88,7 @@
 #define MESSIER_SHOOT_RADIUS      (8.0f * (BULLET_SPEED_FACTOR / MESSIER_SHOOT_RATE))   // 
 #define MESSIER_SHOOT_STEP        (0.01f)                                      // 
 #define MESSIER_SHOOT_TIMES       (3u)                                         // 
+#define MESSIER_SCALE             (10.0f)                                      // 
 
 #define CHOL_WINGS                (4u)                                         // 
 
@@ -205,6 +207,9 @@ public:
     void StoreRotation(const coreVector3 vDir, const coreVector3 vOri);
     void StoreRotation();
 
+    // 
+    inline coreBool HasAllHelpers()const {return (m_iHelperHit == BITLINE(BOSS_HELPERS));}
+
     // get object properties
     inline  const coreUint8& GetPhase    ()const {return m_iPhase;}
     inline  const coreUint8& GetHelperHit()const {return m_iHelperHit;}
@@ -225,6 +230,9 @@ protected:
     // 
     coreBool _ResurrectHelper(const coreUint8 iElement, const coreBool bSmooth);
     void     _KillHelper     (const coreUint8 iElement, const coreBool bAnimated);
+
+    // 
+    void _CreateFragment(const coreUint8 iType);
 
     // 
     template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
@@ -255,7 +263,7 @@ public:
     cDharukBoss()noexcept;
 
     DISABLE_COPY(cDharukBoss)
-    ASSIGN_ID_EX(101, "DHARUK", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(101, "DHARUK", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -314,7 +322,7 @@ public:
     cDharukSubBoss()noexcept;
 
     DISABLE_COPY(cDharukSubBoss)
-    ASSIGN_ID_EX(101, "DHARUK", COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(101, "DHARUK", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -398,7 +406,7 @@ public:
     cTorusBoss()noexcept;
 
     DISABLE_COPY(cTorusBoss)
-    ASSIGN_ID_EX(102, "TORUS", COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
+    ASSIGN_ID_EX(102, "TORUS", COLOR_MENU_GREEN, COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_01.ogg";}
@@ -463,7 +471,7 @@ public:
     cVausBoss()noexcept;
 
     DISABLE_COPY(cVausBoss)
-    ASSIGN_ID_EX(103, "VAUS", COLOR_MENU_YELLOW, coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(103, "VAUS", COLOR_MENU_YELLOW, COLOR_MENU_YELLOW, coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -494,7 +502,7 @@ public:
     cNautilusBoss()noexcept;
 
     DISABLE_COPY(cNautilusBoss)
-    ASSIGN_ID_EX(201, "NAUTILUS", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(201, "NAUTILUS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -534,7 +542,7 @@ public:
     cAmemasuBoss()noexcept;
 
     DISABLE_COPY(cAmemasuBoss)
-    ASSIGN_ID_EX(202, "AMEMASU", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(202, "AMEMASU", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -575,7 +583,7 @@ public:
     cLeviathanBoss()noexcept;
 
     DISABLE_COPY(cLeviathanBoss)
-    ASSIGN_ID_EX(203, "LEVIATHAN", COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
+    ASSIGN_ID_EX(203, "LEVIATHAN", COLOR_MENU_CYAN, COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
 
     // 
     void ResurrectDemo();
@@ -621,7 +629,7 @@ public:
     cUrticaBoss()noexcept;
 
     DISABLE_COPY(cUrticaBoss)
-    ASSIGN_ID_EX(301, "URTICA", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(301, "URTICA", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -635,9 +643,16 @@ private:
 class cTigerBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_Track;                        // 
+    cCustomEnemy m_aTrack    [2];                // 
     cCustomEnemy m_aWeapon   [TIGER_SUBS];       // 
     cCustomEnemy m_aWeaponOld[TIGER_SUBS];       // 
+
+    coreObject3D m_aBeam[2];                     // 
+    coreVector2  m_vBeamPos;                     // 
+    coreFlow     m_fBeamTime;                    // 
+
+    coreObject3D m_aAim[TIGER_AIMS];             // 
+    coreObject3D m_AimRing;                      // 
 
     coreBatchList m_Sting;                       // 
     coreObject3D  m_aStingRaw  [TIGER_STINGS];   // 
@@ -653,16 +668,22 @@ private:
     coreUint8    m_iWeaponTypeOld;               // 
     coreFlow     m_fWeaponChange;                // 
 
-    coreVector2 m_vGroundPos;                    // 
+    coreUint8 m_iDecalState;                     // 
 
     coreFlow m_fAnimation;                       // 
+
+    coreSoundPtr m_pTankSound;                   // 
 
 
 public:
     cTigerBoss()noexcept;
 
     DISABLE_COPY(cTigerBoss)
-    ASSIGN_ID_EX(302, "TIGER MK-III", COLOR_MENU_YELLOW, coreVector2(0.0f,0.0f))
+    ASSIGN_ID_EX(302, "TIGER MK-III", COLOR_MENU_YELLOW, COLOR_MENU_YELLOW, coreVector2(0.0f,0.0f))
+
+    // 
+    inline coreBool ResurrectHelper(const coreUint8 iElement, const coreBool bSmooth)   {return this->_ResurrectHelper(iElement, bSmooth);}
+    inline void     KillHelper     (const coreUint8 iElement, const coreBool bAnimated) {this->_KillHelper(iElement, bAnimated);}
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_03.ogg";}
@@ -670,10 +691,19 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn ()final;
-    void __KillOwn      (const coreBool bAnimated)final;
-    void __RenderOwnOver()final;
-    void __MoveOwn      ()final;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwn        ()final;
+
+    // 
+    void __EnableBeam (const coreVector2 vPosition);
+    void __DisableBeam(const coreBool bAnimated);
+
+    // 
+    void __EnableAim (const coreUintW iIndex);
+    void __DisableAim(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void __EnableStings (const coreUintW iIndex);
@@ -687,7 +717,14 @@ private:
     void __SwitchWeapon(const coreUintW iType);
 
     // 
-    void __CreateTrail(const coreUintW iIndex, const coreVector3 vIntersect);
+    void __ShootWeapon();
+
+    // 
+    void __CauseBeamDamage(cPlayer* pTarget);
+
+    // 
+    void __CreateTrail    (const coreUintW iIndex, const coreVector3 vIntersect);
+    void __CreateOverdrive(const coreVector3 vIntersect);
 };
 
 
@@ -699,7 +736,7 @@ public:
     cLuciferBoss()noexcept;
 
     DISABLE_COPY(cLuciferBoss)
-    ASSIGN_ID_EX(303, "L.U.C.I.F.E.R.", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(303, "L.U.C.I.F.E.R.", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -716,7 +753,7 @@ public:
     cQuaternionBoss()noexcept;
 
     DISABLE_COPY(cQuaternionBoss)
-    ASSIGN_ID_EX(401, "QUATERNION", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(401, "QUATERNION", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -733,7 +770,7 @@ public:
     cSarosBoss()noexcept;
 
     DISABLE_COPY(cSarosBoss)
-    ASSIGN_ID_EX(402, "SAROS", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(402, "SAROS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -753,26 +790,38 @@ private:
     coreFlow     m_fRingTime;                        // 
     coreFlow     m_fRingScreen;                      // 
 
+    coreObject3D m_aClock[2];                        // 
+    coreFlow     m_fClockTime;                       // 
+    coreBool     m_bClockState;                      // 
+
+    coreObject3D m_aHole[2];                         // 
+    coreBool     m_bHoleState;                       // 
+
     coreFloat m_fTimeFactor;                         // 
     coreUint8 m_iTimeRevert;                         // 
+    coreBool  m_bTimeMusic;                          // 
 
     coreFlow   m_afShootTime[MESSIER_SHOOT_TIMES];   // 
     coreUint32 m_aiShootTick[MESSIER_SHOOT_TIMES];   // 
 
     coreUint32 m_iTick;                              // 
 
-    coreFlow m_fAnimation;                           // 
-    coreFlow m_fRotation;                            // 
+    coreFlow m_fMeteorRota;                          // 
+    coreFlow m_fBossRota;                            // 
+
+    coreSoundPtr m_pBellSound;                       // 
+    coreSoundPtr m_pVoidSound;                       // 
 
 
 public:
     cMessierBoss()noexcept;
 
     DISABLE_COPY(cMessierBoss)
-    ASSIGN_ID_EX(403, "MESSIER 87", COLOR_MENU_MAGENTA, coreVector2(0.75f,0.0f))
+    ASSIGN_ID_EX(403, "MESSIER 87", COLOR_MENU_MAGENTA, COLOR_MENU_MAGENTA, coreVector2(0.75f,0.0f))
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_04.ogg";}
+    inline const coreChar* GetMusicName   ()const final {return "boss_04.ogg";}
+    inline const coreChar* GetMusicNameRev()const       {return "boss_04_reverse.ogg";}
 
 
 private:
@@ -780,11 +829,20 @@ private:
     void __ResurrectOwn ()final;
     void __KillOwn      (const coreBool bAnimated)final;
     void __RenderOwnOver()final;
+    void __RenderOwnTop ()final;
     void __MoveOwn      ()final;
 
     // 
     void __EnableRings ();
     void __DisableRings(const coreBool bAnimated);
+
+    // 
+    void __EnableClock ();
+    void __DisableClock(const coreBool bAnimated);
+
+    // 
+    void __EnableHole ();
+    void __DisableHole(const coreBool bAnimated);
 
     // 
     void     __AddBullet  (const coreUintW iType, const coreFloat fSpeed, const coreVector2 vPosition, const coreVector2 vDirection);
@@ -800,7 +858,7 @@ public:
     cTartarusBoss()noexcept;
 
     DISABLE_COPY(cTartarusBoss)
-    ASSIGN_ID_EX(501, "TARTARUS", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(501, "TARTARUS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -817,7 +875,7 @@ public:
     cPhalarisBoss()noexcept;
 
     DISABLE_COPY(cPhalarisBoss)
-    ASSIGN_ID_EX(502, "PHALARIS", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(502, "PHALARIS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -861,7 +919,7 @@ public:
     cCholBoss()noexcept;
 
     DISABLE_COPY(cCholBoss)
-    ASSIGN_ID_EX(503, "CHOL", COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
+    ASSIGN_ID_EX(503, "CHOL", COLOR_MENU_ORANGE, COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_05.ogg";}
@@ -904,7 +962,7 @@ public:
     cFenrirBoss()noexcept;
 
     DISABLE_COPY(cFenrirBoss)
-    ASSIGN_ID_EX(601, "FENRIR", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(601, "FENRIR", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -921,7 +979,7 @@ public:
     cShelobBoss()noexcept;
 
     DISABLE_COPY(cShelobBoss)
-    ASSIGN_ID_EX(602, "SHELOB", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(602, "SHELOB", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -953,7 +1011,7 @@ public:
     cZerothBoss()noexcept;
 
     DISABLE_COPY(cZerothBoss)
-    ASSIGN_ID_EX(603, "ZEROTH", COLOR_MENU_BLUE, coreVector2(0.25f,0.25f))
+    ASSIGN_ID_EX(603, "ZEROTH", COLOR_MENU_BLUE, COLOR_MENU_BLUE, coreVector2(0.25f,0.25f))
 
     // 
     void ResurrectIntro();
@@ -991,7 +1049,7 @@ public:
     cOrlacBoss()noexcept;
 
     DISABLE_COPY(cOrlacBoss)
-    ASSIGN_ID_EX(701, "ORLAC", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(701, "ORLAC", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -1024,7 +1082,7 @@ public:
     cGemingaBoss()noexcept;
 
     DISABLE_COPY(cGemingaBoss)
-    ASSIGN_ID_EX(702, "GEMINGA", COLOR_MENU_RED, coreVector2(0.5f,0.0f))
+    ASSIGN_ID_EX(702, "GEMINGA", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_07.ogg";}
@@ -1049,7 +1107,7 @@ public:
     cNagualBoss()noexcept;
 
     DISABLE_COPY(cNagualBoss)
-    ASSIGN_ID_EX(703, "NAGUAL", coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(703, "NAGUAL", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -1121,6 +1179,7 @@ public:
 
     // get object properties
     inline coreVector3     GetColor    ()const final {return m_vLevelColor;}
+    inline coreVector3     GetColor2   ()const final {return m_vLevelColor;}
     inline coreVector2     GetIcon     ()const final {return coreVector2(-1.0f,-1.0f);}
     inline const coreChar* GetMusicName()const final {return "boss_08_intro.ogg";}
 
@@ -1226,7 +1285,7 @@ public:
     cEigengrauBoss()noexcept;
 
     DISABLE_COPY(cEigengrauBoss)
-    ASSIGN_ID_EX(802, "EIGENGRAU", COLOR_MENU_WHITE, coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(802, "EIGENGRAU", COLOR_MENU_WHITE, COLOR_MENU_WHITE, coreVector2(-1.0f,-1.0f))
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_99.ogg";}
@@ -1272,7 +1331,7 @@ public:
     cIntroBoss()noexcept;
 
     DISABLE_COPY(cIntroBoss)
-    ASSIGN_ID_EX(9901, "SHINAI", COLOR_MENU_PURPLE, coreVector2(0.0f,0.25f))
+    ASSIGN_ID_EX(9901, "SHINAI", COLOR_MENU_PURPLE, COLOR_MENU_PURPLE, coreVector2(0.0f,0.25f))
 
     // 
     void ResurrectIntro();

@@ -12,10 +12,13 @@ sConfig    g_CurConfig               = {};
 sConfig    g_OldConfig               = {};
 sGameInput g_aGameInput[INPUT_TYPES] = {};
 sGameInput g_TotalInput              = {};
-coreUint8  g_iTotalType              = UINT8_MAX;
+coreUint8  g_iTotalType              = 0u;
 sMenuInput g_MenuInput               = {};
 
-static coreBool s_abFireToggle[INPUT_TYPES + 1u] = {};
+static coreBool  s_abFireToggle[INPUT_TYPES + 1u] = {};
+static coreUint8 s_aiTwinState [INPUT_TYPES + 1u] = {};
+
+static coreList<coreVector2> s_avOldStick = {};
 
 
 // ****************************************************************
@@ -30,6 +33,19 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
     g_OldConfig.Graphics.iDistortion = 1u;
 
 #endif
+
+    // 
+    if(Core::Config->GetInt(CORE_CONFIG_BASE_VERSION) == 0)
+    {
+        for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
+        {
+            for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
+            {
+                Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), DEFAULT_ACTION(i, j));
+            }
+        }
+        Core::Config->SetInt(CORE_CONFIG_BASE_VERSION, 1);
+    }
 
     // clamp input set selections
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
@@ -76,6 +92,7 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
                 {
                     pConfig->Input.aiType[k] = k;
                 }
+        // TODO 1: vielleicht erst zu joystick zurücksetzen wenn möglich
 
                 // leave all loops
                 i = j = INPUT_TYPES;
@@ -106,15 +123,16 @@ void LoadConfig()
 
     // read game values
     g_OldConfig.Game.iTextSize     = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
+    g_OldConfig.Game.iCombatText   = Core::Config->GetInt(CONFIG_GAME_COMBAT_TEXT);
     g_OldConfig.Game.iGameRotation = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
     g_OldConfig.Game.iGameScale    = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
     g_OldConfig.Game.iGameSpeed    = Core::Config->GetInt(CONFIG_GAME_GAME_SPEED);
+    g_OldConfig.Game.iMirrorMode   = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
     g_OldConfig.Game.iHudRotation  = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
     g_OldConfig.Game.iHudScale     = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
     g_OldConfig.Game.iHudType      = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
     g_OldConfig.Game.iUpdateFreq   = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
     g_OldConfig.Game.iVersion      = Core::Config->GetInt(CONFIG_GAME_VERSION);
-    g_OldConfig.Game.iMirrorMode   = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
 
     // read graphics values
     g_OldConfig.Graphics.iRender     = Core::Config->GetInt(CONFIG_GRAPHICS_RENDER);
@@ -125,6 +143,7 @@ void LoadConfig()
     g_OldConfig.Graphics.iShake      = Core::Config->GetInt(CONFIG_GRAPHICS_SHAKE);
     g_OldConfig.Graphics.iFlash      = Core::Config->GetInt(CONFIG_GRAPHICS_FLASH);
     g_OldConfig.Graphics.iHitStop    = Core::Config->GetInt(CONFIG_GRAPHICS_HIT_STOP);
+    g_OldConfig.Graphics.iChroma     = Core::Config->GetInt(CONFIG_GRAPHICS_CHROMA);
 
     // read audio values
     g_OldConfig.Audio.fEffectVolume  = Core::Config->GetFloat(CONFIG_AUDIO_EFFECT_VOLUME);
@@ -134,9 +153,10 @@ void LoadConfig()
     // read input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        g_OldConfig.Input.aiType    [i] = Core::Config->GetInt(CONFIG_INPUT_TYPE     (i));
-        g_OldConfig.Input.aiRumble  [i] = Core::Config->GetInt(CONFIG_INPUT_RUMBLE   (i));
-        g_OldConfig.Input.aiFireMode[i] = Core::Config->GetInt(CONFIG_INPUT_FIRE_MODE(i));
+        g_OldConfig.Input.aiType       [i] = Core::Config->GetInt(CONFIG_INPUT_TYPE        (i));
+        g_OldConfig.Input.aiRumble     [i] = Core::Config->GetInt(CONFIG_INPUT_RUMBLE      (i));
+        g_OldConfig.Input.aiFireMode   [i] = Core::Config->GetInt(CONFIG_INPUT_FIRE_MODE   (i));
+        g_OldConfig.Input.aiControlMode[i] = Core::Config->GetInt(CONFIG_INPUT_CONTROL_MODE(i));
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
@@ -156,6 +176,7 @@ void LoadConfig()
     // 
     Core::Audio->SetSoundVolume(1.0f);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_EFFECT);
+    Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_MENU);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
 
     // forward values to the current structure
@@ -172,15 +193,16 @@ void SaveConfig()
 
     // write game values
     Core::Config->SetInt(CONFIG_GAME_TEXT_SIZE,     g_OldConfig.Game.iTextSize);
+    Core::Config->SetInt(CONFIG_GAME_COMBAT_TEXT,   g_OldConfig.Game.iCombatText);
     Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION, g_OldConfig.Game.iGameRotation);
     Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,    g_OldConfig.Game.iGameScale);
     Core::Config->SetInt(CONFIG_GAME_GAME_SPEED,    g_OldConfig.Game.iGameSpeed);
+    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,   g_OldConfig.Game.iMirrorMode);
     Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,  g_OldConfig.Game.iHudRotation);
     Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,     g_OldConfig.Game.iHudScale);
     Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,      g_OldConfig.Game.iHudType);
     Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,   g_OldConfig.Game.iUpdateFreq);
     Core::Config->SetInt(CONFIG_GAME_VERSION,       g_OldConfig.Game.iVersion);
-    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,   g_OldConfig.Game.iMirrorMode);
 
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_RENDER,     g_OldConfig.Graphics.iRender);
@@ -191,6 +213,7 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_SHAKE,      g_OldConfig.Graphics.iShake);
     Core::Config->SetInt(CONFIG_GRAPHICS_FLASH,      g_OldConfig.Graphics.iFlash);
     Core::Config->SetInt(CONFIG_GRAPHICS_HIT_STOP,   g_OldConfig.Graphics.iHitStop);
+    Core::Config->SetInt(CONFIG_GRAPHICS_CHROMA,     g_OldConfig.Graphics.iChroma);
 
     // write audio values
     Core::Config->SetFloat(CONFIG_AUDIO_EFFECT_VOLUME,  g_OldConfig.Audio.fEffectVolume);
@@ -200,9 +223,10 @@ void SaveConfig()
     // write input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        Core::Config->SetInt(CONFIG_INPUT_TYPE     (i), g_OldConfig.Input.aiType    [i]);
-        Core::Config->SetInt(CONFIG_INPUT_RUMBLE   (i), g_OldConfig.Input.aiRumble  [i]);
-        Core::Config->SetInt(CONFIG_INPUT_FIRE_MODE(i), g_OldConfig.Input.aiFireMode[i]);
+        Core::Config->SetInt(CONFIG_INPUT_TYPE        (i), g_OldConfig.Input.aiType       [i]);
+        Core::Config->SetInt(CONFIG_INPUT_RUMBLE      (i), g_OldConfig.Input.aiRumble     [i]);
+        Core::Config->SetInt(CONFIG_INPUT_FIRE_MODE   (i), g_OldConfig.Input.aiFireMode   [i]);
+        Core::Config->SetInt(CONFIG_INPUT_CONTROL_MODE(i), g_OldConfig.Input.aiControlMode[i]);
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
@@ -229,29 +253,13 @@ void SaveConfig()
 // update input interface
 void UpdateInput()
 {
+    // 
+    s_avOldStick.resize(Core::Input->GetJoystickNum(), coreVector2(0.0f,0.0f));
+
     // forward hat input to stick input
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
         Core::Input->ForwardHatToStick(i);
-    }
-
-    // 
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-    {
-        coreVector3 vColor = COLOR_LED_WHITE;
-
-        // 
-        for(coreUintW j = 0u; j < INPUT_TYPES; ++j)
-        {
-            if(i == g_CurConfig.Input.aiType[j] - INPUT_SETS_KEYBOARD)
-            {
-                vColor = (STATIC_ISVALID(g_pGame) && (j < g_pGame->GetNumPlayers())) ? g_pGame->GetPlayer(j)->GetLedColor() : (j ? COLOR_LED_YELLOW : COLOR_LED_BLUE);
-                break;
-            }
-        }
-
-        // 
-        Core::Input->JoystickChangeLED(i, vColor);
     }
 
     // reset mapped input values
@@ -309,6 +317,34 @@ void UpdateInput()
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
 
+            if(iJoystickID < s_avOldStick.size())
+            {
+                // TODO 1: statt old-stick sollte die spieler-richtung verwendet werden, so wie bei control mode
+                
+                if(!STATIC_ISVALID(g_pGame)) s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
+                
+                const coreVector2 vOldStick = s_avOldStick[iJoystickID];
+                coreVector2 vNewStick = Core::Input->GetJoystickRelativeR(iJoystickID);
+                
+                const coreBool bValid = (vNewStick.LengthSq() >= POW2(0.7f));
+                if(!vNewStick.IsNull()) vNewStick = vNewStick.Normalized();
+                
+                for(coreUintW j = 0u; j < 4u; ++j)
+                {
+                    const coreVector2 vBase = StepRotated90(j);
+                    const coreBool bOldState = (!vOldStick.IsNull() && (coreVector2::Dot(vOldStick, vBase) >= (1.0f / SQRT2)));
+                    const coreBool bNewState = (!vNewStick.IsNull() && (coreVector2::Dot(vNewStick, vBase) >= (bOldState ? 0.01f : (vOldStick.IsNull() ? (1.0f / SQRT2) : 0.8f))) && (bOldState || bValid));
+                    
+                    if(!bOldState &&  bNewState) ADD_BIT(oMap.iActionPress,   3u + j)
+                    if( bOldState && !bNewState) ADD_BIT(oMap.iActionRelease, 3u + j)
+                    if( bNewState)               ADD_BIT(oMap.iActionHold,    3u + j)
+                    
+                    
+                    if(!bOldState && bNewState) s_avOldStick[iJoystickID] = vNewStick.IsNull() ? coreVector2(0.0f,0.0f) : AlongCrossNormal(vNewStick);
+                }
+            }
+            
+            
             // TODO 1: es gibt keinen cancel-button mehr
             //if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
         }
@@ -337,7 +373,7 @@ void UpdateInput()
         {
             //if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
             //if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
-            if(HAS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
+            if(HAS_BIT(oMap.iActionPress, 7u)) g_MenuInput.bPause  = true;
         }
     }
 
@@ -381,6 +417,75 @@ void UpdateInput()
     nDirectionFunc(&g_TotalInput);
 
     // 
+    const auto nControlModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iStateIndex)
+    {
+        constexpr coreUint8 iTurnBits  = BIT(1u) | BIT(2u);
+        constexpr coreUint8 iShootBits = BIT(3u) | BIT(4u) | BIT(5u) | BIT(6u);
+
+        const coreUint8 iControlMode = g_CurConfig.Input.aiControlMode[iModeIndex];
+        if(iControlMode == 1u)
+        {
+            // 
+            SET_BIT(pInput->iActionPress,   0u, (pInput->iActionPress   & iShootBits) && !HAS_BIT(s_aiTwinState[iStateIndex], 1u))
+            SET_BIT(pInput->iActionHold,    0u, (pInput->iActionHold    & iShootBits))
+            SET_BIT(pInput->iActionRelease, 0u, (pInput->iActionRelease & iShootBits) && !HAS_BIT(pInput->iActionHold, 0u))
+
+            // 
+            REMOVE_FLAG(pInput->iActionPress,   iTurnBits)
+            REMOVE_FLAG(pInput->iActionHold,    iTurnBits)
+            REMOVE_FLAG(pInput->iActionRelease, iTurnBits)
+            
+            
+            if(STATIC_ISVALID(g_pGame))
+            {
+                const cPlayer* pPlayer = g_pGame->GetPlayer(iModeIndex);
+                const coreVector2 vDir = pPlayer->GetDirection().xy();
+                
+                if((SameDirection90(vDir, coreVector2( 0.0f, 1.0f)) && HAS_BIT(pInput->iActionPress, 3u)) ||
+                   (SameDirection90(vDir, coreVector2(-1.0f, 0.0f)) && HAS_BIT(pInput->iActionPress, 4u)) ||
+                   (SameDirection90(vDir, coreVector2( 0.0f,-1.0f)) && HAS_BIT(pInput->iActionPress, 5u)) ||
+                   (SameDirection90(vDir, coreVector2( 1.0f, 0.0f)) && HAS_BIT(pInput->iActionPress, 6u)))
+                {
+                    
+                    SET_BIT(s_aiTwinState[iStateIndex], 0u, false)
+                }
+                else 
+                    SET_BIT(s_aiTwinState[iStateIndex], 0u, true)
+            /*
+                if(!s_aiTwinState[iStateIndex]) s_aiTwinState[iStateIndex] = iShootBits;   // make sure to toggle in starting direction
+                
+    
+                // 
+                const coreUint8 iNew = (pInput->iActionPress & iShootBits);
+                if(iNew)
+                {
+                    const coreBool bSwitch = !HAS_FLAG(s_aiTwinState[iStateIndex], iNew);
+    
+                    s_aiTwinState[iStateIndex] = iNew;
+                    SET_BIT(s_aiTwinState[iStateIndex], 0u, bSwitch)
+                }*/
+            }
+
+            // 
+            SET_BIT(s_aiTwinState[iStateIndex], 1u, HAS_BIT(pInput->iActionHold, 0u))
+        }
+        else
+        {
+            // 
+            REMOVE_FLAG(pInput->iActionPress,   iShootBits)
+            REMOVE_FLAG(pInput->iActionHold,    iShootBits)
+            REMOVE_FLAG(pInput->iActionRelease, iShootBits)
+        }
+
+        // 
+        if((iControlMode != 1u) || !STATIC_ISVALID(g_pGame))
+            s_aiTwinState[iStateIndex] = 0u;
+    };
+    nControlModeFunc(&g_aGameInput[0], 0u, 0u);
+    nControlModeFunc(&g_aGameInput[1], 1u, 1u);
+    nControlModeFunc(&g_TotalInput,    0u, 2u);
+
+    // 
     const auto nFireModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iToggleIndex)
     {
         const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
@@ -398,7 +503,7 @@ void UpdateInput()
         else if(iFireMode == 2u)
         {
             // 
-            const coreBool bPress = HAS_BIT(pInput->iActionPress, 0u);
+            const coreBool bPress = HAS_BIT(pInput->iActionPress, 0u) && !HAS_BIT(s_aiTwinState[iToggleIndex], 0u);
             if(bPress) s_abFireToggle[iToggleIndex] = !s_abFireToggle[iToggleIndex];
 
             SET_BIT(pInput->iActionPress,   0u,  s_abFireToggle[iToggleIndex] && bPress)
@@ -416,6 +521,28 @@ void UpdateInput()
     nFireModeFunc(&g_aGameInput[0], 0u, 0u);
     nFireModeFunc(&g_aGameInput[1], 1u, 1u);
     nFireModeFunc(&g_TotalInput,    0u, 2u);
+
+    // 
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
+        coreVector3 vColor = COLOR_LED_WHITE;
+
+        // 
+        for(coreUintW j = 0u; j < INPUT_TYPES; ++j)
+        {
+            const coreUint8 iType       = (!STATIC_ISVALID(g_pGame) || g_pGame->IsMulti()) ? g_CurConfig.Input.aiType[j] : g_iTotalType;
+            const coreUintW iJoystickID = iType - INPUT_SETS_KEYBOARD;
+
+            if(i == iJoystickID)
+            {
+                vColor = (STATIC_ISVALID(g_pGame) && (j < g_pGame->GetNumPlayers())) ? g_pGame->GetPlayer(j)->GetLedColor() : (j ? COLOR_LED_YELLOW : COLOR_LED_BLUE);
+                break;
+            }
+        }
+
+        // 
+        Core::Input->JoystickChangeLED(i, vColor);
+    }
 
     // 
          if(!coreMath::IsNear(g_TotalInput.vMove.x, 0.0f)) g_MenuInput.iMove = (g_TotalInput.vMove.x > 0.0f) ? 4u : 2u;

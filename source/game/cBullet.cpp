@@ -1168,7 +1168,6 @@ void cDebrisBullet::GlobalInit()
     s_Wave.DefineModel  (Core::Manager::Object->GetLowQuad());
     s_Wave.DefineTexture(0u, "effect_wave.png");
     s_Wave.DefineProgram("effect_decal_single_program");
-    s_Wave.SetTexSize   (coreVector2(0.5f,1.0f));
 }
 
 
@@ -1256,7 +1255,6 @@ void cMineBullet::GlobalInit()
     s_Wave.DefineModel  (Core::Manager::Object->GetLowQuad());
     s_Wave.DefineTexture(0u, "effect_wave.png");
     s_Wave.DefineProgram("effect_decal_single_program");
-    s_Wave.SetTexSize   (coreVector2(0.5f,1.0f));
 }
 
 
@@ -1335,9 +1333,6 @@ cRocketBullet::cRocketBullet()noexcept
     this->DefineModel  ("bullet_rocket.md3");
     this->DefineTexture(0u, "ship_enemy.png");
     this->DefineProgram("object_ship_glow_program");
-
-    // set object properties
-    this->SetColor3(coreVector3(0.0f,0.0f,1.0f));
 }
 
 
@@ -1389,7 +1384,7 @@ void cRocketBullet::__MoveOwn()
 
     // update animation
     m_fAnimation.UpdateMod(10.0f * m_fAnimSpeed, 2.0f);
-    this->SetColor3(coreVector3(0.0f, 0.6f + 0.4f * SIN(m_fAnimation * (1.0f*PI)), 0.0f));
+    this->SetColor3(COLOR_SHIP_BLUE * (0.6f + 0.4f * SIN(m_fAnimation * (1.0f*PI))));
 
     // update fade
     m_fFade.Update(1.0f);

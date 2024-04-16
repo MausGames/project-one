@@ -11,6 +11,9 @@
 #define _P1_GUARD_CREDITROLL_H_
 
 // TODO 5: rotate entries and make them rotatable
+// TODO 3: add label pool
+
+// https://old.reddit.com/r/shmups/comments/10dd8qd/i_would_like_to_show_you_the_game_ive_been/
 
 
 // ****************************************************************
@@ -22,7 +25,8 @@
 #define CREDIT_ENTRIES_MODELS    (ARRAY_SIZE(g_apcCreditEntryModels))      // 
 #define CREDIT_ENTRIES_FONTS     (ARRAY_SIZE(g_apcCreditEntryFonts))       // 
 #define CREDIT_ENTRIES_LIBRARIES (ARRAY_SIZE(g_apcCreditEntryLibraries))   // 
-#define CREDIT_HEADERS           (6u)                                      // 
+#define CREDIT_ENTRIES_THANKS    (ARRAY_SIZE(g_apcCreditEntryThanks))      // 
+#define CREDIT_HEADERS           (6u)//(7u)                                      // 
 
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2] =
@@ -103,6 +107,19 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryLibrar
     "zstd"
 };
 
+// 
+alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryThanks[] =
+{
+        ""
+    //"AgitatedBrilliant",   // r/shmups: comment
+    //"cy13erpunk",          // r/shmups: feedback, comment
+    //"FaceTimePolice",      // r/shmups: feedback, comment
+    //"JewsEatFruit",        // r/shmups: comment, marking
+    //"leanderish",          // r/shmups: feedback, comment
+    //"Sentmoraap",          // r/shmups: comment
+    //"TheCaptainGhost"      // r/shmups: feedback, comment
+};
+
 
 // ****************************************************************
 // credit roll class
@@ -123,6 +140,7 @@ private:
     cGuiLabel m_aOtherModels   [CREDIT_ENTRIES_MODELS];      // 
     cGuiLabel m_aOtherFonts    [CREDIT_ENTRIES_FONTS];       // 
     cGuiLabel m_aOtherLibraries[CREDIT_ENTRIES_LIBRARIES];   // 
+    cGuiLabel m_aOtherThanks   [CREDIT_ENTRIES_THANKS];      // 
 
     coreFlow  m_fOffset;                                     // 
     coreFloat m_fMaxOffset;                                  // 

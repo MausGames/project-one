@@ -837,7 +837,7 @@ private:
 class cRocketBullet final : public cBullet
 {
 private:
-    cShip* m_pTarget;   // 
+    const cShip* m_pTarget;   // 
 
 
 public:
@@ -850,7 +850,7 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.8f,1.8f,1.8f)); m_fAnimation = 0.0f; m_fFade = 0.0f; m_pTarget = NULL;}
 
     // 
-    inline cRocketBullet* SetTarget(cShip* pTarget) {m_pTarget = pTarget; return this;}
+    inline cRocketBullet* SetTarget(const cShip* pTarget) {m_pTarget = pTarget; return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}

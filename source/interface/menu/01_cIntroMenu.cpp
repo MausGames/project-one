@@ -186,6 +186,7 @@ void cIntroMenu::StartIntro()
         }
         m_Navigator.AssignFirst(m_apLanguageButton.front());
         m_Navigator.AssignMenu (this);
+        m_Navigator.ShowIcon   (true);
 
         // 
         this->BindObject(SURFACE_INTRO_LANGUAGE, &m_Navigator);

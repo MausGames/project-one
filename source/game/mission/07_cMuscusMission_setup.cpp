@@ -106,6 +106,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: hardmode: zusätzliche Mario geister die man nicht töten kann (vlt. nur einer)
     // TODO 1: disable shadow and water-reflection (completely) for segments in darkness
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), destroy an enemy while no light is shining on it
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumData = 36u;
@@ -583,6 +584,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: hard mode: alles 45 grad gedreht
     // TODO 1: hard mode: der rand is mit generates zugedeckt (man sieht die ecken?)
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), finish the segment without ever letting disppear a damaging field (increase all-flash time after the first few hits)
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep        = 0.275f;
@@ -1138,6 +1140,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: [?] striking attack sollte weiter weggehn wenn sie näher bei target sind, vielleicht beschleunigt das mehr
     // TODO 1: [?] maybe also update strike-spline target tangent in real-time (e.g. when enemy moves into strike the animation gets slower)
     // TODO 1: MAIN: task-check, hard idea, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iHiddenFirst = 31u;
@@ -1737,6 +1740,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: hardmode: all cinder enemies attack after teleportation, or teleportation attacks you
     // TODO 1: hardmode: something dangerous will be left behind after teleportation
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData = 16u;
@@ -2211,6 +2215,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: badge: touch the helper for N seconds
     // TODO 1: hard-mode: geschoss-linie die im kreis rotiert, bei allen stages!, auch bei legion, gegen legion rotation (andere bullet-farbe)
     // TODO 1: MAIN: task-check, regular score, extra score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), destroy all enemies at the start in reverse order
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumEnemies = 40u;
@@ -2979,6 +2984,16 @@ void cMuscusMission::__SetupOwn()
         });
 
         STAGE_BOSS(m_Geminga, {60.0f, 120.0f, 180.0, 240.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################

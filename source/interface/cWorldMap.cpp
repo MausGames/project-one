@@ -156,7 +156,7 @@ void cWorldMap::Move()
 void cWorldMap::Arrange()
 {
     // 
-    this->SetTexSize  (this->GetSize().MinRatio());
+    this->SetTexSize  (this->GetSize().LowRatio());
     this->SetTexOffset((coreVector2(1.0f,1.0f) * this->GetSize().Max() - this->GetSize()) * 0.5f);
 
     // 

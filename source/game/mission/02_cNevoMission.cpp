@@ -854,6 +854,8 @@ void cNevoMission::__RenderOwnOver()
     m_Chip.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Chip);
 
+    DEPTH_PUSH
+
     glDisable(GL_DEPTH_TEST);
     {
         // 
@@ -960,7 +962,7 @@ void cNevoMission::__MoveOwnAfter()
         // 
         const coreBool  bWarn   = (fTime < 1.0f);
         const coreFloat fLerp   = 1.0f - POW(fTime - 1.0f, 9.0f);
-        const coreFloat fBlend  = CLAMP((fTime - 1.0f) * 20.0f, 0.0f, 1.0f);
+        const coreFloat fBlend  = CLAMP01((fTime - 1.0f) * 20.0f);
         const coreFloat fSize   = bWarn ? (2.0f)                  : (LERP(1.0f, 4.0f, fLerp) * fBlend);
         const coreFloat fAlpha  = bWarn ? (0.6f * (1.0f - fTime)) : (LERP(0.0f, 1.0f, fLerp) * fBlend);
         const coreFloat fTex    = FRACT(2.4f * m_fAnimation * (bWarn ? 0.35f : -1.0f));

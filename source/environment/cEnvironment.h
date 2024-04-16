@@ -85,6 +85,9 @@ public:
     FUNC_PURE coreFloat   RetrieveSafeHeight   (const coreVector2 vPosition,                                     const coreFloat fFallbackHeight = WATER_HEIGHT)const;
     FUNC_PURE coreVector3 RetrieveSafeIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection, const coreFloat fFallbackHeight = WATER_HEIGHT)const;
 
+    // 
+    inline void OverrideFlyOffset(const coreFloat fFlyOffset) {m_fFlyOffset = fFlyOffset;}
+
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 

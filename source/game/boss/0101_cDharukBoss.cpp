@@ -564,7 +564,7 @@ void cDharukBoss::__MoveOwn()
     // 
     if(m_Duplicate.ReachedDeath())
     {
-        g_pGame->GetItemManager()->AddItem<cFragmentItem>(m_Duplicate.GetPosition().xy());
+        //g_pGame->GetItemManager()->AddItem<cFragmentItem>(m_Duplicate.GetPosition().xy(), 0u);
         this->__DisableDuplicate(true);
     }
 

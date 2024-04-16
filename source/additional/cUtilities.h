@@ -35,20 +35,28 @@
     inline const coreChar* GetName()const final {return n;}
 #define ENABLE_ID_EX                                        \
     ENABLE_ID                                               \
-    virtual coreVector3 GetColor()const = 0;                \
-    virtual coreVector2 GetIcon ()const = 0;
-#define ASSIGN_ID_EX(i,n,c,o)                               \
+    virtual coreVector3 GetColor ()const = 0;               \
+    virtual coreVector3 GetColor2()const = 0;               \
+    virtual coreVector2 GetIcon  ()const = 0;
+#define ASSIGN_ID_EX(i,n,c,d,o)                             \
     ASSIGN_ID(i, n)                                         \
-    static constexpr const coreVector3 Color = c;           \
-    static constexpr const coreVector2 Icon  = o;           \
-    inline coreVector3 GetColor()const final {return c;}    \
-    inline coreVector2 GetIcon ()const final {return o;}
+    static constexpr const coreVector3 Color  = c;          \
+    static constexpr const coreVector3 Color2 = d;          \
+    static constexpr const coreVector2 Icon   = o;          \
+    inline coreVector3 GetColor ()const final {return c;}   \
+    inline coreVector3 GetColor2()const final {return d;}   \
+    inline coreVector2 GetIcon  ()const final {return o;}
 
 // 
 #define LIST_KEY (CORE_MEMORY_SHARED)
 
 // 
 #define HIDDEN_POS (coreVector2(1000.0f,1000.0f))
+
+// 
+#define ADD_BIT_EX(o,n)    {ADD_BIT   ((o)[(n) / (sizeof((o)[0]) * 8u)], (n) % (sizeof((o)[0]) * 8u)) ASSERT((n) < ARRAY_SIZE(o) * (sizeof((o)[0]) * 8u))}
+#define REMOVE_BIT_EX(o,n) {REMOVE_BIT((o)[(n) / (sizeof((o)[0]) * 8u)], (n) % (sizeof((o)[0]) * 8u)) ASSERT((n) < ARRAY_SIZE(o) * (sizeof((o)[0]) * 8u))}
+#define HAS_BIT_EX(o,n)    (HAS_BIT   ((o)[(n) / (sizeof((o)[0]) * 8u)], (n) % (sizeof((o)[0]) * 8u)))
 
 
 // ****************************************************************

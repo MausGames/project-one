@@ -162,7 +162,7 @@ void cEnvironment::Move()
     g_pMenu->SetHighlightColor(vColor);
     
     
-    const coreVector3 vColor2 = m_TransitionTime.GetStatus() ? LERPH3(m_pOldBackground->GetButtonColor(), m_pBackground->GetButtonColor(), m_TransitionTime.GetValuePct(CORE_TIMER_GET_NORMAL)) : m_pBackground->GetButtonColor();
+    const coreVector3 vColor2 = m_TransitionTime.GetStatus() ? LERPH3(m_pOldBackground->GetColor2(), m_pBackground->GetColor2(), m_TransitionTime.GetValuePct(CORE_TIMER_GET_NORMAL)) : m_pBackground->GetColor2();
     g_pMenu->SetButtonColor(vColor2);
 }
 
@@ -177,7 +177,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     SAFE_DELETE(m_pOldBackground)
 
     // make current to old
-    if(!fTransitionSpeed) SAFE_DELETE(m_pBackground)
+    //if(!fTransitionSpeed) SAFE_DELETE(m_pBackground)
     m_pOldBackground = m_pBackground;
 
     // create new background
@@ -200,6 +200,9 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     // 
     if((iID != cNoBackground::ID) && (iID != cStomachBackground::ID) && (!g_bDemoVersion || (iID != cDarkBackground::ID)))
         m_iLastID = iID;
+    
+    
+    if(!fTransitionSpeed) SAFE_DELETE(m_pOldBackground)
 
     if(m_pOldBackground)
     {

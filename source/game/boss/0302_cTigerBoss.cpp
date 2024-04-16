@@ -23,50 +23,51 @@
 // alle angriffe, außer die raketen, erscheinen an der einschlags-stelle, ein teppich von der anderen seite zum ziel war zu un-balanced (zu nah am einschlag war zu leicht, zu fern zu schwer), geschosse entlang des schusses waren viel zu schwer, und ein wellen-angriff direkt vom tank aus hat die mitte komplett unbrauchbar gemacht (und hat zu sehr eingeschränkt)
 // intro gegner sollten weit auseinander stehen, damit man die abstürze gut sieht, und später kommen, damit der spieler erst versucht den tank anzugreifen (und dabei die haubitze sieht, mit der aiming mechanik die bei allen waffen gleich ist)
 // abstürzende gegner sollten explodieren vor absturz, was besonders wichtig ist um die gegner über spike-plates zu kaschieren
-// TODO 1: raupen-spuren im sand bei einigen gegner-welle davor schon (foreshadowing)
-// TODO 1: every weapon needs an own design, own number on top of it, own color?
-// TODO 1: boss sollte immer im selben background offset starten (zm. für die sinus-welle) -> baue sync-punkt ein -> ich hab eh den sinus-wert allein wegen der bewegung
-// TODO 1: arrow für schussrichtung ? (gelb)
-// TODO 1: manche gegner in mission sollen schon abstürzen
-// TODO 1: fixup scoring (enemies or damaging boss makes score ? how to handle chain ?)
-// TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
-// TODO 1: reifen unrealistisch animieren, damit sie bei hoher geschwindigkeit noch gut aussehen ?
 // TODO 1: hard-mode: wind + minen
-// TODO 1: make sure health is same in coop and non-coop (should already be, but check and confirm)
-// TODO 1: improve the pattern for the spike phase ((maybe) remove possible empty plates)
-// TODO 1: zweite sub-phase von child enemies sollte anders sein, nicht einfach nur richtung ändern
-// TODO 1: BIG: last phase with laser from above, multiple single shots first (fix (damit man nicht schon auf boss schießt), soll letzter schon boss treffen?), then laser which follows player, move 1-3 times over tank to win
-// TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
-// TODO 1: maybe add rotation to purple attack ? (would make this weapon more distinct, other weapons are already distinct)
-// TODO 1: farbe von raketen is auch grün, vielleicht ändern ? blau is noch frei
-// TODO 1: restliche modelle: laser schaut derzeit orsch aus, raketen-werfer, violette haubitze
-// TODO 1: weißer rauch bei laser-waffe vermischt sich mti weißem rauch von maulwürfen
-// TODO 1: raketen vielleicht hochdrehen, 1, 2, 3, 4
-// TODO 1: Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
-// TODO 1: bei stacheln keine doppelten platten erzeugen, alle überschüssigen schon am anfang erzeugen
+// TODO 1: hard mode: wind force in environment-richtung (damit es von tiger position beeinflusst wird) (stark genug, dass man beim schießen nicht dagegen ankommt)
 
-// TODO 1: (mines need to be enemies to allow blinking, combo/chain)
-// TODO 1: (in die stacheln schießen erzeugt effekt (knusprig))
-// TODO 1: (make sure to disable wind on boss-death (hard if necessary))
-// TODO 1: (sting calculations only for enabled stings)
+// TODO 1: manche gegner in mission sollen schon abstürzen
+// TODO 1: Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
+// TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
+// TODO 1: improve/fix beam effect
+
+// TODO 1: weißer rauch bei laser-waffe vermischt sich mit weißem rauch von maulwürfen
+// TODO 1: fliegend tower gegner sollten roten schein haben -> duplicate
+
+// TODO 1: ACHIEVEMENT: name (), description (), spin around the boss 10 times without getting hit
+
+// TODO 1: rote bullet noch mal überprüfen, da flog ein einzelnes geschoss herum, und nochmal mehrere einzelne einer linie
+
+// TODO 5: (mines need to be enemies to allow blinking, combo/chain)
+// TODO 5: (in die stacheln schießen erzeugt effekt (knusprig))
+// TODO 5: (make sure to disable wind on boss-death (hard if necessary))
+// TODO 5: (sting calculations only for enabled stings)
 
 
 // ****************************************************************
 // counter identifier
-#define WEAPON_SHOT (0u)
+#define WEAPON_SHOT      (0u)
+#define BEAM_SHOT        (1u)
+#define MANUAL_TRANSFORM (2u)
 
 
 // ****************************************************************
 // vector identifier
-#define TRAIL_HIT   (0u)   // # uses 0u - 1u
-#define RECOIL_TIME (2u)
-#define POS_OFFSET  (3u)
+#define TRAIL_HIT     (0u)   // # uses 0u - 1u
+#define OVERDRIVE_HIT (2u)
+#define RECOIL_TIME   (3u)
+#define POS_OFFSET    (4u)
+#define JUMP_DATA     (5u)
+#define HELPER_DATA   (6u)
+#define FINAL_ROTA    (7u)
 
 
 // ****************************************************************
 // constructor
 cTigerBoss::cTigerBoss()noexcept
-: m_Sting          (TIGER_STINGS)
+: m_vBeamPos       (coreVector2(0.0f,0.0f))
+, m_fBeamTime      (0.0f)
+, m_Sting          (TIGER_STINGS)
 , m_afStingTime    {}
 , m_avPushDir      {}
 , m_fPushPower     (0.0f)
@@ -74,7 +75,7 @@ cTigerBoss::cTigerBoss()noexcept
 , m_iWeaponType    (0u)
 , m_iWeaponTypeOld (0u)
 , m_fWeaponChange  (0.0f)
-, m_vGroundPos     (coreVector2(0.0f,0.0f))
+, m_iDecalState    (0u)
 , m_fAnimation     (0.0f)
 {
     // load models
@@ -85,25 +86,28 @@ cTigerBoss::cTigerBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.5f);
 
     // configure the boss
-    this->Configure(TIGER_DAMAGE * 104, 0u, COLOR_SHIP_YELLOW);
+    this->Configure(TIGER_DAMAGE * 117, 0u, COLOR_SHIP_YELLOW);
     this->AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
 
-    // 
-    m_Track.DefineModelHigh("ship_boss_tiger_track.md3");
-    m_Track.DefineModelLow ("ship_boss_tiger_track.md3");
-    m_Track.DefineTexture  (0u, "effect_track.png");
-    m_Track.DefineProgram  ("effect_track_program");
-    m_Track.SetSize        (this->GetSize());
-    m_Track.SetTexSize     (coreVector2(1.0f,2.0f));
-    m_Track.Configure      (1, 0u, coreVector3(1.0f,1.0f,1.0f));
-    m_Track.AddStatus      (ENEMY_STATUS_BOTTOM);
-    m_Track.SetParent      (this);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrack); ++i)
+    {
+        // 
+        m_aTrack[i].DefineModelHigh(i ? "ship_boss_tiger_track_right.md3" : "ship_boss_tiger_track_left.md3");
+        m_aTrack[i].DefineModelLow (i ? "ship_boss_tiger_track_right.md3" : "ship_boss_tiger_track_left.md3");
+        m_aTrack[i].DefineTexture  (0u, "effect_track.png");
+        m_aTrack[i].DefineProgram  ("effect_track_program");
+        m_aTrack[i].SetSize        (this->GetSize());
+        m_aTrack[i].SetTexSize     (coreVector2(1.0f,2.0f));
+        m_aTrack[i].Configure      (1, 0u, coreVector3(1.0f,1.0f,1.0f));
+        m_aTrack[i].AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST);
+        m_aTrack[i].SetParent      (this);
+    }
 
     for(coreUintW i = 0u; i < TIGER_SUBS; ++i)
     {
         // 
         m_aWeapon[i].Configure(1, 0u, COLOR_SHIP_YELLOW);
-        m_aWeapon[i].AddStatus(ENEMY_STATUS_BOTTOM);
+        m_aWeapon[i].AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST);
         m_aWeapon[i].SetParent(this);
     }
 
@@ -111,9 +115,39 @@ cTigerBoss::cTigerBoss()noexcept
     {
         // 
         m_aWeaponOld[i].Configure(1, 0u, COLOR_SHIP_YELLOW);
-        m_aWeaponOld[i].AddStatus(ENEMY_STATUS_BOTTOM);
+        m_aWeaponOld[i].AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST);
         m_aWeaponOld[i].SetParent(this);
     }
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBeam); ++i)
+    {
+        // 
+        m_aBeam[i].DefineModel  ("object_tube_open.md3");
+        m_aBeam[i].DefineTexture(0u, "effect_energy.png");
+        m_aBeam[i].DefineProgram(i ? "effect_energy_direct_program" : "effect_energy_program");
+        m_aBeam[i].SetSize      (i ? coreVector3(0.0f,10.0f,0.0f) : coreVector3(0.0f,100.0f,0.0f));
+        m_aBeam[i].SetColor3    (i ? (LERP(COLOR_ENERGY_WHITE, COLOR_ENERGY_MAGENTA, 0.5f)) : (COLOR_ENERGY_MAGENTA * 0.8f));
+        m_aBeam[i].SetTexSize   (i ? coreVector2(1.0f,1.0f) : coreVector2(4.0f,1.0f));
+        m_aBeam[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
+    {
+        // 
+        m_aAim[i].DefineModel  (Core::Manager::Object->GetLowQuad());
+        m_aAim[i].DefineTexture(0u, "effect_aim.png");
+        m_aAim[i].DefineProgram("effect_decal_program");
+        m_aAim[i].SetSize      (coreVector3(1.0f,1.0f,1.0f) * 12.0f);
+        m_aAim[i].SetTexSize   (coreVector2(0.5f,1.0f));
+        m_aAim[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
+    m_AimRing.DefineModel  (Core::Manager::Object->GetLowQuad());
+    m_AimRing.DefineTexture(0u, "effect_aim.png");
+    m_AimRing.DefineProgram("effect_decal_program");
+    m_AimRing.SetTexSize   (coreVector2(0.5f,1.0f));
+    m_AimRing.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Sting.DefineProgram("object_ship_glow_inst_program");
@@ -162,7 +196,11 @@ cTigerBoss::cTigerBoss()noexcept
     m_aapModelLow [4][4] = m_aapModelLow [4][3] = m_aapModelLow [4][2] = m_aapModelLow [4][1];
 
     // 
+    m_pTankSound = Core::Manager::Resource->Get<coreSound>("effect_tank.wav");
+
+    // 
     this->__SwitchWeapon(0u);
+    //m_fWeaponChange = 3.0f - CORE_MATH_PRECISION;
 }
 
 
@@ -180,7 +218,7 @@ void cTigerBoss::__ResurrectOwn()
 
         this->TakeDamage(iDamage, ELEMENT_NEUTRAL, HIDDEN_POS, g_pGame->GetPlayer(iPlayer));
 
-        if((m_iPhase == 50u) && (this->GetCurHealth() <= TIGER_DAMAGE * 16)) this->AddStatus(ENEMY_STATUS_INVINCIBLE);
+        if((m_iPhase == 50u) && (this->GetCurHealth() <= TIGER_DAMAGE * 21)) this->AddStatus(ENEMY_STATUS_INVINCIBLE);
     });
 
     // 
@@ -193,11 +231,36 @@ void cTigerBoss::__ResurrectOwn()
 void cTigerBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
+    this->__DisableBeam(bAnimated);
+
+    // 
+    for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
+        this->__DisableAim(i, bAnimated);
+
+    // 
     for(coreUintW i = 0u; i < TIGER_SIDES; ++i)
         this->__DisableStings(i, bAnimated);
 
     // 
+    if(m_pTankSound->EnableRef(this)) m_pTankSound->Stop();
+
+    // 
     g_pGame->GetCrashManager()->SetImpactCallback(NULL);
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__RenderOwnBottom()
+{
+    if(m_aBeam[0].IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    {
+        DEPTH_PUSH
+
+        // 
+        //m_aBeam[0].Render();
+        //g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_aBeam[0]);
+    }
 }
 
 
@@ -210,12 +273,28 @@ void cTigerBoss::__RenderOwnOver()
     glDepthFunc(GL_ALWAYS);
     {
         // 
+        for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
+            m_aAim[i].Render();
+
+        // 
+        m_AimRing.Render();
+
+        // 
         m_Sting.Render();
     }
     glDepthFunc(GL_LEQUAL);
 
     // 
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Sting);
+
+    // 
+    
+   //         glCullFace(GL_FRONT);
+        m_aBeam[0].Render();
+        
+  //          glCullFace(GL_BACK);
+    m_aBeam[1].Render();
+    //g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_aBeam[1]);
 }
 
 
@@ -228,19 +307,67 @@ void cTigerBoss::__MoveOwn()
     // 
     this->_UpdateBoss();
 
-    if(this->ReachedDeath())
-    {
-        this->Kill(true);   
-        this->_EndBoss();
-    }
-
     // ################################################################
     // 
     if(m_iPhase == 0u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.2f, LERP_SMOOTH)
+        m_avVector[POS_OFFSET].y = -70.0f;
+
+        const coreFloat fCurFlyOffset = g_pEnvironment->GetFlyOffset();
+        const coreFloat fOldFlyOffset = fCurFlyOffset - TIME * g_pEnvironment->GetSpeed();
+
+        if(F_TO_SI(fCurFlyOffset * (0.075f*PI) / (2.0f*PI)) != F_TO_SI(fOldFlyOffset * (0.075f*PI) / (2.0f*PI)))
         {
-            m_avVector[POS_OFFSET].y = LERP(-80.0f, -40.0f, fTime);
+            g_pEnvironment->OverrideFlyOffset(RoundFactor(fCurFlyOffset, (0.075f*PI) / (2.0f*PI)));
+
+            m_aWeapon[0].SetDirection(coreVector3(coreVector2(-0.5f,1.0f).Normalized(), 0.0f));
+            this->__ShootWeapon();
+
+            PHASE_CHANGE_INC
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 1u)
+    {
+        PHASE_CONTROL_TICKER(0u, 4u, 3.5f, LERP_LINEAR)
+        {
+            coreVector2 vDir;
+            switch(iTick)
+            {
+            default: ASSERT(false)
+            case 0u: vDir = coreVector2( 0.2f,1.0f); break;
+            case 1u: vDir = coreVector2( 0.5f,1.0f); break;
+            case 2u: vDir = coreVector2(-0.2f,1.0f); break;
+            case 3u: vDir = coreVector2(-0.8f,1.0f); break;
+            }
+
+            m_aWeapon[0].SetDirection(coreVector3(vDir.Normalized(), 0.0f));
+            this->__ShootWeapon();
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 2u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.25f, LERP_BREAK)
+        {
+            if(PHASE_BEGINNING)
+            {
+                g_pSpecialEffects->ExternPlayPosition(m_pTankSound, this, 0.0f, 1.0f, true, SOUND_EFFECT, this->GetPosition());
+            }
+
+            if(m_pTankSound->EnableRef(this))
+            {
+                m_pTankSound->SetVolume(ParaLerp(0.0f, 1.0f, 0.2f, fTime));
+            }
+
+            m_avVector[POS_OFFSET].y = ParaLerp(-70.0f, -10.0f, -40.0f, fTime);
 
             if(PHASE_TIME_POINT(0.7f))
                 this->_StartBoss();
@@ -252,13 +379,16 @@ void cTigerBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 1u)
+    else if(m_iPhase == 3u)
     {
         PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
             pMission->ChangeInsanity(1u);
 
             PHASE_CHANGE_TO(20u)
+            //PHASE_CHANGE_TO(80u)
+            //m_avVector[POS_OFFSET].y = 0.0f;
+            //this->__SwitchWeapon(4u);
         });
     }
 
@@ -266,7 +396,7 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 20u)
     {
-        if(pMission->GetStageSub() == 11u)
+        if(pMission->GetStageSub() == 12u)
             PHASE_CHANGE_INC
     }
 
@@ -287,7 +417,7 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 22u)
     {
-        if(pMission->GetStageSub() == 12u)
+        if(pMission->GetStageSub() == 13u)
             PHASE_CHANGE_INC
     }
 
@@ -335,6 +465,9 @@ void cTigerBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.1f, LERP_SMOOTH)
         {
+            cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+            pBackground->SetVeilAlpha(fTime);
+
             g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(fTime * (-1.5f*PI)));
 
             if(PHASE_FINISHED)
@@ -384,6 +517,15 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 40u)
     {
+        if(pMission->GetStageSub() == 4u)
+        {
+            if(this->_ResurrectHelper(ELEMENT_YELLOW, false))
+            {
+                g_pGame->GetHelper(ELEMENT_YELLOW)->SetPosition(coreVector3(0.95f,1.2f,0.0f) * FOREGROUND_AREA3);
+                m_avVector[HELPER_DATA].z = -1.0f;
+            }
+        }
+
         if(pMission->GetStageSub() == 7u)
             PHASE_CHANGE_INC
     }
@@ -437,7 +579,7 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 50u)
     {
-        if(this->GetCurHealth() <= TIGER_DAMAGE * 16)
+        if(this->GetCurHealth() <= TIGER_DAMAGE * 21)
             PHASE_CHANGE_INC
     }
 
@@ -471,36 +613,315 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 60u)
     {
-        const coreFloat fRotaTime = BLENDBR(MIN1(m_fPhaseTime * 0.5f)) * 2.0f + MAX0(m_fPhaseTime - 2.0f);
-        g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(fRotaTime * (-0.1f*PI) + (-3.0f*PI)));
+        cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+        pBackground->SetVeilAlpha(1.0f - STEPS(0.0f, 10.0f, m_fPhaseTime));
+
+        constexpr coreUintW iHelperSpike = 35u;
+        if(pMission->GetSpikeLaunched(iHelperSpike))
+        {
+            if(this->_ResurrectHelper(ELEMENT_CYAN, true))
+            {
+                g_pGame->GetHelper(ELEMENT_CYAN)->SetPosition(pMission->GetSpikeBoard(iHelperSpike)->GetPosition());
+            }
+        }
+
+        if(this->GetCurHealth() <= TIGER_DAMAGE * 5)
+            PHASE_CHANGE_TO(80u)
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 70u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            this->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
+
+            this->_EndBoss();
+
+            m_avVector[POS_OFFSET].y = 0.0f;
+
+            for(coreUintW i = 0u; i < TIGER_SUBS; ++i)
+            {
+                m_aWeapon[i].Kill(false);
+            }
+            m_iWeaponType = 5u;
+
+            g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+        }
+
+        PHASE_CONTROL_TICKER(4u, 0u, 60.0f, LERP_LINEAR)
+        {
+            g_pSpecialEffects->CreateBlowSmoke(this->GetPosition(), coreVector3(-g_pEnvironment->GetDirection(), 0.0f), 100.0f, 3u, coreVector3(1.0f,1.0f,1.0f));
+        });
+
+        PHASE_CONTROL_PAUSE(0u, 0.18f)
+        {
+            m_aiCounter[MANUAL_TRANSFORM] = 1;
+
+            m_avVector[JUMP_DATA].x = this->GetPosition().z;
+
+            if(m_pTankSound->EnableRef(this)) m_pTankSound->Stop();
+
+            g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 71u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.35f, LERP_LINEAR)
+        {
+            const coreVector2 vSide = g_pEnvironment->GetDirection().Rotated90();
+
+            const coreMatrix3 mRota1 = coreMatrix4::RotationAxis(TIME * -12.0f, coreVector3(vSide, 0.5f).Normalized()).m123();
+            const coreMatrix3 mRota2 = coreMatrix4::RotationAxis(TIME *   6.0f, coreVector3(vSide, 0.5f).Normalized()).m123();
+
+            const coreFloat fHeight = m_avVector[JUMP_DATA].x + 70.0f * SIN(fTime * PI);
+
+            this->SetPosition   (coreVector3(this->GetPosition().xy(), fHeight));
+            this->SetDirection  (this->GetDirection  () * mRota1);
+            this->SetOrientation(this->GetOrientation() * mRota1);
+
+            if(fHeight >= 0.0f) this->ChangeToTop();
+                           else this->ChangeToBottom();
+
+            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrack); ++i)
+            {
+                m_aTrack[i].SetPosition   (this->GetPosition() + coreVector3(vSide * (fTime * 150.0f * (i ? 1.0f : -1.0f)), 0.0f));
+                m_aTrack[i].SetDirection  (m_aTrack[i].GetDirection  () * mRota2);
+                m_aTrack[i].SetOrientation(m_aTrack[i].GetOrientation() * mRota2);
+            }
+
+            if(PHASE_FINISHED)
+            {
+                this->Kill(false);
+
+                if(this->HasAllHelpers())
+                {
+                    this->_CreateFragment(3u);
+                }
+
+                g_pSpecialEffects->CreateExplosion (this->GetPosition());
+                g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->SlowScreen(4.0f);
+
+                // load object resources
+                coreObject3D* pObject = MANAGED_NEW(coreObject3D);
+                pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
+                pObject->DefineTexture(0u, "effect_soot.png");
+                pObject->DefineProgram("effect_decal_single_program");
+
+                // set object properties
+                pObject->SetSize     (coreVector3(20.0f,20.0f,1.0f));
+                pObject->SetDirection(coreVector3(0.0f,1.0f,0.0f));
+                pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
+                
+                const coreVector3 vDecalPos = coreVector3(this->GetPosition().xy(), g_pEnvironment->RetrieveSafeHeight(this->GetPosition().xy()));
+
+                // 
+                g_pEnvironment->GetBackground()->AddDecal(pObject, vDecalPos, 1u, "effect_decal_single_inst_program", LIST_KEY);
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 80u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 81u)
+    {
+        PHASE_CONTROL_TICKER(0u, 6u, 2.0f, LERP_LINEAR)
+        {
+            if(iTick < 5u)
+            {
+                this->__EnableAim(iTick);
+
+                coreVector2 vPos;
+                switch(iTick)
+                {
+                default: ASSERT(false)
+                case 0u: vPos = coreVector2(-1.5f, 1.0f); break;
+                case 1u: vPos = coreVector2( 1.5f,-0.5f); break;
+                case 2u: vPos = coreVector2(-1.0f,-1.0f); break;
+                case 3u: vPos = coreVector2( 1.0f, 0.5f); break;
+                case 4u: vPos = coreVector2( 0.0f, 0.0f); break;
+                }
+
+                m_aAim[iTick].SetPosition(coreVector3(vPos * FOREGROUND_AREA * 0.6f, 0.0f));
+            }
+
+            if(PHASE_FINISHED)
+            {
+                this->__DisableAim(0u, true);
+                this->__EnableBeam(m_aAim[0].GetPosition().xy());
+                this->__CauseBeamDamage(NULL);
+
+                PHASE_CHANGE_INC
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 82u)
+    {
+        PHASE_CONTROL_TICKER(0u, 4u, 1.0f, LERP_LINEAR)
+        {
+            const coreUintW iIndex = iTick + 1u;
+
+            this->__DisableBeam(false);
+
+            this->__DisableAim(iIndex, true);
+            this->__EnableBeam(m_aAim[iIndex].GetPosition().xy());
+            this->__CauseBeamDamage(NULL);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 83u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 84u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
+        {
+            if(PHASE_BEGINNING)
+            {
+                this->__EnableAim(0u);
+            }
+
+            cPlayer* pTarget = this->NearestPlayerDual(m_aiCounter[BEAM_SHOT] % 2);
+
+            if(PHASE_TIME_BEFORE(0.85f))
+            {
+                m_vBeamPos = pTarget->GetPosition().xy();
+
+                m_aAim[0].SetPosition(coreVector3(m_vBeamPos, 0.0f));
+            }
+
+            m_AimRing.SetSize(m_aAim[0].GetSize() * LERP(3.0f, 1.0f, STEP(0.0f, 0.85f, fTime)));
+            m_AimRing.SetAlpha     (STEP(0.0f, 0.85f, fTime) * 0.7f);
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC
+
+                this->__DisableAim(0u, true);
+                this->__EnableBeam(m_vBeamPos);
+                this->__CauseBeamDamage(pTarget);
+
+                m_aiCounter[BEAM_SHOT] += 1;
+
+                if(m_aiCounter[BEAM_SHOT] == 3u)
+                {
+                    if(this->_ResurrectHelper(ELEMENT_MAGENTA, true))
+                    {
+                        g_pGame->GetHelper(ELEMENT_MAGENTA)->SetPosition(coreVector3(m_vBeamPos, 0.0f));
+                    }
+                }
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 85u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        {
+            PHASE_CHANGE_TO(84u)
+        });
     }
 
     // ################################################################
     // ################################################################
 
+    if(m_iPhase >= 60u)
+    {
+        m_avVector[FINAL_ROTA].x += 1.0f * TIME;
+
+        const coreFloat fRotaTime = BLENDBR(MIN1(m_avVector[FINAL_ROTA].x * 0.5f)) * 2.0f + MAX0(m_avVector[FINAL_ROTA].x - 2.0f);
+        g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(fRotaTime * (-0.1f*PI) + (-3.0f*PI)));
+    }
+
     // 
     const coreVector2 vEnvDirection = g_pEnvironment->GetDirection();
     const coreFloat   fEnvSpeed     = g_pEnvironment->GetSpeed();
-    const coreFloat   fEnvFlyOffset = g_pEnvironment->GetFlyOffset();
+    const coreFloat   fEnvFlyOffset = g_pEnvironment->GetFlyOffset() * OUTDOOR_DETAIL;
     ASSERT(fEnvSpeed > 0.0f)
 
-    // 
-    if(fEnvFlyOffset * OUTDOOR_DETAIL < m_vGroundPos.y) m_vGroundPos.y -= I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL;
+    if(!m_aiCounter[MANUAL_TRANSFORM])
+    {
+        // 
+        const coreFloat   fFullOffset = fEnvFlyOffset + m_avVector[POS_OFFSET].y;
+        const coreVector2 vGroundPos  = coreVector2(SIN(fFullOffset / OUTDOOR_DETAIL * (0.075f*PI)) * -12.5f, fFullOffset);
 
-    // 
-    const coreVector2 vPrevGroundPos = m_vGroundPos;
-    m_vGroundPos = coreVector2(SIN((fEnvFlyOffset + m_avVector[POS_OFFSET].y / OUTDOOR_DETAIL) * (0.075f*PI)) * -12.5f, fEnvFlyOffset * OUTDOOR_DETAIL);
+        // 
+        const coreFloat   fPrevFullOffset = fFullOffset - fEnvSpeed;   // approximate
+        const coreVector2 vPrevGroundPos  = coreVector2(SIN(fPrevFullOffset / OUTDOOR_DETAIL * (0.075f*PI)) * -12.5f, fPrevFullOffset);
 
-    // 
-    const coreVector2 vBodyPos    = MapToAxis(coreVector2(m_vGroundPos.x, m_avVector[POS_OFFSET].y), vEnvDirection);
-    const coreFloat   fBodyHeight = LERP(this->GetPosition().z, g_pEnvironment->RetrieveSafeHeight(vBodyPos) + 2.0f, m_fLifeTimeBefore ? TIME : 1.0f);
-    const coreVector2 vBodyDir    = TIME ? (MapToAxis(m_vGroundPos - vPrevGroundPos, vEnvDirection)).Normalized(this->GetDirection().xy()) : this->GetDirection().xy();
+        // 
+        const coreVector2 vBodyPos    = MapToAxis(coreVector2(vGroundPos.x, m_avVector[POS_OFFSET].y), vEnvDirection);
+        const coreFloat   fBodyHeight = LERP(this->GetPosition().z, g_pEnvironment->RetrieveSafeHeight(vBodyPos) + 2.0f, m_fLifeTimeBefore ? TIME : 1.0f);
+        const coreVector2 vBodyDir    = MapToAxis(vGroundPos - vPrevGroundPos, vEnvDirection).Normalized(this->GetDirection().xy());
 
-    // 
-    this->SetPosition (coreVector3(vBodyPos, fBodyHeight));
-    this->SetDirection(coreVector3(vBodyDir, 0.0f));
+        // 
+        this->SetPosition (coreVector3(vBodyPos, fBodyHeight));
+        this->SetDirection(coreVector3(vBodyDir, 0.0f));
 
-    if(m_iPhase >= 1u)
+        // 
+        m_fAnimation.Update(fEnvSpeed * -0.25f * 0.5f);
+
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrack); ++i)
+        {
+            // 
+            m_aTrack[i].SetPosition   (this->GetPosition   ());
+            m_aTrack[i].SetDirection  (this->GetDirection  ());
+            m_aTrack[i].SetOrientation(this->GetOrientation());
+            m_aTrack[i].SetColor3     (coreVector3(1.0f,1.0f,1.0f));   // override brightness
+            m_aTrack[i].SetTexOffset  (coreVector2(0.0f, FRACT(m_fAnimation)));
+        }
+
+        // 
+        m_aWeapon[0].SetPosition   (this->GetPosition   ());
+        m_aWeapon[0].SetOrientation(this->GetOrientation());
+
+        if(!m_aiCounter[WEAPON_SHOT]) m_aWeapon[0].SetDirection(this->GetDirection());          
+
+        // 
+        const coreVector2 vTrailPos1 = vBodyPos - vBodyDir * 8.0f + vBodyDir.Rotated90() * 6.8f;
+        const coreVector2 vTrailPos2 = vBodyPos - vBodyDir * 8.0f - vBodyDir.Rotated90() * 6.8f;
+        this->__CreateTrail(0u, coreVector3(vTrailPos1, g_pEnvironment->RetrieveSafeHeight(vTrailPos1) - 0.0f));
+        this->__CreateTrail(1u, coreVector3(vTrailPos2, g_pEnvironment->RetrieveSafeHeight(vTrailPos2) - 0.0f));
+    }
+
+    if(m_iPhase >= 3u)
     {
         if(m_iWeaponType < 4u)
         {
@@ -511,7 +932,7 @@ void cTigerBoss::__MoveOwn()
             case 0u: fShootSpeed = 0.5f; break;
             case 1u: fShootSpeed = 2.0f; break;
             case 2u: fShootSpeed = 1.0f; break;
-            case 3u: fShootSpeed = 0.5f; break;
+            case 3u: fShootSpeed = 0.3f; break;
             }
 
             PHASE_CONTROL_TIMER(3u, fShootSpeed, LERP_LINEAR)
@@ -528,80 +949,7 @@ void cTigerBoss::__MoveOwn()
 
                 if(PHASE_FINISHED)
                 {
-                    if((m_iWeaponType != 1u) || ((m_aiCounter[WEAPON_SHOT] - 1) % 4 >= 2))
-                    {
-                        const coreVector2 vWeaponPos = g_pForeground->Project3D(m_aWeapon[0].GetPosition());
-                        const coreVector2 vWeaponDir = m_aWeapon[0].GetDirection().xy();
-                        const coreVector2 vHit       = vWeaponPos + vWeaponDir * g_pForeground->RayIntersection(vWeaponPos, vWeaponDir);
-
-                        if(m_iWeaponType == 0u)
-                        {
-                            const coreVector2 vBase = -AlongCrossNormal(vHit).Rotated90();
-
-                            for(coreUintW i = 37u; i--; )
-                            {
-                                const coreVector2 vDir = MapToAxis(coreVector2::Direction(I_TO_F(i) * (2.0f*PI) / 72.0f), vBase);
-
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 2.0f, this, vHit, vDir)->ChangeSize(1.6f);
-                            }
-
-                            m_avVector[RECOIL_TIME].x = 1.0f;
-                        }
-                        else if(m_iWeaponType == 1u)
-                        {
-                            const coreVector2 vDir = -AlongCrossNormal(vHit);
-
-                            for(coreUintW i = 6u; i--; )
-                            {
-                                const coreVector2 vPos1 = vHit + vDir.Rotated90() * (I_TO_F(i) * 2.2f);
-                                const coreVector2 vPos2 = vHit - vDir.Rotated90() * (I_TO_F(i) * 2.2f);
-
-                                      g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f - I_TO_F(i) * 0.035f, this, vPos1, vDir)->ChangeSize(1.5f);
-                                if(i) g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f - I_TO_F(i) * 0.035f, this, vPos2, vDir)->ChangeSize(1.5f);
-                            }
-
-                            m_avVector[RECOIL_TIME].arr(m_aiCounter[WEAPON_SHOT] % 2) = 1.0f;
-                        }
-                        else if(m_iWeaponType == 2u)
-                        {
-                            const coreVector2 vDir = IsHorizontal(vHit) ? vWeaponDir.InvertedX() : vWeaponDir.InvertedY();
-
-                            for(coreUintW i = 8u; i--; )
-                            {
-                                const coreVector2 vPos = vHit - vDir * (I_TO_F(i) * 3.0f);
-
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.4f, this, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
-                            }
-
-                            m_avVector[RECOIL_TIME].x = 1.0f;
-                        }
-                        else if(m_iWeaponType == 3u)
-                        {
-                            for(coreUintW i = 50u; i--; )
-                            {
-                                if((i % 10u) < 2u) continue;
-
-                                const coreVector2 vDir   = coreVector2::Direction(DEG_TO_RAD((I_TO_F(i) - 2.0f) * 3.6f));
-                                const coreFloat   fSpeed = LERP(0.7f, 1.0f, I_TO_F(i % 10u) * 0.1f);
-
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, fSpeed, this, vHit,  vDir)->ChangeSize(1.5f);
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, fSpeed, this, vHit, -vDir)->ChangeSize(1.5f);
-                            }
-
-                            m_avVector[RECOIL_TIME].x = 1.0f;
-                        }
-                        else ASSERT(false)
-
-                        const coreVector3 vStart = m_aWeapon[0].GetPosition() + m_aWeapon[0].GetDirection() * 9.0f;
-                        const coreVector3 vDiff  = coreVector3(vHit, 0.0f) - vStart;
-                        const coreUintW   iNum   = MAX(F_TO_UI(vDiff.Length() / 1.9f), 2u);
-
-                        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, COLOR_ENERGY_WHITE);
-
-                        g_pSpecialEffects->CreateSplashColor(coreVector3(vHit, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
-                        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                    }
-
+                    this->__ShootWeapon();
                     PHASE_RESET(3u)
                 }
             });
@@ -623,15 +971,22 @@ void cTigerBoss::__MoveOwn()
                 {
                     if(m_aiCounter[WEAPON_SHOT] % 4 == 2)
                     {
+                        const cPlayer* pPlayer = this->NearestPlayerDual((m_aiCounter[WEAPON_SHOT] / 4) % 2);
+
+                        const coreVector2 vAim  = (pPlayer->GetPosition().xy() - g_pForeground->Project3D(this->GetPosition())).Normalized();
                         const coreVector2 vBase = g_pForeground->Project3D(m_aWeapon[0].GetPosition());
 
                         for(coreUintW i = 4u; i--; )
                         {
-                            const coreVector2 vDir = StepRotated90(i);
+                            if(g_pGame->IsEasy() && ((i == 0u) || (i == 3u))) continue;
+
+                            const coreVector2 vDir = MapStepRotated90X(vAim, i);
                             const coreVector2 vPos = vBase + vDir * 3.0f;
 
-                            g_pGame->GetBulletManagerEnemy()->AddBullet<cRocketBullet>(5, 1.0f, this, vPos, vDir)->SetTarget(this->NearestPlayerDual((m_aiCounter[WEAPON_SHOT] / 4) % 2))->ChangeSize(1.4f);
+                            g_pGame->GetBulletManagerEnemy()->AddBullet<cRocketBullet>(5, 1.0f, this, vPos, vDir)->SetTarget(pPlayer)->ChangeSize(1.4f);
                         }
+
+                        g_pSpecialEffects->PlaySound(coreVector3(vBase, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_12);
 
                         m_avVector[RECOIL_TIME].x = 1.0f;
                     }
@@ -640,12 +995,93 @@ void cTigerBoss::__MoveOwn()
                 }
             });
         }
+        else if(m_iWeaponType == 5u)
+        {
+            // no weapon
+        }
         else ASSERT(false)
     }
+    
 
-    g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cTriangleBullet>([&](cTriangleBullet* OUTPUT pBullet)
+    if(m_aBeam[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
-        if(pBullet->GetDamage() > 2)
+        if(m_vBeamPos.IsNull()) m_vBeamPos = coreVector2(0.0f, CORE_MATH_PRECISION);
+
+        const coreFloat   fBeamHeight = g_pEnvironment->RetrieveSafeHeight(m_vBeamPos);
+        const coreVector2 vBeamCenter = m_vBeamPos + m_vBeamPos.Normalized() * 10.0f;// * (1.0f - STEP(0.0f, 50.0f, m_vBeamPos.Length()));
+        const coreVector3 vBeamDir    = (coreVector3(m_vBeamPos, fBeamHeight) - coreVector3(vBeamCenter, 0.0f)).Normalized();
+        //const coreVector3 vBeamOri    = coreVector3(vBeamCenter.Normalized().x, coreVector3::Cross(vBeamDir, coreVector3(vBeamDir.xy().Normalized().Rotated90(), 0.0f)).yz()).Normalized();
+        const coreVector3 vBeamOri    = coreVector3(vBeamCenter.Normalized(), 0.0f);
+        
+        
+        
+
+        // 
+        m_fBeamTime.Update(1.0f);
+        const coreFloat fTime = m_fBeamTime;
+
+        // 
+        if(fTime >= 1.0f) this->__DisableBeam(false);
+        
+
+        // 
+        const coreFloat fLerp  = 1.0f - POW(MAX0(fTime - 0.0f), 9.0f);
+        const coreFloat fBlend = CLAMP01(fTime * 20.0f);
+        const coreFloat fSize  = LERP(1.0f, 4.0f, fLerp) * fBlend * 1.5f;
+        const coreFloat fAlpha = LERP(0.0f, 1.0f, fLerp) * fBlend;
+        const coreFloat fTex   = (m_fAnimation * -1.0f);
+        
+            // 
+            const coreVector3 vPos = coreVector3(m_vBeamPos + m_vBeamPos.Normalized() * 0.0f, fBeamHeight) - vBeamDir * m_aBeam[0].GetSize().y;
+
+            // 
+            m_aBeam[0].SetPosition   (vPos);
+            m_aBeam[0].SetDirection  (vBeamDir);
+            m_aBeam[0].SetOrientation(vBeamOri);
+            m_aBeam[0].SetSize       (coreVector3(fSize, m_aBeam[0].GetSize().y, fSize));
+            m_aBeam[0].SetAlpha      (fAlpha);
+            m_aBeam[0].SetTexOffset  (coreVector2(1.0f,1.0f) * fTex);
+            m_aBeam[0].Move();
+            
+            
+            // 
+            const coreVector3 vPos2 = coreVector3(m_vBeamPos + m_vBeamPos.Normalized() * 0.0f, fBeamHeight) - vBeamDir * m_aBeam[1].GetSize().y * 1.0;
+
+            // 
+            m_aBeam[1].SetPosition   (vPos2);
+            m_aBeam[1].SetDirection  (vBeamDir);
+            m_aBeam[1].SetOrientation(vBeamOri);
+            m_aBeam[1].SetSize       (coreVector3(fSize * 1.1f, m_aBeam[1].GetSize().y, fSize * 1.3f));
+            m_aBeam[1].SetAlpha      (fAlpha);
+            m_aBeam[1].SetTexOffset  (coreVector2(0.3f,0.3f) * fTex);
+            m_aBeam[1].Move();
+        
+
+        this->__CreateOverdrive(coreVector3(m_vBeamPos, fBeamHeight));
+    }
+
+    const coreVector2 vAimDir = coreVector2::Direction((1.0f*PI) * m_fAnimation);
+
+    for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
+    {
+        coreObject3D& oAim = m_aAim[i];
+        if(!oAim.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        oAim.SetDirection(coreVector3(vAimDir, 0.0f));
+        oAim.SetAlpha    (MIN1(oAim.GetAlpha() + 5.0f * TIME));
+        oAim.Move();
+    }
+
+    if(m_AimRing.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        m_AimRing.SetPosition (m_aAim[0].GetPosition ());
+        m_AimRing.SetDirection(m_aAim[0].GetDirection());
+        m_AimRing.Move();
+    }
+
+    g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cTriangleBullet>([](cTriangleBullet* OUTPUT pBullet)
+    {
+        if(pBullet->GetDamage() > (g_pGame->IsEasy() ? 3 : 2))
         {
             coreVector2 vCurPos = pBullet->GetPosition().xy();
             coreVector2 vCurDir = pBullet->GetFlyDir();
@@ -663,39 +1099,23 @@ void cTigerBoss::__MoveOwn()
         else pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
     });
 
+    const coreFloat fVelocity = (g_pGame->IsEasy() ? 3.0f : 2.0f) * TIME;
+
     g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cConeBullet>([&](cConeBullet* OUTPUT pBullet)
     {
-        const coreFloat fNewSpeed = pBullet->GetSpeed() - 2.0f * TIME;
+        const coreFloat fNewSpeed = pBullet->GetSpeed() - fVelocity;
 
         pBullet->SetSpeed(fNewSpeed);
         if(fNewSpeed <= 0.0f) pBullet->Deactivate(true);
     });
 
+    //const coreMatrix2 mBulletRota = coreMatrix3::Rotation(0.7f * TIME).m12();
 
-
-
-    // TODO 1: move up, so new weapon-pos is used   
-    // 
-    m_fAnimation.Update(fEnvSpeed * -0.25f);
-
-    // 
-    m_Track.SetPosition   (this->GetPosition   ());
-    m_Track.SetDirection  (this->GetDirection  ());
-    m_Track.SetOrientation(this->GetOrientation());
-    m_Track.SetColor3     (coreVector3(1.0f,1.0f,1.0f));   // override brightness
-    m_Track.SetTexOffset  (coreVector2(0.0f, FRACT(m_fAnimation)));
-
-    // 
-    m_aWeapon[0].SetPosition   (this->GetPosition   ());
-    m_aWeapon[0].SetOrientation(this->GetOrientation());
-
-    if(!m_aiCounter[WEAPON_SHOT]) m_aWeapon[0].SetDirection(this->GetDirection());          
-
-    // 
-    const coreVector2 vTrailPos1 = vBodyPos - vBodyDir * 8.0f + vBodyDir.Rotated90() * 6.8f;
-    const coreVector2 vTrailPos2 = vBodyPos - vBodyDir * 8.0f - vBodyDir.Rotated90() * 6.8f;
-    this->__CreateTrail(0u, coreVector3(vTrailPos1, g_pEnvironment->RetrieveSafeHeight(vTrailPos1) - 0.0f));
-    this->__CreateTrail(1u, coreVector3(vTrailPos2, g_pEnvironment->RetrieveSafeHeight(vTrailPos2) - 0.0f));
+    //g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([&](cFlipBullet* OUTPUT pBullet)
+    //{
+    //    //pBullet->SetPosition(coreVector3(pBullet->GetPosition().xy() * mBulletRota, 0.0f));
+    //    pBullet->SetFlyDir  (pBullet->GetFlyDir() * mBulletRota);
+    //});
 
 
 
@@ -904,7 +1324,204 @@ void cTigerBoss::__MoveOwn()
     }
 
     // 
+    if(m_pTankSound->EnableRef(this))
+    {
+        g_pSpecialEffects->ExternSetSource(m_pTankSound, this->GetPosition());
+    }
+
+    // 
     pMission->PlayInsanity();
+    
+    
+
+    if(this->ReachedDeath())
+    {
+        PHASE_CHANGE_TO(70u)
+    }
+    
+    
+    // 
+    cHelper* pYellowHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
+    if(!pYellowHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        coreVector2 vNewPos = pYellowHelper->GetPosition().xy() + coreVector2(0.0f, 60.0f * TIME * m_avVector[HELPER_DATA].z);
+
+             if((vNewPos.y < -FOREGROUND_AREA.y * 1.1f) && (m_avVector[HELPER_DATA].z < 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y + FOREGROUND_AREA.y * 1.1f); m_avVector[HELPER_DATA].z = 1.0f;}
+        else if((vNewPos.y >  FOREGROUND_AREA.y * 1.1f) && (m_avVector[HELPER_DATA].z > 0.0f)) {this->_KillHelper(ELEMENT_YELLOW, false);}
+
+        pYellowHelper->SetPosition(coreVector3(vNewPos, 0.0f));
+    }
+
+    // 
+    cHelper* pOrangeHelper = g_pGame->GetHelper(ELEMENT_ORANGE);
+    if(!pOrangeHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        if(pOrangeHelper->GetLifeTime() >= (1.0f/0.75f)) this->_KillHelper(ELEMENT_ORANGE, false);
+    }
+
+    // 
+    cHelper* pRedHelper = g_pGame->GetHelper(ELEMENT_RED);
+    if(!pRedHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pRedHelper->GetPosition().xy() + m_avVector[HELPER_DATA].xy() * (1.4f * BULLET_SPEED_FACTOR * TIME);
+
+        pRedHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pRedHelper->GetPosition().xy(), 1.3f))
+        {
+            this->_KillHelper(ELEMENT_RED, false);
+        }
+    }
+
+    // 
+    cHelper* pMagentaHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
+    if(!pMagentaHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pMagentaHelper->GetPosition().xy() + pMagentaHelper->GetPosition().xy().Normalized() * ((pMagentaHelper->GetLifeTime() * 20.0f + 10.0f) * TIME);
+
+        pMagentaHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pMagentaHelper->GetPosition().xy(), 1.3f))
+        {
+            this->_KillHelper(ELEMENT_MAGENTA, false);
+        }
+    }
+
+    // 
+    cHelper* pPurpleHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
+    if(!pPurpleHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pPurpleHelper->GetPosition().xy() + AlongCrossNormal(pPurpleHelper->GetPosition().xy()) * (pPurpleHelper->GetLifeTime() * 1.5f * TIME);
+
+        pPurpleHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pPurpleHelper->GetPosition().xy(), 1.3f))
+        {
+            this->_KillHelper(ELEMENT_PURPLE, true);
+        }
+    }
+
+    // 
+    cHelper* pBlueHelper = g_pGame->GetHelper(ELEMENT_BLUE);
+    if(!pBlueHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        // handled in mission code
+    }
+
+    // 
+    cHelper* pCyanHelper = g_pGame->GetHelper(ELEMENT_CYAN);
+    if(!pCyanHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        if(pCyanHelper->GetLifeTime() >= 2.0f) this->_KillHelper(ELEMENT_CYAN, true);
+    }
+
+    // 
+    cHelper* pGreenHelper = g_pGame->GetHelper(ELEMENT_GREEN);
+    if(!pGreenHelper->HasStatus(HELPER_STATUS_DEAD))
+    {
+        const coreVector2 vPos = pGreenHelper->GetPosition().xy() + coreVector2(1.0f,0.0f) * (50.0f * TIME);
+
+        pGreenHelper->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(!g_pForeground->IsVisiblePoint(pGreenHelper->GetPosition().xy(), 1.3f))
+        {
+            this->_KillHelper(ELEMENT_GREEN, true);
+        }
+    }
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__EnableBeam(const coreVector2 vPosition)
+{
+    // 
+    WARN_IF(m_aBeam[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableBeam(false);
+
+    // 
+    m_vBeamPos  = vPosition;
+    m_fBeamTime = 0.0f;
+
+    // 
+    m_avVector[OVERDRIVE_HIT].xyz(coreVector3(0.0f,0.0f,0.0f));
+
+    // 
+    const auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetAlpha  (0.0f);
+        pObject->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(pObject);
+    };
+    nInitFunc(&m_aBeam[0]);
+    nInitFunc(&m_aBeam[1]);
+    
+    const coreVector3 vImpact = coreVector3(vPosition, g_pEnvironment->RetrieveSafeHeight(vPosition));
+
+    g_pSpecialEffects->MacroExplosionColorBig(vImpact, COLOR_ENERGY_MAGENTA);
+    g_pSpecialEffects->PlaySound(vImpact, 0.8f, 0.8f, SOUND_EFFECT_FIRE_START);
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__DisableBeam(const coreBool bAnimated)
+{
+    // 
+    if(!m_aBeam[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    if(!bAnimated)
+    {
+        // 
+        const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+        {
+            pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            g_pGlow->UnbindObject(pObject);
+        };
+        nExitFunc(&m_aBeam[0]);
+        nExitFunc(&m_aBeam[1]);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__EnableAim(const coreUintW iIndex)
+{
+    ASSERT(iIndex < TIGER_AIMS)
+    coreObject3D& oAim = m_aAim[iIndex];
+
+    // 
+    WARN_IF(oAim.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableAim(iIndex, false);
+
+    // 
+    oAim.SetAlpha  (0.0f);
+    oAim.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    if(iIndex == 0u)
+    {
+        m_AimRing.SetAlpha  (0.0f);
+        m_AimRing.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__DisableAim(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < TIGER_AIMS)
+    coreObject3D& oAim = m_aAim[iIndex];
+
+    // 
+    if(!oAim.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    oAim.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    
+    if(iIndex == 0u)
+    {
+        m_AimRing.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
 }
 
 
@@ -998,12 +1615,142 @@ void cTigerBoss::__SwitchWeapon(const coreUintW iType)
 
 
     // 
-    if(!this->HasStatus(ENEMY_STATUS_DEAD)) g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
+    if(!this->HasStatus(ENEMY_STATUS_DEAD))
+    {
+        g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
+    }
 
     m_aiCounter[WEAPON_SHOT] = 0;   // TODO 1: wave-weapon might be activated too early
     
     // 
     PHASE_RESET(3u)
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__ShootWeapon()
+{
+    if((m_iWeaponType != 1u) || ((m_aiCounter[WEAPON_SHOT] - 1) % 4 >= 2))
+    {
+        const coreVector2 vWeaponPos = g_pForeground->Project3D(m_aWeapon[0].GetPosition());
+        const coreVector2 vWeaponDir = m_aWeapon[0].GetDirection().xy();
+        const coreVector2 vHit       = vWeaponPos + vWeaponDir * g_pForeground->RayIntersection(vWeaponPos, vWeaponDir);
+
+        if(m_iWeaponType == 0u)
+        {
+            const coreVector2 vBase = -AlongCrossNormal(vHit).Rotated90();
+
+            for(coreUintW i = 37u; i--; )
+            {
+                const coreVector2 vDir = MapToAxis(coreVector2::Direction(I_TO_F(i) * (2.0f*PI) / 72.0f), vBase);
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 2.0f, this, vHit, vDir)->ChangeSize(1.6f);
+            }
+
+            g_pSpecialEffects->PlaySound(coreVector3(vHit, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+
+            m_avVector[RECOIL_TIME].x = 1.0f;
+        }
+        else if(m_iWeaponType == 1u)
+        {
+            const coreVector2 vDir = -AlongCrossNormal(vHit);
+
+            for(coreUintW i = g_pGame->IsEasy() ? 4u : 6u; i--; )
+            {
+                const coreVector2 vPos1 = vHit + vDir.Rotated90() * (I_TO_F(i) * 2.2f);
+                const coreVector2 vPos2 = vHit - vDir.Rotated90() * (I_TO_F(i) * 2.2f);
+
+                      g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f - I_TO_F(i) * 0.035f, this, vPos1, vDir)->ChangeSize(1.5f);
+                if(i) g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f - I_TO_F(i) * 0.035f, this, vPos2, vDir)->ChangeSize(1.5f);
+            }
+
+            g_pSpecialEffects->PlaySound(coreVector3(vHit, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_07);
+
+            m_avVector[RECOIL_TIME].arr(m_aiCounter[WEAPON_SHOT] % 2) = 1.0f;
+        }
+        else if(m_iWeaponType == 2u)
+        {
+            const coreVector2 vDir = IsHorizontal(vHit) ? vWeaponDir.InvertedX() : vWeaponDir.InvertedY();
+
+            for(coreUintW i = g_pGame->IsEasy() ? 6u : 8u; i--; )
+            {
+                const coreVector2 vPos = vHit - vDir * (I_TO_F(i) * 3.0f);
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.4f, this, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+            }
+
+            g_pSpecialEffects->PlaySound(coreVector3(vHit, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_05);
+
+            m_avVector[RECOIL_TIME].x = 1.0f;
+
+            if((m_iPhase >= 33u) && this->_ResurrectHelper(ELEMENT_RED, true))
+            {
+                g_pGame->GetHelper(ELEMENT_RED)->SetPosition(coreVector3(vHit, 0.0f));
+                m_avVector[HELPER_DATA].xy(vDir);
+            }
+        }
+        else if(m_iWeaponType == 3u)
+        {
+            for(coreUintW i = 75u; i--; )
+            {
+                if((i % 15u) < (g_pGame->IsEasy() ? 6u : 3u)) continue;
+
+                const coreVector2 vDir   = coreVector2::Direction(DEG_TO_RAD((I_TO_F(i) - 3.0f) * 2.4f));
+                const coreFloat   fSpeed = LERP(0.7f, 1.0f, I_TO_F(i % 15u) * 0.065f);
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, fSpeed, this, vHit,  vDir)->ChangeSize(1.5f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, fSpeed, this, vHit, -vDir)->ChangeSize(1.5f);
+            }
+
+            g_pSpecialEffects->PlaySound(coreVector3(vHit, 0.0f), 1.2f, 0.9f, SOUND_ENEMY_EXPLOSION_09);
+
+            m_avVector[RECOIL_TIME].x = 1.0f;
+
+            if((m_iPhase >= 41u) && this->_ResurrectHelper(ELEMENT_PURPLE, true))
+            {
+                g_pGame->GetHelper(ELEMENT_PURPLE)->SetPosition(coreVector3(vHit, 0.0f));
+            }
+        }
+        else ASSERT(false)
+
+        const coreVector3 vStart = m_aWeapon[0].GetPosition() + m_aWeapon[0].GetDirection() * 9.0f;
+        const coreVector3 vDiff  = coreVector3(vHit, 0.0f) - vStart;
+        const coreUintW   iNum   = MAX(F_TO_UI(vDiff.Length() / 1.9f), 2u);
+
+        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, COLOR_ENERGY_WHITE);
+
+        g_pSpecialEffects->CreateSplashColor(coreVector3(vHit, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__CauseBeamDamage(cPlayer* pTarget)
+{
+    const coreVector2 vDiff = this->GetPosition().xy() - m_vBeamPos;
+    if(vDiff.LengthSq() < POW2(15.0f))
+    {
+        const coreUint8 iDamage = TIGER_DAMAGE / GAME_PLAYERS * g_pGame->GetNumPlayers();
+        this->TakeDamage(iDamage, ELEMENT_NEUTRAL, HIDDEN_POS, pTarget);
+
+        g_pGame->GetCombatText()->DrawText(Core::Language->GetString("HIT"), this->GetPosition(), COLOR_MENU_MAGENTA);
+    }
+
+    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        if(pPlayer->IsNormal())
+        {
+            const coreVector2 vDiff = pPlayer->GetPosition().xy() - m_vBeamPos;
+            if(vDiff.LengthSq() < POW2(5.0f))
+            {
+                pPlayer->TakeDamage(5, ELEMENT_MAGENTA, m_vBeamPos);
+            }
+        }
+    });
 }
 
 
@@ -1076,4 +1823,93 @@ void cTigerBoss::__CreateTrail(const coreUintW iIndex, const coreVector3 vInters
 
     // 
     m_avVector[TRAIL_HIT + iIndex].xyz(vOldHit);
+}
+
+
+// ****************************************************************
+// 
+void cTigerBoss::__CreateOverdrive(const coreVector3 vIntersect)
+{
+    // 
+    constexpr coreFloat fMin = 2.5f;
+    constexpr coreFloat fMax = 5.0f;
+    coreVector3 vOldHit = m_avVector[OVERDRIVE_HIT].xyz();
+
+    // 
+    if(vOldHit.IsNull()) vOldHit = vIntersect;
+    else
+    {
+        while(true)
+        {
+            // 
+            const coreVector3 vDiff = vIntersect - vOldHit;
+            const coreFloat   fLen  = vDiff.Length();
+
+            // 
+            if(fLen < fMin) break;
+
+            // 
+            const coreVector3 vNewHit      = (fLen > fMax) ? LERP(vOldHit, vIntersect, fMax*RCP(fLen)) : vIntersect;
+            const coreVector2 vOldOnScreen = g_pForeground->Project2D(vOldHit);
+            const coreVector2 vNewOnScreen = g_pForeground->Project2D(vNewHit);
+
+            // 
+            if(((ABS(vOldOnScreen.x) < 0.55f) && (ABS(vOldOnScreen.y) < 0.55f)) ||
+               ((ABS(vNewOnScreen.x) < 0.55f) && (ABS(vNewOnScreen.y) < 0.55f)))
+            {
+                // 
+                if(HAS_BIT(m_iDecalState, 0u)) TOGGLE_BIT(m_iDecalState, 1u)
+                TOGGLE_BIT(m_iDecalState, 0u)
+
+                // 
+                const coreBool    bRotated   = HAS_BIT(m_iDecalState, 0u);
+                const coreBool    bFlipped   = HAS_BIT(m_iDecalState, 1u);
+                const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
+                const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(15.0f, 19.5f), MIN(fLen, fMax)*1.8f*3.0f);
+                const coreVector2 vDecalDir  = vDiff.xy().Normalized();
+
+                // load object resources
+                coreObject3D* pObject = MANAGED_NEW(coreObject3D);
+                pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
+                pObject->DefineTexture(0u, "effect_soot.png");
+                pObject->DefineProgram("effect_decal_single_program");
+
+                // set object properties
+                pObject->SetSize     (coreVector3((bRotated ? vDecalSize.yx()       : vDecalSize),                            1.0f));
+                pObject->SetDirection(coreVector3((bRotated ? vDecalDir.Rotated90() : vDecalDir) * (bFlipped ? -1.0f : 1.0f), 0.0f));
+                pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
+
+                // add object to background or windscreen
+                g_pEnvironment->GetBackground()->AddDecal(pObject, vDecalPos, 128u, "effect_decal_single_inst_program", LIST_KEY);
+                
+                // 
+                for(coreUintW i = 0u; i < 8u; ++i)
+                {
+                    const coreVector3 vDir = coreVector3(coreVector2::Direction(I_TO_F(i) * (0.125f*PI)) * m_aBeam[0].GetSize().x * 1.0f, 0.0f);
+
+                    // 
+                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir*1.5f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir*1.5f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir*2.0f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir*2.0f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashColor(vNewHit + vDir, 25.0f*2.0f, 2u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashColor(vNewHit - vDir, 25.0f*2.0f, 2u, COLOR_ENERGY_MAGENTA);
+                }
+            }
+
+            // 
+            g_pSpecialEffects->ShakeScreen(0.3f);
+
+            // 
+            vOldHit = vNewHit;
+        }
+    }
+
+    // 
+    vOldHit.y -= g_pEnvironment->GetSpeed() * TIME * OUTDOOR_DETAIL;
+
+    // 
+    m_avVector[OVERDRIVE_HIT].xyz(vOldHit);
 }

@@ -28,7 +28,7 @@
 #define TOOLTIP_PRINT(f,...)   (this + __LINE__), f, ##__VA_ARGS__   // specialized print-function for ShowText()
 #define TOOLTIP_ONELINER       (FLT_MAX)                             // create tooltip without wrapping (infinite width)
 
-#define TOOLTIP_MOUSE          (Core::Input->GetMousePosition() * Core::System->GetResolution().MaxRatio())
+#define TOOLTIP_MOUSE          (Core::Input->GetMousePosition() * Core::System->GetResolution().HighRatio())
 #define TOOLTIP_OBJECT(x)      (GetTranslationArea(x))
 
 

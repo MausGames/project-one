@@ -186,7 +186,7 @@ void cArcadeInput::Move()
     }
 
     // 
-    if(!cMenuNavigator::IsUsingJoystick()) m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
+    if(!cMenuNavigator::IsUsingJoystick() && !g_pMenu->GetMsgBox()->IsVisible()) m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
 
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].Move();

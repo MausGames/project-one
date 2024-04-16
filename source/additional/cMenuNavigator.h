@@ -30,7 +30,8 @@ enum eMenuType : coreUint8
     MENU_TYPE_TAB_NODE     = 0x08u,
     MENU_TYPE_SWITCH_MOVE  = 0x01u,
     MENU_TYPE_SWITCH_PRESS = 0x02u,
-    MENU_TYPE_AUTO_CLICK   = 0x10u
+    MENU_TYPE_AUTO_CLICK   = 0x10u,
+    MENU_TYPE_BIG          = 0x20u
 };
 ENABLE_BITWISE(eMenuType)
 
@@ -51,6 +52,7 @@ private:
         coreUint8 iSurface;     // 
     };
 
+    // 
     struct sMenuTab final
     {
         coreUint8 iSurface;     // 
@@ -58,6 +60,7 @@ private:
         coreUint8 iFallLeft;    // 
         coreUint8 iFallDown;    // 
         coreUint8 iFallRight;   // 
+        coreUint8 iLastEntry;   // 
     };
 
 

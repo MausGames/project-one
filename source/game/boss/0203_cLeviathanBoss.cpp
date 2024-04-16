@@ -22,6 +22,10 @@
 // TODO 1: auftauchende parts sollten angreifbar sein sobald arrow sichtbar ist, bei unertauchen kann es ruhig wie vorher sein, aber vielleicht besser auch anpassen
 // TODO 1: vielleicht sollten kaputte parts keine geschosse reflektieren sondern eher schlucken (gab da probleme bei finaler phase, reflektierte geschosse zerstören großflächig den teppich)
 // TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, juiciness (move, rota, muzzle, effects), intro, foreshadow, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: ACHIEVEMENT: name (), description (), 
+// TODO 1: mehr body-parts in erster phase, die dann zerstört werden
+
+// TODO 1: foreshadowing indem er manchmal im background einen bogen macht und sich bewegt
 
 // NOTE: never ever use exactly 4 rays, the resulting laser+fire pattern does NOT look good
 
@@ -1146,7 +1150,7 @@ void cLeviathanBoss::__MoveOwn()
 
                 g_pSpecialEffects->CreateExplosion (m_Head.GetPosition());
                 g_pSpecialEffects->CreateSplashDark(m_Head.GetPosition(), 200.0f, 400u, true);
-                g_pSpecialEffects->PlaySound       (m_Head.GetPosition(), 1.0f, 0.8f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (m_Head.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
                 g_pSpecialEffects->SlowScreen(4.0f);
             }
             else
@@ -1197,7 +1201,7 @@ void cLeviathanBoss::__MoveOwn()
             //g_pSpecialEffects->MacroExplosionDarkBig(pPlayer->GetPosition());
                 g_pSpecialEffects->CreateExplosion (pPlayer->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), 200.0f, 400u, true);
-                g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.0f, 0.8f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
                 g_pSpecialEffects->SlowScreen(4.0f);
             
             pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
@@ -1458,7 +1462,7 @@ void cLeviathanBoss::__MoveOwn()
         pWave->SetDirection(-vDir);
         pWave->SetColor3   (vColor);
         pWave->SetAlpha    (fAlpha * 0.85f);
-        pWave->SetTexOffset(coreVector2(-0.3f,-0.6f) * (m_fAnimation + fOffset));
+        pWave->SetTexOffset((coreVector2(-0.3f,-0.6f) * (m_fAnimation + fOffset)).Processed(FRACT));
 
         if((fOldTime < 1.0f) && (fNewTime >= 1.0f))
         {

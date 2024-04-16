@@ -206,8 +206,6 @@ public:
     // access background components
     inline cOutdoor* GetOutdoor()const {return m_pOutdoor;}
     inline cWater*   GetWater  ()const {return m_pWater;}
-    
-    virtual coreVector3 GetButtonColor()const {return this->GetColor();}
 
 
 protected:
@@ -252,10 +250,7 @@ public:
     cNoBackground() = default;
 
     DISABLE_COPY(cNoBackground)
-    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f), coreVector2(-1.0f,-1.0f))
-    
-    
-    inline coreVector3 GetButtonColor()const final {return coreVector3(1.0f,1.0f,1.0f) * 0.8f;}      
+    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f), coreVector3(0.8f,0.8f,0.8f), coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -280,7 +275,7 @@ public:
     ~cGrassBackground()final;
 
     DISABLE_COPY(cGrassBackground)
-    ASSIGN_ID_EX(1, "Grass", COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
+    ASSIGN_ID_EX(1, "Grass", COLOR_MENU_GREEN, COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
 
 
 protected:
@@ -312,7 +307,7 @@ public:
     ~cSeaBackground()final;
 
     DISABLE_COPY(cSeaBackground)
-    ASSIGN_ID_EX(2, "Sea", COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
+    ASSIGN_ID_EX(2, "Sea", COLOR_MENU_CYAN, COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
 
 
 protected:
@@ -349,7 +344,7 @@ public:
     ~cDesertBackground()final;
 
     DISABLE_COPY(cDesertBackground)
-    ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW, coreVector2(0.0f,0.0f))
+    ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW, COLOR_MENU_YELLOW, coreVector2(0.0f,0.0f))
 
     // 
     inline void SetSandMove (const coreVector2 vMove)  {m_vSandMove = vMove;}
@@ -377,18 +372,19 @@ private:
 class cSpaceBackground final : public cBackground
 {
 private:
-    coreFullscreen m_Cover;         // 
-    coreFullscreen m_Cover2;        // 
-    coreVector2    m_vCoverDir;     // 
+    coreObject2D m_Cover;         // (# not fullscreen) 
+    coreObject2D m_Cover2;        // (# not fullscreen) 
+    coreVector2  m_vCoverDir;     // 
+    coreFloat    m_fCoverScale;   // 
 
-    coreFloat  m_fMeteorSpeed;      // 
-    coreUint16 m_iCopyLower;        // 
-    coreUint16 m_iCopyUpper;        // 
+    coreFloat  m_fMeteorSpeed;    // 
+    coreUint16 m_iCopyLower;      // 
+    coreUint16 m_iCopyUpper;      // 
 
-    coreFullscreen m_Nebula;        // 
-    coreVector2    m_vNebulaMove;   // 
+    coreObject2D m_Nebula;        // (# not fullscreen) 
+    coreVector2  m_vNebulaMove;   // 
 
-    coreSoundPtr m_pBaseSound;      // base sound-effect
+    coreSoundPtr m_pBaseSound;    // base sound-effect
 
 
 public:
@@ -396,11 +392,12 @@ public:
     ~cSpaceBackground()final;
 
     DISABLE_COPY(cSpaceBackground)
-    ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA, coreVector2(0.75f,0.0f))
+    ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA, COLOR_MENU_MAGENTA, coreVector2(0.75f,0.0f))
 
     // 
     inline void SetCoverColor (const coreVector3 vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f); m_Cover2.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.15f) * 1.3f);}
     inline void SetCoverDir   (const coreVector2 vDir)   {m_vCoverDir    = vDir; ASSERT(vDir.IsNormalized())}
+    inline void SetCoverScale (const coreFloat   fScale) {m_fCoverScale  = fScale;}
     inline void SetMeteorSpeed(const coreFloat   fSpeed) {m_fMeteorSpeed = fSpeed;}
 
     // 
@@ -438,7 +435,7 @@ public:
     ~cVolcanoBackground()final;
 
     DISABLE_COPY(cVolcanoBackground)
-    ASSIGN_ID_EX(5, "Volcano", COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
+    ASSIGN_ID_EX(5, "Volcano", COLOR_MENU_ORANGE, COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
 
 
 protected:
@@ -467,7 +464,7 @@ public:
     ~cSnowBackground()final;
 
     DISABLE_COPY(cSnowBackground)
-    ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE, coreVector2(0.25f,0.25f))
+    ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE, COLOR_MENU_BLUE, coreVector2(0.25f,0.25f))
 
     // 
     inline void SetSnowMove(const coreVector2 vMove) {m_vSnowMove = vMove;}
@@ -512,7 +509,7 @@ public:
     ~cMossBackground()final;
 
     DISABLE_COPY(cMossBackground)
-    ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED, coreVector2(0.5f,0.0f))
+    ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
 
     // 
     inline void FlashLightning() {m_fLightningFlash = 1.0f;}
@@ -566,7 +563,7 @@ public:
     ~cDarkBackground()final;
 
     DISABLE_COPY(cDarkBackground)
-    ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f), coreVector2(0.0f,0.5f))
+    ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f), coreVector3(0.8f,0.8f,0.8f), coreVector2(0.0f,0.5f))
 
     // 
     void Dissolve();
@@ -589,10 +586,6 @@ public:
 
     // 
     inline cHeadlight* GetHeadlight() {return &m_Headlight;}
-    
-    
-    
-    inline coreVector3 GetButtonColor()const final {return coreVector3(1.0f,1.0f,1.0f) * 0.8f;}      
 
 
 private:
@@ -622,7 +615,7 @@ public:
     ~cStomachBackground()final;
 
     DISABLE_COPY(cStomachBackground)
-    ASSIGN_ID_EX(51, "Stomach", COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID_EX(51, "Stomach", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -653,7 +646,7 @@ public:
     ~cCloudBackground()final;
 
     DISABLE_COPY(cCloudBackground)
-    ASSIGN_ID_EX(99, "Cloud", COLOR_MENU_PURPLE, coreVector2(0.0f,0.25f))
+    ASSIGN_ID_EX(99, "Cloud", COLOR_MENU_PURPLE, COLOR_MENU_PURPLE, coreVector2(0.0f,0.25f))
 
 
 private:

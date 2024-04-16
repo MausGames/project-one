@@ -13,6 +13,7 @@
 // constructor
 cSpaceBackground::cSpaceBackground()noexcept
 : m_vCoverDir    (coreVector2(0.0f,1.0f))
+, m_fCoverScale  (1.0f)
 , m_fMeteorSpeed (1.0f)
 , m_iCopyLower   (0u)
 , m_iCopyUpper   (0u)
@@ -84,14 +85,12 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover.DefineTexture(0u, "environment_space_inside.png");
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);
 
     // 
     m_Cover2.DefineTexture(0u, "environment_space_outside.png");
     m_Cover2.DefineProgram("menu_single_program");
     m_Cover2.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Cover2.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover2.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.15f) * 1.3f);
     m_Cover2.SetAlpha     (0.7f);
     m_Cover2.SetTexSize   (coreVector2(1.0f,1.0f) * 4.2f);
@@ -100,7 +99,6 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Nebula.DefineTexture(0u, "environment_clouds_low.png");
     m_Nebula.DefineProgram("effect_weather_nebula_program");
     m_Nebula.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Nebula.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Nebula.SetAlpha     (0.2f);
 }
 
@@ -211,15 +209,18 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     const coreVector2 vEnvMove    = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
+    const coreVector2 vSize       = coreVector2(1.0f,1.0f) * SQRT2 * m_fCoverScale;
     const coreVector2 vTexOffset  = m_Cover .GetTexOffset() + (coreVector2(0.0f,0.0f) + vEnvMove) * (0.05f * TIME);
     const coreVector2 vTexOffset2 = m_Cover2.GetTexOffset() + (coreVector2(0.0f,0.0f) + vEnvMove) * (0.28f * TIME);
 
     // 
+    m_Cover.SetSize     (vSize);
     m_Cover.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
     m_Cover.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Cover.Move();
 
     // 
+    m_Cover2.SetSize     (vSize);
     m_Cover2.SetDirection(m_Cover.GetDirection());
     m_Cover2.SetTexOffset(vTexOffset2.Processed(FRACT));
     m_Cover2.Move();
@@ -230,8 +231,9 @@ void cSpaceBackground::__MoveOwn()
     const coreVector2 vTexOffset3 = m_Nebula.GetTexOffset() + (m_vNebulaMove.InvertedX() + vEnvMove2) * (0.5f * TIME);
 
     // 
+    m_Nebula.SetSize     (vSize);
     m_Nebula.SetDirection(MapToAxisInv(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
-    m_Nebula.SetColor3   (m_Cover.GetColor3().MinRatio());
+    m_Nebula.SetColor3   (m_Cover.GetColor3().LowRatio());
     m_Nebula.SetTexSize  (vTexSize);
     m_Nebula.SetTexOffset(vTexOffset3.Processed(FRACT));
     m_Nebula.Move();

@@ -10,7 +10,13 @@
 
 // TODO 1: hard mode: x3 gegner und x3 attacks (= x9)
 // TODO 1: MAIN: task-check, helper, regular score, badges, sound
+// TODO 1: ACHIEVEMENT: name (), description (Do not press a single button / Destroy all enemies without pressing a single button), 1 destroy all enemies without every moving or pressing fire button
+// TODO 1: ACHIEVEMENT: name (), description (), 2 destroy all enemies without missing a single shot
+// TODO 1: ACHIEVEMENT: name (), description (), 3 
+// TODO 1: ACHIEVEMENT: name (), description (), 4 destroy all enemies while staying at the very top of the screen, without getting hit
+// TODO 1: ACHIEVEMENT: name (), description (), 5 destroy all enemies while no enemy bullet is present
 // TODO 1: gegner und spieler farben ?
+// TODO 1: add some gimmick, as this part can becom boring for advanced players: https://youtu.be/RENI2gk0ZJA?t=567
 
 
 // ****************************************************************
@@ -85,7 +91,7 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
-    // show mission name (not really)
+    // show mission name
     STAGE_MAIN({TAKE_MISSION})
     {
         if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
@@ -94,6 +100,11 @@ void cIntroMission::__SetupOwn()
         }
         else
         {
+            if(!m_bFirstPlay && STAGE_BEGINNING)
+            {
+                g_pGame->GetInterface()->ShowMission(this);
+            }
+
             STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
         }
     });
@@ -162,7 +173,7 @@ void cIntroMission::__SetupOwn()
                 ADD_BIT(iInputState, 0u)
                 fInputDelay = 0.0f;
             }
-            else if(!HAS_BIT(iInputState, 1u) && pPlayer->GetWeapon(0u)->GetCooldown())
+            else if(!HAS_BIT(iInputState, 1u) && (pPlayer->GetWeapon(0u)->GetCooldown() && (pPlayer->GetDirection().y > 0.0f)))
             {
                 ADD_BIT(iInputState, 1u)
             }
@@ -179,6 +190,10 @@ void cIntroMission::__SetupOwn()
             else if(!HAS_BIT(iInputState, 1u) && (fInputDelay >= 3.0f))
             {
                 this->EnableManual(i, 4u);
+                this->EnableManual(i, 7u);
+                this->EnableManual(i, 8u);
+                this->EnableManual(i, 9u);
+                this->EnableManual(i, 10u);
             }
         });
 
@@ -238,9 +253,11 @@ void cIntroMission::__SetupOwn()
         }
 
         coreBool bFront = false;
+        coreBool bBack  = false;
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            if((i < 12u) && !pEnemy->HasStatus(ENEMY_STATUS_DEAD)) bFront = true;
+                 if((i >=  0u && i < 12u) && !pEnemy->HasStatus(ENEMY_STATUS_DEAD)) bFront = true;
+            else if((i >= 12u && i < 24u) && !pEnemy->HasStatus(ENEMY_STATUS_DEAD)) bBack  = true;
         });
 
         STAGE_FOREACH_PLAYER(pPlayer, i)
@@ -248,22 +265,33 @@ void cIntroMission::__SetupOwn()
             coreUint32& iInputState = aiInputState[i];
             coreFloat&  fInputDelay = afInputDelay[i];
 
-            if(!HAS_BIT(iInputState, 0u) && (pPlayer->GetDirection().y < 1.0f))
+            if(!HAS_BIT(iInputState, 0u) && (pPlayer->GetDirection().y < 0.0f))
             {
                 ADD_BIT(iInputState, 0u)
-                iResetArea = 1u;
+                ADD_BIT(iResetArea,  0u)
+            }
+            else if(!HAS_BIT(iInputState, 1u) && (pPlayer->GetDirection().y > 0.0f))
+            {
+                ADD_BIT(iInputState, 1u)
+                ADD_BIT(iResetArea,  1u)
             }
 
-            if(!bFront) fInputDelay += 1.0f * TIME;
+            if(!bFront || !bBack) fInputDelay += 1.0f * TIME;
 
-            if(!HAS_BIT(iInputState, 0u) && (fInputDelay >= 4.0f))
+            if((!HAS_BIT(iInputState, 0u) || !HAS_BIT(iInputState, 1u)) && (fInputDelay >= 4.0f))
             {
                 this->EnableManual(i, 5u);
                 this->EnableManual(i, 6u);
+                this->EnableManual(i, 7u);
+                this->EnableManual(i, 8u);
+                this->EnableManual(i, 9u);
+                this->EnableManual(i, 10u);
             }
         });
 
-        const coreVector4 vArea = PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,0.0f) * (((m_iStageSub == 1u) && !iResetArea) ? (BLENDH3(MIN1(m_fStageSubTime * 1.0f)) * 12.0f) : 0.0f);
+        const coreFloat   fShift = (m_iStageSub == 1u) ? (BLENDH3(MIN1(m_fStageSubTime)) * 12.0f) : 0.0f;
+        const coreVector4 vArea  = PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,0.0f) * (HAS_BIT(iResetArea, 0u) ? 0.0f : fShift)
+                                                       - coreVector4(0.0f,0.0f,0.0f,1.0f) * (HAS_BIT(iResetArea, 1u) ? 0.0f : fShift);
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -746,6 +774,16 @@ void cIntroMission::__SetupOwn()
                 pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE);
             });
 
+            STAGE_FINISH_NOW
+        }
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
             STAGE_FINISH_NOW
         }
     });

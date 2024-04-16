@@ -24,6 +24,8 @@ cRutilusMission::cRutilusMission()noexcept
 , m_iPlateRotated     (0u)
 , m_fAreaTime         (0.0f)
 , m_fAreaScale        (1.0f)
+, m_fAreaSpeed        (1.0f)
+, m_bAreaUpdate       (true)
 , m_fSafeTime         (0.0f)
 , m_Wave              (RUTILUS_WAVES_RAWS)
 , m_afWaveTime        {}
@@ -39,6 +41,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_SlapWave          (RUTILUS_SLAPS)
 , m_afSlapValue       {}
 , m_aiMoveFlip        {}
+, m_aiWarnDir         {}
 , m_aiRegisterID      {}
 , m_afRegisterSpeed   {}
 , m_fAnimation        (0.0f)
@@ -806,17 +809,27 @@ void cRutilusMission::__MoveOwnAfter()
                     if(!oPlate.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
                     const coreVector2 vSize = oPlate.GetCollisionRange().xy();
-                    const coreVector2 vDiff = MapToAxis(oPlate.GetPosition().xy() - vPos, oPlate.GetDirection().xy());
+                    const coreVector2 vDiff = MapToAxisInv(oPlate.GetPosition().xy() - vPos, oPlate.GetDirection().xy());
 
                     if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
                     {
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT) ||
-                           HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT))
+                        // 
+                        coreUint8 iNewWarnDir = 0u;
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f, 1.0f))) iNewWarnDir = 1u;
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2(-1.0f, 0.0f))) iNewWarnDir = 2u;
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f,-1.0f))) iNewWarnDir = 3u;
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 1.0f, 0.0f))) iNewWarnDir = 4u;
+
+                        // 
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT)  ||
+                           HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT) || (iNewWarnDir && (iNewWarnDir != m_aiWarnDir[i])))
                         {
                             pPlayer->ShowArrow(1u);
                             g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_ERROR);
 
                             if(g_CurConfig.Graphics.iFlash) m_afPlatePulse[j] = 1.0f;
+
+                            m_aiWarnDir[i] = iNewWarnDir;
                         }
 
                         pPlayer->SetDirection(oPlate.GetDirection());
@@ -825,6 +838,9 @@ void cRutilusMission::__MoveOwnAfter()
                     }
                 }
             }
+
+            // 
+            if(!pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_TURN)) m_aiWarnDir[i] = 0u;
         });
     }
 
@@ -1243,19 +1259,20 @@ void cRutilusMission::__UpdateAreaSpeed()
         fEnvSpeed += fSpeed;
     });
 
-    
-    fEnvSpeed = (fEnvSpeed * RCP(I_TO_F(g_pGame->GetNumPlayers()))) * 0.5f + 0.5f;
+    m_fAreaSpeed = (fEnvSpeed * RCP(I_TO_F(g_pGame->GetNumPlayers()))) * 0.5f + 0.5f;
 
-    g_MusicPlayer.SetPitch(fEnvSpeed);
-
-    if(g_pEnvironment->GetBackground()->GetID() == cSpaceBackground::ID)
+    if(m_bAreaUpdate)
     {
-        cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
-        pBackground->SetMeteorSpeed(fEnvSpeed);
-    
-        g_pEnvironment->SetTargetSpeedNow(4.0f * fEnvSpeed);  // TODO 1: macht Messier rotation kaputt
-    }
+        g_MusicPlayer.SetPitch(m_fAreaSpeed);
 
+        if(g_pEnvironment->GetBackground()->GetID() == cSpaceBackground::ID)
+        {
+            cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
+            pBackground->SetMeteorSpeed(m_fAreaSpeed);
+
+            g_pEnvironment->SetTargetSpeedNow(4.0f * m_fAreaSpeed);
+        }
+    }
 
     // 
     coreFloat fFactorFast = 0.0f;
@@ -1292,7 +1309,7 @@ void cRutilusMission::__UpdateAreaSpeed()
     g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletSpeedFunc);
 
     fFactorFast = m_Safe.IsEnabled(CORE_OBJECT_ENABLE_MOVE) ? 0.7f : 1.0f;
-    g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletSpeedFunc);
+    g_pGame->GetBulletManagerEnemy()->ForEachBullet(nBulletSpeedFunc);
 }
 
 

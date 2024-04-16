@@ -104,7 +104,7 @@ void cMenuNavigator::Move()
         const coreVector2 vResolution = Core::System->GetResolution();
 
         const coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) * RCP(vResolution.Min());
-        const coreVector2 vNewSize = m_pCurObject->GetSize();
+        const coreVector2 vNewSize = m_pCurObject->GetSize() * (HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_BIG) ? 1.5f : 1.0f);
 
         if(m_vCurPos == HIDDEN_POS)
         {
@@ -139,8 +139,18 @@ void cMenuNavigator::Move()
 
         if(TIME)
         {
-            const coreBool bInScroll = std::any_of(m_apScroll.begin(), m_apScroll.end(), [](const coreObject2D* A) {return A->IsFocused();});
-            Core::Input->SetMousePosition(bInScroll ? MENUNAVIGATOR_IGNORE_MOUSE : ((vPosition + m_vMouseOffset) / vResolution));   // for focus
+            coreVector2 vNewTarget = (vPosition + m_vMouseOffset) / vResolution;
+            FOR_EACH(it, m_apScroll)
+            {
+                const coreObject2D* pScroll = (*it);
+                if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll))
+                {
+                    const coreVector2 vPos = GetTranslationArea(*pScroll);
+                    vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x, vPos.x + pScroll->GetSize().x);
+                    vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y, vPos.y + pScroll->GetSize().y);
+                }
+            }
+            Core::Input->SetMousePosition(vNewTarget);   // for focus
         }
 
         m_pCurObject->SetFocused(m_pCurObject->IsFocusable());
@@ -288,16 +298,20 @@ void cMenuNavigator::Update()
                         }
                     }
 
+                    coreObject2D* pOldTab = m_aTab.get_keylist()[iCurTab];
+
                     if(bShoulderLeft) {if(--iCurTab >= m_aTab.size()) iCurTab = m_aTab.size() - 1u;}
                                  else {if(++iCurTab >= m_aTab.size()) iCurTab = 0u;}
 
                     coreObject2D* pCurTab = m_aTab.get_keylist()[iCurTab];
 
-                    cMenu::ChangeTab(m_pMenu, m_aTab.at(pCurTab).iSurface);
+                    const sMenuTab& oTab = m_aTab.at(pCurTab);
+                    cMenu::ChangeTab(m_pMenu, oTab.iSurface);
 
                     if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_NODE))
                     {
-                        m_pCurObject = this->__ToObject(m_aTab.at(pCurTab).iFallDown);
+                        if(m_pCurObject) m_aTab.at(pOldTab).iLastEntry = this->__ToIndex(m_pCurObject);
+                        m_pCurObject = this->__ToObject((oTab.iLastEntry != MENUNAVIGATOR_INVALID) ? oTab.iLastEntry : oTab.iFallDown);
 
                         for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && m_pCurObject && !cMenuNavigator::IsValid(m_pCurObject); ++j)
                         {
@@ -458,8 +472,18 @@ void cMenuNavigator::Update()
         const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
         const coreVector2 vResolution = Core::System->GetResolution();
 
-        const coreBool bInScroll = std::any_of(m_apScroll.begin(), m_apScroll.end(), [](const coreObject2D* A) {return A->IsFocused();});
-        Core::Input->SetMousePosition(bInScroll ? MENUNAVIGATOR_IGNORE_MOUSE : (vPosition + m_vMouseOffset) / vResolution);   // for focus and click
+        coreVector2 vNewTarget = (vPosition + m_vMouseOffset) / vResolution;
+        FOR_EACH(it, m_apScroll)
+        {
+            const coreObject2D* pScroll = (*it);
+            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll))
+            {
+                const coreVector2 vPos = GetTranslationArea(*pScroll);
+                vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x, vPos.x + pScroll->GetSize().x);
+                vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y, vPos.y + pScroll->GetSize().y);
+            }
+        }
+        Core::Input->SetMousePosition(vNewTarget);   // for focus and click
     }
     else if(s_bJoystick)
     {
@@ -520,6 +544,7 @@ void cMenuNavigator::BindSurface(coreObject2D* pTab, const coreUint8 iSurface, c
     oTab.iFallLeft  = this->__ToIndex(pLeft);
     oTab.iFallDown  = this->__ToIndex(pDown);
     oTab.iFallRight = this->__ToIndex(pRight);
+    oTab.iLastEntry = MENUNAVIGATOR_INVALID;
 
     m_aTab.at(pTab) = oTab;
 }
@@ -553,7 +578,7 @@ void cMenuNavigator::GlobalUpdate()
     {
         // 
         s_vMouseMove += Core::Input->GetMouseRelative().xy() * Core::System->GetResolution();
-        if(s_vMouseMove.LengthSq() > POW2(10.0f))
+        if(s_vMouseMove.LengthSq() > POW2(20.0f))
         {
             s_bJoystick = false;
         }
@@ -569,7 +594,7 @@ void cMenuNavigator::GlobalUpdate()
     // 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
-        if(!Core::Input->GetJoystickRelativeL(i).IsNull() || Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD))
+        if(!Core::Input->GetJoystickRelativeL(i).IsNull() || (Core::Input->GetCountJoystick(i, CORE_INPUT_PRESS) && (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING))))
         {
             s_vMouseMove    = coreVector2(0.0f,0.0f);
             s_bJoystick     = true;

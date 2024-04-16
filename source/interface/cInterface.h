@@ -19,7 +19,8 @@
 // interface definitions
 #define INTERFACE_VIEWS                   (PLAYERS)        // number of player views
 #define INTERFACE_LIVES                   (LIVES)          // 
-#define INTERFACE_BADGES                  (BADGES)         // 
+#define INTERFACE_FRAGMENTS               (FRAGMENTS)      // 
+#define INTERFACE_BADGES                  (BADGES  - 3u)   // 
 #define INTERFACE_HELPERS                 (HELPERS - 1u)   // 
 #define INTERFACE_BOSS_DELAY              (1.5f)           // 
 #define INTERFACE_DIALOGS                 (2u)             // 
@@ -41,6 +42,12 @@
 
 #define INTERFACE_STORY_SPEED             (1.0f)           // 
 #define INTERFACE_STORY_DURATION          (4.0f)           // 
+
+#define INTERFACE_FRAGMENT_SPEED          (1.5f)           // 
+#define INTERFACE_FRAGMENT_DURATION       (5.0f)           // 
+#define INTERFACE_FRAGMENT_SCALE          (0.4f)           // 
+#define INTERFACE_FRAGMENT_TYPE_SHOW      (0xFFu)          // 
+#define INTERFACE_FRAGMENT_TYPE_HIDE      (0xFEu)          // 
 
 
 // ****************************************************************
@@ -116,6 +123,13 @@ private:
 
     cGuiLabel m_aDialogText[INTERFACE_DIALOGS];     // 
 
+    cGuiObject m_aFragment[INTERFACE_FRAGMENTS];    // 
+    cGuiObject m_aFragmentTable[2];                 // 
+    cGuiObject m_FragmentShadow;                    // 
+    coreFloat  m_fFragmentStart;                    // 
+    coreUint8  m_iFragmentNew;                      // 
+    coreUint8  m_iFragmentState;                    // 
+
     cGuiObject m_Medal;                             // 
 
     coreSoundPtr m_pAlertSound;                     // 
@@ -161,6 +175,11 @@ public:
     coreBool IsStoryActive()const;
 
     // 
+    void ShowFragment(const coreUint8 iNewIndex, const coreUint32 iOldBits);
+    void ShowFragment(const coreUint8 iNewIndex);
+    coreBool IsFragmentActive()const;
+
+    // 
     void UpdateLayout();
     void UpdateSpacing();
     void UpdateEnabled();
@@ -170,7 +189,7 @@ public:
     inline void PingImmune(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_VIEWS) m_aView[iIndex].fImmuneTime = 1.0f;}
 
     // 
-    inline void Reset() {m_fBannerStart = INTERFACE_INVALID_START; m_fStoryStart = INTERFACE_INVALID_START; m_fAlertStart = INTERFACE_INVALID_START;}
+    inline void Reset() {m_fBannerStart = INTERFACE_INVALID_START; m_fStoryStart = INTERFACE_INVALID_START; m_fFragmentStart = INTERFACE_INVALID_START; m_fAlertStart = INTERFACE_INVALID_START;}
 
     // set object properties
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}

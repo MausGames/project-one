@@ -94,6 +94,8 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: badge: nicht zu lange auf einer platte, hin und her, timer für blau, etc.
     // TODO 1: badge: another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge (oder für boss)
     // TODO 1: MAIN: task-check, regular score, badges, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), beat the wave without ever shooting to the left (in regular game rotation)
+    // TODO 1: plate error badge in zusammenhang mit twin-stick anschauen
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -140,8 +142,9 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(GAME_PLAYERS + 5u)
+        STAGE_GET_START(GAME_PLAYERS * 2u + 5u)
             STAGE_GET_UINT_ARRAY(aiTryCount, GAME_PLAYERS)
+            STAGE_GET_UINT_ARRAY(aiTryDir,   GAME_PLAYERS)
             STAGE_GET_UINT      (iBonusCount)
             STAGE_GET_UINT      (iTransitionState)
             STAGE_GET_FLOAT     (fTransitionTime)
@@ -308,7 +311,7 @@ void cRutilusMission::__SetupOwn()
             fConveyerSpeed = MIN1(fConveyerSpeed + 0.5f * TIME);
             fConveyerTime  = FmodRange(fConveyerTime - fConveyerSpeed * TIME * ((m_iStageSub >= 20u) ? -1.0f : 1.0f), 0.0f, 4.0f);
 
-            for(coreUintW i = 0; i < 4u; ++i)
+            for(coreUintW i = 0u; i < 4u; ++i)
             {
                 m_avPlateData[i].xy(coreVector2(1.0f,1.0f) * FmodRange((I_TO_F(i) - 1.5f - fConveyerTime) * 0.25f, -0.625f, 0.375f));
             }
@@ -461,8 +464,8 @@ void cRutilusMission::__SetupOwn()
         {
             if(!pPlayer->IsRolling() && pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_TURN))
             {
-                if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT) ||
-                   HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT))
+                if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT)  ||
+                   HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT) || (m_aiWarnDir[i] && (m_aiWarnDir[i] != aiTryDir[i])))
                 {
                     constexpr coreUintW iTotal = 15u;
 
@@ -471,6 +474,8 @@ void cRutilusMission::__SetupOwn()
                          if(aiTryCount[i] >= iTotal)      STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
                     else if(aiTryCount[i] >= iTotal - 3u) g_pGame->GetCombatText()->DrawCountdown(aiTryCount[i], iTotal, pPlayer->GetPosition());
                 }
+
+                aiTryDir[i] = m_aiWarnDir[i];
             }
         });
 
@@ -531,8 +536,11 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: hardmode: player cannot rotate, is rotating all the time, player bullets rotate with background, rotation is based on player position or other actions
     // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
     // TODO 1: MAIN: task-check, regular score, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), beat the segment without every turning your ship manually
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
+        constexpr coreUintW iCoreIndex = 61u;
+
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
@@ -572,6 +580,15 @@ void cRutilusMission::__SetupOwn()
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
                 pEnemy->Configure(4, 0u, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);   // due to tight spawning
+            });
+        });
+
+        STAGE_ADD_SQUAD(pSquad2, cCoreEnemy, 1u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -655,7 +672,7 @@ void cRutilusMission::__SetupOwn()
         {
             if(iTransitionState == 0u)
             {
-                pHelper->SetPosition(coreVector3(LERPB(1.08f, -1.2f, MAX(1.0f - fTransitionTime, 0.0f)) * FOREGROUND_AREA.x, 0.0f, 0.0f));
+                pHelper->SetPosition(coreVector3(LERPBR(-1.2f, 1.08f, MIN1(fTransitionTime)) * FOREGROUND_AREA.x, 0.0f, 0.0f));
 
                 if(fTransitionTime >= 1.0f)
                 {
@@ -668,7 +685,7 @@ void cRutilusMission::__SetupOwn()
             }
             else if(iTransitionState == 1u)
             {
-                fRotationValue = LERPB(0.25f*PI, 0.0f*PI, CLAMP(1.0f - (fTransitionTime - 1.5f) / 1.5f, 0.0f, 1.0f));
+                fRotationValue = LERPBR(0.0f*PI, 0.249f*PI, CLAMP01((fTransitionTime - 1.5f) / 1.5f));   // # prevent rounding-issues
 
                 if(fTransitionTime >= 3.0f)
                 {
@@ -713,11 +730,11 @@ void cRutilusMission::__SetupOwn()
                 this->DisableCapsule(true);
             }
 
-            const coreFloat fTime = MAX0(1.0f - fTransitionTime);
+            const coreFloat fTime = MIN1(fTransitionTime);
 
-            pHelper->SetPosition(coreVector3(LERPB(-1.2f, 1.08f, fTime) * FOREGROUND_AREA.x, 0.0f, 0.0f));
+            pHelper->SetPosition(coreVector3(LERPBR(1.08f, -1.2f, fTime) * FOREGROUND_AREA.x, 0.0f, 0.0f));
 
-            fRotationValue = LERPB(fRotationTo, fRotationFrom, fTime);
+            fRotationValue = LERPBR(fRotationFrom, fRotationTo, fTime);
 
             if(fTransitionTime >= 1.0f)
             {
@@ -957,7 +974,28 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(1u, "4-2", {55.0f, 80.0f, 110.0f, 135.0f})   // ZWANZIG
+        coreBool bPostpone = false;
+
+        STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+        {
+            cEnemy* pParent = pSquad1->GetEnemy(iCoreIndex);
+
+            if(pEnemy->ReachedDeath())
+            {
+                pParent->Kill(false);
+                bPostpone = true;
+            }
+
+            if(!pParent->HasStatus(ENEMY_STATUS_DEAD) && pEnemy->HasStatus(ENEMY_STATUS_DEAD))
+            {
+                pEnemy->Resurrect();
+            }
+
+            pEnemy->SetPosition(pParent->GetPosition());
+            pParent->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+        });
+
+        if(!bPostpone) STAGE_WAVE(1u, "4-2", {55.0f, 80.0f, 110.0f, 135.0f})   // ZWANZIG
     });
 
     // ################################################################
@@ -1015,11 +1053,13 @@ void cRutilusMission::__SetupOwn()
         // TODO 1: nochmal schauen ob man den wellen-angriffen der letzten gegner gescheit ausweichen kann (hab bubble-größe wieder zurückgesetzt von 22 auf 20, könnte damit zu tun haben), ansonsten vielleicht offsets ändern 0.5f,0.0f,0.5f,0.0f
         // TODO 1: gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
     // TODO 1: MAIN: task-check, hard idea, regular score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
-    // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble
+    // TODO 1: ACHIEVEMENT: name (), description (), survive 60 seconds in the matrix phase without destroying an enemy (ähnlich zu tower) / destroy 10 enemies from within the bubble, or while being slowed down
+    // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble (?)
     // TODO 1:  #### vielleicht gerade gegner-angriffe (wenn sich bubble bewegt)
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        constexpr coreUintW iNumData = 6u;
+        constexpr coreUintW iNumData   = 6u;
+        constexpr coreUintW iCoreIndex = 17u;
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -1068,6 +1108,15 @@ void cRutilusMission::__SetupOwn()
                     pEnemy->SetPosition (coreVector3( vPos, 0.0f) * FOREGROUND_AREA3);
                     pEnemy->SetDirection(coreVector3(-vDir, 0.0f));
                 }
+            });
+        });
+
+        STAGE_ADD_SQUAD(pSquad2, cCoreEnemy, 1u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -1335,6 +1384,27 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
+        coreBool bPostpone = false;
+
+        STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+        {
+            cEnemy* pParent = pSquad1->GetEnemy(iCoreIndex);
+
+            if(pEnemy->ReachedDeath())
+            {
+                pParent->Kill(false);
+                bPostpone = true;
+            }
+
+            if(!pParent->HasStatus(ENEMY_STATUS_DEAD) && pEnemy->HasStatus(ENEMY_STATUS_DEAD))
+            {
+                pEnemy->Resurrect();
+            }
+
+            pEnemy->SetPosition(pParent->GetPosition());
+            pParent->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+        });
+
         for(coreUintW i = 0u; i < RUTILUS_TOCKS; ++i)
         {
             coreObject3D* pTock = this->GetTock(i);
@@ -1369,7 +1439,7 @@ void cRutilusMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(2u, "4-3", {60.0f, 80.0f, 100.0f, 120.0f})   // EINUNDZWANZIG
+        if(!bPostpone) STAGE_WAVE(2u, "4-3", {60.0f, 80.0f, 100.0f, 120.0f})   // EINUNDZWANZIG
     });
 
     // ################################################################
@@ -1421,9 +1491,12 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: improve boring middle enemy-waves (first 3 are good, last 2 are good)
     // TODO 1: bullet-linien sollten nicht unterbrochen werden, zumindest am anfang, nicht so wichtig beim kill
     // TODO 1: MAIN: task-check, easy, hard idea, coop, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
+    // TODO 1: final not-shooting enemy-move-pattern is weird
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumTargets = 16u;
+        constexpr coreUintW iCoreIndex  = 105u;
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -1447,6 +1520,15 @@ void cRutilusMission::__SetupOwn()
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
                 pEnemy->Configure(4, 0u, COLOR_SHIP_ORANGE);
+            });
+        });
+
+        STAGE_ADD_SQUAD(pSquad2, cCoreEnemy, 1u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -1760,7 +1842,28 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(3u, "4-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ZWEIUNDZWANZIG
+        coreBool bPostpone = false;
+
+        STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+        {
+            cEnemy* pParent = pSquad1->GetEnemy(iCoreIndex);
+
+            if(pEnemy->ReachedDeath())
+            {
+                pParent->Kill(false);
+                bPostpone = true;
+            }
+
+            if(!pParent->HasStatus(ENEMY_STATUS_DEAD) && pEnemy->HasStatus(ENEMY_STATUS_DEAD))
+            {
+                pEnemy->Resurrect();
+            }
+
+            pEnemy->SetPosition(pParent->GetPosition());
+            pParent->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+        });
+
+        if(!bPostpone) STAGE_WAVE(3u, "4-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ZWEIUNDZWANZIG
     });
 
     // ################################################################
@@ -1812,6 +1915,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: orb angriff is zu ähnlich zur snow-wave
     // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
     // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), keep all magenta enemies alive and flying around until the very end
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -1847,6 +1951,16 @@ void cRutilusMission::__SetupOwn()
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
                 pEnemy->Configure(1, 0u, COLOR_SHIP_CYAN);
+                pEnemy->AddStatus(ENEMY_STATUS_GHOST);
+            });
+        });
+
+        STAGE_ADD_SQUAD(pSquad4, cCoreEnemy, 1u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad4, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_MAGENTA);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
         });
@@ -2143,6 +2257,9 @@ void cRutilusMission::__SetupOwn()
                         nSpawnMeteorFunc(j, vPos, vMove, 2u);
                     }
 
+                    pSquad4->GetEnemy(0u)->Resurrect();
+                    pSquad4->GetEnemy(0u)->SetPosition(pEnemy->GetPosition());
+
                     if(!iImpact) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
                 }
                 else if(bMedium)
@@ -2330,6 +2447,16 @@ void cRutilusMission::__SetupOwn()
                 }
 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
+            }
+        });
+
+        STAGE_FOREACH_ENEMY_ALL(pSquad4, pEnemy, i)
+        {
+            pEnemy->DefaultMoveForward(coreVector2(0.0f,-1.0f), 50.0f * pEnemy->GetLifeTime());
+
+            if(pEnemy->GetPosition().y < -1.3f * FOREGROUND_AREA.y)
+            {
+                pEnemy->Kill(false);
             }
         });
 
@@ -2921,8 +3048,8 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(10, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
-                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
+                pEnemy->Configure(50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
+                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
             });
         });
 
@@ -2932,11 +3059,21 @@ void cRutilusMission::__SetupOwn()
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 5.0f * fBaseScale);
                 pEnemy->Configure(50 * 100, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
-                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_TOP | ENEMY_STATUS_SECRET);
+                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
 
         STAGE_BOSS(m_Messier, {60.0f, 120.0f, 180.0, 240.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################

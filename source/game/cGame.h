@@ -81,7 +81,8 @@ enum eGameDifficulty : coreUint8
 
 enum eGameFlag : coreUint8
 {
-    GAME_FLAG_TASK = 0x01u   // 
+    GAME_FLAG_TASK     = 0x01u,   // 
+    GAME_FLAG_FRAGMENT = 0x02u    // 
 };
 
 struct sGameOptions final
@@ -124,27 +125,59 @@ static constexpr coreInt32 GAME_MISSION_LIST_DEMO[] =
 
 struct sMissionData final
 {
-    coreInt32       iID;      // 
-    const coreChar* pcName;   // 
-    coreVector3     vColor;   // 
-    coreVector2     vIcon;    // 
-    const coreChar* pcBoss;   // 
+    coreInt32       iID;       // 
+    const coreChar* pcName;    // 
+    coreVector3     vColor;    // 
+    coreVector3     vColor2;   // 
+    coreVector2     vIcon;     // 
+    const coreChar* pcBoss;    // 
 };
 
 static constexpr sMissionData g_aMissionData[] =
 {
-    {cIntroMission  ::ID, cIntroMission  ::Name, cCloudBackground  ::Color, cCloudBackground  ::Icon, cIntroBoss     ::Name},
-    {cViridoMission ::ID, cViridoMission ::Name, cGrassBackground  ::Color, cGrassBackground  ::Icon, cTorusBoss     ::Name},
-    {cNevoMission   ::ID, cNevoMission   ::Name, cSeaBackground    ::Color, cSeaBackground    ::Icon, cLeviathanBoss ::Name},
-    {cHarenaMission ::ID, cHarenaMission ::Name, cDesertBackground ::Color, cDesertBackground ::Icon, cTigerBoss     ::Name},
-    {cRutilusMission::ID, cRutilusMission::Name, cSpaceBackground  ::Color, cSpaceBackground  ::Icon, cMessierBoss   ::Name},
-    {cGeluMission   ::ID, cGeluMission   ::Name, cVolcanoBackground::Color, cVolcanoBackground::Icon, cCholBoss      ::Name},
-    {cCalorMission  ::ID, cCalorMission  ::Name, cSnowBackground   ::Color, cSnowBackground   ::Icon, cZerothBoss    ::Name},
-    {cMuscusMission ::ID, cMuscusMission ::Name, cMossBackground   ::Color, cMossBackground   ::Icon, cGemingaBoss   ::Name},
-    {cAterMission   ::ID, cAterMission   ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon, cProjectOneBoss::Name},
-    {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon, cVausBoss      ::Name},   // #
-    {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon, cNautilusBoss  ::Name}    // #
+    {cIntroMission  ::ID, cIntroMission  ::Name, cCloudBackground  ::Color, cCloudBackground  ::Color2, cCloudBackground  ::Icon, cIntroBoss     ::Name},
+    {cViridoMission ::ID, cViridoMission ::Name, cGrassBackground  ::Color, cGrassBackground  ::Color2, cGrassBackground  ::Icon, cTorusBoss     ::Name},
+    {cNevoMission   ::ID, cNevoMission   ::Name, cSeaBackground    ::Color, cSeaBackground    ::Color2, cSeaBackground    ::Icon, cLeviathanBoss ::Name},
+    {cHarenaMission ::ID, cHarenaMission ::Name, cDesertBackground ::Color, cDesertBackground ::Color2, cDesertBackground ::Icon, cTigerBoss     ::Name},
+    {cRutilusMission::ID, cRutilusMission::Name, cSpaceBackground  ::Color, cSpaceBackground  ::Color2, cSpaceBackground  ::Icon, cMessierBoss   ::Name},
+    {cGeluMission   ::ID, cGeluMission   ::Name, cVolcanoBackground::Color, cVolcanoBackground::Color2, cVolcanoBackground::Icon, cCholBoss      ::Name},
+    {cCalorMission  ::ID, cCalorMission  ::Name, cSnowBackground   ::Color, cSnowBackground   ::Color2, cSnowBackground   ::Icon, cZerothBoss    ::Name},
+    {cMuscusMission ::ID, cMuscusMission ::Name, cMossBackground   ::Color, cMossBackground   ::Color2, cMossBackground   ::Icon, cGemingaBoss   ::Name},
+    {cAterMission   ::ID, cAterMission   ::Name, cDarkBackground   ::Color, cDarkBackground   ::Color2, cDarkBackground   ::Icon, cProjectOneBoss::Name},
+    {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Color2, cDarkBackground   ::Icon, cVausBoss      ::Name},   // #
+    {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Color2, cDarkBackground   ::Icon, cNautilusBoss  ::Name}    // #
 };
+
+
+// ****************************************************************
+// 
+struct sFragmentData final
+{
+    coreUintW   iIndex;    // 
+    coreVector2 vOffset;   // 
+    coreVector2 vSize;     // 
+    coreVector3 vColor;    // 
+};
+
+static constexpr sFragmentData g_aFragmentData[] =
+{
+    {1u, coreVector2(  0.0f, 1024.0f -  516.0f) / 1024.0f, coreVector2(452.0f,517.0f) / 1024.0f, cCloudBackground  ::Color2 * 0.9f},
+    {7u, coreVector2(378.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2(648.0f,329.0f) / 1024.0f, cGrassBackground  ::Color2 * 0.9f},
+    {3u, coreVector2(638.0f, 1024.0f -  328.0f) / 1024.0f, coreVector2(388.0f,329.0f) / 1024.0f, cSeaBackground    ::Color2 * 0.9f},
+    {4u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2(372.0f,370.0f) / 1024.0f, cDesertBackground ::Color2 * 0.9f},
+    {6u, coreVector2(439.0f, 1024.0f -  783.0f) / 1024.0f, coreVector2(588.0f,533.0f) / 1024.0f, cSpaceBackground  ::Color2 * 0.9f},
+    {2u, coreVector2(252.0f, 1024.0f -  453.0f) / 1024.0f, coreVector2(524.0f,454.0f) / 1024.0f, cVolcanoBackground::Color2 * 0.9f},
+    {5u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2(520.0f,647.0f) / 1024.0f, cSnowBackground   ::Color2 * 0.9f},
+    {8u, coreVector2(760.0f, 1024.0f -  837.0f) / 1024.0f, coreVector2(264.0f,369.0f) / 1024.0f, cMossBackground   ::Color2 * 0.9f},
+    {9u, coreVector2(250.0f, 1024.0f -  773.0f) / 1024.0f, coreVector2(524.0f,524.0f) / 1024.0f, cDarkBackground   ::Color2 * 0.9f},
+    {0u, coreVector2(0.0f,0.0f),                           coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f},   // #
+    {0u, coreVector2(0.0f,0.0f),                           coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f}    // #
+};
+
+#define FRAGMENT_POSITION(x) (g_aFragmentData[x].vOffset + g_aFragmentData[x].vSize * 0.5f - 0.5f)
+
+STATIC_ASSERT(ARRAY_SIZE(g_aFragmentData) >= FRAGMENTS)
+STATIC_ASSERT(ARRAY_SIZE(g_aFragmentData) == ARRAY_SIZE(g_aMissionData))
 
 
 // ****************************************************************
@@ -197,6 +230,7 @@ private:
 
     coreFlow  m_fMusicFade;                 // 
     coreFloat m_fMusicSpeed;                // 
+    coreFloat m_fMusicVolume;               // 
     
     coreFlow m_fHitDelay;
     coreBool m_bDefeatDelay;                // 
@@ -244,6 +278,7 @@ public:
 
     // 
     void FadeMusic(const coreFloat fSpeed);
+    inline void SetMusicVolume(const coreFloat fVolume) {m_fMusicVolume = fVolume;}
 
     // 
     void PlayHitSound    (const coreVector3 vPosition);
@@ -285,6 +320,7 @@ public:
     inline coreBool IsEasy     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_EASY);}
     inline coreBool IsHard     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_HARD);}
     inline coreBool IsTask     ()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_TASK);}
+    inline coreBool IsFragment ()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_FRAGMENT);}
     inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
     
     inline coreUintW GetPlayerIndex(const cPlayer* pPlayer)const {ASSERT(pPlayer) return (pPlayer - &m_aPlayer[0]);}

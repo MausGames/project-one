@@ -186,7 +186,11 @@ void cHelper::Resurrect(const coreBool bSmooth)
     m_fAngleOverride  = FLT_MAX;
 
     // 
-    if(bSmooth) this->SetSize(coreVector3(0.0f,0.0f,0.0f));
+    if(bSmooth)
+    {
+        this ->SetSize(coreVector3(0.0f,0.0f,0.0f));
+        m_Wind.SetSize(coreVector3(0.0f,0.0f,0.0f));
+    }
 
     // 
     g_pGlow->BindObject(&m_Wind);

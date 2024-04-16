@@ -7,6 +7,7 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
+#include "file/cConfig.h"
 
 
 // ****************************************************************
@@ -208,7 +209,7 @@ void cPostProcessing::Move()
     
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
         {
-            m_aInterior[i].SetAlpha(m_fChroma * POST_CHROMA_FACTOR);
+            m_aInterior[i].SetAlpha(g_CurConfig.Graphics.iChroma ? (m_fChroma * POST_CHROMA_FACTOR) : 0.0f);
         }
     }
 }

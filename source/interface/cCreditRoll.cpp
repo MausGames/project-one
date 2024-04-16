@@ -98,6 +98,7 @@ cCreditRoll::cCreditRoll()noexcept
     nInitFunc(&m_aOtherHeader[3], m_aOtherModels,    "CREDITS_MODELS",    g_apcCreditEntryModels,    CREDIT_ENTRIES_MODELS);
     nInitFunc(&m_aOtherHeader[4], m_aOtherFonts,     "CREDITS_FONTS",     g_apcCreditEntryFonts,     CREDIT_ENTRIES_FONTS);
     nInitFunc(&m_aOtherHeader[5], m_aOtherLibraries, "CREDITS_LIBRARIES", g_apcCreditEntryLibraries, CREDIT_ENTRIES_LIBRARIES);
+    //nInitFunc(&m_aOtherHeader[6], m_aOtherThanks,    "CREDITS_THANKS",    g_apcCreditEntryThanks,    CREDIT_ENTRIES_THANKS);
 
     // 
     m_fMaxOffset = I_TO_F(iOffset) * 0.05f + fWait + 0.6f;
@@ -153,6 +154,7 @@ void cCreditRoll::Move()
     nCullListFunc(m_aOtherModels,    1.1f, CREDIT_ENTRIES_MODELS);
     nCullListFunc(m_aOtherFonts,     1.1f, CREDIT_ENTRIES_FONTS);
     nCullListFunc(m_aOtherLibraries, 1.1f, CREDIT_ENTRIES_LIBRARIES);
+    //nCullListFunc(m_aOtherThanks,    1.1f, CREDIT_ENTRIES_THANKS);
 }
 
 
@@ -181,6 +183,7 @@ void cCreditRoll::Start()
     nSetRectifyFunc(m_aOtherModels,    CREDIT_ENTRIES_MODELS);
     nSetRectifyFunc(m_aOtherFonts,     CREDIT_ENTRIES_FONTS);
     nSetRectifyFunc(m_aOtherLibraries, CREDIT_ENTRIES_LIBRARIES);
+    //nSetRectifyFunc(m_aOtherThanks,    CREDIT_ENTRIES_THANKS);
 
     // 
     m_fOffset   = 0.0f;

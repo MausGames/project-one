@@ -97,6 +97,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: drum shield needs blink!
     // TODO 1: ich konnte durch schräge schilde von unten durchschießen, und durch die großen rotierenden schilden (wenn ich direkt am schild hänge)
     // TODO 1: MAIN: task-check, regular score, badges, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), beat the mission without touching any shield / fly through a shield / ping-pong a single bullet at least 3 times
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fWidth = 0.38f;
@@ -634,6 +635,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: gegner im 3er-kreuz werden teleportiert: range muss dort erweitert werden
     // TODO 1: HARD: laser halten geschosse auf
     // TODO 1: MAIN: regular score, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), touch every line at least once
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumData = 8u;
@@ -1114,6 +1116,8 @@ void cViridoMission::__SetupOwn()
     // TODO 1: bullets sollten sich schön überlagern bei 2x2
     // TODO 1: big sollte extra box haben die den schaden weiterleitet (und bullet zerstört! damit nicht doppelt zählt), statt volume-change
     // TODO 1: MAIN: hard idea, regular score, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), get crushed by at least 10 enemies / never touch an aim-object
+    // TODO 1: shadow sollte drehendes rundes faden-kreuz sein (Shape_Shifter_Formations screenshot)
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData  = 12u;
@@ -1681,6 +1685,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: hard-mode: enemies which charge infinitely (teleport, N-times)
     // TODO 1: hard-mode: every enemy bounces once (what about bouncy enemy?), oder 1 infinity move (and bouncy enemy just moves N times infinitely)
     // TODO 1: MAIN: regular score, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), catch 3 enemies while they rush at you
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData     = 16u;
@@ -2098,6 +2103,7 @@ void cViridoMission::__SetupOwn()
     // TASK: collect all moving energy beans
     // TODO 1: HARD: 1:1 invert-mimic für beide spieler, mit den schnellen laser-bullets (gelbe geschosse?), oder steuerung komplett invertiert
     // TODO 1: MAIN: task-check, regular score, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     // TODO 1: reihenfolge ziel besser markieren (leuchten, wie bei laser)
     // TODO 1: implement proper bean-wave or remove related objects!
     // TODO 1: der helfer nervt
@@ -2565,6 +2571,16 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Torus, {140.0f, 210.0f, 280.0, 350.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################

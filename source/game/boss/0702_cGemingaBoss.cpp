@@ -20,7 +20,9 @@
 // orange geschosse sollten bis zum rand gehen, aber bei abwechselnden schießen wird das nur von einer der beiden hälften gemacht ohne es komplett zu überspannen
 // stampf-phase geht nur auf einer ache, um die achse zu verändern müsste der boss in die mitte springen
 // pearls sollten so erzeugt werden, dass ihre animation eine schöne welle erzeugt (in bewegungs-richtung vom boss)
+// TODO 1: hard mode: teleporter kommt zurück
 // TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: ACHIEVEMENT: name (), description (), collect ALL pills
 // TODO 1: death: jaw opens like Pacmans death (make sure geometry does not collide), and sides will move away from each other (like a spring when backs touch) and will explode
 // TODO 1: death: rotation wird langsamer, dann fetzen zusammen, bei einschlag starke drehung die langsamer wird, bei stillstand -> pacman death
 // TODO 1: foreshadow: other boss, flies in the background

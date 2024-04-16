@@ -29,7 +29,7 @@
 #define MSGBOX_ANSWER_NO        (2)                        // 
 #define MSGBOX_ANSWER_KEY       (3)                        // 
 
-#define MSGBOX_NO_CALLBACK      ([](coreInt32) {})         // 
+#define MSGBOX_NO_CALLBACK      ([](){})                   // 
 
 STATIC_ASSERT(MSGBOX_IGNORE_MOUSE != MENUNAVIGATOR_IGNORE_MOUSE)
 
@@ -66,11 +66,15 @@ public:
     void Move  ()final;
 
     // 
-    template <typename F> void ShowInformation(const coreChar* pcText,                             F&& nCallback);   // [](const corInt32 iAnswer) -> void
+    template <typename F> void ShowInformation(const coreChar* pcText,                             F&& nCallback);   // []() -> void
     template <typename F> void ShowQuestion   (const coreChar* pcText,                             F&& nCallback);   // [](const corInt32 iAnswer) -> void
     template <typename F> void ShowMapping    (const coreChar* pcText, const coreUint8 iInputType, F&& nCallback);   // [](const corInt32 iAnswer, const coreInt16 iKey) -> void
 
+    // 
     inline coreBool IsVisible()const {return (m_nCallback != NULL);}
+
+    // 
+    inline const coreUint8& GetMsgType()const {return m_iMsgType;}
 
 
 private:
@@ -92,7 +96,7 @@ template <typename F> void cMsgBox::ShowInformation(const coreChar* pcText, F&& 
 
     // 
     m_iMsgType = MSGBOX_TYPE_INFORMATION;
-    this->__ShowMessage(pcText, [=](const coreInt32 a, const coreInt32 b) {nCallback(a);});
+    this->__ShowMessage(pcText, [=](const coreInt32 a, const coreInt32 b) {nCallback();});
 }
 
 

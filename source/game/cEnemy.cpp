@@ -150,7 +150,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
             // 
             const coreInt32 iPower = (bMulti || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
             
-            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * (g_pGame->IsEasy() ? 110 : 100);
+            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy()        && (!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS) || (this->GetID() != cTigerBoss::ID))) ? 110 : 100);
             
             const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 100, iElement, vImpact) / iPower);
             ASSERT(!(this->GetMaxHealth() % iPower))
@@ -312,6 +312,9 @@ void cEnemy::Kill(const coreBool bAnimated)
             // TODO 1: position 0.0f,0.0f
             //g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 10.0f, NULL);
         }
+
+        // 
+        this->TrackEnemy();
     }
 
     if(bEnergy)
@@ -379,6 +382,15 @@ void cEnemy::ApplyScore()
 {
     // 
     this->ApplyScore(this->LastAttacker());
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::TrackEnemy()
+{
+    // 
+    g_pSave->EditGlobalStats()->iEnemiesDone += 1u;
 }
 
 
@@ -1276,6 +1288,16 @@ void cUfoEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
     g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_UFO);
+}
+
+
+// ****************************************************************
+// constructor
+cCoreEnemy::cCoreEnemy()noexcept
+{
+    // load models
+    this->DefineModelHigh("ship_boss_messier_core.md3");
+    this->DefineModelLow ("ship_boss_messier_core.md3");
 }
 
 

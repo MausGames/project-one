@@ -22,7 +22,8 @@
 // TODO 1: separate particles for background rendering (automatic selection, based on start-position ? would be easier to expose)
 // TODO 3: extend particle system to allow custom move algorithms
 // TODO 3: options to completely disable certain sound effects: turn, player shooting
-// TODO 1: 3d-sound option should also affect looping sounds in other classes
+// TODO 3: update 3d-sound settings in real-time (store position)
+// TODO 3: move some global sound effects to local pointers (where it makes sense), to reduce permanent memory load
 
 
 // ****************************************************************
@@ -83,6 +84,9 @@ enum eSoundEffect : coreUint8
     SOUND_ENEMY_EXPLOSION_09,
     SOUND_ENEMY_EXPLOSION_10,
     SOUND_ENEMY_EXPLOSION_11,
+    SOUND_ENEMY_EXPLOSION_12,
+
+    SOUND_SHIP_FLY,
 
     SOUND_WEAPON_RAY,
     SOUND_WEAPON_ENEMY,
@@ -103,9 +107,8 @@ enum eSoundEffect : coreUint8
 
     SOUND_HELPER,
 
-    SOUND_FRAGMENT_HELPER,
-    SOUND_FRAGMENT_APPEAR,
     SOUND_FRAGMENT_COLLECT,
+    SOUND_FRAGMENT_IMPACT,
 
     SOUND_ITEM_COLLECT,
 
@@ -114,6 +117,8 @@ enum eSoundEffect : coreUint8
     SOUND_SUMMARY_MEDAL,
     SOUND_SUMMARY_PERFECT,
     SOUND_SUMMARY_RECORD,
+
+    SOUND_UNLOCK,
 
     SOUND_CONTINUE_TICK,
     SOUND_CONTINUE_ACCEPT,
@@ -136,8 +141,6 @@ enum eSoundEffect : coreUint8
     SOUND_EFFECT_ERROR,
     SOUND_EFFECT_FIRE_START,
     SOUND_EFFECT_SHAKE,   // bomb, laser
-    SOUND_EFFECT_SWORD_01,    
-    SOUND_EFFECT_SWORD_02,    
     SOUND_EFFECT_WOOSH,
 
     SOUND_PLACEHOLDER,
@@ -188,9 +191,9 @@ private:
     coreObject3D m_aExplosionWave[SPECIAL_EXPLOSION];       // 
     coreUintW    m_iCurExplosion;                           // 
 
-    coreSoundPtr m_apSound[SOUND_MAX];                      // 
-    coreUint64   m_iSoundGuard;                             // (to reduce multiple same sound-effects within one frame) 
-    coreList<cSoundData> m_aSoundData;
+    coreSoundPtr         m_apSound[SOUND_MAX];              // 
+    coreUint64           m_aiSoundGuard[1];                 // (to reduce multiple same sound-effects within one frame) 
+    coreList<cSoundData> m_aSoundData;                      // 
 
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
@@ -237,6 +240,7 @@ public:
     // create directional particle blow
     void CreateBlowColor(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
     void CreateBlowDark (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum);
+    void CreateBlowSmoke(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
 
     // 
     void CreateChargeColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);

@@ -86,6 +86,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: hardmode: enemies get bigger, based on life or force
     // TODO 1: // 0b1101'1011u, // 0b1101'1011u, ?
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), hit every enemy at least one time
     // TODO 1: s_aiMark anpassen, is derzeit viel viel zu leicht
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -562,6 +563,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: hard mode: attacking the border creates attacks (stings fly away, and respawn a second later ?)
     // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
     // TODO 1: MAIN: regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), never miss a shot (same as stage 0-2 ?!?!) / ###
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fOffMin = 0.0f;
@@ -1250,6 +1252,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: fix/finish gap badge, fix/finish/remove block touch badge
     // TODO 1: finale phase schaut mir background nach rechts gut aus
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), destroy 10 enemies from inside the rocks / fly 5s on top of the tunnel without getting hit
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = GELU_FANG_STEP;
@@ -1945,6 +1948,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: badge: items in finaler phase einsammeln die von oben herunterfliegen
     // TODO 1: badge: move into void, after killing an enemy which takes away an orb
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), Be on top of an orb which does not exist anymore
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -2511,6 +2515,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: add dance fail condition ? (m_iTouchState & m_iWayVisible) && (m_iWayGhost & m_iWayVisible)
     // TODO 1: I got hit in dance part, even though I was in the middle, when I moved between two blocks vertically and switched   -> vielleicht nur 1 linie, ändert aber nix am issue für andere stellen ?
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), never touch a solid block
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreFloat fStep        = GELU_WAY_STEP;
@@ -3163,6 +3168,16 @@ void cGeluMission::__SetupOwn()
         }
 
         STAGE_BOSS(m_Chol, {60.0f, 120.0f, 180.0, 240.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################

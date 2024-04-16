@@ -33,6 +33,7 @@ cMenu::cMenu()noexcept
 , m_TransitionTime   (coreTimer(1.3f, 0.0f, 1u))
 , m_iTransitionState (0u)
 , m_pTransitionMenu  (NULL)
+, m_bStarted (false)
 //, m_vHighlightColor  (COLOR_MENU_WHITE)
 {
     // 
@@ -101,6 +102,19 @@ cMenu::cMenu()noexcept
     // 
     cFigure       ::GlobalInit();
     cMenuNavigator::GlobalInit();
+    
+    
+    
+    m_apCurButton[0] = NULL;
+    m_apCurButton[1] = NULL;
+    m_apNewButton[0] = NULL;
+    m_apNewButton[1] = NULL;
+    m_pCurTab        = NULL;
+    m_pNewTab        = NULL;
+    m_pCurLine       = NULL;
+    m_pNewLine       = NULL;
+    
+    s_aButtonData.clear();
 }
 
 
@@ -234,10 +248,10 @@ void cMenu::Move()
     this->coreMenu::Move();
     
     
-    static coreBool bStarted = false;
-    if(!bStarted && !Core::Manager::Resource->IsLoading())   // after coreMenu::Move()
+    
+    if(!m_bStarted && !Core::Manager::Resource->IsLoading())   // after coreMenu::Move()
     {
-        bStarted = true;
+        m_bStarted = true;
         m_IntroMenu.StartIntro();
     }
     
@@ -327,8 +341,19 @@ void cMenu::Move()
         {
             if(m_TitleMenu.GetStatus())
             {
-                // switch to main menu
-                this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 0u);
+                if(m_BridgeMenu.HasUnlocks())
+                {
+                    // 
+                    this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+
+                    // 
+                    m_BridgeMenu.ShowUnlocks();
+                }
+                else
+                {
+                    // switch to main menu
+                    this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 0u);
+                }
 
                 // 
                 m_MainMenu.ResetNavigator();
@@ -622,6 +647,11 @@ void cMenu::Move()
                 // 
                 g_pGame->UseRestart();
             }
+            else if(m_BridgeMenu.GetStatus() == 5)
+            {
+                // 
+                this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 0u);
+            }
         }
         break;
 
@@ -767,6 +797,7 @@ void cMenu::SetHighlightColor(const coreVector3 vColor)
     // 
     m_SummaryMenu.SetHighlightColor(vColor);
     m_FinishMenu .SetHighlightColor(vColor);
+    m_BridgeMenu .SetHighlightColor(vColor);
 }
 
 
@@ -934,7 +965,7 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
         m_apNewButton[0] = pButton;
     }
     
-    if(pButton->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS))
+    if(pButton->IsClicked())
     {
         g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
     }
@@ -1009,19 +1040,6 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
 {
     ASSERT(pSwitchBox)
 
-    //if(!s_aButtonData.count_bs(pSwitchBox))
-    //{
-    //    sButtonData oNewData;
-    //    oNewData.vPosition  = pSwitchBox->GetCaption()->GetPosition();
-    //    oNewData.vSize      = pSwitchBox->GetSize();
-    //    oNewData.vTexOffset = pSwitchBox->GetTexOffset();
-    //    oNewData.fTime      = 0.0f;
-    //    oNewData.bGrow      = false;
-//
-    //    s_aButtonData.emplace_bs(pSwitchBox, oNewData);
-    //}
-    //sButtonData& oData = s_aButtonData.at_bs(pSwitchBox);
-
     const auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEndIndex)
     {
         const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEndIndex);
@@ -1057,24 +1075,6 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
         // 
         g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_DISABLED);
     }
-    
-    //if(iUserSwitch)
-    //{
-    //    if(bArrowLeft)
-    //    {
-    //        oData.fTime = 1.0f;
-    //        oData.bGrow = false;
-    //    }
-    //    else if(bArrowRight)
-    //    {
-    //        oData.fTime = 1.0f;
-    //        oData.bGrow = true;
-    //    }
-    //}
-//
-    //oData.fTime.UpdateMax(-3.0f, 0.0f);
-    //pSwitchBox->GetCaption()->SetPosition(oData.vPosition + coreVector2(LERPBR(0.0f, 0.005f, oData.fTime) * (oData.bGrow ? 1.0f : -1.0f), 0.0f));
-    //pSwitchBox->GetCaption()->Move();
 }
 
 
@@ -1096,7 +1096,7 @@ void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const
 
 void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract)
 {
-    cMenu::UpdateLine(pLine, bInteract, m_vHighlightColor);
+    cMenu::UpdateLine(pLine, bInteract, m_vButtonColor);
 }
 
 
@@ -1124,16 +1124,19 @@ void cMenu::UpdateAnimateProgram(cGuiObject* OUTPUT pObject)
 
 // ****************************************************************
 // 
-void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType)
+void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType, const coreBool bHide)
 {
     ASSERT(pObject && (iMedal < MEDAL_MAX) && (iMedalType < MEDAL_TYPE_MAX))
 
+    const coreBool bValid = (iMedal != MEDAL_NONE);
+
     // 
-    const coreUint8 iIndex = (iMedal - MEDAL_BRONZE) + iMedalType * MEDAL_DARK;
+    const coreUint8 iIndex = bValid ? ((iMedal - MEDAL_BRONZE) + iMedalType * MEDAL_DARK) : 15u;
     pObject->SetTexOffset(coreVector2(I_TO_F(iIndex % 4u), I_TO_F(iIndex / 4u)) * 0.25f);
 
     // 
-    pObject->SetEnabled((iMedal != MEDAL_NONE) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    pObject->SetEnabled((bValid || !bHide) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    pObject->SetColor3 (coreVector3(1.0f,1.0f,1.0f) * (bValid ? 1.0f : 0.5f));
 }
 
 
@@ -1148,7 +1151,7 @@ void cMenu::ClearButtonTime(const cGuiButton* pButton)
         oData.fTime = 0.0f;
         oData.bGrow = false;
         
-        // TODO 1: größe des objekts sollte auch resettet werden, wegen gamepad-cursor size-init
+        // TODO 1: größe des objekts sollte auch resettet werden, wegen gamepad-cursor size-init (achtung, position muss auch angepasst werden)
     }
 }
 
@@ -1198,7 +1201,7 @@ void cMenu::__StartGame()
     oOptions.iType        = m_GameMenu.GetSelectedType      ();
     oOptions.iMode        = m_GameMenu.GetSelectedMode      ();
     oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
-    oOptions.iFlags       = GAME_FLAG_TASK;
+    oOptions.iFlags       = GAME_FLAG_TASK | GAME_FLAG_FRAGMENT;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         oOptions.aiShield  [i]    = m_GameMenu.GetSelectedShield (i);
@@ -1241,6 +1244,7 @@ void cMenu::__EndGame()
     if(g_pSave->GetHeader().oProgress.bFirstPlay && g_pSave->GetHeader().oProgress.aiAdvance[1])
     {
         g_pSave->EditProgress()->bFirstPlay = false;
+        if(!g_bDemoVersion) ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
 
         m_TitleMenu.DeactivateFirstPlay();
         m_MainMenu .DeactivateFirstPlay();

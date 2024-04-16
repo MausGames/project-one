@@ -19,6 +19,7 @@
 // in stand-rotierender einzelteil-phase, alle 4 teile sollten nicht gleichzeitig in eine richtung feuern, weil man sonst nicht ausweichen kann
 // nur eine wand sollte sich auf den spieler zubewegen, zu viele seiten sind zu kompliziert (vor allem mit zusätzlichen geschossen) (is schon heavy in normaler wave), außerdem könnte einschlag nur in mitte sein weil teile sonst langsam verdeckt werden, und einzelteile würden sich beim abschuss komisch überlagern
 // einzelteil-phase sollt kohärente muster haben, damit die gefahr einfach einzuschätzen ist, vor allem weil der spieler die bewegung kontrolliert (er soll sich nicht so fühlen als hätte er keine kontrolle)
+// TODO 1: hard mode: hitze und wasser
 // TODO 1: rotation von körper oder flügel signalisieren bestimmten angriff -> andere bosse auch
 // TODO 1: ram von boss und wings braucht flammen-wellen-effekt
 // TODO 1: outline vom body is dünner als von flügeln (wegen shape)
@@ -26,6 +27,7 @@
 // TODO 1: tod: fliegt in lava, kommt wieder raus
 // TODO 1: boss glüht nach dem einschlag in boden (und wand ?)
 // TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: ACHIEVEMENT: name (), description (), 
 // TODO 1: mehrere einzelne einschläge schon während der background sich noch bewegt, dann bleibt er stehen und alle 5 schlagen nochmal ein
 // TODO 1: banner-anzeige bei finalem tod hat anderen text "Real Time Bonus" (Real farbig ? und separat rausstehend)
 // TODO 1: wellen beim sturmangriff sind zu ähnlich wie von sword, vielleicht kreis-wellen wie beim alten leviathan ?
@@ -55,6 +57,8 @@
 // TODO 1: vielleicht fliegt boss in erster phase auch rauf und runter (separat oder gemischt mit links-rechts)
 // TODO 1: helfer: einer springt bei wellen von der anderen seite raus, bei gitter fliegt einer seitlich runter
 // TODO 1: energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
+
+// TODO 1: foreshadow: rast 1-2 mal (untersch waves) über schirm (above) mit einzelteilen
 
 
 // ****************************************************************

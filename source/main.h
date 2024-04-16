@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.1.3 (https://www.maus-games.at)                             |//
+//| Project One v0.1.4 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -103,6 +103,8 @@
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
 // TODO 4: MIN1, MAX0, CLAMP01, BLEND* everywhere possible
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
+// TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
+// TODO 1: badges anordnen nach reihenfolge im level (index + description)
 
 
 // ****************************************************************
@@ -149,7 +151,7 @@
 #define CONTINUES            (3u)
 #define SHIELD_MAX           (255u)
 #define SHIELD_INVINCIBLE    (1000u)
-#define BADGES               (3u)
+#define BADGES               (3u + 3u)
 #define FRAGMENTS            (9u)
 #define WEAPONS              (6u)
 #define SUPPORTS             (2u)
@@ -324,7 +326,8 @@ enum eBadge : coreUint8
 {
     BADGE_EASY = 1u,
     BADGE_NORMAL,
-    BADGE_HARD
+    BADGE_HARD,
+    BADGE_ACHIEVEMENT
 };
 
 extern void InitResolution(const coreVector2 vResolution);   // init resolution properties (1:1)
@@ -359,7 +362,10 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "additional/cRotaCache.h"
 #include "additional/cGuiObject.h"
 #include "additional/cLodObject.h"
+#include "additional/cAchievements.h"
+#include "additional/cPasswords.h"
 #include "interface/cFigure.h"
+#include "interface/cNewIndicator.h"
 #include "additional/cMenuNavigator.h"
 #include "file/cConfig.h"
 #include "file/cReplay.h"

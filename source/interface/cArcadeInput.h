@@ -14,6 +14,7 @@
 // TODO 3: require two enter presses to confirm with keyboard input
 // TODO 3: cancel feature CORE_INPUT_CHAR(ESCAPE) (check coreTextBox issues) (with message box "do you really want to ...", but makes only sense in volatile situations)
 // TODO 3: add blinking label-cursor | (also to engine textbox)
+// TODO 3: check if template longer than expected length can cause issues (or shorter)
 
 
 // ****************************************************************

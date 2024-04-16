@@ -144,15 +144,15 @@ cViridoMission::cViridoMission()noexcept
     }
 
     // 
-    m_Shadow.DefineProgram("effect_decal_single_inst_program");
+    m_Shadow.DefineProgram("effect_decal_inst_program");
     {
         for(coreUintW i = 0u; i < VIRIDO_SHADOWS_RAWS; ++i)
         {
             // load object resources
             coreObject3D* pShadow = &m_aShadowRaw[i];
             pShadow->DefineModel  (Core::Manager::Object->GetLowQuad());
-            pShadow->DefineTexture(0u, "effect_wave.png");
-            pShadow->DefineProgram("effect_decal_single_program");
+            pShadow->DefineTexture(0u, "effect_aim.png");
+            pShadow->DefineProgram("effect_decal_program");
 
             // set object properties
             pShadow->SetTexSize(coreVector2(0.5f,1.0f));
@@ -487,7 +487,7 @@ void cViridoMission::EnableShadow(const coreUintW iIndex, const cShip* pOwner, c
     oShadow.SetSize     (coreVector3(0.0f,0.0f,0.0f));
     oShadow.SetTexOffset(coreVector2(bQuad ? 0.5f : 0.0f, 0.0f));
     oShadow.SetColor3   (bQuad ? coreVector3(1.0f,0.85f,0.1f) : coreVector3(1.0f,1.0f,1.0f));
-    oShadow.SetAlpha    (0.85f);
+    oShadow.SetAlpha    (0.8f);
     oShadow.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
 }
 
@@ -1086,6 +1086,8 @@ void cViridoMission::__MoveOwnAfter()
         // (here due to ordering, to prevent player from flying through laser)
         cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, vRayPos, vRayDir, pLaser, [&](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount, const coreBool bFirstHit)
         {
+            if((m_avLaserPos[i] - pLaser->GetPosition().xy()).LengthSq() >= POW2(20.0f)) return;
+            
             // 
             const coreVector4 vArea = pPlayer->GetArea();
             const coreVector2 vDiff = pPlayer->GetOldPos() - m_avLaserPos[i];
@@ -1117,12 +1119,15 @@ void cViridoMission::__MoveOwnAfter()
                 
                 coreVector2 vOldPos = pPlayer->GetOldPos();
                 
+                // TODO 1: funktioniert noch immer nicht ganz richtig bei >=3 linien (Torus)
                 for(coreUintW j = 0u; j < VIRIDO_LASERS; ++j)
                 {
                     if(iCurLaser == j) continue;
                     
                     coreObject3D* pLaser2 = (*m_Laser.List())[j];
                     if(!pLaser2->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+                    
+                    if((m_avLaserPos[j] - pLaser2->GetPosition().xy()).LengthSq() >= POW2(20.0f)) continue;       
     
                     const coreVector2 vRayDir2 = pLaser2->GetDirection().xy();
                     const coreVector2 vRayPos2 = pLaser2->GetPosition ().xy() - vRayDir2 * pLaser2->GetSize().y;
@@ -1214,7 +1219,7 @@ void cViridoMission::__MoveOwnAfter()
         else oShadow.SetAlpha(MAX(oShadow.GetAlpha() - 5.0f*TIME, 0.0f));
 
         // 
-        if(HAS_BIT(m_iShadowType, i)) oShadow.SetDirection(coreVector3(coreVector2::Direction((6.0f*PI) * m_fAnimation), 0.0f));
+        oShadow.SetDirection(coreVector3(coreVector2::Direction((4.0f*PI) * m_fAnimation), 0.0f));
 
         // 
         if(!oShadow.GetAlpha()) this->DisableShadow(i, false);

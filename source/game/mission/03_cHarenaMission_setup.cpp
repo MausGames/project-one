@@ -104,6 +104,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: sub-wave 2 is too similar to the boss waves
     // TODO 1: der flip muss verbessert werden: er muss viel sichtbarer sein, farbe form bewegung ?
     // TODO 1: MAIN: task-check, hard idea, regular score, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), 
     // TODO 1: im ersten frame beim flimmern is nur die outline sichtbar (gefüllt) (aufgenommen im video von 05.11.2022)
     // TODO 1: delay nach N sekunden, wenn der letzte gegner am leben gelassen wird, damit zeit+combo nicht abläuft
     m_aInsanityStage[0] = [this]()
@@ -458,6 +459,12 @@ void cHarenaMission::__SetupOwn()
                 case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupA; break;
                 case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupB; break;
                 }
+
+                if((iChangeCount == 3u) && m_Tiger.ResurrectHelper(ELEMENT_ORANGE, false))
+                {
+                    ASSERT(pHelper != g_pGame->GetHelper(ELEMENT_ORANGE))
+                    g_pGame->GetHelper(ELEMENT_ORANGE)->SetPosition(coreVector3(0.0f,0.5f,0.0f) * FOREGROUND_AREA3);
+                }
             }
         }
         else if(m_iStageSub == 12u)
@@ -779,6 +786,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: fix short movements by enemies when transitioning 4->6 and 6->8 (und intro für new enemies)
     // TODO 1: check if bullet-collision really affects the whole shooting area, to never cause any frame-delay when getting visible
     // TODO 1: MAIN: task-check, coop, regular score, badges, sound
+    // TODO 1: badge: ride the wave
+    // TODO 1: ACHIEVEMENT: name (), description (), trigger revenge-wave at least once from every enemy
     m_aInsanityStage[1] = [this]()
     {
         constexpr coreUintW iNumEnemies = 8u;
@@ -794,7 +803,7 @@ void cHarenaMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(12u + 4u * iNumEnemies)
+        STAGE_GET_START(14u + 4u * iNumEnemies)
             STAGE_GET_UINT      (iVisible)
             STAGE_GET_UINT      (iBig)
             STAGE_GET_UINT      (iGold)
@@ -809,6 +818,7 @@ void cHarenaMission::__SetupOwn()
             STAGE_GET_FLOAT     (fDelay, fDelay = 1.0f;)
             STAGE_GET_VEC2_ARRAY(avPosFrom, iNumEnemies)
             STAGE_GET_VEC2_ARRAY(avPosTo,   iNumEnemies)
+            STAGE_GET_VEC2      (vSpawnPos)
         STAGE_GET_END
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
@@ -874,7 +884,10 @@ void cHarenaMission::__SetupOwn()
                     {
                         iPoints += 1u;
 
-                        this->AddExtraScore(pEnemy->LastAttacker(), 100u, pEnemy->GetPosition());
+                        if(!m_iInsanity)
+                        {
+                            this->AddExtraScore(pEnemy->LastAttacker(), 100u, pEnemy->GetPosition());
+                        }
 
                         if(iPoints > 15u)
                         {
@@ -900,6 +913,8 @@ void cHarenaMission::__SetupOwn()
 
                 ADD_BIT(iHit, i)
             }
+
+            this->CrashEnemy(pEnemy);
         });
 
         const coreFloat fSpeed = 1.0f + (m_iInsanity ? 0.0f : (0.8f * (I_TO_F(iNumEnemies - pSquad1->GetNumEnemiesAlive()) / I_TO_F(iNumEnemies - 1u))));
@@ -987,6 +1002,9 @@ void cHarenaMission::__SetupOwn()
                             case 5u: iStep = 3u; break;
                             }
                             if(i < 6u) avPosTo[i] = coreVector2::Direction(DEG_TO_RAD(I_TO_F(iStep) * 60.0f + 90.0f + CORE_MATH_PRECISION)) * 0.95f;
+
+                            if((iPoints == 1u) && (i == 1u)) vSpawnPos = avPosFrom[i];
+                            m_Tiger.KillHelper(ELEMENT_BLUE, false);
                         }
                     }
                     else
@@ -1049,6 +1067,14 @@ void cHarenaMission::__SetupOwn()
                     if(avPosFrom[i] == HIDDEN_POS) avPosFrom[i] = avPosTo[i].Processed(SIGN) * 1.2f;
                 });
             }
+            else if(m_iInsanity)
+            {
+                if(!vSpawnPos.IsNull() && m_Tiger.ResurrectHelper(ELEMENT_BLUE, false))
+                {
+                    ASSERT(pHelper != g_pGame->GetHelper(ELEMENT_BLUE))
+                    g_pGame->GetHelper(ELEMENT_BLUE)->SetPosition(coreVector3(vSpawnPos * FOREGROUND_AREA, 0.0f));
+                }
+            }
         }
 
         if(iPoints >= 11u)
@@ -1081,6 +1107,7 @@ void cHarenaMission::__SetupOwn()
                 if(STAGE_TICK_FREE(60.0f, 0.0f))
                 {
                     g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 0.0f, 1u, HAS_BIT(iBig, i) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_WHITE, false, true);
+                 //   if(HAS_BIT(iBig, i)) g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 25.0f, 1u, COLOR_ENERGY_BLUE, false, true);
                 }
 
                 if(!pHelper->HasStatus(HELPER_STATUS_DEAD) && (i == 4u))
@@ -1125,8 +1152,6 @@ void cHarenaMission::__SetupOwn()
                 pEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
                 pEnemy->SetBaseColor(COLOR_SHIP_GREY);
             }
-
-            this->CrashEnemy(pEnemy);
         });
 
         for(coreUintW i = 0u; i < HARENA_EGGS; ++i)
@@ -1225,6 +1250,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: coop: abwechselnd gegner treffen
     // TODO 1: moving tower sollte nicht in seine (exakte) flug-richtung schießen
     // TODO 1: MAIN: task-check, hard idea, coop, regular score, badges, sound
+    // TODO 1: ACHIEVEMENT: name (), description (), dance at least 60s with the big enemy without getting hit
     m_aInsanityStage[2] = [this]()
     {
         constexpr coreUintW iNumEnemies = 61u;
@@ -1435,7 +1461,10 @@ void cHarenaMission::__SetupOwn()
 
                 this->DisableFloor(i % HARENA_FLOORS, false);
 
-                if(bBig) this->DisableAim(true);
+                if(bBig || (m_iInsanity && (i == 15u)))
+                {
+                    this->DisableAim(true);
+                }
 
                 g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetDirection(), 50.0f, 10u, COLOR_ENERGY_BLUE);
             }
@@ -1519,7 +1548,7 @@ void cHarenaMission::__SetupOwn()
                         const coreFloat fSide = (((i - 8u) / 2u) % 2u) ? -1.0f : 1.0f;
 
                         vPos = coreVector2(fSide * 0.9f, fOffset * 0.4f);
-                        vDir = coreVector2::Direction(fLifeTime * 3.0f);
+                        vDir = coreVector2(-fSide, (i % 2u) ? 1.0f : -1.0f).Normalized();
                     }
                 }
                 else
@@ -1713,6 +1742,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: hardmode: every killed enemy makes an attack (target single ?)
     // TODO 1: pacifist: holes in line border attack
     // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), beat the level without every destroying an arrow
     m_aInsanityStage[3] = [this]()
     {
         constexpr coreUintW iNumEnemies = 170u;
@@ -1756,10 +1786,12 @@ void cHarenaMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(7u + iNumTypes + iNumState + iNumEnemies)
+        STAGE_GET_START(9u + iNumTypes + iNumState + iNumEnemies)
             STAGE_GET_UINT      (iTakeStart)
             STAGE_GET_UINT      (iLoopKill)
-            STAGE_GET_UINT      (iLoopCount)
+            STAGE_GET_UINT      (iLoopCount1)
+            STAGE_GET_UINT      (iLoopCount2)
+            STAGE_GET_UINT      (iLoopState)
             STAGE_GET_UINT      (iInitCount)
             STAGE_GET_UINT      (iBreakCount)
             STAGE_GET_UINT      (iBreakRef)
@@ -2012,24 +2044,47 @@ void cHarenaMission::__SetupOwn()
         }
         else if(m_iStageSub == 13u)
         {
-            if((iLoopKill < 32u) && STAGE_TICK_FREE2(10.0f, 0.0f))
+            if(STAGE_TICK_FREE2(10.0f, 0.0f))
             {
                 if(!(s_iTick % 16u))
                 {
-                    if(iLoopKill < 16u) iLoopCount += 1u;
-                                   else iLoopCount -= 1u;
+                    if(iLoopKill < 20u) iLoopCount1 += 1u;
+                                   else iLoopState   = 1u;
                 }
 
-                cEnemy*         pChild = nTakeChildFunc(0u);
-                const coreUintW iIndex = pSquad2->GetIndex(pChild);
+                if(!iLoopState)
+                {
+                    cEnemy*         pChild = nTakeChildFunc(0u);
+                    const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
-                const coreVector2 vDir = StepRotated90(iLoopCount % 4u);
-                const coreFloat   fOff = (I_TO_F(s_iTick % 16u) - 7.5f) * 0.1375f;
-                const coreVector2 vPos = (vDir * -1.2f + vDir.Rotated90() * fOff) * FOREGROUND_AREA;
+                    const coreVector2 vDir = StepRotated90(iLoopCount1 % 4u);
+                    const coreFloat   fOff = (I_TO_F(s_iTick % 16u) - 7.5f) * 0.1375f;
+                    const coreVector2 vPos = (vDir * -1.2f + vDir.Rotated90() * fOff) * FOREGROUND_AREA;
 
-                pChild->SetPosition(coreVector3(vPos, 0.0f));
+                    pChild->SetPosition(coreVector3(vPos, 0.0f));
 
-                aiVector[iIndex] = vDir.PackFloat2x16();
+                    aiVector[iIndex] = vDir.PackFloat2x16();
+                }
+                else if(iLoopKill < 40u)
+                {
+                    iLoopCount2 += 1u;
+
+                    cEnemy*         pChild = nTakeChildFunc(0u);
+                    const coreUintW iIndex = pSquad2->GetIndex(pChild);
+
+                    const coreFloat   fOff = (I_TO_F(((iLoopCount2 / 2u) * 7u) % 17u) - 8.0f) * 0.1375f;
+                    const coreVector2 vPos = coreVector2(fOff, 1.2f) * FOREGROUND_AREA;
+
+                    pChild->SetPosition(coreVector3(vPos, 0.0f));
+
+                    aiVector[iIndex] = coreVector2(0.0f,-1.0f).PackFloat2x16();
+                }
+
+                if((s_iTick == 47u) && m_Tiger.ResurrectHelper(ELEMENT_GREEN, false))
+                {
+                    ASSERT(pHelper != g_pGame->GetHelper(ELEMENT_GREEN))
+                    g_pGame->GetHelper(ELEMENT_GREEN)->SetPosition(coreVector3(-1.2f, -7.5f * 0.1375f, 0.0f) * FOREGROUND_AREA3);
+                }
             }
         }
 
@@ -2298,6 +2353,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: badge: % time moving on purple plates
     // TODO 1: badge: touch each plate at least once (needs visual highlight)
     // TODO 1: MAIN: task-check, easy, regular score, extra score, badges, sound, background rota/speed
+    // TODO 1: ACHIEVEMENT: name (), description (), stay on 10 plates when an enemy is currently spawning there
     m_aInsanityStage[4] = [this]()
     {
         constexpr coreUintW iNumData  = 16u;
@@ -2565,19 +2621,19 @@ void cHarenaMission::__SetupOwn()
                 case 16u: this->EnableSpike( 0u, false); this->EnableSpike(29u, false); this->LaunchSpike( 2u, fInfinity); this->LaunchSpike(30u, fInfinity); break;
                 case 15u: this->EnableSpike(12u, false); this->EnableSpike(35u, false); this->LaunchSpike( 0u, fInfinity); this->LaunchSpike(29u, fInfinity); break;
                 case 14u: this->EnableSpike( 5u, false); this->EnableSpike(33u, false); this->LaunchSpike(12u, fInfinity); this->LaunchSpike(35u, fInfinity); break;
-                case 13u: this->EnableSpike(11u, false);                                this->LaunchSpike( 5u, fInfinity); this->LaunchSpike(33u, fInfinity); break;
-                case 12u: this->EnableSpike(31u, false);                                this->LaunchSpike(11u, fInfinity);                                    break;
-                case 11u: this->EnableSpike( 3u, false);                                this->LaunchSpike(31u, fInfinity);                                    break;
-                case 10u: this->EnableSpike(18u, false);                                this->LaunchSpike( 3u, fInfinity);                                    break;
-                case  9u: this->EnableSpike(17u, false);                                this->LaunchSpike(18u, fInfinity);                                    break;
-                case  8u: this->EnableSpike( 1u, false);                                this->LaunchSpike(17u, fInfinity);                                    break;
-                case  7u: this->EnableSpike(34u, false);                                this->LaunchSpike( 1u, fInfinity);                                    break;
-                case  6u: this->EnableSpike(24u, false);                                this->LaunchSpike(34u, fInfinity);                                    break;
-                case  5u: this->EnableSpike(10u, false); this->EnableSpike(23u, false); this->LaunchSpike(24u, fInfinity);                                    break;
-                case  4u: this->EnableSpike( 6u, false); this->EnableSpike(25u, false); this->LaunchSpike(10u, fInfinity); this->LaunchSpike(23u, fInfinity); break;
-                case  3u: this->EnableSpike(28u, false); this->EnableSpike(32u, false); this->LaunchSpike( 6u, fInfinity); this->LaunchSpike(25u, fInfinity); break;
-                case  2u: this->EnableSpike( 4u, false); this->EnableSpike( 7u, false); this->LaunchSpike(28u, fInfinity); this->LaunchSpike(32u, fInfinity); break;
-                case  1u:                                                               this->LaunchSpike( 4u, fInfinity); this->LaunchSpike( 7u, fInfinity); break;
+                case 13u: this->EnableSpike(11u, false); this->EnableSpike(31u, false); this->LaunchSpike( 5u, fInfinity); this->LaunchSpike(33u, fInfinity); break;
+                case 12u: this->EnableSpike( 3u, false); this->EnableSpike(18u, false); this->LaunchSpike(11u, fInfinity); this->LaunchSpike(31u, fInfinity); break;
+                case 11u: this->EnableSpike( 1u, false); this->EnableSpike(17u, false); this->LaunchSpike( 3u, fInfinity); this->LaunchSpike(18u, fInfinity); break;
+                case 10u: this->EnableSpike(24u, false); this->EnableSpike(34u, false); this->LaunchSpike( 1u, fInfinity); this->LaunchSpike(17u, fInfinity); break;
+                case  9u: this->EnableSpike(10u, false); this->EnableSpike(23u, false); this->LaunchSpike(24u, fInfinity); this->LaunchSpike(34u, fInfinity); break;
+                case  8u: this->EnableSpike( 6u, false); this->EnableSpike(25u, false); this->LaunchSpike(10u, fInfinity); this->LaunchSpike(23u, fInfinity); break;
+                case  7u: this->EnableSpike(28u, false); this->EnableSpike(32u, false); this->LaunchSpike( 6u, fInfinity); this->LaunchSpike(25u, fInfinity); break;
+                case  6u: this->EnableSpike( 4u, false); this->EnableSpike( 7u, false); this->LaunchSpike(28u, fInfinity); this->LaunchSpike(32u, fInfinity); break;
+                case  5u: this->EnableSpike(13u, false); this->EnableSpike(27u, false); this->LaunchSpike( 4u, fInfinity); this->LaunchSpike( 7u, fInfinity); break;
+                case  4u: this->EnableSpike( 8u, false); this->EnableSpike(22u, false); this->LaunchSpike(13u, fInfinity); this->LaunchSpike(27u, fInfinity); break;
+                case  3u: this->EnableSpike(16u, false); this->EnableSpike(26u, false); this->LaunchSpike( 8u, fInfinity); this->LaunchSpike(22u, fInfinity); break;
+                case  2u: this->EnableSpike( 9u, false); this->EnableSpike(19u, false); this->LaunchSpike(16u, fInfinity); this->LaunchSpike(26u, fInfinity); break;
+                case  1u:                                                               this->LaunchSpike( 9u, fInfinity); this->LaunchSpike(19u, fInfinity); break;
                 case  0u:                                                                                                                                     break;
                 }
             }
@@ -2694,17 +2750,17 @@ void cHarenaMission::__SetupOwn()
 
             case 42u: iColumn = 1u; iRow = 0u; break;
             case 43u: iColumn = 2u; iRow = 0u; break;
-            case 44u: iColumn = 3u; iRow = 0u; break;
-            case 45u: iColumn = 4u; iRow = 0u; break;
-            case 46u: iColumn = 0u; iRow = 1u; break;
+            case 44u: iColumn = 4u; iRow = 0u; break;
+            case 45u: iColumn = 0u; iRow = 1u; break;
+            case 46u: iColumn = 3u; iRow = 1u; break;
             case 47u: iColumn = 5u; iRow = 1u; break;
             case 48u: iColumn = 0u; iRow = 2u; break;
-            case 49u: iColumn = 5u; iRow = 2u; break;
+            case 49u: iColumn = 1u; iRow = 2u; break;
             case 50u: iColumn = 0u; iRow = 3u; break;
-            case 51u: iColumn = 5u; iRow = 3u; break;
-            case 52u: iColumn = 0u; iRow = 4u; break;
-            case 53u: iColumn = 5u; iRow = 4u; break;
-            case 54u: iColumn = 1u; iRow = 5u; break;
+            case 51u: iColumn = 4u; iRow = 3u; break;
+            case 52u: iColumn = 5u; iRow = 3u; break;
+            case 53u: iColumn = 2u; iRow = 4u; break;
+            case 54u: iColumn = 5u; iRow = 4u; break;
             case 55u: iColumn = 2u; iRow = 5u; break;
             case 56u: iColumn = 3u; iRow = 5u; break;
             case 57u: iColumn = 4u; iRow = 5u; break;
@@ -2961,7 +3017,17 @@ void cHarenaMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Tiger, {60.0f, 120.0f, 180.0, 240.0f})
+        STAGE_BOSS(m_Tiger, {140.0f, 210.0f, 280.0, 350.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################

@@ -77,6 +77,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 , m_fBannerSpeed    (0.0f)
 , m_iBannerType     (0u)
 , m_fStoryStart     (INTERFACE_INVALID_START)
+, m_fFragmentStart  (INTERFACE_INVALID_START)
+, m_iFragmentNew    (0u)
+, m_iFragmentState  (0u)
 , m_fAlertStart     (INTERFACE_INVALID_START)
 , m_fAnimation      (0.0f)
 , m_fRotation       (0.0f)
@@ -162,8 +165,8 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 
     for(coreUintW i = 0u; i < INTERFACE_HELPERS; ++i)
     {
-        m_aHelper[i].DefineTexture(0u, "menu_helper_small_12.png");
-        m_aHelper[i].DefineProgram("default_2d_program");
+        m_aHelper[i].DefineTexture(0u, "menu_helper.png");
+        m_aHelper[i].DefineProgram("menu_helper_program");
         m_aHelper[i].SetTexSize   (coreVector2(0.25f,0.25f));
         m_aHelper[i].SetTexOffset (coreVector2(0.25f,0.25f) * coreVector2(I_TO_F(i % 4u), I_TO_F(i / 4u)));
 
@@ -189,25 +192,24 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 
     m_BannerShadow.DefineTexture(0u, "effect_headlight_point.png");
     m_BannerShadow.DefineProgram("menu_single_program");
-    m_BannerShadow.SetPosition(coreVector2(0.0f,0.0f));
-    m_BannerShadow.SetSize    (coreVector2(1.0f,0.4f) * 0.75f);
-    m_BannerShadow.SetCenter  (coreVector2(0.0f,0.02f));
-    m_BannerShadow.SetColor3  (coreVector3(0.0f,0.0f,0.0f));
+    m_BannerShadow.SetPosition  (coreVector2(0.0f,0.0f));
+    m_BannerShadow.SetSize      (coreVector2(1.0f,0.4f) * 0.75f);
+    m_BannerShadow.SetCenter    (coreVector2(0.0f,0.02f));
+    m_BannerShadow.SetColor3    (coreVector3(0.0f,0.0f,0.0f));
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBannerIcon); ++i)
     {
-        m_aBannerIcon[i].DefineTexture(0u, "menu_helper_big_02.png");
-        m_aBannerIcon[i].DefineProgram("default_2d_program");
-        m_aBannerIcon[i].SetPosition(coreVector2(0.0f, 0.0f));
-        m_aBannerIcon[i].SetSize    (coreVector2(1.0f, 1.0f) * (i ? 0.35f : 0.45f));
-        m_aBannerIcon[i].SetCenter  (coreVector2(0.0f, 0.02f));
-        m_aBannerIcon[i].SetTexSize (coreVector2(0.25f,0.25f));
+        m_aBannerIcon[i].DefineTexture(0u, "menu_helper.png");
+        m_aBannerIcon[i].DefineProgram("menu_helper_program");
+        m_aBannerIcon[i].SetPosition  (coreVector2(0.0f, 0.0f));
+        m_aBannerIcon[i].SetCenter    (coreVector2(0.0f, 0.02f));
+        m_aBannerIcon[i].SetTexSize   (coreVector2(0.25f,0.25f));
     }
 
-    m_aBannerText[0].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
-    m_aBannerText[0].SetColor3(COLOR_MENU_INSIDE * 0.75f);
-    m_aBannerText[1].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
-    m_aBannerText[1].SetColor3(COLOR_MENU_INSIDE * 0.75f);
+    m_aBannerText[0].Construct    (MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
+    m_aBannerText[0].SetColor3    (COLOR_MENU_INSIDE * 0.75f);
+    m_aBannerText[1].Construct    (MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
+    m_aBannerText[1].SetColor3    (COLOR_MENU_INSIDE * 0.75f);
     m_aBannerText[2].DefineTexture(2u, "menu_background_black.png");
     m_aBannerText[3].DefineTexture(2u, "menu_background_black.png");
 
@@ -220,6 +222,35 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aDialogText[0].SetColor3(COLOR_MENU_INSIDE);
     m_aDialogText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aDialogText[1].SetColor3(COLOR_MENU_INSIDE);
+
+    for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS; ++i)
+    {
+        const coreVector2 vDir  = coreVector2(1.0f,1.0f).Normalized();
+        const coreVector2 vSize = g_aFragmentData[i].vSize * INTERFACE_FRAGMENT_SCALE * ((i == 8u) ? 1.1f : 1.0f);
+
+        m_aFragment[i].DefineTexture(0u, PRINT("menu_fragment_%02zu.png", g_aFragmentData[i].iIndex));
+        m_aFragment[i].DefineTexture(1u, "menu_background_black.png");
+        m_aFragment[i].DefineProgram("menu_fragment_program");
+        m_aFragment[i].SetSize      (vSize);
+        m_aFragment[i].SetDirection (vDir);
+        m_aFragment[i].SetColor3    (g_aFragmentData[i].vColor);
+    }
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFragmentTable); ++i)
+    {
+        m_aFragmentTable[i].DefineTexture(0u, "menu_fragment_plate.png");
+        m_aFragmentTable[i].DefineProgram("menu_single_program");
+        m_aFragmentTable[i].SetPosition  (coreVector2(0.0f,0.0f));
+        m_aFragmentTable[i].SetSize      (coreVector2(1.0f,1.0f) * INTERFACE_FRAGMENT_SCALE);
+        m_aFragmentTable[i].SetDirection (coreVector2(1.0f,1.0f).Normalized());
+        m_aFragmentTable[i].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.0f);
+    }
+
+    m_FragmentShadow.DefineTexture(0u, "effect_headlight_point.png");
+    m_FragmentShadow.DefineProgram("menu_single_program");
+    m_FragmentShadow.SetPosition(coreVector2(0.0f,0.0f));
+    m_FragmentShadow.SetSize    (coreVector2(1.0f,1.0f) * 0.75f);
+    m_FragmentShadow.SetColor3  (coreVector3(1.0f,1.0f,1.0f));
 
     m_Medal.DefineTexture(0u, "menu_medal.png");
     m_Medal.DefineProgram("default_2d_program");
@@ -265,6 +296,15 @@ void cInterface::Render()
 
         // 
         m_Medal.Render();
+    }
+
+    if(this->IsFragmentActive())
+    {
+        // 
+        m_FragmentShadow   .Render();
+        m_aFragmentTable[0].Render();
+        m_aFragmentTable[1].Render();
+        for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS; ++i) m_aFragment[i].Render();
     }
 
     if(m_fAlphaAll)
@@ -474,15 +514,16 @@ void cInterface::Move()
         // display score
         oView.oScore.SetText(PRINT("%07u", pScoreTable->GetScoreTotal()));
 
-        const coreUint32 iModifier = pScoreTable->GetModifier();
-        const coreBool   bShow     = (iModifier > (pScoreTable->HasOverride() ? 0u : 10u));
+        const coreUint32 iModifier  = pScoreTable->GetModifier();
+        const coreBool   bShowValue = (iModifier > (pScoreTable->HasOverride() ? 0u : 10u));
+        const coreBool   bShowBar   = bShowValue && (!pScoreTable->HasOverride() || pScoreTable->GetCurChain());
 
         // 
-        oView.oCooldownBar.SetSize  (coreVector2(bShow ? (0.15f * MIN(pScoreTable->GetCooldown() * 1.1f, 1.0f)) : 0.0f, 0.013f));
+        oView.oCooldownBar.SetSize  (coreVector2(bShowBar ? (0.15f * MIN(pScoreTable->GetCooldown() * 1.1f, 1.0f)) : 0.0f, 0.013f));
         oView.oCooldownBar.SetColor3((pScoreTable->GetCooldown() > 0.5f) ? pPlayer->GetMenuColor() : COLOR_MENU_RED);
 
         // 
-        oView.oComboValue.SetText(bShow ? PRINT("x%u.%u", iModifier / 10u, iModifier % 10u) : "");
+        oView.oComboValue.SetText(bShowValue ? PRINT("x%u.%u", iModifier / 10u, iModifier % 10u) : "");
         oView.oChainValue.SetText(pScoreTable->GetCurChain() ? PRINT("+%u", pScoreTable->GetCurChain()) : "");
 
         // 
@@ -612,7 +653,7 @@ void cInterface::Move()
     {
         if(iSegmentIndex != MISSION_NO_SEGMENT)
         {
-            const auto&     oStats     = g_pSave->GetHeader().aaLocalStatsSegment[iMissionIndex][iSegmentIndex];
+            const auto&     oStats     = g_pSave->GetHeader().aaaaaLocalStatsSegment[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex][iSegmentIndex];
             const coreInt32 iBestShift = coreInt32(oStats.iTimeBestShiftBad) - coreInt32(oStats.iTimeBestShiftGood);
             const coreFloat fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), 10.0f);
 
@@ -904,11 +945,13 @@ void cInterface::Move()
         }
 
         // 
+        m_aBannerIcon[0].SetSize     (coreVector2(1.0f,1.0f) * 0.45f * LERPB(0.85f, 1.0f, fVisibility));
+        m_aBannerIcon[1].SetSize     (coreVector2(1.0f,1.0f) * 0.35f * LERPB(0.85f, 1.0f, fVisibility));
         m_aBannerIcon[0].SetDirection(coreVector2::Direction(fBanner *  (0.2f*PI)));
         m_aBannerIcon[1].SetDirection(coreVector2::Direction(fBanner * (-0.1f*PI)));
 
         // 
-        m_Medal.SetPosition(coreVector2(0.0f, fAnimation * 0.01f - 0.07f));
+        m_Medal.SetPosition(coreVector2(0.0f, LERPB(-0.07f, -0.04f, MIN1(fBanner * 0.8f))));
         m_Medal.SetSize    (coreVector2(0.135f,0.135f) * LERP(1.5f, 1.0f, MIN1(fBanner * 10.0f)));
 
         // set banner transparency
@@ -939,7 +982,7 @@ void cInterface::Move()
     if((fStory <= INTERFACE_STORY_DURATION) && (fStory >= 0.0f))
     {
         // 
-        const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED * MENU_INSIDE_ALPHA;
+        const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED;
 
         // set story transparency
         const coreFloat fStoryAlpha = BLENDH3(fVisibility) * MENU_INSIDE_ALPHA;
@@ -954,6 +997,63 @@ void cInterface::Move()
     // 
     m_aDialogText[0].Move();
     m_aDialogText[1].Move();
+
+    // 
+    const coreFloat fFragment = g_pGame->GetTimeTable()->GetTimeEvent() - m_fFragmentStart;
+    if((fFragment <= INTERFACE_FRAGMENT_DURATION) && (fFragment >= 0.0f))
+    {
+        // 
+        const coreBool bShow = (m_iFragmentNew == INTERFACE_FRAGMENT_TYPE_SHOW);
+
+        // 
+        const coreFloat fVisibility = bShow ? 1.0f : (MIN(fFragment, INTERFACE_FRAGMENT_DURATION - fFragment, 1.0f / INTERFACE_FRAGMENT_SPEED) * INTERFACE_FRAGMENT_SPEED);
+        const coreFloat fAnimation  = STEPBR(1.0f, 2.0f, fFragment);
+
+        // 
+        const coreFloat fFragmentAlpha = BLENDH3(fVisibility);   // no inside-alpha
+        const coreFloat fOffset        = coreFloat(Core::System->GetTotalTime()) * 0.1f;
+
+        if(!bShow)
+        {
+            if((m_iFragmentState == 0u) && (fFragment >= 2.0f))
+            {
+                m_iFragmentState = 1u;
+
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_FRAGMENT_IMPACT);
+            }
+
+            const coreVector2 vDir = coreVector2(1.0f,1.0f).Normalized();
+            const coreVector2 vPos = MapToAxisInv(FRAGMENT_POSITION(m_iFragmentNew), vDir) * INTERFACE_FRAGMENT_SCALE;
+
+            m_aFragment[m_iFragmentNew].SetPosition(vPos + ((m_iFragmentNew == 8u) ? coreVector2(0.0f,1.0f) : vPos.Normalized()) * LERP(1.5f, 0.0f, fAnimation) + m_aFragmentTable[0].GetPosition());
+
+            g_pPostProcessing->SetChroma(fFragmentAlpha);
+            g_pGame->SetMusicVolume(LERP(1.0f, 0.2f, fVisibility));
+        }
+
+        // 
+        for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS; ++i)
+        {
+            m_aFragment[i].SetTexOffset(coreVector2(0.0f, fOffset));
+            m_aFragment[i].SetAlpha    (fFragmentAlpha);
+            m_aFragment[i].Move();
+        }
+
+        // 
+        const coreFloat fFlash = (m_iFragmentState == 1u) ? (1.0f - STEPB(2.0f, 3.0f, fFragment)) : 0.0f;
+        m_aFragmentTable[1].SetSize(m_aFragmentTable[0].GetSize() * LERP(1.3f, 1.0f, fFlash));
+
+        // 
+        m_aFragmentTable[0].SetAlpha(fFragmentAlpha * 0.7f);
+        m_aFragmentTable[1].SetAlpha(fFragmentAlpha * fFlash);
+        m_FragmentShadow   .SetAlpha(fFragmentAlpha * 0.7f);
+
+        // 
+        m_aFragmentTable[0].Move();
+        m_aFragmentTable[1].Move();
+        m_FragmentShadow   .Move();
+    }
 
     // 
     const coreFloat fAlert = g_pGame->GetTimeTable()->GetTimeEvent() - m_fAlertStart;
@@ -1041,10 +1141,10 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 
 void cInterface::ShowMission(const cMission* pMission)
 {
-    ASSERT(pMission)
+    ASSERT(pMission && (pMission == g_pGame->GetCurMission()))
 
     // show default mission banner
-    this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("MISSION"), pMission->GetID()));
+    this->ShowMission(pMission->GetName(), PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetMissionLetters(g_pGame->GetCurMissionIndex())));
 }
 
 
@@ -1116,6 +1216,22 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
 {
     ASSERT(pBoss)
+    
+    if(pBoss->GetID() == cProjectOneBoss::ID)
+    {
+        coreUint8 iFragments = 0u;
+        for(coreUintW i = 0u; i < FRAGMENTS - 1u; ++i)
+        {
+            if(g_pSave->GetHeader().oProgress.aiFragment[i])
+                iFragments += 1u;
+        }
+
+        if(iFragments < 8u)
+        {
+            this->ShowBoss(pBoss->GetName(), Core::Language->GetString("BOSS_TITLE_HIDDEN"));
+            return;
+        }
+    }
 
     // show default boss banner
     this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
@@ -1298,9 +1414,58 @@ coreBool cInterface::IsStoryActive()const
 
 // ****************************************************************
 // 
+void cInterface::ShowFragment(const coreUint8 iNewIndex, const coreUint32 iOldBits)
+{
+    if(iNewIndex == INTERFACE_FRAGMENT_TYPE_HIDE)
+    {
+        m_fFragmentStart = INTERFACE_INVALID_START;
+        return;
+    }
+
+    for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS; ++i)
+    {
+        const coreVector2 vDir = coreVector2(1.0f,1.0f).Normalized();
+        const coreVector2 vPos = MapToAxisInv(FRAGMENT_POSITION(i), vDir) * INTERFACE_FRAGMENT_SCALE;
+
+        m_aFragment[i].SetPosition(vPos + m_aFragmentTable[0].GetPosition());
+        m_aFragment[i].SetEnabled (((iNewIndex == i) || HAS_BIT(iOldBits, i)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
+    m_fFragmentStart = g_pGame->GetTimeTable()->GetTimeEvent();
+    m_iFragmentNew   = iNewIndex;
+    m_iFragmentState = 0u;
+}
+
+void cInterface::ShowFragment(const coreUint8 iNewIndex)
+{
+    // 
+    coreUint32 iOldBits = 0u;
+    for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
+    {
+        if(g_pSave->GetHeader().oProgress.aiFragment[i])
+            ADD_BIT(iOldBits, i)
+    }
+
+    // 
+    this->ShowFragment(iNewIndex, iOldBits);
+}
+
+
+// ****************************************************************
+// 
+coreBool cInterface::IsFragmentActive()const
+{
+    // 
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fFragmentStart) <= INTERFACE_FRAGMENT_DURATION);
+}
+
+
+// ****************************************************************
+// 
 void cInterface::UpdateLayout()
 {   
-    const coreVector2 vCenter = coreVector2(0.5f,0.5f) - (g_CurConfig.Game.iHudType ? coreVector2(1.0f,1.0f) : Core::System->GetResolution().yx().MinRatio()) * 0.005f;
+    const coreVector2 vCenter = coreVector2(0.5f,0.5f) - (g_CurConfig.Game.iHudType ? coreVector2(1.0f,1.0f) : Core::System->GetResolution().yx().LowRatio()) * 0.005f;
     // TODO 1: option 0.5f-0.45f, handle aspect ratio (for outside) (also up-down)
     
     const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (cInterface::__IsFlipped() ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);

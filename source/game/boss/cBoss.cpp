@@ -190,6 +190,7 @@ void cBoss::_UpdateBoss()
                         pBullet->Deactivate(true);
     
                         d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->RefreshCooldown();
+                        d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->AddChain(100);
                     }
                 });
     
@@ -203,7 +204,7 @@ void cBoss::_UpdateBoss()
 
                     g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_HELPER);
 
-                    if(m_iHelperHit == BITLINE(BOSS_HELPERS))
+                    if(this->HasAllHelpers())
                     {
                         g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
                         {
@@ -245,6 +246,9 @@ coreBool cBoss::_ResurrectHelper(const coreUint8 iElement, const coreBool bSmoot
     ADD_BIT(m_iHelperSpawn, iIndex);
 
     // 
+    if(!g_pGame->IsFragment()) return false;
+
+    // 
     cHelper* pHelper = g_pGame->GetHelper(iElement);
 
     // 
@@ -269,6 +273,20 @@ void cBoss::_KillHelper(const coreUint8 iElement, const coreBool bAnimated)
 
     // 
     pHelper->Kill(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+void cBoss::_CreateFragment(const coreUint8 iType)
+{
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    const coreUintW iBossIndex    = 0u;
+
+    if(!HAS_BIT(g_pSave->GetHeader().oProgress.aiFragment[iMissionIndex], iBossIndex))
+    {
+        g_pGame->GetItemManager()->AddItem<cFragmentItem>(this->GetPosition().xy(), iType, iMissionIndex, iBossIndex);
+    }
 }
 
 

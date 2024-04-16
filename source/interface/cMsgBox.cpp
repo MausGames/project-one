@@ -197,6 +197,11 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
 
     // execute callback
     nLocal(a, b);
+    
+    
+    
+        Core::Input->ClearButtonAll();
+        
 
     // 
     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, (a == MSGBOX_ANSWER_NO) ? SOUND_MENU_MSGBOX_NO : SOUND_MENU_MSGBOX_YES);

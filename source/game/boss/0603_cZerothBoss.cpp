@@ -27,10 +27,12 @@
 // schnee sollte erst nach bounce-transition verschwinden, als zusätzliche steigerung dieser phase
 // transition in drag-phase kann nicht an jeder schnittstelle passieren, weil das plötzliche bremsen dann komisch wirkt (zb. nach der bogen-bewegung)
 // spieler kann bei schwing-phase einfach stehen bleiben und alle rand-geschosse werden sauber zerstört, aber der zusätzliche boss-angriff bringt ihn dazu sich zu bewegen (geschwindigkeit der rand-geschosse sollte nicht weiter erhöht werden, weil es sonst zu schwer wird in kombination mit boss-angriff)
+// TODO 1: hard mode: gleiten
 // TODO 1: decent smoke on ice cubes ?
 // TODO 1: boss dreht sich in erster phase permanent, derzeitige rotation on top
 // TODO 1: stone outside of boss should also be ice cube ?
 // TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: ACHIEVEMENT: name (), description (), destroy one ice cube with another ice cube / ###
 // TODO 1: ice-cube damage in coop will be halved, but should not
 // TODO 1: in coop: vor-letzter eiswürfel fängt spieler 1, letzter fängt spieler 2, bei bremsung vor ende von herumzieh phase reißt spieler 2 ab und verliert morgenstern
 // TODO 1: leichtes zucken vom boss(?) wenn er vom stern ge-grabt wird (wenn das ok is und nur ein zufall weil spieler-speed auf 0 gesetzt wird, dann mit effekt kaschieren)

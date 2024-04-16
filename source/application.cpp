@@ -25,11 +25,6 @@ const coreBool        CoreApp::Settings::Graphics::StereoRender = false;
 // setup the application
 void CoreApp::Setup()
 {
-    if(CoreApp::Settings::Platform::SteamAppID == 1624320u)
-    {
-        Core::Platform->DefineAchievement("test", "TEST_ACHIEVEMENT");
-    }
-
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_flip_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_flip_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
@@ -73,7 +68,16 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("environment_tree_02.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_tree_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_tree_03.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_tree_03.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("fragment_01.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_02.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_03.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_03.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_04.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_04.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_05.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_05.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_06.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_06.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_07.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_07.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_08.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_08.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("fragment_09.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_09.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_arrow.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_arrow_long.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow_long.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_low.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_low.md3");
@@ -135,39 +139,40 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_core_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_core_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_core_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_core_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_core.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_core.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_inside_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_inside_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_inside_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_inside_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_inside_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_inside_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_outside_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_outside_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_outside_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_outside_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_outside_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_outside_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_volume.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_volume.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_body_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_body_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_body_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_body_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_claw_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_claw_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_claw_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_claw_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_body_high.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_body_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_body_low.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_body_low.md3");   // TODO 1: clusters currently for explosion, still required ?
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_track.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_track.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_body_low.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_body_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_track_left.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_track_left.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_track_right.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_track_right.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_01_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_02_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_01_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_02_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_01_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_02_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_01_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_02_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_01_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_02_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -214,6 +219,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_projectone_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_projectone_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_projectone_volume.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_projectone_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
 
+    Core::Manager::Resource->Load<coreTexture>("effect_aim.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_aim.png");
     Core::Manager::Resource->Load<coreTexture>("effect_arrow.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_arrow.png");
     Core::Manager::Resource->Load<coreTexture>("effect_energy.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
     Core::Manager::Resource->Load<coreTexture>("effect_headlight_point.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_headlight_point.png");
@@ -283,15 +289,16 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_tree_03_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_03_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_rain.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_rain.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("fragment_01.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_01.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_02.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_02.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_03.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_03.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_04.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_04.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_05.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_05.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_06.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_06.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_07.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_07.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_08.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_08.png");
-    Core::Manager::Resource->Load<coreTexture>("fragment_09.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fragment_09.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_01.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_01.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_02.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_02.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_03.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_03.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_04.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_04.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_05.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_05.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_06.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_06.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_07.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_07.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_08.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_08.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_09.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_09.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_fragment_plate.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_plate.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_luna.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_luna.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
@@ -312,16 +319,12 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_detail_02.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_04.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_04.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_helper_big_02.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big_02.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_helper_big_04.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big_04.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_helper_big_06.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big_06.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_helper_small_08.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_small_08.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_helper_small_12.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_small_12.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_fragment.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper.png");
     Core::Manager::Resource->Load<coreTexture>("menu_medal.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_medal.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_segment_boss.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_segment_boss.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_segment_wave.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_segment_wave.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("menu_unlocks.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_unlocks.png");
     Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
     Core::Manager::Resource->Load<coreTexture>("menu_worldmap.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_worldmap.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png", CORE_TEXTURE_LOAD_NEAREST);
@@ -333,14 +336,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light_single.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_LIGHT SHADER_SINGLE);
-    Core::Manager::Resource->Load<coreShader> ("effect_decal_color.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag");
+    //Core::Manager::Resource->Load<coreShader> ("effect_decal_color.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_single_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SINGLE);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light_single_inst.frag",    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT SHADER_SINGLE);
-    Core::Manager::Resource->Load<coreShader> ("effect_decal_color_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag", CORE_SHADER_OPTION_INSTANCING);
+    //Core::Manager::Resource->Load<coreShader> ("effect_decal_color_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_direct.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", SHADER_DIRECT);
@@ -480,9 +483,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_border.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_border_direct.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("menu_color.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_color.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_fragment.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_fragment.vert");
+    Core::Manager::Resource->Load<coreShader> ("menu_fragment.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_fragment.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_free.vert",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_free.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_free.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_free.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_grey.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_helper.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_helper.vert");
+    Core::Manager::Resource->Load<coreShader> ("menu_helper.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_helper.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_single.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_single.frag");
@@ -554,14 +561,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("bullet_reflect.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_reflect.wav");
     Core::Manager::Resource->Load<coreSound>("continue_tick.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_tick.wav");
     Core::Manager::Resource->Load<coreSound>("continue_accept.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_accept.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_bell.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_bell.wav");
     Core::Manager::Resource->Load<coreSound>("effect_dust.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_dust.wav");
     Core::Manager::Resource->Load<coreSound>("effect_error.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_error.wav");
     Core::Manager::Resource->Load<coreSound>("effect_fire.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_fire.wav");
     Core::Manager::Resource->Load<coreSound>("effect_fire_start.wav",    CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_fire_start.wav");
     Core::Manager::Resource->Load<coreSound>("effect_nightmare.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_nightmare.wav");
     Core::Manager::Resource->Load<coreSound>("effect_shake.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_shake.wav");
-    Core::Manager::Resource->Load<coreSound>("effect_sword_01.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_sword_01.wav");
-    Core::Manager::Resource->Load<coreSound>("effect_sword_02.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_sword_02.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_tank.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_tank.wav");
     Core::Manager::Resource->Load<coreSound>("effect_woosh.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_woosh.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_01.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_01.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_02.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_02.wav");
@@ -574,9 +581,9 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_09.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_09.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_10.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_10.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_11.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_11.wav");
-    Core::Manager::Resource->Load<coreSound>("fragment_appear.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
-    Core::Manager::Resource->Load<coreSound>("fragment_collect.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
-    Core::Manager::Resource->Load<coreSound>("fragment_helper.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
+    Core::Manager::Resource->Load<coreSound>("enemy_explosion_12.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_12.wav");
+    Core::Manager::Resource->Load<coreSound>("fragment_collect.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/fragment_collect.wav");
+    Core::Manager::Resource->Load<coreSound>("fragment_impact.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/fragment_impact.wav");
     Core::Manager::Resource->Load<coreSound>("helper.wav",               CORE_RESOURCE_UPDATE_AUTO, "data/sounds/helper.wav");
     Core::Manager::Resource->Load<coreSound>("item_collect.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/item_collect.wav");
     Core::Manager::Resource->Load<coreSound>("medal_bronze.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/medal_bronze.wav");
@@ -605,11 +612,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("player_turn.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_turn.wav");
     Core::Manager::Resource->Load<coreSound>("shield_destroy.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/shield_destroy.wav");
     Core::Manager::Resource->Load<coreSound>("shield_hit.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/shield_hit.wav");
+    Core::Manager::Resource->Load<coreSound>("ship_fly.wav",             CORE_RESOURCE_UPDATE_AUTO, "data/sounds/ship_fly.wav");
     Core::Manager::Resource->Load<coreSound>("summary_medal.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_medal.wav");
     Core::Manager::Resource->Load<coreSound>("summary_perfect.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_perfect.wav");
     Core::Manager::Resource->Load<coreSound>("summary_record.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_record.wav");
     Core::Manager::Resource->Load<coreSound>("summary_score.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_score.wav");
     Core::Manager::Resource->Load<coreSound>("summary_text.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_text.wav");
+    Core::Manager::Resource->Load<coreSound>("unlock.wav",               CORE_RESOURCE_UPDATE_AUTO, "data/sounds/unlock.wav");
     Core::Manager::Resource->Load<coreSound>("weapon_enemy.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/weapon_enemy.wav");
     Core::Manager::Resource->Load<coreSound>("weapon_ray.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/weapon_ray.wav");
 
@@ -654,10 +663,10 @@ void CoreApp::Setup()
         ->AttachShader("effect_decal_light_single.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_color_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("effect_decal.vert")
-        ->AttachShader("effect_decal_color.frag")
-        ->Finish();
+    //d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_color_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    //    ->AttachShader("effect_decal.vert")
+    //    ->AttachShader("effect_decal_color.frag")
+    //    ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_decal_inst.vert")
@@ -684,10 +693,10 @@ void CoreApp::Setup()
         ->AttachShader("effect_decal_light_single_inst.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_color_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("effect_decal_inst.vert")
-        ->AttachShader("effect_decal_color_inst.frag")
-        ->Finish();
+    //d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_color_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    //    ->AttachShader("effect_decal_inst.vert")
+    //    ->AttachShader("effect_decal_color_inst.frag")
+    //    ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_distortion.vert")
@@ -1229,6 +1238,11 @@ void CoreApp::Setup()
         ->AttachShader("menu_color.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_fragment_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_fragment.vert")
+        ->AttachShader("menu_fragment.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_free_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("menu_free.vert")
         ->AttachShader("menu_free.frag")
@@ -1237,6 +1251,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_grey_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("default_2d.vert")
         ->AttachShader("menu_grey.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_helper_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_helper.vert")
+        ->AttachShader("menu_helper.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_inner_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
