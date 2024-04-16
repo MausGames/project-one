@@ -15,7 +15,6 @@
 // TODO 3: render wind, bubble, etc. in group for multiplayer
 // TODO 1: check which operations have to be done outside of dead-check
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
-// TODO 3: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
 // TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
 // TODO 4: remove dark shading resources, if not required anymore (maybe for bonus phases)
 // TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
@@ -64,10 +63,11 @@ enum ePlayerStatus : coreUint8
     PLAYER_STATUS_DEAD           = 0x01u,   // completely removed from the game
     PLAYER_STATUS_SHIELDED       = 0x02u,   // 
     PLAYER_STATUS_GHOST          = 0x04u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x08u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x10u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x20u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x40u,   // 
+    PLAYER_STATUS_HEALER         = 0x08u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x10u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x20u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x40u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x80u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 

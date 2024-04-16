@@ -393,7 +393,10 @@ void cReplay::SaveFile(const coreChar* pcName)
     oArchive.CreateFile("body",   pBodyData,   iBodySize)      ->Compress();
 
     // 
-    oArchive.Save(coreData::UserFolder(coreData::DateTimePrint(REPLAY_FILE_FOLDER "/replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION)));
+    WARN_IF(oArchive.Save(coreData::UserFolder(coreData::DateTimePrint(REPLAY_FILE_FOLDER "/replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION))) != CORE_OK)
+    {
+
+    }
 
     Core::Log->Info("Replay (%s) saved", oArchive.GetPath());
 }

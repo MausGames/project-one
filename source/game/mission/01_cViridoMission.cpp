@@ -359,7 +359,7 @@ void cViridoMission::DisableLaser(const coreUintW iIndex, const coreBool bAnimat
     pWave ->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    if(bAnimated) for(coreUintW j = 80u; j--; ) g_pSpecialEffects->CreateSplashColor(pLaser->GetPosition() + pLaser->GetDirection() * (2.0f * I_TO_F(j - 40u)), 10.0f, 1u, COLOR_ENERGY_PURPLE);
+    if(bAnimated) for(coreUintW j = 100u; j--; ) g_pSpecialEffects->CreateSplashColor(pLaser->GetPosition() + pLaser->GetDirection() * (2.0f * (I_TO_F(j) - 49.5f)), 10.0f, 1u, COLOR_ENERGY_PURPLE);
 }
 
 

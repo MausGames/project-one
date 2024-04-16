@@ -20,6 +20,8 @@
 // TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 // TODO 1: scoring + leaderboard also needs to be version specific
 // TODO 1: iBadge needs to be handled correctly, 64-bit ? 5 badges per segment ? [SAVE_MISSIONS][SAVE_SEGMENTS]
+// TODO 1: handle unsuccessful saving (dialog box, retry, cancel, show available disc space, test for write access)
+// TODO 1: check for, and ask for import of savegame (+ whole user folder?) from demo (Steam) (could also be general, if savegame is (also) stored globally (delete copy after import)), if no save is available on startup -> needs own menu state in intro menu (show date-time of file, maybe also some meta-data (name, time played, max mission))
 
 
 // ****************************************************************

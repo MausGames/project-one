@@ -244,23 +244,6 @@ void cPlayer::Render()
     {
         // 
         cLodObject::RenderHighObject(this);
-
-#if defined(_P1_VIDEO_)
-        glDepthFunc(GL_ALWAYS);
-        // 
-        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
-            m_apWeapon[i]->Render();
-
-        // 
-        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Arrow);
-
-        // 
-        m_Arrow.Render();   // # swapped
-        m_Range.Render();
-        //m_Wind .Render();
-    glDepthFunc(GL_LEQUAL);
-#endif
     }
 }
 
@@ -275,7 +258,7 @@ void cPlayer::RenderBefore()
         m_Bubble    .Render();
         m_aShield[1].Render();
         m_Exhaust   .Render();
-        m_Wind .Render();
+        m_Wind      .Render();
     }
 }
 
@@ -292,7 +275,6 @@ void cPlayer::RenderAfter()
 {
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
-#if !defined(_P1_VIDEO_)
         // 
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
             m_apWeapon[i]->Render();
@@ -305,7 +287,6 @@ void cPlayer::RenderAfter()
         m_Arrow.Render();   // # swapped
         m_Range.Render();
         //m_Wind .Render();
-#endif
     }
 }
 
@@ -587,7 +568,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
-    if(iDamage > 0)
+    if(iDamage)
     {
         constexpr coreInt32 iReplacement = 1;
 

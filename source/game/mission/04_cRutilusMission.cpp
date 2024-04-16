@@ -24,8 +24,9 @@ cRutilusMission::cRutilusMission()noexcept
 , m_fSafeTime         (0.0f)
 , m_Wave              (RUTILUS_WAVES_RAWS)
 , m_afWaveTime        {}
-, m_iWaveActive       (0u)
+, m_vWavePos          (HIDDEN_POS)
 , m_iWaveDir          (0u)
+, m_iWaveActive       (0u)
 , m_iWaveType         (0u)
 , m_aiMoveFlip        {}
 , m_fAnimation        (0.0f)
@@ -303,6 +304,7 @@ void cRutilusMission::EnableWave(const coreUint8 iType)
 
     // 
     ADD_BIT(m_iWaveActive, RUTILUS_WAVES)
+    m_vWavePos  = HIDDEN_POS;
     m_iWaveDir  = 0u;
     m_iWaveType = iType;
 
@@ -312,6 +314,7 @@ void cRutilusMission::EnableWave(const coreUint8 iType)
         m_afWaveTime[iIndex] = fOffset;
 
         pObject->DefineModel (m_iWaveType ? m_apWaveModel[1] : m_apWaveModel[0]);
+        pObject->SetPosition (coreVector3(HIDDEN_POS, 0.0f));
         pObject->SetAlpha    (0.0f);
         pObject->SetTexSize  (m_iWaveType ? coreVector2(0.6f,2.4f) : coreVector2(0.9f,0.9f));
         pObject->SetTexOffset(coreVector2(0.0f, fOffset));
@@ -461,6 +464,33 @@ void cRutilusMission::__MoveOwnAfter()
     m_Plate.MoveNormal();
 
     // 
+    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+
+        if(!pPlayer->IsRolling())
+        {
+            const coreVector2 vPos = pPlayer->GetPosition().xy();
+
+            for(coreUintW j = 0u; j < RUTILUS_PLATES; ++j)
+            {
+                const coreObject3D& oPlate = m_aPlateRaw[j];
+                if(!oPlate.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                const coreVector2 vSize = oPlate.GetCollisionRange().xy();
+                const coreVector2 vDiff = MapToAxis(oPlate.GetPosition().xy() - vPos, oPlate.GetDirection().xy());
+
+                if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
+                {
+                    pPlayer->SetDirection(oPlate.GetDirection());
+                    pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
+                    break;
+                }
+            }
+        }
+    });
+
+    // 
     if(m_aArea[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         coreFloat fScale;
@@ -530,8 +560,9 @@ void cRutilusMission::__MoveOwnAfter()
         coreObject3D& oWave = m_aWaveRaw[i];
         if(!oWave.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        const coreVector2 vDir  = StepRotated45(GET_BITVALUE(m_iWaveDir, 2u, 0u));
-        const coreFloat   fSign = HAS_BIT(m_iWaveDir, 2u) ? -1.0f : 1.0f;
+        const coreVector2 vDir   = StepRotated45(GET_BITVALUE(m_iWaveDir, 2u, 0u));
+        const coreFloat   fSign  = HAS_BIT(m_iWaveDir, 2u) ? -1.0f : 1.0f;
+        const coreBool    bDelay = HAS_BIT(m_iWaveDir, 3u);
 
         // 
         m_afWaveTime[i].Update(0.5f * fSign);
@@ -542,13 +573,18 @@ void cRutilusMission::__MoveOwnAfter()
             SET_BIT(m_iWaveActive, i, HAS_BIT(m_iWaveActive, RUTILUS_WAVES))
 
             // 
+            if(bDelay) oWave.SetPosition(coreVector3(m_vWavePos, 0.0f));
+
+            // 
             oWave.SetDirection(coreVector3(m_iWaveType ? vDir : (coreVector2::Direction((I_TO_F(i) / I_TO_F(RUTILUS_WAVES_RAWS)) * (-0.5f*PI))), 0.0f));
         }
 
         // 
-        oWave.SetPosition(m_aWaveRaw[0].GetPosition());
-        oWave.SetSize    (m_iWaveType ? coreVector3(20.0f * m_afWaveTime[i], 80.0f, 1.0f) : (coreVector3(1.0f,1.0f,1.0f) * 30.0f * m_afWaveTime[i]));
-        oWave.SetAlpha   (MIN(1.0f - m_afWaveTime[i], 6.0f * m_afWaveTime[i], 1.0f) * (HAS_BIT(m_iWaveActive, i) ? 1.0f : 0.0f));
+        if(!bDelay) oWave.SetPosition(coreVector3(m_vWavePos, 0.0f));
+
+        // 
+        oWave.SetSize (m_iWaveType ? coreVector3(20.0f * m_afWaveTime[i], 80.0f, 1.0f) : (coreVector3(1.0f,1.0f,1.0f) * 30.0f * m_afWaveTime[i]));
+        oWave.SetAlpha(MIN(1.0f - m_afWaveTime[i], 6.0f * m_afWaveTime[i], 1.0f) * (HAS_BIT(m_iWaveActive, i) ? 1.0f : 0.0f));
     }
 
     // 
@@ -556,6 +592,36 @@ void cRutilusMission::__MoveOwnAfter()
 
     // 
     m_Wave.MoveNormal();
+
+    // 
+    if(HAS_BIT(m_iWaveActive, RUTILUS_WAVES))
+    {
+        const coreVector2 vDir  = StepRotated45(GET_BITVALUE(m_iWaveDir, 2u, 0u)).Rotated90();
+        const coreFloat   fSign = HAS_BIT(m_iWaveDir, 2u) ? 1.0f : -1.0f;
+
+        coreFloat fPower = 0.0f;
+        coreFloat fLimit = 0.0f;
+        const auto nGravityFunc = [&](cBullet* OUTPUT pBullet)
+        {
+            const coreVector2 vDiff = m_vWavePos - pBullet->GetPosition().xy();
+            const coreVector2 vPush = vDir * SIGN(coreVector2::Dot(vDiff, vDir)) * fSign;
+            const coreVector2 vMove = pBullet->GetFlyDir() * pBullet->GetSpeed() + vPush * (fPower * TIME * (60.0f/16.0f));
+
+            pBullet->SetFlyDir(vMove.Normalized());
+            pBullet->SetSpeed (vMove.Length());
+
+            if(pBullet->GetFlyTime() >= fLimit)
+                pBullet->Deactivate(true);
+        };
+
+        fPower = HAS_BIT(m_iWaveDir, 2u) ? 12.0f/*18.0f*/ : 12.0f;   // TODO 1: 12 for boss, 18 for wave ?
+        fLimit = 3.0f;
+        g_pGame->GetBulletManagerPlayer()->ForEachBullet(nGravityFunc);
+
+        fPower = HAS_BIT(m_iWaveDir, 2u) ? 0.15f : 0.1f;
+        fLimit = 6.0f;
+        g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nGravityFunc);
+    }
 
     if(m_iTeleporterActive == 1u)
     {

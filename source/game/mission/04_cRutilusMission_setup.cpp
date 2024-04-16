@@ -36,12 +36,10 @@ void cRutilusMission::__SetupOwn()
     // change background appearance (split)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
+        //cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
 
-#if !defined(_P1_VIDEO_)
-        pBackground->SetGroundDensity(0u, 0.0f);
+        //pBackground->SetGroundDensity(0u, 0.0f);
         //pBackground->SetCoverColor(COLOR_MENU_BLUE);
-#endif
 
         STAGE_FINISH_NOW
     });
@@ -87,6 +85,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
     // TODO 1: boss: spieler wird herumgedreht (mit gravitation und geschosse drehen sich auch), und beim verwenden der platte wird er in richtung forciert (eigentlich orsch)
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: effect (+ sound) when getting forced and unforced (also for boss) (not permanent, but when entering/exiting)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -172,32 +171,6 @@ void cRutilusMission::__SetupOwn()
             fTransitionTime  = 0.0f;
         }
 
-        STAGE_FOREACH_PLAYER(pPlayer, i)   // before plates change, positions may not be updated yet
-        {
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
-
-            if(!pPlayer->IsRolling())
-            {
-                const coreVector2 vPos = pPlayer->GetPosition().xy();
-
-                for(coreUintW j = 0u; j < RUTILUS_PLATES; ++j)
-                {
-                    coreObject3D& oPlate = m_aPlateRaw[j];
-                    if(!oPlate.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-                    const coreVector2 vSize = oPlate.GetCollisionRange().xy();
-                    const coreVector2 vDiff = MapToAxis(oPlate.GetPosition().xy() - vPos, oPlate.GetDirection().xy());
-
-                    if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
-                    {
-                        pPlayer->SetDirection(oPlate.GetDirection());
-                        pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
-                        break;
-                    }
-                }
-            }
-        });
-
         const coreBool bRotated = g_pGame->IsHard();
 
         if(STAGE_BEGINNING)
@@ -215,17 +188,17 @@ void cRutilusMission::__SetupOwn()
 
         if(m_iStageSub == 2u)
         {
-            m_aPlateRaw[0].SetDirection(coreVector3(coreVector2::Direction(LERPB(0.0f*PI, 0.5f*PI, MIN(fTransitionTime, 1.0f))), 0.0f));
+            this->SetPlateDirection(0u, coreVector2::Direction(LERPB(0.0f*PI, 0.5f*PI, MIN(fTransitionTime, 1.0f))));
             m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.5f, 0.75f, MIN(fTransitionTime, 1.0f)));
         }
         else if(m_iStageSub == 3u)
         {
-            m_aPlateRaw[0].SetDirection(coreVector3(coreVector2::Direction(LERPB(0.5f*PI, 1.0f*PI, MIN(fTransitionTime, 1.0f))), 0.0f));
+            this->SetPlateDirection(0u, coreVector2::Direction(LERPB(0.5f*PI, 1.0f*PI, MIN(fTransitionTime, 1.0f))));
             m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.75f, 1.0f, MIN(fTransitionTime, 1.0f)));
         }
         else if(m_iStageSub == 4u)
         {
-            m_aPlateRaw[0].SetDirection(coreVector3(coreVector2::Direction(LERPB(1.0f*PI, 1.5f*PI, MIN(fTransitionTime, 1.0f))), 0.0f));
+            this->SetPlateDirection(0u, coreVector2::Direction(LERPB(1.0f*PI, 1.5f*PI, MIN(fTransitionTime, 1.0f))));
             m_avPlateData[0].zw(coreVector2(1.0f,1.0f));
         }
         else if(m_iStageSub == 6u)
@@ -239,8 +212,8 @@ void cRutilusMission::__SetupOwn()
                 this->SetPlateOffset(0u, -0.25f);
                 this->SetPlateScale (0u, -0.5f);
 
-                m_aPlateRaw[0].SetDirection(coreVector3( 1.0f,0.0f,0.0f));
-                m_aPlateRaw[1].SetDirection(coreVector3(-1.0f,0.0f,0.0f));
+                this->SetPlateDirection(0u, coreVector2( 1.0f,0.0f));
+                this->SetPlateDirection(1u, coreVector2(-1.0f,0.0f));
             }
         }
         else if(m_iStageSub == 16u)
@@ -257,8 +230,8 @@ void cRutilusMission::__SetupOwn()
                 this->SetPlateOffset(1u,  0.5f);
                 this->SetPlateScale (1u,  0.0f);
 
-                m_aPlateRaw[2].SetDirection(coreVector3( 1.0f,0.0f,0.0f));
-                m_aPlateRaw[3].SetDirection(coreVector3(-1.0f,0.0f,0.0f));
+                this->SetPlateDirection(2u, coreVector2( 1.0f,0.0f));
+                this->SetPlateDirection(3u, coreVector2(-1.0f,0.0f));
             }
             else if((iTransitionState == 1u) && (STAGE_SUBTIME_POINT(1.0f / RUTILUS_PLATE_SPEED)))
             {
@@ -278,17 +251,17 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                this->EnablePlate(1u, 0.0f, -0.125f, 0.0f, -0.25);
-                this->EnablePlate(2u, 0.0f,  0.125f, 0.0f, -0.25);
-                this->EnablePlate(4u, 5.0f,  5.0f,   0.0f, -0.25);
+                this->EnablePlate(1u, 0.0f, -0.125f, 0.0f, -0.25f);
+                this->EnablePlate(2u, 0.0f,  0.125f, 0.0f, -0.25f);
+                this->EnablePlate(4u, 5.0f,  5.0f,   0.0f, -0.25f);
 
                 this->SetPlateOffset(0u, -0.375f);
-                this->SetPlateScale (0u, -0.25);
+                this->SetPlateScale (0u, -0.25f);
                 this->SetPlateOffset(3u,  0.375f);
-                this->SetPlateScale (3u, -0.25);
+                this->SetPlateScale (3u, -0.25f);
 
-                m_aPlateRaw[1].SetDirection(coreVector3(-1.0f,0.0f,0.0f));
-                m_aPlateRaw[2].SetDirection(coreVector3( 1.0f,0.0f,0.0f));
+                this->SetPlateDirection(1u, coreVector2(-1.0f,0.0f));
+                this->SetPlateDirection(2u, coreVector2( 1.0f,0.0f));
             }
         }
         else if(m_iStageSub >= 23u)
@@ -301,7 +274,7 @@ void cRutilusMission::__SetupOwn()
                 m_avPlateData[i].xy(coreVector2(1.0f,1.0f) * FmodRange((I_TO_F(i) - 1.5f - fConveyerTime) * 0.25f, -0.625f, 0.375f));
             }
 
-            m_aPlateRaw[4].SetDirection(m_aPlateRaw[F_TO_UI(fConveyerTime)].GetDirection());
+            m_aPlateRaw[4].SetDirection(m_aPlateRaw[F_TO_UI(fConveyerTime)].GetDirection());   // without wrapper
             m_aPlateRaw[4].SetColor3   (m_aPlateRaw[F_TO_UI(fConveyerTime)].GetColor3());
             m_avPlateData[4].xy(coreVector2(1.0f,1.0f) * LERP(0.625f, 0.375f, FRACT(fConveyerTime)));
         }
@@ -425,11 +398,6 @@ void cRutilusMission::__SetupOwn()
         for(coreUintW i = 0u; i < RUTILUS_PLATES; ++i)
             this->DisablePlate(i, false);
 
-        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
-        {
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
-        });
-
         STAGE_FINISH_NOW
     });
 
@@ -437,12 +405,10 @@ void cRutilusMission::__SetupOwn()
     // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-#if !defined(_P1_VIDEO_)
         if(STAGE_BEGINNING)
         {
-            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetGroundDensity(0u, 0.2f);
+            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetGroundDensity(0u, 0.2f);
         }
-#endif
 
         STAGE_FINISH_PLAY
     });
@@ -798,7 +764,7 @@ void cRutilusMission::__SetupOwn()
     // zwei gegner gleichzeitig mit weitem wellen-angriff funktioniert nicht, die geschosse überlagern sich zu sehr, oder bei shift kommen die angriffe zu oft
     // bei finalen wellen-angriff gegnern müssen die schon 1 mal schießen bevor sie zerstört werden können
     // TODO 1: effekt um verlangsamte objekte herum (schein)
-    // TODO 1: reduce bullet-animation + dark-animation speed (abhängig von flyspeed ?)
+    // TODO 1: reduce bullet-animation + dark-animation speed (abhängig von flyspeed ?) (auch bei boss, auch fürs rückwärts-fliegen)
     // TODO 1: player bullets sollten nicht so stark gekürzt werden
     // TODO 1: shift time-bubble to the side on disable ?
     // TODO 1: on continuous shooting, maybe half frequency and do double-shots (same speed, shifted into direction) to make navigation easier
@@ -808,6 +774,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: wenn in bubble, musik wird langsamer
     // TODO 1: vielleicht sollten gegner geschosse langsamer sein als derzeit, wenn sie in die "normale" bubble kommen am ende
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: musik langsamer und verzerrt wiedergeben, wenn man selbst verlangsamt ist ? coop ? (vielleicht mittel von beiden spielern)
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iRegisterSize = GAME_PLAYERS + 1u;
@@ -864,7 +831,7 @@ void cRutilusMission::__SetupOwn()
 
         STAGE_GET_START(2u * iRegisterSize + 4u)
             STAGE_GET_UINT_ARRAY (aiRegisterID,    iRegisterSize)
-            STAGE_GET_FLOAT_ARRAY(aiRegisterSpeed, iRegisterSize)
+            STAGE_GET_FLOAT_ARRAY(afRegisterSpeed, iRegisterSize)
             STAGE_GET_UINT       (iTransitionState)
             STAGE_GET_FLOAT      (fTransitionTime)
             STAGE_GET_FLOAT      (fAreaMove)
@@ -945,7 +912,7 @@ void cRutilusMission::__SetupOwn()
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
             }
 
-            m_fAreaScale = ParaLerp(1.0f, 0.8f, 4.2f, BLENDH3(MIN(m_fStageSubTime * 0.85f, 1.0f)));
+            this->SetAreaScale(ParaLerp(1.0f, 0.8f, 4.2f, BLENDH3(MIN(m_fStageSubTime * 0.85f, 1.0f))));
         }
         else if(m_iStageSub == 17u)
         {
@@ -1036,11 +1003,11 @@ void cRutilusMission::__SetupOwn()
                     if(aiRegisterID[i] == 0u)
                     {
                         aiRegisterID   [i] = pBullet->GetID();
-                        aiRegisterSpeed[i] = pBullet->GetSpeed();
+                        afRegisterSpeed[i] = pBullet->GetSpeed();
                     }
                     if(aiRegisterID[i] == coreUint32(pBullet->GetID()))
                     {
-                        fBase = aiRegisterSpeed[i];
+                        fBase = afRegisterSpeed[i];
                         break;
                     }
                 }
@@ -1279,6 +1246,7 @@ void cRutilusMission::__SetupOwn()
                     iTransitionState += 1u;
 
                     this->EnableWave(1u);
+                    this->SetWaveDelayed(false);
                     g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
                 }
             }
@@ -1289,7 +1257,7 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                SET_BITVALUE(m_iWaveDir, 2u, 0u, 3u)
+                this->SetWaveDirection(3u);
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
             }
         }
@@ -1301,7 +1269,7 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    ADD_BIT(m_iWaveDir, 2u)
+                    this->SetWavePull(true);
                     g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
                 }
             }
@@ -1312,7 +1280,7 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                SET_BITVALUE(m_iWaveDir, 2u, 0u, 2u)
+                this->SetWaveDirection(2u);
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
             }
         }
@@ -1344,33 +1312,7 @@ void cRutilusMission::__SetupOwn()
 
         if(HAS_BIT(m_iWaveActive, RUTILUS_WAVES))
         {
-            const coreVector2 vDir  = StepRotated45(GET_BITVALUE(m_iWaveDir, 2u, 0u)).Rotated90();
-            const coreFloat   fSign = HAS_BIT(m_iWaveDir, 2u) ? 1.0f : -1.0f;
-
-            coreFloat fPower = 0.0f;
-            coreFloat fLimit = 0.0f;
-            const auto nGravityFunc = [&](cBullet* OUTPUT pBullet)
-            {
-                const coreVector2 vDiff = pHelper->GetPosition().xy() - pBullet->GetPosition().xy();
-                const coreVector2 vPush = vDir * SIGN(coreVector2::Dot(vDiff, vDir)) * fSign;
-                const coreVector2 vMove = pBullet->GetFlyDir() * pBullet->GetSpeed() + vPush * (fPower * TIME * (60.0f/16.0f));
-
-                pBullet->SetFlyDir(vMove.Normalized());
-                pBullet->SetSpeed (vMove.Length());
-
-                if(pBullet->GetFlyTime() >= fLimit)
-                    pBullet->Deactivate(true);
-            };
-
-            fPower = HAS_BIT(m_iWaveDir, 2u) ? 18.0f : 12.0f;
-            fLimit = 3.0f;
-            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nGravityFunc);
-
-            fPower = HAS_BIT(m_iWaveDir, 2u) ? 0.15f : 0.1f;
-            fLimit = 6.0f;
-            g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nGravityFunc);
-
-            m_aWaveRaw[0].SetPosition(pHelper->GetPosition());
+            this->SetWavePosition(pHelper->GetPosition().xy());
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1517,7 +1459,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: hard mode: every small meteor splits into 4 more smaller meteors
     // TODO 1: maybe also slight color difference between different sized meteors
     // TODO 1: meteor rotation affects enemy ships spawning from it, but the offset is currently based on index which might be different each time (due to pooling) (marked with TODOs)
-    // TODO 1: kleine meteoriten (vielleicht auch mittlere) kommen mir zu klein vor
+    // TODO 1: kleine meteoriten (vielleicht auch mittlere) kommen mir zu klein vor (wurden schon vergrößert)
     // TODO 1: bei der links-rechts-links-... gruppe konnte ich ganz unten durchschlüpfen
     // TODO 1: badge: 1 ganz spezieller gegner in nem meteor, verschwindet aber nach 1 bounce
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
@@ -1526,12 +1468,13 @@ void cRutilusMission::__SetupOwn()
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
         constexpr coreUintW iNumAdds2   = 6u;
         constexpr coreUintW iNumAdds3   = 8u;
+        constexpr coreFloat fBaseScale  = 1.5f;
 
         STAGE_ADD_SQUAD(pSquad1, cMeteorEnemy, iNumMeteors)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(1, COLOR_SHIP_RED);
+                pEnemy->Configure(1, COLOR_SHIP_PURPLE);
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING);
             });
         });
@@ -1589,9 +1532,9 @@ void cRutilusMission::__SetupOwn()
                     switch(iType)
                     {
                     default: ASSERT(false)
-                    case 0u: fScale = 11.0f; fSpeed = 50.0f; iHealth = 120; break;
-                    case 1u: fScale =  3.0f; fSpeed = 40.0f; iHealth =  10; break;
-                    case 2u: fScale =  5.0f; fSpeed = 25.0f; iHealth =  50; break;
+                    case 0u: fScale = 11.0f * fBaseScale; fSpeed = 50.0f; iHealth = 120; break;
+                    case 1u: fScale =  3.0f * fBaseScale; fSpeed = 40.0f; iHealth =  10; break;
+                    case 2u: fScale =  5.0f * fBaseScale; fSpeed = 25.0f; iHealth =  50; break;
                     }
 
                     pNewEnemy->SetPosition (coreVector3(vPos,     0.0f) * FOREGROUND_AREA3);
@@ -1738,7 +1681,7 @@ void cRutilusMission::__SetupOwn()
 
                 for(coreUintW i = 0u; i < 4u; ++i)
                 {
-                    const coreVector2 vPos  = coreVector2(0.0f,1.3f) - vDir * (I_TO_F(i) * 0.4f);
+                    const coreVector2 vPos  = coreVector2(-0.5f,1.3f) - vDir * (I_TO_F(i) * 0.5f);
                     const coreVector2 vMove = vDir * 2.0f;
 
                     nSpawnMeteorFunc(vPos, vMove, 2u);
@@ -1904,7 +1847,7 @@ void cRutilusMission::__SetupOwn()
             }
             else
             {
-                const coreVector3 vOffset = pParent->GetRotation().QuatApply(coreVector3(0.0f,-3.5f,0.0f));
+                const coreVector3 vOffset = pParent->GetRotation().QuatApply(coreVector3(0.0f,-3.5f,0.0f) * fBaseScale);
 
                 pEnemy->SetPosition   (pParent->GetPosition   () + vOffset);
                 pEnemy->SetDirection  (pParent->GetDirection  ());
@@ -1919,7 +1862,7 @@ void cRutilusMission::__SetupOwn()
             const coreUintW iIndex  = aiAddIndex[i + iNumAdds2];
             const cEnemy*   pParent = pSquad1->GetEnemy(iIndex);
 
-            const coreVector3 vOffset = pParent->GetRotation().QuatApply(coreVector3(0.0f,-3.5f,0.0f));
+            const coreVector3 vOffset = pParent->GetRotation().QuatApply(coreVector3(0.0f,-3.5f,0.0f) * fBaseScale);
 
             pEnemy->SetPosition   (pParent->GetPosition   () + vOffset);
             pEnemy->SetDirection  (pParent->GetDirection  ());
@@ -1937,8 +1880,8 @@ void cRutilusMission::__SetupOwn()
                 {
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 18.0f));
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.5f);
                 }
             }
         });
@@ -1982,6 +1925,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: !!!! vielleicht teleportation mit rechenfehler (InvertedX wieder entfernen)
     // TODO 1: !!!! gegner sollten sich nicht bewegen, sie spawnen aus portalen (unsichtbar, bis erswter teleportation)
     // TODO 1: !!!! wenn portale als hindernisse wahrgenommen werden, sollten sie auch als solche funktionieren
+    // TODO 1: links und rechts teleporter, meteoriten kommen raus in unendlichkeit, sind manchmal so arranged (seitlich und von oben-schräg), dass man durch teleporter durch muss
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
@@ -2480,19 +2424,31 @@ void cRutilusMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
+        constexpr coreFloat fBaseScale = 1.5f;
+
         if(STAGE_BEGINNING)
         {
             //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
-            g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
+            //g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
         }
 
-        UNUSED STAGE_ADD_SQUAD(pSquad1, cMeteorEnemy, MESSIER_ENEMIES)
+        UNUSED STAGE_ADD_SQUAD(pSquad1, cMeteorEnemy, MESSIER_ENEMIES_SMALL)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f); // 5.0f 3.0f    
-                pEnemy->Configure(1, COLOR_SHIP_MAGENTA);
-                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_WORTHLESS);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
+                pEnemy->Configure(10, COLOR_SHIP_PURPLE);
+                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS);
+            });
+        });
+
+        UNUSED STAGE_ADD_SQUAD(pSquad2, cMeteorEnemy, MESSIER_ENEMIES_BIG)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 5.0f * fBaseScale);
+                pEnemy->Configure(50 * 100, COLOR_SHIP_PURPLE);
+                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_TOP);
             });
         });
 

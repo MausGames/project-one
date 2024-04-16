@@ -62,7 +62,6 @@
 // TODO 3: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
 // TODO 3: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
 // TODO 3: make sure shaders use 0.5,0.5 for pixel centers
-// TODO 3: check for single-channel menu_background_black
 // TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
@@ -96,7 +95,7 @@
 // TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
 // TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
 // TODO 1: should bullets create particles when shot ? especially for bosses
-// TODO 1: GL_DEPTH_CLAMP
+// TODO 3: remove unused mechanics (#ifdef would be enough) so they don't take up code and memory
 
 
 // ****************************************************************
@@ -107,7 +106,9 @@
     #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #endif
 
+#if defined(_CORE_MSVC_)
 #pragma warning(disable : 4189) // 'fBulletSpeed': local variable is initialized but not referenced
+#endif
 
 
 #define _P1_DEBUG_INPUT_ (1)
@@ -124,9 +125,6 @@
         #pragma message("Warning: Debug randomization enabled!")
     #endif
 #endif
-
-
-//#define _P1_VIDEO_ (1)
 
 
 // ****************************************************************

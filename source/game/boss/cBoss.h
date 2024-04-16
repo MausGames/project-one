@@ -19,13 +19,14 @@
 // TODO 5: boss0102, separate emitters to three objects, to make them blue
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
+// TODO 1: boss hat mit PHASE_CONTROL_TICKER noch einmal geschossen, nachdem er gestorben ist und alle geschosse zerstört wurden, sollte allgemein verhindert werden, auch bei normalen waves
 
 
 // ****************************************************************
 // boss definitions
 #define BOSS_TIMERS   (8u)    // 
 #define BOSS_COUNTERS (10u)   // 
-#define BOSS_VECTORS  (10u)   // 
+#define BOSS_VECTORS  (12u)   // 
 
 
 // ****************************************************************
@@ -37,8 +38,8 @@
 #define DHARUK_WIDTH              (0.5f)                                       // 
 #define DHARUK_HEIGHT             (0.8f)                                       // 
 
-#define TORUS_TURRETS             (6u)                                         // 
-#define TORUS_GUNNERS             (6u)                                         // 
+#define TORUS_TURRETS             (2u)                                         // 
+#define TORUS_GUNNERS             (4u)                                         // 
 #define TORUS_CHARGERS            (4u)                                         // 
 #define TORUS_DRIVERS             (6u)                                         // 
 #define TORUS_WAVERS              (4u)                                         // 
@@ -58,9 +59,9 @@
 #define LEVIATHAN_RADIUS_INNER    (10.0f)                                      // 
 #define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.6f : 4.8f)                          // 
 #define LEVIATHAN_RAY_HEIGHT      (0.2f)                                       // 
-#define LEVIATHAN_RAY_SIZE        (coreVector3(0.9f,50.0f,0.9f))               // 
+#define LEVIATHAN_RAY_SIZE        (coreVector3(1.2f,50.0f,1.2f))               // 
 #define LEVIATHAN_RAY_TEXSIZE     (coreVector2(0.5f,1.5f))                     // 
-#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(2.0f,7.0f,2.0f))                // 
+#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(2.4f,7.0f,2.4f))                // 
 #define LEVIATHAN_RAYWAVE_TEXSIZE (coreVector2(0.5f,0.5f))                     // 
 #define LEVIATHAN_TILES           (20u)                                        // 
 
@@ -72,12 +73,20 @@
 #define TIGER_DAMAGE              (70)                                         // 
 
 #define MESSIER_RINGS             (3u)                                         // 
-#define MESSIER_ENEMIES           (8u)                                         // 
+#define MESSIER_ENEMIES_SMALL     (8u)                                         // 
+#define MESSIER_ENEMIES_BIG       (8u)                                         // 
+#define MESSIER_METEOR_RANGE      (1.35f)                                      // 
+#define MESSIER_SHOOT_RATE        (1.8f)                                       // 
+#define MESSIER_SHOOT_RADIUS      (8.0f * (BULLET_SPEED_FACTOR / MESSIER_SHOOT_RATE))   // 
+#define MESSIER_SHOOT_STEP        (0.01f)                                      // 
+#define MESSIER_SHOOT_TIMES       (3u)                                         // 
 
 #define CHOL_WINGS                (4u)                                         // 
 
 #define ZEROTH_LIMBS              (6u)                                         // 
 #define ZEROTH_ICES               (2u)                                         // 
+#define ZEROTH_LIMB_HEAD          (0u)                                         // 
+#define ZEROTH_LIMB_TAIL          (3u)                                         // 
 
 #define PROJECTONE_SHIELDS        (HELPERS - 1u)                               // 
 
@@ -611,15 +620,20 @@ private:
 class cMessierBoss final : public cBoss
 {
 private:
-    coreObject3D m_aRing[MESSIER_RINGS];   // 
-    coreFlow     m_fRingTime;              // 
+    coreObject3D m_aRing[MESSIER_RINGS];             // 
+    coreFlow     m_fRingTime;                        // 
+    coreFlow     m_fRingScreen;                      // 
 
-    coreFloat m_fTimeFactor;               // 
+    coreFloat m_fTimeFactor;                         // 
+    coreUint8 m_iTimeRevert;                         // 
 
-    coreFlow m_fShootTime;                 // 
+    coreFlow   m_afShootTime[MESSIER_SHOOT_TIMES];   // 
+    coreUint32 m_aiShootTick[MESSIER_SHOOT_TIMES];   // 
 
-    coreFlow m_fAnimation;                 // 
-    coreFlow m_fRotation;                  // 
+    coreUint32 m_iTick;                              // 
+
+    coreFlow m_fAnimation;                           // 
+    coreFlow m_fRotation;                            // 
 
 
 public:
@@ -641,8 +655,8 @@ private:
     void __DisableRings(const coreBool bAnimated);
 
     // 
-    void     __AddBullet  (const coreFloat fSpeed, const coreVector2 vPosition, const coreVector2 vDirection);
-    coreBool __PhaseTicker(const coreFloat fRate);
+    void     __AddBullet  (const coreUintW iType, const coreFloat fSpeed, const coreVector2 vPosition, const coreVector2 vDirection);
+    coreBool __PhaseTicker(const coreUintW iIndex, const coreFloat fRate);
 };
 
 
@@ -689,11 +703,23 @@ private:
     coreObject3D m_Fire;                      // 
 
     coreUint8   m_aiWingState [CHOL_WINGS];   // 
-    coreFlow    m_afWingThrow [CHOL_WINGS];   // 
+    coreFlow    m_afWingTime  [CHOL_WINGS];   // 
     coreVector3 m_avWingReturn[CHOL_WINGS];   // 
+
+    coreModelPtr m_apFireModel[2];            // 
+    coreUint8    m_iFireType;                 // 
+    coreBool     m_bFireActive;               // 
+
+    coreFloat m_fWebLevel;                    // 
+    coreFloat m_fWebReverse;                  // 
+    coreUintW m_iWebIndex;                    // 
+    coreUintW m_iPathIndex;                   // 
+    coreUint8 m_iPathSide;                    // 
 
     coreFloat m_fTilt;                        // 
     coreFloat m_fFlap;                        // 
+
+    coreFloat m_fPush;                        // 
 
     coreFlow m_fAnimation;                    // 
     coreFlow m_fResurrection;                 // 
@@ -714,14 +740,20 @@ private:
     void __MoveOwn       ()final;
 
     // 
-    void __EnableFire ();
+    void __EnableFire (const coreUint8 iType);
     void __DisableFire(const coreBool bAnimated);
 
     // 
-    inline void __ChangeWing      (const coreUintW iIndex, const coreUint8 iState) {ASSERT(iIndex < CHOL_WINGS) m_aiWingState[iIndex] = iState; m_afWingThrow[iIndex] = 0.0f;}
-    inline void __ChangeWingThrow (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  1u);}
-    inline void __ChangeWingReturn(const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 11u);}
-    inline void __ChangeWingIntro (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 21u);}
+    inline void __ChangeWing       (const coreUintW iIndex, const coreUint8 iState) {ASSERT(iIndex < CHOL_WINGS) m_aiWingState[iIndex] = iState; m_afWingTime[iIndex] = 0.0f;}
+    inline void __ChangeWingInc    (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, m_aiWingState[iIndex] + 1u);}
+    inline void __ChangeWingReset  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  0u);}
+    inline void __ChangeWingIntro  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  1u);}
+    inline void __ChangeWingThrow1 (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 11u);}
+    inline void __ChangeWingThrow2 (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 21u);}
+    inline void __ChangeWingReturn (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 31u);}
+    inline void __ChangeWingPull   (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 41u);}
+    inline void __ChangeWingSpike  (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 51u);}
+    inline void __ChangeWingExplode(const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 61u);}
 
     // 
     void __ResurrectFake();
@@ -774,6 +806,9 @@ private:
     cCustomEnemy m_Body;                        // 
 
     coreObject3D m_Laser;                       // 
+    coreObject3D m_Laser2;                      // 
+    coreObject3D m_Laser2Wave;                      // 
+    coreVector2  m_vLaserDir;                   // 
 
     cCustomEnemy m_aIce[ZEROTH_ICES];           // 
 
@@ -792,14 +827,19 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn ()final;
-    void __KillOwn      (const coreBool bAnimated)final;
-    void __RenderOwnOver()final;
-    void __MoveOwn      ()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __MoveOwn       ()final;
 
     // 
     void __EnableLaser (const coreVector2 vPosition, const coreVector2 vDirection);
     void __DisableLaser(const coreBool bAnimated);
+
+    // 
+    void __EnableLaser2 (const coreUintW iLimb);
+    void __DisableLaser2(const coreBool bAnimated);
 
     // 
     void __CreateCube(const coreVector2 vPosition, const coreVector2 vDirection);

@@ -16,10 +16,8 @@ cShieldEffect::cShieldEffect()noexcept
 , m_apOwner    {}
 , m_fAnimation (0.0f)
 {
-#if !defined(_P1_VIDEO_)
     // 
     //g_pGlow->BindList(&m_ShieldList);
-#endif
 }
 
 
@@ -27,10 +25,8 @@ cShieldEffect::cShieldEffect()noexcept
 // destructor
 cShieldEffect::~cShieldEffect()
 {
-#if !defined(_P1_VIDEO_)
     // 
     //g_pGlow->UnbindList(&m_ShieldList);
-#endif
 }
 
 
@@ -178,11 +174,9 @@ cShieldManager::cShieldManager()noexcept
 // render the shield manager
 void cShieldManager::Render()
 {
-#if !defined(_P1_VIDEO_)
     //
     //for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
     //    m_aShieldEffect[i].Render();
-#endif
 }
 
 

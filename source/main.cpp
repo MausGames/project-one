@@ -54,7 +54,7 @@ void CoreApp::Init()
     LoadConfig();
 
     // load available music files
-    g_MusicPlayer.AddMusicFolder("data/music", "Secret*.ogg");
+    g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
     g_MusicPlayer.Shuffle();
     g_MusicPlayer.Control()->Play();
 
@@ -472,7 +472,7 @@ static void DebugGame()
                 oOptions.aaiSupport[i][0] = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 1u : 0u;
             }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->Activate(); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -620,8 +620,12 @@ static void DebugGame()
         {
             g_pGame->GetEnemyManager()->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
             {
+                const coreBool bInvincible = pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE);
                 pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+
                 pEnemy->TakeDamage(pEnemy->HasStatus(ENEMY_STATUS_BOSS) ? 200 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+
+                if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         }
     }

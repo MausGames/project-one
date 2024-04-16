@@ -18,6 +18,7 @@
 // TODO 1: health icons should be different, when the player has color (+ transformed to enemy)
 // TODO 4: merge wave time and boss time if possible
 // TODO 1: wave-name FÜNF is getting shifted down
+// TODO 1: add option to display outside interface near line, to handle ultrawide screens
 
 
 // ****************************************************************
@@ -119,7 +120,7 @@ public:
     void ShowMission(const coreChar*  pcMain, const coreChar* pcSub);
     void ShowMission(const cMission*  pMission);
     void ShowBoss   (const coreChar*  pcMain, const coreChar* pcSub);
-    void ShowBoss   (const cBoss*     pBoss);
+    void ShowBoss   (const cBoss*     pBoss, const coreBool bSilent = false);
     void ShowWave   (const coreChar*  pcName);
     void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);
     void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);

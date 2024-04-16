@@ -700,7 +700,7 @@ void cTorusBoss::__MoveOwn()
            (InBetweenExt(1.5f + (1.0f/3.0f), FMOD(fPrevGrind, 2.0f), FMOD(m_avVector[GRIND_VALUE].x, 2.0f)) == 1))
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                this->__EnableGunner(F_TO_UI(m_avVector[GRIND_VALUE].x) % TORUS_GUNNERS, this->GetPosition().xy());
+                this->__EnableGunner(F_TO_UI(m_avVector[GRIND_VALUE].x * 2.0f) % TORUS_GUNNERS, this->GetPosition().xy());
         }
     }
 

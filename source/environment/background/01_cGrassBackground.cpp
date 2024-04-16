@@ -74,10 +74,10 @@ cGrassBackground::cGrassBackground()noexcept
 
     // allocate reed lists
     pList1 = new coreBatchList(GRASS_REED_1_RESERVE);
-    pList1->DefineProgram("object_ground_inst_program");
+    pList1->DefineProgram("object_wave_inst_program");
 
     pList2 = new coreBatchList(GRASS_REED_2_RESERVE);
-    pList2->DefineProgram("object_ground_inst_program");
+    pList2->DefineProgram("object_wave_inst_program");
     {
         // load object resources
         coreObject3D oBase;
@@ -361,4 +361,20 @@ void cGrassBackground::__MoveOwn()
     // adjust volume of the base sound-effect
     if(m_pBaseSound->EnableRef(this))
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    
+    
+    
+    static coreFlow m_fWaveTime;
+    m_fWaveTime.Update(1.4f);
+    
+    const coreBatchList*  pGround    = m_apGroundObjectList[1];
+    const coreBool        bInstanced = pGround->IsInstanced();
+    const coreProgramPtr& pProgram   = bInstanced ? pGround->GetProgram() : pGround->List()->front()->GetProgram();
+
+    // enable the shader-program
+    if(!pProgram.IsUsable()) return;
+    if(!pProgram->Enable())  return;
+
+    // 
+    pProgram->SendUniform("u_v1Time", m_fWaveTime);
 }

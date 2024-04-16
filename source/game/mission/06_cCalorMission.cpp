@@ -19,7 +19,9 @@ cCalorMission::cCalorMission()noexcept
 , m_StarChain      (CALOR_STARS * CALOR_CHAINS)
 , m_apStarOwner    {}
 , m_avStarOffset   {}
+, m_afStarLength   {}
 , m_iStarState     (0u)
+, m_fSwingSpeed    (7.0f)
 , m_fSwingStart    (0.0f)
 , m_afSwingValue   {}
 , m_apCatchObject  {}
@@ -196,6 +198,7 @@ void cCalorMission::EnableStar(const coreUintW iIndex, const cShip* pOwner, cons
     ASSERT(pOwner)
     m_apStarOwner [iIndex] = pOwner;
     m_avStarOffset[iIndex] = vOffset;
+    m_afStarLength[iIndex] = CALOR_CHAIN_CONSTRAINT1;
 
     // 
     const auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
@@ -236,10 +239,11 @@ void cCalorMission::DisableStar(const coreUintW iIndex, const coreBool bAnimated
 
 // ****************************************************************
 // 
-void cCalorMission::StartSwing()
+void cCalorMission::StartSwing(const coreFloat fSpeed)
 {
     // 
     m_iStarState  = BITLINE(CALOR_STARS);
+    m_fSwingSpeed = fSpeed;
     m_fSwingStart = 0.0f;
 
     // 
@@ -251,6 +255,16 @@ void cCalorMission::StartSwing()
             m_afSwingValue[i] = (pStar->GetPosition().xy() - m_apStarOwner[i]->GetPosition().xy()).Angle();
         }
     }
+}
+
+// ****************************************************************
+// 
+void cCalorMission::StopSwing()
+{
+    // 
+    m_iStarState  = 0u;
+    m_fSwingSpeed = 0.0f;
+    m_fSwingStart = 0.0f;
 }
 
 
@@ -351,7 +365,7 @@ void cCalorMission::__MoveOwnMiddle()
         if(!pStar->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        m_afSwingValue[i].UpdateMod(7.0f * m_fSwingStart, 2.0f*PI);
+        m_afSwingValue[i].UpdateMod(m_fSwingSpeed * m_fSwingStart, 2.0f*PI);
 
         // 
         const cShip* pOwner = m_apStarOwner[i];
@@ -367,7 +381,7 @@ void cCalorMission::__MoveOwnMiddle()
                     const coreVector2 vDir = coreVector2::Direction(m_afSwingValue[i]) * coreVector2(i ? -1.0f : 1.0f, 1.0f);
 
                     // 
-                    pStar->SetPosition (coreVector3(pPlayer->GetPosition().xy() + vDir * CALOR_CHAIN_CONSTRAINT1, 0.0f));
+                    pStar->SetPosition (coreVector3(pPlayer->GetPosition().xy() + vDir * m_afStarLength[i], 0.0f));
                     pStar->SetDirection(coreVector3(vDir, 0.0f));
 
                     // 
@@ -379,7 +393,7 @@ void cCalorMission::__MoveOwnMiddle()
                     const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
 
                     // 
-                    pPlayer->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), CALOR_CHAIN_CONSTRAINT1), 0.0f));
+                    pPlayer->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), m_afStarLength[i]), 0.0f));
                 }
             }
             else
@@ -444,19 +458,24 @@ void cCalorMission::__MoveOwnMiddle()
                     Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                     {
                         if(!m_apCatchObject[i]) return;
+                        if(pObject->HasStatus(ENEMY_STATUS_BOSS)) return;
 
                         // 
-                        const coreBool bEnemyBig  = (pEnemy ->GetMaxHealth() >= 10);
+                        const coreBool bEnemyBig  = (pEnemy ->GetMaxHealth() >= 10) || pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild();
                         const coreBool bObjectBig = (pObject->GetMaxHealth() >= 10);
 
                         if(!bEnemyBig || bObjectBig)
                         {
                             const coreBool bOther = (pEnemy == m_apCatchObject[1u - i]);
+                            
+                            const coreBool bInvincible = pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE);
 
                             // 
                             pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pEnemy->TakeDamage  (1000, ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
+                            pEnemy->TakeDamage  (pObject->GetCurHealth() / (g_pGame->IsCoop() ? 1 : 2), ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
 
+                            if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+                            
                             // 
                             if(bOther) this->UncatchObject(1u - i);
                         }
@@ -579,14 +598,14 @@ void cCalorMission::__MoveOwnAfter()
         const cShip* pOwner = m_apStarOwner[i];
         if(pOwner)
         {
-            const cPlayer* pPlayer = g_pGame->GetPlayer(i);
+            //const cPlayer* pPlayer = g_pGame->GetPlayer(i);
 
             // 
             const coreVector2 vBase    = pOwner->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pOwner->GetDirection().xy());
             const coreVector2 vDiff    = vBase - pStar->GetPosition().xy();
             const coreVector2 vDir     = vDiff.Normalized();
             const coreFloat   fLen     = vDiff.Length();
-            const coreFloat   fTension = STEPH3(CALOR_CHAIN_CONSTRAINT2 - 5.0f, CALOR_CHAIN_CONSTRAINT2, (pPlayer == pOwner) ? fLen : 0.0f);
+            //const coreFloat   fTension = STEPH3(CALOR_CHAIN_CONSTRAINT2 - 5.0f, CALOR_CHAIN_CONSTRAINT2, (pPlayer == pOwner) ? fLen : 0.0f);
 
             // 
             for(coreUintW j = 0u; j < CALOR_CHAINS; ++j)
@@ -599,7 +618,8 @@ void cCalorMission::__MoveOwnAfter()
 
                 // 
                 pChain->SetPosition(coreVector3(vPos, 0.0f));
-                pChain->SetColor3  (LERP(COLOR_ENERGY_WHITE * 0.8f, COLOR_ENERGY_RED * 0.8f, fTension));
+                //pChain->SetColor3  (LERP(COLOR_ENERGY_WHITE * 0.8f, COLOR_ENERGY_RED * 0.8f, fTension));
+                pChain->SetColor3  (COLOR_ENERGY_WHITE * 0.8f);
                 pChain->SetAlpha   (STEPH3(1.7f, 2.2f, fLen - fOffset));
                 pChain->SetEnabled (pChain->GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             }

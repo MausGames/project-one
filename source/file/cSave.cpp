@@ -144,7 +144,10 @@ void cSave::SaveFile()
         oArchive.CreateFile("header", pHeaderData, sizeof(sHeader))->Compress();
 
         // 
-        oArchive.Save(m_sPath.c_str());
+        WARN_IF(oArchive.Save(m_sPath.c_str()) != CORE_OK)
+        {
+
+        }
 
         Core::Log->Info("Save (%s) saved", m_sPath.c_str());
         return CORE_OK;

@@ -17,6 +17,7 @@
 // TODO 3: frame-count in stream-packet can be compressed further by using delta-frames and injecting wrap-around packets at max delta
 // TODO 3: check if num of streams and snapshots and sizes per stream would exceed anything, also replayhash + bodysize (those two are referencing the second file)
 // TODO 1: snapshot data: both player positions and state (roll, feel, force, interrupt, health, dead/repair (stats), continues, scores, shoot (timer), input), bullets, (chroma (bullets)), background
+// TODO 1: handle unsuccessful saving
 
 
 // ****************************************************************

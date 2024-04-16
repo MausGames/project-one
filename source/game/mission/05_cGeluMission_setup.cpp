@@ -925,7 +925,7 @@ void cGeluMission::__SetupOwn()
     // in kreuz-tunnel, gegner von angriffen zu entkoppeln erhöhte engagement, im zweiten teil die gegner seitlich statt im tunnel bewegen zu lassen macht es weniger einfach alle zu töten, weil man fürs ausweichen nicht ständig draufhalten kann
     // TODO 1: beim start von letzter phase wackelt einmal alles bevor es sich bewegt ?
     // TODO 1: badge: one (single) stomp contains a special enemy to attack or item to collect like Dr Robotnik, in the 2. block to appear
-    // TODO 1: final phase sollte unterschiedlich schnelle linien haben, um muster zu brehcne
+    // TODO 1: final phase sollte unterschiedlich schnelle linien haben, um muster zu brechnen
     // TODO 1: blöcke müssen echte gegner sein, für bonus punkte und handling von pulse etc
     // TODO 1: move shake (and color management if not yet) to mission code, it's only visual
     // TODO 1: smoke zwischen bewegenden steinen (smoke+partikel? oder nur smoke?)
@@ -937,7 +937,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        constexpr coreFloat fStep = 0.44f;
+        constexpr coreFloat fStep = GELU_FANG_STEP;
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -1015,7 +1015,7 @@ void cGeluMission::__SetupOwn()
             const coreUintW X = iIndex % GELU_FANGS_DIMENSION;
             const coreUintW Y = iIndex / GELU_FANGS_DIMENSION;
 
-            return coreVector2(I_TO_F(X) - 2.0f, I_TO_F(Y) - 2.0f) * 0.44f;
+            return coreVector2(I_TO_F(X) - 2.0f, I_TO_F(Y) - 2.0f) * fStep;
         };
 
         const auto nSetFangPositionFunc = [&](const coreUintW iIndex, const coreVector2 vOffset)
@@ -1342,21 +1342,6 @@ void cGeluMission::__SetupOwn()
             }
 
             oFang.SetPosition(coreVector3(oFang.GetPosition().xy(), -0.1f));   // make sure player can be inside
-
-            const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
-            {
-                if(InBetween(pBullet->GetPosition().xy(), FOREGROUND_AREA * -1.05f, FOREGROUND_AREA * 1.05f))
-                {
-                    const coreVector2 vDiff = pBullet->GetPosition().xy() - oFang.GetPosition().xy();
-
-                    if(InBetween(vDiff, -oFang.GetCollisionRange().xy(), oFang.GetCollisionRange().xy()))
-                    {
-                        pBullet->Deactivate(true);
-                        if(m_iStageSub == 19u) this->DisableFang(i, true);
-                    }
-                }
-            };
-            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletFangCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
         }
 
         if((m_iStageSub >= 9u) && (m_iStageSub < 18u))
@@ -1496,10 +1481,11 @@ void cGeluMission::__SetupOwn()
     // moving everything statically is possible and feels nice, but does not add any depth (so it's only used to improve the rail-sequence)
     // in rail-sequence, make sure enemies are stretched out, so player has to move all the way, and nearly touch the sides, and enemies do not die too quickly
     // TODO 1: entferne cross movement
+    // TODO 1: add input-cache du allow quick movement, e.g. right up up right down
     // TODO 1: kugerl die verschwinden sollen, aber der spieler noch belegt, sollen erst verschwinden nachdem er wegmoved (chained at corners)
     // TODO 1: orb wave special effects
     // TODO 1: collect yellow blocks as badge (+ extra score ?)
-    // TODO 1: spieler müssen während des einflugs auf ihre plätze bewegt werden
+    // TODO 1: spieler müssen während des einflugs auf ihre plätze bewegt werden, mit rotation ? durch helfer ? (durch einsaug-effekt auf target-orbs) (auch bei boss)
     // TODO 1: helfer ist in eine der spheren und fliegt weg wenn diese zerstört wird
     // TODO 1: first bullets should start left, top, and left again
     // TODO 1: outro animation where orbs crash together (also make sure bullet creation is correctly disabled) (moved to center of screen ?) (beware of line calculation causing div0)
@@ -1507,12 +1493,17 @@ void cGeluMission::__SetupOwn()
     // TODO 1: get pushed back to old sphere when crashing into enemy
     // TODO 1: near the end towards 2x2, the vertical middle line is not crossed that often, should be improved
     // TODO 1: effekt, wenn spieler eine linie entlang-rast
+    // TODO 1: kleiner funken-effekt wenn spieler eine bewegung macht (auch bei hin und her) (auch bei boss)
     // TODO 1: in 3. grid, 2/2+2/3 (X/Y, start 0, oben links) is ne todesfalle
-    // TODO 1: grüne geschosse kamen nach punktevergabe am ende noch
+    // TODO 1: irgendetwas mit dem linien-wechsel machen, wenn man gleich danach versuchen muss nem angriff auszuweichen, vielleicht wechsel in zwei schritten, alle linien kommen zurück und blinkende verschwinden dann (1s)
+    // TODO 1: sollen linien am ende mergen ? 2x2 > 2x1, dann könnten auch 4 verbindungen am ende bleiben, vielleicht sollten gegner die den übergang verursachen immer vom mittel 2x2 angegriffen werden, wodurch man immer ausweichen kann
+    // TODO 1: gegner am ende halten irgendwie nix aus (vielleicht verdoppeln und dicht hintereinander)
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
+        constexpr coreUintW iOrbNum = 16u;
+        STATIC_ASSERT(iOrbNum <= GELU_ORBS)
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -1559,19 +1550,19 @@ void cGeluMission::__SetupOwn()
 
         const auto nPosFromFunc = [](const coreUintW iIndex)
         {
-            ASSERT(iIndex < GELU_ORBS)
-            return coreVector2::Direction(I_TO_F(iIndex) / I_TO_F(GELU_ORBS - 1u) * (9.0f*PI)) * FOREGROUND_AREA * 2.0f;   // -1u looks better
+            ASSERT(iIndex < iOrbNum)
+            return coreVector2::Direction(I_TO_F(iIndex) / I_TO_F(iOrbNum - 1u) * (9.0f*PI)) * FOREGROUND_AREA * 2.0f;   // -1u looks better
         };
 
         const auto nPosToFunc = [](const coreUintW iIndex)
         {
-            ASSERT(iIndex < GELU_ORBS)
+            ASSERT(iIndex < iOrbNum)
             return coreVector2(I_TO_F(iIndex % 4u) - 1.5f, I_TO_F(iIndex / 4u) - 1.5f) * FOREGROUND_AREA * fOrbLen;
         };
 
         const auto nLineIndexFunc = [](coreUintW iOrb1, coreUintW iOrb2)
         {
-            ASSERT((iOrb1 < GELU_ORBS) && (iOrb2 < GELU_ORBS))
+            ASSERT((iOrb1 < iOrbNum) && (iOrb2 < iOrbNum))
 
             if(iOrb1 > iOrb2) std::swap(iOrb1, iOrb2);
             ASSERT(iOrb1 != iOrb2)
@@ -1633,7 +1624,7 @@ void cGeluMission::__SetupOwn()
             else if(STAGE_SUB(42u)) STAGE_RESURRECT(pSquad1, 82u, 90u)
             else if(STAGE_SUB(43u))
             {
-                for(coreUintW i = 0u; i < GELU_ORBS; ++i)
+                for(coreUintW i = 0u; i < iOrbNum; ++i)
                     this->DisableOrb(i, true);
 
                 STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
@@ -1720,19 +1711,21 @@ void cGeluMission::__SetupOwn()
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
-                pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().xy() * vFactor + vOffset, 0.0f));
+                pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().xy() * vFactor + vOffset, 0.0f));   // remove interpolation-delay
             });
         }
 
         if(STAGE_BEGINNING)
         {
-            for(coreUintW i = 0u; i < GELU_ORBS; ++i)
+            for(coreUintW i = 0u; i < iOrbNum; ++i)
                 this->EnableOrb(i);
+
+            this->SetLineMode(0u);
         }
 
         if(STAGE_TIME_BEFORE(3.0f))
         {
-            for(coreUintW i = 0u; i < GELU_ORBS; ++i)
+            for(coreUintW i = 0u; i < iOrbNum; ++i)
                 m_aOrbRaw[i].SetPosition(coreVector3(LERPB(nPosFromFunc(i), nPosToFunc(i), CLAMP(m_fStageTime - 2.0f * (1.0f - (I_TO_F(i) / I_TO_F(GELU_ORBS - 1u))), 0.0f, 1.0f)), 0.0f));
         }
         else if(STAGE_TIME_POINT(3.0f))
@@ -1740,7 +1733,7 @@ void cGeluMission::__SetupOwn()
             for(coreUintW i = 0u; i < GELU_LINES; ++i)
                 this->EnableLine(i);
 
-            for(coreUintW i = 0u; i < GELU_ORBS; ++i)
+            for(coreUintW i = 0u; i < iOrbNum; ++i)
                 m_aOrbRaw[i].SetPosition(coreVector3(nPosToFunc(i), 0.0f));
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
@@ -1755,7 +1748,7 @@ void cGeluMission::__SetupOwn()
         {
             const auto nChangeTargetFunc = [&](const coreUintW iIndex, const coreUint32 iNewTarget)
             {
-                ASSERT(iNewTarget < GELU_ORBS)
+                ASSERT(iNewTarget < iOrbNum)
 
                 if(this->IsOrbEnabled(iNewTarget) && (!this->IsOrbEnabled(aiTarget[iIndex]) || m_aLineRaw[nLineIndexFunc(aiTarget[iIndex], iNewTarget)].IsEnabled(CORE_OBJECT_ENABLE_ALL)))
                     aiTarget[iIndex] = iNewTarget;
@@ -1778,23 +1771,29 @@ void cGeluMission::__SetupOwn()
                 const coreUint8   y      = (aiTarget[i] / 4u);
                 const sGameInput* pInput = pPlayer->GetInput();
 
-                if(SIGNUM(avOldMove[i].x) != SIGNUM(pInput->vMove.x))
+                const coreVector2 vDiff1 = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();
+                if(vDiff1.LengthSq() < POW2(3.0f))
                 {
-                         if((x > 0u) && (pInput->vMove.x < 0.0f)) nChangeTargetFunc(i, aiTarget[i] - 1u);
-                    else if((x < 3u) && (pInput->vMove.x > 0.0f)) nChangeTargetFunc(i, aiTarget[i] + 1u);
-                }
-                if(SIGNUM(avOldMove[i].y) != SIGNUM(pInput->vMove.y))
-                {
-                         if((y > 0u) && (pInput->vMove.y < 0.0f)) nChangeTargetFunc(i, aiTarget[i] - 4u);
-                    else if((y < 3u) && (pInput->vMove.y > 0.0f)) nChangeTargetFunc(i, aiTarget[i] + 4u);
+                    if(SIGNUM(avOldMove[i].x) != SIGNUM(pInput->vMove.x))
+                    {
+                             if((x > 0u) && (pInput->vMove.x < 0.0f)) nChangeTargetFunc(i, aiTarget[i] - 1u);
+                        else if((x < 3u) && (pInput->vMove.x > 0.0f)) nChangeTargetFunc(i, aiTarget[i] + 1u);
+
+                        avOldMove[i].x = pInput->vMove.x;
+                    }
+                    if(SIGNUM(avOldMove[i].y) != SIGNUM(pInput->vMove.y))
+                    {
+                             if((y > 0u) && (pInput->vMove.y < 0.0f)) nChangeTargetFunc(i, aiTarget[i] - 4u);
+                        else if((y < 3u) && (pInput->vMove.y > 0.0f)) nChangeTargetFunc(i, aiTarget[i] + 4u);
+
+                        avOldMove[i].y = pInput->vMove.y;
+                    }
                 }
 
-                avOldMove[i] = pInput->vMove;
-
-                const coreVector2 vDiff = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(!vDiff.IsNull())
+                const coreVector2 vDiff2 = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();
+                if(!vDiff2.IsNull())
                 {
-                    const coreVector2 vPos = pPlayer->GetPosition().xy() + vDiff.Normalized() * (3.0f * pPlayer->CalcMoveSpeed() * TIME * SmoothTowards(vDiff.Length(), 3.0f));
+                    const coreVector2 vPos = pPlayer->GetPosition().xy() + vDiff2.Normalized() * (3.0f * pPlayer->CalcMoveSpeed() * TIME * SmoothTowards(vDiff2.Length(), 3.0f));
                     pPlayer->SetPosition(coreVector3(vPos, 0.0f));
                 }
             });
@@ -1877,9 +1876,9 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        if(STAGE_TIME_AFTER(3.5f))
+        if(STAGE_TIME_AFTER(3.5f) && !STAGE_CLEARED)
         {
-            if(STAGE_TICK_FREE(9.0f/4.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
+            if(STAGE_TICK_FREE(9.0f/4.0f, 0.0f))
             {
                 const auto nShootFunc = [&](const coreVector2 vPos, const coreVector2 vDir)
                 {
@@ -1940,11 +1939,11 @@ void cGeluMission::__SetupOwn()
     {
         //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
 
-        for(coreUintW i = 0u; i < GELU_LINES; ++i)
-            this->DisableLine(i, false);
-
         for(coreUintW i = 0u; i < GELU_ORBS; ++i)
             this->DisableOrb(i, false);
+
+        for(coreUintW i = 0u; i < GELU_LINES; ++i)
+            this->DisableLine(i, false);
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -1992,7 +1991,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: enemies in the block wave need to have more variety per zone
     // TODO 1: how to show player that touching blocks is harmless, energy-effect is usually perceived as bad
     // TODO 1: dance dance revolution as badge (+ extra score ?)
-    // TODO 1: show an effect when you cannot rotate (on player)
+    // TODO 1: show an effect when you cannot rotate (on player) (+ effect on enter/exit + sound)
     // TODO 1: N ms delay wenn man drehen will während man geblockt ist, in dem drehung doch noch umgesetzt wird wenn man dann rausfliegt
     // TODO 1: sollte nicht über lava sein wegen kontrast der blöcke
     // TWIST: (boss?) line of blocks fom left and right at the same time, but with different direction, can crush player
@@ -2000,7 +1999,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        constexpr coreFloat fStep      = 0.36f;
+        constexpr coreFloat fStep      = GELU_WAY_STEP;
         constexpr coreFloat fStepDelay = 0.067f;
 
         STAGE_ADD_PATH(pPath1)
@@ -2057,9 +2056,9 @@ void cGeluMission::__SetupOwn()
         {
             for(coreUintW i = iCreateStart; i < GELU_WAYS; ++i)
             {
-                const coreObject3D* pGenerate = (*m_Way.List())[i];
+                const coreObject3D* pWay = this->GetWay(i);
 
-                if(!pGenerate->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+                if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
                     iCreateStart = i + 1u;
                     this->EnableWay(i, vPosition, vDirection);
@@ -2203,7 +2202,7 @@ void cGeluMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < GELU_WAYS; ++i)
         {
-            coreObject3D* pWay = (*m_Way.List())[i];
+            coreObject3D* pWay = this->GetWay(i);
             if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, i)) continue;
 
             const coreVector2 vOldPos = pWay->GetPosition().xy();
@@ -2216,52 +2215,7 @@ void cGeluMission::__SetupOwn()
                 iCreateStart = MIN(iCreateStart, i);
                 this->DisableWay(i, false);
             }
-
-            if(coreVector2::Dot(g_pGame->FindPlayerSide(pWay->GetPosition().xy())->GetDirection().xy(), pWay->GetDirection().xy()) > 0.9f)
-            {
-                REMOVE_BIT(m_iWayVisible, i)
-            }
-            else
-            {
-                ADD_BIT(m_iWayVisible, i)
-
-                const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet)
-                {
-                    const coreVector2 vDiff = pBullet->GetPosition().xy() - pWay->GetPosition().xy();
-
-                    if(InBetween(vDiff, -pWay->GetCollisionRange().xy(), pWay->GetCollisionRange().xy()))
-                        pBullet->Deactivate(true);
-                };
-                g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletWayCollFunc);
-                g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletWayCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
-            }
         }
-
-        STAGE_FOREACH_PLAYER(pPlayer, i)   // copied from group "force rotation"
-        {
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
-
-            if(!pPlayer->IsRolling())
-            {
-                const coreVector2 vPos = pPlayer->GetPosition().xy();
-
-                for(coreUintW j = 0u; j < GELU_WAYS; ++j)
-                {
-                    const coreObject3D* pWay = (*m_Way.List())[j];
-                    if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, i) || pWay->GetAlpha()) continue;
-
-                    const coreVector2 vSize = pWay->GetCollisionRange().xy();
-                    const coreVector2 vDiff = MapToAxis(pWay->GetPosition().xy() - vPos, pWay->GetDirection().xy());
-
-                    if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
-                    {
-                        pPlayer->SetDirection(pWay->GetDirection());
-                        pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
-                        break;
-                    }
-                }
-            }
-        });
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -2531,8 +2485,7 @@ void cGeluMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
-            c_cast<coreFloat&>(g_pEnvironment->GetSpeed()) = 0.0f;                 
+            g_pEnvironment->SetTargetSpeedNow(0.0f);
         }
 
         STAGE_BOSS(m_Chol, {60.0f, 120.0f, 180.0, 240.0f})

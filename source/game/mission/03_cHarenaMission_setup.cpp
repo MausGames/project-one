@@ -79,7 +79,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: analysieren ob order-wave verbessert werden muss (e.g. schräge bewegungen am ende erlauben ? könnte gschissener, aber schwerer sein (gut gegen ende))
     // TODO 1: change pattern of stutter wave ?
     // TODO 1: adjust aim function nAimFunc, it was not updated after production-phase
-    // TODO 1: check the order of the sub-wave, I'm still not happy, especially lines in 2 and 3 are too similar
+    // TODO 1: check the order of the sub-wave, I'm still not happy, especially lines in 2 and 3 are too similar (there were some changes, now 2 is similar to the boss waves)
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     m_aInsanityStage[0] = [this]()
     {
@@ -179,7 +179,7 @@ void cHarenaMission::__SetupOwn()
             constexpr coreUint32 iGroupC = coreMath::RotateLeft32(0b0000'1111'0000'0000u, 0u % iRange);
             constexpr coreUint32 iGroupD = coreMath::RotateLeft32(0b1111'0000'0000'0000u, 0u % iRange);
 
-            if(FRACT(fChangeTime * 1.1f) < FRACT(fChangeTimePrev * 1.1f))
+            if(FRACT(fChangeTime * 1.05f) < FRACT(fChangeTimePrev * 1.05f))
             {
                 iChangeCount += 1u;
 
@@ -275,7 +275,7 @@ void cHarenaMission::__SetupOwn()
 
                 STAGE_FOREACH_PLAYER(pPlayer, i)
                 {
-                    if(pPlayer->GetPosition().x < pEnemy->GetPosition().x + 5.0f) bPast = false;
+                    if(pPlayer->GetPosition().x < pEnemy->GetPosition().x + 10.0f) bPast = false;
                 });
 
                 if(bPast) ADD_BIT(iStateActive, i % iRange)
@@ -648,6 +648,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: finale phase ist vielleicht etwas zu schnell (oder steigt zu schnell an)
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     // TODO 1: big can change, like in tiger boss, just (iBig << 1u), maybe not on the first 1-2 hits
+    // TODO 1: coop: jeder muss einem anderen gegner folgen (4+4 bei 8er gruppe), oder ein gegner muss innerhalb des zeitlimits von beiden erwischt werden!
     m_aInsanityStage[1] = [this]()
     {
         constexpr coreUintW iNumEnemies = 8u;
@@ -998,6 +999,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: die anvisierenden gegner könnten sich vom spieler weg-drehen, is weniger nervig
     // TODO 1: eine der star bewegenden gruppen könnte sich eher gegen flugrichtung weg-werfen
     // TODO 1: bewegende in der luft sind schwer von damaging gegnern zu unterscheiden (besonders die einzelnen später), vielleicht geschwindigkeit reduzieren
+    // TODO 1: coop: abwechselnd gegner treffen
     m_aInsanityStage[2] = [this]()
     {
         constexpr coreUintW iNumEnemies = 61u;

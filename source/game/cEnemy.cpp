@@ -15,6 +15,7 @@ cEnemy::cEnemy()noexcept
 : m_fLifeTime       (0.0f)
 , m_fLifeTimeBefore (0.0f)
 , m_iLastAttacker   (0u)
+, m_bWasDamaged     (false)
 {
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
@@ -61,6 +62,9 @@ void cEnemy::Move()
         // 
         m_fLifeTimeBefore = m_fLifeTime;
         m_fLifeTime.Update(1.0f);
+
+        // 
+        m_bWasDamaged = false;
 
         // call individual move routines
         this->__MoveOwn();
@@ -117,31 +121,24 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
+        // 
+        m_bWasDamaged = (m_iCurHealth != 0) && (iDamage != 0);
+
         // forward to parent
         if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
-        if(iDamage > 0)
+        if(iDamage)
         {
             // 
             const coreInt32 iPower = (bMulti || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
-            const coreInt32 iTaken = this->_TakeDamage(iDamage * iPower, iElement, vImpact) / iPower;
+            const coreInt32 iTaken = ABS(this->_TakeDamage(iDamage * iPower, iElement, vImpact) / iPower);
             ASSERT(!(this->GetMaxHealth() % iPower))
 
             if(iTaken)
             {
                 // 
-                this->RefreshColor();
-                this->InvokeBlink();
-
-                // 
-                if(this->IsParent())
-                {
-                    FOR_EACH(it, m_apMember)
-                    {
-                        (*it)->RefreshColor(this->GetCurHealthPct());
-                        (*it)->InvokeBlink();
-                    }
-                }
+                this->RefreshColorAll();
+                this->InvokeBlinkAll();
 
                 if(pAttacker)
                 {
@@ -337,6 +334,86 @@ void cEnemy::ResetProperties()
     m_iStatus = ENEMY_STATUS_DEAD;
 }
 
+// ****************************************************************
+// 
+void cEnemy::RefreshColorAll(const coreFloat fFactor)
+{
+    // 
+    this->RefreshColor(fFactor);
+
+    // 
+    if(this->IsParent())
+    {
+        FOR_EACH(it, m_apMember) (*it)->RefreshColor(fFactor);
+    }
+
+}
+void cEnemy::RefreshColorAll()
+{
+    // 
+    this->RefreshColorAll(this->GetCurHealthPct());
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::InvokeBlinkAll()
+{
+    // 
+    this->InvokeBlink();
+
+    // 
+    if(this->IsParent())
+    {
+        FOR_EACH(it, m_apMember)(*it)->InvokeBlink();
+    }
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::ChangeToBottom()
+{
+    // 
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    {
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM) && !HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP))
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+    }
+
+    // 
+    ADD_FLAG   (m_iStatus, ENEMY_STATUS_BOTTOM)
+    REMOVE_FLAG(m_iStatus, ENEMY_STATUS_TOP)
+}
+
+void cEnemy::ChangeToTop()
+{
+    // 
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    {
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM) && !HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP))
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+    }
+
+    // 
+    REMOVE_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM)
+    ADD_FLAG   (m_iStatus, ENEMY_STATUS_TOP)
+}
+
+void cEnemy::ChangeToNormal()
+{
+    // 
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    {
+        if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM) || HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP))
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+    }
+
+    // 
+    REMOVE_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM)
+    REMOVE_FLAG(m_iStatus, ENEMY_STATUS_TOP)
+}
+
 
 // ****************************************************************
 // 
@@ -418,6 +495,9 @@ void cEnemy::_SetParent(cEnemy* pParent)
         pParent->m_apMember.insert(this);
         pParent->RemoveStatus(ENEMY_STATUS_CHILD);
     }
+
+    // 
+    this->RefreshColor((pParent ? pParent : this)->GetCurHealthPct());
 }
 
 

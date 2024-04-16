@@ -762,10 +762,6 @@ coreBool cGame::__HandleIntro()
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
             });
-
-#if defined(_P1_VIDEO_)
-            g_pPostProcessing->SetWallOpacity(CLAMP(1.35f * (m_fTimeInOut-GAME_INTRO_OFFSET), 0.0f, 1.0f));
-#endif
         }
     }
 

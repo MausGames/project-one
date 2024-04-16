@@ -25,6 +25,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_fShakeStrength   (0.0f)
 , m_iShakeCount      (0u)
 , m_fFreezeTime      (0.0f)
+, m_iEffectCount     (0u)
 , m_iBreakupCount    (0u)
 , m_bActive          (false)
 {
@@ -239,7 +240,7 @@ void cSpecialEffects::Move()
 void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -259,7 +260,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreF
 void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -279,7 +280,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFl
 void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -299,7 +300,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreF
 void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -324,7 +325,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3 vPosition, const coreVec
     ASSERT(vDirection.IsNormalized())
 
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -346,7 +347,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVect
     ASSERT(vDirection.IsNormalized())
 
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -369,7 +370,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVect
 void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -389,7 +390,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreF
 void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -412,7 +413,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFl
 void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -433,7 +434,7 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFl
 void cSpecialEffects::CreateWhirlDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
-    const coreFloat fBase = Core::Rand->Float(-PI, PI);
+    const coreFloat fBase = this->__GetEffectBase();
     const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
 
     // 
@@ -907,9 +908,20 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 
 // ****************************************************************
 // 
+coreFloat cSpecialEffects::__GetEffectBase()
+{
+    // 
+    return Core::Rand->Float(-PI, PI);
+    //m_iEffectCount = (m_iEffectCount + 13u) % 32u;
+    //return (0.0625f*PI) * I_TO_F(m_iEffectCount);
+}
+
+
+// ****************************************************************
+// 
 coreVector2 cSpecialEffects::__GetBreakupSide()
 {
     // 
-    if(++m_iBreakupCount >= 8u) m_iBreakupCount = 0u;
-    return coreVector2::Direction(0.25f*PI * (I_TO_F(m_iBreakupCount) + 0.5f));
+    m_iBreakupCount = (m_iBreakupCount + 3u) % 8u;
+    return coreVector2::Direction((0.25f*PI) * (I_TO_F(m_iBreakupCount) + 0.5f));
 }

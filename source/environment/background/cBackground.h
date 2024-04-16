@@ -35,6 +35,7 @@
 // TODO 3: adding temporary objects can/should implicitly rotate the position ?
 // TODO 3: use __Reset in water class, instead of __OwnInit
 // TODO 3: tropfen einschlag bei moss
+// TODO 3: there is no shadow on the lava (add shadow to lava or blend on edges ?)
 
 
 // ****************************************************************

@@ -8,26 +8,43 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// dying enemies flying towards boss doesn't feel right when you yourself are flying above boss
-// all together: wind, mines, enemies, haubitze ... is just too much
+// crashing enemies should not smoke, and should be subtle, otherwise they are too annoying
+// adding the tank is just too much, so some of the attacks from enemies are therefore removed, and focus is on the enemy mechanics in combinations with the unique tank attacks
 // it is very harder to find a perfect safe-spot, because of the tank-movement
-// TODO 1: (mines need to be enemies to allow blinking, combo/chain)
-// TODO 1: in die stacheln schießen erzeugt effekt (knusprig)
-// TODO 1: implement high watermark in __AddEnemy
-// TODO 1: make sure to disable wind on boss-death (hard if necessary)
-// TODO 1: for bounce-bullets, change fly time or position, to make sure whole line disappears together (or switch to bounce count)
-// TODO 1: sting calculations only for enabled stings
+// explosion when changing weapons is hiding fade-in of new weapon
+// position change of the tank into move direction also changes the way tank-aiming interacts with the player (e.g. on side the attacks mostly hit the other side, in center it is evenly distributed, turning by 90 degree also changes the side by 90 degree)
+// after a weapon change, the new weapon needs to attack 1-2 times before enemies appear
+// the haubitze and the wizzrobe enemies work well together with their different timings (especially when enabled groups are completely separate and on the border, player has to switch or time perfectly for a multi-kill)
+// rotating side-movement with laser-weapon changes the primary attack direction (which is very apparent for this weapon)
+// using the laser-weapon with the mole enemies, it is very important the laser color is distinct from the mole color (the laser had the same color before, and it was so confusing)
+// tower enemies should be very simple, as they can damage the player besides the tank weapon for the first time, so complex setups can overwhelm the player (especially moving enemies were too much)
+// deactivated spike-plates should indicate the next enemies to spawn
+// the child enemies need to be killed fully to cause damage to the boss, which adds a bit more depth tho this sub-phase, especially when also evading the wave-attack
+// alle angriffe, außer die raketen, erscheinen an der einschlags-stelle, ein teppich von der anderen seite zum ziel war zu un-balanced (zu nah am einschlag war zu leicht, zu fern zu schwer), geschosse entlang des schusses waren viel zu schwer, und ein wellen-angriff direkt vom tank aus hat die mitte komplett unbrauchbar gemacht (und hat zu sehr eingeschränkt)
+// intro gegner sollten weit auseinander stehen, damit man die abstürze gut sieht, und später kommen, damit der spieler erst versucht den tank anzugreifen (und dabei die haubitze sieht, mit der aiming mechanik die bei allen waffen gleich ist)
+// abstürzende gegner sollten explodieren vor absturz, was besonders wichtig ist um die gegner über spike-plates zu kaschieren
 // TODO 1: raupen-spuren im sand bei einigen gegner-welle davor schon (foreshadowing)
 // TODO 1: every weapon needs an own design, own number on top of it, own color?
 // TODO 1: boss sollte immer im selben background offset starten (zm. für die sinus-welle) -> baue sync-punkt ein -> ich hab eh den sinus-wert allein wegen der bewegung
 // TODO 1: arrow für schussrichtung ? (gelb)
-// TODO 1: manche gegner im level sollen schon abstürzen
+// TODO 1: manche gegner in mission sollen schon abstürzen
 // TODO 1: fixup scoring (enemies or damaging boss makes score ? how to handle chain ?)
 // TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
 // TODO 1: reifen unrealistisch animieren, damit sie bei hoher geschwindigkeit noch gut aussehen ?
 // TODO 1: hard-mode: wind + minen
-// TODO 1: make sure health is same in coop and non-coop
-// TODO 1: improve the pattern for the spike phase
+// TODO 1: make sure health is same in coop and non-coop (should already be, but check and confirm)
+// TODO 1: improve the pattern for the spike phase ((maybe) remove possible empty plates)
+// TODO 1: zweite sub-phase von child enemies sollte anders sein, nicht einfach nur richtung ändern
+// TODO 1: BIG: last phase with laser from above, multiple single shots first (fix (damit man nicht schon auf boss schießt), soll letzter schon boss treffen?), then laser which follows player, move 1-3 times over tank to win
+// TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
+// TODO 1: maybe add rotation to purple attack ? (would make this weapon more distinct, other weapons are already distinct)
+// TODO 1: farbe von raketen is auch grün, vielleicht ändern ? blau is noch frei
+// TODO 1: restliche modelle: laser schaut derzeit orsch aus, raketen-werfer, violette haubitze
+
+// TODO 1: (mines need to be enemies to allow blinking, combo/chain)
+// TODO 1: (in die stacheln schießen erzeugt effekt (knusprig))
+// TODO 1: (make sure to disable wind on boss-death (hard if necessary))
+// TODO 1: (sting calculations only for enabled stings)
 
 
 // ****************************************************************
@@ -931,7 +948,7 @@ void cTigerBoss::__SwitchWeapon(const coreUintW iType)
 
 
     // 
-    g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
+    if(!this->HasStatus(ENEMY_STATUS_DEAD)) g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
 
     m_aiCounter[WEAPON_SHOT] = 0;   // TODO 1: wave-weapon might be activated too early
     

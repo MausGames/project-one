@@ -16,7 +16,6 @@
 // TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 // TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
 // TODO 4: move parent-child system to custom-enemy, if not elsewhere required
-// TODO 3: rota cache for enemies, or make rotation more irregular ?
 
 
 // ****************************************************************
@@ -60,6 +59,7 @@ protected:
     coreFloat m_fLifeTimeBefore;   // 
 
     coreUint8 m_iLastAttacker;     // 
+    coreBool  m_bWasDamaged;       // 
 
     coreSet<cEnemy*> m_apMember;   // 
 
@@ -90,8 +90,21 @@ public:
     void ResetProperties();
 
     // 
+    void RefreshColorAll(const coreFloat fFactor);
+    void RefreshColorAll();
+    void InvokeBlinkAll ();
+
+    // 
+    inline const coreBool& WasDamaged()const {return m_bWasDamaged;}
+
+    // 
     inline coreBool IsParent()const {return !m_apMember.empty() && !HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
     inline coreBool IsChild ()const {return !m_apMember.empty() &&  HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+
+    //
+    void ChangeToBottom();
+    void ChangeToTop   ();
+    void ChangeToNormal();
 
     // 
     cPlayer*    LastAttacker        ()const;

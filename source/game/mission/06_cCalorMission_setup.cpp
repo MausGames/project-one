@@ -398,7 +398,6 @@ void cCalorMission::__SetupOwn()
     // TODO 1: schnee wirbel auf wenn man in oder aus schnee geht (vlt. nur permanent-effekt)
     // TODO 1: final enemy needs better integration (blitze, rauch, ramp-up, soll er zerstört werden, soll es helfer sein)
     // TODO 1: improve pacing/add pause before "final enemy"
-    // TODO 1: schnee hat weiterhin bullets geschluckt nach punkte-vergabe, sollte nicht sein
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
@@ -1127,10 +1126,10 @@ void cCalorMission::__SetupOwn()
 
             if(m_iStageSub < 6u)
             {
-                      if((vNewPos.x < -FOREGROUND_AREA.x * 1.4f) && (vGlobalMove.x < 0.0f)) vNewPos.x += FOREGROUND_AREA.x * 2.8f;
-                 else if((vNewPos.x >  FOREGROUND_AREA.x * 1.4f) && (vGlobalMove.x > 0.0f)) vNewPos.x -= FOREGROUND_AREA.x * 2.8f;
-                      if((vNewPos.y < -FOREGROUND_AREA.y * 1.4f) && (vGlobalMove.y < 0.0f)) vNewPos.y += FOREGROUND_AREA.y * 2.8f;
-                 else if((vNewPos.y >  FOREGROUND_AREA.y * 1.4f) && (vGlobalMove.y > 0.0f)) vNewPos.y -= FOREGROUND_AREA.y * 2.8f;
+                     if((vNewPos.x < -FOREGROUND_AREA.x * 1.4f) && (vGlobalMove.x < 0.0f)) vNewPos.x += FOREGROUND_AREA.x * 2.8f;
+                else if((vNewPos.x >  FOREGROUND_AREA.x * 1.4f) && (vGlobalMove.x > 0.0f)) vNewPos.x -= FOREGROUND_AREA.x * 2.8f;
+                     if((vNewPos.y < -FOREGROUND_AREA.y * 1.4f) && (vGlobalMove.y < 0.0f)) vNewPos.y += FOREGROUND_AREA.y * 2.8f;
+                else if((vNewPos.y >  FOREGROUND_AREA.y * 1.4f) && (vGlobalMove.y > 0.0f)) vNewPos.y -= FOREGROUND_AREA.y * 2.8f;
             }
 
             pBullet->SetPosition(coreVector3(vNewPos, 0.0f));
@@ -1187,6 +1186,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: der ruck am ende is zu stark, kA warum
     // TODO 1: ganz am anfang wird man nach unten gedrückt, aber wenn man nicht schießt kann man entkommen, geschosse am unteren rand
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: super-schnelles dodging am anfang (Super Aleste)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1311,7 +1311,6 @@ void cCalorMission::__SetupOwn()
             if(STAGE_SUBTIME_POINT(fShakeDist))
             {
                 g_pEnvironment->SetTargetSpeedNow(fOldSpeed);
-                c_cast<coreFloat&>(g_pEnvironment->GetSpeed()) = fOldSpeed;
 
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
@@ -1354,7 +1353,7 @@ void cCalorMission::__SetupOwn()
 
         if(iPushBack)
         {
-            const coreVector2 vPush = g_pEnvironment->GetDirection() * LERPB(0.5f, -1.0f, fBoost);   // also hide Y movement (forward leaning)
+            const coreVector2 vPush = g_pEnvironment->GetDirection() * (LERPB(0.5f, -1.0f, fBoost) * 60.0f * TIME);   // also hide Y movement (forward leaning)
 
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
@@ -1549,7 +1548,7 @@ void cCalorMission::__SetupOwn()
                 m_Boulder.Resurrect();
                 m_Boulder.SetPosition(coreVector3(0.0f,-1.25f,0.0f) * FOREGROUND_AREA3);
 
-                this->StartSwing();
+                this->StartSwing(7.0f);
 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);

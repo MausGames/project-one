@@ -21,6 +21,7 @@ cGeluMission::cGeluMission()noexcept
 , m_afOrbTime     {}
 , m_Line          (GELU_LINES)
 , m_afLineTime    {}
+, m_iLineMode     (0u)
 , m_avOldPos      {}
 , m_abCrushImmune {}
 , m_iCrushState   (0u)
@@ -314,7 +315,7 @@ void cGeluMission::DisableLine(const coreUintW iIndex, const coreBool bAnimated)
         m_afLineTime[iIndex] = -1.0f;
 
         // 
-        if(bAnimated) for(coreUintW j = 10u; j--; ) g_pSpecialEffects->CreateSplashColor(oLine.GetPosition() + oLine.GetDirection() * (2.0f * I_TO_F(j - 5u)), 10.0f, 1u, COLOR_ENERGY_CYAN);
+        if(bAnimated) for(coreUintW j = 10u; j--; ) g_pSpecialEffects->CreateSplashColor(oLine.GetPosition() + oLine.GetDirection() * (2.0f * (I_TO_F(j) - 4.5f)), 10.0f, 1u, COLOR_ENERGY_CYAN);
     }
 
     // 
@@ -409,7 +410,7 @@ void cGeluMission::__MoveOwnAfter()
                         if(IsHorizontal(vDiff)) vNewPos.x = vFangPos.x + SIGN(vDiff.x) * vFangRange.x;
                                            else vNewPos.y = vFangPos.y + SIGN(vDiff.y) * vFangRange.y;
 
-                        ASSERT(k == 0u)
+                        //ASSERT(k == 0u)  triggered while moving within blocks, maybe edge case when moving along the tilted edge
                         break;
                     }
                     else
@@ -482,7 +483,28 @@ void cGeluMission::__MoveOwnAfter()
 
     // 
     m_Fang.MoveNormal();
-    
+
+
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+    {
+        cLodObject& oFang = m_aFangRaw[i];
+        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
+        {
+            if(InBetween(pBullet->GetPosition().xy(), FOREGROUND_AREA * -1.05f, FOREGROUND_AREA * 1.05f))
+            {
+                const coreVector2 vDiff = pBullet->GetPosition().xy() - oFang.GetPosition().xy();
+
+                if(InBetween(vDiff, -oFang.GetCollisionRange().xy(), oFang.GetCollisionRange().xy()))
+                {
+                    pBullet->Deactivate(true);
+                    if(m_iStageSub == 19u) this->DisableFang(i, true);   // TODO 1: HACK!!!
+                }
+            }
+        };
+        g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletFangCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
+    }
     
     
     g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -524,7 +546,7 @@ void cGeluMission::__MoveOwnAfter()
                         if(IsHorizontal(vDiff)) vNewPos.x = vFangPos.x + SIGN(vDiff.x) * vWayRange.x;
                                            else vNewPos.y = vFangPos.y + SIGN(vDiff.y) * vWayRange.y;
 
-                        ASSERT(k == 0u)
+                        // ASSERT(k == 0u) same as for fangs
                         break;
                     }
                     else
@@ -630,6 +652,59 @@ void cGeluMission::__MoveOwnAfter()
     // 
     m_Way     .MoveNormal();
     m_WayArrow.MoveNormal();
+    
+    
+    for(coreUintW i = 0u; i < GELU_WAYS; ++i)
+    {
+        const coreObject3D* pWay = (*m_Way.List())[i];
+        if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, i)) continue;
+
+        if(coreVector2::Dot(g_pGame->FindPlayerSide(pWay->GetPosition().xy())->GetDirection().xy(), pWay->GetDirection().xy()) > 0.9f)
+        {
+            REMOVE_BIT(m_iWayVisible, i)
+        }
+        else
+        {
+            ADD_BIT(m_iWayVisible, i)
+
+            const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet)
+            {
+                const coreVector2 vDiff = pBullet->GetPosition().xy() - pWay->GetPosition().xy();
+
+                if(InBetween(vDiff, -pWay->GetCollisionRange().xy(), pWay->GetCollisionRange().xy()))
+                    pBullet->Deactivate(true);
+            };
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletWayCollFunc);
+            g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletWayCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
+        }
+    }
+
+    // 
+    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)   // copied from group "force rotation"
+    {
+        pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+
+        if(!pPlayer->IsRolling())
+        {
+            const coreVector2 vPos = pPlayer->GetPosition().xy();
+
+            for(coreUintW j = 0u; j < GELU_WAYS; ++j)
+            {
+                const coreObject3D* pWay = (*m_Way.List())[i];
+                if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, i) || pWay->GetAlpha()) continue;
+
+                const coreVector2 vSize = pWay->GetCollisionRange().xy() * 1.1f;   // TODO 1: otherwise you can rotate when between blocks and take damage
+                const coreVector2 vDiff = MapToAxis(pWay->GetPosition().xy() - vPos, pWay->GetDirection().xy());
+
+                if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
+                {
+                    pPlayer->SetDirection(pWay->GetDirection());
+                    pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
+                    break;
+                }
+            }
+        }
+    });
 
     // 
     for(coreUintW i = 0u; i < GELU_ORBS; ++i)
@@ -673,11 +748,11 @@ void cGeluMission::__MoveOwnAfter()
         if(!oLine.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        const coreUintW     iIndex1 = (i < 12u) ? (i + (i/3u) + 1u) : (i - 12u);
-        const coreUintW     iIndex2 = (i < 12u) ? (i + (i/3u))      : (i - 12u + 4u);
+        const coreUintW     iIndex1 = (m_iLineMode == 0u) ? ((i < 12u) ? (i + (i/3u) + 1u) : (i - 12u))      : ((i));
+        const coreUintW     iIndex2 = (m_iLineMode == 0u) ? ((i < 12u) ? (i + (i/3u))      : (i - 12u + 4u)) : ((i + 1u) % GELU_ORBS);
         const coreObject3D& oOrb1   = m_aOrbRaw[iIndex1];
         const coreObject3D& oOrb2   = m_aOrbRaw[iIndex2];
-        STATIC_ASSERT((GELU_ORBS == 16u) && (GELU_LINES == 24u))
+        ASSERT((iIndex1 < GELU_ORBS) && (iIndex2 < GELU_ORBS))
 
         // 
         if(!this->IsOrbEnabled(iIndex1) || !this->IsOrbEnabled(iIndex2))

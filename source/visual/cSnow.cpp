@@ -123,6 +123,7 @@ coreUintW cSnow::DrawPoint(const coreVector2 vPosition, const coreFloat fSize, c
     const coreUintW iToX   = cSnow::__GetMapIndex(vSnap.x + (fSize + 1.0f));
     const coreUintW iFromY = cSnow::__GetMapIndex(vSnap.y - (fSize + 1.0f));
     const coreUintW iToY   = cSnow::__GetMapIndex(vSnap.y + (fSize + 1.0f));
+    ASSERT((iFromX < SNOW_SIZE) && (iToX < SNOW_SIZE) && (iFromY < SNOW_SIZE) && (iToY < SNOW_SIZE))
 
     // 
     for(coreUintW j = iFromY; j <= iToY; ++j)
@@ -167,6 +168,7 @@ coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, co
     const coreUintW iToX   =  bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vSnap.x + fSize);
     const coreUintW iFromY = !bHorizontal ? (0u)             : cSnow::__GetMapIndex(vSnap.y - fSize);
     const coreUintW iToY   = !bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vSnap.y + fSize);
+    ASSERT((iFromX < SNOW_SIZE) && (iToX < SNOW_SIZE) && (iFromY < SNOW_SIZE) && (iToY < SNOW_SIZE))
 
     // 
     for(coreUintW j = iFromY; j <= iToY; ++j)
@@ -181,6 +183,46 @@ coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, co
                 iHit += 1u;
             }
         }
+    }
+
+    // 
+    if(iHit) m_bDirty = true;
+    return iHit;
+}
+
+
+// ****************************************************************
+// 
+coreUintW cSnow::DrawRay(const coreVector2 vPosition, const coreVector2 vDirection, const eSnowType eType)
+{
+    coreUintW iHit = 0u;
+
+    // 
+    coreVector2 vCurrent = coreVector2(cSnow::__GetMapFloat(vPosition.x), cSnow::__GetMapFloat(vPosition.y));
+
+    // 
+    ASSERT(vDirection.IsNormalized())
+    const coreVector2 vStep = vDirection * ABS(RCP(IsHorizontal(vDirection) ? vDirection.x : vDirection.y));
+
+    // 
+    while((vCurrent.x >= 0.0f) && (vCurrent.x < I_TO_F(SNOW_SIZE)) &&
+          (vCurrent.y >= 0.0f) && (vCurrent.y < I_TO_F(SNOW_SIZE)))
+    {
+        // 
+        const coreUintW i = F_TO_UI(vCurrent.x);
+        const coreUintW j = F_TO_UI(vCurrent.y);
+        ASSERT((i < SNOW_SIZE) && (j < SNOW_SIZE))
+
+        // 
+        coreUint8& iByte = m_piSnowData[j * SNOW_SIZE + i];
+        if((eType == SNOW_TYPE_INVERT) || (eType ? !iByte : iByte))
+        {
+            iByte = (eType == SNOW_TYPE_INVERT) ? ~iByte : (eType ? 0xFFu : 0x00u);
+            iHit += 1u;
+        }
+
+        // 
+        vCurrent += vStep;
     }
 
     // 
@@ -241,10 +283,16 @@ void cSnow::__Reset(const coreResourceReset eInit)
 
 // ****************************************************************
 // 
+coreFloat cSnow::__GetMapFloat(const coreFloat fValue)
+{
+    STATIC_ASSERT(FOREGROUND_AREA.x == FOREGROUND_AREA.y)
+    return CLAMP((fValue + (FOREGROUND_AREA.x * 1.1f)) / (FOREGROUND_AREA.x * 2.2f), 0.0f, 1.0f - CORE_MATH_PRECISION) * I_TO_F(SNOW_SIZE);
+}
+
 coreUintW cSnow::__GetMapIndex(const coreFloat fValue)
 {
     STATIC_ASSERT(FOREGROUND_AREA.x == FOREGROUND_AREA.y)
-    return F_TO_UI(CLAMP((fValue + (FOREGROUND_AREA.x * 1.1f)) / (FOREGROUND_AREA.x * 2.2f), 0.0f, 1.0f - CORE_MATH_PRECISION) * I_TO_F(SNOW_SIZE));
+    return F_TO_UI(cSnow::__GetMapFloat(fValue));
 }
 
 coreFloat cSnow::__GetMapValue(const coreUintW iIndex)

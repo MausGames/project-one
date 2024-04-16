@@ -131,7 +131,7 @@ void cPostProcessing::Move()
                   else m_fSplitScreenValue.UpdateMax(-3.0f, 0.0f);
 
     // 
-    m_fAnimation.UpdateMod(1.0f, 10.0f);
+    if(!g_pMenu->IsPaused()) m_fAnimation.UpdateMod(1.0f, 10.0f);
 
     // update interiors
     this->__UpdateInterior();

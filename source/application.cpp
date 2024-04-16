@@ -91,7 +91,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_low.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_amemasu_tooth.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_amemasu_tooth.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_boss_chol_fire.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_chol_fire.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_chol_fire_01.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_chol_fire_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_chol_fire_02.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_chol_fire_02.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_dharuk_boomerang.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_dharuk_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_emitter.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_emitter.md3", CORE_MODEL_LOAD_NO_CLUSTERS);

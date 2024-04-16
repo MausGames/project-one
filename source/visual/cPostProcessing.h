@@ -16,8 +16,9 @@
 // TODO 3: also clamp fullscreen distortion similar to water distortion ?
 // TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
 // TODO 3: try to reduce overdraw when all walls are active
-// TODO 3: remove overdraw when rendering border object
+// TODO 3: remove overdraw when rendering border object (own shader with discard ?)
 // TODO 3: border might flicker-disappear when rotating, briefly passing 0.0f, and shaking screen
+// TODO 3: if overdraw can be handled, then N "shadow-border" can be used when rotating (like on Dharuk) (own shader with discard ?)
 
 
 // ****************************************************************

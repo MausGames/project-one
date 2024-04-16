@@ -48,14 +48,12 @@ void cViridoMission::__SetupOwn()
     // change background appearance (split)
     STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
-#if !defined(_P1_VIDEO_)
         //g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
         //g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
         //g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
         //g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
         //g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
         //g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
-#endif
 
         STAGE_FINISH_NOW
     });

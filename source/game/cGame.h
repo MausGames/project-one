@@ -15,6 +15,7 @@
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
 // TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (but needs separation between sub-ghost states, maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
+// TODO 3: temporarily changing to no-background (on mission start) unloads all resources, even though we were just on that background (caching old background ?)
 
 
 // ****************************************************************

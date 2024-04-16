@@ -1118,8 +1118,7 @@ cRocketBullet::cRocketBullet()noexcept
     this->DefineProgram("object_ship_glow_program");
 
     // set object properties
-    //this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
-    this->SetColor3           (coreVector3(0.0f,1.0f,0.0f));
+    this->SetColor3(coreVector3(0.0f,0.0f,1.0f));
 }
 
 
@@ -1146,20 +1145,6 @@ void cRocketBullet::__ReflectOwn()
 void cRocketBullet::__MoveOwn()
 {
     // 
-    //m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * TIME;
-    //if(m_fSpeed > 300.0f) this->Deactivate(true);
-
-    // 
-    //const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
-    //if(pEnemy)
-    //{
-    //    const coreVector2 vAim    = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-    //    const coreVector2 vNewDir = SmoothAim(m_vFlyDir, vAim, 0.05f * m_fSpeed);
-//
-    //    m_vFlyDir = vNewDir;
-    //}
-
-    // 
     if(m_pTarget)
     {
         if(m_fFlyTime < 3.0f)
@@ -1168,7 +1153,7 @@ void cRocketBullet::__MoveOwn()
             const coreVector2 vNewDir = SmoothAim(m_vFlyDir, vAim, 0.06f * m_fSpeed);
 
             m_vFlyDir = vNewDir;
-            
+
             this->AddStatus(BULLET_STATUS_IMMORTAL);
         }
         else

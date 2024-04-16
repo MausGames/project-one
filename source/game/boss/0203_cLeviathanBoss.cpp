@@ -112,7 +112,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     m_Tail.AddStatus      (ENEMY_STATUS_IMMORTAL);
 
     // 
-    m_Ray    .DefineProgram("effect_energy_invert_inst_program");
+    m_Ray    .DefineProgram("effect_energy_inst_program");
     m_RayWave.DefineProgram("effect_energy_direct_inst_program");
     {
         for(coreUintW i = 0u; i < LEVIATHAN_RAYS_RAWS; ++i)
@@ -124,7 +124,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
             coreObject3D* pRay = &m_aRayRaw[i];
             pRay->DefineModel  ("object_tube_open.md3");
             pRay->DefineTexture(0u, "effect_energy.png");
-            pRay->DefineProgram(iType ? "effect_energy_direct_program" : "effect_energy_invert_program");
+            pRay->DefineProgram(iType ? "effect_energy_direct_program" : "effect_energy_program");
 
             // set object properties
             pRay->SetTexSize(iType ? LEVIATHAN_RAYWAVE_TEXSIZE : LEVIATHAN_RAY_TEXSIZE);
@@ -1117,8 +1117,9 @@ void cLeviathanBoss::__MoveOwn()
         const coreVector3 vDir  = pPart->GetDirection();
 
         // 
-        const coreVector3 vColor = coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.9f - 0.4f * ABS(vDir.z)));
-        const coreFloat   fAlpha = (fNewTime < 1.0f) ? (0.6f * (1.0f - fNewTime)) : 1.0f;
+        const coreVector3 vColor  = coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.9f - 0.4f * ABS(vDir.z)));
+        const coreFloat   fAlpha  = (fNewTime < 1.0f) ? (0.6f * (1.0f - fNewTime)) : 1.0f;
+        const coreFloat   fOffset = I_TO_F(i) * (1.0f/5.0f);
 
         if(!bOverdrive           || m_avVector[OVERDRIVE_HIT + i].xyz().IsNull())
         {
@@ -1138,14 +1139,14 @@ void cLeviathanBoss::__MoveOwn()
         pRay->SetColor3   (vColor);
         pRay->SetAlpha    (fAlpha);
         pRay->SetTexSize  (coreVector2(LEVIATHAN_RAY_TEXSIZE.x, LEVIATHAN_RAY_TEXSIZE.y * (pRay->GetSize().y * (1.0f/LEVIATHAN_RAY_SIZE.y))));
-        pRay->SetTexOffset(coreVector2(0.4f,0.3f) * m_fAnimation);
+        pRay->SetTexOffset(coreVector2(0.4f,0.3f) * (m_fAnimation + fOffset));
 
         // 
         pWave->SetPosition (vPos + vDir * (pWave->GetSize().y  + LEVIATHAN_RAY_OFFSET(i)));
         pWave->SetDirection(-vDir);
         pWave->SetColor3   (vColor);
         pWave->SetAlpha    (fAlpha * 0.85f);
-        pWave->SetTexOffset(coreVector2(-0.3f,-0.6f) * m_fAnimation);
+        pWave->SetTexOffset(coreVector2(-0.3f,-0.6f) * (m_fAnimation + fOffset));
 
         if((fOldTime < 1.0f) && (fNewTime >= 1.0f))
         {
@@ -1475,7 +1476,7 @@ void cLeviathanBoss::__DisableRay(const coreUintW iIndex, const coreBool bAnimat
         const coreVector3 vDir  = pPart->GetDirection();
 
         // 
-        for(coreUintW j = 40u; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDir * (LEVIATHAN_RAY_OFFSET(iIndex) + 2.0f*I_TO_F(j)), 10.0f, 1u, COLOR_ENERGY_YELLOW);
+        for(coreUintW j = 50u; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDir * (LEVIATHAN_RAY_OFFSET(iIndex) + 2.0f*I_TO_F(j)), 10.0f, 1u, COLOR_ENERGY_YELLOW);
     }
 }
 

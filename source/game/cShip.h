@@ -14,6 +14,7 @@
 // TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?) (but needs to be far, because explosions with sound on borders are still important)
 // TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 // TODO 4: check and cleanup transformation functions
+// TODO 3: merge WasDamaged in cShip and cEnemy
 
 
 // ****************************************************************
@@ -37,6 +38,8 @@ protected:
 
     coreUint32 m_iBaseColor;               // packed base color for interpolations
     coreFlow   m_fBlink;                   // blink intensity (to highlight successful hits)
+
+    static cRotaCache s_RotaCache;         // 
 
 
 protected:

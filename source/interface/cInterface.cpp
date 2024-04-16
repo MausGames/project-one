@@ -213,7 +213,8 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 // render the interface
 void cInterface::Render()
 {
-#if !defined(_P1_VIDEO_) || 1
+//#define _P1_SCREENSHOT_
+
     if(this->IsBannerActive())
     {
         // 
@@ -250,13 +251,13 @@ void cInterface::Render()
             m_aBossHealthBar[1].Render();
             m_aBossHealthBar[2].Render();
         }
-
+#if !defined(_P1_SCREENSHOT_)
         // 
         m_GoalMedal.Render();
 
         // 
         for(coreUintW j = 0u; j < INTERFACE_BADGES; ++j) m_aBadge[j].Render();
-
+#endif
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
             // render player labels
@@ -275,19 +276,22 @@ void cInterface::Render()
             m_aBossTime[1]   .Render();
             m_aBossTime[2]   .Render();
         }
-
+#if !defined(_P1_SCREENSHOT_)
             m_WaveName    .Render();   // TODO 1: nur in coop weg
-
+#endif
         if(m_fAlphaBoss != 1.0f)
         {
             // render wave labels
             m_aWaveTime[0].Render();
             m_aWaveTime[1].Render();
+            #if !defined(_P1_SCREENSHOT_)
             m_aWaveTime[2].Render();
+            #endif
         }
-
+#if !defined(_P1_SCREENSHOT_)
         // 
         m_GoalTime.Render();
+#endif
     }
 
     if(this->IsStoryActive())
@@ -296,7 +300,6 @@ void cInterface::Render()
         m_aStoryText[0].Render();
         m_aStoryText[1].Render();
     }
-#endif
 }
 
 
@@ -695,6 +698,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -702,6 +706,8 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 
 void cInterface::ShowMission(const cMission* pMission)
 {
+    ASSERT(pMission)
+
     // show default mission banner
     this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("MISSION"), pMission->GetID()));
 }
@@ -745,6 +751,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -753,10 +760,24 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_WaveName.SetText(pcMain);
 }
 
-void cInterface::ShowBoss(const cBoss* pBoss)
+void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
 {
+    ASSERT(pBoss)
+
     // show default boss banner
     this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
+
+    if(bSilent)
+    {
+        m_fBannerStart = g_pGame->GetTimeTable()->GetTimeEvent() - INTERFACE_BOSS_DELAY;
+
+        m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_BannerShadow  .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aBannerText[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
 }
 
 
@@ -814,6 +835,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
     m_aBannerText[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
     ASSERT(iMedal != MEDAL_NONE)
@@ -867,6 +889,7 @@ void cInterface::ShowAlert()
     m_aBannerText[0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);

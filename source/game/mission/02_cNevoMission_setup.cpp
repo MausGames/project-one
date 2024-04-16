@@ -75,6 +75,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top)
     // TODO 1: make enemies damaging ?
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: hard-mode: bullets get bigger with time
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;

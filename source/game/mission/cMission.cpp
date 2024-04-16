@@ -391,12 +391,6 @@ void cMission::__CloseSegment()
     // 
     g_pSave->SaveFile();
 
-#if defined(_P1_VIDEO_)
-
-    //static coreUint8 iDir = 0u;
-    //g_pEnvironment->SetTargetDirectionNow(StepRotated90((++iDir) % 4u));
-
-#endif
     
     g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {

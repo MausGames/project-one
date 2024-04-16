@@ -94,6 +94,9 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
+    // 
+    const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+
     if(iMode == 0u)
     {
         /*
@@ -101,7 +104,7 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
         if(m_CooldownTimer.GetStatus()) return;
 
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 6.0f, m_pOwner, vPos, vDir))->ChangeScale(1.3f);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeScale(1.3f);
 
         // 
         m_CooldownTimer.SetValue(-1.1f);
@@ -111,10 +114,10 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
     else if(iMode == 1u)
     {
         // 
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6, 1.0f, m_pOwner, vPos,  vDir.Rotated45());
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6, 1.0f, m_pOwner, vPos,  vDir.Rotated90());
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6, 1.0f, m_pOwner, vPos, -vDir.Rotated90());
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6, 1.0f, m_pOwner, vPos, -vDir.Rotated135());
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6 * iSign, 1.0f, m_pOwner, vPos,  vDir.Rotated45());
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6 * iSign, 1.0f, m_pOwner, vPos,  vDir.Rotated90());
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6 * iSign, 1.0f, m_pOwner, vPos, -vDir.Rotated90());
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(6 * iSign, 1.0f, m_pOwner, vPos, -vDir.Rotated135());
 
         // 
         //if(m_pRocketSound.IsUsable()) m_pRocketSound->PlayPosition(NULL, 1.0f, 1.0f, false, SOUND_EFFECT, m_pOwner->GetPosition());
@@ -127,8 +130,8 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
         {
             const coreVector2 vDir2 = coreVector2::Direction(0.25f * PI * I_TO_F(i));
 
-            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(6, 1.0f, m_pOwner, vPos,  vDir2);
-            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(6, 1.0f, m_pOwner, vPos, -vDir2);
+            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(6 * iSign, 1.0f, m_pOwner, vPos,  vDir2);
+            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(6 * iSign, 1.0f, m_pOwner, vPos, -vDir2);
         }
 
         // 
@@ -156,12 +159,15 @@ void cRayWeapon::__ShootOwn()
     const coreVector2 vTan = vDir.Rotated90();
 
     // 
+    const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+
+    // 
     if(!m_bBurst)
     {
         m_bBurst = true;
 
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(6, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(6 * iSign, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
 
         // 
         m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
@@ -169,9 +175,9 @@ void cRayWeapon::__ShootOwn()
     else
     {
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 8.0f, m_pOwner, vPos + vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 8.0f, m_pOwner, vPos - vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
-        //this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 6.0f, m_pOwner, vPos, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos - vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
+        //this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
     }
 
     // play bullet sound-effect
@@ -210,7 +216,10 @@ void cPulseWeapon::__ShootOwn()
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(5 + 10 * F_TO_SI(m_fCharge), 3.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f + 0.4f * FLOOR(m_fCharge))->AddStatus(BULLET_STATUS_PENETRATE);
+    const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+
+    // 
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>((5 + 10 * F_TO_SI(m_fCharge)) * iSign, 3.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f + 0.4f * FLOOR(m_fCharge))->AddStatus(BULLET_STATUS_PENETRATE);
 
     // 
     m_fCharge = 0.0f;
@@ -241,8 +250,11 @@ void cWaveWeapon::__ShootOwn()
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2, 3.5f, m_pOwner, vPos,  vDir))->ChangeScale(1.8f);
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2, 3.5f, m_pOwner, vPos, -vDir))->ChangeScale(1.8f);
+    const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+
+    // 
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos,  vDir))->ChangeScale(1.8f);
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos, -vDir))->ChangeScale(1.8f);
 
     // play bullet sound-effect
     //if(m_pBulletSound.IsUsable()) m_pBulletSound->PlayPosition(NULL, 1.0f, 1.0f, false, SOUND_EFFECT, m_pOwner->GetPosition());
@@ -362,7 +374,10 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
             m_fStrikeOffset = g_pSpecialEffects->CreateLightning(vPosFrom, vPosTo, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexSizeFactor, m_fStrikeOffset);
 
             // 
-            pTarget->TakeDamage(6, ELEMENT_BLUE, vPosTo, m_pOwner);
+            const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+
+            // 
+            pTarget->TakeDamage(6 * iSign, ELEMENT_BLUE, vPosTo, m_pOwner);
             g_pSpecialEffects->MacroExplosionColorSmall(pTarget->GetPosition(), COLOR_ENERGY_BLUE);
         }
     }
@@ -385,7 +400,10 @@ void cTeslaWeapon::__ShootOwn()
     const coreVector2 vTan = coreVector2((m_iShotType < 3) ? (0.04f * I_TO_F(m_iShotType-1)) : 0.0f, 0.0f);
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cTeslaBullet>(6, 3.0f, m_pOwner, vPos, (vDir + vTan).Normalized()));
+    const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+
+    // 
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cTeslaBullet>(6 * iSign, 3.0f, m_pOwner, vPos, (vDir + vTan).Normalized()));
 
     // play bullet sound-effect
     //if(m_pBulletSound.IsUsable()) m_pBulletSound->PlayPosition(NULL, 1.0f, 1.0f, false, SOUND_EFFECT, m_pOwner->GetPosition());

@@ -28,6 +28,9 @@
 // TODO 2: generate objects are preventing each others outlines while being alpha 0 (especially on diagonal movement)
 // TODO 3: nevo: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
 // TODO 4: mission code sometimes accesses variables directly without wrapper-functions (mixed), bosses always need wrapper functions, should this be handled consistently ?
+// TODO 4: warum sind s_iTick und co. static ?
+// TODO 3: change m_piData into static buffer (needs manual clear), that way I can also remove init-number
+// TODO 3: morning star chain should be above player wind
 
 
 // ****************************************************************
@@ -100,10 +103,12 @@
 #define GELU_FANGS_DIMENSION        (5u)                                              //    
 #define GELU_WAYS                   (26u)                                             // 
 #define GELU_WAYS_RAWS              (GELU_WAYS * 2u)                                  // 
-#define GELU_ORBS                   (16u)                                             // 
+#define GELU_ORBS                   (20u)                                             // 
 #define GELU_ORBS_RAWS              (GELU_ORBS)                                       // 
 #define GELU_LINES                  (24u)                                             // 
 #define GELU_LINES_RAWS             (GELU_LINES)                                      // 
+#define GELU_FANG_STEP              (0.44f)                                           // 
+#define GELU_WAY_STEP               (0.36f)                                           // 
 #define GELU_POSITIONS              (MAX(GELU_FANGS, GELU_WAYS))                      // 
 
 #define CALOR_LOADS                 (12u)                                             // 
@@ -678,8 +683,9 @@ private:
     coreBatchList m_Wave;                                  // 
     coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
     coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
-    coreUint8     m_iWaveActive;                           // 
+    coreVector2   m_vWavePos;                              // 
     coreUint8     m_iWaveDir;                              // 
+    coreUint8     m_iWaveActive;                           // 
     coreUint8     m_iWaveType;                             // 
     coreModelPtr  m_apWaveModel[2];                        // 
 
@@ -719,9 +725,24 @@ public:
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
 
     // 
-    inline void SetPlateOffset (const coreUintW iIndex, const coreFloat fOffset)  {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].xy(coreVector2(m_avPlateData[iIndex].y, fOffset));}
-    inline void SetPlateScale  (const coreUintW iIndex, const coreFloat fScale)   {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].zw(coreVector2(m_avPlateData[iIndex].w, fScale));}
-    inline void SetPlateRotated(const coreUintW iIndex, const coreBool  bRotated) {ASSERT(iIndex < RUTILUS_PLATES) SET_BIT(m_iPlateRotated, iIndex, bRotated)}
+    inline void SetPlateDirection(const coreUintW iIndex, const coreVector2 vDirection) {ASSERT(iIndex < RUTILUS_PLATES) m_aPlateRaw[iIndex].SetDirection(coreVector3(vDirection, 0.0f));}
+    inline void SetPlateOffsetNow(const coreUintW iIndex, const coreFloat   fOffset)    {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 1.0f; m_avPlateData[iIndex].xy(coreVector2(fOffset, fOffset));}
+    inline void SetPlateOffset   (const coreUintW iIndex, const coreFloat   fOffset)    {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].xy(coreVector2(m_avPlateData[iIndex].y, fOffset));}
+    inline void SetPlateScale    (const coreUintW iIndex, const coreFloat   fScale)     {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].zw(coreVector2(m_avPlateData[iIndex].w, fScale));}
+    inline void SetPlateRotated  (const coreUintW iIndex, const coreBool    bRotated)   {ASSERT(iIndex < RUTILUS_PLATES) SET_BIT(m_iPlateRotated, iIndex, bRotated)}
+
+    // 
+    inline void SetAreaPosition(const coreVector2 vPosition) {m_aArea[0].SetPosition(coreVector3(vPosition, 0.0f));}
+    inline void SetAreaScale   (const coreFloat   fScale)    {m_fAreaScale = fScale;}
+
+    // 
+    inline void SetWavePosition (const coreVector2 vPosition) {m_vWavePos = vPosition;}
+    inline void SetWaveDirection(const coreUint8   iStep)     {SET_BITVALUE(m_iWaveDir, 2u, 0u, iStep) ASSERT(iStep < 4u)}
+    inline void SetWavePull     (const coreBool    bPull)     {SET_BIT     (m_iWaveDir, 2u, bPull)}
+    inline void SetWaveDelayed  (const coreBool    bDelayed)  {SET_BIT     (m_iWaveDir, 3u, bDelayed)}
+
+    // 
+    inline coreObject3D* GetArea(const coreUintW iIndex) {ASSERT(iIndex < RUTILUS_AREAS) return &m_aArea[iIndex];}
 
 
 private:
@@ -760,6 +781,7 @@ private:
     coreBatchList m_Line;                          // 
     coreObject3D  m_aLineRaw  [GELU_LINES_RAWS];   // 
     coreFlow      m_afLineTime[GELU_LINES];        // 
+    coreUint8     m_iLineMode;                     // 
 
     coreVector2 m_avOldPos[GELU_POSITIONS];        // 
 
@@ -793,12 +815,23 @@ public:
     void DisableLine(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    inline coreBool IsWayActive(const coreUintW iIndex)const {ASSERT(iIndex < GELU_WAYS) return HAS_BIT(m_iWayActive, iIndex);}
+
+    // 
     inline coreBool IsOrbEnabled (const coreUintW iIndex)const {ASSERT(iIndex < GELU_ORBS)  return (m_afOrbTime [iIndex] > 0.0f);}
     inline coreBool IsLineEnabled(const coreUintW iIndex)const {ASSERT(iIndex < GELU_LINES) return (m_afLineTime[iIndex] > 0.0f);}
 
     // 
+    inline void SetLineMode(const coreUint8 iMode) {m_iLineMode = iMode;}
+
+    // 
     inline void SetCrushFree(const coreBool bCrushFree) {SET_BIT(m_iCrushState, 0u, bCrushFree)}   // move through blocks after crush
     inline void SetCrushLong(const coreBool bCrushLong) {SET_BIT(m_iCrushState, 1u, bCrushLong)}   // move in-and-out of blocks after crush
+
+    // 
+    inline coreObject3D* GetFang(const coreUintW iIndex) {ASSERT(iIndex < GELU_FANGS) return &m_aFangRaw[iIndex];}
+    inline coreObject3D* GetWay (const coreUintW iIndex) {ASSERT(iIndex < GELU_WAYS)  return &m_aWayRaw [iIndex * 2u];}
+    inline coreObject3D* GetOrb (const coreUintW iIndex) {ASSERT(iIndex < GELU_ORBS)  return &m_aOrbRaw [iIndex];}
 
 
 private:
@@ -830,10 +863,12 @@ private:
     coreObject3D  m_aStarRaw    [CALOR_STARS_RAWS];   // 
     const cShip*  m_apStarOwner [CALOR_STARS];        // 
     coreVector2   m_avStarOffset[CALOR_STARS];        // 
+    coreFloat     m_afStarLength[CALOR_STARS];        // 
     coreUint8     m_iStarState;                       // 
 
-    coreFlow m_fSwingStart;                           // 
-    coreFlow m_afSwingValue[CALOR_STARS];             // 
+    coreFloat m_fSwingSpeed;                          // 
+    coreFlow  m_fSwingStart;                          // 
+    coreFlow  m_afSwingValue[CALOR_STARS];            // 
 
     cShip*      m_apCatchObject[CALOR_STARS];         // 
     coreVector2 m_avCatchPos   [CALOR_STARS];         // 
@@ -864,13 +899,21 @@ public:
     inline void BumpLoad(const coreFloat fValue) {ASSERT(fValue > 0.0f) m_afLoadPower[0] = MIN(m_afLoadPower[0] + fValue, I_TO_F(CALOR_LOADS)); m_afLoadPower[2] = 1.0f;}
 
     // 
-    void StartSwing();
+    inline coreBool IsStarEnabled(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return (m_apStarOwner[iIndex] != NULL);}
+
+    // 
+    inline void SetStarLength(const coreUintW iIndex, const coreFloat fLength) {ASSERT(iIndex < CALOR_STARS) m_afStarLength[iIndex] = fLength;}
+
+    // 
+    void StartSwing(const coreFloat fSpeed);
+    void StopSwing();
 
     // 
     void CatchObject  (const coreUintW iIndex, cShip* pObject);
     void UncatchObject(const coreUintW iIndex);
 
     // 
+    inline cSnow*        GetSnow       ()                            {return &m_Snow;}
     inline coreObject3D* GetStar       (const coreUintW iIndex)      {ASSERT(iIndex < CALOR_STARS) return &m_aStarRaw    [iIndex * (CALOR_CHAINS + 1u)];}
     inline cShip*        GetCatchObject(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return m_apCatchObject[iIndex];}
 
