@@ -17,15 +17,15 @@ void cAterMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        g_pEnvironment->SetTargetSpeed(4.0f);
+        g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(4.0f);
 
         g_pGame->StartIntro();
 
@@ -36,33 +36,31 @@ void cAterMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION})
     {
-        g_pGame->GetInterface()->ShowMission(this);
-
-        STAGE_FINISH_NOW
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
-    {
         if(STAGE_BEGINNING)
         {
-
+            g_pGame->GetInterface()->ShowMission(this);
         }
 
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    {
         STAGE_FINISH_PLAY
     });
-STAGE_START_HERE
+
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 11u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 7u})
     {
         if(STAGE_BEGINNING)
         {
@@ -74,7 +72,7 @@ STAGE_START_HERE
 
     // ################################################################
     // 
-    //STAGE_MAIN({TAKE_ALWAYS, 11u})
+    //STAGE_MAIN({TAKE_ALWAYS, 7u})
     //{
     //    STAGE_BOSS(m_Eigengrau, {60.0f, 120.0f, 180.0, 240.0f})
     //});

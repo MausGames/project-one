@@ -39,7 +39,7 @@ cZerothBoss::cZerothBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.0f);
 
     // configure the boss
-    this->Configure(10000, COLOR_SHIP_MAGENTA);
+    this->Configure(10000, COLOR_SHIP_BLUE);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
@@ -56,7 +56,7 @@ cZerothBoss::cZerothBoss()noexcept
         m_aLimb[i].DefineModelLow (sModelLow);
         m_aLimb[i].DefineVolume   (sVolume);
         m_aLimb[i].SetSize        (this->GetSize());
-        m_aLimb[i].Configure      (1, COLOR_SHIP_MAGENTA);
+        m_aLimb[i].Configure      (1, COLOR_SHIP_BLUE);
         m_aLimb[i].SetParent      (this);
     }
 
@@ -65,7 +65,7 @@ cZerothBoss::cZerothBoss()noexcept
     m_Body.DefineModelLow ("ship_boss_zeroth_body_low.md3");
     m_Body.DefineVolume   ("ship_boss_zeroth_body_volume.md3");
     m_Body.SetSize        (this->GetSize());
-    m_Body.Configure      (1, COLOR_SHIP_MAGENTA);
+    m_Body.Configure      (1, COLOR_SHIP_BLUE);
     m_Body.AddStatus      (ENEMY_STATUS_INVINCIBLE);
     m_Body.SetParent      (this);
 

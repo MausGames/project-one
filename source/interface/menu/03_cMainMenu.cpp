@@ -12,8 +12,7 @@
 // ****************************************************************
 // constructor
 cMainMenu::cMainMenu()noexcept
-: coreMenu    (SURFACE_MAIN_MAX, SURFACE_MAIN_DEFAULT)
-, m_Navigator (NULL)
+: coreMenu (SURFACE_MAIN_MAX, SURFACE_MAIN_DEFAULT)
 {
     // create menu objects
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);

@@ -69,7 +69,6 @@ public:
         coreUint64 iStartTimestamp;                                                        // 
         coreUint64 iEndTimestamp;                                                          // 
 
-        coreUint32 iBodySize;                                                              // 
         coreUint32 iFrameCount;                                                            // 
         coreUint32 iSnapshotCount;                                                         // 
         coreUint32 aiPacketCount[REPLAY_PLAYERS];                                          // 
@@ -79,6 +78,7 @@ public:
         coreUint8  iNumSegments;                                                           // 
 
         coreUint8  iOptionMode;                                                            // 
+        coreUint8  iOptionType;                                                            // 
         coreUint8  iOptionDifficulty;                                                      // 
         coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                 // 
         coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                // 

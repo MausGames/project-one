@@ -13,22 +13,22 @@
 // constructor
 cConfigMenu::cConfigMenu()noexcept
 : coreMenu           (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
+, m_apcDescKey       {}
 , m_iCurMonitorIndex (Core::System->GetDisplayIndex())
-, m_Navigator        (this)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
-    m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetSize      (coreVector2(0.8f,0.7f));
+    m_Background.SetPosition  (coreVector2(0.0f,0.01f));
+    m_Background.SetSize      (coreVector2(0.9f,0.75f));
 
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
-    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.115f,-0.0115f));
-    m_VideoTab.SetSize      (coreVector2(0.17f,0.07f));
+    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.1275f,-0.0125f));
+    m_VideoTab.SetSize      (coreVector2(0.195f,0.07f));
     m_VideoTab.SetAlignment (coreVector2(0.0f, 1.0f));
     m_VideoTab.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.115f,0.0115f));
+    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.1275f,0.0125f));
     m_VideoTab.GetCaption()->SetTextLanguage("CONFIG_VIDEO");
 
     m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -87,6 +87,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_VIDEO || i == ENTRY_AUDIO || i == ENTRY_INPUT) iOffset = 0u;
         if(i == ENTRY_VIDEO_ANTIALIASING)  ++iOffset;   // # new paragraph
         if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
+        if(i == ENTRY_VIDEO_SHAKEEFFECTS)  ++iOffset;
         if(i == ENTRY_AUDIO_MUSICVOLUME)   ++iOffset;
         if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
@@ -117,7 +118,7 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueInput); ++i)
     {
         m_aCueInput[i].Construct  (MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
-        m_aCueInput[i].SetPosition(m_aLabel[ENTRY_INPUT_MOVEUP + i].GetPosition() + coreVector2(0.21f,0.0f));
+        m_aCueInput[i].SetPosition(m_aLabel[ENTRY_INPUT_MOVEUP + i].GetPosition() + coreVector2(0.23f,0.0f));
         m_aCueInput[i].SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
     }
     m_aCueInput[1].SetDirection(coreVector2( 1.0f, 0.0f));
@@ -136,8 +137,15 @@ cConfigMenu::cConfigMenu()noexcept
         m_aCueRota[i].SetColor3(COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
         m_aCueRota[i].SetText  (ICON_ARROW_UP);
     }
-    m_aCueRota[0].SetPosition(m_aLabel[ENTRY_GAME_GAMEROTATION].GetPosition() + coreVector2(0.422f,0.0f));
-    m_aCueRota[1].SetPosition(m_aLabel[ENTRY_GAME_HUDROTATION] .GetPosition() + coreVector2(0.422f,0.0f));
+    m_aCueRota[0].SetPosition(m_aLabel[ENTRY_GAME_GAMEROTATION].GetPosition() + coreVector2(0.522f,0.0f));
+    m_aCueRota[1].SetPosition(m_aLabel[ENTRY_GAME_HUDROTATION] .GetPosition() + coreVector2(0.522f,0.0f));
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDescription); ++i)
+    {
+        m_aDescription[i].Construct  (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aDescription[i].SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f, 0.075f - 0.03f*I_TO_F(i)));
+        m_aDescription[i].SetColor3  (COLOR_MENU_WHITE);
+    }
 
     #define __SET_OPTION(x,n,s)                                                  \
     {                                                                            \
@@ -150,6 +158,8 @@ cConfigMenu::cConfigMenu()noexcept
         x.SetAlignment(coreVector2(-1.00f,0.00f));                               \
         x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                        \
         x.GetCaption()->ChangeLanguage(Core::Language);                          \
+                                                                                 \
+        m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                        \
     }
     {
         __SET_OPTION(m_Monitor,       VIDEO_MONITOR,       0.26f)
@@ -159,6 +169,8 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.26f)
         __SET_OPTION(m_RenderQuality, VIDEO_RENDERQUALITY, 0.26f)
         __SET_OPTION(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.26f)
+        __SET_OPTION(m_ShakeEffects,  VIDEO_SHAKEEFFECTS,  0.26f)
+        __SET_OPTION(m_FlashEffects,  VIDEO_FLASHEFFECTS,  0.26f)
         __SET_OPTION(m_GlobalVolume,  AUDIO_GLOBALVOLUME,  0.26f)
         __SET_OPTION(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
         __SET_OPTION(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
@@ -187,7 +199,9 @@ cConfigMenu::cConfigMenu()noexcept
         m_Navigator.BindObject(&m_AntiAliasing,  &m_DisplayMode,   NULL, &m_TextureFilter,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_TextureFilter, &m_AntiAliasing,  NULL, &m_RenderQuality,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_RenderQuality, &m_TextureFilter, NULL, &m_ShadowQuality,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-        m_Navigator.BindObject(&m_ShadowQuality, &m_RenderQuality, NULL, &m_SaveButton,     NULL, &m_AmbientVolume,        MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_ShadowQuality, &m_RenderQuality, NULL, &m_ShakeEffects,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_ShakeEffects,  &m_ShadowQuality, NULL, &m_FlashEffects,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_FlashEffects,  &m_ShakeEffects,  NULL, &m_SaveButton,     NULL, &m_AmbientVolume,        MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_GlobalVolume,  &m_AudioTab,      NULL, &m_MusicVolume,    NULL, &m_aInput[0].oType,      MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_MusicVolume,   &m_GlobalVolume,  NULL, &m_EffectVolume,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_EffectVolume,  &m_MusicVolume,   NULL, &m_AmbientVolume,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
@@ -202,7 +216,7 @@ cConfigMenu::cConfigMenu()noexcept
         m_Navigator.BindObject(&m_HudType,       &m_HudScale,      NULL, &m_UpdateFreq,     NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_UpdateFreq,    &m_HudType,       NULL, &m_Version,        NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_Version,       &m_UpdateFreq,    NULL, &m_MirrorMode,     NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-        m_Navigator.BindObject(&m_MirrorMode,    &m_Version,       NULL, &m_SaveButton,     NULL, &m_ShadowQuality,        MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_MirrorMode,    &m_Version,       NULL, &m_SaveButton,     NULL, &m_FlashEffects,         MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     }
     #undef __SET_OPTION
 
@@ -217,23 +231,25 @@ cConfigMenu::cConfigMenu()noexcept
         m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                  \
         m_aInput[i].x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                           \
         m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                             \
+                                                                                                \
+        m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                       \
     }
     {
         for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
         {
-            const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_CONFIG_INPUTS - i - 1u), 0.0f);
+            const coreVector2 vOffset = coreVector2(0.29f * I_TO_F(MENU_CONFIG_INPUTS - i - 1u), 0.0f);
 
-            __SET_INPUT(oType,      INPUT_TYPE,      0.22f)
-            __SET_INPUT(oRumble,    INPUT_RUMBLE,    0.22f)
-            __SET_INPUT(oFireMode,  INPUT_FIREMODE,  0.22f)
-            __SET_INPUT(oMoveUp,    INPUT_MOVEUP,    0.22f)
-            __SET_INPUT(oMoveLeft,  INPUT_MOVELEFT,  0.22f)
-            __SET_INPUT(oMoveDown,  INPUT_MOVEDOWN,  0.22f)
-            __SET_INPUT(oMoveRight, INPUT_MOVERIGHT, 0.22f)
-            __SET_INPUT(aAction[0], INPUT_ACTION1,   0.22f)
-            __SET_INPUT(aAction[1], INPUT_ACTION2,   0.22f)
-            __SET_INPUT(aAction[2], INPUT_ACTION3,   0.22f)
-            __SET_INPUT(aAction[3], INPUT_ACTION4,   0.22f)
+            __SET_INPUT(oType,      INPUT_TYPE,      0.26f)
+            __SET_INPUT(oRumble,    INPUT_RUMBLE,    0.26f)
+            __SET_INPUT(oFireMode,  INPUT_FIREMODE,  0.26f)
+            __SET_INPUT(oMoveUp,    INPUT_MOVEUP,    0.26f)
+            __SET_INPUT(oMoveLeft,  INPUT_MOVELEFT,  0.26f)
+            __SET_INPUT(oMoveDown,  INPUT_MOVEDOWN,  0.26f)
+            __SET_INPUT(oMoveRight, INPUT_MOVERIGHT, 0.26f)
+            __SET_INPUT(aAction[0], INPUT_ACTION1,   0.26f)
+            __SET_INPUT(aAction[1], INPUT_ACTION2,   0.26f)
+            __SET_INPUT(aAction[2], INPUT_ACTION3,   0.26f)
+            __SET_INPUT(aAction[3], INPUT_ACTION4,   0.26f)
 
             m_aInput[i].oType    .SetEndless(true);
             m_aInput[i].oRumble  .SetEndless(true);
@@ -292,6 +308,9 @@ cConfigMenu::cConfigMenu()noexcept
     m_RenderQuality.AddEntryLanguage("VALUE_HIGH",             1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_LOW",              1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_HIGH",             2u);
+    for(coreUintW i = 0u; i <= 200u; i += 5u) m_ShakeEffects .AddEntry(PRINT("%zu%%", i), i);
+    m_FlashEffects .AddEntryLanguage("VALUE_OFF",              0u);
+    m_FlashEffects .AddEntryLanguage("VALUE_ON",               1u);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_GlobalVolume .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_MusicVolume  .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
@@ -338,6 +357,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.AssignSurface(&m_GameTab,  SURFACE_CONFIG_GAME);
 
     m_Navigator.AssignFirst(&m_Monitor);
+    m_Navigator.AssignMenu(this);
 
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_CONFIG_MAX; ++i)
@@ -357,6 +377,8 @@ cConfigMenu::cConfigMenu()noexcept
         this->BindObject(i, &m_SaveButton);
         this->BindObject(i, &m_DiscardButton);
         this->BindObject(i, &m_BackButton);
+
+        for(coreUintW j = 0u; j < ARRAY_SIZE(m_aDescription); ++j) this->BindObject(i, &m_aDescription[j]);
     }
 
     coreUintW iIndex;
@@ -376,6 +398,8 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_TextureFilter);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_RenderQuality);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShadowQuality);
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShakeEffects);
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_FlashEffects);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_GlobalVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
@@ -448,6 +472,8 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_TextureFilter);
             cMenu::UpdateSwitchBox(&m_RenderQuality);
             cMenu::UpdateSwitchBox(&m_ShadowQuality);
+            cMenu::UpdateSwitchBox(&m_ShakeEffects);
+            cMenu::UpdateSwitchBox(&m_FlashEffects);
 
             // 
                  if(m_RenderQuality.GetCurEntry().tValue == 0u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
@@ -664,7 +690,7 @@ void cConfigMenu::Move()
         // 
         this->SaveValues();
     }
-    else if(m_DiscardButton.IsClicked())
+    else if(m_DiscardButton.IsClicked() || Core::System->GetTerminated())
     {
         // 
         this->LoadValues();
@@ -711,11 +737,23 @@ void cConfigMenu::Move()
     if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
     
     
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDescription); ++i)
+    {
+        m_aDescription[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
+    
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
+        if(!m_aLine[i].GetAlpha()) continue;
+
         m_aLine[i].Interact();
-        //m_aLine[i].SetAlpha(m_aLine[i].GetAlpha() * (m_aLine[i].IsFocused() ? 1.0f : 0.6f));
         m_aLine[i].SetColor3(m_aLine[i].IsFocused() ? g_pMenu->GetHighlightColor() : coreVector3(1.0f,1.0f,1.0f));
+
+        if(m_aLine[i].IsFocused())
+        {
+            m_aDescription[0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aDescription[0].SetTextLanguage(m_apcDescKey[i]);
+        }
     }
 }
 
@@ -736,6 +774,8 @@ void cConfigMenu::CheckValues()
                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                         ||
                            (m_RenderQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iRender)                                                         ||
                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                                         ||
+                           (m_ShakeEffects .GetCurEntry().tValue != g_OldConfig.Graphics.iShake)                                                          ||
+                           (m_FlashEffects .GetCurEntry().tValue != g_OldConfig.Graphics.iFlash)                                                          ||
                            (m_GlobalVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME))) ||
                            (m_MusicVolume  .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))  ||
                            (m_EffectVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                        ||
@@ -780,7 +820,6 @@ void cConfigMenu::LoadValues()
     }
     else if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
     {
-        m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", 0xFFu);
         m_Resolution.SelectValue(0xFFu);
     }
 
@@ -791,6 +830,8 @@ void cConfigMenu::LoadValues()
     m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
     m_RenderQuality.SelectValue(g_CurConfig.Graphics.iRender);
     m_ShadowQuality.SelectValue(g_CurConfig.Graphics.iShadow);
+    m_ShakeEffects .SelectValue(g_CurConfig.Graphics.iShake);
+    m_FlashEffects .SelectValue(g_CurConfig.Graphics.iFlash);
 
     // 
     m_GlobalVolume .SelectValue(cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME)));
@@ -863,6 +904,8 @@ void cConfigMenu::SaveValues()
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
     g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
+    g_CurConfig.Graphics.iShake  = m_ShakeEffects .GetCurEntry().tValue;
+    g_CurConfig.Graphics.iFlash  = m_FlashEffects .GetCurEntry().tValue;
 
     // 
     Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurEntry().tValue));
@@ -1044,6 +1087,10 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
 
     // 
     m_Resolution.AddEntryLanguage("RESOLUTION_DESKTOP", 0xEEu);
+    if((iMonitorIndex == Core::System->GetDisplayIndex()) && !avResolutionList.count(Core::System->GetResolution()))
+    {
+        m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", 0xFFu);
+    }
 
     // 
     if(!m_Resolution.SelectText(m_asCurResolution[iMonitorIndex].c_str())) m_Resolution.SelectLast();
@@ -1107,12 +1154,19 @@ void cConfigMenu::__LoadInputs()
 // convert input key to readable string
 const coreChar* cConfigMenu::__PrintKey(const coreUint8 iType, const coreInt16 iKey)
 {
+    // TODO 1: use as translation key, what about keyboard ?
+    // TODO 1: test with old controller
+    
     if(iType < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
     {
+        if(-iKey == CORE_INPUT_LEFT)   return "M LEFT";
+        if(-iKey == CORE_INPUT_MIDDLE) return "M MIDDLE";
+        if(-iKey == CORE_INPUT_RIGHT)  return "M RIGHT";
         return (iKey <= 0) ? PRINT("M %d", -iKey) : SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(iKey)));
     }
     else   // # joystick/gamepad
     {
-        return PRINT("J %d", iKey);
+        const coreChar* pcText = SDL_GameControllerGetStringForButton(SDL_GameControllerButton(iKey));
+        return pcText ? coreData::StrUpper(pcText) : PRINT("J %d", iKey);
     }
 }

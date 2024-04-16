@@ -12,7 +12,6 @@ coreUint16  cMission::s_iTick           = 0u;
 coreFloat   cMission::s_fLifeTimePoint  = 0.0f;
 coreFloat   cMission::s_fHealthPctPoint = 0.0f;
 coreVector2 cMission::s_vPositionPoint  = coreVector2(0.0f,0.0f);
-cRotaCache  cMission::s_RotaCache       = {};
 
 
 // ****************************************************************
@@ -34,7 +33,7 @@ cMission::cMission()noexcept
 , m_fStageSubTimeBefore (0.0f)
 , m_fStageWait          (0.0f)
 , m_pfMedalGoal         (NULL)
-, m_bBadgeGiven         (false)
+, m_iBadgeGiven         (0u)
 , m_iTakeFrom           (0u)
 , m_iTakeTo             (TAKE_MISSION)
 , m_bRepeat             (false)
@@ -168,7 +167,7 @@ void cMission::SkipStage()
     m_pfMedalGoal = NULL;
 
     // 
-    m_bBadgeGiven = false;
+    m_iBadgeGiven = 0u;
 
     // 
     m_nCollPlayerEnemy  = NULL;
@@ -251,7 +250,13 @@ void cMission::DeactivateWave()
 
     // 
     m_iStageSub  = 0xFFu;
-    m_fStageWait = 3.5f;
+    m_fStageWait = 4.0f;
+
+    // 
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->HealShield(5u);
+    });
 
     // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;
@@ -260,10 +265,12 @@ void cMission::DeactivateWave()
 
 // ****************************************************************
 // 
-void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition)
+void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const coreVector3 vPosition)
 {
-    if(m_bBadgeGiven) return;
-    m_bBadgeGiven = true;
+    ASSERT(iIndex < BADGES)
+
+    if(HAS_BIT(m_iBadgeGiven, iIndex)) return;
+    ADD_BIT(m_iBadgeGiven, iIndex)
 
     // 
     const coreUint32 iBonus = cGame::CalcBonusBadge(iBadge);
@@ -271,8 +278,9 @@ void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition)
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->GetDataTable ()->GiveBadge();
+        pPlayer->GetDataTable ()->GiveBadge(iIndex);
         pPlayer->GetScoreTable()->AddScore(iBonus, false);
+        pPlayer->HealHealth(1u);
     });
 
     // 
@@ -382,5 +390,7 @@ UNITY_BUILD
 #include "07_cMuscusMission.cpp"
 #include "08_cAterMission.cpp"
 #include "99_cIntroMission.cpp"
-#include "AA_cErrorMission.cpp"
-#include "BB_cDemoMission.cpp"
+#include "A1_cBonus1Mission.cpp"
+#include "A2_cBonus2Mission.cpp"
+#include "B1_cErrorMission.cpp"
+#include "B2_cDemoMission.cpp"

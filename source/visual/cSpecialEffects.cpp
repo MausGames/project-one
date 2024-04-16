@@ -228,8 +228,8 @@ void cSpecialEffects::Move()
         m_iShakeCount    = m_iShakeCount + 1u;
 
         // 
-        
-        g_pPostProcessing->SetPosition(((g_vHudDirection.InvertedX() * (m_fShakeStrength * 0.01f * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f))) * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
+        const coreFloat fPower = I_TO_F(g_CurConfig.Graphics.iShake) * 0.0001f;
+        g_pPostProcessing->SetPosition(((g_vHudDirection.InvertedX() * (m_fShakeStrength * fPower * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f))) * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
     }
 }
 
@@ -711,7 +711,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))
             {
                 // create rumble effect
-                Core::Input->RumbleJoystick(iJoystickID, CLAMP(fStrength * I_TO_F(iRumble) * 0.1f, 0.0f, 1.0f), iLengthMs);
+                Core::Input->JoystickRumble(iJoystickID, CLAMP(fStrength * I_TO_F(iRumble) * 0.1f, 0.0f, 1.0f), 0.0f, iLengthMs);
             }
         }
     });

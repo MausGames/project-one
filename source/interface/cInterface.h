@@ -22,16 +22,19 @@
 #define INTERFACE_BOSS_DELAY              (1.5f)                            // 
 
 #define INTERFACE_BANNER_SPEED            (4.0f)                            // fade-in and fade-out speed
-#define INTERFACE_BANNER_SPEED_REV        (1.0f / INTERFACE_BANNER_SPEED)   // 
+//#define INTERFACE_BANNER_SPEED_REV        (1.0f / INTERFACE_BANNER_SPEED)   // 
+#define INTERFACE_BANNER_SPEED_MISSION    (1.0f)                            // 
 #define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
-#define INTERFACE_BANNER_DURATION_MISSION (3.0f)                            // 
+#define INTERFACE_BANNER_DURATION_MISSION (3.7f)                            // 
 #define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
-#define INTERFACE_BANNER_DURATION_SCORE   (2.5f)                            // 
+#define INTERFACE_BANNER_DURATION_SCORE   (3.0f)                            // 
+#define INTERFACE_BANNER_DURATION_ALERT   (3.0f)                            // 
 
 #define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
 #define INTERFACE_BANNER_TYPE_BOSS        (1u)                              // boss banner type
 #define INTERFACE_BANNER_TYPE_WAVE        (2u)                              // 
 #define INTERFACE_BANNER_TYPE_SCORE       (3u)                              // 
+#define INTERFACE_BANNER_TYPE_ALERT       (4u)                              // 
 
 #define INTERFACE_STORY_SPEED             (1.0f)                            // 
 #define INTERFACE_STORY_DURATION          (4.0f)                            // 
@@ -46,7 +49,7 @@ private:
     struct sPlayerView final
     {
         cGuiObject aLife[INTERFACE_LIVES];   // player lives
-        cGuiObject aShieldBar[2];            // player shield bar (0 = background, 1 = foreground)
+        cGuiObject aShieldBar[3];            // player shield bar (0 = background, 1 = foreground, 2 = empty)
         cGuiLabel  oShieldValue;             // player shield value
         cGuiLabel  oScoreTotal;              // total score
         cGuiLabel  oScoreMission;            // mission score
@@ -54,6 +57,7 @@ private:
         cGuiLabel  oComboValue;              // combo label
         cGuiLabel  oChainValue;              // chain value
         coreFlow   fSpin;                    // 
+        coreFlow   fSpin2;                   // 
 
         void Construct(const coreUintW iIndex);
     };
@@ -63,7 +67,7 @@ private:
     sPlayerView m_aView[INTERFACE_VIEWS];   // player views
     coreUint8   m_iNumViews;                // number of constructed player views
 
-    cGuiObject m_aBossHealthBar[2];         // boss health bar (0 = background, 1 = foreground)
+    cGuiObject m_aBossHealthBar[3];         // boss health bar (0 = background, 1 = foreground, 2 = empty)
     cGuiLabel  m_BossHealthValue;           // boss health value
     cGuiLabel  m_aBossTime[2];              // boss time (0 = seconds, 1 = deci-seconds)
     coreFlow   m_fBossSpin;                 // 
@@ -72,10 +76,12 @@ private:
     cGuiLabel m_aWaveTime[2];               // wave time (0 = seconds, 1 = deci-seconds)
 
     cGuiObject m_BannerBar;                 // banner background
+    cGuiObject m_BannerShadow;              // 
     cGuiLabel  m_aBannerText[4];            // banner labels
     coreFloat  m_fBannerStart;              // animation start time
     coreFloat  m_fBannerDuration;           // 
-    coreUint8  m_iBannerType;               // animation type (boss, mission, score)
+    coreFloat  m_fBannerSpeed;              // 
+    coreUint8  m_iBannerType;               // animation type (boss, mission, wave, score, alert)
 
     cGuiLabel m_aStoryText[2];              // 
     coreFloat m_fStoryStart;                // 
@@ -106,6 +112,7 @@ public:
     void ShowWave   (const coreChar*  pcName);
     void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);
     void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);
+    void ShowAlert  ();
     coreBool IsBannerActive()const;
 
     // 

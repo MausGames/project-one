@@ -14,7 +14,7 @@
 cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
-, m_Interface           (oOptions.iPlayers)
+, m_Interface           ((oOptions.iType != GAME_TYPE_SOLO) ? GAME_PLAYERS : 1u)
 , m_pRepairEnemy        (NULL)
 , m_piMissionList       (piMissionList)
 , m_iNumMissions        (iNumMissions)
@@ -35,33 +35,26 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 
     // 
     if(!this->IsMulti() && (CORE_RAND_RUNTIME & 0x01u))
-        m_aPlayer[0].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        m_aPlayer[0].Configure(PLAYER_SHIP_DEF);
     else
 
 #endif
 
     // configure first player
-    m_aPlayer[0].Configure(PLAYER_SHIP_ATK, COLOR_SHIP_RED);
+    m_aPlayer[0].Configure(PLAYER_SHIP_ATK);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
 
     if(this->IsMulti())
     {
         // configure second player
-        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        m_aPlayer[1].Configure(PLAYER_SHIP_DEF);
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oOptions.aaiWeapon [1][i]);
         for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oOptions.aaiSupport[1][i]);
 
         // 
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
         m_aPlayer[1].SetInput(&g_aGameInput[1]);
-
-        // 
-        m_aPlayer[0].SetArea(m_aPlayer[0].GetArea() * coreVector4(1.0f, 1.0f, -0.045f, 1.0f));
-        m_aPlayer[1].SetArea(m_aPlayer[1].GetArea() * coreVector4(-0.045f, 1.0f, 1.0f, 1.0f));
-
-        // 
-        g_pPostProcessing->SetSplitScreen(true);
 
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
@@ -103,12 +96,12 @@ cGame::~cGame()
     for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO 1: make transition smoother
     g_pPostProcessing->SetSplitScreen  (false);
     g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO 1: make transition smoother
-    g_pPostProcessing->SetSaturationAll(1.0f);
+    g_pPostProcessing->SetSaturationAll(1.0f);   // TODO 1: make transition smoother
 
     // 
-    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
-    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE);
-    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED);
+    g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+    g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+    g_pEnvironment->SetTargetSpeedNow    (ENVIRONMENT_DEFAULT_SPEED);
 
     // 
     g_pSave->SaveFile();
@@ -156,7 +149,7 @@ void cGame::Render()
         m_EnemyManager.RenderUnder();
         m_pCurMission->RenderUnder();
 
-        // TODO: push oder GL_DEPTH_TEST ?? 
+        // TODO 1: push oder GL_DEPTH_TEST ?? 
         glDepthMask(false);
         {
             // 
@@ -184,7 +177,7 @@ void cGame::Render()
         m_EnemyManager.RenderOver();
         m_pCurMission->RenderOver();
 
-        // TODO: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
+        // TODO 1: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
         glDepthMask(false);
         {
             // 
@@ -231,6 +224,9 @@ void cGame::Move()
 
     // 
     m_TimeTable.Update();
+
+    //if(m_TimeTable.GetTimeEvent() >= 6.3f)   // GAME_INTRO_INTERFACE
+    //    m_Interface.SetVisible(true);
 
     // 
     cHelper::GlobalUpdate();
@@ -302,7 +298,8 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     this->__ClearAll(false);
 
     // 
-    const coreInt32 iOldID    = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
+    ASSERT(m_pCurMission)
+    const coreInt32 iOldID    = m_pCurMission->GetID();
     const coreUintW iOldIndex = m_iCurMissionIndex;
 
     // hold old mission (to keep resources valid)
@@ -322,6 +319,8 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     case cMuscusMission ::ID: m_pCurMission = new cMuscusMission (); break;
     case cAterMission   ::ID: m_pCurMission = new cAterMission   (); break;
     case cIntroMission  ::ID: m_pCurMission = new cIntroMission  (); break;
+    case cBonus1Mission ::ID: m_pCurMission = new cBonus1Mission (); break;
+    case cBonus2Mission ::ID: m_pCurMission = new cBonus2Mission (); break;
     case cErrorMission  ::ID: m_pCurMission = new cErrorMission  (); break;
     case cDemoMission   ::ID: m_pCurMission = new cDemoMission   (); break;
     }
@@ -338,7 +337,7 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
         // 
         g_pSave->EditGlobalStats()->iMissionsDone += 1u;
 
-        for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
         {
             // 
             const coreUint32 iScoreFull = m_aPlayer[i].GetScoreTable()->GetScoreMission(iOldIndex);
@@ -421,9 +420,9 @@ void cGame::StartIntro()
     ADD_FLAG(m_iStatus, GAME_STATUS_INTRO)
 
     // 
-    m_fTimeInOut = -GAME_INTRO_DELAY;
+    m_fTimeInOut = GAME_INTRO_OFFSET;
 
-    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
         m_aPlayer[i].Kill(false);
@@ -455,7 +454,7 @@ void cGame::StartOutro(const coreUint8 iType)
     m_iOutroType = iType;
 
     // 
-    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
     // 
@@ -480,7 +479,7 @@ void cGame::UseContinue()
     ASSERT(m_iContinues)
     m_iContinues -= 1u;
 
-    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
         m_aPlayer[i].StartFeeling(PLAYER_FEEL_TIME_CONTINUE, 2u);
@@ -617,7 +616,6 @@ coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
     case BADGE_NORMAL: return 2000u;
     case BADGE_EASY:   return 1000u;
     }
-    // extra life or shield recharge
 }
 
 
@@ -636,7 +634,7 @@ coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool
         case 2u: return  50000u;
         case 3u: return  30000u;
         case 4u: return  20000u;
-        default: return  10000u - 50u * MIN(iDamageTaken - LIVES, 199u);
+        default: return  10000u - MIN(50u * (iDamageTaken - LIVES), 9900u);
         }
 
         STATIC_ASSERT(LIVES == 5u)
@@ -653,12 +651,14 @@ coreBool cGame::__HandleIntro()
     if(HAS_FLAG(m_iStatus, GAME_STATUS_LOADING))
     {
         // do not start while game resources are still loading
-        if(Core::Manager::Resource->IsLoading()) return false;
+        if(Core::Manager::Resource->IsLoading()) return false;   // mission
         REMOVE_FLAG(m_iStatus, GAME_STATUS_LOADING)
     }
 
     if(HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
+        if(Core::Manager::Resource->IsLoading()) return false;   // background
+
         // 
         m_fTimeInOut.Update(1.0f);
 
@@ -671,7 +671,7 @@ coreBool cGame::__HandleIntro()
             ADD_FLAG   (m_iStatus, GAME_STATUS_PLAY)
 
             // re-enable player controls
-            for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+            for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
             // 
@@ -704,7 +704,7 @@ coreBool cGame::__HandleIntro()
                 if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
                 {
                     g_pSpecialEffects->PlaySound      (pPlayer->GetPosition(), 1.0f, SOUND_RUSH_LONG);
-                    g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
+                    g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, i ? (COLOR_ENERGY_YELLOW) : (COLOR_ENERGY_BLUE));     
                 }
 
                 // fly player animated into the game field
@@ -757,7 +757,7 @@ void cGame::__HandleDefeat()
         coreBool bAllDefeated = true;
 
         // 
-        for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
         {
             cPlayer* pPlayer = &m_aPlayer[i];
 
@@ -808,9 +808,16 @@ void cGame::__HandleDefeat()
 
             // 
             pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
-            pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
+            //pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
             pPlayer->SetDesaturate  (PLAYER_DESATURATE);
             pPlayer->StartFeeling   (PLAYER_FEEL_TIME_REPAIR, 0u);
+            
+            pPlayer->SetCurHealth(1u);
+            if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+            {
+                pPlayer->SetCurShield(5u);
+            }
+                
 
             // 
             pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;

@@ -16,10 +16,10 @@
 // TODO 1: check which operations have to be done outside of dead-check
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO 3: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
-// TODO 5: orange/red/yellow exhaust for second ship ?
 // TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
 // TODO 4: remove dark shading resources, if not required anymore (maybe for bonus phases)
-// TODO 3: add more delay to bubble/feeling
+// TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
+// TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 
 
 // ****************************************************************
@@ -29,6 +29,8 @@
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.15f)           // 
+#define PLAYER_SIZE_FACTOR        (1.15f)           // 
+#define PLAYER_AREA_FACTOR        (1.06f)           // 
 #define PLAYER_RANGE_SIZE         (1.04f)           // 
 #define PLAYER_WIND_SIZE          (4.5f)            // 
 #define PLAYER_BUBBLE_SIZE        (4.8f)            // 
@@ -99,6 +101,9 @@ private:
 
     coreFlow m_fDesaturate;                                  // 
 
+    coreProtect<coreInt32> m_iMaxShield;                     // 
+    coreProtect<coreInt32> m_iCurShield;                     // 
+
     cDataTable  m_DataTable;                                 // 
     cScoreTable m_ScoreTable;                                // 
 
@@ -129,7 +134,7 @@ public:
     DISABLE_COPY(cPlayer)
 
     // configure the player
-    void Configure   (const coreUintW iShipType, const coreVector3 vColor);
+    void Configure   (const coreUintW iShipType);
     void EquipWeapon (const coreUintW iIndex, const coreInt32 iID);
     void EquipSupport(const coreUintW iIndex, const coreInt32 iID);
 
@@ -142,6 +147,10 @@ public:
 
     // reduce current health
     coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact);
+
+    // 
+    void HealHealth(const coreUint8 iHealth);
+    void HealShield(const coreUint8 iShield);
 
     // control life and death
     void Resurrect();
@@ -208,15 +217,19 @@ public:
     inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
     inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
+    inline void SetCurShield (const coreUint8   iCurShield)  {m_iCurShield  = iCurShield;}
 
     // get object properties
-    inline const sGameInput*  GetInput     ()const {ASSERT(m_pInput) return m_pInput;}
-    inline const coreVector4& GetArea      ()const {return m_vArea;}
-    inline const coreVector2& GetForce     ()const {return m_vForce;}
-    inline const coreFloat&   GetSpeed     ()const {return m_fSpeed;}
-    inline const coreFloat&   GetTilt      ()const {return m_fTilt;}
-    inline const coreFloat&   GetInterrupt ()const {return m_fInterrupt;}
-    inline const coreFloat&   GetDesaturate()const {return m_fDesaturate;}
+    inline const sGameInput*  GetInput       ()const {ASSERT(m_pInput) return m_pInput;}
+    inline const coreVector4& GetArea        ()const {return m_vArea;}
+    inline const coreVector2& GetForce       ()const {return m_vForce;}
+    inline const coreFloat&   GetSpeed       ()const {return m_fSpeed;}
+    inline const coreFloat&   GetTilt        ()const {return m_fTilt;}
+    inline const coreFloat&   GetInterrupt   ()const {return m_fInterrupt;}
+    inline const coreFloat&   GetDesaturate  ()const {return m_fDesaturate;}
+    inline       coreInt32    GetMaxShield   ()const {return m_iMaxShield;}
+    inline       coreInt32    GetCurShield   ()const {return m_iCurShield;}
+    inline       coreFloat    GetCurShieldPct()const {return I_TO_F(m_iCurShield) * RCP(I_TO_F(m_iMaxShield));}
 
     // 
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void

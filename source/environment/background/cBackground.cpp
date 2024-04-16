@@ -26,7 +26,7 @@ template <const coreChar* pcString, coreUintW iLength, coreUintW iNum> struct sS
     extern const coreChar v ## __a[] = s; \
     static const sStringList<v ## __a, ARRAY_SIZE(v ## __a), n> v;
 
-__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(SEA_BUBBLE_NUM, DESERT_SAND_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
+__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
 
 
 // ****************************************************************
@@ -36,7 +36,7 @@ cBackground::cBackground()noexcept
 , m_pWater   (NULL)
 {
     // create background frame buffer
-    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);   // TODO 1: RGB might not be supported for render targets, Create() needs to return state, then configuration needs to change, or maybe transparent mechanism in Create() -> is a TODO 
+    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
     m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
     m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
 

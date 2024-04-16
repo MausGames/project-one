@@ -18,6 +18,7 @@
 // - welle von links nach rechts
 // - welle aus mitte
 // - schachmuster (auf und ab animation)
+// - rotation
 // - auf und ab linien, größere blöcke, diagonale
 // - boss macht bomben-angriffe die eine lokale welle erzeugen
 // - hügel bewegt sich mit etwas vom boss/spieler mit
@@ -74,7 +75,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
         m_aShield[i].DefineModelHigh("object_sphere.md3");
         m_aShield[i].DefineModelLow ("object_sphere.md3");
         m_aShield[i].DefineTexture  (0u, "effect_energy.png");
-        m_aShield[i].DefineProgram  ("effect_energy_blink_spheric_program");
+        m_aShield[i].DefineProgram  ("effect_energy_blink_spheric_program");   // TODO 1: vielleicht lieber effect_energy_blink_flat_spheric_program ?
         m_aShield[i].SetTexSize     (coreVector2(1.0f,1.0f) * 4.0f);
         m_aShield[i].Configure      (1000, avColor[i]);
         m_aShield[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_IMMORTAL);

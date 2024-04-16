@@ -230,10 +230,18 @@ constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2 vDirection, 
 
 // ****************************************************************
 // 
-inline FUNC_CONST coreBool IsHorizontal(const coreVector2 v)
+constexpr FUNC_CONST coreBool IsHorizontal(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
-    return ABS(v.x) > ABS(v.y);
+    if(std::is_constant_evaluated())
+    {
+        return ((v.x > v.y) && (v.x > -v.y)) ||
+               ((v.x < v.y) && (v.x < -v.y));
+    }
+    else
+    {
+        return ABS(v.x) > ABS(v.y);
+    }
 }
 
 constexpr FUNC_CONST coreVector2 AlongCross(const coreVector2 v)

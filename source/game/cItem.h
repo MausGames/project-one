@@ -10,6 +10,9 @@
 #ifndef _P1_GUARD_ITEM_H_
 #define _P1_GUARD_ITEM_H_
 
+// TODO 1: richtiges fragment einer tafel mit dicke
+// TODO 1: ineinander verschachtelter rotierender wuerfel
+
 
 // ****************************************************************
 // item definitions
@@ -82,7 +85,6 @@ public:
 
 // ****************************************************************
 // fragment item class
-// TODO 1: richtiges fragment einer tafel mit dicke
 class cFragmentItem final : public cItem
 {
 private:
@@ -113,7 +115,6 @@ private:
 
 // ****************************************************************
 // 
-// TODO 1: ineinander verschachtelter rotierender wuerfel  
 class cCubeItem final : public cItem
 {
 private:

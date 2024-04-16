@@ -78,6 +78,17 @@ void cEnemy::Move()
             this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
         }
 
+        // 
+        const coreModelPtr& pLowQuad = Core::Manager::Object->GetLowQuad();
+        if(HAS_FLAG(m_iStatus, ENEMY_STATUS_GHOST))
+        {
+            if(m_pVolume.GetHandle() == NULL) this->DefineVolume(pLowQuad);
+        }
+        else
+        {
+            if(m_pVolume.GetHandle() == pLowQuad.GetHandle()) this->DefineVolume(NULL);
+        }
+
         // TODO 1: better would be a shield which is only visible on bullet-hits (and tighter, maybe around silhouette)
         //if(STATIC_ISVALID(g_pGame)) 
         //{
@@ -379,7 +390,7 @@ coreVector2 cEnemy::AimAtPlayerDual(const coreUintW iIndex)const
 
 // ****************************************************************
 // 
-void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
+void cEnemy::_SetParent(cEnemy* pParent)
 {
     ASSERT(!this->IsParent())
 
@@ -395,7 +406,7 @@ void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
         ASSERT(!pParent->IsChild())
 
         // 
-        m_apMember.insert(&*pParent);
+        m_apMember.insert(pParent);
         this->AddStatus(ENEMY_STATUS_CHILD);
 
         // 
@@ -917,24 +928,32 @@ cRepairEnemy::cRepairEnemy()noexcept
 , m_fAnimation (0.0f)
 {
     // 
-    this->Configure(50, COLOR_ENERGY_WHITE * 0.6f);
+    this->Configure(50, COLOR_SHIP_GREY);
     this->AddStatus(ENEMY_STATUS_SINGLE);
-    this->AddStatus(ENEMY_STATUS_ENERGY);
     this->AddStatus(ENEMY_STATUS_IMMORTAL);
+    this->AddStatus(ENEMY_STATUS_HIDDEN);
+    this->AddStatus(ENEMY_STATUS_WORTHLESS);
 
     // 
     g_pGame->GetEnemyManager()->BindEnemy(this);
 
     // 
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_blink_invert_program");
+    this->DefineModelHigh("object_sphere.md3");
+    this->DefineModelLow ("object_sphere.md3");
+    this->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
 
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
     m_Bubble.DefineTexture(0u, "effect_energy.png");
-    m_Bubble.DefineProgram("effect_energy_flat_spheric_program");
-    m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
-    m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
+    m_Bubble.DefineProgram("effect_energy_blink_flat_spheric_program");
+    m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.6f, 0.0f));
+    m_Bubble.SetTexSize   (coreVector2(1.0f,1.0f) * 3.5f);
+
+    // 
+    m_Ship.DefineTexture(0u, "effect_energy.png");
+    m_Ship.DefineProgram("effect_energy_blink_invert_program");
+    m_Ship.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.6f, 0.0f));
+    m_Ship.SetTexSize   (coreVector2(1.0f,1.0f) * 0.6f);
 }
 
 
@@ -960,31 +979,63 @@ void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
     m_pPlayer = pPlayer;
 
     // 
-    m_vDirection = coreVector2(-SIGN(this->GetPosition().x), -SIGN(this->GetPosition().y)).Normalized();
+    m_vDirection = coreVector2(-SIGN(pPlayer->GetPosition().x), -SIGN(pPlayer->GetPosition().y) * 2.0f).Normalized();
     m_fAnimation = 0.0f;
 
     // 
-    this->DefineModelHigh(pPlayer->GetModelHigh());
-    this->DefineModelLow (pPlayer->GetModelLow ());
-    this->SetPosition    (pPlayer->GetPosition ());
+    this->SetPosition(pPlayer->GetPosition());
+
+    // 
+    m_Ship.DefineModelHigh(pPlayer->GetModelHigh());
+    m_Ship.DefineModelLow (pPlayer->GetModelLow ());
 
     // 
     m_Bubble.SetAlpha(0.0f);
+    m_Ship  .SetAlpha(0.0f);
 }
 
 
 // ****************************************************************
 // 
-void cRepairEnemy::__RenderOwnUnder()
+void cRepairEnemy::__ResurrectOwn()
+{
+    // 
+    g_pGlow->BindObject(&m_Bubble);
+    g_pGlow->BindObject(&m_Ship);
+}
+
+
+// ****************************************************************
+// 
+void cRepairEnemy::__KillOwn(const coreBool bAnimated)
+{
+    // 
+    g_pGlow->UnbindObject(&m_Bubble);
+    g_pGlow->UnbindObject(&m_Ship);
+}
+
+
+// ****************************************************************
+// 
+void cRepairEnemy::__RenderOwnOver()
 {
     DEPTH_PUSH
 
-    glDepthMask(false);
-    {
-        // 
-        m_Bubble.Render();
-    }
-    glDepthMask(true);
+    // 
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Bubble);
+
+    // 
+    this->_EnableBlink(m_Bubble.GetProgram());
+    m_Bubble.Render();
+
+    DEPTH_PUSH
+
+    // 
+    this->_EnableBlink(m_Ship.GetProgram());
+    m_Ship.Render();
+
+    // 
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Ship);
 }
 
 
@@ -995,10 +1046,11 @@ void cRepairEnemy::__MoveOwn()
     ASSERT(m_pPlayer)
 
     // 
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.2f, 4.0f);
 
     // 
     const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * TIME);
+    const coreVector2 vNewDir = coreVector2::Direction(m_fAnimation * (8.0f*PI));
     const coreVector4 vArea   = m_pPlayer->GetArea();
 
     // 
@@ -1008,18 +1060,27 @@ void cRepairEnemy::__MoveOwn()
     else if((vNewPos.y > vArea.w) && (m_vDirection.y > 0.0f)) m_vDirection.y = -ABS(m_vDirection.y);
 
     // 
-    this->SetPosition    (coreVector3(vNewPos, 0.0f));
-    this->SetTexOffset   (coreVector2(0.0f, m_fAnimation));
-    this->DefaultMultiate(m_fAnimation * (8.0f*PI));
+    this->SetPosition (coreVector3(vNewPos, 0.0f));
+    this->SetDirection(coreVector3(vNewDir, 0.0f));
 
     // 
-    m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f * TIME, 0.8f));
+    const coreFloat fAlpha = MIN(m_Bubble.GetAlpha() + 4.0f * TIME, 1.0f);
 
     // 
     m_Bubble.SetPosition (coreVector3(vNewPos, 0.0f));
-    m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
+    m_Bubble.SetDirection(coreVector3(vNewDir, 0.0f));
+    m_Bubble.SetSize     (fAlpha * this->GetSize() * PLAYER_SIZE_FACTOR);
+    m_Bubble.SetAlpha    (fAlpha);
     m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.5f));
     m_Bubble.Move();
+
+    // 
+    m_Ship.SetPosition (coreVector3(vNewPos, 0.0f));
+    m_Ship.SetDirection(coreVector3(vNewDir, 0.0f));
+    m_Ship.SetSize     (fAlpha * coreVector3(1.0f,1.0f,1.0f) * PLAYER_SIZE_FACTOR);
+    m_Ship.SetAlpha    (fAlpha);
+    m_Ship.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+    m_Ship.Move();
 
     // 
     m_pPlayer->SetPosition(this->GetPosition());

@@ -12,8 +12,7 @@
 // ****************************************************************
 // constructor
 cPauseMenu::cPauseMenu()noexcept
-: coreMenu    (SURFACE_PAUSE_MAX, SURFACE_PAUSE_DEFAULT)
-, m_Navigator (this)
+: coreMenu (SURFACE_PAUSE_MAX, SURFACE_PAUSE_DEFAULT)
 {
     // create menu objects
     m_ResumeButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -40,6 +39,7 @@ cPauseMenu::cPauseMenu()noexcept
     m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_ResumeButton, NULL, NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.AssignFirst(&m_ResumeButton);
+    m_Navigator.AssignMenu(this);
 
     // bind menu objects
     this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ResumeButton);

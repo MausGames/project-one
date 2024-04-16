@@ -24,6 +24,9 @@ cVolcanoBackground::cVolcanoBackground()noexcept
     m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
     m_pOutdoor->LoadProgram(true);
 
+    // 
+    //m_pWater = new cUnderWater();
+
     // allocate smoke list
     pList1 = new coreBatchList(VOLCANO_SMOKE_RESERVE);
                 pList1->DefineProgram("effect_decal_color_inst_program");
@@ -97,11 +100,10 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
-                    pObject->SetSize       (coreVector3(1.0f,1.0f,1.0f) * fSize * 1.2f * 1.3f);
+                    pObject->SetSize       (coreVector3(1.0f,1.0f,1.1f) * fSize * 1.2f * 1.3f);
                     pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
                     pObject->SetDirection  (coreVector3(1.0f,1.0f,0.0f).Normalized());
                     pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
-                  //  pObject->SetTexSize    (coreVector2(2.0f,2.0f));
 
                     // add object to the list
                     pList1->BindObject(pObject);
@@ -167,7 +169,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
                         pObject->SetSize     (pObject->GetSize() * coreVector3(coreVector2(1.0f,1.0f) * (bType ? 1.0f : 1.3f), 1.0f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
                         //pObject->SetDirection(coreVector3::Cross(vNormal, coreVector3::Cross(vNormal, coreVector3(0.0f,0.0f,1.0f)).Normalized()));
-                        pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+                        pObject->SetColor3   (coreVector3(1.0f,1.0f,0.0f) * Core::Rand->Float(0.85f, 1.0f));
                        // pObject->SetColor3   (LERP(coreVector3(54.0f/255.0f, 204.0f/255.0f, 255.0f/255.0f), coreVector3(1.0f,1.0f,1.0f), Core::Rand->Float(1.0f)));
 
                         // add object to the list
@@ -221,11 +223,11 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
-                    pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f));
+                    pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
                     //pObject->SetColor4  (coreVector4(COLOR_ENERGY_ORANGE * (0.8f + 0.2f * fHeight/40.0f), 0.95f));
                     pObject->SetColor4  (coreVector4(LERP(COLOR_ENERGY_ORANGE, COLOR_ENERGY_YELLOW, 0.9f), 0.95f));
                     pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * 0.6f);
-                    pObject->SetAlpha   (Core::Rand->Float(0.0f, 0.8f));
+                    pObject->SetAlpha   (Core::Rand->Float(0.3f, 0.8f));
 
                     // add object to the list
                     pList1->BindObject(pObject);
@@ -344,9 +346,12 @@ cVolcanoBackground::~cVolcanoBackground()
 // 
 void cVolcanoBackground::__RenderOwnBefore()
 {
-    // 
-    m_Lava.Render();
-    
+    glDisable(GL_BLEND);
+    {
+        // 
+        m_Lava.Render();
+    }
+    glEnable(GL_BLEND);
 
     glDisable(GL_DEPTH_TEST);
     {
@@ -370,9 +375,23 @@ void cVolcanoBackground::__RenderOwnBefore()
 // 
 void cVolcanoBackground::__MoveOwn()
 {
+    const coreFloat fFlyOffset = g_pEnvironment->GetFlyOffset();
+    
     // 
-    m_Lava.SetFlyOffset(g_pEnvironment->GetFlyOffset());
+    m_Lava.SetFlyOffset(fFlyOffset);
     m_Lava.Move();
+    
+    
+    const coreFloat fShift = g_pEnvironment->GetOffsetShift();
+    if(fShift)
+    {
+        m_Smoke.ForEachParticleAll([&](coreParticle* OUTPUT pParticle, const coreUintW i)
+        {
+            pParticle->GetBeginState().vPosition.y += fShift;
+            pParticle->GetEndState  ().vPosition.y += fShift;
+        });
+    }
+
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
@@ -389,6 +408,7 @@ void cVolcanoBackground::__MoveOwn()
             pParticle->SetScaleAbs   (3.0f,                              12.5f * 2.0f);
             pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.1f, PI*0.1f));
             pParticle->SetColor4Abs  (coreVector4(0.8f,0.8f,0.8f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
+            pParticle->SetColor4Abs  (coreVector4(0.5f,0.5f,0.5f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
             pParticle->SetSpeed      (0.1f * Core::Rand->Float(0.9f, 1.1f));
         });
         */

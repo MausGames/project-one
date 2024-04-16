@@ -64,7 +64,6 @@
 #define SEA_ANIMAL_NUM        (1536u)
 #define SEA_ANIMAL_1_RESERVE  (192u)
 #define SEA_ANIMAL_2_RESERVE  (36u)
-#define SEA_BUBBLE_NUM        (5u)
 #define SEA_ALGAE_NUM         (2048u)
 #define SEA_ALGAE_RESERVE     (512u)
 
@@ -118,8 +117,13 @@
 // background interface
 class INTERFACE cBackground
 {
+private:
+    // 
+    template <typename T> using uDataMap = coreMap<const coreBatchList*, coreList<T>>;
+
+
 protected:
-    // background nicht neu erzeugen, sondern refresh function aufrufen hier
+    // TODO 1: background nicht neu erzeugen, sondern refresh function aufrufen hier
     coreFrameBuffer m_FrameBuffer;                   // background frame buffer (multisampled)
     coreFrameBuffer m_ResolvedTexture;               // resolved texture
 
@@ -134,8 +138,8 @@ protected:
     coreMapStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
     coreMapStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
 
-    coreMap<const coreBatchList*, coreList<coreUint16>> m_aaiBaseHeight;   // 
-    coreMap<const coreBatchList*, coreList<coreUint32>> m_aaiBaseNormal;   // 
+    uDataMap<coreUint16> m_aaiBaseHeight;            // 
+    uDataMap<coreUint32> m_aaiBaseNormal;            // 
 
     static coreMemoryPool s_MemoryPool;              // 
 
@@ -205,12 +209,12 @@ public:
     cNoBackground() = default;
 
     DISABLE_COPY(cNoBackground)
-    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f))
 
 
 private:
     // execute own routines
-    inline void __RenderOwnAfter()final {/*glClearColor(1.0,1.0,1.0,1.0);*/ m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void __RenderOwnAfter()final {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
 
@@ -244,10 +248,6 @@ protected:
 class cSeaBackground final : public cBackground
 {
 private:
-    coreFullscreen m_Snow;        // 
-    coreVector2    m_vSnowMove;   // 
-    coreFlow       m_fSnowWave;   // 
-
     coreFlow m_fWaveTime;         // 
 
     coreSoundPtr m_pUnderSound;   // 
@@ -263,9 +263,8 @@ public:
 
 protected:
     // execute own routines
-    void __RenderOwnAfter()final;
-    void __MoveOwn       ()final;
-    void __UpdateOwn     ()final;
+    void __MoveOwn  ()final;
+    void __UpdateOwn()final;
 };
 
 
@@ -502,7 +501,7 @@ public:
     cStomachBackground()noexcept;
 
     DISABLE_COPY(cStomachBackground)
-    ASSIGN_ID_EX(51, "Stomach", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(51, "Stomach", coreVector3(0.5f,0.5f,0.5f))
 
 
 private:

@@ -21,13 +21,8 @@
 #define GAME_PLAYERS        (PLAYERS)     // default number of players
 #define GAME_HELPERS        (HELPERS)     // 
 #define GAME_CONTINUES      (CONTINUES)   // 
-#define GAME_INTRO_DELAY    (0.2f)        // 
-#define GAME_INTRO_DURATION (3.5f)        // 
-
-#define GAME_MULTI      (g_pGame->IsMulti())
-#define GAME_EASY       (g_pGame->GetDifficulty() == 0u)
-#define GAME_HARD       (g_pGame->GetDifficulty() == 2u)
-#define GAME_VERSION(x) (g_pGame->GetVersion() >= (x))
+#define GAME_INTRO_OFFSET   (0.4f)        // 
+#define GAME_INTRO_DURATION (4.1f)        // 
 
 enum eGameStatus : coreUint8
 {
@@ -41,17 +36,32 @@ enum eGameStatus : coreUint8
 
 enum eGameMode : coreUint8
 {
-    GAME_MODE_DEFAULT   = 0x00u,   // 
-    GAME_MODE_COOP      = 0x01u,   // 
-    GAME_MODE_DUEL      = 0x02u,   // 
-    GAME_MODE_PACIFIST  = 0x10u,   // 
-    GAME_MODE_MASOCHIST = 0x20u    // 
+    GAME_MODE_STANDARD = 0u,   // 
+    GAME_MODE_PACIFIST,        // 
+    GAME_MODE_MASOCHIST,       // 
+    GAME_MODE_MAX              // 
+};
+
+enum eGameType : coreUint8
+{
+    GAME_TYPE_SOLO = 0u,   // (opposite of MULTI) 
+    GAME_TYPE_COOP,        // 
+    GAME_TYPE_DUEL,        // 
+    GAME_TYPE_MAX          // 
+};
+
+enum eGameDifficulty : coreUint8
+{
+    GAME_DIFFICULTY_EASY = 0u,   // 
+    GAME_DIFFICULTY_NORMAL,      // 
+    GAME_DIFFICULTY_HARD,        // 
+    GAME_DIFFICULTY_MAX          // 
 };
 
 struct sGameOptions final
 {
-    coreUint8 iPlayers;                                          // 
     coreUint8 iMode;                                             // 
+    coreUint8 iType;                                             // 
     coreUint8 iDifficulty;                                       // 
     coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_EQUIP_WEAPONS];    // 
     coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_EQUIP_SUPPORTS];   // 
@@ -71,36 +81,42 @@ static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
     cCalorMission  ::ID,
     cMuscusMission ::ID,
     cAterMission   ::ID,
-    cNoMission     ::ID
-};
-
-static constexpr coreInt32 __GAME_MISSION_LIST_ADDON1[] =
-{
-    cNoMission::ID,
-    cNoMission::ID
-};
-
-static constexpr coreInt32 __GAME_MISSION_LIST_ADDON2[] =
-{
-    cNoMission::ID,
-    cNoMission::ID
-};
-
-static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
-{
-    cErrorMission::ID,
-    cNoMission   ::ID
+    cBonus1Mission ::ID,
+    cBonus2Mission ::ID,
+    cErrorMission  ::ID
 };
 
 static constexpr coreInt32 __GAME_MISSION_LIST_DEMO[] =
 {
-    cDemoMission::ID,
-    cNoMission  ::ID
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    cDemoMission::ID
 };
 
-#define GAME_MISSION_LIST_MAIN  (__GAME_MISSION_LIST_MAIN),  ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
-#define GAME_MISSION_LIST_ERROR (__GAME_MISSION_LIST_ERROR), ARRAY_SIZE(__GAME_MISSION_LIST_ERROR)
-#define GAME_MISSION_LIST_DEMO  (__GAME_MISSION_LIST_DEMO),  ARRAY_SIZE(__GAME_MISSION_LIST_DEMO)
+#define GAME_MISSION_LIST_MAIN (__GAME_MISSION_LIST_MAIN), ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
+#define GAME_MISSION_LIST_DEMO (__GAME_MISSION_LIST_DEMO), ARRAY_SIZE(__GAME_MISSION_LIST_DEMO)
+
+struct sMissionData final
+{
+    coreInt32       iID;      // 
+    const coreChar* pcName;   // 
+    coreVector3     vColor;   // 
+};
+
+static constexpr sMissionData g_aMissionData[] =
+{
+    {cIntroMission  ::ID, cIntroMission  ::Name, cCloudBackground  ::Color},
+    {cViridoMission ::ID, cViridoMission ::Name, cGrassBackground  ::Color},
+    {cNevoMission   ::ID, cNevoMission   ::Name, cSeaBackground    ::Color},
+    {cHarenaMission ::ID, cHarenaMission ::Name, cDesertBackground ::Color},
+    {cRutilusMission::ID, cRutilusMission::Name, cSpaceBackground  ::Color},
+    {cGeluMission   ::ID, cGeluMission   ::Name, cVolcanoBackground::Color},
+    {cCalorMission  ::ID, cCalorMission  ::Name, cSnowBackground   ::Color},
+    {cMuscusMission ::ID, cMuscusMission ::Name, cMossBackground   ::Color},
+    {cAterMission   ::ID, cAterMission   ::Name, cDarkBackground   ::Color},
+    {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color},   // #
+    {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color}    // #
+};
+// TODO 1: handle game end based on mission-list
 
 
 // ****************************************************************
@@ -137,7 +153,7 @@ private:
 
     cRepairEnemy* m_pRepairEnemy;           // 
 
-    const coreInt32* m_piMissionList;       // 
+    const coreInt32* m_piMissionList;       // (should never be NULL) 
     coreUintW        m_iNumMissions;        // 
 
     cMission* m_pCurMission;                // currently active mission (should never be NULL)
@@ -202,10 +218,14 @@ public:
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
     // 
-    inline coreBool IsMulti    ()const {return (m_Options.iPlayers > 1u);}
-    inline coreBool IsCoop     ()const {return HAS_FLAG(m_Options.iMode, GAME_MODE_COOP);}
-    inline coreBool IsPacifist ()const {return HAS_FLAG(m_Options.iMode, GAME_MODE_PACIFIST);}
-    inline coreBool IsMasochist()const {return HAS_FLAG(m_Options.iMode, GAME_MODE_MASOCHIST);}
+    inline coreBool IsPacifist ()const                          {return (this->GetMode      () == GAME_MODE_PACIFIST);}
+    inline coreBool IsMasochist()const                          {return (this->GetMode      () == GAME_MODE_MASOCHIST);}
+    inline coreBool IsMulti    ()const                          {return (this->GetType      () != GAME_TYPE_SOLO);}
+    inline coreBool IsCoop     ()const                          {return (this->GetType      () == GAME_TYPE_COOP);}
+    inline coreBool IsDuel     ()const                          {return (this->GetType      () == GAME_TYPE_DUEL);}
+    inline coreBool IsEasy     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_EASY);}
+    inline coreBool IsHard     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_HARD);}
+    inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
 
     // access game objects
     inline cPlayer*         GetPlayer             (const coreUintW iIndex)   {ASSERT(iIndex                   < GAME_PLAYERS) return &m_aPlayer[iIndex];}
@@ -223,12 +243,14 @@ public:
     inline cTimeTable*      GetTimeTable          ()                         {return &m_TimeTable;}
 
     // get object properties
-    inline const coreInt32*    GetMissionList()const {return m_piMissionList;}
+    inline       coreUint8     GetNumPlayers ()const {return this->IsMulti() ? GAME_PLAYERS : 1u;}
+    inline const coreInt32*    GetMissionList()const {ASSERT(m_piMissionList) return m_piMissionList;}
     inline const coreUintW&    GetNumMissions()const {return m_iNumMissions;}
     inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
     inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
     inline const sGameOptions& GetOptions    ()const {return m_Options;}
-    inline const coreUint8&    GetPlayers    ()const {return m_Options.iPlayers;}
+    inline const coreUint8&    GetMode       ()const {return m_Options.iMode;}
+    inline const coreUint8&    GetType       ()const {return m_Options.iType;}
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
     inline const coreUint16&   GetVersion    ()const {return m_iVersion;}
     inline const coreUint8&    GetStatus     ()const {return m_iStatus;}
@@ -258,7 +280,7 @@ private:
 template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 {
     // 
-    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         cPlayer* pPlayer = &m_aPlayer[i];
         if(pPlayer->HasStatus(PLAYER_STATUS_DEAD)) continue;
@@ -274,7 +296,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 template <typename F> void cGame::ForEachPlayerAll(F&& nFunction)
 {
     // 
-    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
         nFunction(&m_aPlayer[i], i);

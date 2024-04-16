@@ -171,6 +171,7 @@ void cRayWeapon::__ShootOwn()
         // 
         this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos + vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt());
         this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos - vTan*1.5f, vDir))->ChangeTilt(m_pOwner->GetTilt());
+        //this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 6.0f, m_pOwner, vPos, vDir))->ChangeTilt(m_pOwner->GetTilt());
     }
 
     // play bullet sound-effect

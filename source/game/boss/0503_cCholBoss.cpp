@@ -147,7 +147,11 @@ void cCholBoss::__MoveOwn()
             nImpactFunc(this,        coreVector2( 0.0f, 1.0f) * 2.0f, coreVector3(-1.0f,-1.0f,-2.5f).Normalized(), (fTime - 0.4f)  * 6.0f, (fTimeBefore - 0.4f)  * 6.0f, true);
 
             if(PHASE_TIME_AFTER(0.85f))
+            {
                 PHASE_CHANGE_INC
+
+                this->_StartBoss();
+            }
         });
     }
 
@@ -186,7 +190,6 @@ void cCholBoss::__MoveOwn()
             {
                 PHASE_CHANGE_INC
 
-                this->_StartBoss();
                 this->__EnableFire();
             }
         });

@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_SHIP_H_
 #define _P1_GUARD_SHIP_H_
 
-// TODO 3: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
+// TODO 4: reduce ship health (and player shield) and all damage values to 16-bit (also reorder for better packing if possible)
 // TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
 // TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 // TODO 4: check and cleanup transformation functions
@@ -73,9 +73,9 @@ public:
     inline cShip* Rotate270() {this->SetPosition(this->GetPosition().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
 
     // 
-    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = cShip::CalcColorFactor(fFactor); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
-    inline void InvokeBlink ()                        {if(m_fBlink < 0.4f) m_fBlink = 1.2f;}
+    inline void InvokeBlink ()                        {if(!g_CurConfig.Graphics.iFlash || (m_fBlink < 0.4f)) m_fBlink = 1.2f;}
 
     // 
     inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
@@ -105,6 +105,9 @@ public:
     inline       coreVector2  GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}
     inline       coreVector3  GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
     inline       coreFloat    GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
+
+    // 
+    static inline coreFloat CalcColorFactor(const coreFloat fFactor) {return (fFactor < (1.0f/3.0f)) ? 0.0f : ((fFactor < (2.0f/3.0f)) ? 0.5f : 1.0f);}
 
 
 protected:

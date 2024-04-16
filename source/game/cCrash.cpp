@@ -124,6 +124,8 @@ void cCrashManager::Move()
 // 
 void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget, void* pData)
 {
+    return;
+
     // 
     const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
     if(!pOutdoor || !pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;

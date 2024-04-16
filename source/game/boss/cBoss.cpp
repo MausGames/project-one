@@ -32,6 +32,7 @@ cBoss::cBoss()noexcept
     this->AddStatus(ENEMY_STATUS_BOSS);
     this->AddStatus(ENEMY_STATUS_SINGLE);
     this->AddStatus(ENEMY_STATUS_IMMORTAL);
+    this->AddStatus(ENEMY_STATUS_WORTHLESS);
 
     // 
     g_pGame->GetEnemyManager()->BindEnemy(this);
@@ -110,6 +111,12 @@ void cBoss::_EndBoss(const coreBool bAnimated)
 {
     // 
     g_pGame->GetCurMission()->DeactivateBoss();
+
+    // 
+    g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetScoreTable()->ResetOverride();
+    });
 }
 
 
@@ -120,6 +127,12 @@ void cBoss::_UpdateBoss()
     // 
     m_fPhaseTimeBefore = m_fPhaseTime;
     m_fPhaseTime.Update(1.0f);
+
+    // 
+    g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetScoreTable()->SetOverride(1.0f - this->GetCurHealthPct());
+    });
 }
 
 

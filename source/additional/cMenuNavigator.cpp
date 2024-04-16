@@ -14,19 +14,18 @@ coreBool    cMenuNavigator::s_bJoystick  = false;
 
 // ****************************************************************
 // constructor
-cMenuNavigator::cMenuNavigator(coreMenu* pMenu)noexcept
+cMenuNavigator::cMenuNavigator()noexcept
 : m_pCurObject   (NULL)
 , m_iStore       (0u)
 , m_iFirst       (0u)
 , m_bPressed     (false)
 , m_vMouseOffset (coreVector2(0.0f,0.0f))
-, m_pMenu        (pMenu)
+, m_pMenu        (NULL)
 {
     // 
-    this->DefineTexture(0u, Core::Manager::Resource->Load<coreTexture>("game_icon.png", CORE_RESOURCE_UPDATE_AUTO, "data/textures/game_icon.png"));
+    this->DefineTexture(0u, "ship_icon_01.png");
     this->DefineProgram("default_2d_program");
-    this->SetSize      (coreVector2(0.05f,0.05f));
-    this->SetDirection (coreVector2(-1.0f,0.0f));
+    this->SetSize      (coreVector2(0.06f,0.06f));
 
     m_aObject.emplace(NULL);
 }
@@ -43,7 +42,8 @@ void cMenuNavigator::Move()
         const coreVector2 vResolution = Core::System->GetResolution();
 
         Core::Input->SetMousePosition((vPosition + m_vMouseOffset) / vResolution);
-        this->SetPosition(vPosition * RCP(vResolution.Min()) + vOffset);
+        this->SetPosition (vPosition * RCP(vResolution.Min()) + vOffset);
+        this->SetDirection(coreVector2::Direction(1.2f * coreFloat(Core::System->GetTotalTime()))); // TODO 1: goes faster when confirming something
 
         m_pCurObject->SetFocused(true);
 
@@ -112,43 +112,46 @@ void cMenuNavigator::Update()
                 else if(Core::Input->GetJoystickButton(i, 0u, CORE_INPUT_HOLD)) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
             }
 
-            const coreBool bShoulderLeft  = Core::Input->GetJoystickButton(i,  9u, CORE_INPUT_PRESS);
-            const coreBool bShoulderRight = Core::Input->GetJoystickButton(i, 10u, CORE_INPUT_PRESS);
-
-            if(bShoulderLeft || bShoulderRight)
+            if(!m_aTab.empty())
             {
-                ASSERT(m_pMenu)
+                const coreBool bShoulderLeft  = Core::Input->GetJoystickButton(i,  9u, CORE_INPUT_PRESS);
+                const coreBool bShoulderRight = Core::Input->GetJoystickButton(i, 10u, CORE_INPUT_PRESS);
 
-                coreUint8 iCurTab = 0u;
-                for(coreUintW j = 0u, je = m_aTab.size(); j < je; ++j)
+                if(bShoulderLeft || bShoulderRight)
                 {
-                    if(m_aTab.get_valuelist()[j].iSurface == m_pMenu->GetCurSurface())
+                    ASSERT(m_pMenu)
+
+                    coreUint8 iCurTab = 0u;
+                    for(coreUintW j = 0u, je = m_aTab.size(); j < je; ++j)
                     {
-                        iCurTab = j;
-                        break;
+                        if(m_aTab.get_valuelist()[j].iSurface == m_pMenu->GetCurSurface())
+                        {
+                            iCurTab = j;
+                            break;
+                        }
                     }
-                }
 
-                if(bShoulderLeft) {if(--iCurTab >= m_aTab.size()) iCurTab = m_aTab.size() - 1u;}
-                             else {if(++iCurTab >= m_aTab.size()) iCurTab = 0u;}
+                    if(bShoulderLeft) {if(--iCurTab >= m_aTab.size()) iCurTab = m_aTab.size() - 1u;}
+                                 else {if(++iCurTab >= m_aTab.size()) iCurTab = 0u;}
 
-                coreObject2D* pCurTab = m_aTab.get_keylist()[iCurTab];
+                    coreObject2D* pCurTab = m_aTab.get_keylist()[iCurTab];
 
-                m_pMenu->ChangeSurface(m_aTab.at(pCurTab).iSurface, 0.0f);
+                    m_pMenu->ChangeSurface(m_aTab.at(pCurTab).iSurface, 0.0f);
 
-                if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_NODE))
-                {
-                    m_pCurObject = this->__ToObject(m_aObject.at(pCurTab).iMoveDown);
-
-                    for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && m_pCurObject && !m_pCurObject->GetAlpha(); ++j)
+                    if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_NODE))
                     {
-                        const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
-                        m_pCurObject = this->__ToObject(iFallback ? iFallback : m_aObject.at(m_pCurObject).iMoveDown);
+                        m_pCurObject = this->__ToObject(m_aObject.at(pCurTab).iMoveDown);
+
+                        for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && m_pCurObject && !m_pCurObject->GetAlpha(); ++j)
+                        {
+                            const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
+                            m_pCurObject = this->__ToObject(iFallback ? iFallback : m_aObject.at(m_pCurObject).iMoveDown);
+                        }
                     }
-                }
-                else if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_ROOT))
-                {
-                    m_pCurObject = pCurTab;
+                    else if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_TAB_ROOT))
+                    {
+                        m_pCurObject = pCurTab;
+                    }
                 }
             }
 

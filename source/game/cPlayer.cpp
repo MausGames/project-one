@@ -14,7 +14,7 @@
 cPlayer::cPlayer()noexcept
 : m_apWeapon        {}
 , m_pInput          (&g_TotalInput)
-, m_vArea           (coreVector4(-FOREGROUND_AREA * 1.06f, FOREGROUND_AREA * 1.06f))
+, m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fSpeed          (1.0f)
 , m_fTilt           (0.0f)
@@ -28,9 +28,11 @@ cPlayer::cPlayer()noexcept
 , m_fLightningTime  (0.0f)
 , m_fLightningAngle (0.0f)
 , m_fDesaturate     (0.0f)
+, m_iMaxShield      (0)
+, m_iCurShield      (0)
 , m_fAnimation      (0.0f)
 , m_iLook           (0u)
-, m_vOldDir         (coreVector2(0.0f,0.0f))
+, m_vOldDir         (coreVector2(0.0f,1.0f))
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
 {
@@ -39,6 +41,7 @@ cPlayer::cPlayer()noexcept
     this->DefineTexture(1u, "menu_background_black.png");
 
     // set object properties
+    this->SetSize             (coreVector3(1.0f,1.0f,1.0f) * PLAYER_SIZE_FACTOR);
     this->SetDirection        (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation      (coreVector3(0.0f,0.0f,1.0f));
     this->SetCollisionModifier(coreVector3(0.0f,0.0f,0.0f));
@@ -74,14 +77,14 @@ cPlayer::cPlayer()noexcept
     m_Range.DefineTexture(0u, "effect_energy.png");
     m_Range.DefineProgram("effect_energy_flat_invert_program");
     m_Range.SetAlpha     (0.0f);
-    m_Range.SetTexSize   (coreVector2(1.0f,1.0f) * 0.1f);
+    m_Range.SetTexSize   (coreVector2(0.1f,0.1f));
     m_Range.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Arrow.DefineModel  ("bullet_cone.md3");
     m_Arrow.DefineTexture(0u, "effect_energy.png");
     m_Arrow.DefineProgram("effect_energy_flat_invert_program");
-    m_Arrow.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+    m_Arrow.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 1.3f * PLAYER_SIZE_FACTOR);
     m_Arrow.SetAlpha     (0.0f);
     m_Arrow.SetTexSize   (coreVector2(4.0f,1.0f) * 0.2f);
     m_Arrow.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -98,7 +101,7 @@ cPlayer::cPlayer()noexcept
     m_Bubble.DefineTexture(0u, "effect_energy.png");
     m_Bubble.DefineProgram("effect_energy_flat_spheric_program");
     m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.6f, 0.0f));
-    m_Bubble.SetTexSize   (coreVector2(1.0f,1.0f) * 0.5f);
+    m_Bubble.SetTexSize   (coreVector2(0.5f,0.5f));
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
@@ -107,7 +110,7 @@ cPlayer::cPlayer()noexcept
         m_aShield[i].DefineModel  ("effect_shield.md3");
         m_aShield[i].DefineTexture(0u, "effect_shield.png");
         m_aShield[i].DefineProgram("effect_shield_program");
-        m_aShield[i].SetSize      (coreVector3(4.7f,4.7f,4.7f) * (i ? -1.0f : 1.0f));
+        m_aShield[i].SetSize      (coreVector3(4.7f,4.7f,4.7f) * (i ? -1.0f : 1.0f) * PLAYER_SIZE_FACTOR);
         m_aShield[i].SetAlpha     (0.0f);
         m_aShield[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     }
@@ -117,7 +120,7 @@ cPlayer::cPlayer()noexcept
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetDirection (this->GetDirection());
-    m_Exhaust.SetColor4    (coreVector4(COLOR_FIRE_BLUE, 0.7f));
+    m_Exhaust.SetAlpha     (0.7f);
     m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
     m_Exhaust.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
@@ -138,7 +141,7 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
+void cPlayer::Configure(const coreUintW iShipType)
 {
     // select appearance type
     coreHashString sModelHigh;
@@ -150,7 +153,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
     default: ASSERT(false)
     case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_BLUE   * 1.1f; break;
     case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_ENERGY_YELLOW * 0.7f; break;
-    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone.md3";      sModelLow = "ship_projectone.md3";     sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_BLUE   * 1.1f; break;
+    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone.md3";      sModelLow = "ship_projectone.md3";     sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_GREEN  * 0.8f; break;
     }
 
     // load models
@@ -166,9 +169,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
     m_Arrow     .SetColor3(vEnergy * (0.9f/1.1f));
     m_aShield[0].SetColor3(vEnergy * (1.0f/1.1f));
     m_aShield[1].SetColor3(vEnergy * (1.0f/1.1f));
-
-    // set color
-    //this->SetBaseColor(vColor);
+    m_Exhaust   .SetColor3(vEnergy);
 
     // 
     SET_BITVALUE(m_iLook, 4u, 0u, iShipType)
@@ -428,10 +429,11 @@ void cPlayer::Move()
 
             // 
             m_Range.SetPosition (this->GetPosition());
-            m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_RANGE_SIZE * fScale);
+            m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_RANGE_SIZE * PLAYER_SIZE_FACTOR * fScale);
             m_Range.SetDirection(coreVector3(vDir, 0.0f));
             m_Range.SetAlpha    (STEP(0.0f, 0.15f, fScale));
-            m_Range.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.1f));
+            //m_Range.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.1f));
+                            m_Range.SetTexOffset(m_Range.GetTexOffset() - 0.1f * TIME * m_Range.GetDirection().xy());
             m_Range.Move();
         }
 
@@ -444,7 +446,7 @@ void cPlayer::Move()
             if(m_fArrowValue <= 0.0f) this->DisableArrow();
 
             // 
-            m_Arrow.SetPosition (this->GetPosition () + this->GetDirection() * 6.2f);
+            m_Arrow.SetPosition (this->GetPosition () + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR);
             m_Arrow.SetDirection(this->GetDirection());
             m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
             m_Arrow.SetAlpha    (LERPH3(0.0f, 1.0f, m_fArrowValue));
@@ -458,7 +460,7 @@ void cPlayer::Move()
 
             // 
             m_Wind.SetPosition (this->GetPosition());
-            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * LERP(1.0f, 1.5f, POW3(m_fRollTime)));
+            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * PLAYER_SIZE_FACTOR * LERP(1.0f, 1.5f, POW3(m_fRollTime)));
             m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
             m_Wind.Move();
         }
@@ -480,7 +482,7 @@ void cPlayer::Move()
 
             // 
             m_Bubble.SetPosition (this->GetPosition());
-            m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
+            m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * PLAYER_SIZE_FACTOR * m_Bubble.GetAlpha());
             m_Bubble.SetDirection(coreVector3(vDir, 0.0f));
             m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
             m_Bubble.Move();
@@ -554,22 +556,27 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 {
     if(iDamage > 0)
     {
+        constexpr coreInt32 iReplacement = 1;
+
         // 
         m_ScoreTable.CancelCooldown();
 
         // 
-        const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);
+        const coreInt32 iShieldDamage = CLAMP(iReplacement, m_iCurShield - m_iMaxShield, m_iCurShield);
+        m_iCurShield -= iShieldDamage;
+
+        // 
+        const coreInt32 iTaken = this->_TakeDamage(iReplacement - iShieldDamage, iElement, vImpact) + iShieldDamage;
 
         if(m_iCurHealth)
         {
             // 
             if(!this->IsDarkShading()) this->RefreshColor();
 
-            if(HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+            if(iShieldDamage)
             {
                 // 
-                //this->SetDesaturate(PLAYER_DESATURATE);
-                this->StartIgnoring((m_iCurHealth == 1) ? 1u : 0u);
+                this->StartIgnoring(m_iCurShield ? 0u : 1u);
             }
             else
             {
@@ -580,16 +587,6 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
             // 
             m_fInterrupt = 0.0f;
-
-            // 
-            m_DataTable.EditCounterTotal  ()->iDamageTaken += iTaken;
-            m_DataTable.EditCounterMission()->iDamageTaken += iTaken;
-            m_DataTable.EditCounterSegment()->iDamageTaken += iTaken;
-
-            // 
-            g_pSave->EditGlobalStats      ()->iDamageTaken += iTaken;
-            g_pSave->EditLocalStatsMission()->iDamageTaken += iTaken;
-            g_pSave->EditLocalStatsSegment()->iDamageTaken += iTaken;
         }
         else
         {
@@ -597,10 +594,38 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             this->Kill(true);
         }
 
+        // 
+        m_DataTable.EditCounterTotal  ()->iDamageTaken += iTaken;
+        m_DataTable.EditCounterMission()->iDamageTaken += iTaken;
+        m_DataTable.EditCounterSegment()->iDamageTaken += iTaken;
+
+        // 
+        g_pSave->EditGlobalStats      ()->iDamageTaken += iTaken;
+        g_pSave->EditLocalStatsMission()->iDamageTaken += iTaken;
+        g_pSave->EditLocalStatsSegment()->iDamageTaken += iTaken;
+
         return iTaken;
     }
 
     return 0;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::HealHealth(const coreUint8 iHealth)
+{
+    // 
+    m_iCurHealth = MIN(m_iCurHealth + iHealth, m_iMaxHealth);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::HealShield(const coreUint8 iShield)
+{
+    // 
+    m_iCurShield = MIN(m_iCurShield + iShield, m_iMaxShield);
 }
 
 
@@ -611,6 +636,9 @@ void cPlayer::Resurrect()
     // resurrect player
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
+
+    // 
+    m_iCurShield = m_iMaxShield;
 
     // add ship to global shadow and outline
     cShadow::GetGlobalContainer()->BindObject(this);
@@ -655,7 +683,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fLightningAngle = 0.0f;
 
     // 
-    m_vOldDir     = coreVector2(0.0f,0.0f);
+    m_vOldDir     = coreVector2(0.0f,1.0f);
     m_fRangeValue = 0.0f;
     m_fArrowValue = 0.0f;
 
@@ -754,13 +782,6 @@ void cPlayer::StartIgnoring(const coreUint8 iType)
 
     // 
     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-
-    // 
-    if(iType == 1u)
-    {
-        this->SetDesaturate(PLAYER_DESATURATE);
-        this->StartFeeling (PLAYER_FEEL_TIME_SHIELD, 2u);
-    }
 }
 
 
@@ -808,7 +829,7 @@ void cPlayer::TurnIntoPlayer()
 
     this->DefineTexture  (0u, "ship_player.png");
 
-    this->Configure(GET_BITVALUE(m_iLook, 4u, 0u), coreVector4::UnpackUnorm4x8(GET_BITVALUE(m_iLook, 8u, 4u)).xyz());
+    this->Configure(GET_BITVALUE(m_iLook, 4u, 0u));//, coreVector4::UnpackUnorm4x8(GET_BITVALUE(m_iLook, 8u, 4u)).xyz());
     this->EquipWeapon(0u, GET_BITVALUE(m_iLook, 4u, 12u));
     this->ActivateDarkShading();
 }
@@ -972,9 +993,9 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
     else if(!fStrength &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->UnbindObject(&m_Exhaust);
 
     // 
-    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f);
+    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f * PLAYER_SIZE_FACTOR);
     m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
-    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f));
+    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR));
     m_Exhaust.SetDirection(this->GetDirection());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();
@@ -1085,7 +1106,7 @@ void cPlayer::__EquipShield()
 
     // 
     ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-    this->SetMaxHealth(PLAYER_SHIELD);
+    m_iMaxShield = PLAYER_SHIELD;
 }
 
 

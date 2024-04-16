@@ -16,7 +16,6 @@
 // TODO 3: add memory pool object for bullets ? also for enemy
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
-// TODO 3: shift spear-bullet collision like ray-bullet
 // TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this even be fixed ?)
 // TODO 3: bullets (ray) spawning directly in front of a hollow object fly inside
 // TODO 5: bullet -> to POD-type with single parent object
@@ -803,7 +802,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
 
 // ****************************************************************
 // destructor
-template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
+template <typename T> cBulletManager::sBulletSet<T>::sBulletSet::~sBulletSet()
 {
     // 
     T::GlobalExit();

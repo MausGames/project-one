@@ -12,9 +12,7 @@ static coreUint32 m_iSparkNum = 0u;
 // ****************************************************************
 // constructor
 cSeaBackground::cSeaBackground()noexcept
-: m_vSnowMove (coreVector2(0.0f,0.0f))
-, m_fSnowWave (0.0f)
-, m_fWaveTime (0.0f)
+: m_fWaveTime (0.0f)
 {
     // TODO 1: bubbles ?    
 
@@ -120,7 +118,7 @@ cSeaBackground::cSeaBackground()noexcept
     pList1 = new coreBatchList(SEA_WEED_RESERVE);
     pList1->DefineProgram("object_wave_inst_program");
 
-    pList2 = new coreBatchList(SEA_WEED_RESERVE);
+    pList2 = new coreBatchList(SEA_WEED_RESERVE);   // TODO 1: NOT YET, setting the shader-uniform is not submittable
     pList2->DefineProgram("object_wave_inst_program");
     {
         // load object resources
@@ -243,13 +241,6 @@ cSeaBackground::cSeaBackground()noexcept
     }
 
     // 
-    m_Snow.DefineTexture(0u, "effect_snow.png");
-    m_Snow.DefineProgram("effect_weather_snow_program");
-    m_Snow.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Snow.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
-    m_Snow.SetAlpha     (0.9f);
-
-    // 
     m_pUnderSound = Core::Manager::Resource->Get<coreSound>("environment_under.wav");
     m_pUnderSound.OnUsableOnce([this, pResource = m_pUnderSound]()
     {
@@ -269,56 +260,10 @@ cSeaBackground::~cSeaBackground()
 
 
 // ****************************************************************
-// 
-void cSeaBackground::__RenderOwnAfter()
-{
-    // enable the shader-program
-    if(!m_Snow.GetProgram().IsUsable()) return;
-    if(!m_Snow.GetProgram()->Enable())  return;
-
-    // 
-    coreProgram* pLocal = m_Snow.GetProgram().GetResource();
-    for(coreUintW i = 0u; i < SEA_BUBBLE_NUM; ++i)
-    {
-        const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(POW2(i)) + coreVector2(0.13f * SIN(m_fSnowWave * (0.125f*PI) + I_TO_F(POW2(i))), 0.0f);
-        const coreFloat   fNewScale     = 0.9f - 0.07f * I_TO_F(i);
-
-        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
-    }
-
-    glDisable(GL_DEPTH_TEST);
-    {
-        // 
-        //m_Snow.Render();
-    }
-    glEnable(GL_DEPTH_TEST);
-}
-
-
-// ****************************************************************
 // move the sea background
 void cSeaBackground::__MoveOwn()
 {
-    
-    // 
-    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
-    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.4f;
-    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (m_vSnowMove.InvertedX() + vEnvMove) * (0.9f * TIME);
 
-    // 
-    m_Snow.SetDirection(g_pEnvironment->GetDirection().InvertedX());
-    m_Snow.SetTexSize  (vTexSize);
-    m_Snow.SetTexOffset(vTexOffset.Processed(FRACT));
-    m_Snow.Move();
-
-    // 
-    m_fSnowWave.UpdateMod(SQRT(MAX(ABS(g_pEnvironment->GetSpeed()), 1.0f)), 16.0f);
-    
-    
-    
-    
-    
-    
     static coreFlow m_fSparkTime = 0.0f;
     // 
     m_fSparkTime.Update(0.25f * MAX(ABS(g_pEnvironment->GetSpeed()), 2.0f));

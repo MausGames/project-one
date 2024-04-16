@@ -17,15 +17,15 @@ void cCalorMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pEnvironment->ChangeBackground(cSnowBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        g_pEnvironment->SetTargetSpeed(4.0f);
+        g_pEnvironment->ChangeBackground(cSnowBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(6.0f);
 
         g_pGame->StartIntro();
 
@@ -33,23 +33,28 @@ void cCalorMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_MISSION})
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
-        g_pGame->GetInterface()->ShowMission(this);
-
         STAGE_FINISH_NOW
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    STAGE_MAIN({TAKE_MISSION})
     {
         if(STAGE_BEGINNING)
         {
-
+            g_pGame->GetInterface()->ShowMission(this);
         }
 
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+    });
+
+    // ################################################################
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -63,6 +68,10 @@ void cCalorMission::__SetupOwn()
     // multi-jumper needs to shoot late, to note cause immediate hit when moving into player
     // TODO 1: badge
     // TODO 1: multi-jumper shoot even later when moving into player (otherwise shoot normal)
+    // TODO 1: add enemies which move to the border (corner) perpendicular to bullet-dir
+    // TODO 1: enemies evade but rotate far away from center
+    // TODO 1: one enemy separating multiple times 1->2->2x2->2x2x2 and stays there
+    // TODO 1: a line of enemies evading, should look like a wave
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 29u)
@@ -363,7 +372,7 @@ void cCalorMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
     {
         if(STAGE_BEGINNING)
@@ -387,6 +396,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: how to practically introduce orb shrinking ? durch (leichte) bewegung ?
     // TODO 1: do not remove energy-effect on king after resurrection ?
     // TODO 1: maybe he is caught in an ice block
+    // TODO 1: rotate (all balls) helper around enemy to highlight state
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -454,7 +464,7 @@ void cCalorMission::__SetupOwn()
             g_pSpecialEffects->MacroExplosionColorBig(pKing->GetPosition(), COLOR_ENERGY_RED);
 
             if(pSquad2->GetNumEnemies() == pSquad2->GetNumEnemiesAlive())
-                STAGE_BADGE(BADGE_HARD, pKing->GetPosition())
+                STAGE_BADGE(0u, BADGE_HARD, pKing->GetPosition())
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -533,7 +543,7 @@ void cCalorMission::__SetupOwn()
         {
             if(!bFirstHit || (pEnemy->GetID() != cWarriorEnemy::ID)) return;
 
-            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.04f * RCP(I_TO_F(g_pGame->GetPlayers())));
+            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.04f * RCP(I_TO_F(g_pGame->GetNumPlayers())));
 
             pBullet->Deactivate(true);
         });
@@ -562,7 +572,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: gegner welche seitlich runterkommen sieht man schwer (springen vielleicht auf die seite zu)
     // TODO 1: springende gegner zweite welle is orsch auszuweichen
     // TODO 1: can be used to highlight player beging freed from morning-star (fels reißt leicht aus mit bröckerl)
-    // TODO 1: beschleunigung und force müssen viel viel schneller sein, spieler muss überrascht werden, richtig BAM
+    // TODO 1: beschleunigung und force müssen viel viel schneller sein, spieler muss überrascht werden, richtig BAM (mit speed lines ?)
     // TODO 1: gegner teilen sich auf und bouncen nach unten (balloon harpunen game), may swim at the bottom
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
@@ -655,14 +665,14 @@ void cCalorMission::__SetupOwn()
             else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 44u, 59u)
             else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 60u, 67u)
             else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 68u, 83u)
-            else if(STAGE_SUB(8u)) STAGE_DELAY_START
+            else if(STAGE_SUB(8u)) STAGE_DELAY_START_CLEAR
 
             if(m_iStageSub == 3u) STAGE_RESURRECT(pSquad2, 0u, 0u)
         }
 
         if(m_iStageSub < 8u)
         {
-            g_pEnvironment->SetTargetSpeed(LERPH3(fOldSpeed, 16.0f, MIN(m_fStageTime * 0.5f, 1.0f)));
+            g_pEnvironment->SetTargetSpeedNow(LERPH3(fOldSpeed, 16.0f, MIN(m_fStageTime * 0.5f, 1.0f)));
         }
         else
         {
@@ -681,7 +691,7 @@ void cCalorMission::__SetupOwn()
 
             if((m_fStageSubTime >= fShakeDist) && (m_fStageSubTimeBefore < fShakeDist))
             {
-                g_pEnvironment->SetTargetSpeed(fOldSpeed);
+                g_pEnvironment->SetTargetSpeedNow(fOldSpeed);
                 c_cast<coreFloat&>(g_pEnvironment->GetSpeed()) = fOldSpeed;
 
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
@@ -791,7 +801,7 @@ void cCalorMission::__SetupOwn()
             pEnemy->SetDirection(coreVector3(1.0f,0.0f,0.0f));
             pEnemy->Rotate270();
 
-            if(pEnemy->ReachedDeath()) STAGE_BADGE(BADGE_EASY, pEnemy->GetPosition())
+            if(pEnemy->ReachedDeath()) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
         });
 
         if((m_iStageSub >= 2u) && (m_iStageSub < 4u) && STAGE_TICK_FREE(2.5f, 0.0f))
@@ -825,8 +835,8 @@ void cCalorMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 10u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -1168,6 +1178,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: how to communicate that normal attacks are useless, maybe prevent shooting, maybe first enemies should wait above (but then second sub-wave might run directly into you)
     // TODO 1: attacks should be more front-shield-like, more mass basically, like in die recorded video
     // TODO 1: linien im bullet-teppich sollten abwechselnd geshiftet sein (oder 1/3 ?)
+    // TODO 1: remove catch-forwarding if separator stays disabled, maybe also make swing-direction identical
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         // TODO 1: remove    
@@ -1176,7 +1187,7 @@ void cCalorMission::__SetupOwn()
             this->EnableStar(0u, g_pGame->GetPlayer(0u));
             (*m_Star.List())[0]->SetPosition(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3);
 
-            if(GAME_MULTI)
+            if(g_pGame->IsMulti())
             {
                 this->EnableStar(1u, g_pGame->GetPlayer(1u));
                 (*m_Star.List())[1]->SetPosition(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3);
@@ -1341,10 +1352,10 @@ void cCalorMission::__SetupOwn()
 
         STAGE_WAVE("SECHSUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 10u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_BOSS(m_Zeroth, {60.0f, 120.0f, 180.0, 240.0f})
     });
@@ -1353,7 +1364,7 @@ STAGE_START_HERE
     // end
     STAGE_MAIN({TAKE_MISSION})
     {
-        STAGE_FINISH_AFTER(2.0f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 
     // ################################################################

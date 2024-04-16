@@ -47,14 +47,14 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     this->SetSize(coreVector3(0.0f,0.0f,0.0f));
 
     // configure the boss
-    this->Configure(400, COLOR_SHIP_BLUE);
+    this->Configure(400, COLOR_SHIP_CYAN);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
     m_Head.DefineModelHigh("ship_boss_leviathan_head_high.md3");
     m_Head.DefineModelLow ("ship_boss_leviathan_head_low.md3");
     m_Head.SetSize        (coreVector3(1.5f,1.5f,1.5f));
-    m_Head.Configure      (20, COLOR_SHIP_BLUE);
+    m_Head.Configure      (20, COLOR_SHIP_CYAN);
     m_Head.AddStatus      (ENEMY_STATUS_IMMORTAL);
 
     // 
@@ -63,7 +63,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
         m_aBody[i].DefineModelHigh("ship_boss_leviathan_body_high.md3");
         m_aBody[i].DefineModelLow ("ship_boss_leviathan_body_low.md3");
         m_aBody[i].SetSize        (coreVector3(1.7f,1.7f,1.7f));
-        m_aBody[i].Configure      (20, COLOR_SHIP_BLUE);
+        m_aBody[i].Configure      (20, COLOR_SHIP_CYAN);
         m_aBody[i].AddStatus      (ENEMY_STATUS_IMMORTAL);
     }
 
@@ -71,7 +71,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     m_Tail.DefineModelHigh("ship_boss_leviathan_tail_high.md3");
     m_Tail.DefineModelLow ("ship_boss_leviathan_tail_low.md3");
     m_Tail.SetSize        (coreVector3(1.7f,1.7f,1.7f));
-    m_Tail.Configure      (20, COLOR_SHIP_BLUE);
+    m_Tail.Configure      (20, COLOR_SHIP_CYAN);
     m_Tail.AddStatus      (ENEMY_STATUS_IMMORTAL);
 
     // 

@@ -17,17 +17,17 @@ void cHarenaMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pEnvironment->ChangeBackground(cDesertBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        g_pEnvironment->SetTargetSpeed(4.0f);
+        g_pEnvironment->ChangeBackground(cDesertBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(6.0f);
         
-        g_pEnvironment->SetTargetDirection(coreVector2(1.0f,-1.0f).Normalized());   // kommt gut mit den säulen          
+        //g_pEnvironment->SetTargetDirection(coreVector2(1.0f,-1.0f).Normalized());   // kommt gut mit den säulen          
 
         g_pGame->StartIntro();
 
@@ -35,23 +35,28 @@ void cHarenaMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_MISSION})
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
-        g_pGame->GetInterface()->ShowMission(this);
-
         STAGE_FINISH_NOW
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    STAGE_MAIN({TAKE_MISSION})
     {
         if(STAGE_BEGINNING)
         {
-
+            g_pGame->GetInterface()->ShowMission(this);
         }
 
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+    });
+
+    // ################################################################
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -63,6 +68,9 @@ void cHarenaMission::__SetupOwn()
     // 3: pattern should not have too long straight lines, as this makes it too easy, and should have no corners, as this creates placement artifacts
     // 1: diamond shape to not be able to kill 2 groups at the same time
     // TODO 1: maybe just a circle shape in last sub-stage (or double-circle)
+    // TODO 1: chess board pattern quick 1-2-1-2
+    // TODO 1: sandsturm
+    // TODO 1: low FPS movement
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -295,7 +303,7 @@ void cHarenaMission::__SetupOwn()
 
                 if(!g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy()))
                 {
-                    STAGE_BADGE(BADGE_NORMAL, pEnemy->GetPosition())
+                    STAGE_BADGE(0u, BADGE_NORMAL, pEnemy->GetPosition())
                     pEnemy->Kill(true);
                 }
             }
@@ -310,8 +318,11 @@ void cHarenaMission::__SetupOwn()
     // non-linear movement is harder to track
     // shooting on "hide" instead of "show" is too overwhelming, identifying both initial bullet-direction and movement at the same time
     // 8 pattern is too overwhelming (order: 0, 3, 5, 2, 6, 1, 7, 4)
-    // TTODO 1ODO: badge, richte großen schaden auf ein (einzelnes) non-ziel an
+    // TODO 1: badge, richte großen schaden auf ein (einzelnes) non-ziel an
     // TODO 1: add effect (visual + sound) if the correct target was hit
+    // TODO 1: ganz letzter gegner verfolgt einem länger und direkt
+    // TODO 1: erstes pattern vielleicht im quadrat statt diamant
+    // TODO 1: sandsturm
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumEnemies = 6u;
@@ -522,7 +533,7 @@ void cHarenaMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
     {
         if(STAGE_BEGINNING)
@@ -711,6 +722,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: pacifist: holes in line border attack
     // BADGE: kill N% enemies at the start
     // BADGE: kill marked enemies on the line-wave
+    // TODO 1: marked enemies are across the mission (1 per sub-stage)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumEnemies = 108u;
@@ -980,8 +992,8 @@ void cHarenaMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 10u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -998,6 +1010,7 @@ void cHarenaMission::__SetupOwn()
     // doppelgruppe nur breites pattern um ausweichen zu erleichtern 
     // reihenfolge am weitesten entfernt 
     // TODO 1: show 3142 group at start, matrix of enemies
+    // TODO 1: simon says, linear up and down, to make distinction easy, and to prevent accidental hits (order forward, backward, mirrored, to stay fair but variable)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1287,7 +1300,7 @@ void cHarenaMission::__SetupOwn()
                            (ABS(vDiff.y) < pBoard->GetCollisionRange().y))
                         {
                             if(bIsActive &&  pPlayer->IsNormal ()) pPlayer->TakeDamage(10u, ELEMENT_NEUTRAL, pPlayer->GetPosition().xy());
-                            if(bIsQuiet  && !pPlayer->IsRolling()) this->LaunchSpike(i, 6.0f * RCP(I_TO_F(g_pGame->GetPlayers())));
+                            if(bIsQuiet  && !pPlayer->IsRolling()) this->LaunchSpike(i, 6.0f * RCP(I_TO_F(g_pGame->GetNumPlayers())));
                         }
                     });
                 }
@@ -1386,10 +1399,10 @@ void cHarenaMission::__SetupOwn()
 
         STAGE_FINISH_NOW
     });
-STAGE_START_HERE
+
     // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 10u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -1398,7 +1411,7 @@ STAGE_START_HERE
             g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(3u, 0.0f);
-            g_pEnvironment->SetTargetSpeed(4.0f);
+            g_pEnvironment->SetTargetSpeed(4.0f, 1.0f);
         }
 
         UNUSED STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, TIGER_ENEMIES)
@@ -1417,7 +1430,7 @@ STAGE_START_HERE
     // end
     STAGE_MAIN({TAKE_MISSION})
     {
-        STAGE_FINISH_AFTER(2.0f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 
     // ################################################################

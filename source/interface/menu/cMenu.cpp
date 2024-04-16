@@ -28,7 +28,7 @@ cMenu::cMenu()noexcept
 {
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
-    m_PauseLayer.DefineProgram("default_2d_program");
+    m_PauseLayer.DefineProgram("menu_grey_program");
     m_PauseLayer.SetSize      (coreVector2(1.0f,1.0f));
     m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
@@ -105,7 +105,7 @@ void cMenu::Render()
             m_aFrameBuffer[0].StartDraw();
             m_aFrameBuffer[0].Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
             {
-                glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+                glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);   // TODO 1: reduce those calls
                 {
                     // 
                     pMenu->coreMenu::Render();
@@ -118,7 +118,7 @@ void cMenu::Render()
             m_aFrameBuffer[0].Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
             
             
-            coreFrameBuffer::EndDraw();
+            coreFrameBuffer::EndDraw();   // TODO 1: reduce those calls
         };
         
         //if(((m_iTransitionState <= 1u) && !m_pTransitionMenu->GetTransition().GetStatus()) && iForceA != 0xFFu)
@@ -151,7 +151,7 @@ void cMenu::Render()
             // set transition uniforms
             m_MixObject.GetProgram()->Enable();
             m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
-            m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  g_vHudDirection.Rotated90());
+            m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  g_vHudDirection.InvertedX().Rotated90());
 
             glBlendFunc(FOREGROUND_BLEND_ALPHA);
             {
@@ -277,6 +277,9 @@ void cMenu::Move()
             {
                 // switch to score menu
                 this->ShiftSurface(this, SURFACE_SCORE, 3.0f);
+
+                // 
+                m_ScoreMenu.LoadMissions();
             }
             else if(m_MainMenu.GetStatus() == 3)
             {
@@ -284,12 +287,16 @@ void cMenu::Move()
                 this->ShiftSurface(this, SURFACE_REPLAY, 3.0f);
 
                 // 
-                m_ReplayMenu.LoadReplays();
+                m_ReplayMenu.LoadOverview();
             }
             else if(m_MainMenu.GetStatus() == 4)
             {
                 // switch to extra menu
                 this->ShiftSurface(this, SURFACE_EXTRA, 3.0f);
+
+                // 
+                m_ExtraMenu.ChangeSurface(SURFACE_EXTRA_PROGRESS, 0.0f);
+                m_ExtraMenu.LoadMissions();
             }
             else if(m_MainMenu.GetStatus() == 5)
             {
@@ -594,27 +601,28 @@ void cMenu::UpdateLanguageFont()
 const coreMap<coreString, coreString>& cMenu::GetLanguageList()
 {
     // static language list <name, path>
-    static coreMap<coreString, coreString> s_asLanguage;
-
-    if(s_asLanguage.empty())
+    static const coreMap<coreString, coreString> s_asLanguage = []()
     {
         // 
-        coreLanguage::GetAvailableLanguages(&s_asLanguage);
+        coreMap<coreString, coreString> asOutput;
+        coreLanguage::GetAvailableLanguages(&asOutput);
 
         // 
-        if(s_asLanguage.empty()) s_asLanguage.emplace("MISSING", "");
+        if(asOutput.empty()) asOutput.emplace("MISSING", "");
 
 #if defined(_P1_DEBUG_RANDOM_)
 
         // 
-        const coreString& sRandFile = s_asLanguage.get_valuelist()[CORE_RAND_RUNTIME % s_asLanguage.size()];
+        const coreString& sRandFile = asOutput.get_valuelist()[CORE_RAND_RUNTIME % asOutput.size()];
         Core::Language->Load(sRandFile.c_str());
 
         // 
         cMenu::UpdateLanguageFont();
 
 #endif
-    }
+
+        return asOutput;
+    }();
 
     return s_asLanguage;
 }
@@ -632,7 +640,7 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
 
     // set button and caption color
     pButton              ->SetColor3(vColor * (fLight / MENU_CONTRAST_WHITE));
-    pButton->GetCaption()->SetColor3(vColor * (fLight));
+    if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * (fLight));
 
     // 
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
@@ -687,11 +695,11 @@ void cMenu::UpdateAnimateProgram(cGuiObject* OUTPUT pObject)
     if(!pObject->GetProgram()->Enable())  return;
 
     // 
-    const coreFloat fSize = 2.0f * pObject->GetSize().y;
-    const coreFloat fLerp = ((fSize - 0.4f) * RCP(fSize)) * 0.5f;
+    const coreFloat fSize = pObject->GetSize().y;
+    const coreFloat fLerp = ((fSize - 0.2f) * RCP(fSize)) * 0.5f;
 
     // 
-    pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.0f, fSize));
+    pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.0f, 2.0f * fSize));
 }
 
 
@@ -746,8 +754,8 @@ void cMenu::__StartGame()
 {
     // 
     sGameOptions oOptions = {};
-    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers   ();
     oOptions.iMode        = m_GameMenu.GetSelectedMode      ();
+    oOptions.iType        = m_GameMenu.GetSelectedType      ();
     oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
@@ -756,9 +764,14 @@ void cMenu::__StartGame()
     }
 
     // 
+    coreInt32 iMissionID;
+    coreUint8 iTakeFrom, iTakeTo;
+    m_GameMenu.RetrieveStartData(&iMissionID, &iTakeFrom, &iTakeTo);
+
+    // 
     ASSERT(!STATIC_ISVALID(g_pGame))
     STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN)
-    g_pGame->LoadMissionID(m_GameMenu.GetMissionID());
+    g_pGame->LoadMissionID(iMissionID, iTakeFrom, iTakeTo);
 
     // 
     g_pReplay->StartRecording();

@@ -28,6 +28,7 @@ void CoreApp::Setup()
 
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_flip_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_flip_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_pulse.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_pulse.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -35,7 +36,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
-    Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3");   // # clusters, for flip bullet
+    Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_view.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -275,7 +276,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_tree_04_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_04_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_rain.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_rain.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("game_icon.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_icon.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
@@ -289,6 +289,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
     Core::Manager::Resource->Load<coreTexture>("menu_worldmap.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_worldmap.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png", CORE_TEXTURE_LOAD_NEAREST);
+    Core::Manager::Resource->Load<coreTexture>("ship_icon_01.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_icon_01.png");
+    Core::Manager::Resource->Load<coreTexture>("ship_icon_02.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_icon_02.png");
     Core::Manager::Resource->Load<coreTexture>("ship_player.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png", CORE_TEXTURE_LOAD_NEAREST);
 
     Core::Manager::Resource->Load<coreShader> ("effect_decal.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert");
@@ -429,6 +431,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_single.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_single.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_swipe.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("menu_swipe.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_worldmap.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_worldmap.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_worldmap.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_worldmap.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
@@ -482,7 +486,7 @@ void CoreApp::Setup()
     FOR_EACH(it, asPath)   // # config for default font is ignored, because it was already loaded
     {
         coreConfig oConfig(PRINT("%s.ini", it->c_str()));
-        const coreUint8 iHinting = oConfig.GetInt ("Config", "Hinting", TTF_HINTING_NORMAL);
+        const coreUint8 iHinting = oConfig.GetInt ("Config", "Hinting", TTF_HINTING_LIGHT_SUBPIXEL);
         const coreBool  bKerning = oConfig.GetBool("Config", "Kerning", true);
 
         Core::Manager::Resource->Load<coreFont>(coreData::StrFilename(it->c_str()), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), iHinting, bKerning);
@@ -643,6 +647,11 @@ void CoreApp::Setup()
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_invert.vert")
+        ->AttachShader("effect_energy_blink.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_flat_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_energy_flat_spheric.vert")
         ->AttachShader("effect_energy_blink.frag")
         ->Finish();
 
@@ -1023,6 +1032,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_single_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("default_2d.vert")
         ->AttachShader("menu_single.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_swipe_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_swipe.vert")
+        ->AttachShader("menu_swipe.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_worldmap_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

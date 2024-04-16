@@ -412,14 +412,18 @@ void cRayBullet::__MoveOwn()
     this->SetOrientation(coreVector3(0.0f, coreVector2::Direction(m_fTilt)));
     
     if(this->GetPosition().z < -500.0f) this->Deactivate(false);
+    
+    const coreFloat fRelSpeed = m_fSpeed / (6.0f*BULLET_SPEED_FACTOR);
 
     // update animation
-    m_fAnimation.UpdateMod(0.4f, 1.0f);
+    m_fAnimation.UpdateMod(0.4f * fRelSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.35f, m_fAnimation));
 
+    
     // update fade
-    m_fFade.Update(1.5f);
-    this->SetSize (coreVector3(3.7f, 3.7f * MIN(12.0f * m_fFade, 1.0f)     * (m_fSpeed / (6.0f*BULLET_SPEED_FACTOR)), 3.7f) * 0.5f * m_fScale);
+    m_fFade.Update(1.5f * fRelSpeed);
+    const coreFloat fWave = 1.0f + 0.25f * SIN(m_fFade * 40.0f);
+    this->SetSize (coreVector3(3.7f * fWave, 3.7f * MIN(12.0f * m_fFade, 1.0f) * fRelSpeed, 3.7f * fWave) * 0.5f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 
@@ -471,13 +475,15 @@ void cPulseBullet::__MoveOwn()
     this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
+    const coreFloat fRelSpeed = m_fSpeed / (3.0f*BULLET_SPEED_FACTOR);
+    
     // update animation
-    m_fAnimation.UpdateMod(0.4f, 1.0f);
+    m_fAnimation.UpdateMod(0.4f * fRelSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
-    m_fFade.Update(1.0f);
-    this->SetSize (coreVector3(1.0f, 2.5f * MIN(12.0f * m_fFade, 1.0f)     * (m_fSpeed / (3.0f*BULLET_SPEED_FACTOR)), 1.0f) * 1.3f * m_fScale);
+    m_fFade.Update(1.0f * fRelSpeed);
+    this->SetSize (coreVector3(1.0f, 2.5f * MIN(12.0f * m_fFade, 1.0f)     * fRelSpeed, 1.0f) * 1.3f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 
@@ -859,6 +865,7 @@ cFlipBullet::cFlipBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_spear.md3");
+    this->DefineVolume ("bullet_flip_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
 

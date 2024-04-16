@@ -145,25 +145,29 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         const coreInt32 x = i % OUTDOOR_WIDTH;
         const coreInt32 y = i / OUTDOOR_WIDTH;
 
-        // calculate level (height) of the vertex
-        coreFloat fLevel = nAlgorithmFunc(I_TO_F(x), I_TO_F(y));
-        if(fGrade)
+        coreFloat fLevel = 0.0f;
+        if(i < OUTDOOR_HEIGHT * OUTDOOR_WIDTH)
         {
-            // add randomness to the level and smooth out water-intersection-area
-            coreFloat fSmoothLevel;
-            do {fSmoothLevel = CLAMP(fLevel, -fGrade*1.5f, fGrade*1.5f) + fGrade * Core::Rand->Float(-0.5f, 0.5f) * ((fLevel < 0.0f) ? 0.6f : 1.0f);}
-            while(coreMath::IsNear(fSmoothLevel, 0.0f, fGrade*0.25f));
+            // calculate level (height) of the vertex
+            fLevel = nAlgorithmFunc(I_TO_F(x), I_TO_F(y));
+            if(fGrade)
+            {
+                // add randomness to the level and smooth out water-intersection-area
+                coreFloat fSmoothLevel;
+                do {fSmoothLevel = CLAMP(fLevel, -fGrade*1.5f, fGrade*1.5f) + fGrade * Core::Rand->Float(-0.5f, 0.5f) * ((fLevel < 0.0f) ? 0.6f : 1.0f);}
+                while(coreMath::IsNear(fSmoothLevel, 0.0f, fGrade*0.25f));
 
-            // forward smooth level
-            fLevel = fSmoothLevel;
+                // forward smooth level
+                fLevel = fSmoothLevel;
+            }
+
+            // center level at water
+            fLevel += WATER_HEIGHT;
+
+            // save height value
+            m_aiHeight[i] = coreMath::Float32To16(fLevel);
+            m_fMaxHeight  = MAX(m_fMaxHeight, fLevel);
         }
-
-        // center level at water
-        fLevel += WATER_HEIGHT;
-
-        // save height value
-        m_aiHeight[i] = coreMath::Float32To16(fLevel);
-        m_fMaxHeight  = MAX(m_fMaxHeight, fLevel);
 
         // set vertex position
         s_aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, fLevel);

@@ -296,6 +296,7 @@ cGrassBackground::~cGrassBackground()
     // stop nature sound-effect
     if(m_pNatureSound->EnableRef(this))
         m_pNatureSound->Stop();
+    // TODO 1: it might request stop, before play was started, if I unload background quickly again, then sound hangs
 }
 
 

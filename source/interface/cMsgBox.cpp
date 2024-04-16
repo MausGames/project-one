@@ -16,11 +16,10 @@ cMsgBox::cMsgBox()noexcept
 , m_fFade      (0.0f)
 , m_iMsgType   (0u)
 , m_iInputType (0u)
-, m_Navigator  (NULL)
 {
     // 
     this->DefineTexture(0u, "menu_background_black.png");
-    this->DefineProgram("default_2d_program");
+    this->DefineProgram("menu_grey_program");
     this->SetSize      (coreVector2(1.0f,1.0f));
     this->SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     this->SetTexSize   (coreVector2(1.2f,1.2f));
@@ -122,7 +121,7 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_Yes, m_Yes.IsFocused(), COLOR_MENU_GREEN);
 
         // 
-        if(m_Yes.IsClicked() || g_MenuInput.bAccept)
+        if(m_Yes.IsClicked() /*|| g_MenuInput.bAccept*/)
             this->__ExecuteCallback(MSGBOX_ANSWER_YES, 0);
     }
 

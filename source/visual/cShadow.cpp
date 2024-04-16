@@ -38,15 +38,15 @@ void cShadow::Update()
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
         {
-            glDrawBuffer(GL_NONE);
+            glColorMask(false, false, false, false);
             {
                 // render all shadow-casting objects (from the background)
                 cShadow::RenderInstanced(s_amDrawShadowMatrix[0], this->GetListSet());
                 cShadow::RenderSingle   (s_amDrawShadowMatrix[0], this->GetListSet(), this->GetObjectSet());
             }
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glColorMask(true, true, true, true);
 
-            if(!s_GlobalContainer.GetListSet().empty() || !s_GlobalContainer.GetObjectSet().empty())
+            if(!s_GlobalContainer.IsEmpty())
             {
                 glDisable(GL_DEPTH_TEST);
                 {

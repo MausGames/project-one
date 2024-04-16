@@ -17,6 +17,7 @@
 // TODO 4: fix _WEAPONS and _SUPPORTS defines in save and replay
 // TODO 2: disable save stats while playing replays
 // TODO 2: disable or handle save stats while in error-mission
+// TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 
 
 // ****************************************************************
@@ -98,8 +99,8 @@ public:
         coreChar  acName[SAVE_NAME_LENGTH];                        // 
         coreUint8 iStandard;                                       // 
         coreUint8 iTraining;                                       // 
-        coreUint8 iPlayers;                                        // 
         coreUint8 iMode;                                           // 
+        coreUint8 iType;                                           // 
         coreUint8 iDifficulty;                                     // 
         coreUint8 aaiWeapon [SAVE_PLAYERS][SAVE_EQUIP_WEAPONS];    // 
         coreUint8 aaiSupport[SAVE_PLAYERS][SAVE_EQUIP_SUPPORTS];   // 
@@ -108,7 +109,7 @@ public:
     // 
     struct sProgress final
     {
-        // TODO 1: coop, duel, game modes, difficulty (27 dimensions)
+        // TODO 1: coop, duel, game modes, difficulty (27 dimensions) (reserve memory for 1 more in each dimension ?)
         coreBool   bFirstPlay;                                      // 
         coreUint8  aiAdvance      [SAVE_MISSIONS];                  // 
         coreUint8  aiMedalMission [SAVE_MISSIONS];                  // 
@@ -117,7 +118,29 @@ public:
         coreUint32 aiBadge        [SAVE_MISSIONS];                  // (bitfield) 
         coreUint64 iTrophy;                                         // (bitfield) 
         coreUint64 iUnlock;                                         // (bitfield) 
+        coreUint64 aiHideMessage[2];                                // (bitfield) 
+        coreUint64 aiHideNew    [2];                                // (bitfield) 
     };
+    
+    enum eShowMessage : coreUint8
+    {
+        SHOW_MESSAGE_FRAGMENT_01 = 0u,
+        SHOW_MESSAGE_FRAGMENT_02
+    };
+    
+    enum eShowNew : coreUint8
+    {
+        SHOW_NEW_FRAGMENT_01 = 0u,
+        SHOW_NEW_FRAGMENT_02
+    };
+    
+    // messages after arcade-input when returning from mission, or after pressing START when getting into game
+    // "new" disappears after being seen (condition), but gets effective after exiting affected submenu or subsubmenu (even going deeper, but not tab) (cached separate from save, where CanShowNew is managed)
+    // accumulated news on buttons and tabs
+    
+    // coreBool CanShowNew(const coreBool bCondition, const coreUintW iIndex) {}
+    // void HideNew(const coreUintW iIndex);
+    // void ApplyNew();
 
     // 
     struct sHeader final

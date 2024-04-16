@@ -14,8 +14,7 @@
 // TODO 5: should low quality option also affect ship models, or vegetation density, or sprite density, or FB resolution ?
 // TODO 5: don't input-check inactive input-sets in multiplayer
 // TODO 1: default input should differ between keyboard and joystick, and between sets
-// TODO 5: SDL_JoystickCurrentPowerLevel
-// TODO 3: alt+F4 while having temp changes in the options menu should not save them
+// TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 
 
@@ -28,6 +27,8 @@
 #define CONFIG_GRAPHICS_REFLECTION  "Graphics", "Reflection",                           (1)
 #define CONFIG_GRAPHICS_GLOW        "Graphics", "Glow",                                 (1)
 #define CONFIG_GRAPHICS_DISTORTION  "Graphics", "Distortion",                           (1)
+#define CONFIG_GRAPHICS_SHAKE       "Graphics", "Shake",                                (100)
+#define CONFIG_GRAPHICS_FLASH       "Graphics", "Flash",                                (1)
 
 #define CONFIG_AUDIO_EFFECT_VOLUME  "Audio",    "EffectVolume",                         (1.0f)
 #define CONFIG_AUDIO_AMBIENT_VOLUME "Audio",    "AmbientVolume",                        (1.0f)
@@ -48,7 +49,7 @@
 #define CONFIG_GAME_HUD_ROTATION    "Game",     "HudRotation",                          (0)
 #define CONFIG_GAME_HUD_SCALE       "Game",     "HudScale",                             (100)
 #define CONFIG_GAME_HUD_TYPE        "Game",     "HudType",                              (0)
-#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (120)
+#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (60)//(120) TODO 1: 120 makes it slow in menu, on debug
 #define CONFIG_GAME_VERSION         "Game",     "Version",                              (0)
 #define CONFIG_GAME_MIRROR_MODE     "Game",     "MirrorMode",                           (0)
 
@@ -61,7 +62,7 @@
 #define INPUT_SETS          (INPUT_SETS_KEYBOARD + INPUT_SETS_JOYSTICK)   // total number of sets
 
 STATIC_ASSERT(INPUT_TYPES       <= INPUT_SETS)
-STATIC_ASSERT(INPUT_KEYS_ACTION <= BITSOF(coreUint8))
+STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint8)*8u)
 
 
 // ****************************************************************
@@ -75,6 +76,8 @@ struct sConfig final
         coreUint8 iReflection;   // water reflection level
         coreUint8 iGlow;         // fullscreen glow level
         coreUint8 iDistortion;   // fullscreen distortion level
+        coreUint8 iShake;        // 
+        coreUint8 iFlash;        // 
     }
     Graphics;
 

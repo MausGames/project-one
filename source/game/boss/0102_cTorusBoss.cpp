@@ -388,6 +388,8 @@ void cTorusBoss::__MoveOwn()
         {
             if(PHASE_BEGINNING) this->AddStatus(ENEMY_STATUS_GHOST);
             
+            if(PHASE_BEGINNING) g_pGame->GetInterface()->ShowAlert();
+
             // TODO 1: spin faster at the end, like a real coin
             
             if(fTime < 0.85f)
@@ -485,12 +487,12 @@ void cTorusBoss::__MoveOwn()
             if(m_aiCounter[ROTATION_DIRECTION])
             {
                 this->DefaultMoveLerp(vPosFrom.InvertedX(), vPosTo.InvertedX(), fTime);
-                g_pEnvironment->SetTargetDirection(coreVector2::Direction(-LERP(fAngFrom, fAngTo, fTime)));
+                g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(-LERP(fAngFrom, fAngTo, fTime)));
             }
             else
             {
                 this->DefaultMoveLerp(vPosFrom, vPosTo, fTime);
-                g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime)));
+                g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime)));
             }
 
             if(PHASE_FINISHED)
@@ -599,7 +601,7 @@ void cTorusBoss::__MoveOwn()
 
                 this->__DisableSummon();
 
-                for(coreUintW i = 0u, ie = /*(GAME_EASY ? 1u : 2u)*/1u; i < ie; ++i)
+                for(coreUintW i = 0u, ie = /*(g_pGame->IsEasy() ? 1u : 2u)*/1u; i < ie; ++i)
                 {
                     const coreVector2 vDir = (i ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalized();
                     pMission->EnableBall(i, this->GetPosition().xy(), vDir);
@@ -658,7 +660,7 @@ void cTorusBoss::__MoveOwn()
             const coreVector2 vDirection = coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime));
 
             this->SetPosition(coreVector3(vDirection * (0.65f * FOREGROUND_AREA), 0.0f));
-            g_pEnvironment->SetTargetDirection(vDirection);
+            g_pEnvironment->SetTargetDirectionNow(vDirection);
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_TO(m_iPhase + 4u)
@@ -698,7 +700,7 @@ void cTorusBoss::__MoveOwn()
             vNewOri.yz(coreVector2::Direction((5.0f*PI) * fBreakTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f)));
 
             this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + m_avVector[TUMBLE_DIRECTION].xy(), fBreakTime);
-            g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fBreakTime)));
+            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fBreakTime)));
 
             coreVector3 vNewColor;
             switch(m_aiCounter[SUB_PHASE])

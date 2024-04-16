@@ -73,6 +73,7 @@ private:
     coreParticleSystem m_aParticleDark [2];                 // dark particle system
     coreParticleSystem m_aParticleSmoke[2];                 // smoke particle system
     coreParticleSystem m_aParticleFire [2];                 // fire particle system
+    // TODO 1: leviathan laser wird nicht gut von bottom partikel gezeichnet, vielleicht deaktivierbar machen ?
 
     coreObject3D  m_aLightning      [SPECIAL_LIGHTNINGS];   // 
     coreObject3D* m_apLightningOwner[SPECIAL_LIGHTNINGS];   // owner of a lightning sprite (to move together)

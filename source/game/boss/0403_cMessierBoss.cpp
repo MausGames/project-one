@@ -44,7 +44,7 @@ cMessierBoss::cMessierBoss()noexcept
     this->SetOrientation(coreVector3(1.0f,1.0f,0.0f).Normalized());
 
     // configure the boss
-    this->Configure(5000, COLOR_SHIP_RED);
+    this->Configure(5000, COLOR_SHIP_MAGENTA);
 
     // 
     for(coreUintW i = 0u; i < MESSIER_RINGS; ++i)
@@ -53,7 +53,7 @@ cMessierBoss::cMessierBoss()noexcept
         m_aRing[i].DefineModel  ("object_ring.md3");
         m_aRing[i].DefineTexture(0u, "effect_energy.png");
         m_aRing[i].DefineProgram("effect_energy_spheric_program");
-        m_aRing[i].SetColor3    (COLOR_ENERGY_RED * 0.7f);
+        m_aRing[i].SetColor3    (COLOR_ENERGY_MAGENTA * 0.7f);
         m_aRing[i].SetTexSize   (coreVector2(0.5f,1.0f) * 2.5f);
         m_aRing[i].SetTexOffset (coreVector2(I_TO_F(i) / I_TO_F(MESSIER_RINGS), 0.0f));
         m_aRing[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -346,7 +346,7 @@ void cMessierBoss::__EnableRings()
     }
 
     // 
-    g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_RED);
+    g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_MAGENTA);
 }
 
 

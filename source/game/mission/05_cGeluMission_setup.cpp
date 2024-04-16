@@ -17,15 +17,15 @@ void cGeluMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pEnvironment->ChangeBackground(cVolcanoBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        g_pEnvironment->SetTargetSpeed(4.0f);
+        g_pEnvironment->ChangeBackground(cVolcanoBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(6.0f);
 
         g_pGame->StartIntro();
 
@@ -33,23 +33,28 @@ void cGeluMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_MISSION})
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
-        g_pGame->GetInterface()->ShowMission(this);
-
         STAGE_FINISH_NOW
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    STAGE_MAIN({TAKE_MISSION})
     {
         if(STAGE_BEGINNING)
         {
-
+            g_pGame->GetInterface()->ShowMission(this);
         }
 
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+    });
+
+    // ################################################################
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -70,13 +75,15 @@ void cGeluMission::__SetupOwn()
     // TODO 1: fix not overlaying game-area with thin wallpapers (maybe additional blocker)
     // TODO 1: fully disable collision with bullets, wall-collision is tested instead
     // TODO 1: handle pulse bullet penetration, handle wave/surge
-    // TODO 1: helfer fliegt über schirm wärend spikes erzeugt werden, oder in eine der spike-lines!
+    // TODO 1: helfer fliegt über schirm wärend spikes erzeugt werden, oder in/entlang eine der spike-lines!
     // TODO 1: water reflection and shadow pop in if enemies spawn in the middle, also bullets reflect in air -> definitiv kein wasser, space ?
     // TODO 1: wenn dodge zurück kommt, lass alle geschosse wegfliegen, wenn wand einrastet, ansonsten vielleicht in muster
     // TODO 1: don't smooth at the end when pushing walls to 0
     // TODO 1: vielleicht eck-gruppe als zweites
     // TODO 1: handle assert in SetArea (both single and coop)
     // TODO 1: fix away-moving wall being tracked incorrectly for collision/damage
+    // TODO 1: gegner sieht man orsch unter den stacheln
+    // TODO 1: etwas mus blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -161,7 +168,7 @@ void cGeluMission::__SetupOwn()
         {
             const coreVector2 vPos  = pBullet->GetPosition().xy();
             const coreVector2 vDir  = pBullet->GetFlyDir();
-            const coreFloat   fPush = 0.005f * I_TO_F(pBullet->GetDamage()) * (iDefend ? -4.0f : 3.0f) * RCP(I_TO_F(g_pGame->GetPlayers()));
+            const coreFloat   fPush = 0.005f * I_TO_F(pBullet->GetDamage()) * (iDefend ? -4.0f : 3.0f) * RCP(I_TO_F(g_pGame->GetNumPlayers()));
 
                  if((vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {afOffTarget[0] += fPush; pBullet->Deactivate(true);}
             else if((vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {afOffTarget[1] += fPush; pBullet->Deactivate(true);}
@@ -214,21 +221,10 @@ void cGeluMission::__SetupOwn()
             //g_pPostProcessing->SetWallOffset(i, afOffTarget[i]);
         }
 
-        vAreaFrom = -FOREGROUND_AREA + 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);
-        vAreaTo   =  FOREGROUND_AREA - 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[1], afOffCurrent[3]);
+        vAreaFrom = -FOREGROUND_AREA * PLAYER_AREA_FACTOR + 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);
+        vAreaTo   =  FOREGROUND_AREA * PLAYER_AREA_FACTOR - 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[1], afOffCurrent[3]);
 
-        if(GAME_MULTI)
-        {
-            g_pGame->GetPlayer(0u)->SetArea(coreVector4(vAreaFrom, FOREGROUND_AREA.x * -0.1f, vAreaTo.y));
-            g_pGame->GetPlayer(1u)->SetArea(coreVector4(FOREGROUND_AREA.x *  0.1f, vAreaFrom.y, vAreaTo));
-
-            STATIC_ASSERT(GAME_PLAYERS == 2u)
-        }
-        else
-        {
-            g_pGame->GetPlayer(0u)->SetArea(coreVector4(vAreaFrom, vAreaTo));
-        }
-        // TODO 1: adjust to new extended hitbox area
+        g_pGame->GetPlayer(0u)->SetArea(coreVector4(vAreaFrom, vAreaTo));
 
         if(m_iStageSub >= 2u)
         {
@@ -509,7 +505,7 @@ void cGeluMission::__SetupOwn()
             else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 38u, 39u)
             else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 40u, 59u)
             else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 60u, 64u)
-            else if(STAGE_SUB(17u)) STAGE_DELAY_START
+            else if(STAGE_SUB(17u)) STAGE_DELAY_START_CLEAR
         }
 
         if(STAGE_BEGINNING)
@@ -869,7 +865,7 @@ void cGeluMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
     {
         if(STAGE_BEGINNING)
@@ -907,7 +903,9 @@ void cGeluMission::__SetupOwn()
     // TODO 1: player may forget on block-wave that he can block the bullets
     // TODO 1: enemies in the line wave and block wave need to have more variety per zone
     // TODO 1: how to show player that touching blocks is harmless, energy-effect is usually perceived as bad
-    // TWIST: line of blocks fom left and right at the same time, but with different direction, can crush player
+    // TODO 1: dance dance revolution as badge (+ extra score ?)
+    // TODO 1: maybe in line sub-stage have 2 empty lines between 1-2-1-2, and only use left and right
+    // TWIST: (boss?) line of blocks fom left and right at the same time, but with different direction, can crush player
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep      = 0.36f;
@@ -1207,7 +1205,7 @@ void cGeluMission::__SetupOwn()
                 {
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iCount - 1u) * 0.5f) * 8.0f) + fBase);
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
                 }
             }
         });
@@ -1239,7 +1237,7 @@ void cGeluMission::__SetupOwn()
     // attacks while moving between orbs (with sluggishness) are too hard to control precisely
     // the spawn pattern should make sure that it is impossible for the single player to stand at a location where the next enemy might spawn
     // moving or stretching orbs is possible (e.g. inner 4 orbs to outer), but a meaningful enemy pattern related to it might be problematic
-    // attack waves from above (dance dance revolution) (or any direction) while attacking enemies was ok, but cut due to time
+    // attack waves from above (guitar hero) (or any direction) while attacking enemies was ok, but cut due to time
     // TODO 1: entferne cross movement
     // TODO 1: bullets have different distances from each other
     // TODO 1: bullets should not disappear when causing a hit
@@ -1247,7 +1245,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: orb wave special effects
     // TODO 1: die finale welle brauch noch einen twist
     // TODO 1: animation-offset for each gameplay object (everywhere!)
-    // TODO 1: dance dance revolution as badge (+ extra score ?)
+    // TODO 1: guitar hero as badge (+ extra score ?)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -1574,8 +1572,8 @@ void cGeluMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 10u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -1596,6 +1594,10 @@ void cGeluMission::__SetupOwn()
     //     on first wave, one of the up-flying enemies need to fly first with some delay, to show the bullet-attack
     // coop: player not receiving two groups in second sub-wave needs to receive two groups in first sub-wave
     // TODO 1: completely disable player-enemy collision, just in case
+    // TODO 1: enemies coming from all sides at the same time
+    // TODO 1: enemies want to stay with you, can only be killed when far away
+    // TODO 1: remove bend ?
+    // TODO 1: fixed fields where enemies bend (gradius mines)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)
@@ -1712,7 +1714,7 @@ void cGeluMission::__SetupOwn()
             const coreBool bInsideNew = g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy() * vAlong);
             const coreBool bForward   = (coreVector2::Dot(pEnemy->GetMove(), vAlong.InvertedX() * vSide.y) < 0.0f);
 
-            if(((bInsideOld && !bInsideNew) || (GAME_HARD && !bInsideOld && bInsideNew)) && bForward)
+            if(((bInsideOld && !bInsideNew) || (g_pGame->IsHard() && !bInsideOld && bInsideNew)) && bForward)
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
                 const coreVector2 vDir = ((i < 12u) ? pEnemy->AimAtPlayerDual((i / 8u) % 2u) : pEnemy->AimAtPlayerSide()).Normalized();
@@ -1784,7 +1786,7 @@ void cGeluMission::__SetupOwn()
             else if(i < 32u) iGroupNum = 4u;
             else             iGroupNum = 8u;
 
-            const coreFloat fPower = I_TO_F(pBullet->GetDamage()) * RCP(I_TO_F(g_pGame->GetPlayers()));
+            const coreFloat fPower = I_TO_F(pBullet->GetDamage()) * RCP(I_TO_F(g_pGame->GetNumPlayers()));
 
             coreVector2 vForceDir;
                  if(i < 16u) vForceDir   = fPower * 6.0f * coreVector2( 0.0f,-1.0f);
@@ -1851,14 +1853,14 @@ void cGeluMission::__SetupOwn()
 
         STAGE_WAVE("DREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 10u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->SetTargetSpeed(0.0f);
+            g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
             c_cast<coreFloat&>(g_pEnvironment->GetSpeed()) = 0.0f;                 
         }
 
@@ -1869,7 +1871,7 @@ STAGE_START_HERE
     // end
     STAGE_MAIN({TAKE_MISSION})
     {
-        STAGE_FINISH_AFTER(2.0f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 
     // ################################################################

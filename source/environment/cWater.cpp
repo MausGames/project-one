@@ -150,6 +150,9 @@ void cWater::UpdateReflection()
 
         if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive()))
         {
+            // 
+            cLodObject::AllowHigh(false);
+
             glCullFace(GL_FRONT);
             {
                 if(STATIC_ISVALID(g_pGame))
@@ -171,6 +174,9 @@ void cWater::UpdateReflection()
                 m_Sky.Render(m_apSkyProgram[1]);
             }
             glEnable(GL_DEPTH_TEST);
+
+            // 
+            cLodObject::AllowHigh(true);
         }
     }
 
@@ -192,14 +198,12 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
         // fill depth frame buffer
         m_Depth.StartDraw();
         {
-            glDepthFunc (GL_ALWAYS);   // better performance than clear
-            glDrawBuffer(GL_NONE);
+            glDepthFunc(GL_ALWAYS);   // better performance than clear
             {
                 // render the outdoor-surface
                 pOutdoor->RenderDepth();
             }
-            glDepthFunc (GL_LEQUAL);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glDepthFunc(GL_LEQUAL);
         }
     }
     else m_Depth.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
@@ -264,7 +268,7 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
 , m_fFallDelay (0.0f)
 {
     // 
-    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA16);
+    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, DEFINED(_CORE_GLES_) ? CORE_TEXTURE_SPEC_RGBA8 : CORE_TEXTURE_SPEC_RGBA16);
     m_WaveMap.Create(g_vGameResolution * RAIN_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 

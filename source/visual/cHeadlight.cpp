@@ -76,7 +76,7 @@ void cHeadlight::Update()
         if(m_Flicker.GetStatus())
         {
             // 
-            m_Spot.SetAlpha(m_Flicker.GetValue(CORE_TIMER_GET_NORMAL));
+            m_Spot.SetAlpha(g_CurConfig.Graphics.iFlash ? m_Flicker.GetValue(CORE_TIMER_GET_NORMAL) : 0.5f);
         }
         else
         {
@@ -226,6 +226,6 @@ void cHeadlight::ResetFlicker()
 // reset with the resource manager
 void cHeadlight::__Reset(const coreResourceReset eInit)
 {
-    if(eInit) m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
-         else m_FrameBuffer.Delete();
+    if(eInit) {m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL); this->Move();}
+         else {m_FrameBuffer.Delete();}
 }

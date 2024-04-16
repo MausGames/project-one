@@ -20,10 +20,7 @@ void cIntroMission::__SetupOwn()
         g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             pPlayer->ActivateNormalShading();
-            
-                 //pPlayer->SetTilt(0.5f*PI); // TODO   
         });
-//m_Turf.Enable(); // TODO   
 
         STAGE_FINISH_NOW
     });
@@ -32,24 +29,32 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        if(STAGE_BEGINNING)
-        {
-            g_pGame->StartIntro();
-        }
+        g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(4.0f);
 
-        if(STAGE_TIME_POINT(0.6f))
-        {
-            g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-            g_pEnvironment->SetTargetSpeed(4.0f);   // TODO 1: set earlier, because of acceleration delay   
-        }
+        g_pGame->StartIntro();
 
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
         STAGE_FINISH_PLAY
     });
 

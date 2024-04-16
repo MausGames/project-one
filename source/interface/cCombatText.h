@@ -16,6 +16,7 @@
 // TODO 2: use oldest active label instead of nothing, if all labels are busy (or dynamically allocated fallback)
 // TODO 3: RestrictCenter should also use size
 // TODO 4: use index instead of pointer for order-list ?
+// TODO 2: also invert with mirror mode (like interface, maybe move outside ? only size needs to be flipped, not position) (even more, like summary and continue menu) (should it be a 3rd option ?)
 
 
 // ****************************************************************
@@ -41,6 +42,8 @@ private:
     cGuiObject m_BadgeIcon;                // 
     cGuiLabel  m_BadgeLabel;               // 
     coreFlow   m_fBadgeTimer;              // 
+    
+    coreUint8 m_iLastLabel;
 
 
 public:

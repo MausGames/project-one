@@ -17,15 +17,15 @@ void cNevoMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        g_pEnvironment->SetTargetSpeed(4.0f);
+        g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(6.0f);
 
         g_pGame->StartIntro();
 
@@ -33,23 +33,28 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_MISSION})
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
-        g_pGame->GetInterface()->ShowMission(this);
-
         STAGE_FINISH_NOW
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    STAGE_MAIN({TAKE_MISSION})
     {
         if(STAGE_BEGINNING)
         {
-
+            g_pGame->GetInterface()->ShowMission(this);
         }
 
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+    });
+
+    // ################################################################
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -182,16 +187,16 @@ void cNevoMission::__SetupOwn()
     // 3: for coop, make sure tiles are equally distributed
     // 1,2: blending in tiles needs to be equally delayed, to not favor certain start-positions
     // enemies need to die fast after loosing invincibility
-    // TODO 1: ON tiles have X (eher nicht, schlecht in japan) or other distinct difference (maybe only in lower-right corner, or center)
-    // TODO 1: wenn letztes tile schrumpft kommen funken bei size=0 und grüner helfer erscheint und fliegt weg
     // TODO 1: badge, helper marks N fields to active in that order
     // TODO 1: badge, 1-2 der gegner sind schon vorher abschießbar
+    // TODO 1: ON tiles have X (eher nicht, schlecht in japan) or other distinct difference (maybe only in lower-right corner, or center)
+    // TODO 1: wenn letztes tile schrumpft kommen funken bei size=0 und grüner helfer erscheint und fliegt weg
     // TODO 1: create a image with the light tiles ?
     // TODO 1: flipswitch galaxy: blocking tiles moving around, lasers blocking movement between tiles
     // TODO 1: maybe just kill everything when plates are active -> contrast to pacman stage
     // TODO 1: extend collision-range of tiles (to occupy 100%) not visuals, except on overlying sub-stage (like for spikes) (check with size first)
-    // TODO 1: in second wave, 2 plate shgould alreay by active (2,2 und 1,3 (start with 0, oben links), oder 2,3 + 3,2)
-    // TWIST: plate moves around and has positive effect when activated, negative when deactivated, never locks in
+    // TODO 1: in second wave, 2 plate should already be active (2,2 und 1,3 (start with 0, oben links), oder 2,3 + 3,2)
+    // TWIST (boss?): plate moves around and has positive effect when activated, negative when deactivated, never locks in
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -446,7 +451,7 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
     {
         if(STAGE_BEGINNING)
@@ -473,6 +478,10 @@ void cNevoMission::__SetupOwn()
     // TODO 1: vertical enemies offset so players have to work together
     // TODO 1: use object_arrow.md3
     // TODO 1: mehr masse, zumindest eine breit gefächerte gegner-welle (möglichst früh ?)
+    // TODO 1: enemies with 4 arrows
+    // TODO 1: 4x4 (or more) box puzzle
+    // TODO 1: big enemy with changing arrow
+    // TODO 1: eine gruppe mit super-vielen
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -709,6 +718,9 @@ void cNevoMission::__SetupOwn()
     // TODO 1: maybe only diagonal position on linear explosion and vice-versa
     // TODO 1: 2-3 quickly after another, with pattern or just aim
     // TODO 1: reference: Monolith
+    // TODO 1: smaller mines
+    // TODO 1: super-huge bomb
+    // TODO 1: highlight current enemy rotation
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 24u)
@@ -883,8 +895,8 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 10u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -906,6 +918,10 @@ void cNevoMission::__SetupOwn()
     // TODO 1: also focus on difference from d/generate wave, make are strongly occupied ?
     // TODO 1: create an absurd big object
     // TODO 1: gegner-masse kommt auf spieler zu, alle mit energy, man muss loch rein schießen
+    // TODO 1: small enemy triangles stay (maybe only for hard)
+    // TODO 1: keep triangles from growing with attacks
+    // TODO 1: movement only from right to left
+    // TODO 1: (previously bullet shrink+grow, mentioned in bottom of Waves page)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1036,7 +1052,10 @@ void cNevoMission::__SetupOwn()
     // - 1,2: enemy path is not too wide, to not slow down bullets immediately after shooting
     // TODO 1: enemy or golden ball (1-N) hides in blue balls, to attack for badge
     // TODO 1: blue helper in one of the bullets
-    // TODO 1: bug, sand-background, music was playing, 2. sub-stage, only one enemy living, black quad got bigger on upper-left corner and filled the whole screen, maybe with depth, disappeared by destroying game, d_cast
+    // TODO 1: multiple bullets at the same time as directed wave
+    // TODO 1: increase end-size
+    // TODO 1: maybe bullets flying across screen (enemies at border)
+    // TODO 1: maybe all bullets get gravity, "flooding" the bottom (ZeroRanger kugerl-auge-boss)
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1150,10 +1169,10 @@ void cNevoMission::__SetupOwn()
 
         STAGE_WAVE("ZWÖLF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 10u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_BOSS(m_Leviathan, {60.0f, 120.0f, 180.0, 240.0f})
     });
@@ -1162,7 +1181,7 @@ STAGE_START_HERE
     // end
     STAGE_MAIN({TAKE_MISSION})
     {
-        STAGE_FINISH_AFTER(2.0f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 
     // ################################################################

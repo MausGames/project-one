@@ -108,6 +108,8 @@ void LoadConfig()
     g_OldConfig.Graphics.iReflection = Core::Config->GetInt(CONFIG_GRAPHICS_REFLECTION);
     g_OldConfig.Graphics.iGlow       = Core::Config->GetInt(CONFIG_GRAPHICS_GLOW);
     g_OldConfig.Graphics.iDistortion = Core::Config->GetInt(CONFIG_GRAPHICS_DISTORTION);
+    g_OldConfig.Graphics.iShake      = Core::Config->GetInt(CONFIG_GRAPHICS_SHAKE);
+    g_OldConfig.Graphics.iFlash      = Core::Config->GetInt(CONFIG_GRAPHICS_FLASH);
 
     // read audio values
     g_OldConfig.Audio.fEffectVolume  = Core::Config->GetFloat(CONFIG_AUDIO_EFFECT_VOLUME);
@@ -170,6 +172,8 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_REFLECTION, g_OldConfig.Graphics.iReflection);
     Core::Config->SetInt(CONFIG_GRAPHICS_GLOW,       g_OldConfig.Graphics.iGlow);
     Core::Config->SetInt(CONFIG_GRAPHICS_DISTORTION, g_OldConfig.Graphics.iDistortion);
+    Core::Config->SetInt(CONFIG_GRAPHICS_SHAKE,      g_OldConfig.Graphics.iShake);
+    Core::Config->SetInt(CONFIG_GRAPHICS_FLASH,      g_OldConfig.Graphics.iFlash);
 
     // write audio values
     Core::Config->SetFloat(CONFIG_AUDIO_EFFECT_VOLUME,  g_OldConfig.Audio.fEffectVolume);
@@ -267,22 +271,6 @@ void UpdateInput()
             //if(Core::Input->GetJoystickButton(iJoystickID, 1u, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
         }
 
-        if(!oMap.vMove.IsNull())
-        {
-            // 
-            const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-            const coreVector2 vHud   = g_vHudDirection.InvertedX();
-            const coreVector2 vFinal = MapToAxis(vGame, vHud);
-            ASSERT(vFinal.IsNormalized())
-
-            // 
-            oMap.vMove = MapToAxis(oMap.vMove, vFinal);
-            oMap.vMove = oMap.vMove.NormalizedUnsafe();
-
-            // 
-            if(g_pPostProcessing->GetSize().x < 0.0f) oMap.vMove = oMap.vMove.InvertedX();
-        }
-
         // 
         for(coreUintW j = 0u; j < INPUT_TYPES; ++j)
         {
@@ -302,11 +290,50 @@ void UpdateInput()
         // 
         if(i >= INPUT_SETS_KEYBOARD)
         {
-            //if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
+            if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
             //if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
             if(HAS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
         }
     }
+
+    // 
+    const auto nDirectionFunc = [](sGameInput* OUTPUT pInput)
+    {
+        if(!pInput->vMove.IsNull())
+        {
+            // 
+            const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+            const coreVector2 vHud   = g_vHudDirection;
+            const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+            ASSERT(vFinal.IsNormalized())
+
+            // 
+            pInput->vMove = MapToAxis(pInput->vMove, vFinal);
+            pInput->vMove = pInput->vMove.NormalizedUnsafe();
+        }
+
+        if(g_pPostProcessing->IsMirrored())
+        {
+            // 
+            pInput->vMove = pInput->vMove.InvertedX();
+
+            // 
+            const auto nFlipTurnFunc = [](coreUint8* OUTPUT piAction)
+            {
+                const coreBool bBit1 = HAS_BIT(*piAction, 1u);
+                const coreBool bBit2 = HAS_BIT(*piAction, 2u);
+
+                SET_BIT(*piAction, 1u, bBit2)
+                SET_BIT(*piAction, 2u, bBit1)
+            };
+            nFlipTurnFunc(&pInput->iActionPress);
+            nFlipTurnFunc(&pInput->iActionRelease);
+            nFlipTurnFunc(&pInput->iActionHold);
+        }
+    };
+    nDirectionFunc(&g_aGameInput[0]);
+    nDirectionFunc(&g_aGameInput[1]);
+    nDirectionFunc(&g_TotalInput);
 
     // 
     const auto nFireModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iToggleIndex)
@@ -356,9 +383,9 @@ void UpdateInput()
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_HOLD)) g_MenuInput.iMove = 4u;
 
     // 
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN),      CORE_INPUT_PRESS) ||
-       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_ENTER),    CORE_INPUT_PRESS) ||
-       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),       CORE_INPUT_PRESS)) g_MenuInput.bAccept     = true;
+    //if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN),      CORE_INPUT_PRESS) ||
+    //   Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_ENTER),    CORE_INPUT_PRESS) ||
+    //   Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),       CORE_INPUT_PRESS)) g_MenuInput.bAccept     = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
        Core::Input->GetKeyboardButton(CORE_INPUT_KEY(BACKSPACE),   CORE_INPUT_PRESS) ||
        Core::Input->GetMouseButton   (CORE_INPUT_RIGHT,            CORE_INPUT_PRESS)) g_MenuInput.bCancel     = true;

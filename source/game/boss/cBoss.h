@@ -256,7 +256,7 @@ public:
     cTorusBoss()noexcept;
 
     DISABLE_COPY(cTorusBoss)
-    ASSIGN_ID_EX(102, "Torus", COLOR_SHIP_GREEN)
+    ASSIGN_ID_EX(102, "Torus", COLOR_MENU_GREEN)
 
 
 private:
@@ -404,7 +404,7 @@ public:
     cLeviathanBoss()noexcept;
 
     DISABLE_COPY(cLeviathanBoss)
-    ASSIGN_ID_EX(203, "Leviathan", COLOR_SHIP_BLUE)
+    ASSIGN_ID_EX(203, "Leviathan", COLOR_MENU_CYAN)
 
 
 private:
@@ -497,7 +497,7 @@ public:
     cTigerBoss()noexcept;
 
     DISABLE_COPY(cTigerBoss)
-    ASSIGN_ID_EX(302, "Tiger MK-III", COLOR_SHIP_YELLOW)
+    ASSIGN_ID_EX(302, "Tiger MK-III", COLOR_MENU_YELLOW)
 
 
 private:
@@ -598,7 +598,7 @@ public:
     cMessierBoss()noexcept;
 
     DISABLE_COPY(cMessierBoss)
-    ASSIGN_ID_EX(403, "Messier 87", COLOR_SHIP_RED)
+    ASSIGN_ID_EX(403, "Messier 87", COLOR_MENU_MAGENTA)
 
 
 private:
@@ -675,7 +675,7 @@ public:
     cCholBoss()noexcept;
 
     DISABLE_COPY(cCholBoss)
-    ASSIGN_ID_EX(503, "Chol", COLOR_SHIP_ORANGE)
+    ASSIGN_ID_EX(503, "Chol", COLOR_MENU_ORANGE)
 
 
 private:
@@ -756,7 +756,7 @@ public:
     cZerothBoss()noexcept;
 
     DISABLE_COPY(cZerothBoss)
-    ASSIGN_ID_EX(603, "???", COLOR_SHIP_MAGENTA)
+    ASSIGN_ID_EX(603, "???", COLOR_MENU_BLUE)
 
 
 private:
@@ -818,7 +818,7 @@ public:
     cGemingaBoss()noexcept;
 
     DISABLE_COPY(cGemingaBoss)
-    ASSIGN_ID_EX(702, "Geminga", COLOR_SHIP_RED)
+    ASSIGN_ID_EX(702, "Geminga", COLOR_MENU_RED)
 
 
 private:

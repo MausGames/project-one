@@ -23,7 +23,7 @@ cSnowBackground::cSnowBackground()noexcept
 
     // 
     m_pWater = new cIceWater("environment_clouds_blue.png");
-
+/*
     // allocate stone list
     pList1 = new coreBatchList(SNOW_STONE_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
@@ -90,7 +90,7 @@ cSnowBackground::cSnowBackground()noexcept
         m_pOutdoor->GetShadowMap()->BindList(pList1);
         m_pOutdoor->GetShadowMap()->BindList(pList2);
     }
-
+*/
     // 
     pList1 = new coreBatchList(SNOW_REED_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
@@ -101,7 +101,7 @@ cSnowBackground::cSnowBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineTexture(0u, "environment_plant.png");
-        oBase.DefineTexture(0u, "environment_desert.png");
+        //oBase.DefineTexture(0u, "environment_desert.png");
         //oBase.DefineTexture(0u, "environment_sea.png");
         oBase.DefineTexture(1u, "default_normal.png");
         oBase.DefineProgram("object_ground_program");
@@ -116,12 +116,13 @@ cSnowBackground::cSnowBackground()noexcept
 
                 // test for valid values
                 //if((fHeight > -16.0f) && (fHeight < -5.0f) && (((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 80 < 40)) || (F_TO_SI(vPosition.y+160.0f) % 40 < 20))) //&& (ABS(vPosition.x) < 10.0f) )
-                if((fHeight > -16.0f) && ((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 40 < 20))) //&& (ABS(vPosition.x) < 10.0f) )
+                if((fHeight > -15.0f) && ((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 40 < 20))) //&& (ABS(vPosition.x) < 10.0f) )
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(7.0f)) &&
-                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, POW2(7.0f)) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(8.0f)) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(8.0f)))
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(9.0f)) &&
+                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, POW2(9.0f)) )
+                       // &&
+                       //!cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(8.0f)) &&
+                       //!cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(8.0f)))
                     {
                         // determine object type
                         const coreBool bType = Core::Rand->Bool(0.7f);//(F_TO_SI(vPosition.y+176.0f) % 80 < 30);//
@@ -135,20 +136,22 @@ cSnowBackground::cSnowBackground()noexcept
 
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
-                        pObject->DefineTexture(0u, bType ? "environment_desert.png" : "environment_desert.png");
+                        //pObject->DefineTexture(0u, bType ? "environment_desert.png" : "environment_desert.png");
                         pObject->DefineModel(bType ? "environment_plant_06.md3" : "environment_plant_07.md3");
-                        pObject->DefineModel(bType ? "environment_desert_01.md3" : "environment_desert_01.md3");
+                        pObject->DefineModel("environment_plant_06.md3");
+                        //pObject->DefineModel(bType ? "environment_desert_01.md3" : "environment_desert_01.md3");
                         //pObject->DefineModel(bType ? "environment_sea_06.md3" : "environment_sea_07.md3");
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
-                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 1.1f * 1.1f * 4.0f  * coreVector3(1.0f,1.0f,1.0f)    * ((bType) ? 0.7f : 0.7f));
+                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 1.1f * 1.1f * 1.5f * coreVector3(1.0f,1.0f,1.0f)    * ((bType) ? 0.7f : 1.0f));
+                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 1.1f * 1.1f * 1.5f * coreVector3(1.0f,1.0f,1.0f)    * ((bType) ? 0.7f : 0.7f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
 
                         //pObject->SetDirection  (vOrientation);
                         //pObject->SetOrientation(vDirection);
                         //pObject->SetDirection(coreVector3::Cross(vNormal, coreVector3::Cross(vNormal, coreVector3(0.0f,0.0f,1.0f)).Normalized()));
-                        pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+                        pObject->SetColor3   (coreVector3(0.7f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
                        // pObject->SetColor3   (LERP(coreVector3(54.0f/255.0f, 204.0f/255.0f, 255.0f/255.0f), coreVector3(1.0f,1.0f,1.0f), Core::Rand->Float(1.0f)));
 
                         // add object to the list
@@ -161,8 +164,8 @@ cSnowBackground::cSnowBackground()noexcept
         }
 
         // 
-        this->_StoreHeight(pList1, -3.0f);
-        this->_StoreHeight(pList2, -3.0f);
+        this->_StoreHeight(pList1, 0.0f);
+        this->_StoreHeight(pList2, 0.0f);
 
         // post-process lists and add them to the ground
         cBackground::_FillInfinite(pList1, SNOW_REED_RESERVE);
@@ -197,13 +200,15 @@ cSnowBackground::cSnowBackground()noexcept
 
                 // test for valid values
                 //if(fHeight > -17.0f && (F_TO_SI(vPosition.y+160.0f) % 80 >= 40)) //&& (ABS(vPosition.x) < 10.0f) )//&& (((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 80 < 40)) || (F_TO_SI(vPosition.y+160.0f) % 40 < 20)))
-                if(fHeight > -17.0f && ((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 40 >= 20))) //&& (ABS(vPosition.x) < 10.0f) )//&& (((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 80 < 40)) || (F_TO_SI(vPosition.y+160.0f) % 40 < 20)))
+                if(fHeight > -15.0f)// && ((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 40 >= 20))) //&& (ABS(vPosition.x) < 10.0f) )//&& (((vPosition.x > 0.0f) == (F_TO_SI(vPosition.y+160.0f) % 80 < 40)) || (F_TO_SI(vPosition.y+160.0f) % 40 < 20)))
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(6.0f)) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[3], vPosition, POW2(7.0f)) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[2], vPosition, POW2(7.0f)) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(10.0f)) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(10.0f)))
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(6.0f)) 
+                    &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(8.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(8.0f)) //&&
+                       //!cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(10.0f)) &&
+                       //!cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(10.0f))
+                       )
                     {
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);

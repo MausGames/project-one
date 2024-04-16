@@ -17,17 +17,30 @@ void cMuscusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        g_pEnvironment->SetTargetSpeed(4.0f);
+        g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(6.0f);
 
         g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    {
+        cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetHeadlight()->ResetFlicker();
+        pBackground->SetEnableLightning(false);
+        pBackground->SetEnableHeadlight(true);
 
         STAGE_FINISH_NOW
     });
@@ -36,24 +49,18 @@ void cMuscusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION})
     {
-        g_pGame->GetInterface()->ShowMission(this);
+        if(STAGE_BEGINNING)
+        {
+            g_pGame->GetInterface()->ShowMission(this);
+        }
 
-        STAGE_FINISH_NOW
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
     });
 
     // ################################################################
-    // 
+    // change background appearance (split)
     STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
-        if(STAGE_BEGINNING)
-        {
-            cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
-
-            pBackground->GetHeadlight()->ResetFlicker();
-            pBackground->SetEnableLightning(false);
-            pBackground->SetEnableHeadlight(true);
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -325,7 +332,7 @@ void cMuscusMission::__SetupOwn()
             else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 16u, 23u)
             else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 24u, 31u)
             else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 32u, 47u)
-            else if(STAGE_SUB(8u)) STAGE_DELAY_START
+            else if(STAGE_SUB(8u)) STAGE_DELAY_START_CLEAR
 
             iSpawnCount  = 0u;
             fSpawnOffset = (1.0f - fSpawn) / fSpeed;
@@ -611,7 +618,7 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
     {
         if(STAGE_BEGINNING)
@@ -1014,8 +1021,8 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 10u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -1042,6 +1049,8 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: transformed player should not kill other (transforming) enemy for coop -> IMMORTAL and do custom handling
     // TODO 1: in the bullet-wave phase, maybe move enemies more far away, to force player rotation (same distance like first groups ?)
     // TODO 1: gegner in schussrichtung drehen
+    // TODO 1: in coop, nur 1 spieler transformiert, der bekommt rosa hit-box + lifes
+    // TODO 1: player should change into correct direction when taking over enemy
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1251,7 +1260,7 @@ void cMuscusMission::__SetupOwn()
             nTeleportFunc(pEnemy, false);
         });
 
-        const coreBool bTransform = (m_iStageSub >= 13u) && (pSquad2->GetNumEnemiesAlive() < g_pGame->GetPlayers());
+        const coreBool bTransform = (m_iStageSub >= 13u) && (pSquad2->GetNumEnemiesAlive() < g_pGame->GetNumPlayers());
 
         STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
         {
@@ -1321,6 +1330,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: helfer is in mitte ?
     // TODO 1: similar to zelda water boss https://youtu.be/HRQXOCU8OWA?t=1005
     // TODO 1: tunnel to follow
+    // TODO 1: create particle effect (interpolated) on the side first, to make the player move away into the center
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1600,10 +1610,10 @@ void cMuscusMission::__SetupOwn()
 
         STAGE_WAVE("ZWEIUNDVIERZIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 10u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_BOSS(m_Geminga, {60.0f, 120.0f, 180.0, 240.0f})
     });
@@ -1612,7 +1622,7 @@ STAGE_START_HERE
     // end
     STAGE_MAIN({TAKE_MISSION})
     {
-        STAGE_FINISH_AFTER(2.0f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 
     // ################################################################

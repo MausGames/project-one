@@ -31,26 +31,35 @@
 // TODO 3: custom resolution should be stored when switching monitors
 // TODO 3: show target FPS in config menu (speed x update rate)
 // TODO 3: when switching resolution, and confirming by returning, the transition is broken
-// TODO 3: when switching resolution, the next mouse click is not recognized (no press even is coming from SDL, only the release event)
+// TODO 3: when switching resolution, the next mouse click is not recognized (no press event is coming from SDL, only the release event)
 // TODO 3: swapping controls should swap buttons visually
 // TODO 3: context specific controller button icons on top of J0 J1 etc.
 // TODO 3: in config menu, switchboxes flicker when discarding config
+// TODO 3: load replay number only on first entry, load headers async on demand, handle changes during runtime
+// TODO 3: display gamepad/device name in options description
+// TODO 4: locked config input buttons are set with dummy values before getting locked
+// TODO 2: handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
 
 
 // ****************************************************************
 // menu definitions
 #define MENU_LIGHT_ACTIVE             (1.0f)     // visible strength of active menu objects
-#define MENU_LIGHT_IDLE               (0.667f)   // visible strength of idle menu objects
+#define MENU_LIGHT_IDLE               (0.65f)    // visible strength of idle menu objects
 #define MENU_CONTRAST_WHITE           (0.8f)     // white contrast value (to reduce eye strain)
 #define MENU_CONTRAST_BLACK           (0.04f)    // black contrast value
-#define MENU_INSIDE_ALPHA             (0.9f)     // 
+#define MENU_CONTRAST_INSIDE          (0.94f)    // 
+#define MENU_INSIDE_ALPHA             (0.95f)    // 
 
 #define MENU_GAME_MISSIONS            (9u)
 #define MENU_GAME_STAGES              (7u)//SEGMENTS)
 #define MENU_GAME_PLAYERS             (PLAYERS)
-#define MENU_GAME_OPTIONS             (5u)
-#define MENU_SCORE_ENTRIES            (10u)
-#define MENU_REPLAY_ENTRIES           (5u)
+#define MENU_GAME_OPTIONS             (3u)
+#define MENU_GAME_EQUIPS              (2u)
+#define MENU_SCORE_ENTRIES            (20u)
+#define MENU_REPLAY_ENTRIES           (12u)
+#define MENU_EXTRA_FILTERS            (2u)
+#define MENU_EXTRA_STATS              (20u)
+#define MENU_EXTRA_OTHERS             (3u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
 #define MENU_SUMMARY_MEDALS           (SEGMENTS)
 #define MENU_SUMMARY_ENTRIES          (2u)
@@ -73,20 +82,20 @@
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
 #define MENU_FONT_DEFAULT       "keifont.ttf"
-#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (18u)
-#define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (22u)
-#define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (32u)
-#define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (42u)
-#define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (72u)
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (18u)
-#define MENU_FONT_DYNAMIC_2     "dynamic_font",    (22u)
-#define MENU_FONT_DYNAMIC_3     "dynamic_font",    (32u)
-#define MENU_FONT_DYNAMIC_4     "dynamic_font",    (42u)
-#define MENU_FONT_DYNAMIC_5     "dynamic_font",    (72u)
+#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (20u)
+#define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (25u)
+#define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (35u)
+#define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (46u)
+#define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (79u)
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (20u)
+#define MENU_FONT_DYNAMIC_2     "dynamic_font",    (25u)
+#define MENU_FONT_DYNAMIC_3     "dynamic_font",    (35u)
+#define MENU_FONT_DYNAMIC_4     "dynamic_font",    (46u)
+#define MENU_FONT_DYNAMIC_5     "dynamic_font",    (79u)
 #define MENU_FONT_ICON_1        "fontawesome.ttf", (20u)
 #define MENU_FONT_ICON_2        "fontawesome.ttf", (24u)
 #define MENU_FONT_ICON_3        "fontawesome.ttf", (40u)
-#define MENU_OUTLINE_SMALL      (2u)
+#define MENU_OUTLINE_SMALL      (3u)
 #define MENU_OUTLINE_BIG        (4u)
 
 
@@ -124,16 +133,22 @@ enum eSurface : coreUint8
 
     SURFACE_GAME_STANDARD = 0u,
     SURFACE_GAME_TRAINING,
+    SURFACE_GAME_OPTIONS,
     SURFACE_GAME_ARMORY,
     SURFACE_GAME_MAX,
 
     SURFACE_SCORE_DEFAULT = 0u,
     SURFACE_SCORE_MAX,
 
-    SURFACE_REPLAY_DEFAULT = 0u,
+    SURFACE_REPLAY_OVERVIEW = 0u,
+    SURFACE_REPLAY_DETAILS,
     SURFACE_REPLAY_MAX,
 
-    SURFACE_EXTRA_DEFAULT = 0u,
+    SURFACE_EXTRA_PROGRESS = 0u,
+    SURFACE_EXTRA_STATS,
+    SURFACE_EXTRA_OTHER,
+    SURFACE_EXTRA_PASSWORD,
+    SURFACE_EXTRA_CREDITS,
     SURFACE_EXTRA_MAX,
 
     SURFACE_CONFIG_VIDEO = 0u,
@@ -159,7 +174,10 @@ enum eSurface : coreUint8
     SURFACE_FINISH_MAX,
 
     SURFACE_BRIDGE_ENTER = 0u,
-    SURFACE_BRIDGE_RETURN,
+    SURFACE_BRIDGE_RETURN1,
+    SURFACE_BRIDGE_RETURN2,
+    SURFACE_BRIDGE_INPUT,
+    SURFACE_BRIDGE_UNLOCK,
     SURFACE_BRIDGE_MAX
 };
 
@@ -175,6 +193,8 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_TEXTUREFILTER,
     ENTRY_VIDEO_RENDERQUALITY,
     ENTRY_VIDEO_SHADOWQUALITY,
+    ENTRY_VIDEO_SHAKEEFFECTS,
+    ENTRY_VIDEO_FLASHEFFECTS,
     ENTRY_VIDEO,
 
     ENTRY_AUDIO_GLOBALVOLUME = ENTRY_VIDEO,
@@ -331,38 +351,62 @@ public:
 class cGameMenu final : public coreMenu
 {
 private:
-    cGuiObject m_DirectoryBackground;                  // 
-    cGuiObject m_ArmoryBackground;                     // 
+    cGuiObject m_Background;                                      // 
 
-    cGuiButton m_StandardTab;                          // 
-    cGuiButton m_TrainingTab;                          // 
+    cGuiButton m_StandardTab;                                     // 
+    cGuiButton m_TrainingTab;                                     // 
 
-    cGuiButton m_StartButton;                          // start button
-    cGuiButton m_CancelButton;                         // cancel button
-    cGuiButton m_BackButton;                           // back button
+    cGuiButton m_StartButton;                                     // start button
+    cGuiButton m_OptionButton;                                    // 
+    cGuiButton m_BackButton;                                      // back button
 
-    cGuiLabel m_DirectoryHeader;                       // 
-    cGuiLabel m_ArmoryHeader;                          // 
+    cGuiLabel m_OptionState;                                      // 
 
-    cWorldMap m_WorldMap;                              // 
+    cGuiLabel m_StandardHeader;                                   //                    
+    cGuiLabel m_TrainingHeader;                                   //                    
+    cGuiLabel m_ArmoryHeader;                                     //                    
 
-    cGuiLabel  m_aMissionName[MENU_GAME_MISSIONS];     // 
-    cGuiObject m_aMissionLine[MENU_GAME_MISSIONS];     // 
+    cWorldMap m_WorldMap;                                         // 
 
-    cGuiObject m_StageArea;                            // 
-    cGuiButton m_aaStage[MENU_GAME_MISSIONS][MENU_GAME_STAGES];             // 
-    cGuiObject m_aStageCursor;
+    cGuiObject m_StandardArea;                                    // 
+    cGuiObject m_StandardMedal;                                   // 
+    cGuiObject m_StandardFragment;                                // 
+    cGuiLabel  m_aStandardName [2];                               // 
+    cGuiLabel  m_aStandardScore[2];                               // 
+    cGuiLabel  m_aStandardTime [2];                               // 
 
-    cGuiLabel  m_aOptionName[MENU_GAME_OPTIONS];       // 
-    cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];       // 
+    cGuiLabel  m_aMissionName[MENU_GAME_MISSIONS];                // 
+    cGuiObject m_aMissionLine[MENU_GAME_MISSIONS];                // 
 
-    cGuiSwitchBox m_Players;                           // 
-    cGuiSwitchBox m_Mode;                              // 
-    cGuiSwitchBox m_Difficulty;                        // 
-    cGuiSwitchBox m_aWeapon     [MENU_GAME_PLAYERS];   // 
-    cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];   // 
-    cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
-    cGuiObject    m_aSupportIcon[MENU_GAME_PLAYERS];   // 
+    cGuiObject m_aaStage[MENU_GAME_MISSIONS][MENU_GAME_STAGES];   // 
+    cGuiObject m_aStageCursor;                                    // 
+    coreUint8  m_aiStageSelection[2];                             // 
+
+    cGuiObject m_TrainingArea;                                    // 
+    cGuiObject m_TrainingMedal;                                   // 
+    cGuiObject m_TrainingFragment;                                // 
+    cGuiObject m_aTrainingBadge[BADGES];                          // 
+    cGuiLabel  m_aTrainingName [2];                               // 
+    cGuiLabel  m_aTrainingScore[2];                               // 
+    cGuiLabel  m_aTrainingTime [2];                               // 
+
+    cGuiLabel  m_aOptionName[MENU_GAME_OPTIONS];                  // 
+    cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];                  // 
+
+    cGuiSwitchBox m_Mode;                                         // 
+    cGuiSwitchBox m_Type;                                         // 
+    cGuiSwitchBox m_Difficulty;                                   // 
+
+    cGuiLabel  m_aEquipName[MENU_GAME_EQUIPS];                    // 
+    cGuiObject m_aEquipLine[MENU_GAME_EQUIPS];                    // 
+
+    cGuiSwitchBox m_aWeapon     [MENU_GAME_PLAYERS];              // 
+    cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];              // 
+    cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];              // 
+    cGuiObject    m_aSupportIcon[MENU_GAME_PLAYERS];              // 
+
+    coreUint8 m_iCurPage;                                         // 
+    coreUintW m_aiCurIndex[3];                                    // 
 
     cMenuNavigator m_Navigator;
 
@@ -384,13 +428,20 @@ public:
     void SaveValues();
 
     // 
-    // TODO  
-    inline const coreInt32& GetMissionID         ()const                       {return m_WorldMap.GetSelectionID();}
-    inline       coreUint8  GetSelectedPlayers   ()const                       {return m_Players   .GetCurEntry().tValue ? 2u : 1u;}
-    inline       coreUint8  GetSelectedMode      ()const                       {return m_Mode      .GetCurEntry().tValue | m_Players.GetCurEntry().tValue;}
+    void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo)const;
+
+    // 
+    inline const coreUint8& GetSelectedMode      ()const                       {return m_Mode      .GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedType      ()const                       {return m_Type      .GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
+
+
+private:
+    // 
+    void __SelectStandard(const coreUintW iMissionIndex);
+    void __SelectTraining(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 };
 
 
@@ -399,14 +450,22 @@ public:
 class cScoreMenu final : public coreMenu
 {
 private:
-    cGuiObject m_Background;                   // 
+    cGuiObject m_Background;                        // 
 
-    cGuiButton m_BackButton;                   // back button
+    cGuiButton m_DefaultTab;                        // 
 
-    cGuiLabel  m_aRank [MENU_SCORE_ENTRIES];   // 
-    cGuiLabel  m_aName [MENU_SCORE_ENTRIES];   // 
-    cGuiLabel  m_aScore[MENU_SCORE_ENTRIES];   // 
-    cGuiObject m_aLine [MENU_SCORE_ENTRIES];   // 
+    cGuiButton m_BackButton;                        // back button
+
+    cGuiObject m_aFilterLine[MENU_EXTRA_FILTERS];   // 
+
+    cGuiSwitchBox m_Mission;                        // 
+    cGuiSwitchBox m_Segment;                        // 
+
+    cGuiLabel  m_aRank [MENU_SCORE_ENTRIES];        // 
+    cGuiLabel  m_aName [MENU_SCORE_ENTRIES];        // 
+    cGuiLabel  m_aScore[MENU_SCORE_ENTRIES];        // 
+    cGuiObject m_aLine [MENU_SCORE_ENTRIES];        // 
+    cScrollBox         m_ScoreBox;
 
     cMenuNavigator m_Navigator;
 
@@ -418,6 +477,10 @@ public:
 
     // move the score menu
     void Move()final;
+
+    // 
+    void LoadMissions();
+    void LoadSegments(const coreUintW iIndex);
 };
 
 
@@ -428,13 +491,22 @@ class cReplayMenu final : public coreMenu
 private:
     cGuiObject m_Background;                   // 
 
+    cGuiButton m_DefaultTab;                   // 
+
+    cGuiButton m_StartButton;                  // 
+    cGuiButton m_DeleteButton;                 // 
+    cGuiButton m_RenameButton;                 // 
     cGuiButton m_BackButton;                   // back button
+
+    cGuiSwitchBox m_Page;                      // 
+    cGuiObject    m_PageLine;                  // 
 
     cGuiLabel  m_aName[MENU_REPLAY_ENTRIES];   // 
     cGuiLabel  m_aTime[MENU_REPLAY_ENTRIES];   // 
     cGuiObject m_aLine[MENU_REPLAY_ENTRIES];   // 
 
     coreList<cReplay::sInfo> m_aInfoList;      // 
+    coreUintW m_iSelected;                     // 
 
     cMenuNavigator m_Navigator;
 
@@ -448,7 +520,8 @@ public:
     void Move()final;
 
     // 
-    void LoadReplays();
+    void LoadOverview();
+    void LoadDetails(const coreUintW iIndex);
 };
 
 
@@ -457,9 +530,39 @@ public:
 class cExtraMenu final : public coreMenu
 {
 private:
-    cGuiObject m_Background;   // 
+    cGuiObject m_Background;                        // 
 
-    cGuiButton m_BackButton;   // back button
+    cGuiButton m_ProgressTab;                       // 
+    cGuiButton m_StatsTab;                          // 
+    cGuiButton m_OtherTab;                          // 
+
+    cGuiButton m_BackButton;                        // back button
+
+    cGuiLabel m_TrophyHeader;
+
+    cGuiObject m_ProgressArea;                      // 
+    cGuiObject m_aFragment[8];
+    cGuiObject m_aTrophy[20];
+
+    cGuiLabel m_TrophyName;
+    cGuiLabel m_aTrophyDescription[3];
+
+    cGuiObject m_aFilterLine[MENU_EXTRA_FILTERS];   // 
+
+    cGuiSwitchBox m_Mission;                        // 
+    cGuiSwitchBox m_Segment;                        // 
+
+    cGuiLabel  m_aStatsName [MENU_EXTRA_STATS];     // 
+    cGuiLabel  m_aStatsValue[MENU_EXTRA_STATS];     // 
+    cGuiObject m_aStatsLine [MENU_EXTRA_STATS];     // 
+    cScrollBox         m_StatsBox;
+
+    cGuiLabel  m_aOtherName[MENU_EXTRA_OTHERS];     // 
+    cGuiObject m_aOtherLine[MENU_EXTRA_OTHERS];     // 
+
+    cGuiButton m_Password;                          // 
+    cGuiButton m_Credits;                           // 
+    cGuiButton m_Credits2;                          // 
 
     cMenuNavigator m_Navigator;
 
@@ -471,6 +574,10 @@ public:
 
     // move the extra menu
     void Move()final;
+
+    // 
+    void LoadMissions();
+    void LoadSegments(const coreUintW iIndex);
 };
 
 
@@ -511,6 +618,9 @@ private:
     cGuiLabel  m_aCueInput[INPUT_KEYS];   // 
     cGuiLabel  m_aCueRota [2];            // 
 
+    cGuiLabel       m_aDescription[2];         // 
+    const coreChar* m_apcDescKey[ENTRY_MAX];   // 
+
     cGuiSwitchBox m_Monitor;
     cGuiSwitchBox m_Resolution;
     cGuiSwitchBox m_DisplayMode;
@@ -518,6 +628,8 @@ private:
     cGuiSwitchBox m_TextureFilter;
     cGuiSwitchBox m_RenderQuality;
     cGuiSwitchBox m_ShadowQuality;
+    cGuiSwitchBox m_ShakeEffects;
+    cGuiSwitchBox m_FlashEffects;
     cGuiSwitchBox m_GlobalVolume;
     cGuiSwitchBox m_MusicVolume;
     cGuiSwitchBox m_EffectVolume;
@@ -634,6 +746,7 @@ private:
 
     cGuiLabel m_aName [MENU_SUMMARY_ENTRIES];                       // 
     cGuiLabel m_aValue[MENU_SUMMARY_ENTRIES];                       // 
+    cGuiLabel m_aaPart[MENU_SUMMARY_ENTRIES][MENU_SUMMARY_PARTS];   // 
 
     cGuiLabel m_TotalName;                                          // 
     cGuiLabel m_TotalValue;                                         // 
@@ -774,11 +887,18 @@ public:
 class cBridgeMenu final : public coreMenu
 {
 private:
-    coreFlow m_fReturnTimer;    // 
-    coreBool m_bReturnState;    // 
+    cGuiLabel m_InputHeader;          // 
 
-    coreUint8 m_iTarget;        // 
-    coreBool  m_bPaused;        // 
+    cGuiLabel  m_UnlockHeader;        // 
+    cGuiLabel  m_UnlockName;          // 
+    cGuiLabel  m_UnlockDescription;   // 
+    cGuiObject m_UnlockIcon;          // 
+
+    coreFlow m_fReturnTimer;          // 
+    coreBool m_bReturnState;          // 
+
+    coreUint8 m_iTarget;              // 
+    coreBool  m_bPaused;              // 
 
 
 public:
@@ -792,6 +912,10 @@ public:
     // 
     void EnterGame();
     void ReturnMenu(const coreUint8 iTarget, const coreBool bPaused);
+    void ShowUnlock();
+
+    // 
+    coreBool RequiresUnlock()const;
 
     // 
     inline coreUint8 GetTarget()const {return m_iTarget;}
@@ -818,8 +942,10 @@ private:
     cFinishMenu  m_FinishMenu;           // finish menu object
     cBridgeMenu  m_BridgeMenu;           // bridge menu object
 
-    cMsgBox  m_MsgBox;                   // message box overlay
-    cTooltip m_Tooltip;                  // tooltip overlay
+    cMsgBox      m_MsgBox;               // message box overlay
+    cTooltip     m_Tooltip;              // tooltip overlay
+    cArcadeInput m_ArcadeInput;          // 
+    cCreditRoll  m_CreditRoll;           // 
 
     cGuiObject m_PauseLayer;             // 
     coreUint32 m_iPauseFrame;            // 
@@ -848,8 +974,10 @@ public:
     void Move  ()final;
 
     // access special menu overlays
-    inline cMsgBox*  GetMsgBox () {return &m_MsgBox;}
-    inline cTooltip* GetTooltip() {return &m_Tooltip;}
+    inline cMsgBox*      GetMsgBox     () {return &m_MsgBox;}
+    inline cTooltip*     GetTooltip    () {return &m_Tooltip;}
+    inline cArcadeInput* GetArcadeInput() {return &m_ArcadeInput;}
+    inline cCreditRoll*  GetCreditRoll () {return &m_CreditRoll;}
 
     // 
     coreBool IsPaused()const;

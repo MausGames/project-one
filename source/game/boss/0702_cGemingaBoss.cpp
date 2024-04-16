@@ -208,7 +208,7 @@ void cGemingaBoss::__MoveOwn()
     // transition to inner phase
     else if(m_iPhase == 10u)
     {
-        g_pEnvironment->SetTargetSpeed(0.0f);     
+        g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);     
 
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK_REV)
         {
@@ -285,7 +285,7 @@ void cGemingaBoss::__MoveOwn()
 
             g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                const coreFloat fSide = GAME_MULTI ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
+                const coreFloat fSide = g_pGame->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
 
                 const coreFloat fHeightPlayer = m_ChangePath.CalcPositionLerp(CLAMP((fTime*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f)).y;
                 pPlayer->SetPosition(coreVector3(fSide, (-3.75f - fHeightPlayer) * FOREGROUND_AREA.y, 0.0f));

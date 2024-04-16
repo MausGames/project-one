@@ -24,7 +24,6 @@
 // TODO 3: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing) (create dummy enemy with reserve 1)
 // TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
 // TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
-// TODO 3: use mission-RotaCache everywhere applicable (even bullet generation if required)
 
 
 // ****************************************************************
@@ -35,13 +34,17 @@
 #define MISSION_NO_BOSS    (0xFFu)     // no boss currently active (error-value)
 #define MISSION_NO_WAVE    (0xFFu)     // 
 #define MISSION_NO_SEGMENT (0xFFu)     // 
+#define MISSION_WAIT_INTRO (1.5f)      // 
+#define MISSION_WAIT_OUTRO (2.0f)      // 
+#define MISSION_WAIT_PLAY  (5.9f)      // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) >= MISSION_WAVES)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) +  MISSION_WAVES)
 #define MISSION_WAVE_TO_SEGMENT(i) ((i))
 
-#define TAKE_ALWAYS  (0x00u)
-#define TAKE_MISSION (0xFFu)
+#define TAKE_ALWAYS   (0x00u)
+#define TAKE_MISSION  (0xFEu)
+#define TAKE_TRAINING (0xFFu)   // anders nennen
 
 
 // ****************************************************************
@@ -123,9 +126,10 @@
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
-#define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
+#define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cScoutEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
+#define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
 #define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
@@ -257,7 +261,7 @@ protected:
 
     const coreFloat* m_pfMedalGoal;                         // 
 
-    coreBool m_bBadgeGiven;                                 // 
+    coreUint8 m_iBadgeGiven;                                // 
 
     uCollPlayerEnemyType  m_nCollPlayerEnemy;               // 
     uCollPlayerBulletType m_nCollPlayerBullet;              // 
@@ -272,8 +276,6 @@ protected:
     static coreFloat   s_fLifeTimePoint;                    // 
     static coreFloat   s_fHealthPctPoint;                   // 
     static coreVector2 s_vPositionPoint;                    // 
-
-    static cRotaCache s_RotaCache;                          // 
 
 
 public:
@@ -311,7 +313,7 @@ public:
     inline void SetMedalGoal(const coreFloat* pfMedalGoal) {m_pfMedalGoal = pfMedalGoal; ASSERT(pfMedalGoal)}
 
     // 
-    void GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition);
+    void GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const coreVector3 vPosition);
 
     // 
     inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
@@ -885,6 +887,9 @@ private:
     cProjectOneBoss m_ProjectOne;   // 
     
     cTurf m_Turf;                       
+            
+                 //pPlayer->SetTilt(0.5f*PI); // TODO   
+//m_Turf.Enable(); // TODO   
 
 
 public:
@@ -903,6 +908,48 @@ private:
 
 
 // ****************************************************************
+// Bonus1 mission class
+class cBonus1Mission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+
+
+public:
+    cBonus1Mission()noexcept;
+
+    DISABLE_COPY(cBonus1Mission)
+    ASSIGN_ID(101, "Bonus 1")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
+};
+
+
+// ****************************************************************
+// Bonus2 mission class
+class cBonus2Mission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+
+
+public:
+    cBonus2Mission()noexcept;
+
+    DISABLE_COPY(cBonus2Mission)
+    ASSIGN_ID(102, "Bonus 2")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
+};
+
+
+// ****************************************************************
 // Error mission class
 class cErrorMission final : public cMission
 {
@@ -914,7 +961,7 @@ public:
     cErrorMission()noexcept;
 
     DISABLE_COPY(cErrorMission)
-    ASSIGN_ID(100, "Error")
+    ASSIGN_ID(201, "Error")
 
 
 private:
@@ -955,7 +1002,7 @@ public:
     ~cDemoMission()final;
 
     DISABLE_COPY(cDemoMission)
-    ASSIGN_ID(101, "Demo")
+    ASSIGN_ID(202, "Demo")
 
     // 
     void EnableLaser (const coreUintW iIndex, const cShip* pOwner);
@@ -1029,8 +1076,11 @@ template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUin
 // 
 constexpr FUNC_LOCAL coreBool cMission::_TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize)
 {
+    ASSERT(piIndexList && iSize)
+
     // 
-    if((piIndexList[0] == TAKE_MISSION) && (iTo != TAKE_MISSION))
+    if(((piIndexList[0] == TAKE_MISSION)  && (iTo != TAKE_MISSION)) ||
+       ((piIndexList[0] == TAKE_TRAINING) && (iTo == TAKE_MISSION)))
         return false;
 
     // 

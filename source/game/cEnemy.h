@@ -34,7 +34,7 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_BOSS        = 0x0010u,   // 
     ENEMY_STATUS_SINGLE      = 0x0020u,   // 
     ENEMY_STATUS_ENERGY      = 0x0040u,   // 
-    ENEMY_STATUS_BOTTOM      = 0x0080u,   // TODO 1: not yet used 
+    ENEMY_STATUS_BOTTOM      = 0x0080u,   // 
     ENEMY_STATUS_INVINCIBLE  = 0x0100u,   // 
     ENEMY_STATUS_DAMAGING    = 0x0200u,   // 
     ENEMY_STATUS_IMMORTAL    = 0x0400u,   // 
@@ -109,7 +109,7 @@ public:
 
 protected:
     // 
-    void _SetParent(cEnemy* OUTPUT pParent);
+    void _SetParent(cEnemy* pParent);
 
 
 private:
@@ -419,6 +419,7 @@ private:
     coreFlow    m_fAnimation;   // 
 
     coreObject3D m_Bubble;      // 
+    cLodObject   m_Ship;        // 
 
 
 public:
@@ -437,8 +438,10 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwnUnder()final;
-    void __MoveOwn       ()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
 };
 
 
@@ -477,7 +480,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 
 // ****************************************************************
 // destructor
-template <typename T> cEnemyManager::sEnemySet<T>::~sEnemySet()
+template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet::~sEnemySet()
 {
     // 
     FOR_EACH(it, apEnemyPool)

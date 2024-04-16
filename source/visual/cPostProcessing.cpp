@@ -16,6 +16,7 @@ cPostProcessing::cPostProcessing()noexcept
 , m_bSplitScreen      (false)
 , m_vDirectionConfig  (coreVector2(0.0f,1.0f))
 , m_vDirectionGame    (coreVector2(0.0f,1.0f))
+, m_avData            {}
 , m_afOffset          {}
 , m_bOffsetActive     (false)
 {
@@ -40,7 +41,6 @@ cPostProcessing::cPostProcessing()noexcept
     m_Separator.DefineProgram("default_2d_program");
     m_Separator.DefineTexture(0u, "default_white.png");
     m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
-    m_Separator.SetColor4    (coreVector4(coreVector3(1.0f,1.0f,1.0f),0.0f));
 
     // 
     this->SetWallOpacity  (0.0f);
@@ -71,7 +71,13 @@ void cPostProcessing::Render()
         m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
     }
 
-    glDisable(GL_BLEND);
+    // 
+    this->__UpdateData();
+
+    // 
+    const coreBool bDisableBlend = (m_aWall[0].GetAlpha() >= 1.0f);
+
+    if(bDisableBlend) glDisable(GL_BLEND);
     {
         // render interiors (post-process)
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
@@ -81,7 +87,7 @@ void cPostProcessing::Render()
         for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
             m_aWall[i].Render();
     }
-    glEnable(GL_BLEND);
+    if(bDisableBlend) glEnable(GL_BLEND);
 
     // render separator
     if(m_fSplitScreenValue)
@@ -188,13 +194,11 @@ void cPostProcessing::UpdateLayout()
 // set wallpaper opacity
 void cPostProcessing::SetWallOpacity(const coreFloat fOpacity)
 {
-    // change color instead of transparency (blending is disabled)
     ASSERT((fOpacity >= 0.0f) && (fOpacity <= 1.0f))
-    const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * fOpacity;
 
     // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
-        m_aWall[i].SetColor3(vColor);
+        m_aWall[i].SetAlpha(fOpacity);
 }
 
 
@@ -289,9 +293,38 @@ void cPostProcessing::__UpdateSeparator()
         const coreFloat fValue = (m_fSplitScreenValue == 1.0f) ? 1.0f : LERPB(0.0f, 1.0f, m_fSplitScreenValue);
 
         // 
-        m_Separator.SetSize     (coreVector2(LERP(0.1f, 0.0055f, fValue), 1.0f));
+        m_Separator.SetSize     (coreVector2(LERP(0.1f, 0.01f, fValue), 1.0f));
         m_Separator.SetDirection(this->GetDirection());
         m_Separator.SetAlpha    (LERP(0.0f, 0.8f, fValue));
         m_Separator.Move();
+    }
+}
+
+
+// ****************************************************************
+// 
+void cPostProcessing::__UpdateData()
+{
+    if(m_bSplitScreen)
+    {
+        // 
+        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+        {
+            m_aInterior[i].SetColor3(m_avData[i]);
+        }
+    }
+    else
+    {
+        // 
+        coreVector3 vFullData = m_avData[0];
+        for(coreUintW i = 1u; i < POST_INTERIORS; ++i)
+        {
+            vFullData.x = MIN(vFullData.x, m_avData[i].x);
+            vFullData.y = MIN(vFullData.y, m_avData[i].y);
+            vFullData.z = MAX(vFullData.z, m_avData[i].z);
+        }
+
+        // 
+        m_aInterior[0].SetColor3(vFullData);
     }
 }

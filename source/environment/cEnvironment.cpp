@@ -17,10 +17,12 @@ cEnvironment::cEnvironment()noexcept
 , m_iLastID        (0)
 , m_TransitionTime (coreTimer(1.3f, 0.0f, 1u))
 , m_vTransitionDir (coreVector2(0.0f,0.0f))
+, m_afStrength     {}
 , m_fFlyOffset     (0.0f)
 , m_fSideOffset    (0.0f)
 , m_vCameraPos     (CAMERA_POSITION)
 , m_vLightDir      (LIGHT_DIRECTION)
+, m_fOffsetShift   (0.0f)
 , m_bActive        (false)
 {
     // create environment frame buffer
@@ -117,15 +119,16 @@ void cEnvironment::Render()
 void cEnvironment::Move()
 {
     // update all transformation properties
-    m_avDirection[0] = SmoothAim(m_avDirection[0], m_avDirection[1], 8.0f);
-    m_avSide     [0] = m_avSide  [0] + (m_avSide  [1] - m_avSide  [0]) * (TIME * 16.0f);
-    m_afSpeed    [0] = m_afSpeed [0] + (m_afSpeed [1] - m_afSpeed [0]) * (TIME *  1.0f);
-    m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (TIME *  2.0f);
+    if(m_afStrength[0] > 0.0f) m_avDirection[0] = SmoothAim(m_avDirection[0], m_avDirection[1], m_afStrength[0]);
+    if(m_afStrength[1] > 0.0f) m_avSide     [0] = m_avSide  [0] + (m_avSide  [1] - m_avSide  [0]) * (TIME * m_afStrength[1]);
+    if(m_afStrength[2] > 0.0f) m_afSpeed    [0] = m_afSpeed [0] + (m_afSpeed [1] - m_afSpeed [0]) * (TIME * m_afStrength[2]);
+    if(m_afStrength[3] > 0.0f) m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (TIME * m_afStrength[3]);
 
     // calculate global fly offset
-    m_fFlyOffset += TIME * m_afSpeed[0];
-    while(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveAdds( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveAdds( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
-    while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveAdds(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveAdds(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
+    m_fFlyOffset  += TIME * m_afSpeed[0];
+    m_fOffsetShift = 0.0f;
+         if(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_fOffsetShift =  I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fOffsetShift); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fOffsetShift);}
+    else if(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_fOffsetShift = -I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fOffsetShift); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fOffsetShift);}
 
     // calculate global side offset (only perpendicular to flight direction, never on diagonal camera (smooth with max-min))
     const coreVector2 vAbsDir = m_avDirection[0].Processed(ABS);
@@ -141,8 +144,7 @@ void cEnvironment::Move()
     if(m_TransitionTime.GetStatus())
     {
         // update transition and move old background (do not update while new background is still loading)
-        if(m_bActive && (!Core::Manager::Resource->IsLoading() || (m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) > 0.0f)) &&
-           m_TransitionTime.Update(1.0f))
+        if(m_bActive && (!Core::Manager::Resource->IsLoading() || (m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) > 0.0f)) && m_TransitionTime.Update(1.0f))
         {
             // delete old background
             m_MixObject.DefineTexture(0u, NULL);
@@ -153,15 +155,8 @@ void cEnvironment::Move()
     }
 
     // 
-    coreVector3 vColor = m_pBackground->GetColor();
-    
-    if(m_TransitionTime.GetStatus() && !m_pOldBackground->GetColor().IsNull())
-    {
-        
-        vColor = LERPH3(m_pOldBackground->GetColor(), vColor, m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_TransitionTime.GetEnd()));
-    }
-    
-    if(!vColor.IsNull()) g_pMenu->SetHighlightColor(vColor);   // TODO 1: implement transition
+    const coreVector3 vColor = m_TransitionTime.GetStatus() ? LERPH3(m_pOldBackground->GetColor(), m_pBackground->GetColor(), m_TransitionTime.GetValuePct(CORE_TIMER_GET_NORMAL)) : m_pBackground->GetColor();
+    g_pMenu->SetHighlightColor(vColor);
 }
 
 
@@ -267,6 +262,9 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
 
         // re-create environment frame buffer
         m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+        // 
+        m_MixObject.Move();
     }
     else
     {

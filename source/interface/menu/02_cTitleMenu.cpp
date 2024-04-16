@@ -27,15 +27,17 @@ cTitleMenu::cTitleMenu()noexcept
     m_PromptText.SetTextLanguage("PROMPT");
 
     m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.04f));
+    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.045f));
     m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f));
     m_aVersionText[0].SetAlignment(coreVector2(0.0f, 1.0f));
+    m_aVersionText[0].SetColor3   (COLOR_MENU_INSIDE);
     m_aVersionText[0].SetText     ("(c) 2010 Martin Mauersics (www.maus-games.at)");
 
     m_aVersionText[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
     m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.03f));
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
+    m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
     m_aVersionText[1].SetText     (PRINT("Project One - v0.1.0 third edition - %s %.5s", __DATE__, __TIME__));
 
     // bind menu objects
@@ -92,7 +94,7 @@ void cTitleMenu::Move()
 
             // 
             m_PromptText.SetScale (LERPB(1.0f, 1.1f, MAX(m_fPromptExpand, 0.0f)));
-            m_PromptText.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fPromptAnimation)));
+            m_PromptText.SetColor3(COLOR_MENU_INSIDE * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fPromptAnimation)));
             m_PromptText.SetAlpha (m_PromptText.GetAlpha() * MIN(m_fPromptAnimation + 1.0f, 1.0f) * LERPB(1.0f, 0.0f, MAX(m_fPromptExpand, 0.0f)));
         }
         break;

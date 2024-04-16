@@ -32,8 +32,8 @@ void cReplay::CreateGame()
 
     // 
     sGameOptions oOptions = {};
-    oOptions.iPlayers     = m_Header.iNumPlayers;
     oOptions.iMode        = m_Header.iOptionMode;
+    oOptions.iType        = m_Header.iOptionType;
     oOptions.iDifficulty  = m_Header.iOptionDifficulty;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
@@ -67,6 +67,7 @@ void cReplay::StartRecording()
 
     // 
     m_Header.iOptionMode       = g_pGame->GetOptions().iMode;
+    m_Header.iOptionType       = g_pGame->GetOptions().iType;
     m_Header.iOptionDifficulty = g_pGame->GetOptions().iDifficulty;
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
@@ -321,9 +322,8 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
 
     // 
     std::memcpy(&m_Header, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
-    WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)    ||
-            (m_Header.iVersion  != REPLAY_FILE_VERSION)  ||
-            (m_Header.iBodySize != pBodyFile->GetSize()) ||
+    WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)   ||
+            (m_Header.iVersion  != REPLAY_FILE_VERSION) ||
             (m_Header.iChecksum != cReplay::__GenerateChecksum(m_Header)))
     {
         Core::Log->Warning("Replay (%s) is not a valid replay-file!", pcPath);
@@ -333,9 +333,12 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     // 
     cReplay::__CheckHeader(&m_Header);
 
-    // 
     if(!bOnlyHeader)
     {
+        // 
+        pBodyFile->Decompress();
+
+        // 
         WARN_IF(!this->__SetBodyData(pBodyFile->GetData(), pBodyFile->GetSize()))
         {
             Core::Log->Warning("Replay (%s) is corrupt!", pcPath);
@@ -357,11 +360,10 @@ void cReplay::SaveFile(const coreChar* pcName)
     // 
     coreByte*  pBodyData = NULL;
     coreUint32 iBodySize = 0;
-    if(!this->__GetBodyData(&pBodyData, &iBodySize) || !pBodyData || !iBodySize) return;
+    if(!this->__GetBodyData(&pBodyData, &iBodySize)) return;
 
     // 
     coreData::StrCopy(m_Header.acName, ARRAY_SIZE(m_Header.acName), pcName);
-    m_Header.iBodySize = iBodySize;
     m_Header.iChecksum = cReplay::__GenerateChecksum(m_Header);
 
     // 
@@ -371,7 +373,7 @@ void cReplay::SaveFile(const coreChar* pcName)
     // 
     coreArchive oArchive;
     oArchive.CreateFile("header", pHeaderData, sizeof(sHeader))->Compress();
-    oArchive.CreateFile("body",   pBodyData,   iBodySize);
+    oArchive.CreateFile("body",   pBodyData,   iBodySize)      ->Compress();
 
     // 
     oArchive.Save(coreData::UserFolder(coreData::DateTimePrint(REPLAY_FILE_FOLDER "/replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION)));
@@ -446,19 +448,10 @@ coreBool cReplay::__SetBodyData(const coreByte* pData, const coreUint32 iSize)
     }
 
     // 
-    coreByte*  pPlainData;
-    coreUint32 iPlainSize;
-    if(coreData::Decompress(pData, iSize, &pPlainData, &iPlainSize) != CORE_OK) return false;
+    if(!pData || (iSize != iTargetSize)) return false;
 
     // 
-    if(iPlainSize != iTargetSize)
-    {
-        SAFE_DELETE_ARRAY(pPlainData)
-        return false;
-    }
-
-    // 
-    coreByte* pCursor = pPlainData;
+    const coreByte* pCursor = pData;
 
     // 
     m_aSnapshot.resize(m_Header.iSnapshotCount);
@@ -473,8 +466,6 @@ coreBool cReplay::__SetBodyData(const coreByte* pData, const coreUint32 iSize)
         pCursor += sizeof(sPacket) * m_Header.aiPacketCount[i];
     }
 
-    // 
-    SAFE_DELETE_ARRAY(pPlainData)
     return true;
 }
 
@@ -483,21 +474,23 @@ coreBool cReplay::__SetBodyData(const coreByte* pData, const coreUint32 iSize)
 // 
 coreBool cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize)const
 {
-    coreUint32 iPlainSize = 0u;
+    ASSERT(ppData && piSize)
+
+    coreUint32 iSize = 0u;
 
     // 
-    iPlainSize += sizeof(sSnapshot) * m_aSnapshot.size();
+    iSize += sizeof(sSnapshot) * m_aSnapshot.size();
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
-        iPlainSize += sizeof(sPacket) * m_aaPacket[i].size();
+        iSize += sizeof(sPacket) * m_aaPacket[i].size();
     }
 
     // 
-    if(!iPlainSize) return false;
+    if(!iSize) return false;
 
     // 
-    coreByte* pPlainData = new coreByte[iPlainSize];
-    coreByte* pCursor    = pPlainData;
+    coreByte* pData   = new coreByte[iSize];
+    coreByte* pCursor = pData;
 
     // 
     std::memcpy(pCursor, m_aSnapshot.data(), sizeof(sSnapshot) * m_aSnapshot.size());
@@ -511,14 +504,9 @@ coreBool cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piS
     }
 
     // 
-    if(coreData::Compress(pPlainData, iPlainSize, ppData, piSize) != CORE_OK)
-    {
-        SAFE_DELETE_ARRAY(pPlainData)
-        return false;
-    }
+    (*ppData) = pData;
+    (*piSize) = iSize;
 
-    // 
-    SAFE_DELETE_ARRAY(pPlainData)
     return true;
 }
 
@@ -571,7 +559,10 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     pHeader->iNumSegments = CLAMP(pHeader->iNumSegments, 1u, REPLAY_SEGMENTS);
 
     // 
-    // TODO: coop or duel if players > 1
+    // TODO 1: force solo if players == 1
+    pHeader->iOptionMode       = CLAMP(pHeader->iOptionMode,       0u, GAME_MODE_MAX      -1u);
+    pHeader->iOptionType       = CLAMP(pHeader->iOptionType,       0u, GAME_TYPE_MAX      -1u);
+    pHeader->iOptionDifficulty = CLAMP(pHeader->iOptionDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
         for(coreUintW j = 0u; j < REPLAY_EQUIP_WEAPONS;  ++j) pHeader->aaiOptionWeapon [i][j] = CLAMP(pHeader->aaiOptionWeapon [i][j], 0u, WEAPONS -1u);

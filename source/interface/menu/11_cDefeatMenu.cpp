@@ -40,7 +40,7 @@ cDefeatMenu::cDefeatMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
     {
-        m_ContinueImage[i].DefineTexture(0u, "game_icon.png");
+        m_ContinueImage[i].DefineTexture(0u, "ship_icon_01.png");
         m_ContinueImage[i].DefineProgram("default_2d_program");
         m_ContinueImage[i].SetSize      (coreVector2(1.0f,1.0f) * 0.045f);
     }
@@ -131,7 +131,7 @@ void cDefeatMenu::Move()
                 if(iContinues)
                 {
                     // 
-                    static coreSpline2 s_Spline;
+                    static coreSpline2 s_Spline;   // TODO 1: to lambda   
                     if(!s_Spline.GetNumNodes())
                     {
                         s_Spline.Reserve(3u);
@@ -193,7 +193,7 @@ void cDefeatMenu::Move()
         m_Background.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
         // animate background
-        m_Background.SetSize     (coreVector2(fVisibility, 1.0f) * (coreVector2(1.0f,0.21f)));
+        m_Background.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f,0.21f));
         m_Background.SetTexSize  (coreVector2(fVisibility, 1.0f));
         m_Background.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 

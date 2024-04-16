@@ -15,11 +15,11 @@ cIntroMenu::cIntroMenu()noexcept
 : coreMenu       (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
 , m_IntroTimer   (coreTimer(3.0f, 0.5f, 1u))
 , m_iIntroStatus (0xFFu)
-, m_Navigator    (this)
 {
     // create menu objects
     m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_WelcomeText.SetPosition    (coreVector2(0.0f,0.0f));
+    m_WelcomeText.SetColor3      (COLOR_MENU_INSIDE);
     m_WelcomeText.SetTextLanguage("WELCOME");
 
     // bind menu objects
@@ -180,6 +180,7 @@ void cIntroMenu::StartIntro()
             m_Navigator.BindObject(m_apLanguageButton.get_valuelist().at(i), pUp, NULL, pDown, NULL, NULL, MENU_TYPE_DEFAULT);
         }
         m_Navigator.AssignFirst(m_apLanguageButton.front());
+        m_Navigator.AssignMenu(this);
 
         // 
         this->BindObject(SURFACE_INTRO_LANGUAGE, &m_Navigator);

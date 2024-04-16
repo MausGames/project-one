@@ -280,7 +280,7 @@ void cDharukBoss::__MoveOwn()
 
             if(m_aiCounter[CURRENT_ITERATION])
             {
-                g_pEnvironment->SetTargetDirection(coreVector2::Direction(fSideSign * -2.0f*PI * fTime));
+                g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(fSideSign * -2.0f*PI * fTime));
             }
 
             if(m_aiCounter[DUPLICATE_STATUS] || m_aiCounter[FLIP_SAVE])
@@ -317,7 +317,7 @@ void cDharukBoss::__MoveOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, s_vPositionPoint, coreVector2( 0.0f,   -1.0f))             ->ChangeSize(1.4f);
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, s_vPositionPoint, coreVector2(-fSpread,-1.0f).Normalized())->ChangeSize(1.4f);
 
-                    if(m_aiCounter[DUPLICATE_STATUS] && !GAME_EASY)
+                    if(m_aiCounter[DUPLICATE_STATUS] && !g_pGame->IsEasy())
                     {
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, -s_vPositionPoint, coreVector2(-fSpread, 1.0f).Normalized())->ChangeSize(1.4f);
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, -s_vPositionPoint, coreVector2( 0.0f,    1.0f))             ->ChangeSize(1.4f);
@@ -378,7 +378,7 @@ void cDharukBoss::__MoveOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.5f);
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.5f);
 
-                    if(m_aiCounter[DUPLICATE_STATUS] && !GAME_EASY)
+                    if(m_aiCounter[DUPLICATE_STATUS] && !g_pGame->IsEasy())
                     {
                         //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.5f);
                         //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.5f);
@@ -429,7 +429,7 @@ void cDharukBoss::__MoveOwn()
         {
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
-            if((iTick < DHARUK_BOOMERANGS) && ((iTick & 0x01u) || !GAME_EASY))
+            if((iTick < DHARUK_BOOMERANGS) && ((iTick & 0x01u) || !g_pGame->IsEasy()))
                 this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2(/*fSideSign*/(iTick & 0x01u) ? fSideSign : -fSideSign, 0.0f));
 
             if(PHASE_FINISHED)

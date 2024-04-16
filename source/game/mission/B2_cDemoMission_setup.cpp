@@ -26,24 +26,32 @@ void cDemoMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        if(STAGE_BEGINNING)
-        {
-            g_pGame->StartIntro();
-        }
+        g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(4.0f);
 
-        if(STAGE_TIME_POINT(0.6f))
-        {
-            g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-            g_pEnvironment->SetTargetSpeed(4.0f);
-        }
+        g_pGame->StartIntro();
 
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -1559,7 +1567,7 @@ void cDemoMission::__SetupOwn()
             else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 16u, 16u)
             else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 17u, 17u)
             else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 18u, 18u)
-            else if(STAGE_SUB(16u)) STAGE_DELAY_START
+            else if(STAGE_SUB(16u)) STAGE_DELAY_START_CLEAR
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
@@ -1606,8 +1614,6 @@ void cDemoMission::__SetupOwn()
             if(iTransitionState == 0u)
             {
                 iTransitionState += 1u;
-
-                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
                 this->DisableArea(true);
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_PURPLE);

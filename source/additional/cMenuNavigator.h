@@ -74,7 +74,7 @@ private:
 
 
 public:
-    explicit cMenuNavigator(coreMenu* pMenu)noexcept;
+    cMenuNavigator()noexcept;
 
     DISABLE_COPY(cMenuNavigator)
 
@@ -88,6 +88,7 @@ public:
     void BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, coreObject2D* pFallback, const eMenuType eType);
 
     // 
+    inline void AssignMenu   (coreMenu*     pMenu)                          {ASSERT(pMenu)                    m_pMenu  = pMenu;}
     inline void AssignSurface(coreObject2D* pTab, const coreUint8 iSurface) {ASSERT(m_aTab   .count(pTab))    m_aTab.at(pTab).iSurface = iSurface;}
     inline void AssignFirst  (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iFirst = this->__ToIndex(pObject);}
     inline void ResetFirst   ()                                             {m_pCurObject = NULL; m_iStore = 0u;}

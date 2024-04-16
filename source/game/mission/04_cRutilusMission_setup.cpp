@@ -17,17 +17,29 @@ void cRutilusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(1.5f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 
     // ################################################################
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        g_pEnvironment->ChangeBackground(cSpaceBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        g_pEnvironment->SetTargetSpeed(4.0f);
+        g_pEnvironment->ChangeBackground(cSpaceBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+        g_pEnvironment->SetTargetSpeedNow(4.0f);
 
         g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance (split)
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    {
+        cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->SetGroundDensity(0u, 0.0f);
+        pBackground->SetCoverColor(COLOR_MENU_BLUE);
 
         STAGE_FINISH_NOW
     });
@@ -36,23 +48,18 @@ void cRutilusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION})
     {
-        g_pGame->GetInterface()->ShowMission(this);
+        if(STAGE_BEGINNING)
+        {
+            g_pGame->GetInterface()->ShowMission(this);
+        }
 
-        STAGE_FINISH_NOW
+        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
     });
 
     // ################################################################
-    // 
+    // change background appearance (split)
     STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
-        if(STAGE_BEGINNING)
-        {
-            cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
-
-            pBackground->SetGroundDensity(0u, 0.0f);
-            pBackground->SetCoverColor(COLOR_MENU_BLUE);
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -367,7 +374,7 @@ void cRutilusMission::__SetupOwn()
             else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 56u, 59u)
             else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 60u, 63u)
             else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 60u, 63u)
-            else if(STAGE_SUB(17u)) STAGE_DELAY_START
+            else if(STAGE_SUB(17u)) STAGE_DELAY_START_CLEAR
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
@@ -438,8 +445,6 @@ void cRutilusMission::__SetupOwn()
             if(iTransitionState == 0u)
             {
                 iTransitionState += 1u;
-
-                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
                 fRotationSpeed = 0.0f;
                 fRotationFrom  = (fRotationValue);
@@ -532,7 +537,7 @@ void cRutilusMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
     {
         if(STAGE_BEGINNING)
@@ -561,6 +566,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: badge: in der mitte am anfang
     // TODO 1: fix coop, teleportation into other field not possible -> maybe relax and allow it, force teleport with effect back on end, check and change player-area, should make vertical possible again (repair enemy ?)
     // TODO 1: on vertical, enemy from below may ram into player
+    // TODO 1: if player starts in the center, helper switch places (permanent) and teleport players outside
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -597,7 +603,7 @@ void cRutilusMission::__SetupOwn()
             else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 23u, 23u)
             else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 24u, 24u)
             else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 25u, 25u)
-            else if(STAGE_SUB(12u)) STAGE_DELAY_START
+            else if(STAGE_SUB(12u)) STAGE_DELAY_START_CLEAR
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
@@ -705,13 +711,6 @@ void cRutilusMission::__SetupOwn()
         }
         else if(m_iStageSub == 12u)
         {
-            if(iTransitionState == 0u)
-            {
-                iTransitionState += 1u;
-
-                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
-            }
-
             const coreFloat fPos = (LERPB(0.0f, 0.7f, 1.0f - fTransitionTime) + SIN(fTransitionTime * 1.0f*PI) * 0.3f) * FOREGROUND_AREA.y;
 
             if(bVertical)
@@ -879,7 +878,7 @@ void cRutilusMission::__SetupOwn()
             else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 16u, 16u)
             else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 17u, 17u)
             else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 18u, 18u)
-            else if(STAGE_SUB(16u)) STAGE_DELAY_START
+            else if(STAGE_SUB(16u)) STAGE_DELAY_START_CLEAR
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
@@ -926,8 +925,6 @@ void cRutilusMission::__SetupOwn()
             if(iTransitionState == 0u)
             {
                 iTransitionState += 1u;
-
-                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
                 this->DisableArea(true);
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_PURPLE);
@@ -1090,8 +1087,8 @@ void cRutilusMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 10u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {
@@ -1113,6 +1110,10 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: partikel die in die mitte gezogen werden, mit zusätzlichen waves
     // TODO 1: only half of the bullet wave is created for the line enemies, also not the full bullet-tripplet
     // TODO 1: use ParaLerp for disappearance
+    // TODO 1: enemies or metroids fly like orbiting objects around center
+    // TODO 1: something where the gravitation at the bottom forces objects down like in moonlander, accelerating metroids maybe
+    // TODO 1: at the bottom, gravitation changes to line
+    // TODO 1: for player bullets maybe reduce gravity with fly-time
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1152,7 +1153,7 @@ void cRutilusMission::__SetupOwn()
             else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 12u, 19u)
             else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 20u, 27u)
             else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 28u, 35u)
-            else if(STAGE_SUB(6u)) STAGE_DELAY_START
+            else if(STAGE_SUB(6u)) STAGE_DELAY_START_CLEAR
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
@@ -1209,8 +1210,6 @@ void cRutilusMission::__SetupOwn()
             if(iTransitionState == 0u)
             {
                 iTransitionState += 1u;
-
-                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
                 this->DisableWave(true);
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_RED);
@@ -1569,12 +1568,12 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 10u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         if(STAGE_BEGINNING)
         {
-            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_RED);
-            g_pEnvironment->SetTargetSpeed(0.0f);
+            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
+            g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
         }
 
         UNUSED STAGE_ADD_SQUAD(pSquad1, cMeteorEnemy, MESSIER_ENEMIES)
@@ -1582,7 +1581,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f); // 5.0f 3.0f    
-                pEnemy->Configure(1, COLOR_SHIP_RED);
+                pEnemy->Configure(1, COLOR_SHIP_MAGENTA);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -1594,7 +1593,7 @@ void cRutilusMission::__SetupOwn()
     // end
     STAGE_MAIN({TAKE_MISSION})
     {
-        STAGE_FINISH_AFTER(2.0f)
+        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 
     // ################################################################

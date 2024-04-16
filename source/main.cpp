@@ -26,13 +26,14 @@ STATIC_MEMORY(cEnvironment,    g_pEnvironment)
 STATIC_MEMORY(cMenu,           g_pMenu)
 STATIC_MEMORY(cGame,           g_pGame)
 
-static coreUint64 s_iOldPerfTime  = 0u;    // last measured high-precision time value
-static coreDouble s_dLogicalTime  = 0.0;   // logical frame time (simulation rate)
-static coreDouble s_dPhysicalTime = 0.0;   // physical frame time (display rate)
+static coreProtect<coreUint64> s_iOldPerfTime  = 0u;    // last measured high-precision time value
+static coreProtect<coreDouble> s_dLogicalTime  = 0.0;   // logical frame time (simulation rate)
+static coreProtect<coreDouble> s_dPhysicalTime = 0.0;   // physical frame time (display rate)
 
-static void LockFramerate();               // lock frame rate and override frame time
-static void ReshapeGame();                 // reshape and resize game
-static void DebugGame();                   // debug and test game
+static void LockFramerate();                            // lock frame rate and override frame time
+static void UpdateListener();                           // 
+static void ReshapeGame();                              // reshape and resize game
+static void DebugGame();                                // debug and test game
 
 
 // ****************************************************************
@@ -46,8 +47,7 @@ void CoreApp::Init()
     Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
 
     // set listener to default values
-    Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
-                             coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
+    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
     // load configuration
     LoadConfig();
@@ -160,6 +160,33 @@ void CoreApp::Render()
                 // clear the foreground
                 g_pForeground->Clear();
             }
+
+#if 0
+            static cPlayer s_Player;
+            if(s_Player.HasStatus(PLAYER_STATUS_DEAD))
+            {
+                s_Player.Configure(PLAYER_SHIP_DEF);
+                s_Player.Resurrect();
+                s_Player.SetPosition(coreVector3(0.0f,0.0f,0.0f));
+                s_Player.SetSize    (coreVector3(1.0f,1.0f,1.0f) * 10.0f);
+            }
+            s_Player.Move();
+            g_pForeground->Start();
+                glClearColor(1.0f,1.0f,1.0f,1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                glDepthRange(0.8f, 1.0f);
+                    s_Player.RenderBefore();
+                glDepthRange(0.6f, 0.8f);
+                    s_Player.Render();
+                    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&s_Player);
+                glDepthRange(0.4f, 0.6f);
+                    s_Player.RenderMiddle();
+                glDepthRange(0.2f, 0.4f);
+                    s_Player.RenderAfter();
+                glDepthRange(0.0f, 1.0f);
+            g_pForeground->End();
+#endif
         }
         Core::Debug->MeasureEnd("Foreground");
     }
@@ -193,8 +220,8 @@ void CoreApp::Render()
 void CoreApp::Move()
 {
     static coreFlow fBorder = 0.0f;
-    if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 1.0f, 1.0f);
-                           else fBorder.UpdateMax(-1.0f, 0.0f);
+    if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 0.5f, 1.0f);
+                           else fBorder.UpdateMax(-0.5f, 0.0f);
     g_pPostProcessing->SetBorderAll(LERPH3(0.0f, 1.0f, fBorder));
 
 
@@ -243,6 +270,9 @@ void CoreApp::Move()
     }
     Core::Debug->MeasureEnd("Move");
 
+    // 
+    UpdateListener();
+
     // debug and test game
     if(Core::Debug->IsEnabled()) DebugGame();
 }
@@ -254,6 +284,9 @@ void InitResolution(const coreVector2 vResolution)
 {
     // calculate biggest possible 1:1 resolution
     g_vGameResolution = coreVector2(1.0f,1.0f) * vResolution.Min();
+
+    // 
+    if(F_TO_UI(vResolution.x + vResolution.y) & 0x01u) g_vGameResolution.arr(IsHorizontal(vResolution) ? 0u : 1u) += 1.0f;
 }
 
 
@@ -327,30 +360,39 @@ static void LockFramerate()
             const coreUint32 iSleep = F_TO_UI((s_dPhysicalTime - dDifference) * 1000.0);
             if(iSleep) SDL_Delay(iSleep);
 
-        #if defined(_CORE_SSE_)
-
-            // processor level spinning
-            else _mm_pause();
-
-        #endif
+            // 
+            else CORE_SPINLOCK_YIELD
         }
 
         // save last high-precision time value
         s_iOldPerfTime = iNewPerfTime;
     }
 
-    // override frame time
-    if(TIME) c_cast<coreFloat&>(TIME) = coreFloat(s_dLogicalTime);
-
-}
-    
-    
     //coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
     //if(fFreezeTime)
     //{
     //    fFreezeTime = MAX(fFreezeTime - TIME, 0.0f);
     //    c_cast<coreFloat&>(TIME) *= 0.001f;
     //}
+
+    // override frame time
+    if(TIME) c_cast<coreFloat&>(TIME) = coreFloat(s_dLogicalTime);
+}
+
+
+// ****************************************************************
+// 
+static void UpdateListener()
+{
+    // 
+    const coreFloat   fSide = g_pPostProcessing->IsMirrored() ? 1.0f : -1.0f;
+    const coreVector2 vGame = g_pPostProcessing->GetDirection();
+    const coreVector2 vHud  = g_vHudDirection;
+
+    // 
+    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f, 0.0f, fSide), coreVector3(MapToAxisInv(vGame, vHud), 0.0f));
+}
+
 
 // ****************************************************************
 // reshape and resize game
@@ -378,16 +420,16 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
             sGameOptions oOptions = {};
-            oOptions.iPlayers    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? 2u : 1u;
-            oOptions.iMode       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_MODE_COOP : GAME_MODE_DEFAULT;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? 0u : 1u;
+            oOptions.iMode       = GAME_MODE_STANDARD;
+            oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : GAME_DIFFICULTY_NORMAL;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
                 oOptions.aaiSupport[i][0] = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 1u : 0u;
             }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -404,9 +446,9 @@ static void DebugGame()
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RALT), CORE_INPUT_HOLD))
         {
             sGameOptions oOptions = {};
-            oOptions.iPlayers    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? 2u : 1u;
-            oOptions.iMode       = 0u;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
+            oOptions.iMode       = GAME_MODE_STANDARD;
+            oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : GAME_DIFFICULTY_NORMAL;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
@@ -459,25 +501,25 @@ static void DebugGame()
     // set background movement
     if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PERIOD), CORE_INPUT_HOLD))
     {
-             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_1),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f,-1.0f).Normalized());
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_2),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f,-1.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_3),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f,-1.0f).Normalized());
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_4),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 0.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_6),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 0.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_7),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 1.0f).Normalized());
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_8),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f, 1.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalized());
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS),    CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(30.0f * TIME, 0.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(30.0f * TIME, 0.0f));
+             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_1),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f,-1.0f).Normalized(), 10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_2),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f,-1.0f),              10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_3),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f,-1.0f).Normalized(), 10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_4),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 0.0f),              10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_6),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 0.0f),              10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_7),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 1.0f).Normalized(), 10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_8),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f, 1.0f),              10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalized(), 10.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeedNow((&g_pEnvironment->GetSpeed())[1] + 1.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS),    CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeedNow((&g_pEnvironment->GetSpeed())[1] - 1.0f);
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSideNow ((&g_pEnvironment->GetSide ())[1] - coreVector2(30.0f * TIME, 0.0f));
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSideNow ((&g_pEnvironment->GetSide ())[1] + coreVector2(30.0f * TIME, 0.0f));
     }
 
     // set background height
     static coreFloat s_fHeight = 0.0f;
          if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight += 15.0f * TIME;
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * TIME;
-    g_pEnvironment->SetTargetHeight(s_fHeight);
+    g_pEnvironment->SetTargetHeightNow(s_fHeight);
 
     // set background interpolation
     if(g_pEnvironment->GetBackground()->GetOutdoor())
@@ -602,7 +644,7 @@ static void DebugGame()
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_PRESS))
     {
-        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
     }
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))

@@ -19,11 +19,10 @@
 #define TABLE_BOSSES   (BOSSES)     // 
 #define TABLE_SEGMENTS (SEGMENTS)   // 
 
-#define TABLE_TIME_TO_UINT(x)     (F_TO_UI((x)  * 1000.0f))
-#define TABLE_TIME_TO_FLOAT(x)    (I_TO_F ((x)) / 1000.0f))
+#define TABLE_TIME_TO_UINT(x)   (F_TO_UI((x)  * 1000.0f))
+#define TABLE_TIME_TO_FLOAT(x)  (I_TO_F ((x)) / 1000.0f))
 
-#define __TABLE_SCORE_MODIFIER(x) (1.0f + 0.1f * I_TO_F(x))
-#define __TABLE_TIME_CONVERT(x)   (I_TO_F(x) * m_fFrameTime)
+#define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
 
 
 // ****************************************************************
@@ -90,8 +89,8 @@ public:
     void GiveFragment();
 
     // 
-    void GiveBadge(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    void GiveBadge();
+    void GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void GiveBadge(const coreUintW iBadgeIndex);
 
     // 
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
@@ -119,6 +118,7 @@ private:
     coreProtect<coreUint32> m_aiComboValue[2];                                   // absolute values for combo calculations (0 = current value, 1 = max value) 
     coreProtect<coreUint32> m_aiChainValue[2];                                   // 
     coreProtect<coreFlow>   m_fCooldown;                                         // 
+    coreProtect<coreFloat>  m_fOverride;                                         // 
 
     const cPlayer* m_pOwner;                                                     // 
 
@@ -146,6 +146,10 @@ public:
     void CancelCooldown ();
 
     // 
+    void SetOverride(const coreFloat fValue) {m_fOverride = fValue ? FLOOR(LERP(0.1f, 10.0f, fValue) * 10.0f) * 0.1f : 0.0f; ASSERT((fValue >= 0.0f) && (fValue <= 1.0f))}
+    void ResetOverride()                     {m_fOverride = -1.0f;}
+
+    // 
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
@@ -157,7 +161,7 @@ public:
     inline coreUint32 GetCurChain    ()const                                                             {return m_aiChainValue[0];}
     inline coreUint32 GetMaxChain    ()const                                                             {return m_aiChainValue[1];}
     inline coreFloat  GetCooldown    ()const                                                             {return m_fCooldown;}
-    inline coreFloat  GetModifier    ()const                                                             {return __TABLE_SCORE_MODIFIER(m_aiComboValue[0]);}
+    inline coreFloat  GetModifier    ()const                                                             {return (m_fOverride >= 0.0f) ? coreFloat(m_fOverride) : (1.0f + 0.1f * I_TO_F(m_aiComboValue[0]));}
 };
 
 

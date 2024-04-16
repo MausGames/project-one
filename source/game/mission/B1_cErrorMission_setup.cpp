@@ -103,8 +103,8 @@ void cErrorMission::__SetupOwn()
         });
 
         STAGE_GET_START(3u)
-            //STAGE_GET_UINT64(iState, iState = 0b0000'000000'000000'000000'000000'111111000000'000000111111'101010010101)
-            STAGE_GET_UINT64(iState, iState = 0b0000'000000'000000'000000'000000'111111000000'000000111111'110011110011)
+            //STAGE_GET_UINT64(iState, iState = 0b0000'000000'000000'000000'000000'111111000000'000000111111'101010010101u)
+            STAGE_GET_UINT64(iState, iState = 0b0000'000000'000000'000000'000000'111111000000'000000111111'110011110011u)
             STAGE_GET_UINT  (iCount)
         STAGE_GET_END
 
@@ -2400,7 +2400,7 @@ void UnusedWaves()
         {
             if(!bFirstHit || (pEnemy->GetID() != cCinderEnemy::ID)) return;
 
-            STAGE_BADGE(BADGE_EASY, pPlayer->GetPosition())
+            STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
             pEnemy->TakeDamage(100, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
         });
 

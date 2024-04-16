@@ -19,7 +19,7 @@ cCombatText::cCombatText()noexcept
 , m_fBadgeTimer (0.0f)
 {
     // create label objects
-    for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
 
     // 
@@ -27,10 +27,12 @@ cCombatText::cCombatText()noexcept
     m_BadgeIcon.DefineProgram("default_2d_program");
     m_BadgeIcon.SetSize      (coreVector2( 1.0f,1.0f) * 0.06f);
     m_BadgeIcon.SetAlignment (coreVector2(-1.0f,0.0f));
+    m_BadgeIcon.SetTexSize   (coreVector2( 0.5f,1.0f));
 
     // 
     m_BadgeLabel.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_BadgeLabel.SetAlignment(coreVector2(1.0f,0.0f));
+    m_BadgeLabel.SetColor3   (COLOR_MENU_INSIDE);
 }
 
 
@@ -75,7 +77,7 @@ void cCombatText::Move()
         // update label object
         oLabel.SetPosition(vPosition);
         oLabel.SetCenter  (vCenter);
-        oLabel.SetAlpha   (fAlpha);
+        oLabel.SetAlpha   (fAlpha * ((m_iLastLabel == i) ? 1.0f : 0.6f));
         oLabel.SetScale   (fScale);
         oLabel.Move();
     }
@@ -113,7 +115,7 @@ void cCombatText::Move()
 void cCombatText::DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
     // 
-    this->__DrawLabel(PRINT("+%d", iValue), vPosition, bBig, coreVector3(1.0f,1.0f,1.0f), 0u);
+    this->__DrawLabel(PRINT("+%d", iValue), vPosition, bBig, COLOR_MENU_INSIDE, 0u);
 }
 
 void cCombatText::DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
@@ -208,6 +210,8 @@ void cCombatText::__DrawLabel(const coreChar* pcText, const coreVector3 vPositio
 
         // 
         this->__AddOrder(&m_aLabel[i]);
+        
+        m_iLastLabel = i;
 
         return;
     }

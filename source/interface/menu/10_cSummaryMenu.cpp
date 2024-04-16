@@ -30,17 +30,17 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_BackgroundCoop.DefineTexture(0u, "menu_detail_04.png");
     m_BackgroundCoop.DefineTexture(1u, "menu_background_black.png");
     m_BackgroundCoop.DefineProgram("menu_animate_program");
-    m_BackgroundCoop.SetCenter    (coreVector2(0.0f,-0.29f));
+    m_BackgroundCoop.SetCenter    (coreVector2(0.0f,-0.16f));
 
     m_Title.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_Title.SetPosition(coreVector2(0.0f,0.0f));
     m_Title.SetText    (Core::Application->Settings.Name);
 
-    m_aHeader[0].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aHeader[0].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_aHeader[0].SetPosition(coreVector2(0.0f,0.39f));
     m_aHeader[0].SetColor3  (COLOR_MENU_WHITE);
 
-    m_aHeader[1].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    m_aHeader[1].Construct  (MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
     m_aHeader[1].SetPosition(coreVector2(0.0f, m_aHeader[0].GetPosition().y - 0.05f));
     m_aHeader[1].SetColor3  (COLOR_MENU_WHITE);
 
@@ -51,44 +51,57 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i)
     {
+        const coreVector2 vOffset = MISSION_SEGMENT_IS_BOSS(i) ? coreVector2(0.0f,-0.157f) : coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.065f, I_TO_F(i / 3u) * -0.075f);
+
         m_aMedalSegment[i].DefineTexture(0u, "menu_medal.png");
         m_aMedalSegment[i].DefineProgram("default_2d_program");
-        m_aMedalSegment[i].SetPosition  (coreVector2(0.0f, 0.255f) + (MISSION_SEGMENT_IS_BOSS(i) ? coreVector2(0.0f,-0.157f) : coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.065f, I_TO_F(i / 3u) * -0.075f)));
+        m_aMedalSegment[i].SetPosition  (coreVector2(0.0f, 0.255f) + vOffset);
         m_aMedalSegment[i].SetTexSize   (coreVector2(0.25f,0.25f));
     }
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i)
     {
-        m_aName[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_aName[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition(coreVector2(0.0f, -0.01f - 0.1f*I_TO_F(i)));
         m_aName[i].SetColor3  (COLOR_MENU_WHITE);
 
-        m_aValue[i].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+        m_aValue[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
         m_aValue[i].SetPosition(coreVector2(0.0f, m_aName[i].GetPosition().y - 0.03f));
         m_aValue[i].SetColor3  (COLOR_MENU_WHITE);
+
+        for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
+        {
+            const coreFloat fSide = j ? 1.0f : -1.0f;
+
+            m_aaPart[i][j].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+            m_aaPart[i][j].SetPosition(m_aValue[i].GetPosition() + coreVector2(fSide * 0.36f, 0.0f));
+            m_aaPart[i][j].SetColor3  (COLOR_MENU_WHITE);
+        }
     }
     m_aName[0].SetTextLanguage("BONUS_MEDAL");
     m_aName[1].SetTextLanguage("BONUS_SURVIVE");
 
-    m_TotalName.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-    m_TotalName.SetPosition    (coreVector2(0.0f, m_BackgroundCoop.GetCenter().y + 0.045f));
+    m_TotalName.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
+    m_TotalName.SetPosition    (coreVector2(0.0f,-0.245f));
     m_TotalName.SetColor3      (COLOR_MENU_WHITE);
     m_TotalName.SetTextLanguage("SUMMARY_TOTAL");
 
-    m_TotalValue.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_TotalValue.SetPosition(coreVector2(0.0f, m_BackgroundCoop.GetCenter().y));
+    m_TotalValue.Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.045f));
     m_TotalValue.SetColor3  (COLOR_MENU_WHITE);
 
-    for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i)
+    for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
     {
-        const coreFloat fSide = i ? 1.0f : -1.0f;
+        const coreFloat fSide = j ? 1.0f : -1.0f;
 
-        m_aTotalPart[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-        m_aTotalPart[i].SetPosition(m_TotalValue.GetPosition() + coreVector2(fSide * 0.36f, 0.0f));
-        m_aTotalPart[i].SetColor3  (COLOR_MENU_WHITE);
+        m_aTotalPart[j].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+        m_aTotalPart[j].SetPosition(m_TotalValue.GetPosition() + coreVector2(fSide * 0.36f, 0.0f));
+        m_aTotalPart[j].SetColor3  (COLOR_MENU_WHITE);
     }
 
     // bind menu objects
+    this->BindObject(SURFACE_SUMMARY_COOP, &m_BackgroundCoop);
+
     for(coreUintW j = SURFACE_SUMMARY_SOLO; j <= SURFACE_SUMMARY_COOP; ++j)
     {
         this->BindObject(j, &m_BackgroundMain);
@@ -104,7 +117,11 @@ cSummaryMenu::cSummaryMenu()noexcept
         this->BindObject(j, &m_TotalValue);
     }
 
-    for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) this->BindObject(SURFACE_SUMMARY_COOP, &m_aTotalPart[i]);
+    for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
+    {
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_COOP, &m_aaPart[i][j]);
+        this->BindObject(SURFACE_SUMMARY_COOP, &m_aTotalPart[j]);
+    }
 
     this->BindObject(SURFACE_SUMMARY_TITLE, &m_Title);
 }
@@ -114,17 +131,9 @@ cSummaryMenu::cSummaryMenu()noexcept
 // render the summary menu
 void cSummaryMenu::Render()
 {
-    if(this->GetCurSurface() == SURFACE_SUMMARY_COOP)
-    {
-        // 
-        cMenu::UpdateAnimateProgram(&m_BackgroundCoop);
-
-        // 
-        m_BackgroundCoop.Render();
-    }
-
     // 
     cMenu::UpdateAnimateProgram(&m_BackgroundMain);
+    ASSERT(m_BackgroundMain.GetSize() == m_BackgroundCoop.GetSize())
 
     // 
     this->coreMenu::Render();
@@ -193,8 +202,6 @@ void cSummaryMenu::Move()
                 // 
                 const auto nBlendMedalFunc = [&](cGuiObject* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold)
                 {
-                    ASSERT(pMedal)
-
                     const coreFloat fFadeIn = CLAMP((fBlendIn - fThreshold) * 10.0f, 0.0f, 1.0f);
 
                     // 
@@ -210,21 +217,19 @@ void cSummaryMenu::Move()
                 // 
                 const auto nBlendLabelFunc = [&](cGuiLabel* OUTPUT pName, cGuiLabel* OUTPUT pValue, cGuiLabel* OUTPUT pPart, const coreFloat fThreshold)
                 {
-                    ASSERT(pName && pValue)
-
                     const coreObjectEnable eEnabled = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
                     // blend-in
                     pName ->SetEnabled(eEnabled);
                     pValue->SetEnabled(eEnabled);
-                    if(pPart) for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) pPart[i].SetEnabled(eEnabled);
+                    for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) pPart[i].SetEnabled(eEnabled);
 
                     // blend-out
                     pName ->SetAlpha(fBlendOut);
                     pValue->SetAlpha(fBlendOut);
-                    if(pPart) for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) pPart[i].SetAlpha(fBlendOut);
+                    for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) pPart[i].SetAlpha(fBlendOut);
                 };
-                for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) nBlendLabelFunc(&m_aName[i], &m_aValue[i], NULL, 2.5f + 0.8f * I_TO_F(i));
+                for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) nBlendLabelFunc(&m_aName[i], &m_aValue[i], m_aaPart[i], 2.5f + 0.8f * I_TO_F(i));
                 nBlendLabelFunc(&m_TotalName, &m_TotalValue, m_aTotalPart, fSpinFrom);
 
                 // spin-up final score value
@@ -242,14 +247,14 @@ void cSummaryMenu::Move()
                 m_BackgroundMain.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
                 // animate background
-                m_BackgroundMain.SetSize     (coreVector2(fVisibility, 1.0f) * (coreVector2(1.0f,0.45f)));
+                m_BackgroundMain.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f,0.45f));
                 m_BackgroundMain.SetTexSize  (coreVector2(fVisibility, 1.0f));
                 m_BackgroundMain.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 
                 // duplicate background for multiplayer
                 m_BackgroundCoop.SetPosition (m_BackgroundMain.GetPosition ().Rotated90() * -1.0f);
                 m_BackgroundCoop.SetAlpha    (m_BackgroundMain.GetAlpha    ());
-                m_BackgroundCoop.SetSize     (m_BackgroundMain.GetSize     () * coreVector2(1.0f,0.4f));
+                m_BackgroundCoop.SetSize     (m_BackgroundMain.GetSize     ());
                 m_BackgroundCoop.SetTexSize  (m_BackgroundMain.GetTexSize  ());
                 m_BackgroundCoop.SetTexOffset(m_BackgroundMain.GetTexOffset());
 
@@ -378,7 +383,8 @@ void cSummaryMenu::ShowMission()
     });
 
     // 
-    if(g_pGame->IsCoop()) iBonusSurvive /= GAME_PLAYERS;
+    const coreUint32 iModifier = g_pGame->IsCoop() ? GAME_PLAYERS : 1u;
+    iBonusSurvive /= iModifier;
 
     // 
     const coreUint8 iMedalMission = (iMedalCount == MENU_SUMMARY_MEDALS) ? (iMedalTotal / MENU_SUMMARY_MEDALS) : MEDAL_NONE;
@@ -395,11 +401,15 @@ void cSummaryMenu::ShowMission()
         m_aiFinalPart [i] = iBonus + iScore;
         m_aiApplyBonus[i] = iBonus;
         m_aiApplyMedal[i] = iMedalMission;
+
+        // 
+        m_aaPart[0][i].SetText(coreData::ToChars(iBonusMedal));
+        m_aaPart[1][i].SetText(coreData::ToChars(iBonusSurvive));
     });
 
     // 
-    m_aValue[0].SetText(coreData::ToChars(iBonusMedal));
-    m_aValue[1].SetText(coreData::ToChars(iBonusSurvive));
+    m_aValue[0].SetText(coreData::ToChars(iBonusMedal   * iModifier));
+    m_aValue[1].SetText(coreData::ToChars(iBonusSurvive * iModifier));
 
     // 
     this->SetAlpha(0.0f);
