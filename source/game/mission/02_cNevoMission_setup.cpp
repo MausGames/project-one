@@ -177,12 +177,12 @@ void cNevoMission::__SetupOwn()
                 }
             }
 
-            if(STAGE_TICK_FREE(0.75f, 0.0f) && (iRotaCount || (s_iTick % 2u)))
+            if(STAGE_TICK_FREE(0.75f, 0.0f) && (iRotaCount || ((s_iTick % 2u) == 0u)))
             {
-                const cPlayer*    pPlayer = g_pGame->FindPlayerDual(((s_iTick % 8u) < 4u) ? 0u : 1u);   // TODO: tick-1 ? 
+                const cPlayer*    pPlayer = g_pGame->FindPlayerDual(((s_iTick % 8u) < 4u) ? 0u : 1u);
                 const coreBool    bType   = (m_iStageSub <= 2u) ? true : ((m_iStageSub <= 4u) ? false : !((iRotaCount++) % 2u));
                 const coreUintW   iNum    = (m_iStageSub == 3u || m_iStageSub == 4u) ? 3u : 1u;
-                const coreVector2 vOffset = StepRotated45((s_iTick % 8u) / 2u);   // TODO: tick-1 ? 
+                const coreVector2 vOffset = StepRotated45((s_iTick % 8u) / 2u);
 
                 coreVector2 vPos, vForce;
                 nTargetFunc(bType, pPlayer->GetPosition().xy(), &vPos, &vForce);

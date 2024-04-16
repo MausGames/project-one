@@ -30,7 +30,7 @@
 #define BULLET_SET_COUNT        (16u)     // 
 #define BULLET_SPEED_FACTOR     (30.0f)   // 
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
-#define BULLET_COLLISION_FACTOR (0.75f)   // (for enemy bullets) 
+#define BULLET_COLLISION_FACTOR (0.9f)//(0.75f)   // (for enemy bullets) TODO: collision bug, spear bullets where hitting player only after they passed
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 

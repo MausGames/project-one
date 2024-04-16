@@ -67,7 +67,6 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.5f));
-            m_Cover.SetColor3    (LERP(COLOR_MENU_BLUE, coreVector3(1.0f,1.0f,1.0f), 0.5f));
 }
 
 
@@ -98,7 +97,7 @@ void cSpaceBackground::__MoveOwn()
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pStone = (*pList->List())[i];
-        //if(!pStone->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue; // TODO: because of infinity scrolling 
+        //if(!pStone->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue; // TODO: because of infinity scrolling, check if copy and move 
 
         // 
         pStone->SetDirection  ((pStone->GetDirection  () * mRota).Normalized());

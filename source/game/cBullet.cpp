@@ -773,6 +773,7 @@ cSpearBullet::cSpearBullet()noexcept
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+    // TODO: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it)
 }
 
 
@@ -967,6 +968,7 @@ cViewBullet::cViewBullet()noexcept
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+    // TODO: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it) (does the view-bullet also has this problem ?)
 }
 
 

@@ -268,7 +268,7 @@ void cVolcanoBackground::__MoveOwn()
     m_Smoke.Move();
 
 
-
+    // TODO: no smoke at all in area where we rewind
 
     // 
     m_fSparkTime.Update(1.0f);

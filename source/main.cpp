@@ -53,7 +53,9 @@ void CoreApp::Init()
     LoadConfig();
 
     // load available music files
-    g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
+    g_MusicPlayer.AddMusicFolder("data/music", "Secret*.ogg");
+    g_MusicPlayer.Shuffle();
+    g_MusicPlayer.Control()->Play();
 
     // init system properties
     InitResolution(Core::System->GetResolution());

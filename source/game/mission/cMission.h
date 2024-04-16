@@ -78,6 +78,11 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
+#define GELU_ORBS                   (16u)                                             // 
+#define GELU_ORBS_RAWS              (GELU_ORBS)                                       // 
+#define GELU_WEBS                   (24u)                                             // 
+#define GELU_WEBS_RAWS              (GELU_WEBS)                                       // 
+
 #define CALOR_CHAINS                (16u)                                             // 
 #define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
 #define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
@@ -149,11 +154,12 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define STAGE_BRANCH(x,y)                      ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
 
-#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime  * (c) - (o))) != (F_TO_UI(m_fStageTimeBefore  * (c) - (o)))))
+#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime  * (c) - (o)) - 1u) != coreUint16(F_TO_UI(m_fStageTimeBefore  * (c) - (o)) - 1u)))
 #define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase >= 0.0f) && STAGE_TICK_FREE(c, o))
-#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o))) != (F_TO_UI(fLifeTimeBefore     * (c) - (o)))))
-#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o))) != (F_TO_UI(fLifeTimeBeforeBase * (c) - (o)))))
+#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBefore     * (c) - (o)) - 1u)))
+#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBeforeBase * (c) - (o)) - 1u)))
 // TODO: mit dem tod des letzten gegners werden beim scripten manchmal alle geschosse zerstört, aber weil ein toter gegner noch 1mal iteriert wird schießt er danach noch mal
+// vlt. die ClearAll calls durch eine eigene funktion ersetzen, die neue geschosse bis zum ende verhindert
 
 #define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)                   (m_fStageTime <  (t))
@@ -173,7 +179,7 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define STAGE_LIFETIME_AFTER(t)                (fLifeTime     >= (t))
 #define STAGE_LIFETIME_AFTER_BASE(t)           (fLifeTimeBase >= (t))
 #define STAGE_LIFETIME_BETWEEN(t,u)            (InBetween(fLifeTime, (t), (u)))
-#define STAGE_TAKEOFF                          (InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) || (fLifeTimeBase == 0.0f))
+#define STAGE_TAKEOFF                          ((InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) && (fLifeTimeBeforeBase != 0.0f)) || (fLifeTimeBase == 0.0f))
 
 #define STAGE_HEALTHPCT_POINT(e,t)             ((e)->ReachedHealthPct(t) && [&]() {s_fHealthPctPoint = (t); return true;}())
 #define STAGE_HEALTHPCT_BEFORE(e,t)            ((e)->GetCurHealthPct() <  (t))
@@ -629,21 +635,42 @@ private:
 class cGeluMission final : public cMission
 {
 private:
-    cTartarusBoss m_Tartarus;   // 
-    cPhalarisBoss m_Phalaris;   // 
-    cCholBoss     m_Chol;       // 
+    cTartarusBoss m_Tartarus;                    // 
+    cPhalarisBoss m_Phalaris;                    // 
+    cCholBoss     m_Chol;                        // 
+
+    coreBatchList m_Orb;                         // 
+    coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];   // 
+    coreFlow      m_afOrbTime[GELU_ORBS];        // 
+
+    coreBatchList m_Web;                         // 
+    coreObject3D  m_aWebRaw  [GELU_WEBS_RAWS];   // 
+    coreFlow      m_afWebTime[GELU_WEBS];        // 
+
+    coreFlow m_fAnimation;                       // animation value
 
 
 public:
     cGeluMission()noexcept;
+    ~cGeluMission()final;
 
     DISABLE_COPY(cGeluMission)
     ASSIGN_ID(5, "Gelu")
 
+    // 
+    void EnableOrb (const coreUintW iIndex);
+    void DisableOrb(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableWeb (const coreUintW iIndex);
+    void DisableWeb(const coreUintW iIndex, const coreBool bAnimated);
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

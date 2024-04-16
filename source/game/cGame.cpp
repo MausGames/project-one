@@ -264,6 +264,10 @@ void cGame::Move()
 
     // 
     this->__HandleDefeat();
+    
+    
+    //if(!CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD))
+    //    g_pEnvironment->SetTargetSide(m_aPlayer[0].GetPosition().xy() * 0.2f);
 }
 
 
@@ -888,7 +892,7 @@ void cGame::__HandleCollisions()
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pEnemy->GetLifeTime() < 1.0f) return;
+        //if(pEnemy->GetLifeTime() < 1.0f) return;
 
         // 
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
@@ -919,6 +923,11 @@ void cGame::__HandleCollisions()
     {
         // 
         m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);
+        
+        
+        const coreVector2 vDiff = pPlayer->GetPosition().xy() - pBullet->GetPosition().xy();
+        if(coreVector2::Dot(vDiff, pBullet->GetFlyDir()) < 0.0f) return; // issues with moving "into" back of spearbullet (maybe also viewbullet), after evasion maneuver
+        
 
         if(bFirstHit)
         {

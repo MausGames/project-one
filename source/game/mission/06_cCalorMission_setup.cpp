@@ -179,7 +179,7 @@ void cCalorMission::__SetupOwn()
                     if(iTrail && STAGE_TICK_LIFETIME(10.0f, 0.0f))
                     {
                         const coreVector2 vPos = pEnemy->GetPosition().xy();
-                        const coreVector2 vDir = pEnemy->AimAtPlayerDual((s_iTick % 4u) < 2u).Normalized();   // TODO: tick-1 ? 
+                        const coreVector2 vDir = pEnemy->AimAtPlayerDual(((s_iTick % 4u) < 2u) ? 0u : 1u).Normalized();
 
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
                     }
@@ -317,7 +317,7 @@ void cCalorMission::__SetupOwn()
 
             pEnemy->DefaultRotate(fLifeTime * 3.0f);
 
-            if(STAGE_TICK_LIFETIME(60.0f, 0.0f) && ((s_iTick % ((i < 8u) ? 16u : 8u)) < 4u))   // TODO: tick-1 ? 
+            if(STAGE_TICK_LIFETIME(60.0f, 0.0f) && ((s_iTick % ((i < 8u) ? 16u : 8u)) < 4u))
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy();

@@ -788,9 +788,9 @@ static coreFloat fBoost = 0.0f;
 coreFloat cPlayer::CalcMoveSpeed()const
 {
     if(
-            CONTAINS_BIT(m_pInput->iActionPress, 0u) 
+            CONTAINS_BIT(m_pInput->iActionPress, 0u)   // to make movement during quickshots easier
     || 
-    CONTAINS_BIT(m_pInput->iActionRelease, 0u)
+    CONTAINS_BIT(m_pInput->iActionRelease, 0u)   // to make emergency evasion maneuvers easier
     ) fBoost = 1.0f;
     else 
         fBoost = MAX(fBoost - 10.0f * TIME, 0.0f);

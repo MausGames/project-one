@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_UTILITIES_H_
 #define _P1_GUARD_UTILITIES_H_
 
-// TODO: optimize AlongStar, AlongStarNormal, SmoothAim (and AngleDiff ?)
+// TODO: optimize AlongStar, AlongStarNormal, SmoothAim
 // TODO: move ID color directly into background class if not used otherwise (emphasize "highlight" usage)
 // TODO: move a lot of those utilities into engine if proven well, look for other stuff in whole game
 
@@ -48,19 +48,6 @@
 
 
 // ****************************************************************
-// angle difference helper-function
-constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
-{
-    coreFloat A = (x - y);
-
-    while(A <  -PI) A += 2.0f*PI;
-    while(A >=  PI) A -= 2.0f*PI;
-
-    return A;
-}
-
-
-// ****************************************************************
 // 
 inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, const coreFloat b)
 {
@@ -70,6 +57,14 @@ inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, cons
     if(x <  a) return FMOD(x - b, a - b) + b;
 
     return x;
+}
+
+
+// ****************************************************************
+// angle difference helper-function
+inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
+{
+    return FmodRange(x - y, -PI, PI);
 }
 
 
@@ -176,6 +171,12 @@ inline FUNC_CONST coreVector2 StepRotated45(const coreUint8 iStep)
 {
     ASSERT(iStep < 8u)
     return UnpackDirection(iStep);
+}
+
+inline FUNC_CONST coreVector2 StepRotated45X(const coreUint8 iStep)
+{
+    ASSERT(iStep < 8u)
+    return UnpackDirection(iStep) * coreMatrix2(0.923879504f, 0.382683456f, -0.382683456f, 0.923879504f);
 }
 
 inline FUNC_CONST coreVector2 StepRotated90(const coreUint8 iStep)

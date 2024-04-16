@@ -511,7 +511,7 @@ void cViridoMission::__SetupOwn()
             pLaser->SetPosition (coreVector3(vLerpPos, 0.0f));
             pLaser->SetDirection(coreVector3(vLerpDir, 0.0f));
 
-            if(STAGE_TICK_TIME(12.0f, 0.0f) && ((s_iTick % 12u) < 3u))   // TODO: tick-1 ? 
+            if(STAGE_TICK_TIME(12.0f, 0.0f) && ((s_iTick % 12u) < 3u))
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
@@ -1143,6 +1143,7 @@ void cViridoMission::__SetupOwn()
     // - 1,2: enemy path is not too wide, to not slow down bullets immediately after shooting
     // TODO: enemy or golden ball (1-N) hides in blue balls, to attack for badge
     // TODO: blue helper in one of the bullets
+    // TODO: bug, sand-background, music was playing, 2. sub-stage, only one enemy living, black quad got bigger on upper-left corner and filled the whole screen, maybe with depth, disappeared by destroying game, d_cast
     STAGE_MAIN({TAKE_ALWAYS, 9u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1888,7 +1889,7 @@ void cViridoMission::__SetupOwn()
                 {
                     const coreVector2 vPos  = pEnemy->GetPosition ().xy();
                     const coreFloat   fBase = pEnemy->GetDirection().xy().Angle();
-                    const coreUintW   iType = 4u - ((iChiefNum == 9u) ? (s_iTick % 3u) : (((iChiefNum - 1u) / 2u) % 3u));   // TODO: tick-1 ? 
+                    const coreUintW   iType = 4u - ((iChiefNum == 9u) ? (s_iTick % 3u) : (((iChiefNum - 1u) / 2u) % 3u));
 
                     for(coreUintW j = 48u; j--; )
                     {

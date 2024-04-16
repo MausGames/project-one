@@ -136,14 +136,10 @@ void cSave::SaveFile()
         pHeader->iChecksum = cSave::__GenerateChecksum(*pHeader);
 
         // 
-        coreFile* pHeaderFile = new coreFile("header", pHeaderData, sizeof(sHeader));
-
-        // 
-        pHeaderFile->Compress();
-
-        // 
         coreArchive oArchive;
-        oArchive.AddFile(pHeaderFile);
+        oArchive.CreateFile("header", pHeaderData, sizeof(sHeader))->Compress();
+
+        // 
         oArchive.Save(m_sPath.c_str());
 
         Core::Log->Info("Save (%s) saved", m_sPath.c_str());

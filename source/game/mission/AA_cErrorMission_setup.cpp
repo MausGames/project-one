@@ -45,7 +45,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(50, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(50, COLOR_SHIP_MAGENTA);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -939,7 +939,7 @@ void cErrorMission::__SetupOwn()
 
         if(STAGE_TICK_FREE(10.0f, 0.0f))
         {
-            const coreFloat fHeight = 1.1 * (1.0f - 2.0f * (I_TO_F((s_iTick-1u) % 41u) / 40.0f));
+            const coreFloat fHeight = 1.1 * (1.0f - 2.0f * (I_TO_F(s_iTick % 41u) / 40.0f));
 
             const coreVector2 vPos = coreVector2(1.2f, fHeight) * FOREGROUND_AREA;
             const coreVector2 vDir = coreVector2(1.0f, 0.0f);
