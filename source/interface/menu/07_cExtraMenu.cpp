@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cExtraMenu::cExtraMenu()noexcept
-: coreMenu (1u, SURFACE_EXTRA_DEFAULT)
+: coreMenu (SURFACE_EXTRA_MAX, SURFACE_EXTRA_DEFAULT)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -28,7 +28,7 @@ cExtraMenu::cExtraMenu()noexcept
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
     // bind menu objects
-    for(coreUintW i = 0u; i < this->GetNumSurfaces(); ++i) // TODO 
+    for(coreUintW i = 0u; i < SURFACE_EXTRA_MAX; ++i) // TODO 
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
@@ -58,7 +58,13 @@ void cExtraMenu::Move()
         break;
     }
 
-    if(this->GetAlpha() >= 1.0f)
+    // 
+    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+
+    // 
+    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
+
+    if(!g_pMenu->IsInTransition(this))
     {
         if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
         {
@@ -66,10 +72,4 @@ void cExtraMenu::Move()
             m_iStatus = 1;
         }
     }
-
-    // 
-    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
-
-    // 
-    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }

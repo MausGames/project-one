@@ -12,24 +12,19 @@
 // ****************************************************************
 // constructor
 cTitleMenu::cTitleMenu()noexcept
-: coreMenu (1u, SURFACE_TITLE_DEFAULT)
+: coreMenu          (SURFACE_TITLE_MAX, SURFACE_TITLE_DEFAULT)
+, m_fStartAnimation (-1.0f)
 {
     // create menu objects
     m_GameLogo.DefineTexture(0u, "game_logo.png");
     m_GameLogo.DefineProgram("default_2d_program");
-    m_GameLogo.SetPosition  (coreVector2(0.0f,0.10f));
-    m_GameLogo.SetSize      (coreVector2(1.0f,1.0f) * 0.52f);
+    m_GameLogo.SetPosition  (coreVector2(0.0f,0.1f));
+    m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.9f);
     m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
 
-
-    m_GameNameTest.Construct  (MENU_FONT_STANDARD_5, MENU_OUTLINE_BIG);
-    m_GameNameTest.SetPosition(coreVector2(0.0f,0.10f));
-    m_GameNameTest.SetText    ("Eigengrau");
-
-
-    m_StartMessage.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_StartMessage.SetPosition(coreVector2(0.0f,-0.24f));
-    m_StartMessage.SetText    ("Press Button");//"Press Start");
+    m_StartMessage.Construct      (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_StartMessage.SetPosition    (coreVector2(0.0f,-0.1f));
+    m_StartMessage.SetTextLanguage("TITLE_MESSAGE");
 
     m_aVersionInfo[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
     m_aVersionInfo[0].SetPosition (coreVector2(0.0f, 0.03f));
@@ -44,28 +39,11 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionInfo[1].SetText     (PRINT("Project One - v0.1.0a third edition - %s %.5s", __DATE__, __TIME__));
 
     // bind menu objects
-    //this->BindObject(SURFACE_TITLE_DEFAULT, &m_GameLogo);
-    this->BindObject(SURFACE_TITLE_DEFAULT, &m_GameNameTest);
+    this->BindObject(SURFACE_TITLE_DEFAULT, &m_GameLogo);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_StartMessage);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_aVersionInfo[0]);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_aVersionInfo[1]);
-
-
-    //m_Effect.CreateParticle(10u, [](coreParticle* OUTPUT pParticle)
-    //{
-    //    pParticle->SetScaleStc(3.5f);
-    //    pParticle->SetSpeed   (0.0f);
-    //});
-}
-
-
-// ****************************************************************
-// destructor
-cTitleMenu::~cTitleMenu()
-{
-
-    //m_Effect.Clear(); // TODO: race condition
-
+    this->BindObject(SURFACE_TITLE_FIRST,   &m_StartMessage);
 }
 
 
@@ -81,20 +59,23 @@ void cTitleMenu::Move()
     switch(this->GetCurSurface())
     {
     case SURFACE_TITLE_DEFAULT:
+    case SURFACE_TITLE_FIRST:
         {
-            // 
-            m_StartMessage.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * coreFloat(Core::System->GetTotalTime()))));
-
-            //m_GameLogo.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(0.8f, 1.0f, 0.5f + 0.5f * SIN(3.0f * coreFloat(Core::System->GetTotalTime()))));
-
-            if(this->GetAlpha() >= 1.0f)
+            if(!g_pMenu->IsInTransition(this))
             {
                 if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
                 {
                     // 
                     m_iStatus = 1;
                 }
+
+                // 
+                m_fStartAnimation.UpdateMod(1.0f, 2.0f*PI);
             }
+
+            // 
+            m_StartMessage.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fStartAnimation)));
+            m_StartMessage.SetAlpha (m_StartMessage.GetAlpha() * MIN(m_fStartAnimation + 1.0f, 1.0f));
         }
         break;
 
@@ -103,14 +84,7 @@ void cTitleMenu::Move()
         break;
     }
 
-
-    //m_Effect.ForEachParticle([&](coreParticle* OUTPUT pParticle, const coreUintW i)
-    //{
-    //    const coreFloat fTime = FRACT(coreFloat(Core::System->GetTotalTime()) * 0.1f + 0.1f * I_TO_F(i));
-    //
-    //    pParticle->SetPositionStc(coreVector3(coreVector2((0.08f + 0.0f * fTime) * SIN((fTime + (I_TO_F(i) / 10.0f)) * 4.0f*PI), 0.27f - 0.54f * fTime) * (FOREGROUND_AREA * 4.5f), 5.0f));
-    //    pParticle->SetAngleStc   (4.0f*PI * fTime * ((i & 0x01u) ? -1.0f : 1.0f));
-    //    pParticle->SetColor4Stc  (coreVector4(0.0f, 173.0f/255.0f * 0.6f, 223.0f/255.0f * 0.6f, 0.9f * this->GetAlpha()));
-    //    // TODO: as ink shader   
-    //});
+    // 
+    if(this->GetCurSurface() == SURFACE_TITLE_FIRST)
+        m_StartMessage.SetPosition(coreVector2(0.0f,0.0f));
 }

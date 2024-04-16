@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cSummaryMenu::cSummaryMenu()noexcept
-: coreMenu      (2u, SURFACE_SUMMARY_NORMAL)
+: coreMenu      (SURFACE_SUMMARY_MAX, SURFACE_SUMMARY_NORMAL)
 , m_iFinalScore (0u)
 , m_fIntroTimer (0.0f)
 , m_fOutroTimer (0.0f)
@@ -289,4 +289,8 @@ void cSummaryMenu::ShowBegin()
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.0f);
+
+    //show banner on first try + cheat (start first try again)
+    //einfacher kleiner text in mitte der langsam rein-slasht, aber raus-faded
+    //musik soll im schwarzen schon anfangen ?
 }

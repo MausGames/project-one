@@ -12,13 +12,13 @@
 // ****************************************************************
 // constructor
 cConfigMenu::cConfigMenu()noexcept
-: coreMenu (4u, SURFACE_CONFIG_VIDEO)
+: coreMenu (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetSize      (coreVector2(0.8f,0.65f));
+    m_Background.SetSize      (coreVector2(0.8f,0.65f+0.05f));  
 
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
@@ -121,11 +121,11 @@ cConfigMenu::cConfigMenu()noexcept
     m_aArrow[1].SetText(ICON_ARROW_LEFT);
     m_aArrow[2].SetText(ICON_ARROW_DOWN);
     m_aArrow[3].SetText(ICON_ARROW_RIGHT);
-    m_aArrow[4].SetText("SWORD");
-    m_aArrow[5].SetText("SHIELD");
+    //m_aArrow[4].SetText(ICON_BURN);
+    //m_aArrow[5].SetText(ICON_SHIELD_ALT);
     m_aArrow[6].SetText(ICON_UNDO_ALT);
     m_aArrow[7].SetText(ICON_REDO_ALT);
-    m_aArrow[8].SetText(ICON_PAUSE_CIRCLE);
+    //m_aArrow[8].SetText(ICON_PAUSE_CIRCLE);
 
     #define __SET_OPTION(x,n,s)                                                  \
     {                                                                            \
@@ -273,7 +273,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
 
     // bind menu objects
-    for(coreUintW i = 0u, ie = this->GetNumSurfaces(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = SURFACE_CONFIG_MAX; i < ie; ++i)
     {
         if(i != SURFACE_CONFIG_VIDEO) this->BindObject(i, &m_VideoTab);
         if(i != SURFACE_CONFIG_AUDIO) this->BindObject(i, &m_AudioTab);
@@ -566,7 +566,7 @@ void cConfigMenu::Move()
         break;
     }
 
-    if(this->GetAlpha() >= 1.0f)
+    if(!g_pMenu->IsInTransition(this))
     {
         if(m_SaveButton.IsClicked())
         {

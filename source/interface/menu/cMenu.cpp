@@ -37,9 +37,9 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_GAME,    &m_GameMenu);
     this->BindObject(SURFACE_SCORE,   &m_ScoreMenu);
     this->BindObject(SURFACE_REPLAY,  &m_ReplayMenu);
+    this->BindObject(SURFACE_EXTRA,   &m_ExtraMenu);
     this->BindObject(SURFACE_CONFIG,  &m_PauseLayer);
     this->BindObject(SURFACE_CONFIG,  &m_ConfigMenu);
-    this->BindObject(SURFACE_EXTRA,   &m_ExtraMenu);
     this->BindObject(SURFACE_PAUSE,   &m_PauseLayer);
     this->BindObject(SURFACE_PAUSE,   &m_PauseMenu);
     this->BindObject(SURFACE_SUMMARY, &m_SummaryMenu);
@@ -194,7 +194,7 @@ void cMenu::Move()
             if(m_pTitleMenu->GetStatus())
             {
                 // switch to main menu
-                this->AnimateSurface(this, SURFACE_MAIN, 0.75f);
+                this->AnimateSurface(this, SURFACE_MAIN, 2.0f);
 
                 // unload expendable menu resources
                 Core::Manager::Resource->AttachFunction([this]()
@@ -234,17 +234,17 @@ void cMenu::Move()
             }
             else if(m_MainMenu.GetStatus() == 4)
             {
+                // switch to extra menu
+                this->AnimateSurface(this, SURFACE_EXTRA, 3.0f);
+            }
+            else if(m_MainMenu.GetStatus() == 5)
+            {
                 // switch to config menu
                 this->AnimateSurface(this, SURFACE_CONFIG, 3.0f);
 
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
                 m_ConfigMenu.LoadValues();
-            }
-            else if(m_MainMenu.GetStatus() == 5)
-            {
-                // switch to extra menu
-                this->AnimateSurface(this, SURFACE_EXTRA, 3.0f);
             }
         }
         break;
@@ -296,9 +296,9 @@ void cMenu::Move()
         }
         break;
 
-    case SURFACE_CONFIG:
+    case SURFACE_EXTRA:
         {
-            if(m_ConfigMenu.GetStatus())
+            if(m_ExtraMenu.GetStatus())
             {
                 // return to previous menu
                 this->AnimateSurface(this, this->GetOldSurface(), 3.0f);
@@ -306,9 +306,9 @@ void cMenu::Move()
         }
         break;
 
-    case SURFACE_EXTRA:
+    case SURFACE_CONFIG:
         {
-            if(m_ExtraMenu.GetStatus())
+            if(m_ConfigMenu.GetStatus())
             {
                 // return to previous menu
                 this->AnimateSurface(this, this->GetOldSurface(), 3.0f);
@@ -333,14 +333,6 @@ void cMenu::Move()
                 m_ConfigMenu.LoadValues();
             }
             else if(m_PauseMenu.GetStatus() == 3)
-            {
-                // 
-                this->AnimateSurface(this, SURFACE_EMPTY, 0.0f);
-
-                // 
-                g_pGame->RestartMission();
-            }
-            else if(m_PauseMenu.GetStatus() == 4)
             {
                 // 
                 this->AnimateSurface(this, SURFACE_MAIN, 1.0f);
@@ -462,7 +454,7 @@ void cMenu::AnimateSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, 
 void cMenu::UpdateLanguageFont()
 {
     // 
-    const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : "ethnocentric.ttf";
+    const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_DEFAULT;
     Core::Manager::Resource->AssignProxy("dynamic_font", pcName);
 
     // 
@@ -647,8 +639,8 @@ UNITY_BUILD
 #include "04_cGameMenu.cpp"
 #include "05_cScoreMenu.cpp"
 #include "06_cReplayMenu.cpp"
-#include "07_cConfigMenu.cpp"
-#include "08_cExtraMenu.cpp"
+#include "07_cExtraMenu.cpp"
+#include "08_cConfigMenu.cpp"
 #include "09_cPauseMenu.cpp"
 #include "10_cSummaryMenu.cpp"
 #include "11_cDefeatMenu.cpp"

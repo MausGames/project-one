@@ -393,6 +393,7 @@ void cViridoMission::__SetupOwn()
     // - 3: starts with offset, to not fly into players
     // - 4: reflect all bullets and players with force, except with barrel roll
     // - 5: arranged to allow only one kill per turn, and to improve coop gameplay
+    STAGE_START_HERE
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -1127,7 +1128,7 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // leave destroyable residue on its way (r-type leaver)
-    STAGE_START_HERE
+    //STAGE_START_HERE
     STAGE_MAIN
     {
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 6u)

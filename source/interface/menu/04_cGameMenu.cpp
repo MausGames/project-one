@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cGameMenu::cGameMenu()noexcept
-: coreMenu(3u, SURFACE_GAME_STANDARD)
+: coreMenu(SURFACE_GAME_MAX, SURFACE_GAME_ARMORY)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -274,7 +274,7 @@ cGameMenu::cGameMenu()noexcept
     */
 
     // bind menu objects
-    for(coreUintW i = 0u, ie = 2u/*this->GetNumSurfaces()*/; i < ie; ++i)
+    for(coreUintW i = 0u, ie = 2u/*SURFACE_GAME_MAX*/; i < ie; ++i)
     {
         if(i != SURFACE_GAME_STANDARD) this->BindObject(i, &m_StandardTab);
         if(i != SURFACE_GAME_TRAINING) this->BindObject(i, &m_TrainingTab);
@@ -368,7 +368,7 @@ void cGameMenu::Move()
 
     case SURFACE_GAME_TRAINING:
         {
-            if(this->GetAlpha() >= 1.0f)
+            if(!g_pMenu->IsInTransition(this))
             {
                 if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
                 {
@@ -381,7 +381,7 @@ void cGameMenu::Move()
 
     case SURFACE_GAME_ARMORY:
         {
-            if(this->GetAlpha() >= 1.0f)
+            if(!g_pMenu->IsInTransition(this))
             {
                 if(m_StartButton.IsClicked())
                 {
@@ -391,7 +391,8 @@ void cGameMenu::Move()
                 else if(m_CancelButton.IsClicked() || g_MenuInput.bCancel)
                 {
                     // 
-                    g_pMenu->AnimateSurface(this, this->GetOldSurface(), 3.0f);
+                    //g_pMenu->AnimateSurface(this, this->GetOldSurface(), 3.0f);
+                    m_iStatus = 2;
                 }
             }
 

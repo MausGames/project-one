@@ -514,7 +514,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowMission(const cMission* pMission)
 {
     // show default mission banner
-    this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("STAGE"), pMission->GetID()));
+    this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("MISSION"), pMission->GetID()));
 }
 
 // ****************************************************************

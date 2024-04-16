@@ -223,15 +223,18 @@ void cEnemy::Kill(const coreBool bAnimated)
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         // 
-        if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
-        {
-            const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
-            g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), vColor);
-        }
-        else
-        {
-            g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
-        }
+        //if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
+        //{
+        //    const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
+        //    g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), vColor);
+        //}
+        //else
+        //{
+        //    g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+        //}
+
+
+        g_pSpecialEffects->ExplosionTest(this);
     }
 
     if(bEnergy)

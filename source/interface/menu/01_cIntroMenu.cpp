@@ -12,13 +12,13 @@
 // ****************************************************************
 // constructor
 cIntroMenu::cIntroMenu()noexcept
-: coreMenu     (3u, SURFACE_INTRO_EMPTY)
+: coreMenu     (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
 , m_IntroTimer (coreTimer(3.0f, 0.5f, 1u))
 {
     // create menu objects
-    m_MartinMessage.Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_MartinMessage.SetPosition(coreVector2(0.0f,0.0f));
-    m_MartinMessage.SetText    ("A Game by Martin Mauersics");
+    m_MartinMessage.Construct      (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_MartinMessage.SetPosition    (coreVector2(0.0f,0.0f));
+    m_MartinMessage.SetTextLanguage("INTRO_MESSAGE");
 
     // bind menu objects
     this->BindObject(SURFACE_INTRO_MARTIN, &m_MartinMessage);
@@ -29,6 +29,7 @@ cIntroMenu::cIntroMenu()noexcept
     {
         // 
         const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
+        ASSERT(asLanguageList.size() <= 10u)
 
         // 
         const coreFloat fOffset = I_TO_F(asLanguageList.size()) * 0.5f - 0.5f;
@@ -36,13 +37,13 @@ cIntroMenu::cIntroMenu()noexcept
         {
             // 
             std::string sFont;
-            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = "ethnocentric.ttf";
+            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_DEFAULT;
 
             // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 30u, MENU_OUTLINE_SMALL);   // # filter filename again
+            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 20u, MENU_OUTLINE_SMALL);   // # always filter filename
             pButton->DefineProgram("menu_border_program");
-            pButton->SetPosition  (coreVector2(0.0f, 0.15f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
-            pButton->SetSize      (coreVector2(0.3f, 0.07f) * 1.5f);
+            pButton->SetPosition  (coreVector2(0.00f,0.09f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
+            pButton->SetSize      (coreVector2(0.34f,0.07f));
             pButton->GetCaption()->SetText(asLanguageList.get_key(it)->c_str());
 
             // 
@@ -108,7 +109,7 @@ void cIntroMenu::Move()
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        if(!this->GetTransition().GetStatus()) this->ChangeSurface(SURFACE_INTRO_MARTIN, 1.0f);
+        if(!this->GetTransition().GetStatus()) g_pMenu->AnimateSurface(this, SURFACE_INTRO_MARTIN, 1.0f);
     }
     else
     {
@@ -117,12 +118,12 @@ void cIntroMenu::Move()
 
         if(m_IntroTimer.GetStatus())
         {
-
             if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 // 
                 const coreFloat fTime1 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
-                if((fTime1 >= 1.7f) && (fTime1 < 2.0f))
+                if(((fTime1 >= 0.7f) && (fTime1 < 1.0f)) ||
+                   ((fTime1 >= 1.7f) && (fTime1 < 2.0f)))
                 {
                     // 
                     m_IntroTimer.SetValue(2.0f);
@@ -140,7 +141,7 @@ void cIntroMenu::Move()
                 g_pEnvironment->Activate();
                 g_pPostProcessing->SetWallOpacity(CLAMP(1.35f * (fTime2 - 2.0f), 0.0f, 1.0f));
             }
-            else if(fTime2 >= 1.0f)
+            if(fTime2 >= 1.0f)
             {
                 // 
                 g_pMenu->AnimateSurface(this, SURFACE_INTRO_EMPTY, 0.75f);

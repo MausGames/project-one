@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cReplayMenu::cReplayMenu()noexcept
-: coreMenu (1u, SURFACE_REPLAY_DEFAULT)
+: coreMenu (SURFACE_REPLAY_MAX, SURFACE_REPLAY_DEFAULT)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -49,7 +49,7 @@ cReplayMenu::cReplayMenu()noexcept
     }
 
     // bind menu objects
-    for(coreUintW i = 0u; i < this->GetNumSurfaces(); ++i) // TODO 
+    for(coreUintW i = 0u; i < SURFACE_REPLAY_MAX; ++i) // TODO 
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
@@ -101,7 +101,7 @@ void cReplayMenu::Move()
         break;
     }
 
-    if(this->GetAlpha() >= 1.0f)
+    if(!g_pMenu->IsInTransition(this))
     {
         if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
         {

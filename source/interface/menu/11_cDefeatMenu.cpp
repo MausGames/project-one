@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cDefeatMenu::cDefeatMenu()noexcept
-: coreMenu      (2u, SURFACE_DEFEAT_CONTINUE)
+: coreMenu      (SURFACE_DEFEAT_MAX, SURFACE_DEFEAT_CONTINUE)
 , m_fCountdown  (0.0f)
 , m_fBurst      (0.0f)
 , m_fIntroTimer (0.0f)

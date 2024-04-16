@@ -332,7 +332,7 @@ void CoreApp::Setup()
         Core::Manager::Resource->Load<coreFont>(coreData::StrFilename(it->c_str()), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), iHinting, bKerning);
     }
 
-    const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : "ethnocentric.ttf";
+    const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_DEFAULT;
     Core::Manager::Resource->AssignProxy(Core::Manager::Resource->LoadProxy("dynamic_font"), pcInit);
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

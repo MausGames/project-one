@@ -23,7 +23,7 @@
 #define PLAYER_WEAPONS            (1u)                // number of weapons a player can carry
 #define PLAYER_LIVES              (LIVES)             // 
 #define PLAYER_SHIELD             (SHIELD)            // 
-#define PLAYER_COLLISION_MIN      (0.5f)              // 
+#define PLAYER_COLLISION_MIN      (0.4f)              // 
 #define PLAYER_WIND_SIZE          (4.5f)              // 
 #define PLAYER_BUBBLE_SIZE        (6.0f)              // 
 #define PLAYER_ROLL_SPEED         (1.0f)              // 

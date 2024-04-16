@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cScoreMenu::cScoreMenu()noexcept
-: coreMenu (1u, SURFACE_SCORE_DEFAULT)
+: coreMenu (SURFACE_SCORE_MAX, SURFACE_SCORE_DEFAULT)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -68,7 +68,7 @@ cScoreMenu::cScoreMenu()noexcept
     }
 
     // bind menu objects
-    for(coreUintW i = 0u; i < this->GetNumSurfaces(); ++i) // TODO 
+    for(coreUintW i = 0u; i < SURFACE_SCORE_MAX; ++i) // TODO 
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
@@ -103,7 +103,7 @@ void cScoreMenu::Move()
         break;
     }
 
-    if(this->GetAlpha() >= 1.0f)
+    if(!g_pMenu->IsInTransition(this))
     {
         if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
         {

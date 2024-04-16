@@ -49,6 +49,7 @@
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
+#define MENU_FONT_DEFAULT       "ethnocentric.ttf"
 #define MENU_FONT_DYNAMIC_1     "dynamic_font",     (13u)
 #define MENU_FONT_DYNAMIC_2     "dynamic_font",     (20u)
 #define MENU_FONT_DYNAMIC_3     "dynamic_font",     (30u)
@@ -75,8 +76,8 @@
 #define SURFACE_GAME            (4u)
 #define SURFACE_SCORE           (5u)
 #define SURFACE_REPLAY          (6u)
-#define SURFACE_CONFIG          (7u)
-#define SURFACE_EXTRA           (8u)
+#define SURFACE_EXTRA           (7u)
+#define SURFACE_CONFIG          (8u)
 #define SURFACE_PAUSE           (9u)
 #define SURFACE_SUMMARY         (10u)
 #define SURFACE_DEFEAT          (11u)
@@ -85,33 +86,45 @@
 #define SURFACE_INTRO_EMPTY     (0u)
 #define SURFACE_INTRO_MARTIN    (1u)
 #define SURFACE_INTRO_LANGUAGE  (2u)
+#define SURFACE_INTRO_MAX       (3u)
 
 #define SURFACE_TITLE_DEFAULT   (0u)
+#define SURFACE_TITLE_FIRST     (1u)
+#define SURFACE_TITLE_MAX       (2u)
 
 #define SURFACE_MAIN_DEFAULT    (0u)
+#define SURFACE_MAIN_MAX        (1u)
 
 #define SURFACE_GAME_STANDARD   (0u)
 #define SURFACE_GAME_TRAINING   (1u)
 #define SURFACE_GAME_ARMORY     (2u)
+#define SURFACE_GAME_MAX        (3u)
 
 #define SURFACE_SCORE_DEFAULT   (0u)
+#define SURFACE_SCORE_MAX       (1u)
 
 #define SURFACE_REPLAY_DEFAULT  (0u)
+#define SURFACE_REPLAY_MAX      (1u)
+
+#define SURFACE_EXTRA_DEFAULT   (0u)
+#define SURFACE_EXTRA_MAX       (1u)
 
 #define SURFACE_CONFIG_VIDEO    (0u)
 #define SURFACE_CONFIG_AUDIO    (1u)
 #define SURFACE_CONFIG_INPUT    (2u)
 #define SURFACE_CONFIG_GAME     (3u)
-
-#define SURFACE_EXTRA_DEFAULT   (0u)
+#define SURFACE_CONFIG_MAX      (4u)
 
 #define SURFACE_PAUSE_DEFAULT   (0u)
+#define SURFACE_PAUSE_MAX       (1u)
 
 #define SURFACE_SUMMARY_NORMAL  (0u)
 #define SURFACE_SUMMARY_BEGIN   (1u)
+#define SURFACE_SUMMARY_MAX     (2u)
 
 #define SURFACE_DEFEAT_CONTINUE (0u)
 #define SURFACE_DEFEAT_GAMEOVER (1u)
+#define SURFACE_DEFEAT_MAX      (2u)
 
 
 // ****************************************************************
@@ -208,15 +221,15 @@ class cTitleMenu final : public coreMenu
 {
 private:
     coreObject2D m_GameLogo;       // game logo
-    coreLabel m_GameNameTest;
 
     coreLabel m_StartMessage;      // 
+    coreFlow  m_fStartAnimation;   // 
+
     coreLabel m_aVersionInfo[2];   // hard-coded version info strings
 
 
 public:
     cTitleMenu()noexcept;
-    ~cTitleMenu()final;
 
     DISABLE_COPY(cTitleMenu)
 
@@ -233,8 +246,8 @@ private:
     coreButton m_StartButton;    // start button
     coreButton m_ScoreButton;    // score button
     coreButton m_ReplayButton;   // replay button
-    coreButton m_ConfigButton;   // config button
     coreButton m_ExtraButton;    // extra button
+    coreButton m_ConfigButton;   // config button
     coreButton m_ExitButton;     // exit button
 
 
@@ -245,6 +258,10 @@ public:
 
     // move the main menu
     void Move()final;
+
+    // 
+    void ActivateFirstPlay();
+    void DeactivateFirstPlay();
 };
 
 
@@ -311,6 +328,10 @@ public:
     void Move()final;
 
     // 
+    void ActivateFirstPlay();
+    void DeactivateFirstPlay();
+
+    // 
     inline const coreUint8& GetSelectedMode      ()const {return 0u;}
     inline const coreUint8& GetSelectedDifficulty()const {return 0u;}
     inline const coreUint8& GetSelectedPlayers   ()const {return m_Players.GetCurEntry().tValue;}
@@ -368,6 +389,26 @@ public:
 
     // 
     void LoadReplays();
+};
+
+
+// ****************************************************************
+// extra menu class
+class cExtraMenu final : public coreMenu
+{
+private:
+    coreObject2D m_Background;   // 
+
+    coreButton m_BackButton;     // back button
+
+
+public:
+    cExtraMenu()noexcept;
+
+    DISABLE_COPY(cExtraMenu)
+
+    // move the extra menu
+    void Move()final;
 };
 
 
@@ -466,36 +507,13 @@ private:
 
 
 // ****************************************************************
-// extra menu class
-class cExtraMenu final : public coreMenu
-{
-private:
-    coreObject2D m_Background;   // 
-
-    coreButton m_BackButton;     // back button
-
-
-public:
-    cExtraMenu()noexcept;
-
-    DISABLE_COPY(cExtraMenu)
-
-    // move the extra menu
-    void Move()final;
-};
-
-
-// ****************************************************************
 // pause menu class
 class cPauseMenu final : public coreMenu
 {
 private:
-    coreButton m_ResumeButton;    // resume button
-    coreButton m_ConfigButton;    // config button
-    coreButton m_RestartButton;   // restart button
-    coreButton m_ExitButton;      // exit button
-
-    coreUint8 m_iSelected;        // current selected menu button
+    coreButton m_ResumeButton;   // resume button
+    coreButton m_ConfigButton;   // config button
+    coreButton m_ExitButton;     // exit button
 
 
 public:
@@ -615,8 +633,8 @@ private:
     cGameMenu    m_GameMenu;             // game menu object
     cScoreMenu   m_ScoreMenu;            // score menu object
     cReplayMenu  m_ReplayMenu;           // replay menu object
-    cConfigMenu  m_ConfigMenu;           // config menu object
     cExtraMenu   m_ExtraMenu;            // extra menu object
+    cConfigMenu  m_ConfigMenu;           // config menu object
     cPauseMenu   m_PauseMenu;            // pause menu object
     cSummaryMenu m_SummaryMenu;          // summary menu object
     cDefeatMenu  m_DefeatMenu;           // defeat menu object
@@ -655,6 +673,7 @@ public:
     inline void InvokePauseStep() {m_iPauseFrame = Core::System->GetCurFrame();}
 
     // 
+    coreBool IsInTransition(const coreMenu* pMenu)const {return m_TransitionTime.GetStatus() || (pMenu->GetAlpha() < 1.0f) || (pMenu->GetTransition().GetStatus());}    
     void AnimateSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed);
 
     // 

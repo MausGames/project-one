@@ -730,3 +730,30 @@ void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const c
     this         ->CreateBlowDark(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG);
     this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
 }
+
+
+
+
+void cSpecialEffects::ExplosionTest(const cLodObject* pObject)
+{
+    coreModel* pModel = pObject->GetModelLow().GetResource();
+    ASSERT(pModel->GetVertexPosition())
+
+    const coreVector3 vPos = pObject->GetPosition();
+
+    const coreVector3 vColor = COLOR_RED;
+
+    coreUintW i = 0u;
+    m_ParticleColor.GetDefaultEffect()->CreateParticle(pModel->GetNumVertices(), [&](coreParticle* OUTPUT pParticle)
+    {
+        const coreVector3 vVertex = pModel->GetVertexPosition()[i++];
+
+        const coreVector3 vDir = vVertex.Normalized();
+
+        pParticle->SetPositionRel(vPos + vVertex,           vDir * 50.0f);
+        pParticle->SetScaleAbs   (3.5f,                       1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), Core::Rand->Float(-PI, PI));
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
+        pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
+    });
+}
