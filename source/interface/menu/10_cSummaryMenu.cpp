@@ -26,6 +26,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 , m_iSignalActive    (0u)
 , m_fIntroTimer      (0.0f)
 , m_fOutroTimer      (0.0f)
+, m_fTimeShift       (0.0f)
 , m_fFinalSpinOld    (0.0f)
 , m_eState           (SUMMARY_INTRO)
 {
@@ -591,6 +592,8 @@ void cSummaryMenu::Move()
     case SURFACE_SUMMARY_MISSION_SOLO:
     case SURFACE_SUMMARY_MISSION_COOP:
         {
+            const eSummaryState eOld = m_eState;
+                
             // 
             constexpr coreFloat fSpinFrom = (2.5f + 0.8f * I_TO_F(MENU_SUMMARY_ENTRIES));
             constexpr coreFloat fSpinTo   = fSpinFrom + 1.5f;
@@ -599,8 +602,6 @@ void cSummaryMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= 1.0f /*MENU_SUMMARY_BANNER_SPEED_REV*/) && g_MenuInput.bAny)
             {
-                const eSummaryState eOld = m_eState;
-                
                 // 
                      if(m_eState      >= SUMMARY_SKIPPED) m_eState = SUMMARY_OUTRO;     // leave summary
                 else if(m_fIntroTimer >= fSpinTo)         m_eState = SUMMARY_OUTRO;
@@ -609,6 +610,9 @@ void cSummaryMenu::Move()
                 if((g_pGame->GetKind() == GAME_KIND_ALL) && (eOld != SUMMARY_OUTRO) && (m_eState == SUMMARY_OUTRO)) 
                     g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
             }
+            
+            
+            if((eOld != SUMMARY_SKIPPED) && (m_eState == SUMMARY_SKIPPED)) m_fTimeShift = MAX0(MENU_SUMMARY_SKIP_MISSION - m_fIntroTimer);
 
             // 
             if(m_eState == SUMMARY_OUTRO) m_fOutroTimer.Update(1.0f);
@@ -631,7 +635,7 @@ void cSummaryMenu::Move()
                 STATIC_ASSERT(MENU_SUMMARY_BANNER_ANIMATION >= fSpinTo)
 
                 // 
-                const coreFloat fBlendIn  = m_eState ? fSpinTo : m_fIntroTimer.ToFloat();
+                const coreFloat fBlendIn  = m_fIntroTimer + m_fTimeShift;
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * MENU_SUMMARY_BANNER_SPEED;
 
                 // (# enable-state should not be changed) 
@@ -652,7 +656,7 @@ void cSummaryMenu::Move()
                     // 
                     if(pMedal->GetEnabled() && !iStatusdOld && iStatusdNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, bMission ? SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]) : SOUND_SUMMARY_MEDAL);
                 };
-                nBlendMedalFunc(&m_MedalMission, 0.13f, 5.5f, true);
+                nBlendMedalFunc(&m_MedalMission, 0.13f, MENU_SUMMARY_SKIP_MISSION, true);
                 for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) nBlendMedalFunc(&m_aMedalSegment[i], MISSION_SEGMENT_IS_BOSS(i) ? 0.09f : 0.07f, 0.8f + 0.1f * I_TO_F(i), false);
 
                 // 
@@ -782,6 +786,8 @@ void cSummaryMenu::Move()
             }
             
             
+            const eSummaryState eOld = m_eState;
+            
             // 
             constexpr coreFloat fSpinFrom = (2.5f + 0.8f * I_TO_F(MENU_SUMMARY_ENTRIES_SEGMENT));
             constexpr coreFloat fSpinTo   = fSpinFrom + 1.5f;
@@ -793,8 +799,6 @@ void cSummaryMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= 1.0f /*MENU_SUMMARY_BANNER_SPEED_REV*/) && m_iSelection)
             {
-                //const eSummaryState eOld = m_eState;
-                
                 // 
                      if(m_eState      >= SUMMARY_SKIPPED) m_eState = SUMMARY_OUTRO;     // leave summary
                 else if(m_fIntroTimer >= fSpinTo)         m_eState = SUMMARY_OUTRO;
@@ -803,6 +807,8 @@ void cSummaryMenu::Move()
                 //if((eOld != SUMMARY_OUTRO) && (m_eState == SUMMARY_OUTRO)) 
                 //    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
             }
+            
+            if((eOld != SUMMARY_SKIPPED) && (m_eState == SUMMARY_SKIPPED)) m_fTimeShift = MAX0(MENU_SUMMARY_SKIP_SEGMENT - m_fIntroTimer);
 
             // 
             if(m_fIntroTimer >= 1.0f) m_Navigator.SetActive(true);
@@ -822,7 +828,7 @@ void cSummaryMenu::Move()
                 STATIC_ASSERT(MENU_SUMMARY_BANNER_ANIMATION >= fSpinTo)
 
                 // 
-                const coreFloat fBlendIn  = m_eState ? fSpinTo : m_fIntroTimer.ToFloat();
+                const coreFloat fBlendIn  = m_fIntroTimer + m_fTimeShift;
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * MENU_SUMMARY_BANNER_SPEED;
 
                 // (# enable-state should not be changed) 
@@ -843,7 +849,7 @@ void cSummaryMenu::Move()
                     // 
                     if(pMedal->GetEnabled() && !iStatusdOld && iStatusdNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, bMission ? SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]) : SOUND_SUMMARY_MEDAL);
                 };
-                nBlendMedalFunc(&m_SegmentMedal, 0.13f, 2.2f, true);
+                nBlendMedalFunc(&m_SegmentMedal, 0.13f, MENU_SUMMARY_SKIP_SEGMENT, true);
 
                 // 
                 const auto nBlendBadgeFunc = [&](cGuiObject* OUTPUT pBadge, cGuiObject* OUTPUT pWave, const coreFloat fThreshold)
@@ -1589,6 +1595,7 @@ void cSummaryMenu::__ResetState()
     m_iOtherNumMedal   = 0u;
     m_fIntroTimer      = 0.0f;
     m_fOutroTimer      = 0.0f;
+    m_fTimeShift       = 0.0f;
     m_fFinalSpinOld    = 0.0f;
     m_eState           = SUMMARY_INTRO;
 

@@ -49,6 +49,8 @@
 // TODO 3: add auto-scroll for armory-segment-switch, for shoulder-buttons and arrow-keys
 // TODO 1: going into extra menu with mouse and selecting credits, then switching to gamepad accidentally selects the stats-switchbox
 // TODO 2: latam language, text in summary menu is etwas zu nah beinander
+// TODO 1: alle menü rendering orders optimieren, speziell für shader, speziell im game-menü
+// TODO 1: remove mission page in armory
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
 // NOTE: every object in menu needs outline: weapons, medals, icons
@@ -67,7 +69,7 @@
 #define MENU_GAME_MISSIONS            (11u)
 #define MENU_GAME_SEGMENTS            (6u)
 #define MENU_GAME_ARCADES             (1u)
-#define MENU_GAME_ARMORIES            (5u)
+#define MENU_GAME_ARMORIES            (6u)
 #define MENU_GAME_FIRSTS              (4u)
 #define MENU_GAME_DEMOS               (5u)
 #define MENU_GAME_ARROWS              (MENU_GAME_SEGMENTS - 1u)
@@ -76,6 +78,7 @@
 #define MENU_GAME_ARMORY_BADGES_ALL   (MENU_GAME_ARMORY_BADGES * WAVES)
 #define MENU_GAME_ARMORY_HELPERS      (8u)
 #define MENU_GAME_ARMORY_ICONS        (9u)
+#define MENU_GAME_ARMORY_ARROWS       (8u)
 #define MENU_SCORE_FILTERS            (2u)
 #define MENU_SCORE_ENTRIES            (20u)
 #define MENU_REPLAY_ENTRIES           (12u)
@@ -92,6 +95,8 @@
 #define MENU_SUMMARY_BANNER_SPEED     (4.0f)
 #define MENU_SUMMARY_BANNER_SPEED_REV (1.0f / MENU_SUMMARY_BANNER_SPEED)
 #define MENU_SUMMARY_BANNER_ANIMATION (6.8f)
+#define MENU_SUMMARY_SKIP_MISSION     (5.5f)
+#define MENU_SUMMARY_SKIP_SEGMENT     (2.2f)
 #define MENU_DEFEAT_DELAY_INTRO       (0.5f)
 #define MENU_DEFEAT_DELAY_OUTRO       (1.0f)
 #define MENU_DEFEAT_CONTINUES         (CONTINUES)
@@ -226,6 +231,7 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_MONITOR = 0u,
     ENTRY_VIDEO_RESOLUTION,
     ENTRY_VIDEO_DISPLAYMODE,
+    ENTRY_VIDEO_VSYNC,
     ENTRY_VIDEO_ANTIALIASING,
     ENTRY_VIDEO_TEXTUREFILTER,
     ENTRY_VIDEO_RENDERQUALITY,
@@ -333,6 +339,7 @@ class cTitleMenu final : public coreMenu
 private:
     cGuiObject m_GameLogo;          // game logo
     cGuiObject m_GameLogoDemo;      // 
+    cGuiObject m_Shadow;            // 
 
     cGuiLabel m_PromptText;         // 
     coreFlow  m_fPromptAnimation;   // 
@@ -423,7 +430,10 @@ private:
     cGuiObject m_aaSegmentTile[MENU_GAME_MISSIONS][MENU_GAME_SEGMENTS];   // 
     cGuiObject m_aaSegmentBack[MENU_GAME_MISSIONS][MENU_GAME_SEGMENTS];   // 
     cGuiObject m_aaSegmentArrow[MENU_GAME_MISSIONS][MENU_GAME_ARROWS];                // 
-    cGuiObject m_aSegmentCursor    [2];                           // 
+    cGuiObject m_aSegmentCursor[3];                               // 
+    cGuiObject m_SegmentMedal;                                    // 
+    cGuiObject m_aSegmentBadge    [MENU_GAME_ARMORY_BADGES];      // 
+    cGuiObject m_aSegmentBadgeWave[MENU_GAME_ARMORY_BADGES];      // 
     coreUint8  m_aiSegmentSelection[2];                           // 
     coreFlow   m_fSegmentTime;                                    // 
     cScrollBox m_SegmentBox;                                      // 
@@ -440,8 +450,10 @@ private:
 
     cGuiObject m_ArmoryArea;                                      // 
     cGuiObject m_ArmoryArea2;                                     // 
-    cGuiObject m_aArmoryMedal[MENU_GAME_ARMORY_MEDALS];           // 
+    cGuiObject m_aArmoryMedal    [MENU_GAME_ARMORY_MEDALS];       // 
+    cGuiObject m_aArmoryMedalBest[MENU_GAME_ARMORY_MEDALS];       // 
     cGuiObject m_ArmoryMedalBack;                                 // 
+    cGuiObject m_aArmoryMedalBack2[MENU_GAME_ARMORY_MEDALS];      // 
     cGuiObject m_ArmoryFragment;                                  // 
     cGuiObject m_ArmoryFragmentBack;                              // 
     cGuiObject m_aArmoryBadge    [MENU_GAME_ARMORY_BADGES_ALL];   // 
@@ -453,6 +465,8 @@ private:
     cGuiObject m_aArmoryHelper   [MENU_GAME_ARMORY_HELPERS];      // 
     cGuiObject m_aArmoryHelperWave[MENU_GAME_ARMORY_HELPERS];      //    
     cGuiObject m_aArmoryIcon     [MENU_GAME_ARMORY_ICONS];        // 
+    cGuiObject m_aArmoryIconBack [MENU_GAME_ARMORY_ICONS];        // 
+    cGuiObject m_aArmoryArrow    [MENU_GAME_ARMORY_ARROWS];       // 
     cGuiLabel  m_aArmoryTitle    [2];                             // 
     cGuiLabel  m_aArmoryScore    [2];                             // 
     cGuiLabel  m_aArmoryTime     [2];                             // 
@@ -461,6 +475,7 @@ private:
     cGuiObject m_ArmoryBack;                                      // 
     cGuiObject m_ArmoryIconBig;                                   // 
     cGuiObject m_ArmoryLogo;                                      // 
+    cGuiLabel  m_ArmoryTrophy;                                    // 
 
     cGuiSwitchBox m_ArmorySelection;                              // 
 
@@ -468,9 +483,10 @@ private:
     cGuiSwitchBox m_ArmoryMode;                                   // 
     cGuiSwitchBox m_ArmoryDifficulty;                             // 
     cGuiSwitchBox m_ArmorySpeed;                                  // 
-    cGuiSwitchBox m_aArmoryShield[MENU_GAME_PLAYERS];             // 
-    cGuiSwitchBox m_aArmoryWeapon[MENU_GAME_PLAYERS];             // 
-    cGuiLabel     m_aArmoryPlayer[MENU_GAME_PLAYERS];             // 
+    cGuiSwitchBox m_aArmoryShield    [MENU_GAME_PLAYERS];         // 
+    cGuiSwitchBox m_aArmoryWeapon    [MENU_GAME_PLAYERS];         // 
+    cGuiLabel     m_aArmoryPlayer    [MENU_GAME_PLAYERS];         // 
+    cGuiObject    m_aArmoryWeaponIcon[MENU_GAME_PLAYERS];         // 
 
     cGuiLabel  m_FirstHeader;                                     // 
     cGuiLabel  m_aFirstName[MENU_GAME_FIRSTS];                    // 
@@ -496,6 +512,7 @@ private:
 
     coreUint8 m_iCurPage;                                         // 
     coreUintW m_aiCurIndex[4];                                    // 
+    coreBool  m_bFromTrophy;                                      // 
 
     coreUint8 m_iBaseType;                                        // 
     coreUint8 m_iBaseMode;                                        // 
@@ -507,6 +524,7 @@ private:
 
     cNewIndicator m_SpeedNew;
     cNewIndicator m_ShieldNew;
+    cNewIndicator m_WeaponNew;
 
     cMenuNavigator m_NavigatorMain;
     cMenuNavigator m_NavigatorArmory;
@@ -532,17 +550,19 @@ public:
 
     // 
     void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo, coreUint8* OUTPUT piKind)const;
+    void RetrievePageData (coreUintW* OUTPUT piMissionIndex, coreUintW* OUTPUT piSegmentIndex)const;
 
     // 
     void SelectPrevious();
     void SelectNext    ();
+    void SelectTrophy  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 
     // 
     inline const coreUint8& GetSelectedType      ()const                       {return m_ArmoryType      .GetCurValue();}
     inline const coreUint8& GetSelectedMode      ()const                       {return m_ArmoryMode      .GetCurValue();}
     inline const coreUint8& GetSelectedDifficulty()const                       {return m_ArmoryDifficulty.GetCurValue();}
     inline const coreUint8& GetSelectedShield    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aArmoryShield[iIndex].GetCurValue();}
-    inline       coreUint8  GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return 1u;}
+    inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aArmoryWeapon[iIndex].GetCurValue();}
     inline       coreUint8  GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return 0u;}
 
     // 
@@ -555,6 +575,7 @@ private:
 
     // 
     void __RefreshBase();
+    void __RefreshCursor(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 
     // 
     void __SelectMission(const coreUintW iMissionIndex);
@@ -669,6 +690,7 @@ private:
     cGuiLabel  m_aTrophyName [MENU_EXTRA_TROPHIES];   // 
     cGuiLabel  m_aaTrophyDesc[MENU_EXTRA_TROPHIES][2];   // 
     cGuiLabel  m_aTrophyCheck[MENU_EXTRA_TROPHIES];   // 
+    cGuiButton m_aTrophyArrow[MENU_EXTRA_TROPHIES];   // 
     cGuiObject m_aTrophyTile [MENU_EXTRA_TROPHIES];   // 
     cGuiObject m_aTrophyBack [MENU_EXTRA_TROPHIES];   // 
     cGuiObject m_aTrophyLine [MENU_EXTRA_TROPHIES];   // 
@@ -700,6 +722,9 @@ private:
 
     cSave::sLocalStats m_Stats;
 
+    coreUintW m_iTrophyMission;
+    coreUintW m_iTrophySegment;
+
     cMenuNavigator m_Navigator;
 
 
@@ -715,6 +740,10 @@ public:
     void LoadTrophies();
     void LoadMissions();
     void LoadSegments(const coreUintW iMissionIndex);
+
+    // 
+    void SetSelectedTrophy(const coreUintW   iMissionIndex,  const coreUintW   iSegmentIndex);
+    void GetSelectedTrophy(coreUintW* OUTPUT piMissionIndex, coreUintW* OUTPUT piSegmentIndex)const;
 
     // 
     inline void ResetNavigator() {m_Navigator.ResetFirst();}
@@ -752,6 +781,8 @@ private:
         cFigure       oFigureMoveDown;
         cFigure       oFigureMoveRight;
         cFigure       aFigureAction[INPUT_KEYS_ACTION];
+        cFigure       oFigureStickL;
+        cFigure       oFigureStickR;
     };
 
 
@@ -779,6 +810,7 @@ private:
     cGuiSwitchBox m_Monitor;
     cGuiSwitchBox m_Resolution;
     cGuiSwitchBox m_DisplayMode;
+    cGuiSwitchBox m_Vsync;
     cGuiSwitchBox m_AntiAliasing;
     cGuiSwitchBox m_TextureFilter;
     cGuiSwitchBox m_RenderQuality;
@@ -807,8 +839,10 @@ private:
     cGuiSwitchBox m_Version;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
-    cScrollBox   m_InputBox;
     cGuiButton   m_SwapInput;
+
+    cScrollBox m_VideoBox;
+    cScrollBox m_InputBox;
 
     coreUintW                      m_iCurMonitorIndex;
     coreMap<coreUintW, coreString> m_asCurResolution;
@@ -994,8 +1028,9 @@ private:
     coreUint8 m_iSignalActive;
     
 
-    coreFlow m_fIntroTimer;                                         // 
-    coreFlow m_fOutroTimer;                                         // 
+    coreFlow  m_fIntroTimer;                                        // 
+    coreFlow  m_fOutroTimer;                                        // 
+    coreFloat m_fTimeShift;                                         // 
 
     coreFloat m_fFinalSpinOld;                                      // 
 
@@ -1323,6 +1358,9 @@ public:
     
     static const coreChar* GetMissionLetters(const coreUintW iMissionIndex);
     static const coreChar* GetSegmentLetters(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    
+    static const coreChar* GetStoreText();
+    static const coreChar* GetStoreLink();
 
     // menu helper routines
     static void UpdateButton        (coreButton*    OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow = true, const coreBool bSound = true);

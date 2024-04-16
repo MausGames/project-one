@@ -471,11 +471,12 @@ void UpdateInput()
     // 
     const auto nControlModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iStateIndex)
     {
-        constexpr coreUint8 iTurnBits  = BIT(1u) | BIT(2u);
-        constexpr coreUint8 iShootBits = BIT(3u) | BIT(4u) | BIT(5u) | BIT(6u);
+        constexpr coreUint8 iTurnBits   = BIT(1u) | BIT(2u);
+        constexpr coreUint8 iShootBits1 = BIT(3u) | BIT(4u) | BIT(5u) | BIT(6u);
+        constexpr coreUint8 iShootBits2 = iShootBits1 | BIT(0u);
 
         const coreUint8 iControlMode = g_CurConfig.Input.aiControlMode[iModeIndex];
-        if(iControlMode == 1u)
+        if((iControlMode == 1u) || (iControlMode == 2u))
         {
             
             //coreBool bAllow = true;
@@ -496,15 +497,17 @@ void UpdateInput()
             
             
             // 
-            SET_BIT(pInput->iActionPress,   0u, (pInput->iActionPress   & iShootBits) && !HAS_BIT(s_aiTwinState[iStateIndex], 1u))  // && bAllow
-            SET_BIT(pInput->iActionHold,    0u, (pInput->iActionHold    & iShootBits))
-            SET_BIT(pInput->iActionRelease, 0u, (pInput->iActionRelease & iShootBits) && !HAS_BIT(pInput->iActionHold, 0u))
+            SET_BIT(pInput->iActionPress,   0u, (pInput->iActionPress   & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)) && !HAS_BIT(s_aiTwinState[iStateIndex], 1u))  // && bAllow
+            SET_BIT(pInput->iActionHold,    0u, (pInput->iActionHold    & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)))
+            SET_BIT(pInput->iActionRelease, 0u, (pInput->iActionRelease & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)) && !HAS_BIT(pInput->iActionHold, 0u))
 
             // 
-            REMOVE_FLAG(pInput->iActionPress,   iTurnBits)
-            REMOVE_FLAG(pInput->iActionHold,    iTurnBits)
-            REMOVE_FLAG(pInput->iActionRelease, iTurnBits)
-            
+            if(iControlMode == 1u)
+            {
+                REMOVE_FLAG(pInput->iActionPress,   iTurnBits)
+                REMOVE_FLAG(pInput->iActionHold,    iTurnBits)
+                REMOVE_FLAG(pInput->iActionRelease, iTurnBits)
+            }
             
             if(STATIC_ISVALID(g_pGame))
             {
@@ -539,16 +542,23 @@ void UpdateInput()
             // 
             SET_BIT(s_aiTwinState[iStateIndex], 1u, HAS_BIT(pInput->iActionHold, 0u))
         }
+        else if(iControlMode == 3u)
+        {
+            // 
+            REMOVE_FLAG(pInput->iActionPress,   iShootBits1 | iTurnBits)
+            REMOVE_FLAG(pInput->iActionHold,    iShootBits1 | iTurnBits)
+            REMOVE_FLAG(pInput->iActionRelease, iShootBits1 | iTurnBits)
+        }
         else
         {
             // 
-            REMOVE_FLAG(pInput->iActionPress,   iShootBits)
-            REMOVE_FLAG(pInput->iActionHold,    iShootBits)
-            REMOVE_FLAG(pInput->iActionRelease, iShootBits)
+            REMOVE_FLAG(pInput->iActionPress,   iShootBits1)
+            REMOVE_FLAG(pInput->iActionHold,    iShootBits1)
+            REMOVE_FLAG(pInput->iActionRelease, iShootBits1)
         }
 
         // 
-        if((iControlMode != 1u) || !STATIC_ISVALID(g_pGame))
+        if((iControlMode == 0u) || !STATIC_ISVALID(g_pGame))
             s_aiTwinState[iStateIndex] = 0u;
     };
     nControlModeFunc(&g_aGameInput[0], 0u, 0u);

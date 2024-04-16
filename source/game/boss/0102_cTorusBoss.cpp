@@ -1285,6 +1285,12 @@ void cTorusBoss::__MoveOwn()
 
             this->__ChangeColor(0u);
 
+            for(coreUintW i = 0u; i < TORUS_TURRETS;  ++i) this->__DisableTurret (i, true);
+            for(coreUintW i = 0u; i < TORUS_GUNNERS;  ++i) this->__DisableGunner (i, true);
+            for(coreUintW i = 0u; i < TORUS_CHARGERS; ++i) this->__DisableCharger(i, true);
+            for(coreUintW i = 0u; i < TORUS_DRIVERS;  ++i) this->__DisableDriver (i, true);
+            for(coreUintW i = 0u; i < TORUS_WAVERS;   ++i) this->__DisableWaver  (i, true);
+
             g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
 

@@ -17,6 +17,7 @@ void VertexMain()
     // transform position and texture coordinates
     gl_Position      = coreObject2DPosition();
     v_av2TexCoord[0] = coreObject2DTexCoord();
+    v_av2TexCoord[1] = a_v2LowTexCoord * 2.0 - 1.0;
 
     // 
     vec2 v2Aspect = u_v4Resolution.xy * u_v4Resolution.wz;

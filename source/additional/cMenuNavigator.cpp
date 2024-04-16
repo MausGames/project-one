@@ -113,8 +113,19 @@ void cMenuNavigator::Move()
         const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
         const coreVector2 vResolution = Core::System->GetResolution();
 
-        const coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) * RCP(vResolution.Min());
+        coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) * RCP(vResolution.Min());
         const coreVector2 vNewSize = m_pCurObject->GetSize() * (HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_BIG) ? 1.5f : 1.0f);
+
+        FOR_EACH(it, m_apScroll)
+        {
+            const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
+            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
+            {
+                const coreVector2 vPos = GetTranslationArea(*pScroll);
+                vNewPos.x = CLAMP(vNewPos.x, vPos.x - pScroll->GetSize().x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f - m_vCurSize.x * 0.5f);
+                vNewPos.y = CLAMP(vNewPos.y, vPos.y - pScroll->GetSize().y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f - m_vCurSize.y * 0.5f);
+            }
+        }
 
         if(m_vCurPos == HIDDEN_POS)
         {
@@ -133,17 +144,6 @@ void cMenuNavigator::Move()
             if(!vDiff2.IsNull())
             {
                 m_vCurSize = m_vCurSize + vDiff2.Normalized() * (10.0f * TIME * SmoothTowards(vDiff2.Length(), 0.5f));
-            }
-        }
-
-        FOR_EACH(it, m_apScroll)
-        {
-            const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
-            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
-            {
-                const coreVector2 vPos = GetTranslationArea(*pScroll);
-                m_vCurPos.x = CLAMP(m_vCurPos.x, vPos.x - pScroll->GetSize().x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f - m_vCurSize.x * 0.5f);
-                m_vCurPos.y = CLAMP(m_vCurPos.y, vPos.y - pScroll->GetSize().y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f - m_vCurSize.y * 0.5f);
             }
         }
 
@@ -288,15 +288,29 @@ void cMenuNavigator::Update()
         m_aiLastPack.resize(Core::Input->GetJoystickNum(), 8u);
         m_aAutomatic.resize(Core::Input->GetJoystickNum(), coreTimer(1.0f, 10.0f, 0u));
     }
-
+    
+    coreVector2 vRelative      = coreVector2(0.0f,0.0f);
+    coreUint8   iCount         = 0u;
+    coreBool    bButtonA       = false;
+    coreBool    bButtonB       = false;
+    coreBool    bShoulderLeft  = false;
+    coreBool    bShoulderRight = false;
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
-        const coreVector2 vRelative = Core::Input->GetJoystickRelativeL(i);
+        if(vRelative.IsNull()) vRelative = Core::Input->GetJoystickRelativeL(i);
+        iCount         = MAX(iCount, Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD));
+        bButtonA       = bButtonA       || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS);
+        bButtonB       = bButtonB       || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS);
+        bShoulderLeft  = bShoulderLeft  || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS);
+        bShoulderRight = bShoulderRight || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER, CORE_INPUT_PRESS);
+    }
 
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum() ? 1u : 0u; i < ie; ++i)
+    {
         const coreVector2 vMove = vRelative.IsNull() ? coreVector2(0.0f,0.0f) : AlongCross(vRelative);
         const coreUint8   iPack = PackDirection(vMove);
 
-        if(vRelative.IsNull() && !Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD))
+        if(vRelative.IsNull() && !iCount)
         {
             REMOVE_BIT(m_aiLock[i], 0u)
         }
@@ -308,10 +322,7 @@ void cMenuNavigator::Update()
 
         if(!HAS_BIT(m_aiLock[i], 0u))
         {
-            if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) nPressFunc();
-
-            const coreBool bShoulderLeft  = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS);
-            const coreBool bShoulderRight = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER, CORE_INPUT_PRESS);
+            if(bButtonA) nPressFunc();
 
             if(m_bShoulder && m_nShoulderLeft  && bShoulderLeft)  m_nShoulderLeft ();
             if(m_bShoulder && m_nShoulderRight && bShoulderRight) m_nShoulderRight();
@@ -370,11 +381,11 @@ void cMenuNavigator::Update()
 
                 const coreBool bOldGrabbed = m_bGrabbed;
 
-                if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS) && (pSwitchBox->GetOverride() >= 0))
+                if(bButtonA && (pSwitchBox->GetOverride() >= 0))
                 {
                     m_bGrabbed = !m_bGrabbed;
                 }
-                if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS) && m_bGrabbed)
+                if(bButtonB && m_bGrabbed)
                 {
                     g_MenuInput.bCancel = false;
                     m_bGrabbed = false;

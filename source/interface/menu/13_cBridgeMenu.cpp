@@ -42,8 +42,8 @@ cBridgeMenu::cBridgeMenu()noexcept
         m_aUnlockDesc[i].SetColor3  (COLOR_MENU_INSIDE);
     }
 
-    m_UnlockIcon.DefineTexture(0u, "menu_unlocks.png");
-    m_UnlockIcon.DefineProgram("menu_grey_program");
+    m_UnlockIcon.DefineTexture(0u, "menu_unlock.png");
+    m_UnlockIcon.DefineProgram("menu_segment_program");
     m_UnlockIcon.SetSize      (coreVector2(0.15f,0.15f));
 
     m_UnlockBack.DefineProgram("menu_color_program");
@@ -507,9 +507,10 @@ coreBool cBridgeMenu::HasUnlocks()
         }
     };
 
-         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))             return true;
-    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))             return true;
-    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD) && HAS_BIT(g_pSave->GetHeader().oProgress.iState, STATE_AFTER_FIRST)) return true;
+         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)   && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))             return true;
+    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))             return true;
+    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT(g_pSave->GetHeader().oProgress.iState, STATE_AFTER_FIRST)) return true;
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))             return true;
 
     return false;
 }
@@ -532,11 +533,21 @@ void cBridgeMenu::ApplyUnlocks()
         break;
 
     case UNLOCK_GAMESPEEDUP:
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_GAMESPEED)
         break;
 
     case UNLOCK_POWERSHIELD:
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_SHIELD)
+        break;
+
+    case UNLOCK_WEAPON_PULSE:
+    case UNLOCK_WEAPON_WAVE:
+    case UNLOCK_WEAPON_TESLA:
+    case UNLOCK_WEAPON_ANTI:
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_WEAPON)
         break;
 
     default:

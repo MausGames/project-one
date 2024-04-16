@@ -55,7 +55,7 @@ cFinishMenu::cFinishMenu()noexcept
     m_SteamButton.DefineProgram("menu_border_program");
     m_SteamButton.SetPosition  (coreVector2(0.0f,-0.15f));
     m_SteamButton.SetSize      (coreVector2(0.4f,0.07f));
-    m_SteamButton.GetCaption()->SetTextLanguage("TO_STEAM");
+    m_SteamButton.GetCaption()->SetTextLanguage(cMenu::GetStoreText());
 
     m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ExitButton.DefineProgram("menu_border_program");
@@ -123,7 +123,7 @@ void cFinishMenu::Move()
                 if(m_SteamButton.IsClicked())
                 {
                     // 
-                    SDL_OpenURL("https://store.steampowered.com/app/1624320/Eigengrau/");
+                    SDL_OpenURL(cMenu::GetStoreLink());
                 }
                 else if(m_ExitButton.IsClicked())
                 {

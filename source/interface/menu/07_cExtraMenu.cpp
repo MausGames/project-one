@@ -12,9 +12,11 @@
 // ****************************************************************
 // constructor
 cExtraMenu::cExtraMenu()noexcept
-: coreMenu    (SURFACE_EXTRA_MAX, SURFACE_EXTRA_TROPHY)
-, m_iCurIndex (0u)
-, m_Stats     {}
+: coreMenu         (SURFACE_EXTRA_MAX, SURFACE_EXTRA_TROPHY)
+, m_iCurIndex      (0u)
+, m_Stats          {}
+, m_iTrophyMission (0u)
+, m_iTrophySegment (0u)
 {
     constexpr coreFloat fSplit  = 1.0f/300.0f;   // 0.00333...
     constexpr coreFloat fSplit2 = 1.0f/60.0f;    // 0.01666...
@@ -100,10 +102,15 @@ cExtraMenu::cExtraMenu()noexcept
         }
 
         m_aTrophyCheck[i].Construct  (MENU_FONT_ICON_4, MENU_OUTLINE_SMALL);
-        m_aTrophyCheck[i].SetPosition(coreVector2(m_Background.GetPosition().x + m_Background.GetSize().x*0.5f, fHeight) + coreVector2(-0.08f,0.0f));
+        m_aTrophyCheck[i].SetPosition(coreVector2(m_Background.GetPosition().x + m_Background.GetSize().x*0.5f, fHeight) + coreVector2(-0.15f,0.0f));
         m_aTrophyCheck[i].SetText    (ICON_CHECK);
 
-        m_aTrophyTile[i].DefineProgram("menu_grey_program");
+        m_aTrophyArrow[i].Construct  (MENU_SWITCHBOX, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
+        m_aTrophyArrow[i].SetPosition(coreVector2(m_Background.GetPosition().x + m_Background.GetSize().x*0.5f, fHeight) + coreVector2(-0.07f,0.0f));
+        m_aTrophyArrow[i].SetSize    (coreVector2(0.06f,0.03f));
+        m_aTrophyArrow[i].GetCaption()->SetText(">");
+
+        m_aTrophyTile[i].DefineProgram("menu_segment_program");
         m_aTrophyTile[i].SetPosition  (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.08f,0.0f));
         m_aTrophyTile[i].SetSize      (coreVector2(0.05f,0.05f) * 1.4f);
 
@@ -119,7 +126,6 @@ cExtraMenu::cExtraMenu()noexcept
         m_aTrophyLine[i].SetPosition  (coreVector2(0.0f, fHeight));
         m_aTrophyLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.15f));
         m_aTrophyLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
-        m_aTrophyLine[i].SetFocusable (true);
     }
 
     m_TrophyBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.0375f));
@@ -127,6 +133,7 @@ cExtraMenu::cExtraMenu()noexcept
     for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyLine [i]);
     for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyBack [i]);
     for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyTile [i]);   // wave and boss
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyArrow[i]);
     for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyCheck[i]);
     for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyName [i]);
     for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aaTrophyDesc[0]); ++j) m_TrophyBox.BindObject(&m_aaTrophyDesc[i][j]);
@@ -351,14 +358,31 @@ void cExtraMenu::Move()
     {
     case SURFACE_EXTRA_TROPHY:
         {
+            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i)
+            {
+                if(m_aTrophyLine[i].IsClicked() || m_aTrophyArrow[i].IsClicked())
+                {
+                    // 
+                    m_iStatus = 1;
+
+                    // 
+                    m_iTrophyMission = i / 6u;
+                    m_iTrophySegment = i % 6u;
+                    break;
+                }
+            }
+
             if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
-                m_iStatus = 1;
+                m_iStatus = 2;
             }
 
             // 
-            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateLine(&m_aTrophyLine[i], false, false, g_pMenu->GetButtonColor(), cMenuNavigator::IsUsingJoystick());
+            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateLine(&m_aTrophyLine[i], false, false, coreVector3(1.0f,1.0f,1.0f), false);//cMenuNavigator::IsUsingJoystick());
+
+            // 
+            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateButton(&m_aTrophyArrow[i], this, m_aTrophyLine[i].IsFocused() || m_aTrophyArrow[i].IsFocused(), m_aTrophyTile[i].GetColor3(), true, false);
         }
         break;
 
@@ -367,7 +391,7 @@ void cExtraMenu::Move()
             if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
-                m_iStatus = 1;
+                m_iStatus = 2;
             }
 
             // 
@@ -401,7 +425,7 @@ void cExtraMenu::Move()
             if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
-                m_iStatus = 1;
+                m_iStatus = 2;
             }
             else if(m_Password.IsClicked())
             {
@@ -425,7 +449,7 @@ void cExtraMenu::Move()
             cMenu::UpdateButton(&m_Credits,  &m_Navigator, m_Credits .IsFocused());
 
             // 
-            for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true);
+            for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true, true, g_pMenu->GetButtonColor(), !cMenuNavigator::IsUsingJoystick());
         }
         break;
 
@@ -505,9 +529,11 @@ void cExtraMenu::LoadTrophies()
             m_aTrophyName [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aaTrophyDesc[i][0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aaTrophyDesc[i][1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aTrophyArrow[i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aTrophyTile [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aTrophyBack [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aTrophyLine [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aTrophyLine [i]   .SetFocusable(true);
 
             const coreUintW iMissionIndex = i / 6u;
             const coreUintW iSegmentIndex = i % 6u;
@@ -536,7 +562,6 @@ void cExtraMenu::LoadTrophies()
             m_aTrophyTile[i].DefineTexture(0u, bBoss ? "menu_segment_boss.png" : "menu_segment_wave.png");
             m_aTrophyTile[i].SetTexSize   (vTexSize   * vStep);
             m_aTrophyTile[i].SetTexOffset (vTexOffset * vStep);
-        
             
             if((i == iMax - 1u) && !bAchieved)
             {
@@ -576,9 +601,11 @@ void cExtraMenu::LoadTrophies()
             m_aaTrophyDesc[i][0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aaTrophyDesc[i][1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aTrophyCheck[i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aTrophyArrow[i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aTrophyTile [i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aTrophyBack [i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aTrophyLine [i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aTrophyLine [i]   .SetFocusable(false);
         }
     }
 
@@ -687,6 +714,34 @@ void cExtraMenu::LoadSegments(const coreUintW iMissionIndex)
 
     // 
     if(m_iCurIndex && (!m_aiCurFilter.count(m_iCurIndex) || !m_FilterSegment.SelectValue(m_aiCurFilter.at(m_iCurIndex)))) m_FilterSegment.SelectFirst();
+}
+
+
+// ****************************************************************
+// 
+void cExtraMenu::SetSelectedTrophy(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    m_iTrophyMission = MIN(iMissionIndex, MISSION_ATER - 1u);
+    m_iTrophySegment = MIN(iSegmentIndex, 6u);
+    
+    cGuiObject& oLine = m_aTrophyLine[m_iTrophyMission * 6u + m_iTrophySegment];
+
+    // 
+    m_Navigator.ForceCurrent(&oLine);
+    m_TrophyBox.ScrollToObject(&oLine, true);
+}
+
+
+// ****************************************************************
+// 
+void cExtraMenu::GetSelectedTrophy(coreUintW* OUTPUT piMissionIndex, coreUintW* OUTPUT piSegmentIndex)const
+{
+    ASSERT(piMissionIndex && piSegmentIndex)
+
+    // 
+    (*piMissionIndex) = m_iTrophyMission;
+    (*piSegmentIndex) = m_iTrophySegment;
 }
 
 

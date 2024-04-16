@@ -99,6 +99,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: hard mode: reflektierte geschosse verursachen schaden
     // TODO 1: man kann durch große rotierende schilde schießen wenn man ganz am rand ist
     // TODO 1: drum shield needs blink!
+    // TODO 1: it's still possible to shoot very flat bullets through the shield while grinding it (e.g. pulse blast)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fWidth       = 0.38f;
@@ -585,8 +586,15 @@ void cViridoMission::__SetupOwn()
 
             g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
             {
-                ASSERT(pBullet->GetID() == cRayBullet::ID)
-                const coreUintW iIndex = (P_TO_UI(pBullet) / sizeof(cRayBullet)) % iReflectWrap;
+                coreUintW iSize;
+                switch(pBullet->GetID())
+                {
+                default: ASSERT(false)
+                case cRayBullet  ::ID: iSize = sizeof(cRayBullet);   break;
+                case cPulseBullet::ID: iSize = sizeof(cPulseBullet); break;
+                }
+
+                const coreUintW iIndex = (P_TO_UI(pBullet) / iSize) % iReflectWrap;
 
                 if(pBullet->GetFlyTime() < 0.1f)
                 {

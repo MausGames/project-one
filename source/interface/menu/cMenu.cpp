@@ -458,6 +458,16 @@ void cMenu::Move()
                 // return to previous menu          
                 this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 2u, true, false);
             }
+            else if(m_GameMenu.GetStatus() == 3)
+            {
+                // 
+                coreUintW iMissionIndex, iSegmentIndex;
+                m_GameMenu.RetrievePageData(&iMissionIndex, &iSegmentIndex);
+                m_ExtraMenu.SetSelectedTrophy(iMissionIndex, iSegmentIndex);
+
+                // return to previous menu            
+                this->ShiftSurface(this, SURFACE_EXTRA, 3.0f, 2u, true, false);
+            }
         }
         break;
 
@@ -498,10 +508,25 @@ void cMenu::Move()
 
     case SURFACE_EXTRA:
         {
-            if(m_ExtraMenu.GetStatus())
+            if(m_ExtraMenu.GetStatus() == 1)
             {
-                // return to previous menu
-                this->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u);
+                // 
+                m_GameMenu.ChangeSurface(SURFACE_GAME_ARMORY, 0.0f);
+                m_GameMenu.LoadValues();
+                m_GameMenu.ResetNavigator();
+
+                // 
+                coreUintW iMissionIndex, iSegmentIndex;
+                m_ExtraMenu.GetSelectedTrophy(&iMissionIndex, &iSegmentIndex);
+                m_GameMenu.SelectTrophy(iMissionIndex, iSegmentIndex);
+
+                // switch to game menu
+                this->ShiftSurface(this, SURFACE_GAME, 3.0f, 1u);
+            }
+            else if(m_ExtraMenu.GetStatus() == 2)
+            {
+                // return to previous menu          
+                this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 2u);
             }
         }
         break;
@@ -1063,6 +1088,24 @@ const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const co
 
     // 
     return PRINT("%s-%s", pcMissionLetter, pcSegmentLetter);
+}
+
+
+// ****************************************************************
+// 
+const coreChar* cMenu::GetStoreText()
+{
+    static const coreBool bEpic = coreData::FileExists("data/other/epic.txt");
+    return bEpic ? "TO_EPIC" : "TO_STEAM";
+}
+
+
+// ****************************************************************
+// 
+const coreChar* cMenu::GetStoreLink()
+{
+    static const coreBool bEpic = coreData::FileExists("data/other/epic.txt");
+    return bEpic ? "https://store.epicgames.com/p/eigengrau-62aef0" : "https://store.steampowered.com/app/1624320/Eigengrau/";
 }
 
 

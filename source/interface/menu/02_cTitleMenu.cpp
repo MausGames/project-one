@@ -29,6 +29,12 @@ cTitleMenu::cTitleMenu()noexcept
     m_GameLogoDemo.SetSize      (coreVector2(1.0f,0.25f) * 0.23f);
     m_GameLogoDemo.SetColor3    (COLOR_MENU_INSIDE);
 
+    m_Shadow.DefineTexture(0u, "effect_headlight_point.png");
+    m_Shadow.DefineProgram("menu_single_program");
+    m_Shadow.SetPosition  (m_GameLogo.GetPosition());
+    m_Shadow.SetSize      (m_GameLogo.GetSize() * coreVector2(1.4f,1.2f));
+    m_Shadow.SetColor3    (coreVector3(0.0f,0.0f,0.0f));
+
     m_PromptText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_PromptText.SetTextLanguage("PROMPT");
 
@@ -44,9 +50,10 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[1].SetText     (PRINT("Project One%s - v1.0.5 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One%s - v1.1.0 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", __DATE__, __TIME__));
 
     // bind menu objects
+    this->BindObject(SURFACE_TITLE_LOGO,  &m_Shadow);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_GameLogo);
     if(g_bDemoVersion) this->BindObject(SURFACE_TITLE_LOGO, &m_GameLogoDemo);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_PromptText);
@@ -113,6 +120,9 @@ void cTitleMenu::Move()
         ASSERT(false)
         break;
     }
+
+    // 
+    m_Shadow.SetAlpha(m_Shadow.GetAlpha() * 0.5f);
 }
 
 

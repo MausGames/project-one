@@ -19,6 +19,8 @@
 #define FIGURE_INVALID        (coreVector2(-1.0f,-1.0f))                    // 
 #define FIGURE_SCALE_KEYBOARD (coreVector2(1.0f,1.0f) * (100.0f/1024.0f))   // 
 #define FIGURE_SCALE_GAMEPAD  (coreVector2(0.125f,0.25f))                   // 
+#define FIGURE_KEY_LEFTSTICK  (SDL_CONTROLLER_BUTTON_MAX + 10u)             // 
+#define FIGURE_KEY_RIGHTSTICK (SDL_CONTROLLER_BUTTON_MAX + 11u)             // 
 
 
 // ****************************************************************

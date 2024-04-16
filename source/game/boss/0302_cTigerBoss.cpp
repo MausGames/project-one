@@ -1037,7 +1037,7 @@ void cTigerBoss::__MoveOwn()
                             const coreVector2 vDir = MapStepRotated90X(vAim, i);
                             const coreVector2 vPos = vBase + vDir * 3.0f;
 
-                            g_pGame->GetBulletManagerEnemy()->AddBullet<cRocketBullet>(5, 1.0f, this, vPos, vDir)->SetTarget(pPlayer)->ChangeSize(1.4f);
+                            g_pGame->GetBulletManagerEnemy()->AddBullet<cRocketBullet>(5, 1.0f, this, vPos, vDir)->SetTarget(pPlayer)->ChangeSize(1.5f);
                         }
 
                         g_pSpecialEffects->PlaySound(coreVector3(vBase, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_12);

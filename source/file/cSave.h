@@ -78,7 +78,8 @@ enum eSaveNew : coreUint8   // # never change bits after release
     NEW_CONFIG_GAME       = 10u,
     NEW_CONFIG_MIRRORMODE = 11u,
     NEW_ARMORY_GAMESPEED  = 20u,
-    NEW_ARMORY_SHIELD     = 21u
+    NEW_ARMORY_SHIELD     = 21u,
+    NEW_ARMORY_WEAPON     = 22u
 };
 
 enum eSaveState : coreUint8   // # never change bits after release

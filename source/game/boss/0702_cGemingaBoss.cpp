@@ -26,6 +26,7 @@
 // TODO 1: lebenspunkte des inneren bosses sollten sichtbar werden (entweder zweiter bar, der separat gesteuert werden kann, oder ausblenden boss life 1, einblenden boss life 2 (mit hoch-animieren), oder shared life, anpassen der health-grenzen und anwenden auf geminga)
 // TODO 1: player bullets shot into mouth should be on the same visual height
 // TODO 1: repair-enemy wird beim einsaugen und ausspucken über boss gezeichnet, boss kann aber nicht TOP gesetzt werden, wegen partikel-effekte, repair-enemy muss angepasst werden (render-order oder size)
+// TODO 1: da is noch immer ein safe-spot im seitlichen mund
 
 
 // ****************************************************************
@@ -1059,11 +1060,12 @@ void cGemingaBoss::__MoveOwn()
                 }
             }
 
-            const coreVector2 vAim = this->AimAtPlayerDual((iLostHealth < 600) ? 0u : 1u).Normalized();
+            const coreVector2 vDiff = this->AimAtPlayerDual((iLostHealth < 600) ? 0u : 1u);
+            const coreVector2 vAim  = vDiff.Normalized();
 
-            if(coreVector2::Dot(vCur, vAim) <= 0.4f)
+            if((coreVector2::Dot(vCur, vAim) <= 0.4f) && (vDiff.LengthSq() > POW2(5.0f)))
             {
-                vPrev = vCur;
+                vPrev = this->GetDirection().xy();
                 vCur  = AlongCrossNormal(vAim);
                 fTurn = 0.0f;
             }

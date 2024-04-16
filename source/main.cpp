@@ -7,6 +7,7 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
+#include "additional/switch/main.cpp"
 
 coreVector2     g_vGameResolution = coreVector2(0.0f,0.0f);
 coreFloat       g_fGameRate       = 0.0f;
@@ -101,7 +102,7 @@ void CoreApp::Init()
         coreMusic* pMusic = g_MusicPlayer.GetMusic(i);
         pMusic->SetLoop(std::strstr(pMusic->GetPath(), "_intro") == NULL);
     }
-    
+
     g_MusicPlayer.StartThread();
 
     // init system properties
@@ -460,18 +461,14 @@ void InitFramerate()
     }
 
     // override vertical synchronization
-    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))
+    ASSERT(s_dPhysicalTime)
+    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC) && (iRefreshRate == F_TO_UI(1.0 / s_dPhysicalTime)))
     {
-        ASSERT(s_dPhysicalTime)
-
-        if(iRefreshRate == F_TO_UI(1.0 / s_dPhysicalTime))
-        {
-            SDL_GL_SetSwapInterval(1);
-        }
-        else
-        {
-            SDL_GL_SetSwapInterval(0);
-        }
+        SDL_GL_SetSwapInterval(1);
+    }
+    else
+    {
+        SDL_GL_SetSwapInterval(0);
     }
 
     // TODO 1: coreProtect in variadic argument is not portable
@@ -657,16 +654,17 @@ static void DebugGame()
             const coreUintW  iNumMissions  = g_bDemoVersion ? ARRAY_SIZE(GAME_MISSION_LIST_DEMO) : ARRAY_SIZE(GAME_MISSION_LIST_MAIN);
 
             #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, piMissionList, iNumMissions) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->Activate(); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
-                 if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) __LOAD_GAME(cHarenaMission ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) __LOAD_GAME(cRutilusMission::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) __LOAD_GAME(cGeluMission   ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) __LOAD_GAME(cCalorMission  ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) __LOAD_GAME(cMuscusMission ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) __LOAD_GAME(cErrorMission  ::ID)
+                 if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4),     CORE_INPUT_PRESS)) __LOAD_GAME(cHarenaMission ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5),     CORE_INPUT_PRESS)) __LOAD_GAME(cRutilusMission::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6),     CORE_INPUT_PRESS)) __LOAD_GAME(cGeluMission   ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7),     CORE_INPUT_PRESS)) __LOAD_GAME(cCalorMission  ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8),     CORE_INPUT_PRESS)) __LOAD_GAME(cMuscusMission ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9),     CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0),     CORE_INPUT_PRESS)) __LOAD_GAME(cErrorMission  ::ID)
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(MINUS), CORE_INPUT_PRESS)) __LOAD_GAME(cBonus1Mission ::ID)
             #undef __LOAD_GAME
         }
     }

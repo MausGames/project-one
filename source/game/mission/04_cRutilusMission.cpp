@@ -1004,7 +1004,11 @@ void cRutilusMission::__MoveOwnAfter()
 
         fPower = m_fWavePower * 12.0f;
         fLimit = 1.0f;
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet(nGravityFunc);
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cRayBullet>(nGravityFunc);
+
+        fPower = m_fWavePower * 9.0f;
+        fLimit = 1.35f;
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cPulseBullet>(nGravityFunc);
 
         fPower = m_iWaveType ? (this->GetWavePull() ? 0.15f : 0.1f) : 0.3f;
         fLimit = 6.0f;
@@ -1045,12 +1049,21 @@ void cRutilusMission::__MoveOwnAfter()
         if(!pSlap->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
         
         coreBool bActive = false;
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pBullet)
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cRayBullet>([&](const cRayBullet* pBullet)
         {
-            coreVector2 vDiff = pBullet->GetRotation().QuatInvert().QuatApply(pSlap->GetPosition() - pBullet->GetPosition()).xy();
+            const coreVector2 vDiff = pBullet->GetRotation().QuatInvert().QuatApply(pSlap->GetPosition() - pBullet->GetPosition()).xy();
 
             if((ABS(vDiff.x) < pBullet->GetCollisionRange().x + 3.5f) &&
                (ABS(vDiff.y) < pBullet->GetCollisionRange().y + 3.5f))
+            {
+                bActive = true;
+            }
+        });
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cPulseBullet>([&](const cPulseBullet* pBullet)
+        {
+            const coreVector2 vDiff = pSlap->GetPosition().xy() - pBullet->GetPosition().xy();
+
+            if(vDiff.LengthSq() < pBullet->GetCollisionRange().xy().LengthSq() + POW2(7.0f))
             {
                 bActive = true;
             }

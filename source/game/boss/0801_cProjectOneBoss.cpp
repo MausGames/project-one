@@ -601,7 +601,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
+            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 
@@ -4557,13 +4557,15 @@ void cProjectOneBoss::__MoveGreen()
     // 
     else if(m_iPhase == 137u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
+        const coreFloat fSpeed = g_pGame->IsEasy() ? 0.8f : 1.0f;
+
+        PHASE_CONTROL_TIMER(0u, 0.5f * fSpeed, LERP_LINEAR)
         {
             if(m_aiCounter[JUMP_COUNT] % 2 == 1u)
             {
                 this->SetDirection(coreVector3(coreVector2::Direction(fTime * (4.0f*PI)), 0.0f));
 
-                PHASE_CONTROL_TICKER(1u, 0u, 30.0f, LERP_LINEAR)
+                PHASE_CONTROL_TICKER(1u, 0u, 30.0f * fSpeed, LERP_LINEAR)
                 {
                     if(g_pGame->IsEasy() && ((iTick % 4u) < 2u)) return;
 
@@ -4582,7 +4584,7 @@ void cProjectOneBoss::__MoveGreen()
             {
                 this->SetDirection(coreVector3(coreVector2::Direction(fTime * (6.0f*PI)), 0.0f));
 
-                PHASE_CONTROL_TICKER(1u, 0u, 24.0f, LERP_LINEAR)
+                PHASE_CONTROL_TICKER(1u, 0u, 24.0f * fSpeed, LERP_LINEAR)
                 {
                     if((iTick % 3u) < (g_pGame->IsEasy() ? 2u : 1u)) return;
 

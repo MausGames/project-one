@@ -80,9 +80,9 @@ private:
     coreBool m_bPressed;                             // 
     coreBool m_bGrabbed;                             // 
     coreFlow m_fGrabTime;                            // 
+
     coreList<coreUint8> m_aiLock;                    // 
     coreList<coreUint8> m_aiLastPack;                // 
-
     coreList<coreTimer> m_aAutomatic;                // 
 
     coreVector2 m_vMouseOffset;                      // 

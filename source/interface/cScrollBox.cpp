@@ -164,15 +164,16 @@ void cScrollBox::Move()
             }
         }
         
+        const coreFloat fBoost = LERP(6.0f, 1.0f, STEP(0.0f, 0.002f, ABS(m_fCurOffset - this->GetOffset().y)));
 
         if(coreMath::IsNear((m_fCurOffset - this->GetOffset().y), 0.0f, 0.001f)) m_fSpeed = 0.0f;
         m_fSpeed.UpdateMin(10.0f, 1.0f);
         
-        if(ABS(m_fCurOffset - this->GetOffset().y) > 1.0f) this->SetOffset(coreVector2(0.0f, m_fCurOffset));
+        if(ABS(m_fCurOffset - this->GetOffset().y) > 1.0f) this->SetOffset(coreVector2(0.0f, m_fCurOffset));   // quick change      
 
         
         // 
-        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 4.0f : 10.0f) * m_fSpeed * TIME))));
+        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 4.0f : 10.0f) * m_fSpeed * fBoost * TIME))));
 
         // 
         m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y * RCP(m_fMaxOffset))));

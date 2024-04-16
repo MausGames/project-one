@@ -327,7 +327,7 @@ void cSpecialEffects::Move()
 
             // 
             if(pLightning->GetAlpha() > 0.0f)
-                 DYN_KEEP  (it)
+                 DYN_KEEP  (it, *m_LightningList.List())
             else DYN_REMOVE(it, *m_LightningList.List())
         }
         m_LightningList.MoveNormal();
@@ -372,7 +372,7 @@ void cSpecialEffects::Move()
 
             // 
             if(fTime < 1.0f)
-                 DYN_KEEP  (it)
+                 DYN_KEEP  (it, *m_GustList.List())
             else DYN_REMOVE(it, *m_GustList.List())
         }
         m_GustList.MoveNormal();

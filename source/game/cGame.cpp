@@ -456,7 +456,7 @@ void cGame::Render()
             m_pCurMission->RenderOver();
 
             // TODO 1: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
-            glDepthMask(false);
+            //glDepthMask(false);   because of pulse weapon
             {
                 // 
                 for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -465,7 +465,7 @@ void cGame::Render()
                 // 
                 m_Tracker.RenderMiddle();
             }
-            glDepthMask(true);
+            //glDepthMask(true);
         }
 
         __DEPTH_GROUP_TOP
@@ -479,7 +479,8 @@ void cGame::Render()
             m_BulletManagerEnemy.Render();
             m_BulletManagerEnemy.RenderAfter();
             
-            if(m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cRayBullet>())
+            if(m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cRayBullet>() ||
+               m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cPulseBullet>())
             {
                 DEPTH_PUSH
                 m_BulletManagerPlayerTop.Render();

@@ -68,7 +68,7 @@
 #define SPECIAL_SOUND_MEDAL(x)      (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
 #define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.2f, STEP(1.0f, I_TO_F((y) - 1u), I_TO_F(x))))
 
-#define SPECIAL_FROZEN (TIME < 0.001f)
+#define SPECIAL_FROZEN (TIME < ((0.1f - CORE_MATH_PRECISION) / FRAMERATE_MAX))
 
 enum eSoundEffect : coreUint8
 {

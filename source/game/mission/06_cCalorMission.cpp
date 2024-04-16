@@ -858,7 +858,7 @@ void cCalorMission::__MoveOwnBefore()
             bTick       = true;
         }
 
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cRayBullet>([&](cRayBullet* OUTPUT pBullet)
         {
             const auto nHitFunc = [this](const coreVector2 vPosition, const coreFloat fSize)
             {
@@ -869,6 +869,21 @@ void cCalorMission::__MoveOwnBefore()
                nHitFunc(pBullet->GetPosition().xy(),                                4.0f) +
                nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 3.0f))
             {
+                pBullet->Deactivate(true);
+            }
+        });
+
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cPulseBullet>([&](cPulseBullet* OUTPUT pBullet)
+        {
+            const auto nHitFunc = [this](const coreVector2 vPosition, const coreFloat fSize)
+            {
+                return m_Snow.DrawPoint(vPosition, fSize, SNOW_TYPE_REMOVE);
+            };
+
+            if(nHitFunc(pBullet->GetPosition().xy(),                                5.0f) +
+               nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 4.0f))
+            {
+                nHitFunc(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 5.0f);
                 pBullet->Deactivate(true);
             }
         });

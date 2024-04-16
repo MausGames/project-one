@@ -87,6 +87,7 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_VIDEO_MONITOR);
         aiSkip.insert(ENTRY_VIDEO_RESOLUTION);
         aiSkip.insert(ENTRY_VIDEO_DISPLAYMODE);
+        aiSkip.insert(ENTRY_VIDEO_VSYNC);
         aiSkip.insert(ENTRY_VIDEO_ANTIALIASING);
         aiSkip.insert(ENTRY_AUDIO_QUALITY);
         aiSkip.insert(ENTRY_AUDIO_MODE);
@@ -214,6 +215,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_Monitor,         VIDEO_MONITOR,        0.31f)
         __SET_OPTION(m_Resolution,      VIDEO_RESOLUTION,     0.31f)
         __SET_OPTION(m_DisplayMode,     VIDEO_DISPLAYMODE,    0.31f)
+        __SET_OPTION(m_Vsync,           VIDEO_VSYNC,          0.31f)
         __SET_OPTION(m_AntiAliasing,    VIDEO_ANTIALIASING,   0.31f)
         __SET_OPTION(m_TextureFilter,   VIDEO_TEXTUREFILTER,  0.31f)
         __SET_OPTION(m_RenderQuality,   VIDEO_RENDERQUALITY,  0.31f)
@@ -247,8 +249,9 @@ cConfigMenu::cConfigMenu()noexcept
 
         m_Navigator.BindObject(&m_Monitor,         &m_VideoTab,       NULL, &m_Resolution,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_Resolution,      &m_Monitor,        NULL, &m_DisplayMode,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_DisplayMode,     &m_Resolution,     NULL, &m_AntiAliasing,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_AntiAliasing,    &m_DisplayMode,    NULL, &m_TextureFilter,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_DisplayMode,     &m_Resolution,     NULL, &m_Vsync,           NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_Vsync,           &m_DisplayMode,    NULL, &m_AntiAliasing,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_AntiAliasing,    &m_Vsync,          NULL, &m_TextureFilter,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_TextureFilter,   &m_AntiAliasing,   NULL, &m_RenderQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_RenderQuality,   &m_TextureFilter,  NULL, &m_ShadowQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_ShadowQuality,   &m_RenderQuality,  NULL, &m_ShakeEffects,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
@@ -334,6 +337,12 @@ cConfigMenu::cConfigMenu()noexcept
             __SET_INPUT_BUTTON(aAction[6],   INPUT_ACTION7,   aFigureAction[6])
             __SET_INPUT_BUTTON(aAction[7],   INPUT_ACTION8,   aFigureAction[7])
 
+            m_aInput[i].oFigureStickL.SetPosition(LERP(m_aInput[i].oMoveLeft.GetPosition(), m_aInput[i].oMoveDown.GetPosition(), 0.5f));
+            m_aInput[i].oFigureStickL.SetSize    (coreVector2(0.08f,0.08f));
+
+            m_aInput[i].oFigureStickR.SetPosition(LERP(m_aInput[i].aAction[4].GetPosition(), m_aInput[i].aAction[5].GetPosition(), 0.5f));
+            m_aInput[i].oFigureStickR.SetSize    (coreVector2(0.08f,0.08f));
+
             m_aInput[i].oType.SetEndless(true);
 
             m_Navigator.BindObject(&m_aInput[i].oType,        &m_InputTab,               &m_aInput[1u - i].oType,        &m_aInput[i].oRumble,      &m_aInput[1u - i].oType,        MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS, SURFACE_CONFIG_INPUT);
@@ -364,7 +373,7 @@ cConfigMenu::cConfigMenu()noexcept
         const cGuiButton& oLast = this->__RetrieveInputButton(i, INPUT_KEYS - 1u);
 
         m_aInput[i].oHeader.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-        m_aInput[i].oHeader.SetPosition(oLast.GetPosition() - coreVector2(oLast.GetSize().x * 0.5f, 0.0f));
+        m_aInput[i].oHeader.SetPosition(oLast.GetPosition() + coreVector2(oLast.GetSize().x * -0.5f, 0.0f));
         m_aInput[i].oHeader.SetColor3  (COLOR_MENU_WHITE);
     }
     
@@ -373,6 +382,32 @@ cConfigMenu::cConfigMenu()noexcept
     {
         m_aCueInput[i].SetPosition(coreVector2(LERP(m_aInput[0].oHeader.GetPosition().x, m_aInput[1].oHeader.GetPosition().x, 0.5f), m_aLabel[ENTRY_INPUT_ACTION4 + i].GetPosition().y));
     }
+    
+    
+
+    m_SwapInput.Construct  (MENU_SWITCHBOX, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_SwapInput.SetPosition(LERP(m_aInput[0].oHeader.GetPosition(), m_aInput[1].oHeader.GetPosition(), 0.5f));
+    m_SwapInput.SetSize    (coreVector2(0.06f,0.03f));
+    m_SwapInput.GetCaption()->SetText("< >");
+    STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
+
+    m_VideoBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
+    m_VideoBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
+    m_VideoBox.SetMaxOffset(DEFINED(_CORE_EMSCRIPTEN_) ? 0.0f : (0.05f * 13.5f - m_VideoBox.GetSize().y));
+    for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLine [i]);}
+    for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLabel[i]);}
+    if(!m_Monitor       .GetStatus()) m_VideoBox.BindObject(&m_Monitor);
+    if(!m_Resolution    .GetStatus()) m_VideoBox.BindObject(&m_Resolution);
+    if(!m_DisplayMode   .GetStatus()) m_VideoBox.BindObject(&m_DisplayMode);
+    if(!m_Vsync         .GetStatus()) m_VideoBox.BindObject(&m_Vsync);
+    if(!m_AntiAliasing  .GetStatus()) m_VideoBox.BindObject(&m_AntiAliasing);
+    if(!m_TextureFilter .GetStatus()) m_VideoBox.BindObject(&m_TextureFilter);
+    if(!m_RenderQuality .GetStatus()) m_VideoBox.BindObject(&m_RenderQuality);
+    if(!m_ShadowQuality .GetStatus()) m_VideoBox.BindObject(&m_ShadowQuality);
+    if(!m_ShakeEffects  .GetStatus()) m_VideoBox.BindObject(&m_ShakeEffects);
+    if(!m_FlashEffects  .GetStatus()) m_VideoBox.BindObject(&m_FlashEffects);
+    if(!m_HitStopEffects.GetStatus()) m_VideoBox.BindObject(&m_HitStopEffects);
+    if(!m_ChromaEffects .GetStatus()) m_VideoBox.BindObject(&m_ChromaEffects);
 
     m_InputBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
     m_InputBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
@@ -386,12 +421,8 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oControlMode.GetStatus()) m_InputBox.BindObject(&m_aInput[i].oControlMode);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputButton(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputButton(i, j));
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputFigure(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputFigure(i, j));
-
-    m_SwapInput.Construct  (MENU_SWITCHBOX, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
-    m_SwapInput.SetPosition(LERP(m_aInput[0].oHeader.GetPosition(), m_aInput[1].oHeader.GetPosition(), 0.5f));
-    m_SwapInput.SetSize    (coreVector2(0.06f,0.03f));
-    m_SwapInput.GetCaption()->SetText("< >");
-    STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) m_InputBox.BindObject(&m_aInput[i].oFigureStickL);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) m_InputBox.BindObject(&m_aInput[i].oFigureStickR);
 
     m_Navigator.BindObject(&m_SwapInput, &m_aInput[0].oMoveRight, NULL, &m_SaveButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_CONFIG_INPUT);
 
@@ -413,11 +444,16 @@ cConfigMenu::cConfigMenu()noexcept
     m_DisplayMode    .AddEntryLanguage("DISPLAYMODE_WINDOW",     CORE_SYSTEM_MODE_WINDOWED);
     m_DisplayMode    .AddEntryLanguage("DISPLAYMODE_BORDERLESS", CORE_SYSTEM_MODE_BORDERLESS);
     m_DisplayMode    .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", CORE_SYSTEM_MODE_FULLSCREEN);
+    m_Vsync          .AddEntryLanguage("VALUE_OFF",              0u);
+    m_Vsync          .AddEntryLanguage("VALUE_AUTO",             1u);
     m_AntiAliasing   .AddEntryLanguage("VALUE_OFF",              0u);
+         if(CORE_GL_SUPPORT(INTEL_framebuffer_CMAA))               for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 1u)                       ? "CMAA" : "MSAA"), i);
+    else if(CORE_GL_SUPPORT(AMD_framebuffer_multisample_advanced)) for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 2u || i == 4u || i == 8u) ? "EQAA" : "MSAA"), i);
+    else if(CORE_GL_SUPPORT(NV_framebuffer_multisample_coverage))  for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 4u || i == 8u)            ? "CSAA" : "MSAA"), i);
+    else                                                           for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (MSAA)", i),                                                    i);
+    if(m_AntiAliasing.GetValue(m_AntiAliasing.GetNumEntries() - 1u) != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux (MSAA)", iMaxSamples), iMaxSamples);   // possible 6x
     m_TextureFilter  .AddEntryLanguage("VALUE_OFF",              0u);
-    for(coreUintW i = 2u, ie = iMaxSamples;    i <= ie; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%zux", i), i);
     for(coreUintW i = 2u, ie = iMaxAnisotropy; i <= ie; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);
-    if(m_AntiAliasing.GetValue(m_AntiAliasing.GetNumEntries() - 1u) != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux", iMaxSamples), iMaxSamples);   // possible 6x
     m_RenderQuality  .AddEntryLanguage("VALUE_LOW",              0u);
     m_RenderQuality  .AddEntryLanguage("VALUE_HIGH",             1u);
     m_ShadowQuality  .AddEntryLanguage("VALUE_LOW",              1u);
@@ -449,6 +485,10 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode   .AddEntryLanguage("FIREMODE_TOGGLE",       2u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_TWINSTICK", 1u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_ORIGINAL",  0u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_MIXED",     2u);
+#if defined(_CORE_DEBUG_)
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_SINGLE",    3u);
+#endif
     m_GameDirection  .AddEntryLanguage("VALUE_OFF",              0u);
     m_GameDirection  .AddEntryLanguage("HUDDIRECTION_RIGHT",     1u);
     m_GameDirection  .AddEntryLanguage("HUDDIRECTION_UPSIDE",    2u);
@@ -483,6 +523,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindSurface(&m_InputTab, SURFACE_CONFIG_INPUT, &m_SwapInput,     NULL, &m_aInput[0].oType, NULL);
     m_Navigator.BindSurface(&m_GameTab,  SURFACE_CONFIG_GAME,  &m_Version,       NULL, &m_Language,        NULL);
 
+    m_Navigator.BindScroll(&m_VideoBox);
     m_Navigator.BindScroll(&m_InputBox);
 
     m_Navigator.AssignFirst(!m_Monitor.GetStatus() ? &m_Monitor : &m_TextureFilter);
@@ -513,26 +554,15 @@ cConfigMenu::cConfigMenu()noexcept
     }
 
     coreUintW iIndex;
-    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLine [iIndex]);}
+    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) {}//{if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLine [iIndex]);}
     for(;            iIndex < ENTRY_AUDIO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLine [iIndex]);}
     for(;            iIndex < ENTRY_INPUT; ++iIndex) {}//{if(!aiSkip.count(iIndex) && (iIndex < ENTRY_INPUT_MOVEUP)) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLine [iIndex]);}
     for(;            iIndex < ENTRY_MAX;   ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLine [iIndex]);}
-    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLabel[iIndex]);}
+    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) {}//{if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLabel[iIndex]);}
     for(;            iIndex < ENTRY_AUDIO; ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLabel[iIndex]);}
     for(;            iIndex < ENTRY_INPUT; ++iIndex) {}//{if(!aiSkip.count(iIndex) && (iIndex < ENTRY_INPUT_MOVEUP)) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLabel[iIndex]);}
     for(;            iIndex < ENTRY_MAX;   ++iIndex) {if(!aiSkip.count(iIndex)) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLabel[iIndex]);}
 
-    if(!m_Monitor        .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_Monitor);
-    if(!m_Resolution     .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_Resolution);
-    if(!m_DisplayMode    .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_DisplayMode);
-    if(!m_AntiAliasing   .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_AntiAliasing);
-    if(!m_TextureFilter  .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_TextureFilter);
-    if(!m_RenderQuality  .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_RenderQuality);
-    if(!m_ShadowQuality  .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShadowQuality);
-    if(!m_ShakeEffects   .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShakeEffects);
-    if(!m_FlashEffects   .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_FlashEffects);
-    if(!m_HitStopEffects .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_HitStopEffects);
-    if(!m_ChromaEffects  .GetStatus()) this->BindObject(SURFACE_CONFIG_VIDEO, &m_ChromaEffects);
     if(!m_GlobalVolume   .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_GlobalVolume);
     if(!m_MusicVolume    .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
     if(!m_EffectVolume   .GetStatus()) this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
@@ -551,6 +581,8 @@ cConfigMenu::cConfigMenu()noexcept
     if(!m_BackSpeed      .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_BackSpeed);
     if(!m_UpdateFreq     .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_UpdateFreq);
     if(!m_Version        .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_Version);
+
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_VideoBox);
 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
     this->BindObject(SURFACE_CONFIG_INPUT, &m_InputBox);
@@ -605,6 +637,7 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_Monitor);
             cMenu::UpdateSwitchBox(&m_Resolution);
             cMenu::UpdateSwitchBox(&m_DisplayMode);
+            cMenu::UpdateSwitchBox(&m_Vsync);
             cMenu::UpdateSwitchBox(&m_AntiAliasing);
             cMenu::UpdateSwitchBox(&m_TextureFilter);
             cMenu::UpdateSwitchBox(&m_RenderQuality);
@@ -744,7 +777,24 @@ void cConfigMenu::Move()
 
                     if(oButton.IsClicked())
                     {
-                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
+                        constexpr coreUintW aiText[] =
+                        {
+                            ENTRY_INPUT_MOVEUP,
+                            ENTRY_INPUT_MOVELEFT,
+                            ENTRY_INPUT_MOVEDOWN,
+                            ENTRY_INPUT_MOVERIGHT,
+                            ENTRY_INPUT_ACTION1,
+                            ENTRY_INPUT_ACTION2,
+                            ENTRY_INPUT_ACTION3,
+                            ENTRY_INPUT_ACTION4,
+                            ENTRY_INPUT_ACTION5,
+                            ENTRY_INPUT_ACTION6,
+                            ENTRY_INPUT_ACTION7,
+                            ENTRY_INPUT_ACTION8
+                        };
+                        STATIC_ASSERT(ARRAY_SIZE(aiText) == INPUT_KEYS)
+
+                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("MAPPING"), m_aLabel[aiText[j]].GetText());
                         const coreUint8& iType  = oInput.oType.GetCurValue();   // # referenced in lambda
 
                         // 
@@ -997,15 +1047,19 @@ void cConfigMenu::Move()
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
         cMenu::UpdateLine(&m_aLine[i], true);   // TODO 1: causes scroll-box to scroll when wrapping movement
+        // TODO 1: linien koennen fokusiert werden waehrend sie ausserhalb der scroll-box sind
 
         if(m_aLine[i].IsFocused() && TIME)
         {
             m_Description.SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_Description.SetTextLanguage(m_apcDescKey[i]);
+
+            if((i == ENTRY_GAME_MIRRORMODE) && (m_MirrorMode.GetOverride() < 0))
+                m_Description.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         }
     }
-    
-    
+
+
     if(m_iJoystickNum != Core::Input->GetJoystickNum())
     {
         if(m_SaveButton.GetOverride() < 0)
@@ -1028,6 +1082,7 @@ void cConfigMenu::CheckValues()
     const coreBool bSave = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
                            (m_Monitor        .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                                     ||
                            (m_DisplayMode    .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                                  ||
+                           (m_Vsync          .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))                                       ||
                            (m_AntiAliasing   .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                              ||
                            (m_TextureFilter  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                         ||
                            (m_RenderQuality  .GetCurValue() != g_OldConfig.Graphics.iRender)                                                         ||
@@ -1091,6 +1146,7 @@ void cConfigMenu::LoadValues()
     // 
     m_Monitor        .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY));
     m_DisplayMode    .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
+    m_Vsync          .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC));
     m_AntiAliasing   .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
     m_TextureFilter  .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
     m_RenderQuality  .SelectValue(g_CurConfig.Graphics.iRender);
@@ -1172,6 +1228,7 @@ void cConfigMenu::SaveValues()
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurValue());
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurValue());
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_VSYNC,               m_Vsync        .GetCurValue());
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurValue());
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurValue());
     g_CurConfig.Graphics.iRender   = m_RenderQuality  .GetCurValue();
@@ -1269,6 +1326,7 @@ void cConfigMenu::ResetNavigator()
     m_Navigator.ResetFirst();
 
     // 
+    m_VideoBox.SetCurOffset(0.0f);
     m_InputBox.SetCurOffset(0.0f);
 
     // 
@@ -1515,14 +1573,25 @@ void cConfigMenu::__LoadInputs()
         nLockFunc( bKeyboard, &oInput.aAction[7], &oInput.aFigureAction[7], SDL_SCANCODE_ESCAPE,              false);
 
         // 
-        const coreBool bOriginal = (g_CurConfig.Input.aiControlMode[i] == 0u);
-        nLockFunc(!bOriginal, &oInput.aAction[0], &oInput.aFigureAction[0], 0u, true);
-        nLockFunc(!bOriginal, &oInput.aAction[1], &oInput.aFigureAction[1], 0u, true);
-        nLockFunc(!bOriginal, &oInput.aAction[2], &oInput.aFigureAction[2], 0u, true);
-        nLockFunc( bOriginal, &oInput.aAction[3], &oInput.aFigureAction[3], 0u, true);
-        nLockFunc( bOriginal, &oInput.aAction[4], &oInput.aFigureAction[4], 0u, true);
-        nLockFunc( bOriginal, &oInput.aAction[5], &oInput.aFigureAction[5], 0u, true);
-        nLockFunc( bOriginal, &oInput.aAction[6], &oInput.aFigureAction[6], 0u, true);
+        const coreBool bOriginal  = (g_CurConfig.Input.aiControlMode[i] == 0u);
+        const coreBool bTwinstick = (g_CurConfig.Input.aiControlMode[i] == 1u);
+        const coreBool bMixed     = (g_CurConfig.Input.aiControlMode[i] == 2u);
+        const coreBool bSingle    = (g_CurConfig.Input.aiControlMode[i] == 3u);
+        nLockFunc(!bOriginal  && !bMixed && !bSingle, &oInput.aAction[0], &oInput.aFigureAction[0], 0u, true);
+        nLockFunc(!bOriginal  && !bMixed,             &oInput.aAction[1], &oInput.aFigureAction[1], 0u, true);
+        nLockFunc(!bOriginal  && !bMixed,             &oInput.aAction[2], &oInput.aFigureAction[2], 0u, true);
+        nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[3], &oInput.aFigureAction[3], 0u, true);
+        nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[4], &oInput.aFigureAction[4], 0u, true);
+        nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[5], &oInput.aFigureAction[5], 0u, true);
+        nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[6], &oInput.aFigureAction[6], 0u, true);
+
+        // 
+        const coreBool bStickyL = (!bKeyboard);
+        const coreBool bStickyR = (!bKeyboard && (bTwinstick || bMixed));
+        oInput.oFigureStickL.SetEnabled(bStickyL ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+        oInput.oFigureStickR.SetEnabled(bStickyR ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+        if(bStickyL) cConfigMenu::PrintFigure(&oInput.oFigureStickL, g_CurConfig.Input.aiType[i], FIGURE_KEY_LEFTSTICK);
+        if(bStickyR) cConfigMenu::PrintFigure(&oInput.oFigureStickR, g_CurConfig.Input.aiType[i], FIGURE_KEY_RIGHTSTICK);
 
         // 
         //oInput.oRumble.SetOverride((bKeyboard || !Core::Input->GetJoystickHasRumble(g_CurConfig.Input.aiType[i] - INPUT_SETS_KEYBOARD)) ? -1 : 0);

@@ -908,10 +908,16 @@ void cHarenaMission::__SetupOwn()
 
         const auto nAttackFunc = [&](cEnemy* pEnemy, const coreUintW i)
         {
-            const coreVector2 vPos = pEnemy->GetPosition().xy();
-            const coreVector2 vDir = pEnemy->AimAtPlayerDual((iIteration % 2u) ? 0u : 1u).Normalized();
+            const coreVector2 vPos  = pEnemy->GetPosition().xy();
+            const coreFloat   fBase = pEnemy->AimAtPlayerDual((iIteration % 2u) ? 0u : 1u).Angle();
+            const coreUintW   iNum  = g_pGame->IsEasy() ? 3u : 1u;
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.6f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+            for(coreUintW j = iNum; j--; )
+            {
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iNum - 1u) * 0.5f) * 3.0f) + fBase);
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.6f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+            }
 
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 5u, COLOR_ENERGY_MAGENTA);
             g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
@@ -923,6 +929,8 @@ void cHarenaMission::__SetupOwn()
 
             for(coreUintW j = 10u; j--; )
             {
+                if(g_pGame->IsEasy() && (j % 2u)) continue;
+
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 18.0f));
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.6f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
@@ -1212,17 +1220,16 @@ void cHarenaMission::__SetupOwn()
 
                 if(g_pForeground->IsVisibleObject(pEnemy) && !m_iInsanity)
                 {
-                    if(g_pGame->IsEasy())
+                    if(iPoints >= 23u)
                     {
-                        if((iPoints >= 23u) || ((iPoints < 15u) && HAS_BIT(iBig, i)))
-                        {
-                            nAttackFunc(pEnemy, i);
-                        }
+                        nPunishFunc(pEnemy);
                     }
                     else
                     {
-                        if(iPoints >= 23u) nPunishFunc(pEnemy);
-                                      else nAttackFunc(pEnemy, i);
+                        if(!g_pGame->IsEasy() || ((iPoints < 15u) && HAS_BIT(iBig, i)))
+                        {
+                            nAttackFunc(pEnemy, i);
+                        }
                     }
                 }
             }

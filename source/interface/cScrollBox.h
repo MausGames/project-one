@@ -17,7 +17,7 @@
 // 
 #define SCROLL_WIDTH      (0.05f)   // 
 #define SCROLL_DELAY      (-2.0f)   // 
-#define SCROLL_FOCUS_SIZE (0.3f)    // 
+#define SCROLL_FOCUS_SIZE (0.35f)   // 
 
 
 // ****************************************************************

@@ -135,6 +135,7 @@ void cBackground::Render()
             FOR_EACH(it, m_apGroundAddList)    (*it)->Render();
 
     if(bForce) glDepthRange(0.0f, 1.0f);
+
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
@@ -304,7 +305,7 @@ void cBackground::Move()
                 pObject->SetEnabled(bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
                 // keep object while in current view
-                if(bIsAlive) DYN_KEEP(et)
+                if(bIsAlive) DYN_KEEP(et, *(*it)->List())
                 else
                 {
                     // remove object when not visible anymore

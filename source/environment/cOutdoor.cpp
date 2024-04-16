@@ -329,7 +329,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     m_iToken = Core::Manager::Resource->AttachFunction([=, this]()
     {
         // check for sync object status
-        const coreStatus eCheck = m_Sync.Check(0u, CORE_SYNC_CHECK_FLUSHED);
+        const coreStatus eCheck = m_Sync.Check(0u);
         if(eCheck == CORE_OK) this->DefineTexture(2u, m_pNormalMap);
         if(eCheck >= CORE_OK) return eCheck;
 
@@ -386,7 +386,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         SAFE_DELETE_ARRAY(pOutput)
 
         // create sync object
-        const coreBool bSync = m_Sync.Create();
+        const coreBool bSync = m_Sync.Create(CORE_SYNC_CREATE_FLUSHED);
         if(!bSync) this->DefineTexture(2u, m_pNormalMap);
 
         Core::Log->Info("Outdoor-Textures (%s, %s) loaded", pcTextureTop, pcTextureBottom);

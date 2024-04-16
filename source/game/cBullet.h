@@ -10,7 +10,6 @@
 #ifndef _P1_GUARD_BULLET_H_
 #define _P1_GUARD_BULLET_H_
 
-// TODO 3: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO 3: use prefetch with more precise numbers (also in enemy-manager) (maybe with per-class config)
 // TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO 3: add memory pool for bullets, instead of always reallocating
@@ -291,7 +290,7 @@ public:
     ASSIGN_ID(2, "Pulse")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.2f,0.4f)); m_fAnimation = 0.2f; m_fFade = 0.0f; m_fScale = 1.0f;}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.1f,0.1f)); m_fAnimation = 0.0f; m_fFade = 0.0f; m_fScale = 1.0f;}
 
     // 
     inline cPulseBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
@@ -308,8 +307,8 @@ public:
     inline cPulseBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 

@@ -1370,8 +1370,9 @@ void cNevoMission::__MoveOwnAfter()
             if(pBulletEnemy->GetID() != cGrowBullet::ID) return;
             if(!bFirstHit || !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
-            const coreBool  bBadge = (pBulletEnemy->GetDamage() > 5);
-            const coreFloat fPower = I_TO_F(pBulletPlayer->GetDamage()) * RCP(I_TO_F(g_pGame->GetNumPlayers())) * (bBadge ? 0.5f : 1.0f);
+            const coreBool  bBadge   = (pBulletEnemy->GetDamage() >  5);
+            const coreBool  bSpecial = (pBulletEnemy->GetDamage() == 1) && (pBulletPlayer->GetID() == cPulseBullet::ID);
+            const coreFloat fPower   = I_TO_F(pBulletPlayer->GetDamage()) * RCP(I_TO_F(g_pGame->GetNumPlayers())) * (bBadge ? 0.5f : 1.0f) * (bSpecial ? 1.3f : 1.0f);
 
             pBulletEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * (pBulletEnemy->GetSize().x * POW(0.9f, fPower)));
 

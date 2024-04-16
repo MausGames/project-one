@@ -9,22 +9,22 @@
 
 // ****************************************************************
 // project settings
-const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                    = "1.0.5";
-const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
-const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
-const coreBool        CoreApp::Settings::UserManagement             = true;
-const coreUint8       CoreApp::Settings::Graphics::DepthSize        = 16u;
-const coreUint8       CoreApp::Settings::Graphics::StencilSize      = 0u;
-const coreBool        CoreApp::Settings::Graphics::AlphaChannel     = false;
-const coreBool        CoreApp::Settings::Graphics::DoubleBuffer     = true;
-const coreBool        CoreApp::Settings::Graphics::StereoRender     = false;
-/*const*/ coreUint32      CoreApp::Settings::Platform::SteamAppID   = 1624320u;
-const coreChar* const CoreApp::Settings::Platform::EpicProductID    = "7dd83e44b6984bd0b92c5b6a1850a9cb";
-const coreChar* const CoreApp::Settings::Platform::EpicSandboxID    = DEFINED(_CORE_DEBUG_) ? "p-5qg8r3hlhjcsbgl4s4jp4xrauvd6wa" : "d683ed3004f1479abdf2fc4bcfdc615d";
-const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID = DEFINED(_CORE_DEBUG_) ? "2914ec61294d4649b13521053c4dfb11" : "64c112ed4c9d4151a814a6cc93b98070";
-const coreChar* const CoreApp::Settings::Platform::EpicClientID     = "";
-const coreChar* const CoreApp::Settings::Platform::EpicClientSecret = "";
+const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
+const coreChar* const CoreApp::Settings::Version                       = "1.1.0";
+const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
+const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
+const coreBool        CoreApp::Settings::UserManagement                = true;
+const coreUint8       CoreApp::Settings::Graphics::DepthSize           = 16u;
+const coreUint8       CoreApp::Settings::Graphics::StencilSize         = 0u;
+const coreBool        CoreApp::Settings::Graphics::AlphaChannel        = false;
+const coreBool        CoreApp::Settings::Graphics::DoubleBuffer        = true;
+const coreBool        CoreApp::Settings::Graphics::StereoRender        = false;
+/*const*/ coreUint32  CoreApp::Settings::Platform::SteamAppID          = 1624320u;
+const coreChar* const CoreApp::Settings::Platform::EpicProductID       = "7dd83e44b6984bd0b92c5b6a1850a9cb";
+const coreChar* const CoreApp::Settings::Platform::EpicSandboxID   [3] = {"p-5qg8r3hlhjcsbgl4s4jp4xrauvd6wa", "p-n4dztts5qfau4wa27ccdc5yabx6vvp", "d683ed3004f1479abdf2fc4bcfdc615d"};
+const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID[3] = {"2914ec61294d4649b13521053c4dfb11", "c5ca5a6eacc74bfdbd8471d4dd75a78f", "64c112ed4c9d4151a814a6cc93b98070"};
+const coreChar* const CoreApp::Settings::Platform::EpicClientID        = "";
+const coreChar* const CoreApp::Settings::Platform::EpicClientSecret    = "";
 
 //const coreUint32      CoreApp::Settings::Platform::SteamDemoAppID       = 2089690u;
 //const coreChar* const CoreApp::Settings::Platform::EpicDemoClientID     = "";
@@ -40,10 +40,9 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_final_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_final_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_flip_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_flip_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("bullet_pulse.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_pulse.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray_volume.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");  // TODO 1: kann man wieder hinzufügen wenn triangle-sphere intersection implementiert wurde, CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -89,27 +88,28 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("fragment_09.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/fragment_09.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_arrow_long.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow_long.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_arrow_short.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow_short.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_bomb_low.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_cube_ice.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_ice.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_bomb_low.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_low.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_ice.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_ice.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
     Core::Manager::Resource->Load<coreModel>  ("object_cube_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_fang_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_penta_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_penta_top.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_penta_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_penta_top.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_penta_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_penta_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_sphere_center.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere_center.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
+    Core::Manager::Resource->Load<coreModel>  ("object_sphere_center.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere_center.md3");   // TODO 1: wegen bonus mission, noch benötigt?, CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_spike.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_spike.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
     Core::Manager::Resource->Load<coreModel>  ("object_sting.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sting.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_inside.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_inside.md3", CORE_MODEL_LOAD_NO_BUFFERS);
@@ -171,6 +171,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_emitter.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_emitter.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_companion_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_companion_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_companion_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_companion_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_low.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
@@ -320,7 +324,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_segment_boss.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_segment_boss.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_segment_wave.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_segment_wave.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_trophy.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_trophy.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_unlocks.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_unlocks.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_unlock.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_unlock.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png", CORE_TEXTURE_LOAD_NEAREST);
     Core::Manager::Resource->Load<coreTexture>("ship_player.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png", CORE_TEXTURE_LOAD_NEAREST);
 
@@ -476,6 +481,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_helper.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_helper.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_segment.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_segment.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("menu_segment.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_segment.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_single.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_single.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_swipe.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_swipe.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.frag");
@@ -1195,6 +1202,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_inner_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("menu_inner.vert")
         ->AttachShader("menu_inner.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_segment_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_segment.vert")
+        ->AttachShader("menu_segment.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_single_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

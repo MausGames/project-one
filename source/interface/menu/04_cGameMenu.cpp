@@ -17,6 +17,7 @@ cGameMenu::cGameMenu()noexcept
 , m_fSegmentTime       (0.0f)
 , m_iCurPage           (0u)
 , m_aiCurIndex         {coreUintW(-1), coreUintW(-1), coreUintW(-1), 0u}
+, m_bFromTrophy        (false)
 , m_iBaseType          (0u)
 , m_iBaseMode          (0u)
 , m_iBaseDifficulty    (0u)
@@ -26,12 +27,12 @@ cGameMenu::cGameMenu()noexcept
     m_BackgroundMain.DefineTexture(0u, "menu_background_black.png");
     m_BackgroundMain.DefineProgram("menu_border_program");
     m_BackgroundMain.SetPosition  (coreVector2(0.0f,0.045f));
-    m_BackgroundMain.SetSize      (coreVector2(0.9f,0.77f));
+    m_BackgroundMain.SetSize      (coreVector2(0.9f,0.82f));
 
     m_BackgroundArmory.DefineTexture(0u, "menu_background_black.png");
     m_BackgroundArmory.DefineProgram("menu_border_program");
     m_BackgroundArmory.SetPosition  (coreVector2(0.0f,0.045f));
-    m_BackgroundArmory.SetSize      (coreVector2(0.9f,0.77f));
+    m_BackgroundArmory.SetSize      (coreVector2(0.9f,0.82f));
 
     m_BackgroundFirst.DefineTexture(0u, "menu_background_black.png");
     m_BackgroundFirst.DefineProgram("menu_border_program");
@@ -113,7 +114,6 @@ cGameMenu::cGameMenu()noexcept
         m_aSegmentIcon[i].SetPosition  (m_aSegmentName[i].GetPosition()*coreVector2(1.0f,1.0f) + coreVector2(0.005f,0.015f));                     
         m_aSegmentIcon[i].SetPosition  (coreVector2(m_BackgroundMain.GetPosition().x - m_BackgroundMain.GetSize().x*0.5f, fHeight) + coreVector2(0.09f,0.0f));
         m_aSegmentIcon[i].SetSize      (coreVector2(0.1f,0.1f));
-        //m_aSegmentIcon[i].SetDirection (coreVector2(1.0f,1.0f).Normalized()); 
         m_aSegmentIcon[i].SetColor3    (g_aMissionData[i].vColor * 0.8f);
         m_aSegmentIcon[i].SetTexSize   (coreVector2(0.25f,0.25f));
         m_aSegmentIcon[i].SetTexOffset (g_aMissionData[i].vIcon);
@@ -122,11 +122,9 @@ cGameMenu::cGameMenu()noexcept
         m_aSegmentIconBack[i].DefineProgram("menu_helper_program");
         m_aSegmentIconBack[i].SetPosition  (m_aSegmentIcon[i].GetPosition ());
         m_aSegmentIconBack[i].SetSize      (m_aSegmentIcon[i].GetSize     ());
-        //m_aSegmentIconBack[i].SetDirection (m_aSegmentIcon[i].GetDirection());
         m_aSegmentIconBack[i].SetColor3    (m_aSegmentIcon[i].GetColor3   ());
         m_aSegmentIconBack[i].SetTexSize   (m_aSegmentIcon[i].GetTexSize  ());
         m_aSegmentIconBack[i].SetTexOffset (m_aSegmentIcon[i].GetTexOffset());
-        m_aSegmentIconBack[i].SetFocusable (true);
 
         m_aSegmentLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aSegmentLine[i].DefineTexture(1u, "menu_background_black.png");
@@ -134,7 +132,6 @@ cGameMenu::cGameMenu()noexcept
         m_aSegmentLine[i].SetPosition  (coreVector2(0.0f, fHeight));
         m_aSegmentLine[i].SetSize      (coreVector2(m_BackgroundMain.GetSize().x, 0.15f));
         m_aSegmentLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
-        //m_aSegmentLine[i].SetFocusable (true);
 
         iOffset += (i == 8u) ? 11u : 10u;
     }
@@ -147,7 +144,7 @@ cGameMenu::cGameMenu()noexcept
             const coreVector2 vPos  = coreVector2((I_TO_F(j) - 3.5f) * 0.1f, m_aSegmentLine[i].GetPosition().y);
             const coreVector2 vSize = bBoss ? coreVector2(0.1f,0.05f) : coreVector2(0.05f,0.05f);
 
-            m_aaSegmentTile[i][j].DefineProgram   ("menu_grey_program");
+            m_aaSegmentTile[i][j].DefineProgram   ("menu_segment_program");
             m_aaSegmentTile[i][j].SetPosition     (vPos + (bBoss ? coreVector2(0.015f,0.0f) : coreVector2(-0.02f,0.0f)) + coreVector2(0.145f,0.0f));
             m_aaSegmentTile[i][j].SetSize         (vSize * 1.4f);
             m_aaSegmentTile[i][j].SetColor3       (COLOR_MENU_WHITE);
@@ -173,21 +170,45 @@ cGameMenu::cGameMenu()noexcept
 
     m_aSegmentCursor[0].DefineProgram("menu_color_program");
     m_aSegmentCursor[0].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.1f);   // less    
-    m_aSegmentCursor[1].DefineProgram("menu_grey_program");
+    m_aSegmentCursor[1].DefineProgram("menu_segment_program");
+    m_aSegmentCursor[2].DefineTexture(0u, "effect_headlight_point.png");
+    m_aSegmentCursor[2].DefineProgram("menu_single_program");
+    m_aSegmentCursor[2].SetColor3    (coreVector3(0.0f,0.0f,0.0f));
+
+    m_SegmentMedal.DefineTexture(0u, "menu_medal.png");
+    m_SegmentMedal.DefineProgram("default_2d_program");
+    m_SegmentMedal.SetSize      (coreVector2(1.0f,1.0f) * 0.07f * 1.4f);
+    m_SegmentMedal.SetTexSize   (coreVector2(0.25f,0.25f));
+
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i)
+    {
+        m_aSegmentBadge[i].DefineTexture(0u, "menu_badge.png");
+        m_aSegmentBadge[i].DefineProgram("default_2d_program");
+        m_aSegmentBadge[i].SetSize      (coreVector2(0.05f,0.05f) * 1.5f);
+        m_aSegmentBadge[i].SetTexSize   (coreVector2(0.5f,1.0f));
+
+        m_aSegmentBadgeWave[i].DefineTexture(0u, "effect_headlight_point.png");
+        m_aSegmentBadgeWave[i].DefineProgram("menu_single_program");
+        m_aSegmentBadgeWave[i].SetSize      (m_aSegmentBadge[i].GetSize() * 0.7f);
+    }
 
     m_SegmentBox.SetPosition(m_BackgroundMain.GetPosition() + coreVector2(0.0f,0.0f));
-    m_SegmentBox.SetSize    (coreVector2(m_BackgroundMain.GetSize().x, 0.72f));
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentLine[i]);
+    m_SegmentBox.SetSize    (coreVector2(m_BackgroundMain.GetSize().x, 0.77f));
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentLine    [i]);
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentIconBack[i]);        
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentIcon[i]);
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS;      ++j) m_SegmentBox.BindObject(&m_aaSegmentBack[i][j]);
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS - 1u; ++j) m_SegmentBox.BindObject(&m_aaSegmentTile[i][j]);   // waves
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aaSegmentTile[i][MENU_GAME_SEGMENTS - 1u]);                                     // bosses
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) for(coreUintW j = 0u; j < MENU_GAME_ARROWS;        ++j) m_SegmentBox.BindObject(&m_aaSegmentArrow[i][j]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentIcon    [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentName    [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentNumber  [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS;          ++j) m_SegmentBox.BindObject(&m_aaSegmentBack[i][j]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS - 1u;     ++j) m_SegmentBox.BindObject(&m_aaSegmentTile[i][j]);   // waves
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aaSegmentTile[i][MENU_GAME_SEGMENTS - 1u]);                                         // bosses
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) for(coreUintW j = 0u; j < MENU_GAME_ARROWS;            ++j) m_SegmentBox.BindObject(&m_aaSegmentArrow[i][j]);
+    m_SegmentBox.BindObject(&m_aSegmentCursor[2]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) m_SegmentBox.BindObject(&m_aSegmentBadgeWave[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) m_SegmentBox.BindObject(&m_aSegmentBadge    [i]);
+    m_SegmentBox.BindObject(&m_SegmentMedal);
     m_SegmentBox.BindObject(&m_aSegmentCursor[0]);
     m_SegmentBox.BindObject(&m_aSegmentCursor[1]);
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentName  [i]);
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) m_SegmentBox.BindObject(&m_aSegmentNumber[i]);
 
     for(coreUintW i = 0u; i < MENU_GAME_ARCADES; ++i)
     {
@@ -274,17 +295,34 @@ cGameMenu::cGameMenu()noexcept
     {
         m_aArmoryMedal[i].DefineTexture(0u, "menu_medal.png");
         m_aArmoryMedal[i].DefineProgram("default_2d_program");
-        m_aArmoryMedal[i].SetPosition  (i ? coreVector2(0.0f,0.0f) : (m_ArmoryArea.GetPosition() + coreVector2(0.0f,0.0f)));
-        m_aArmoryMedal[i].SetSize      (coreVector2(1.0f,1.0f) * (i ? 0.0f : 0.1f));
+        m_aArmoryMedal[i].SetPosition  (i ? coreVector2(0.0f,0.0f) : (m_ArmoryArea.GetPosition() + coreVector2(0.0f,0.01f)));
+        m_aArmoryMedal[i].SetSize      (coreVector2(1.0f,1.0f) * (i ? 0.0f : 0.115f));
         m_aArmoryMedal[i].SetTexSize   (coreVector2(0.25f,0.25f));
+
+        m_aArmoryMedalBest[i].DefineTexture(0u, "menu_medal.png");
+        m_aArmoryMedalBest[i].DefineProgram("default_2d_program");
+        m_aArmoryMedalBest[i].SetPosition  (i ? coreVector2(0.0f,0.0f) : (m_aArmoryMedal[0].GetPosition() + coreVector2(0.0f,-0.05f)));
+        //m_aArmoryMedalBest[i].SetPosition  (m_aArmoryMedal[0].GetPosition() + coreVector2(0.1f,0.0f));
+        m_aArmoryMedalBest[i].SetSize      (coreVector2(1.0f,1.0f) * (i ? (0.06f * (0.08f/0.115f)) : 0.06f));
+        //m_aArmoryMedalBest[i].SetSize      (coreVector2(1.0f,1.0f) * 0.1f);
+        m_aArmoryMedalBest[i].SetTexSize   (coreVector2(0.25f,0.25f));
     }
 
     m_ArmoryMedalBack.DefineTexture(0u, "menu_detail_02.png");
     m_ArmoryMedalBack.DefineTexture(1u, "menu_background_black.png");
     m_ArmoryMedalBack.DefineProgram("menu_free_program");
-    m_ArmoryMedalBack.SetPosition  (m_ArmoryArea2.GetPosition() + coreVector2(0.0f,-0.022f));
+    m_ArmoryMedalBack.SetPosition  (m_ArmoryArea2.GetPosition() + coreVector2(0.0f,-0.014f));
     m_ArmoryMedalBack.SetSize      (coreVector2(7.0f + 5.0f, 0.5f) * 0.07f);
     m_ArmoryMedalBack.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.5f);
+
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS; ++i)
+    {
+        m_aArmoryMedalBack2[i].DefineTexture(0u, "effect_headlight_point.png");
+        m_aArmoryMedalBack2[i].DefineProgram("menu_single_program");
+        m_aArmoryMedalBack2[i].SetPosition  (m_aArmoryMedal[i].GetPosition());
+        m_aArmoryMedalBack2[i].SetSize      (m_aArmoryMedal[i].GetSize() + coreVector2(0.05f,0.05f));
+        m_aArmoryMedalBack2[i].SetColor3    (coreVector3(0.0f,0.0f,0.0f));
+    }
 
     m_ArmoryFragment.DefineTexture(1u, "menu_background_black.png");
     m_ArmoryFragment.DefineProgram("menu_fragment_program");
@@ -364,11 +402,26 @@ cGameMenu::cGameMenu()noexcept
     {
         m_aArmoryIcon[i].DefineTexture(0u, "menu_helper.png");
         m_aArmoryIcon[i].DefineProgram("menu_helper_program");
-        m_aArmoryIcon[i].SetSize      (coreVector2(1.0f,1.0f) * 0.07f);
-        m_aArmoryIcon[i].SetDirection (coreVector2(1.0f,1.0f).Normalized());
-        m_aArmoryIcon[i].SetColor3    (g_aMissionData[i].vColor * 0.8f);
+        m_aArmoryIcon[i].SetSize      (coreVector2(1.0f,1.0f) * 0.065f);
+        //m_aArmoryIcon[i].SetDirection (coreVector2(1.0f,1.0f).Normalized());
+        m_aArmoryIcon[i].SetColor3    (g_aMissionData[i].vColor * 1.0f);
         m_aArmoryIcon[i].SetTexSize   (coreVector2(0.25f,0.25f));
         m_aArmoryIcon[i].SetTexOffset (g_aMissionData[i].vIcon);
+
+        m_aArmoryIconBack[i].DefineTexture(0u, "menu_helper.png");
+        m_aArmoryIconBack[i].DefineProgram("menu_helper_program");
+        m_aArmoryIconBack[i].SetSize      (m_aArmoryIcon[i].GetSize     () * 1.2f);
+        m_aArmoryIconBack[i].SetColor3    (m_aArmoryIcon[i].GetColor3   ());
+        m_aArmoryIconBack[i].SetTexSize   (m_aArmoryIcon[i].GetTexSize  ());
+        m_aArmoryIconBack[i].SetTexOffset (m_aArmoryIcon[i].GetTexOffset());
+    }
+
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS; ++i)
+    {
+        m_aArmoryArrow[i].DefineTexture(0u, "menu_arrow.png");
+        m_aArmoryArrow[i].DefineProgram("menu_single_program");
+        m_aArmoryArrow[i].SetSize      (coreVector2(0.021f,0.021f));
+        m_aArmoryArrow[i].SetColor3    (COLOR_MENU_WHITE);
     }
 
     m_aArmoryTitle[0].Construct   (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
@@ -418,7 +471,11 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryLogo.SetPosition  (m_ArmoryArea.GetPosition() + coreVector2(0.0f,0.123f));
     m_ArmoryLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.5f);
 
-    m_ArmoryTile.DefineProgram("menu_grey_program");
+    m_ArmoryTrophy.Construct(MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_ArmoryTrophy.SetColor3(COLOR_MENU_WHITE);
+    m_ArmoryTrophy.SetText  (ICON_TROPHY);
+
+    m_ArmoryTile.DefineProgram("menu_segment_program");
 
     m_ArmoryBack.DefineProgram("menu_color_program");
     m_ArmoryBack.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.1f);
@@ -467,16 +524,21 @@ cGameMenu::cGameMenu()noexcept
         m_aArmoryShield[i].SetAlignment(coreVector2(-1.00f,0.00f));
         m_aArmoryShield[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-        //m_aArmoryWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
-        //m_aArmoryWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[5].GetPosition() - vOffset);
-        //m_aArmoryWeapon[i].SetSize     (m_aArmoryShield[i].GetSize());
-        //m_aArmoryWeapon[i].SetAlignment(m_aArmoryShield[i].GetAlignment());
-        //m_aArmoryWeapon[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
+        m_aArmoryWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aArmoryWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[5].GetPosition() - vOffset);
+        m_aArmoryWeapon[i].SetSize     (m_aArmoryShield[i].GetSize());
+        m_aArmoryWeapon[i].SetAlignment(m_aArmoryShield[i].GetAlignment());
+        m_aArmoryWeapon[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
         m_aArmoryPlayer[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-        //m_aArmoryPlayer[i].SetPosition(m_aArmoryWeapon[i].GetPosition() - coreVector2(m_aArmoryWeapon[i].GetSize().x * 0.5f, 0.05f));
-        m_aArmoryPlayer[i].SetPosition(m_aArmoryShield[i].GetPosition() - coreVector2(m_aArmoryShield[i].GetSize().x * 0.5f, 0.05f));                   
+        m_aArmoryPlayer[i].SetPosition(m_aArmoryWeapon[i].GetPosition() + coreVector2(m_aArmoryWeapon[i].GetSize().x * -0.5f, -0.05f));
         m_aArmoryPlayer[i].SetColor3  (COLOR_MENU_WHITE);
+
+        m_aArmoryWeaponIcon[i].DefineTexture(0u, "menu_weapon.png");
+        m_aArmoryWeaponIcon[i].DefineProgram("default_2d_program");
+        m_aArmoryWeaponIcon[i].SetPosition  (m_aArmoryWeapon[i].GetPosition() + coreVector2(m_aArmoryWeapon[i].GetSize().x * -0.5f, 0.0f));
+        m_aArmoryWeaponIcon[i].SetSize      (coreVector2(1.0f, 1.0f) * 0.12f);
+        m_aArmoryWeaponIcon[i].SetTexSize   (coreVector2(0.25f,0.5f));
     }
 
     m_FirstHeader.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
@@ -561,7 +623,7 @@ cGameMenu::cGameMenu()noexcept
         m_aDemoLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
         m_aDemoLine[i].SetFocusable (true);
 
-        iOffset += ((i == 0u) || (i == 3u)) ? 3u : 2u;
+        iOffset += ((i == 2u) || (i == 3u)) ? 3u : 2u;
     }
     m_aDemoName[0].SetTextLanguage("GAME_TYPE");
     m_aDemoName[1].SetTextLanguage("GAME_GAMESPEED");
@@ -621,21 +683,24 @@ cGameMenu::cGameMenu()noexcept
     m_ShieldNew.SetPosition(m_aArmoryShield[1].GetPosition() + coreVector2(0.045f,0.0f));
     m_ShieldNew.SetIndex   (NEW_ARMORY_SHIELD);
 
+    m_WeaponNew.SetPosition(m_aArmoryWeapon[1].GetPosition() + coreVector2(0.045f,0.0f));
+    m_WeaponNew.SetIndex   (NEW_ARMORY_WEAPON);
+
     // fill option entries       
-    m_ArmoryMode      .AddEntryLanguage("GAME_MODE_STANDARD",     GAME_MODE_STANDARD);
-    m_ArmoryMode      .AddEntryLanguage("GAME_MODE_PACIFIST",     GAME_MODE_PACIFIST);
-    m_ArmoryMode      .AddEntryLanguage("GAME_MODE_MASOCHIST",    GAME_MODE_MASOCHIST);
-    m_FirstType       .AddEntryLanguage("GAME_TYPE_SOLO",         GAME_TYPE_SOLO);
-    m_FirstType       .AddEntryLanguage("GAME_TYPE_COOP",         GAME_TYPE_COOP);
-    m_FirstDifficulty .AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
-    m_FirstDifficulty .AddEntryLanguage("GAME_DIFFICULTY_NORMAL", GAME_DIFFICULTY_NORMAL);
+    m_ArmoryMode     .AddEntryLanguage("GAME_MODE_STANDARD",     GAME_MODE_STANDARD);
+    m_ArmoryMode     .AddEntryLanguage("GAME_MODE_PACIFIST",     GAME_MODE_PACIFIST);
+    m_ArmoryMode     .AddEntryLanguage("GAME_MODE_MASOCHIST",    GAME_MODE_MASOCHIST);
+    m_FirstType      .AddEntryLanguage("GAME_TYPE_SOLO",         GAME_TYPE_SOLO);
+    m_FirstType      .AddEntryLanguage("GAME_TYPE_COOP",         GAME_TYPE_COOP);
+    m_FirstDifficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
+    m_FirstDifficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", GAME_DIFFICULTY_NORMAL);
     for(coreUintW i = 50u; i <= 100u; i += 5u) m_FirstSpeed.AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aFirstShield[i].AddEntryLanguage("VALUE_NO", 0u);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) for(coreUintW j = 10u; j <= SHIELD_DEFAULT; j += 10u) m_aFirstShield[i].AddEntry(PRINT("%zu", j), j);
-    m_DemoType       .AddEntryLanguage("GAME_TYPE_SOLO",          GAME_TYPE_SOLO);
-    m_DemoType       .AddEntryLanguage("GAME_TYPE_COOP",          GAME_TYPE_COOP);
-    m_DemoDifficulty .AddEntryLanguage("GAME_DIFFICULTY_EASY",    GAME_DIFFICULTY_EASY);
-    m_DemoDifficulty .AddEntryLanguage("GAME_DIFFICULTY_NORMAL",  GAME_DIFFICULTY_NORMAL);
+    m_DemoType      .AddEntryLanguage("GAME_TYPE_SOLO",          GAME_TYPE_SOLO);
+    m_DemoType      .AddEntryLanguage("GAME_TYPE_COOP",          GAME_TYPE_COOP);
+    m_DemoDifficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",    GAME_DIFFICULTY_EASY);
+    m_DemoDifficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL",  GAME_DIFFICULTY_NORMAL);
     for(coreUintW i = 50u; i <= 100u; i += 5u) m_DemoSpeed.AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aDemoShield[i].AddEntryLanguage("VALUE_NO", 0u);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) for(coreUintW j = 10u; j <= SHIELD_DEFAULT; j += 10u) m_aDemoShield[i].AddEntry(PRINT("%zu", j), j);
@@ -674,26 +739,17 @@ cGameMenu::cGameMenu()noexcept
     m_NavigatorMain.AssignBack (&m_BackButtonMain);
     m_NavigatorMain.AssignMenu (this);
 
-    //m_NavigatorArmory.BindObject(&m_ArmorySelection,   &m_StartButtonArmory, NULL,                 &m_ArmoryType,        NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    //m_NavigatorArmory.BindObject(&m_ArmoryType,        &m_ArmorySelection,   NULL,                 &m_ArmoryMode,        NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    //m_NavigatorArmory.BindObject(&m_ArmoryMode,        &m_ArmoryType,        NULL,                 &m_ArmorySpeed,       NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    //m_NavigatorArmory.BindObject(&m_ArmorySpeed,       &m_ArmoryMode,        NULL,                 &m_ArmoryDifficulty,  NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    //m_NavigatorArmory.BindObject(&m_ArmoryDifficulty,  &m_ArmorySpeed,       NULL,                 &m_aArmoryShield[0],  NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    //m_NavigatorArmory.BindObject(&m_aArmoryShield[0],  &m_ArmoryDifficulty,  &m_aArmoryShield[1],  &m_aArmoryWeapon[0],  &m_aArmoryShield[1],  MENU_TYPE_SWITCH_PRESS);
-    //m_NavigatorArmory.BindObject(&m_aArmoryShield[1],  &m_ArmoryDifficulty,  &m_aArmoryShield[0],  &m_aArmoryWeapon[1],  &m_aArmoryShield[0],  MENU_TYPE_SWITCH_PRESS);
-    //m_NavigatorArmory.BindObject(&m_aArmoryWeapon[0],  &m_aArmoryShield[0],  &m_aArmoryWeapon[1],  &m_StartButtonArmory, &m_aArmoryWeapon[1],  MENU_TYPE_SWITCH_PRESS);
-    //m_NavigatorArmory.BindObject(&m_aArmoryWeapon[1],  &m_aArmoryShield[1],  &m_aArmoryWeapon[0],  &m_StartButtonArmory, &m_aArmoryWeapon[0],  MENU_TYPE_SWITCH_PRESS);
-    //m_NavigatorArmory.BindObject(&m_StartButtonArmory, &m_aArmoryWeapon[0],  &m_BackButtonArmory,  &m_ArmoryType,        &m_BackButtonArmory,  MENU_TYPE_DEFAULT);
-    //m_NavigatorArmory.BindObject(&m_BackButtonArmory,  &m_aArmoryWeapon[0],  &m_StartButtonArmory, &m_ArmoryType,        &m_StartButtonArmory, MENU_TYPE_DEFAULT);
     m_NavigatorArmory.BindObject(&m_ArmorySelection,   &m_StartButtonArmory, NULL,                 &m_ArmoryType,        NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     m_NavigatorArmory.BindObject(&m_ArmoryType,        &m_ArmorySelection,   NULL,                 &m_ArmoryMode,        NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     m_NavigatorArmory.BindObject(&m_ArmoryMode,        &m_ArmoryType,        NULL,                 &m_ArmorySpeed,       NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     m_NavigatorArmory.BindObject(&m_ArmorySpeed,       &m_ArmoryMode,        NULL,                 &m_ArmoryDifficulty,  NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     m_NavigatorArmory.BindObject(&m_ArmoryDifficulty,  &m_ArmorySpeed,       NULL,                 &m_aArmoryShield[0],  NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    m_NavigatorArmory.BindObject(&m_aArmoryShield[0],  &m_ArmoryDifficulty,  &m_aArmoryShield[1],  &m_StartButtonArmory, &m_aArmoryShield[1],  MENU_TYPE_SWITCH_PRESS);
-    m_NavigatorArmory.BindObject(&m_aArmoryShield[1],  &m_ArmoryDifficulty,  &m_aArmoryShield[0],  &m_StartButtonArmory, &m_aArmoryShield[0],  MENU_TYPE_SWITCH_PRESS);
-    m_NavigatorArmory.BindObject(&m_StartButtonArmory, &m_aArmoryShield[0],  &m_BackButtonArmory,  &m_ArmoryType,        &m_BackButtonArmory,  MENU_TYPE_DEFAULT);
-    m_NavigatorArmory.BindObject(&m_BackButtonArmory,  &m_aArmoryShield[0],  &m_StartButtonArmory, &m_ArmoryType,        &m_StartButtonArmory, MENU_TYPE_DEFAULT);
+    m_NavigatorArmory.BindObject(&m_aArmoryShield[0],  &m_ArmoryDifficulty,  &m_aArmoryShield[1],  &m_aArmoryWeapon[0],  &m_aArmoryShield[1],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_aArmoryShield[1],  &m_ArmoryDifficulty,  &m_aArmoryShield[0],  &m_aArmoryWeapon[1],  &m_aArmoryShield[0],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_aArmoryWeapon[0],  &m_aArmoryShield[0],  &m_aArmoryWeapon[1],  &m_StartButtonArmory, &m_aArmoryWeapon[1],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_aArmoryWeapon[1],  &m_aArmoryShield[1],  &m_aArmoryWeapon[0],  &m_StartButtonArmory, &m_aArmoryWeapon[0],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_StartButtonArmory, &m_aArmoryWeapon[0],  &m_BackButtonArmory,  &m_ArmoryType,        &m_BackButtonArmory,  MENU_TYPE_DEFAULT);
+    m_NavigatorArmory.BindObject(&m_BackButtonArmory,  &m_aArmoryWeapon[0],  &m_StartButtonArmory, &m_ArmoryType,        &m_StartButtonArmory, MENU_TYPE_DEFAULT);
 
     m_NavigatorArmory.AssignFirst(&m_StartButtonArmory);
     m_NavigatorArmory.AssignBack (&m_BackButtonArmory);
@@ -738,26 +794,32 @@ cGameMenu::cGameMenu()noexcept
     this->BindObject(SURFACE_GAME_ARMORY, &m_BackButtonArmory);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryArea);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryArea2);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedalBack2[i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryIconBig);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryLine     [i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeBack[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryLine      [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeBack [i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryHelperBack);
-    this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryMedalBack);
+    //this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryMedalBack);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryFragmentBack);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryFragment);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryBack);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryTile);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_HELPERS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryHelperWave[i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_HELPERS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryHelper    [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryIconBack  [i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryIcon      [i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeWave [i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadge     [i]);
+    //for(coreUintW i = 0u; i < MENU_GAME_PLAYERS;           ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryWeaponIcon[i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryLogo);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryArrow    [i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedal    [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedalBest[i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc[i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc2[i][j]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryName     [i]);
     //this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryHeader);
+    this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryTrophy);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryTitle);     ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryTitle    [i]);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryScore);     ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryScore    [i]);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryTime);      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryTime     [i]);
@@ -769,9 +831,10 @@ cGameMenu::cGameMenu()noexcept
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryDifficulty);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmorySpeed);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryShield[i]);
-    //for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryWeapon[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryWeapon[i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_SpeedNew);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ShieldNew);
+    this->BindObject(SURFACE_GAME_ARMORY, &m_WeaponNew);
     this->BindObject(SURFACE_GAME_ARMORY, &m_NavigatorArmory);
 
     this->BindObject(SURFACE_GAME_FIRST, &m_BackgroundFirst);
@@ -872,11 +935,11 @@ void cGameMenu::Move()
 
             for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
             {
-                m_aSegmentIcon[i].SetSize     (coreVector2(0.1f,0.1f) * 1.2f);
+                m_aSegmentIcon[i].SetSize     (coreVector2(0.1f,0.1f) * 1.1f);
                 m_aSegmentIcon[i].SetDirection(coreVector2(1.0f,1.0f).Normalized());
                 //m_aSegmentIcon[i].Move();
 
-                m_aSegmentIconBack[i].SetSize     (m_aSegmentIcon[i].GetSize());
+                m_aSegmentIconBack[i].SetSize     (m_aSegmentIcon[i].GetSize() * 1.2f);
                 m_aSegmentIconBack[i].SetDirection(coreVector2(0.0f,1.0f));
                 //m_aSegmentIconBack[i].Move();
             }
@@ -977,86 +1040,88 @@ void cGameMenu::Move()
             for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
                 m_aSegmentIconBack[i].SetAlpha(m_aSegmentIconBack[i].GetAlpha() * 0.5f);
 
-
-            if(m_aiSegmentSelection[0] < MENU_GAME_MISSIONS)
+            if((m_aiSegmentSelection[0] < MENU_GAME_MISSIONS) && (m_aiSegmentSelection[1] < MENU_GAME_SEGMENTS))
             {
-                if(m_aiSegmentSelection[1] < MENU_GAME_SEGMENTS)
-                {
-                    // 
-                    const cGuiObject& oTile = m_aaSegmentTile[m_aiSegmentSelection[0]][m_aiSegmentSelection[1]];
+                this->__RefreshCursor(m_aiSegmentSelection[0], m_aiSegmentSelection[1]);
+                
+                m_fSegmentTime.Update(1.0f);
 
-                    m_aSegmentCursor[1].DefineTexture(0u, oTile.GetTexture(0u));
-                    m_aSegmentCursor[1].SetPosition  (oTile.GetPosition ());
-                    m_aSegmentCursor[1].SetSize      (oTile.GetSize     () * 1.54f);
-                    m_aSegmentCursor[1].SetTexSize   (oTile.GetTexSize  ());
-                    m_aSegmentCursor[1].SetTexOffset (oTile.GetTexOffset());
-                    m_aSegmentCursor[1].Move();
+                m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.2f*PI) - (0.25f*PI)));
+                m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.1f*PI)));
 
-                    m_aSegmentCursor[0].SetPosition(m_aSegmentCursor[1].GetPosition());
-                    m_aSegmentCursor[0].SetSize    (m_aSegmentCursor[1].GetSize    () + coreVector2(0.01f,0.01f));
-                    m_aSegmentCursor[0].Move();
-
-                    m_aSegmentCursor[1].SetColor3(g_aMissionData[m_aiSegmentSelection[0]].vColor);
-
-                    
-                    
-                    m_fSegmentTime.Update(1.0f);
-
-                    m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.2f*PI) - (0.25f*PI)));
-                    m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.1f*PI)));
-
-                    //m_aSegmentIcon[m_aiSegmentSelection[0]].SetSize(coreVector2(0.1f,0.1f) * 1.2f);
-                    //m_aSegmentIcon[m_aiSegmentSelection[0]].Move();
+                //m_aSegmentIcon[m_aiSegmentSelection[0]].SetSize(coreVector2(0.1f,0.1f) * 1.2f);
+                //m_aSegmentIcon[m_aiSegmentSelection[0]].Move();
 //
-                    //m_aSegmentIconBack[m_aiSegmentSelection[0]].SetSize(m_aSegmentIcon[m_aiSegmentSelection[0]].GetSize());
-                    //m_aSegmentIconBack[m_aiSegmentSelection[0]].Move();
-                }
-                else
-                {
-                    m_aSegmentCursor[1].SetPosition(HIDDEN_POS);
-                    m_aSegmentCursor[1].Move();
-
-                    m_aSegmentCursor[0].SetPosition(m_aSegmentCursor[1].GetPosition());
-                    m_aSegmentCursor[0].Move();
-                    
-                    //m_fSegmentTime.Update(1.0f);
-//
-                    //m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.2f*PI) - (0.25f*PI)));
-                    //m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.1f*PI)));
-//
-                    //m_aSegmentIcon[m_aiSegmentSelection[0]].SetSize(coreVector2(0.1f,0.1f) * 1.2f);
-                    //m_aSegmentIcon[m_aiSegmentSelection[0]].Move();
-//
-                    //m_aSegmentIconBack[m_aiSegmentSelection[0]].SetSize(m_aSegmentIcon[m_aiSegmentSelection[0]].GetSize());
-                    //m_aSegmentIconBack[m_aiSegmentSelection[0]].Move();
-
-                    for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS; ++j)
-                    {
-                        const coreBool    bBoss = MISSION_SEGMENT_IS_BOSS(j);
-                        const coreVector2 vSize = bBoss ? coreVector2(0.1f,0.05f) : coreVector2(0.05f,0.05f);
-
-                        m_aaSegmentTile[m_aiSegmentSelection[0]][j].SetSize  (vSize * 1.4f * 1.1f);
-                        m_aaSegmentTile[m_aiSegmentSelection[0]][j].SetColor3(g_aMissionData[m_aiSegmentSelection[0]].vColor);
-                        m_aaSegmentTile[m_aiSegmentSelection[0]][j].Move();
-
-                        m_aaSegmentBack[m_aiSegmentSelection[0]][j].SetSize(m_aaSegmentTile[m_aiSegmentSelection[0]][j].GetSize() + coreVector2(0.01f,0.01f));
-                        m_aaSegmentBack[m_aiSegmentSelection[0]][j].Move();
-                    }
-                }
+                //m_aSegmentIconBack[m_aiSegmentSelection[0]].SetSize(m_aSegmentIcon[m_aiSegmentSelection[0]].GetSize());
+                //m_aSegmentIconBack[m_aiSegmentSelection[0]].Move();
             }
             else
             {
-                m_aSegmentCursor[1].SetPosition(HIDDEN_POS);
-                m_aSegmentCursor[1].Move();
+                for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSegmentCursor); ++i)
+                {
+                    m_aSegmentCursor[i].SetPosition(HIDDEN_POS);
+                    m_aSegmentCursor[i].Move();
+                }
 
-                m_aSegmentCursor[0].SetPosition(m_aSegmentCursor[1].GetPosition());
-                m_aSegmentCursor[0].Move();
+                m_SegmentMedal.SetPosition(HIDDEN_POS);
+                m_SegmentMedal.Move();
+
+                for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i)
+                {
+                    m_aSegmentBadge[i].SetPosition(HIDDEN_POS);
+                    m_aSegmentBadge[i].Move();
+
+                    m_aSegmentBadgeWave[i].SetPosition(HIDDEN_POS);
+                    m_aSegmentBadgeWave[i].Move();
+                }
+                
+                //m_fSegmentTime.Update(1.0f);
+//
+                //m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.2f*PI) - (0.25f*PI)));
+                //m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.1f*PI)));
+//
+                //m_aSegmentIcon[m_aiSegmentSelection[0]].SetSize(coreVector2(0.1f,0.1f) * 1.2f);
+                //m_aSegmentIcon[m_aiSegmentSelection[0]].Move();
+//
+                //m_aSegmentIconBack[m_aiSegmentSelection[0]].SetSize(m_aSegmentIcon[m_aiSegmentSelection[0]].GetSize());
+                //m_aSegmentIconBack[m_aiSegmentSelection[0]].Move();
+
+                /*
+                for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS; ++j)
+                {
+                    const coreBool    bBoss = MISSION_SEGMENT_IS_BOSS(j);
+                    const coreVector2 vSize = bBoss ? coreVector2(0.1f,0.05f) : coreVector2(0.05f,0.05f);
+
+                    m_aaSegmentTile[m_aiSegmentSelection[0]][j].SetSize  (vSize * 1.4f * 1.1f);
+                    m_aaSegmentTile[m_aiSegmentSelection[0]][j].SetColor3(g_aMissionData[m_aiSegmentSelection[0]].vColor);
+                    m_aaSegmentTile[m_aiSegmentSelection[0]][j].Move();
+
+                    m_aaSegmentBack[m_aiSegmentSelection[0]][j].SetSize(m_aaSegmentTile[m_aiSegmentSelection[0]][j].GetSize() + coreVector2(0.01f,0.01f));
+                    m_aaSegmentBack[m_aiSegmentSelection[0]][j].Move();
+                }
+                 */
             }
             
+
+
+            const coreFloat fRotation = coreFloat(Core::System->GetTotalTime());
+
+            for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i)
+            {
+                if(m_aSegmentBadgeWave[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+                {
+                    m_aSegmentBadge[i].SetDirection(coreVector2::Direction(fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
+                }
+                else
+                {
+                    m_aSegmentBadge[i].SetDirection(coreVector2(0.0f,1.0f));
+                }
+                m_aSegmentBadge[i].Move();
+            }
             
             for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
             {
-                m_aSegmentIcon[i].Move();
+                m_aSegmentIcon    [i].Move();
                 m_aSegmentIconBack[i].Move();
             }
 
@@ -1090,9 +1155,13 @@ void cGameMenu::Move()
                         // 
                         m_SpeedNew .Resolve();
                         m_ShieldNew.Resolve();
+                        m_WeaponNew.Resolve();
 
                         // 
                         m_NavigatorArmory.SetActive(false);
+
+                        // 
+                        m_bFromTrophy = false;
                     }
                 });
             }
@@ -1106,11 +1175,19 @@ void cGameMenu::Move()
                     // 
                     m_iStatus = 2;
                 }
+                else if(m_bFromTrophy)
+                {
+                    // 
+                    m_iStatus = 3;
+                }
                 else
                 {
                     // 
                     g_pMenu->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u, false, true);
                 }
+
+                // 
+                m_bFromTrophy = false;
             }
 
             // 
@@ -1133,18 +1210,6 @@ void cGameMenu::Move()
                  if((m_ArmorySelection.GetUserSwitch() < 0) || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) {this->SelectPrevious(); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
             else if((m_ArmorySelection.GetUserSwitch() > 0) || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_PRESS)) {this->SelectNext();     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
 
-            // 
-            //cMenu::UpdateSwitchBox(&m_ArmorySelection);
-            cMenu::UpdateSwitchBox(&m_ArmoryType);
-            cMenu::UpdateSwitchBox(&m_ArmoryMode);
-            cMenu::UpdateSwitchBox(&m_ArmoryDifficulty);
-            cMenu::UpdateSwitchBox(&m_ArmorySpeed);
-            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aArmoryShield[i]);
-            //for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aArmoryWeapon[i]);
-
-            // 
-            cMenu::UpdateButton(&m_StartButtonArmory, &m_NavigatorArmory, m_StartButtonArmory.IsFocused());
-            cMenu::UpdateButton(&m_BackButtonArmory,  &m_NavigatorArmory, m_BackButtonArmory .IsFocused());
 
             // 
             coreVector3 vMenuColor;
@@ -1153,11 +1218,15 @@ void cGameMenu::Move()
             default: ASSERT(false)
             case 0u: vMenuColor = g_aMissionData[m_aiCurIndex[0]].vColor2; break;
             case 1u: vMenuColor = g_aMissionData[m_aiCurIndex[1]].vColor2; break;
-            case 2u: vMenuColor = g_pMenu->GetButtonColor();               break;
+            case 2u: vMenuColor = g_aMissionData[MISSION_ATER]   .vColor2; break;
             }
             for(coreUintW i = 0u; i < MENU_GAME_ARMORIES; ++i) cMenu::UpdateLine(&m_aArmoryLine[i], true, true, vMenuColor);
             
             
+
+            // 
+            cMenu::UpdateButton(&m_StartButtonArmory, &m_NavigatorArmory, m_StartButtonArmory.IsFocused(), vMenuColor);
+            cMenu::UpdateButton(&m_BackButtonArmory,  &m_NavigatorArmory, m_BackButtonArmory .IsFocused(), vMenuColor);
             
             cMenu::UpdateButton(m_ArmorySelection.GetArrow(0u), &m_NavigatorArmory, m_ArmorySelection.GetArrow(0u)->IsFocused(), vMenuColor, true, false);
             cMenu::UpdateButton(m_ArmorySelection.GetArrow(1u), &m_NavigatorArmory, m_ArmorySelection.GetArrow(1u)->IsFocused(), vMenuColor, true, false);
@@ -1166,14 +1235,47 @@ void cGameMenu::Move()
             m_aArmoryShield[0].GetCaption()->SetColor3(m_aArmoryShield[0].GetCurValue() ? COLOR_MENU_BLUE   : COLOR_MENU_RED);
             m_aArmoryShield[1].GetCaption()->SetColor3(m_aArmoryShield[1].GetCurValue() ? COLOR_MENU_YELLOW : COLOR_MENU_RED);
 
+
             const coreBool bMulti = (m_ArmoryType.GetCurValue() != GAME_TYPE_SOLO);
-            m_aArmoryShield[1].SetOverride(bMulti ? 0 : -1);
-            //m_aArmoryWeapon[1].SetOverride(bMulti ? m_aArmoryWeapon[0].GetOverride() : -1);
+            m_aArmoryShield[1].SetOverride(bMulti ? m_aArmoryShield[0].GetOverride() : -1);
+            m_aArmoryWeapon[1].SetOverride(bMulti ? m_aArmoryWeapon[0].GetOverride() : -1);
             m_aArmoryPlayer[1].SetColor3  (COLOR_MENU_WHITE * (bMulti ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
 
             m_ArmoryIconBig.SetAlpha(m_ArmoryIconBig.GetAlpha() * 0.6f);
 
             m_ArmoryFragment.SetTexOffset(coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * 0.1f));
+
+            // 
+            //cMenu::UpdateSwitchBox(&m_ArmorySelection);
+            cMenu::UpdateSwitchBox(&m_ArmoryType);
+            cMenu::UpdateSwitchBox(&m_ArmoryMode);
+            cMenu::UpdateSwitchBox(&m_ArmoryDifficulty);
+            cMenu::UpdateSwitchBox(&m_ArmorySpeed);
+            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aArmoryShield[i]);
+            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aArmoryWeapon[i]);
+            
+                        
+            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
+            {
+                coreVector3 vColor     = COLOR_MENU_WHITE;
+                coreVector2 vTexOffset = coreVector2(0.5f,0.0f);
+                if(!m_aArmoryWeapon[0].GetOverride())
+                {
+                    switch(m_aArmoryWeapon[i].GetCurValue())
+                    {
+                    default: ASSERT(false)
+                    case 1u: vColor = COLOR_MENU_YELLOW; vTexOffset = coreVector2(0.0f, 0.0f); break;
+                    case 2u: vColor = COLOR_MENU_PURPLE; vTexOffset = coreVector2(0.25f,0.0f); break;
+                    }
+                }
+
+                m_aArmoryWeapon[i].GetCaption()->SetColor3(vColor);
+
+                m_aArmoryWeaponIcon[i].SetColor3   (vColor);
+                m_aArmoryWeaponIcon[i].SetTexOffset(vTexOffset);
+
+                m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.6f * m_aArmoryWeapon[i].GetAlpha());
+            }
 
             //for(coreUintW i = 0u; i < MENU_GAME_ARMORY_WAVES; ++i)
             //{
@@ -1212,6 +1314,24 @@ void cGameMenu::Move()
                 m_aArmoryHelperWave[i].Move();
 
                 m_aArmoryHelperWave[i].SetAlpha(m_aArmoryHelperWave[i].GetAlpha() * 0.5f);
+            }
+
+            for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS; ++i)
+            {
+                if(m_aArmoryIcon[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+                {
+                    m_aArmoryIcon    [i].SetDirection(coreVector2::Direction(fRotation *  (0.2f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
+                    m_aArmoryIconBack[i].SetDirection(coreVector2::Direction(fRotation * (-0.1f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
+                }
+                else
+                {
+                    m_aArmoryIcon    [i].SetDirection(coreVector2(0.0f,1.0f));
+                    m_aArmoryIconBack[i].SetDirection(coreVector2(0.0f,1.0f));
+                }
+                m_aArmoryIcon    [i].Move();
+                m_aArmoryIconBack[i].Move();
+                
+                m_aArmoryIconBack[i].SetAlpha(m_aArmoryIconBack[i].GetAlpha() * 0.5f);
             }
 
             // 
@@ -1398,7 +1518,7 @@ void cGameMenu::LoadValues()
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         m_aArmoryShield[i].SelectValue(g_pSave->GetHeader().oOptions.aiShield [i]);
-        //m_aArmoryWeapon[i].SelectValue(g_pSave->GetHeader().oOptions.aaiWeapon[i][0]);
+        m_aArmoryWeapon[i].SelectValue(g_pSave->GetHeader().oOptions.aaiWeapon[i][0]);
         m_aArmoryPlayer[i].SetText    (PRINT("%s %zu", Core::Language->GetString("PLAYER"), i + 1u));
     }
 
@@ -1467,7 +1587,7 @@ void cGameMenu::SaveValues()
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         g_pSave->EditOptions()->aiShield [i]    = m_aArmoryShield[i].GetCurValue();
-        //g_pSave->EditOptions()->aaiWeapon[i][0] = m_aArmoryWeapon[i].GetCurValue();
+        g_pSave->EditOptions()->aaiWeapon[i][0] = m_aArmoryWeapon[i].GetCurValue();
     }
 
     // 
@@ -1525,6 +1645,19 @@ void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTP
         (*piKind)      = GAME_KIND_ALL;
     }
     else ASSERT(false)
+}
+
+
+// ****************************************************************
+// 
+void cGameMenu::RetrievePageData(coreUintW* OUTPUT piMissionIndex, coreUintW* OUTPUT piSegmentIndex)const
+{
+    ASSERT(piMissionIndex && piSegmentIndex)
+
+    // 
+    (*piMissionIndex) = m_aiCurIndex[1];
+    (*piSegmentIndex) = m_aiCurIndex[2];
+    ASSERT(m_iCurPage == 1u)
 }
 
 
@@ -1658,13 +1791,31 @@ void cGameMenu::SelectNext()
 
 // ****************************************************************
 // 
+void cGameMenu::SelectTrophy(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    m_iCurPage = 1u;
+
+    // 
+    this->__SelectSegment (iMissionIndex, iSegmentIndex);
+    this->__PrepareSegment(iMissionIndex, iSegmentIndex);
+
+    m_NavigatorMain.ForceCurrent(&m_aaSegmentTile[m_aiCurIndex[1]][m_aiCurIndex[2]]);
+    m_SegmentBox.ScrollToObject(&m_aaSegmentTile[m_aiCurIndex[1]][m_aiCurIndex[2]], true);
+    
+    m_bFromTrophy = true;
+}
+
+
+// ****************************************************************
+// 
 void cGameMenu::__LoadUnlocks()
 {
     const coreBool bDuelType       = false;
     const coreBool bHardDifficulty = false;
     const coreBool bGameSpeedUp    = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP);
     const coreBool bPowerShield    = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD);
-    //const coreBool bAnyWeapons     = false;
+    const coreBool bAnyWeapons     = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_PULSE);
 
     // 
     m_ArmoryType.ClearEntries();
@@ -1701,23 +1852,25 @@ void cGameMenu::__LoadUnlocks()
         }
 
         // 
-        //m_aArmoryWeapon[i].ClearEntries();
-        //if(bAnyWeapons)
-        //{
-        //    m_aArmoryWeapon[i].AddEntryLanguage("GAME_WEAPON_RAY", 1u);
-        //}
-        //else
-        //{
-        //    m_aArmoryWeapon[i].AddEntryLanguage("UNKNOWN", 1u);
-        //}
-        //
-        //// 
-        //m_aArmoryWeapon[i].SetOverride(bAnyWeapons ? 0 : -1);
+        m_aArmoryWeapon[i].ClearEntries();
+        if(bAnyWeapons)
+        {
+            m_aArmoryWeapon[i].AddEntryLanguage("GAME_WEAPON_RAY",   1u);
+            m_aArmoryWeapon[i].AddEntryLanguage("GAME_WEAPON_PULSE", 2u);
+        }
+        else
+        {
+            m_aArmoryWeapon[i].AddEntryLanguage("UNKNOWN", 1u);
+        }
+
+        // 
+        m_aArmoryWeapon    [i].SetOverride(bAnyWeapons ? 0 : -1);
+        m_aArmoryWeaponIcon[i].SetEnabled (bAnyWeapons ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
 
     // 
-    //m_aArmoryName[5].SetColor3      (COLOR_MENU_WHITE * (bAnyWeapons ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
-    //m_aArmoryName[5].SetTextLanguage(bAnyWeapons ? "GAME_WEAPON" : "UNKNOWN");
+    m_aArmoryName[5].SetColor3      (COLOR_MENU_WHITE * (bAnyWeapons ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
+    m_aArmoryName[5].SetTextLanguage(bAnyWeapons ? "GAME_WEAPON" : "UNKNOWN");
 }
 
 
@@ -1734,13 +1887,16 @@ void cGameMenu::__RefreshBase()
     m_aiCurIndex[3] = 1u;
 
     // 
+    const auto& oProgress = g_pSave->GetHeader().oProgress;
+
+    // 
     coreUintW iMaxMission = 0u;
     coreUintW iHiddenTile = 0u;   // first few tiles are never hidden
     coreUintW iCountBoss  = 0u;
     coreUintW iCountWave  = 0u;
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
     {
-        const coreUint8        iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < MISSION_BASE) ? 1u : 0u);
+        const coreUint8        iAdvance = oProgress.aiAdvance[i] * ((i < MISSION_BASE) ? 1u : 0u);
         const coreObjectEnable eEnabled = iAdvance ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
         for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS; ++j)
@@ -1751,7 +1907,6 @@ void cGameMenu::__RefreshBase()
             m_aaSegmentTile[i][j].SetEnabled  (eEnabled2);
             m_aaSegmentTile[i][j].SetFocusable(bVisible);
             m_aaSegmentBack[i][j].SetEnabled  (eEnabled2);
-            
             
             const coreBool    bBoss      = MISSION_SEGMENT_IS_BOSS(j);
             const coreVector2 vStep      = bBoss ? coreVector2((1.0f/37.0f), (1.0f/21.0f) * (581.0f/512.0f)) : coreVector2((1.0f/41.0f), (1.0f/41.0f));
@@ -1807,6 +1962,78 @@ void cGameMenu::__RefreshBase()
 
     // 
     m_SegmentBox.SetMaxOffset(0.25f * I_TO_F(iMaxMission + 1u) - m_SegmentBox.GetSize().y + 0.15f);
+}
+
+
+// ****************************************************************
+// 
+void cGameMenu::__RefreshCursor(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    const cGuiObject& oTile = m_aaSegmentTile[iMissionIndex][iSegmentIndex];
+
+    m_aSegmentCursor[1].DefineTexture(0u, oTile.GetTexture(0u));
+    m_aSegmentCursor[1].SetPosition  (oTile.GetPosition ());
+    m_aSegmentCursor[1].SetSize      (oTile.GetSize     () * 1.54f);
+    m_aSegmentCursor[1].SetTexSize   (oTile.GetTexSize  ());
+    m_aSegmentCursor[1].SetTexOffset (oTile.GetTexOffset());
+    m_aSegmentCursor[1].Move();
+
+    m_aSegmentCursor[0].SetPosition(m_aSegmentCursor[1].GetPosition());
+    m_aSegmentCursor[0].SetSize    (m_aSegmentCursor[1].GetSize    () + coreVector2(0.01f,0.01f));
+    m_aSegmentCursor[0].Move();
+
+    m_aSegmentCursor[2].SetPosition(m_aSegmentCursor[1].GetPosition());
+    m_aSegmentCursor[2].SetSize    (m_aSegmentCursor[1].GetSize    () + coreVector2(0.1f,0.25f));
+    m_aSegmentCursor[2].Move();
+
+    m_aSegmentCursor[1].SetColor3(g_aMissionData[iMissionIndex].vColor);
+    
+
+    coreUint8 iMaxMedal = MEDAL_NONE;
+    ALL_MEDAL_SEGMENT(aaiMedal) {iMaxMedal = MAX(iMaxMedal, aaiMedal[iMissionIndex][iSegmentIndex]); return false;});
+
+    cMenu::ApplyMedalTexture(&m_SegmentMedal, iMaxMedal, MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, false);
+    
+    m_SegmentMedal.SetPosition(oTile.GetPosition() + coreVector2(0.0f, 0.065f*1.54f + 0.01f));
+    m_SegmentMedal.Move();
+    
+    
+    if(MISSION_SEGMENT_IS_BOSS(iSegmentIndex))
+    {
+        for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i)
+        {
+            m_aSegmentBadge[i].SetPosition(HIDDEN_POS);
+            m_aSegmentBadge[i].Move();
+
+            m_aSegmentBadgeWave[i].SetPosition(HIDDEN_POS);
+            m_aSegmentBadgeWave[i].Move();
+        }
+    }
+    else
+    {
+        const auto& oProgress = g_pSave->GetHeader().oProgress;
+
+        const coreBool bIntro = (iMissionIndex == MISSION_INTRO);
+
+        for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i)
+        {
+            const coreBool bState = HAS_BIT(oProgress.aaiBadge[iMissionIndex][iSegmentIndex], i);
+
+            m_aSegmentBadge[i].SetPosition (oTile.GetPosition() + coreVector2(bIntro ? 0.0f : ((i ? 1.0f : -1.0f) * 0.021f * 1.54f), -0.065f*1.54f));
+            m_aSegmentBadge[i].SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (bState ? 1.0f : 0.5f));
+            m_aSegmentBadge[i].SetTexOffset(coreVector2(bState ? 0.0f : 0.5f, 0.0f));
+
+            m_aSegmentBadgeWave[i].SetEnabled(bState ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
+            m_aSegmentBadge[i].Move();
+
+            m_aSegmentBadgeWave[i].SetPosition(m_aSegmentBadge[i].GetPosition());
+            m_aSegmentBadgeWave[i].Move();
+        }
+        
+        m_aSegmentBadge[1].SetEnabled(bIntro ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+    }
 }
 
 
@@ -1888,8 +2115,8 @@ void cGameMenu::__SelectSegment(const coreUintW iMissionIndex, const coreUintW i
         {
             const coreBool bState = HAS_BIT(oProgress.aiBadge[iMissionIndex][iSegmentIndex], i);
 
-            m_aSegmentBadge[i].SetTexOffset(coreVector2(bState ? 0.0f : 0.5f, 0.0f));
             m_aSegmentBadge[i].SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (bState ? 1.0f : 0.5f));
+            m_aSegmentBadge[i].SetTexOffset(coreVector2(bState ? 0.0f : 0.5f, 0.0f));
             m_aSegmentBadge[i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
 
             m_aSegmentBadgeWave[i].SetEnabled(bState ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
@@ -1938,6 +2165,11 @@ void cGameMenu::__PrepareMission(const coreUintW iMissionIndex)
 
     // 
     cMenu::ApplyMedalTexture(&m_aArmoryMedal[0], oProgress.aaaaiMedalMission[m_iBaseType][m_iBaseMode][m_iBaseDifficulty][iMissionIndex], MEDAL_TYPE_MISSION, false);
+    
+    coreUint8 iMaxMedal = MEDAL_NONE;
+    ALL_MEDAL_MISSION(aiMedal) {iMaxMedal = MAX(iMaxMedal, aiMedal[iMissionIndex]); return false;});
+
+    cMenu::ApplyMedalTexture(&m_aArmoryMedalBest[0], iMaxMedal, MEDAL_TYPE_MISSION, false);
 
     // 
     for(coreUintW i = 1u; i < 7u; ++i)
@@ -1952,8 +2184,8 @@ void cGameMenu::__PrepareMission(const coreUintW iMissionIndex)
     {
         const coreBool bState = HAS_BIT(oProgress.aaiBadge[iMissionIndex][i / MENU_GAME_ARMORY_BADGES], (i % MENU_GAME_ARMORY_BADGES));
 
-        m_aArmoryBadge[i].SetTexOffset(coreVector2(bState ? 0.0f : 0.5f, 0.0f));
         m_aArmoryBadge[i].SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (bState ? 1.0f : 0.5f));
+        m_aArmoryBadge[i].SetTexOffset(coreVector2(bState ? 0.0f : 0.5f, 0.0f));
         m_aArmoryBadge[i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
 
         m_aArmoryBadgeWave[i].SetEnabled(bState ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
@@ -1975,12 +2207,16 @@ void cGameMenu::__PrepareMission(const coreUintW iMissionIndex)
     m_ArmoryFragmentBack.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aArmoryHelperBack .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 7u; i < MENU_GAME_ARMORY_MEDALS;        ++i) m_aArmoryMedal     [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 1u; i < MENU_GAME_ARMORY_MEDALS;        ++i) m_aArmoryMedalBest [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 1u; i < MENU_GAME_ARMORY_MEDALS;        ++i) m_aArmoryMedalBack2[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;        ++i) m_aArmoryBadgeBack [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;        ++i) m_aArmoryBadgeDesc [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;        ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) m_aArmoryBadgeDesc2[i][j].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_HELPERS;       ++i) m_aArmoryHelper    [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_HELPERS;       ++i) m_aArmoryHelperWave[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS;         ++i) m_aArmoryIcon      [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS;         ++i) m_aArmoryIconBack  [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS;        ++i) m_aArmoryArrow     [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryTitle);     ++i) m_aArmoryTitle     [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryScore);     ++i) m_aArmoryScore     [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryTime);      ++i) m_aArmoryTime      [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -2051,6 +2287,7 @@ void cGameMenu::__PrepareMission(const coreUintW iMissionIndex)
     m_ArmoryBack.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     
     m_ArmoryLogo.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_ArmoryTrophy.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     
     
     m_NavigatorArmory.SetShoulder(true);
@@ -2157,6 +2394,10 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
     // 
     cMenu::ApplyMedalTexture(&m_aArmoryMedal[0], oProgress.aaaaaiMedalSegment[m_iBaseType][m_iBaseMode][m_iBaseDifficulty][iMissionIndex][iSegmentIndex], bBoss ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, false);
 
+    coreUint8 iMaxMedal = MEDAL_NONE;
+    ALL_MEDAL_SEGMENT(aaiMedal) {iMaxMedal = MAX(iMaxMedal, aaiMedal[iMissionIndex][iSegmentIndex]); return false;});
+
+    cMenu::ApplyMedalTexture(&m_aArmoryMedalBest[0], iMaxMedal, bBoss ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, false);
     
 
     if(bBoss && (g_pSave->GetHeader().oProgress.aiAdvance[iMissionIndex] <= iSegmentIndex + 1u))
@@ -2231,6 +2472,8 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
     m_ArmoryFragmentBack.SetEnabled(bBoss ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_aArmoryHelperBack .SetEnabled(bBoss ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 1u;                      i < MENU_GAME_ARMORY_MEDALS;        ++i) m_aArmoryMedal    [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 1u;                      i < MENU_GAME_ARMORY_MEDALS;        ++i) m_aArmoryMedalBest[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 1u;                      i < MENU_GAME_ARMORY_MEDALS;        ++i) m_aArmoryMedalBack2[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u;                      i < MENU_GAME_ARMORY_BADGES_ALL;    ++i) m_aArmoryBadge    [i].SetEnabled((i < MENU_GAME_ARMORY_BADGES && !bBoss) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = MENU_GAME_ARMORY_BADGES; i < MENU_GAME_ARMORY_BADGES_ALL;    ++i) m_aArmoryBadgeWave[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u;                      i < MENU_GAME_ARMORY_BADGES;        ++i) m_aArmoryBadgeBack[i].SetEnabled(bBoss ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
@@ -2238,6 +2481,8 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
     for(coreUintW i = 0u;                      i < MENU_GAME_ARMORY_BADGES;        ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) m_aArmoryBadgeDesc2[i][j].SetEnabled(bBoss ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
     for(coreUintW i = 0u;                      i < MENU_GAME_ARMORY_HELPERS;       ++i) m_aArmoryHelper   [i].SetEnabled(bBoss ? CORE_OBJECT_ENABLE_ALL     : CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u;                      i < MENU_GAME_ARMORY_ICONS;         ++i) m_aArmoryIcon     [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 0u;                      i < MENU_GAME_ARMORY_ICONS;         ++i) m_aArmoryIconBack [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 0u;                      i < MENU_GAME_ARMORY_ARROWS;        ++i) m_aArmoryArrow    [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     for(coreUintW i = 0u;                      i < ARRAY_SIZE(m_aArmoryTitle);     ++i) m_aArmoryTitle    [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     for(coreUintW i = 0u;                      i < ARRAY_SIZE(m_aArmoryScore);     ++i) m_aArmoryScore    [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     for(coreUintW i = 0u;                      i < ARRAY_SIZE(m_aArmoryTime);      ++i) m_aArmoryTime     [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -2308,6 +2553,9 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
     
     m_ArmoryLogo.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     
+    const coreBool bAchieved = HAS_BIT(oProgress.aaiBadge[iMissionIndex][iSegmentIndex], 3u);
+    m_ArmoryTrophy.SetEnabled(bAchieved ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    
     
     const coreVector2 vSize = (bBoss ? coreVector2(0.1f,0.05f) : coreVector2(0.05f,0.05f)) * 1.8f;
 
@@ -2322,6 +2570,10 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
     m_ArmoryBack.SetPosition  (m_ArmoryTile.GetPosition());
     m_ArmoryBack.SetSize      (m_ArmoryTile.GetSize() + coreVector2(0.01f,0.01f));
     m_ArmoryBack.Move();
+    
+    
+    m_ArmoryTrophy.SetPosition(m_ArmoryTile.GetPosition() + m_ArmoryTile.GetSize()*coreVector2(0.5f,-0.5f));
+    m_ArmoryTrophy.Move();
     
     
     m_NavigatorArmory.SetShoulder(true);
@@ -2359,15 +2611,27 @@ void cGameMenu::__PrepareArcade()
     // 
     cMenu::ApplyMedalTexture(&m_aArmoryMedal[0], oProgress.aaaiMedalArcade[m_iBaseType][m_iBaseMode][m_iBaseDifficulty], MEDAL_TYPE_ARCADE, false);
     
-    
+    coreUint8 iMaxMedal = MEDAL_NONE;
+    ALL_MEDAL_ARCADE(iMedal) {iMaxMedal = MAX(iMaxMedal, iMedal); return false;});
+
+    cMenu::ApplyMedalTexture(&m_aArmoryMedalBest[0], iMaxMedal, MEDAL_TYPE_ARCADE, false);
+
     for(coreUintW i = 1u; i < MENU_GAME_ARMORY_MEDALS; ++i)
     {
         cMenu::ApplyMedalTexture(&m_aArmoryMedal[i], oProgress.aaaaiMedalMission[m_iBaseType][m_iBaseMode][m_iBaseDifficulty][i - 1u], MEDAL_TYPE_MISSION, false);
+
+        iMaxMedal = MEDAL_NONE;
+        ALL_MEDAL_MISSION(aiMedal) {iMaxMedal = MAX(iMaxMedal, aiMedal[i - 1u]); return false;});
+
+        cMenu::ApplyMedalTexture(&m_aArmoryMedalBest[i], iMaxMedal, MEDAL_TYPE_MISSION, false);
     }
     
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS; ++i)
     {
-        m_aArmoryIcon[i].SetEnabled(oProgress.aaaaiMedalMission[m_iBaseType][m_iBaseMode][m_iBaseDifficulty][i] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        const coreBool bEnabled = oProgress.aaaaiMedalMission[m_iBaseType][m_iBaseMode][m_iBaseDifficulty][i];
+
+        m_aArmoryIcon    [i].SetEnabled(bEnabled ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        m_aArmoryIconBack[i].SetEnabled(bEnabled ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
     
     
@@ -2392,19 +2656,31 @@ void cGameMenu::__PrepareArcade()
     m_ArmoryIconBig     .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     
     
+    for(coreUintW i = 1u; i < MENU_GAME_ARMORY_MEDALS; ++i) m_aArmoryMedalBack2[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS; ++i) m_aArmoryArrow[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    
     m_ArmorySelection.SetEnabled(CORE_OBJECT_ENABLE_MOVE);   // #
     m_ArmoryTile.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_ArmoryBack.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     
     m_ArmoryLogo.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_ArmoryTrophy.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     
     
     
     for(coreUintW i = 1u; i < MENU_GAME_ARMORY_MEDALS; ++i)
     {
-        m_aArmoryMedal[i].SetPosition(coreVector2(m_ArmoryArea2.GetPosition().x + (I_TO_F(i - 1u) - 4.0f) * 0.088f, m_ArmoryMedalBack.GetPosition().y));
-        m_aArmoryMedal[i].SetSize      (coreVector2(1.0f,1.0f) * 0.08f);
+        m_aArmoryMedal[i].SetPosition(coreVector2(m_ArmoryArea2.GetPosition().x + (I_TO_F(i - 1u) - 4.0f) * 0.09f, m_ArmoryMedalBack.GetPosition().y));
+        m_aArmoryMedal[i].SetSize    (coreVector2(1.0f,1.0f) * 0.08f);
         m_aArmoryMedal[i].Move();
+        
+        m_aArmoryMedalBest[i].SetPosition(m_aArmoryMedal[i].GetPosition() + coreVector2(0.0f,-0.05f) * (0.08f/0.115f));
+        m_aArmoryMedalBest[i].Move();
+        
+        m_aArmoryMedalBack2[i].SetPosition(m_aArmoryMedal[i].GetPosition());
+        m_aArmoryMedalBack2[i].SetSize    (m_aArmoryMedal[i].GetSize() + coreVector2(0.05f,0.05f));
+        m_aArmoryMedalBack2[i].Move();
     }
     
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS; ++i)
@@ -2412,7 +2688,18 @@ void cGameMenu::__PrepareArcade()
         m_aArmoryIcon[i].SetPosition(m_aArmoryMedal[i + 1u].GetPosition() + coreVector2(0.0f,0.04f));
         m_aArmoryIcon[i].Move();
         
+        m_aArmoryIconBack[i].SetPosition(m_aArmoryIcon[i].GetPosition());
+        m_aArmoryIconBack[i].Move();
+        
         STATIC_ASSERT(MENU_GAME_ARMORY_ICONS + 1u == MENU_GAME_ARMORY_MEDALS)
+    }
+
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS; ++i)
+    {
+        m_aArmoryArrow[i].SetPosition(LERP(m_aArmoryMedal[i + 1u].GetPosition(), m_aArmoryMedal[i + 2u].GetPosition(), 0.5f) + coreVector2(0.001f,0.0f));
+        m_aArmoryArrow[i].Move();
+        
+        STATIC_ASSERT(MENU_GAME_ARMORY_ARROWS + 2u <= MENU_GAME_ARMORY_MEDALS)
     }
     
     m_NavigatorArmory.SetShoulder(false);

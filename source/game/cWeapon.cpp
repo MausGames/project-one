@@ -8,6 +8,34 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+/*
+
+Ray
+
+20x
+1x2=2
+40dps
+
+20x / 3 = 6.67x
+5
+33.33dps
+
+Pulse
+
+18x
+2
+36dps (muss niedriger als ray sein, 90% von ray)
+
+18x / 3 = 6x
+2x3 = 6
+36dps
+
+1.5x
+2x12 + 3 = 27
+40.5dps (kann höher sein, weil man eh nah ran muss, aber <= ray) (mitte etwas stärker um, damit man nur 2 statt 3 treffer braucht) (- muss leicht niedriger als sustained fire sein, sonst bringt sich sustained nix)
+
+*/
+
 
 // ****************************************************************
 // update the weapon
@@ -59,6 +87,12 @@ void cWeapon::Render()
 {
     // 
     this->__RenderOwn();
+}
+
+void cWeapon::RenderAfter()
+{
+    // 
+    this->__RenderAfterOwn();
 }
 
 
@@ -125,9 +159,10 @@ void cWeapon::_TrackBullet()
 // ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
-: m_iBurst  (0u)
-, m_fMuzzleTime (0.0f)
-, m_iMuzzleTick (0u)
+: m_iBurst       (0u)
+, m_fMuzzleTime  (0.0f)
+, m_fMuzzleAnim  (0.0f)
+, m_fMuzzleScale (0.0f)
 {
     // set base fire-rate
     m_CooldownTimer.SetSpeed(20.0f);
@@ -140,13 +175,15 @@ cRayWeapon::cRayWeapon()noexcept
         m_aMuzzle[i].DefineProgram("effect_energy_flat_direct_program");
         m_aMuzzle[i].SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.8f, 0.0f));
         m_aMuzzle[i].SetTexSize   (coreVector2(0.5f,0.3f) * 0.3f);
-        //m_aMuzzle[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+        m_aMuzzle[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
         
         g_pGlow->BindObject(&m_aMuzzle[i]);
     }
 }
 
 
+// ****************************************************************
+// 
 cRayWeapon::~cRayWeapon()
 {
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aMuzzle); ++i)
@@ -240,7 +277,6 @@ void cRayWeapon::__ReleaseOwn(const coreUint8 iMode)
 void cRayWeapon::__ShootOwn()
 {
     m_fMuzzleTime = 1.0f;
-    m_iMuzzleTick += 1u;
     
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
@@ -252,6 +288,8 @@ void cRayWeapon::__ShootOwn()
     
     cBulletManager* pManager = m_pOwner->HasStatus(PLAYER_STATUS_TOP) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
     
+    
+    const coreVector2 vOffset = vDir * (8.0f * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
 
     // 
     if(!m_iBurst)
@@ -259,7 +297,7 @@ void cRayWeapon::__ShootOwn()
         m_iBurst = 1u;
 
         // (# bit less, as it basically merges upcoming damage) 
-        this->_MakeWhite(pManager->AddBullet<cRayBullet>(5 * iSign, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.25f)->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(pManager->AddBullet<cRayBullet>(5 * iSign, 8.0f, m_pOwner, vPos + vOffset, vDir))->ChangeScale(1.35f)->ChangeHeight(m_pOwner->GetPosition().z);
 
         // 
         m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
@@ -272,8 +310,8 @@ void cRayWeapon::__ShootOwn()
         m_iBurst = 2u;
 
         // 
-        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
-        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos - vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vOffset + vTan*1.55f, vDir))->ChangeScale(1.05f)->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vOffset - vTan*1.55f, vDir))->ChangeScale(1.05f)->ChangeHeight(m_pOwner->GetPosition().z);
         //this->_MakeWhite(pManager->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
 
         // play bullet sound-effect
@@ -298,14 +336,16 @@ void cRayWeapon::__RenderOwn()
 // 
 void cRayWeapon::__MoveOwn()
 {
-    fTest.Update(4.0f);//LERP(0.0f, 4.0f, m_fMuzzleTime));
+    const coreFloat fShootSpeed = m_pOwner->GetShootSpeed();
+    
+    m_fMuzzleAnim.Update(4.0f * fShootSpeed);//LERP(0.0f, 4.0f, m_fMuzzleTime));
     
     
     
-    if(!m_fMuzzleTime) fScale = 0.0f;
-    else fScale.UpdateMin(20.0f, 1.0f);
+    if(!m_fMuzzleTime) m_fMuzzleScale = 0.0f;
+    else m_fMuzzleScale.UpdateMin(20.0f * fShootSpeed, 1.0f);
     
-    m_fMuzzleTime.UpdateMax(-9.0f, 0.0f);
+    m_fMuzzleTime.UpdateMax(-9.0f * fShootSpeed, 0.0f);
     
     const coreVector3 vPos = m_pOwner->GetPosition ();
     const coreVector3 vDir = m_pOwner->GetDirection();
@@ -316,11 +356,11 @@ void cRayWeapon::__MoveOwn()
     
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aMuzzle); ++i)
     {
-        m_aMuzzle[i].SetPosition(vPos + vDir * 3.0f * fScale + vTan * (i ? -1.5f : 1.5f));
-        m_aMuzzle[i].SetSize(coreVector3(0.5f, 1.2f * fScale, 0.5f) * 2.3f * 1.7f);// * (0.9f + 0.1f * SIN(fTest * 6.0f*PI)));// * LERP(0.8f, 1.2f, m_fMuzzleTime));
+        m_aMuzzle[i].SetPosition(vPos + vDir * 3.0f * m_fMuzzleScale + vTan * (i ? -1.5f : 1.5f));
+        m_aMuzzle[i].SetSize(coreVector3(0.5f, 1.2f * m_fMuzzleScale, 0.5f) * 2.3f * 1.7f);// * (0.9f + 0.1f * SIN(fTest * 6.0f*PI)));// * LERP(0.8f, 1.2f, m_fMuzzleTime));
         m_aMuzzle[i].SetDirection(-vDir);
         m_aMuzzle[i].SetAlpha(STEP(0.0f, 1.0f, m_fMuzzleTime) * STEP(0.7f, 1.0f, ABS(vOri.z)));
-        m_aMuzzle[i].SetTexOffset(coreVector2(0.02f * (i ? 1.0f : -1.0f), 0.1f) * (fTest + 0.0f*I_TO_F(m_iMuzzleTick)));
+        m_aMuzzle[i].SetTexOffset(coreVector2(0.02f * (i ? 1.0f : -1.0f), 0.1f) * m_fMuzzleAnim);
         m_aMuzzle[i].SetEnabled(m_fMuzzleTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         
         m_aMuzzle[i].Move();
@@ -339,10 +379,56 @@ void cRayWeapon::__PrefetchOwn()
 // ****************************************************************
 // constructor
 cPulseWeapon::cPulseWeapon()noexcept
-: m_fCharge (0.0f)
+: m_fCharge      (0.0f)
+, m_iBurst       (0u)
+, m_iShotType    (0u)
+, m_fMuzzleTime  (0.0f)
+, m_fMuzzleAnim  (0.0f)
+, m_fMuzzleScale (0.0f)
+, m_fWave        (0.0f)
+, m_fAnimation   (0.0f)
 {
     // set base fire-rate
-    m_CooldownTimer.SetSpeed(6.0f);
+    m_CooldownTimer.SetSpeed(18.0f);
+
+    // 
+    m_Charge.DefineModel  ("object_penta_top.md3");
+    m_Charge.DefineTexture(0u, "effect_energy.png");
+    m_Charge.DefineProgram("effect_energy_flat_spheric_program");
+    m_Charge.SetTexSize   (coreVector2(1.0f,1.0f) * 0.15f);
+    m_Charge.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    m_ChargeWave.DefineModel  ("object_penta_top.md3");
+    m_ChargeWave.DefineTexture(0u, "effect_energy.png");
+    m_ChargeWave.DefineProgram("effect_energy_flat_spheric_program");
+    m_ChargeWave.SetColor3    (COLOR_ENERGY_WHITE * 0.4f);
+    m_ChargeWave.SetTexSize   (coreVector2(1.0f,1.0f) * 0.15f);
+    m_ChargeWave.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    m_Muzzle.DefineModel  ("object_tube.md3");
+    m_Muzzle.DefineTexture(0u, "effect_energy.png");
+    m_Muzzle.DefineProgram("effect_energy_flat_direct_program");
+    m_Muzzle.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.8f, 0.0f));
+    m_Muzzle.SetTexSize   (coreVector2(0.5f,0.3f) * 0.3f);
+    m_Muzzle.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    g_pGlow->BindObject(&m_Charge);
+    g_pGlow->BindObject(&m_ChargeWave);
+    g_pGlow->BindObject(&m_Muzzle);
+}
+
+
+// ****************************************************************
+// 
+cPulseWeapon::~cPulseWeapon()
+{
+    // 
+    g_pGlow->UnbindObject(&m_Charge);
+    g_pGlow->UnbindObject(&m_ChargeWave);
+    g_pGlow->UnbindObject(&m_Muzzle);
 }
 
 
@@ -350,8 +436,31 @@ cPulseWeapon::cPulseWeapon()noexcept
 // 
 void cPulseWeapon::__UpdateOwn(const coreUint8 iShootStatus, const coreFloat fShootSpeed)
 {
+
+    const coreFloat fFactor = m_CooldownTimer.GetSpeed() / WEAPON_PULSE_CHARGE / 3.0f;
+    
+    const coreFloat fOld = m_fCharge;
+    m_fCharge.UpdateMin(fFactor * m_pOwner->GetShootSpeed(), 1.0f);
+    
+    if(m_pOwner->HasStatus(PLAYER_STATUS_NO_INPUT_SHOOT)) m_fCharge = 0.0f;
+
+    if((m_fCharge >= 1.0f) && (fOld < 1.0f))
+    {
+        m_fWave = 1.0f;
+        
+        // TODO 1: m_PingSound play
+    }
+}
+
+
+// ****************************************************************
+// 
+void cPulseWeapon::__ReleaseOwn(const coreUint8 iMode)
+{
+    if(m_iBurst == 1u) m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+    
     // 
-    if(!m_CooldownTimer.GetStatus()) m_fCharge.UpdateMin(m_CooldownTimer.GetSpeed() * fShootSpeed, 2.0f);
+    m_iBurst = 0u;
 }
 
 
@@ -359,21 +468,149 @@ void cPulseWeapon::__UpdateOwn(const coreUint8 iShootStatus, const coreFloat fSh
 // shoot with the pulse weapon
 void cPulseWeapon::__ShootOwn()
 {
+
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
     // 
     const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+    
+    cBulletManager* pManager = m_pOwner->HasStatus(PLAYER_STATUS_TOP) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
+    
+    const coreVector2 vOffset = vDir * (6.0f * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
 
+
+    
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>((5 + 10 * F_TO_SI(m_fCharge)) * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f + 0.4f * FLOOR(m_fCharge))->AddStatus(BULLET_STATUS_PENETRATE);
+    if(!m_iBurst)
+    {
+        m_iBurst = 1u;
+
+        // 
+        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+
+        
+        constexpr coreUintW aiAngle[] = {0u, 12u, 1u, 11u, 2u, 10u, 3u, 9u, 4u, 8u, 5u, 7u};
+
+        coreUintW iCount = 0u;
+             if(m_fCharge >= 1.0f)                       iCount = 12u;
+        else if(m_fCharge >= 1.0f / WEAPON_PULSE_CHARGE) iCount = 2u;
+        
+        for(coreUintW i = 12u - iCount; i < 12u; ++i)
+        {
+            const coreVector2 vPart = MapToAxis(coreVector2::Direction((I_TO_F(aiAngle[i]) - 6.0f) * (0.03f*PI)), vDir);
+            const coreFloat fSpeed = 6.0f * (1.0f - 0.05f * ABS(I_TO_F(aiAngle[i]) - 6.0f));
+            
+            this->_MakeWhite(pManager->AddBullet<cPulseBullet>(2 * iSign, fSpeed, m_pOwner, vPos + vOffset, vPart))->ChangeScale(1.6f)->ChangeHeight(m_pOwner->GetPosition().z);
+        }
+
+        //  
+        this->_MakeWhite(pManager->AddBullet<cPulseBullet>(((iCount == 12u) ? 3 : 2) * iSign, 6.0f, m_pOwner, vPos + vOffset, vDir))->ChangeScale(1.8f)->ChangeHeight(m_pOwner->GetPosition().z);
+        
+        m_iShotType = 0u;
+    }
+    else
+    {
+        m_iBurst = 2u;
+
+        if(++m_iShotType >= 4u) m_iShotType = 0u;
+
+        const coreVector2 vTan = vDir.Rotated90();
+        const coreVector2 vNewDir = (vDir + vTan * ((m_iShotType < 3u) ? (1.0f * I_TO_F(m_iShotType - 1u)) : 0.0f) * 0.05f).Normalized();
+
+        this->_MakeWhite(pManager->AddBullet<cPulseBullet>(2 * iSign, 6.0f, m_pOwner, vPos + vOffset, vNewDir))->ChangeScale(1.8f)->ChangeHeight(m_pOwner->GetPosition().z);
+    }
 
     // 
     m_fCharge = 0.0f;
 
+    // 
+    m_fMuzzleTime = 1.0f;
+
     // play bullet sound-effect
-    //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_PULSE);
+    g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
+}
+
+
+// ****************************************************************
+// 
+void cPulseWeapon::__RenderOwn()
+{
+    // 
+    m_Muzzle.Render();
+}
+
+
+// ****************************************************************
+// 
+void cPulseWeapon::__RenderAfterOwn()
+{
+    // 
+    m_Charge.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Charge);
+
+    // 
+    m_ChargeWave.Render();
+}
+
+
+// ****************************************************************
+// 
+void cPulseWeapon::__MoveOwn()
+{
+    const coreFloat fShootSpeed = m_pOwner->GetShootSpeed();
+    const coreFloat fAnimSpeed  = m_pOwner->GetAnimSpeed();
+    
+    // 
+    m_fWave     .UpdateMax(-3.0f * fAnimSpeed,  0.0f);
+    m_fAnimation.UpdateMod( 1.0f * fAnimSpeed, 20.0f);
+    
+
+    const coreVector3 vPos = m_pOwner->GetPosition ();
+    const coreVector3 vDir = m_pOwner->GetDirection();
+    
+    constexpr coreVector3 vBaseSize = coreVector3(1.0f,1.0f,1.0f) * 2.5f;
+    
+    const coreFloat fScale = STEP(1.0f / WEAPON_PULSE_CHARGE, 1.0f, m_fCharge);
+    
+    // 
+    m_Charge.SetPosition (vPos + vDir * 4.0f);
+    m_Charge.SetSize     (vBaseSize * fScale);
+    m_Charge.SetDirection(coreVector3(coreVector2::Direction(m_fAnimation * PI), 0.0f));
+    m_Charge.SetColor3   (COLOR_ENERGY_WHITE * ((m_fCharge < 1.0f) ? 0.2f : 0.45f));
+    m_Charge.SetTexOffset(m_Charge.GetTexOffset() - m_Charge.GetDirection().xy() * (0.15f * TIME * fAnimSpeed));
+    m_Charge.SetEnabled  (fScale ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Charge.Move();
+
+    // 
+    m_ChargeWave.SetPosition (m_Charge.GetPosition());
+    m_ChargeWave.SetSize     (vBaseSize * LERPBR(3.0f, 1.0f, m_fWave));
+    m_ChargeWave.SetDirection(m_Charge.GetDirection());
+    m_ChargeWave.SetAlpha    (BLENDBR(m_fWave));
+    m_ChargeWave.SetTexOffset(m_Charge.GetTexOffset());
+    m_ChargeWave.SetEnabled  (m_fWave ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_ChargeWave.Move();
+    
+    
+    
+    m_fMuzzleAnim.Update(4.0f * fShootSpeed);
+
+    if(!m_fMuzzleTime) m_fMuzzleScale = 0.0f;
+    else m_fMuzzleScale.UpdateMin(20.0f * fShootSpeed, 1.0f);
+
+    m_fMuzzleTime.UpdateMax(-5.0f * fShootSpeed, 0.0f);
+
+    const coreVector3 vOri = m_pOwner->GetOrientation();
+
+
+    m_Muzzle.SetPosition (vPos + vDir * 3.5f * m_fMuzzleScale);
+    m_Muzzle.SetSize     (coreVector3(0.5f, 1.2f * m_fMuzzleScale, 0.5f) * 2.3f * 2.0f);
+    m_Muzzle.SetDirection(-vDir);
+    m_Muzzle.SetAlpha    (STEP(0.0f, 1.0f, m_fMuzzleTime) * STEP(0.7f, 1.0f, ABS(vOri.z)));
+    m_Muzzle.SetTexOffset(coreVector2(0.02f,0.1f) * m_fMuzzleAnim);
+    m_Muzzle.SetEnabled  (m_fMuzzleTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Muzzle.Move();
 }
 
 
@@ -404,13 +641,17 @@ void cWaveWeapon::__ShootOwn()
 
     // 
     const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+    
+    cBulletManager* pManager = m_pOwner->HasStatus(PLAYER_STATUS_TOP) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
+    
+    const coreVector2 vOffset = vDir * (3.5f * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos,  vDir))->ChangeScale(1.8f);
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos, -vDir))->ChangeScale(1.8f);
+    this->_MakeWhite(pManager->AddBullet<cSurgeBullet>(1 * iSign, 3.5f, m_pOwner, vPos + vOffset,  vDir))->ChangeScale(0.9f)->ChangeHeight(m_pOwner->GetPosition().z);
+    this->_MakeWhite(pManager->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos + vOffset, -vDir))->ChangeScale(1.8f)->ChangeHeight(m_pOwner->GetPosition().z);
 
     // play bullet sound-effect
-    //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_WAVE);
+    g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
 }
 
 

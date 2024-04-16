@@ -75,6 +75,13 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
+    // MAUVE purple
+    case 11137863330129252440u:
+        {
+            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_PULSE)
+        }
+        break;
+
     // CELADON green
     case 9262066068920926272u:
         {

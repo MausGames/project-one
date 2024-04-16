@@ -26,7 +26,7 @@
 // TODO 3: nevo: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
 // TODO 4: mission code sometimes accesses variables directly without wrapper-functions (mixed), bosses always need wrapper functions, should this be handled consistently ?
 // TODO 4: warum sind s_iTick und co. static ?
-// TODO 3: change m_piData into static buffer (needs manual clear), that way I can also remove init-number (! sometimes there are 2 missions in memory at the same time)
+// TODO 3: change m_piData into static buffer (needs manual clear), that way I can also remove init-number (!!! sometimes there are 2 missions in memory at the same time)
 // TODO 3: morning star chain should be above player wind
 // TODO 3: insanity functions in harena copy (and override) some of the mission code, maybe this can be cleaned up
 // TODO 4: remove direct access with .List() or Raw containers in all missions (change to Getters)
@@ -38,6 +38,7 @@
 // TODO 4: there are multiple "Aim" objects (mission + boss)
 // TODO 2: STAGE_GET_UINT64 and STAGE_GET_UINT64_ARRAY hat falsches alignment (undefined behaviour) (+ reorder iLineTouch)
 // TODO 3: also wrap all object-iterations in g_pGame->IsTask()
+// TODO 3: display sticks in manual
 
 
 // ****************************************************************
@@ -176,6 +177,8 @@
 #define MUSCUS_ZOMBIES              (3u)                                              // 
 
 #define INTRO_MANUALS               (11u)                                             // 
+
+#define BONUS1_SHELTERS             (2u)                                              // 
 
 
 // ****************************************************************
@@ -511,6 +514,7 @@ private:
     coreBool      m_bBarrierSlow;                           // 
     coreBool      m_bBarrierClamp;                          // 
     coreBool      m_bBarrierReflect;                        // 
+    coreUint8     m_iBarrierBounce;                         // 
 
     coreBatchList m_Laser;                                  // 
     coreBatchList m_LaserWave;                              // 
@@ -1610,15 +1614,15 @@ public:
     // get object properties
     inline const coreChar* GetMusicName()const final {return "mission_00_intro.ogg";}
 
+    // 
+    static coreVector3 RetrieveEnemyColor(const coreUintW iIndex);
+
 
 private:
     // execute own routines
     void __SetupOwn    ()final;
     void __RenderOwnTop()final;
     void __MoveOwnAfter()final;
-
-    // 
-    static coreVector3 __GetEnemyColor(const coreUintW iIndex);
 };
 
 
@@ -1627,22 +1631,50 @@ private:
 class cBonus1Mission final : public cMission
 {
 private:
-    cProjectOneBoss m_ProjectOne;   // 
+    cVausBoss m_Vaus;                                // 
+
+    coreObject3D m_aShelter     [BONUS1_SHELTERS];   // 
+    coreObject3D m_aShelterWave [BONUS1_SHELTERS];   // 
+    coreObject3D m_aShelterBack1[BONUS1_SHELTERS];   // 
+    coreObject3D m_aShelterBack2[BONUS1_SHELTERS];   // 
+
+    coreObject3D m_Beam;                             // 
+    coreVector2  m_vBeamPos;                         // 
+    coreVector2  m_vBeamDir;                         // 
+    coreFloat    m_fBeamWidth;                       // 
+    coreFloat    m_fBeamSpeed;                       // 
+    coreFlow     m_fBeamTime;                        // 
+
+    coreFlow m_fAnimation;                           // animation value
 
 
 public:
     cBonus1Mission()noexcept;
+    ~cBonus1Mission()final;
 
     DISABLE_COPY(cBonus1Mission)
     ASSIGN_ID(101, "BONUS 1")
 
+    // 
+    void EnableShelter (const coreUintW iIndex);
+    void DisableShelter(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableBeam ();
+    void DisableBeam(const coreBool bAnimated);
+
+    // 
+    void FadeBeam(const coreBool bEnable, const coreFloat fTime);
+
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_09.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_00_intro.ogg";} //{return "mission_09.ogg";}
 
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn      ()final;
+    void __RenderOwnUnder()final;
+    void __MoveOwnAfter  ()final;
 };
 
 

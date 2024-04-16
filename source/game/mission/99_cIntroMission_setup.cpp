@@ -141,7 +141,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, cIntroMission::__GetEnemyColor(i));
+                pEnemy->Configure(4, 0u, cIntroMission::RetrieveEnemyColor(i));
             });
         });
 
@@ -320,7 +320,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, cIntroMission::__GetEnemyColor((i % 4u) + (i / 12u) * 4u));
+                pEnemy->Configure(4, 0u, cIntroMission::RetrieveEnemyColor((i % 4u) + (i / 12u) * 4u));
             });
         });
 
@@ -531,7 +531,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, cIntroMission::__GetEnemyColor(i));
+                pEnemy->Configure(4, 0u, cIntroMission::RetrieveEnemyColor(i));
 
                 if(i >= 24u) pEnemy->AddStatus(ENEMY_STATUS_TOP);
             });
@@ -794,7 +794,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(120, 0u, cIntroMission::__GetEnemyColor(i + 4u));
+                pEnemy->Configure(120, 0u, cIntroMission::RetrieveEnemyColor(i + 4u));
             });
 
             pSquad1->GetEnemy(0u)->AddStatus(ENEMY_STATUS_IMMORTAL);
@@ -1002,7 +1002,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(30, 0u, cIntroMission::__GetEnemyColor(i - (i >= 4u) - (i >= 6u)));
+                pEnemy->Configure(30, 0u, cIntroMission::RetrieveEnemyColor(i - (i >= 4u) - (i >= 6u)));
             });
         });
 

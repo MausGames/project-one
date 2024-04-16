@@ -317,7 +317,7 @@ void cExhaustManager::UnbindEnemy(cEnemy* pEnemy, const eExhaustType eType)
         else
         {
             // 
-            DYN_KEEP(it)
+            DYN_KEEP(it, m_aData)
         }
     }
 

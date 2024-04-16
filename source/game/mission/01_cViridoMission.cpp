@@ -24,6 +24,7 @@ cViridoMission::cViridoMission()noexcept
 , m_bBarrierSlow    (false)
 , m_bBarrierClamp   (true)
 , m_bBarrierReflect (true)
+, m_iBarrierBounce  (0u)
 , m_Laser           (VIRIDO_LASERS)
 , m_LaserWave       (VIRIDO_LASERS)
 , m_apLaserOwner    {}
@@ -1058,10 +1059,18 @@ void cViridoMission::__MoveOwnAfter()
                 const coreVector2 vOriginDiff = pBullet->GetOwner()->GetPosition().xy() - vRayPos;
                 const coreBool bBehind = (coreVector2::Dot(vOriginDiff, oBarrier.GetDirection().xy()) < 0.0f);
                 
+                
+                if(pBullet->GetFlyTime() < 0.1f)
+                {
+                    if(coreVector2::Dot(vOriginDiff, oBarrier.GetDirection().xy()) < 0.0f) return;
+                }
+                
                 const coreFloat fSlant = (1.0f + coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy())) * (bBehind ? 0.0f : 1.0f);      
                 
-                const coreVector2 vNewPos = pBullet->GetPosition().xy() + pBullet->GetFlyDir() * pBullet->GetCollisionRadius();
+                const coreFloat   fRadius = pBullet->GetCollisionRange().xy().Max();       
+                const coreVector2 vNewPos = pBullet->GetPosition().xy() + pBullet->GetFlyDir() * fRadius;
                 const coreVector2 vOldPos = pBullet->GetPosition().xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * BULLET_SPEED_FACTOR * TIME * (1.0f + 10.0f * fSlant));
+                
                 
                 const coreVector2 vOldRayPos = m_avBarrierPos[i] + m_avBarrierDir[i] * oBarrier.GetCollisionRange().y;
                 const coreVector2 vOldRayDir = m_avBarrierDir[i].Rotated90();
@@ -1118,7 +1127,8 @@ void cViridoMission::__MoveOwnAfter()
                         coreVector2 vNormal = oBarrier.GetDirection().xy();
                         if(SameDirection(-pBullet->GetFlyDir(), vNormal))
                         {
-                            vNormal = (vNormal + vNormal.Rotated90() * Core::Rand->Float(-0.1f, 0.1f)).Normalized();
+                            m_iBarrierBounce = (m_iBarrierBounce + 1u) % 7u;
+                            vNormal = (vNormal + vNormal.Rotated90() * LERP(-1.0f, 1.0f, I_TO_F(m_iBarrierBounce) / 6.0f) * 0.08f).Normalized();
                         }
 
                         // 

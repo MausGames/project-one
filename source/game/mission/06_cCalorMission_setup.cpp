@@ -2935,7 +2935,7 @@ void cCalorMission::__SetupOwn()
         {
             g_pGame->FadeMusic(0.35f);
 
-            m_pNightmareSound->PlayRelative(this, 1.0f, 1.0f, false, SOUND_EFFECT);
+            m_pNightmareSound->PlayRelative(this, 0.5f, 1.0f, false, SOUND_EFFECT);
         }
 
         if(STAGE_TIME_BEFORE(5.0f))

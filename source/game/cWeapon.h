@@ -17,8 +17,9 @@
 
 // ****************************************************************
 // weapon definitions
-#define WEAPON_MODES         (1u)   // 
-#define WEAPON_TESLA_TARGETS (3u)   // 
+#define WEAPON_MODES         (1u)     // 
+#define WEAPON_PULSE_CHARGE  (4.0f)   // 
+#define WEAPON_TESLA_TARGETS (3u)     // 
 
 
 // ****************************************************************
@@ -44,6 +45,7 @@ public:
 
     // 
     void Render();
+    void RenderAfter();
     void Move();
 
     // 
@@ -74,13 +76,14 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __UpdateOwn  (const coreUint8 iShootStatus, const coreFloat fShootSpeed) {}
-    virtual void __TriggerOwn (const coreUint8 iMode)                                     {}
-    virtual void __ReleaseOwn (const coreUint8 iMode)                                     {}
-    virtual void __ShootOwn   ()                                                          {}
-    virtual void __RenderOwn  ()                                                          {}
-    virtual void __MoveOwn    ()                                                          {}
-    virtual void __PrefetchOwn()                                                          {}
+    virtual void __UpdateOwn     (const coreUint8 iShootStatus, const coreFloat fShootSpeed) {}
+    virtual void __TriggerOwn    (const coreUint8 iMode)                                     {}
+    virtual void __ReleaseOwn    (const coreUint8 iMode)                                     {}
+    virtual void __ShootOwn      ()                                                          {}
+    virtual void __RenderOwn     ()                                                          {}
+    virtual void __RenderAfterOwn()                                                          {}
+    virtual void __MoveOwn       ()                                                          {}
+    virtual void __PrefetchOwn   ()                                                          {}
 };
 
 
@@ -101,19 +104,17 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    coreUint8 m_iBurst;   // 
-    
-    coreObject3D m_aMuzzle[2];   //
-    coreFlow m_fMuzzleTime;
-    coreUint8 m_iMuzzleTick;
+    coreUint8 m_iBurst;            // 
 
-    coreFlow fTest = 0.0f;
-    coreFlow fScale = 0.0f;
-    
+    coreObject3D m_aMuzzle[2];     // 
+    coreFlow     m_fMuzzleTime;    // 
+    coreFlow     m_fMuzzleAnim;    // 
+    coreFlow     m_fMuzzleScale;   // 
+
 
 public:
     cRayWeapon()noexcept;
-    ~cRayWeapon();
+    ~cRayWeapon()final;
 
     DISABLE_COPY(cRayWeapon)
     ASSIGN_ID(1, "Laser Gun")
@@ -141,11 +142,27 @@ private:
 class cPulseWeapon final : public cWeapon
 {
 private:
-    coreFlow m_fCharge;   // 
+    coreFlow  m_fCharge;           // 
+    coreUint8 m_iBurst;            // 
+    coreUint8 m_iShotType;         // 
+
+    coreObject3D m_Charge;         // 
+    coreObject3D m_ChargeWave;     // 
+
+    coreObject3D m_Muzzle;         // 
+    coreFlow     m_fMuzzleTime;    // 
+    coreFlow     m_fMuzzleAnim;    // 
+    coreFlow     m_fMuzzleScale;   // 
+
+    coreFlow m_fWave;              // 
+    coreFlow m_fAnimation;         // 
+
+    coreSoundPtr m_PingSound;      // 
 
 
 public:
     cPulseWeapon()noexcept;
+    ~cPulseWeapon()final;
 
     DISABLE_COPY(cPulseWeapon)
     ASSIGN_ID(2, "Pulse Cannon")
@@ -158,9 +175,13 @@ public:
 
 private:
     // execute own routines
-    void __UpdateOwn  (const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
-    void __ShootOwn   ()final;
-    void __PrefetchOwn()final;
+    void __UpdateOwn     (const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
+    void __ReleaseOwn    (const coreUint8 iMode)final;
+    void __ShootOwn      ()final;
+    void __RenderOwn     ()final;
+    void __RenderAfterOwn()final;
+    void __MoveOwn       ()final;
+    void __PrefetchOwn   ()final;
 };
 
 

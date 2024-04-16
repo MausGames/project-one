@@ -66,7 +66,7 @@ void cWindscreen::Move()
                     // 
                     (*it)->SetAlpha (MIN(fNewLifeTime, 1.0f));
                     (*it)->SetStatus(coreMath::FloatToBits(fNewLifeTime));
-                    DYN_KEEP(it)
+                    DYN_KEEP(it, *papObject)
                 }
                 else
                 {
@@ -84,7 +84,7 @@ void cWindscreen::Move()
             {
                 // 
                 nControlAddFunc((*it)->List());
-                DYN_KEEP(it)
+                DYN_KEEP(it, m_apAddList)
             }
             else
             {

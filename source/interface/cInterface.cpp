@@ -1007,7 +1007,7 @@ void cInterface::Move()
         // set banner transparency
         const coreFloat fBannerAlpha = BLENDH3(fVisibility) * MENU_INSIDE_ALPHA;
         m_BannerShadow  .SetAlpha(fBannerAlpha * 0.7f);
-        m_aBannerIcon[0].SetAlpha(fBannerAlpha * 0.6f);
+        m_aBannerIcon[0].SetAlpha(fBannerAlpha * 0.6f);   // # more than 0.5 of the front object, to give it more volume
         m_aBannerIcon[1].SetAlpha(fBannerAlpha * 0.8f);
         m_aBannerText[0].SetAlpha(fBannerAlpha * 0.2f);
         m_aBannerText[1].SetAlpha(fBannerAlpha * 0.2f);

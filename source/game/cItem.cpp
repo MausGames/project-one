@@ -98,7 +98,7 @@ void cItemManager::Move()
         else
         {
             pItem->Move();
-            DYN_KEEP(it)
+            DYN_KEEP(it, m_apItemList)
         }
     }
 }

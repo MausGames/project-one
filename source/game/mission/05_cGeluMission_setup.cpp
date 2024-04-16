@@ -188,7 +188,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.45f);
-                pEnemy->Configure((i < 32u) ? 50 : ((i >= 40u && i < 72u) ? 120 : ((i < 96u) ? 200 : 1000)), 0u, COLOR_SHIP_RED);
+                pEnemy->Configure((i < 32u) ? 50 : ((i < 40u) ? 220 : ((i < 72u) ? 120 : ((i < 80u) ? 200 : ((i < 88u) ? 220 : ((i < 96u) ? 200 : 1000))))), 0u, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
 
                 pEnemy->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
@@ -274,10 +274,10 @@ void cGeluMission::__SetupOwn()
                  if(i < 16u) vForceDir     = fPower * 6.0f * coreVector2( 0.0f,-1.0f);
             else if(i < 24u) vForceDir     = fPower * 6.0f * coreVector2( 1.0f, 0.0f);
             else if(i < 32u) vForceDir     = fPower * 6.0f * coreVector2(-1.0f, 0.0f);
-            else if(i < 40u) vForceDir     = fPower * 6.0f * AlongCrossNormal(-pBullet->GetFlyDir());
+            else if(i < 40u) vForceDir     = fPower * 5.5f * AlongCrossNormal(-pBullet->GetFlyDir());
             else if(i < 72u) vForceDir     = fPower * 6.0f * StepRotated90((i - 40u) / 8u);
             else if(i < 80u) vForceDir.x   = fPower * 2.5f;
-            else if(i < 88u) fBounceForce += fPower * 8.0f;
+            else if(i < 88u) fBounceForce += fPower * 7.5f;
             else if(i < 96u) fMillForce   -= fPower * 0.4f;
             else             fDragForce   += fPower * 6.0f;
 
@@ -1396,6 +1396,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: hardmode: blocks have stings (but not always, and they attack certain areas, e.g in the tunnel from both sides), enemies start attacking
     // TODO 1: move shake (and color management if not yet) to mission code, it's only visual
     // TODO 1: smoke zwischen bewegenden steinen (smoke+partikel? oder nur smoke?)
+    // TODO 1: enemy-exhaust effekt ist nicht sichtbar über den steinen
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = GELU_FANG_STEP;
@@ -1723,10 +1724,6 @@ void cGeluMission::__SetupOwn()
                         {
                             this->DisableFang(i, false);
                         }
-                        else
-                        {
-                            nSetFangPositionFunc(i, coreVector2(0.0f,0.0f));
-                        }
                     }
 
                     STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1748,7 +1745,18 @@ void cGeluMission::__SetupOwn()
                     }
                 }
 
-                if(STAGE_SUBTIME_BETWEEN(0.5f, 1.2f)) iShakeState = 0xFFFFFFFFu;
+                if(STAGE_SUBTIME_BETWEEN(0.5f, 1.2f))
+                {
+                    iShakeState = 0xFFFFFFFFu;
+                }
+
+                if(STAGE_SUBTIME_BEFORE(1.2f) || STAGE_SUBTIME_POINT(1.2f))
+                {
+                    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+                    {
+                        nSetFangPositionFunc(i, coreVector2(0.0f,0.0f));
+                    }
+                }
             }
             else
             {

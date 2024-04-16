@@ -382,6 +382,12 @@ void cDharukBoss::__MoveOwn()
 
             this->ToAxis(StepRotated90(m_aiCounter[TELEPORT_COUNT] % 4));
 
+            if(this->ReachedHealth(2400))
+            {
+                g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_MAGENTA);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+            }
+
             if(PHASE_FINISHED)
             {
                 if(!m_aiCounter[CURRENT_ITERATION] && (this->GetCurHealth() < 2400))

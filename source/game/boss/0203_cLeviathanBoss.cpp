@@ -936,7 +936,7 @@ void cLeviathanBoss::__MoveOwn()
                 {
                     PHASE_CONTROL_TICKER(1u, 0u, 5.0f, LERP_LINEAR)
                     {
-                        const coreFloat fBase = pCurPart->AimAtPlayerDual(((iTick % 4u) == 3u) ? 1u : 0u).Angle();
+                        const coreFloat fBase = pCurPart->AimAtPlayerDual(((iTick % 4u) < 2u) ? 0u : 1u).Angle();
                         const coreUintW iNum  = g_pGame->IsEasy() ? 3u : 7u;
 
                         for(coreUintW j = iNum; j--; )

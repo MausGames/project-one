@@ -342,11 +342,18 @@ void cPlayer::RenderMiddle()
 
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        glDepthMask(false);
         // 
         m_aShield[0].Render();
         
         
         if(m_fTilt) m_Exhaust   .Render();
+        glDepthMask(true);
+        
+        
+        // 
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+            m_apWeapon[i]->RenderAfter();
     }
 }
 
@@ -354,6 +361,7 @@ void cPlayer::RenderAfter()
 {
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        
         if(HAS_FLAG(m_iStatus, PLAYER_STATUS_TOP))
         {
             this->RemoveStatus(PLAYER_STATUS_TOP);
@@ -364,13 +372,15 @@ void cPlayer::RenderAfter()
                 {
                     this->Render();
                     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);   // TODO 1: wird doppelt gezeichnet
+
+                    this->RenderMiddle();
                 }
                 glDisable(GL_DEPTH_TEST);
-
-                this->RenderMiddle();
             }
             this->AddStatus(PLAYER_STATUS_TOP);
         }
+        
+
         
         // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Gyro);
@@ -425,6 +435,20 @@ void cPlayer::Move()
             if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
             if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
 
+            
+            if(g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)] == 3u)
+            {
+                if(!HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_pInput->vMove.IsNull())
+                {
+                         if(SameDirection90(coreVector2( 0.0f, 1.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
+                    else if(SameDirection90(coreVector2(-1.0f, 0.0f), m_pInput->vMove) && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
+                    else if(SameDirection90(coreVector2( 0.0f,-1.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
+                    else if(SameDirection90(coreVector2( 1.0f, 0.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
+                }
+            }
+            
+            
+            
             // set new direction
             this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
 
@@ -603,7 +627,7 @@ void cPlayer::Move()
         }
 
         // 
-        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_GYRO) && (g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)] == 1u))
+        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_GYRO) && (g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)] != 0u))
         {
             if(!m_fGyroValue) this->EnableGyro();
             m_fGyroValue.UpdateMin(2.0f, 1.0f);
@@ -1635,6 +1659,12 @@ void cPlayer::SetPosition(const coreVector3 vPosition)
 
     // 
     m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
+    
+    Timeless([this]()
+    {
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+            m_apWeapon[i]->Move();
+    });
 }
 
 void cPlayer::SetDirection(const coreVector3 vDirection)
@@ -1646,6 +1676,12 @@ void cPlayer::SetDirection(const coreVector3 vDirection)
     
     m_Arrow  .SetDirection(vDirection);
     m_Exhaust.SetDirection(vDirection);
+    
+    Timeless([this]()
+    {
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+            m_apWeapon[i]->Move();
+    });
 }
 
 
@@ -1703,7 +1739,7 @@ void cPlayer::__UpdateCollisions()
     FOR_EACH_DYN(it, m_aiCollision)
     {
         // check for old entries and remove them
-        if((*it) == iCurFrame) DYN_KEEP  (it)
+        if((*it) == iCurFrame) DYN_KEEP  (it, m_aiCollision)
                           else DYN_REMOVE(it, m_aiCollision)
     }
 
@@ -1711,7 +1747,7 @@ void cPlayer::__UpdateCollisions()
     FOR_EACH_DYN(it, m_aRayData)
     {
         // check for old entries and remove them
-        if(it->iFrame == iCurFrame) DYN_KEEP  (it)
+        if(it->iFrame == iCurFrame) DYN_KEEP  (it, m_aRayData)
                                else DYN_REMOVE(it, m_aRayData)
     }
 }

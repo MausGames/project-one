@@ -342,7 +342,8 @@ void cBulletManager::Move()
             {
                 if((m_aiOrder[i] == cTiltBullet::ID) || (m_aiOrder[i] == cFinalBullet::ID))
                 {
-                    pBullet->m_fDepth = (STEP(-350.0f, 100.0f, pBullet->GetPosition().z)) * 800.0f + (1.0f - STEP(0.0f, 250.0f, pBullet->GetPosition().xy().Length())) * 300.0f; DYN_KEEP(it)
+                    pBullet->m_fDepth = (STEP(-350.0f, 100.0f, pBullet->GetPosition().z)) * 800.0f + (1.0f - STEP(0.0f, 250.0f, pBullet->GetPosition().xy().Length())) * 300.0f;
+                    DYN_KEEP(it, *pBulletActive->List())
                     continue;
                 }   // TODO 1: improve
 
@@ -357,7 +358,7 @@ void cBulletManager::Move()
 
                 // 
                 pBullet->m_fDepth = fDepth;
-                DYN_KEEP(it)
+                DYN_KEEP(it, *pBulletActive->List())
             }
         }
 
@@ -507,9 +508,10 @@ cPulseBullet::cPulseBullet()noexcept
 : m_fScale (1.0f)
 {
     // load object resources
-    this->DefineModel  ("bullet_pulse.md3");
+    this->DefineModel  ("object_penta_top.md3");
+    this->DefineVolume ("object_penta_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_direct_program");
+    this->DefineProgram("effect_energy_bullet_program");
 
     // 
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,3.0f));
@@ -521,7 +523,7 @@ cPulseBullet::cPulseBullet()noexcept
 void cPulseBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -530,8 +532,7 @@ void cPulseBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vFor
 void cPulseBullet::__ReflectOwn()
 {
     // 
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, this->GetPosition().z));   // move to tip, to account for resetting the length
-    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, this->GetPosition().z));   // move to tip, to account for resetting the length
 
     // 
     m_fFade = 0.0f;
@@ -539,7 +540,7 @@ void cPulseBullet::__ReflectOwn()
     this->SetAlpha(0.0f);
 
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -547,28 +548,25 @@ void cPulseBullet::__ReflectOwn()
 // move the pulse bullet
 void cPulseBullet::__MoveOwn()
 {
-    // 
-    m_fSpeed += 2.5f * BULLET_SPEED_FACTOR * TIME;
-
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
-    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
+
 
     const coreFloat fRelSpeed = m_fSpeed / (6.0f*BULLET_SPEED_FACTOR);
     
     // update animation
-    //m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
-    //this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    m_fAnimation.UpdateMod(0.1f * fRelSpeed * m_fAnimSpeed, 1.0f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
     m_fFade.Update(1.5f * fRelSpeed);
-    const coreFloat fLen = MIN1(12.0f * m_fFade) * (0.3f + 0.7f * fRelSpeed);
-    const coreFloat fWave = 1.0f + 0.25f * SIN(m_fFade * 30.0f + 1.5f*PI);
-    this->SetSize (coreVector3(1.0f * fWave, 3.5f * fLen * fRelSpeed, 1.0f * fWave) * 1.6f * m_fScale);
+    const coreFloat fLen = MIN1(12.0f * m_fFade) * 1.0f;
+    this->SetSize (coreVector3(coreVector2(1.0f,1.0f) * fLen * 1.4f * m_fScale, 1.0f));
     this->SetAlpha(MIN1(15.0f * m_fFade));
     
     
-    this->SetTexSize(coreVector2(0.2f, 0.4f * fLen) * 0.01f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fFade * 5.0f), 0.0f));
+    
 }
 
 
