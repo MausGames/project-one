@@ -26,7 +26,7 @@ cDesertBackground::cDesertBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  ("environment_stone_01.md3");
+        oBase.DefineModel  ("object_tube_closed.md3");//"environment_stone_01.md3");
         oBase.DefineTexture(0u, "environment_stone_diff.png");
         oBase.DefineTexture(1u, "environment_stone_norm.png");
         oBase.DefineProgram("object_ground_program");
@@ -47,7 +47,7 @@ cDesertBackground::cDesertBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
-                    pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f));
+                    pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f*5.0f,1.3f*5.0f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f));
                     pObject->SetDirection  (coreVector3::Rand());
                     pObject->SetOrientation(coreVector3::Rand());
                     pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));

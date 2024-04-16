@@ -42,15 +42,17 @@ enum eEnemyStatus : coreUint16
 class INTERFACE cEnemy : public cShip
 {
 protected:
-    coreFlow  m_fLifeTime;         // 
-    coreFloat m_fLifeTimeBefore;   // 
+    coreFlow  m_fLifeTime;           // 
+    coreFloat m_fLifeTimeBefore;     // 
 
-    coreSet<cEnemy*> m_apMember;   // 
+    coreSet<cEnemy*> m_apMember;     // 
+
+    static cEnemy* s_pLastDamaged;   // 
 
 
 public:
     cEnemy()noexcept;
-    virtual ~cEnemy()override = default;
+    virtual ~cEnemy()override;
 
     FRIEND_CLASS(cEnemyManager)
     ENABLE_COPY (cEnemy)
@@ -85,6 +87,9 @@ public:
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
     inline const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
+
+    // 
+    static inline cEnemy* GetLastDamaged() {return s_pLastDamaged;}
 
 
 protected:
@@ -124,10 +129,10 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy   (const coreVector2& vPosition);
-    cEnemy* FindEnemyRev(const coreVector2& vPosition);
-    template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
-    template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
+    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
+    template <typename F> void ForEachEnemy   (F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+    template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 
     // 
     inline cEnemy* GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
@@ -204,9 +209,9 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy   (const coreVector2& vPosition);
-    cEnemy* FindEnemyRev(const coreVector2& vPosition);
-    template <typename F> void ForEachEnemy(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
+    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
+    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
+    template <typename F> void ForEachEnemy(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // 
     template <typename T> void PrefetchEnemy();
@@ -219,7 +224,7 @@ public:
     inline void UnbindEnemy(cEnemy* pEnemy) {ASSERT( m_apAdditional.count(pEnemy)) m_apAdditional.erase (pEnemy);}
 
     // 
-    inline coreUintW GetNumEnemiesAlive()const {const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY); return count_if(oEnemyList.begin(), oEnemyList.end(), [](const coreObject3D* pObject) {return pObject && !d_cast<const cEnemy*>(pObject)->IsChild();});}
+    inline coreUintW GetNumEnemiesAlive()const {coreUintW iNum = 0u; this->ForEachEnemy([&](void*) {++iNum;}); return iNum;}
 };
 
 
@@ -382,24 +387,27 @@ template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnem
 
 // ****************************************************************
 // 
-template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)
+template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)const
 {
     // 
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
     {
         cEnemy* pEnemy = m_apEnemy[i];
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;
+        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;    // # for scripting
 
         // 
         nFunction(pEnemy, i);
     }
 }
 
-template <typename F> void cEnemySquad::ForEachEnemyAll(F&& nFunction)
+template <typename F> void cEnemySquad::ForEachEnemyAll(F&& nFunction)const
 {
     // 
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
+    {
+        // 
         nFunction(m_apEnemy[i], i);
+    }
 }
 
 
@@ -491,7 +499,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 
 // ****************************************************************
 // 
-template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)
+template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)const
 {
     // 
     const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);

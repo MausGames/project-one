@@ -118,10 +118,7 @@ void cTheater::Move()
         pEnemy->SetPosition(coreVector3(vPos.xy() + vDir * (35.0f * Core::System->GetTime()), vPos.z));
 
         // 
-        if((vPos.x < -FOREGROUND_AREA.x * THEATER_AREA_FACTOR) ||
-           (vPos.x >  FOREGROUND_AREA.x * THEATER_AREA_FACTOR) ||
-           (vPos.y < -FOREGROUND_AREA.y * THEATER_AREA_FACTOR) ||
-           (vPos.y >  FOREGROUND_AREA.y * THEATER_AREA_FACTOR))
+        if(!IN_FOREGROUND_AREA(vPos, THEATER_AREA_FACTOR))
         {
             this->__KillMute(&(*it), false);
             DYN_REMOVE(it, m_aMute)

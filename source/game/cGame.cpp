@@ -71,7 +71,7 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 // destructor
 cGame::~cGame()
 {
-    constexpr coreBool bAnimated = !DEFINED(_CORE_DEBUG_);
+    constexpr coreBool bAnimated = !DEFINED(_CORE_DEBUG_);   // prevent assertions when force-quitting
 
     // 
     m_ItemManager.ClearItems(bAnimated);
@@ -95,6 +95,9 @@ cGame::~cGame()
 
     // delete last mission
     SAFE_DELETE(m_pCurMission)
+
+    // 
+    g_pWindscreen->ClearAdds(bAnimated);
 
     // 
     g_pPostProcessing->SetSaturation(1.0f);
@@ -671,27 +674,25 @@ void cGame::__HandleCollisions()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-        pEnemy ->TakeDamage(25, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
-
-        // 
-        g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);
+        const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
+        pPlayer->SetForce(vDiff.Normalized() * 80.0f);
     });
 
     // 
     cPlayer::TestCollision(TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
+        if(!bFirstHit) return;  
+
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-        pBullet->Deactivate(true, vIntersection.xy());
+        //pBullet->Deactivate(true, vIntersection.xy());
     });
 
     // 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
-           (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
+        if(!IN_FOREGROUND_AREA(vIntersection, 1.1f)) return;
 
 
         if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))

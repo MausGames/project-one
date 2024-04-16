@@ -82,6 +82,15 @@ cPlayer::cPlayer()noexcept
     m_Exhaust.SetColor4    (coreVector4(COLOR_FIRE_BLUE, 0.7f));
     m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
     m_Exhaust.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+
+    pTest = new coreObject3D();
+    pTest->DefineModel  ("object_sphere.md3");
+    pTest->DefineTexture(0u, "effect_energy.png");
+    pTest->DefineProgram("effect_energy_flat_spheric_program");
+    pTest->SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
+    pTest->SetTexSize   (coreVector2(5.0f,5.0f));
+    //pTest->SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -95,6 +104,9 @@ cPlayer::~cPlayer()
     // delete weapon objects
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         SAFE_DELETE(m_apWeapon[i])
+
+
+    SAFE_DELETE(pTest)
 }
 
 
@@ -195,6 +207,9 @@ void cPlayer::Render()
         {
             g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);
             m_Wind.Render();
+        glDepthFunc(GL_ALWAYS);
+        pTest->Render();
+        glDepthFunc(GL_LEQUAL);
         }
 
         if(g_bDebugOutput)
@@ -330,6 +345,14 @@ void cPlayer::Move()
             m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
             m_Wind.Move();
         }
+
+
+        pTest->SetAlpha(m_fRollTime);
+        pTest->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 3.0f * (1.0f - m_fRollTime));
+
+        pTest->SetPosition (this->GetPosition());
+        pTest->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
+        pTest->Move();
 
         if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {

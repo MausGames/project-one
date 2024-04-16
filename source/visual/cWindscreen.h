@@ -31,16 +31,15 @@
 class cWindscreen final
 {
 private:
-    std::vector<coreObject3D*>    m_apAddObject;   // temporary additional objects
-    coreLookupStr<coreBatchList*> m_apAddList;     // optimized lists for temporary additional objects
+    coreLookupStr<coreBatchList*> m_apAddList;   // temporary additional objects
 
-    coreFullscreen m_Ink;                          // 
-    coreFlow       m_fInkAnimation;                // 
-    coreFloat      m_fInkDelay;                    // 
-    coreVector4    m_vInkPosition;                 // 
-    coreVector2    m_vInkAlpha;                    // 
+    coreFullscreen m_Ink;                        // 
+    coreFlow       m_fInkAnimation;              // 
+    coreFloat      m_fInkDelay;                  // 
+    coreVector4    m_vInkPosition;               // 
+    coreVector2    m_vInkAlpha;                  // 
 
-    bool m_bActive;                                // 
+    bool m_bActive;                              // 
 
 
 public:
@@ -53,10 +52,9 @@ public:
     void Render();
     void Move();
 
-    // manage additional objects
-    void AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreFloat fLifeTime);
+    // manage temporary objects
     void AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreFloat fLifeTime, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
-    void ClearObjects();
+    void ClearAdds(const coreBool bAnimated);
 
     // 
     void EnableInk     (const coreBool  bLine);

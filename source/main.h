@@ -12,7 +12,7 @@
 //*-------------------------------------------------------------------------------*//
 //| Project One v0.1.0a (https://www.maus-games.at)                               |//
 //*-------------------------------------------------------------------------------*//
-//| Copyright (c) 2010-2018 Martin Mauersics                                      |//
+//| Copyright (c) 2010-2019 Martin Mauersics                                      |//
 //|                                                                               |//
 //| This software is provided 'as-is', without any express or implied             |//
 //| warranty. In no event will the authors be held liable for any damages         |//

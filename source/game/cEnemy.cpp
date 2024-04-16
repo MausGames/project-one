@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+cEnemy* cEnemy::s_pLastDamaged = NULL;
+
 
 // ****************************************************************
 // constructor
@@ -26,6 +28,15 @@ cEnemy::cEnemy()noexcept
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;
+}
+
+
+// ****************************************************************
+// destructor
+cEnemy::~cEnemy()
+{
+    // 
+    if(s_pLastDamaged == this) s_pLastDamaged = NULL;
 }
 
 
@@ -115,6 +126,9 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
             }
 
             // 
+            s_pLastDamaged = this;
+
+            // 
             const coreBool bReachedDeath = this->_TakeDamage(iDamage, iElement, vImpact);
 
             // 
@@ -151,7 +165,7 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
 void cEnemy::Resurrect()
 {
     // 
-    this->Resurrect(coreVector2(FLT_MAX,FLT_MAX), coreVector2(0.0f,-1.0f));
+    this->Resurrect(this->GetPosition().xy(), this->GetDirection().xy());
 }
 
 void cEnemy::Resurrect(const coreSpline2* pPath, const coreVector2& vFactor, const coreVector2& vOffset)
@@ -202,7 +216,7 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     this->__ResurrectOwn();
 
     // 
-    if(this->IsParent()) FOR_EACH(it, m_apMember) (*it)->Resurrect(vPosition, vDirection);
+    if(this->IsParent()) FOR_EACH(it, m_apMember) (*it)->Resurrect();
 }
 
 
@@ -350,7 +364,7 @@ void cEnemySquad::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
+cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -375,7 +389,7 @@ cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -598,7 +612,7 @@ void cEnemyManager::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
+cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -623,7 +637,7 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)
+cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;

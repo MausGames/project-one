@@ -12,18 +12,17 @@
 
 // TODO: reuse paths and squads over stages
 // TODO: add visible debug-spline
-// TODO: prevent multiple calculations in script-commands (because of macro variables)
-// TODO: init-value for get-variables
+// TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO: assertion for "active boss should be alive"
-// TODO: check for multiple evaluations in macros
 
 
 // ****************************************************************
 // mission definitions
-#define MISSION_BOSSES  (BOSSES)   // default number of bosses per mission
-#define MISSION_WAVES   (WAVES)    // 
-#define MISSION_NO_BOSS (0xFFu)    // no boss currently active (error-value)
-#define MISSION_NO_WAVE (0xFFu)    // 
+#define MISSION_BOSSES      (BOSSES)                                   // default number of bosses per mission
+#define MISSION_WAVES       (WAVES)                                    // 
+#define MISSION_NO_BOSS     (0xFFu)                                    // no boss currently active (error-value)
+#define MISSION_NO_WAVE     (0xFFu)                                    // 
+#define MISSION_STAGE_DELAY (INTERFACE_BANNER_DURATION_SCORE - 0.5f)   // 
 
 
 // ****************************************************************
@@ -38,14 +37,15 @@
 // ****************************************************************
 // stage management macros
 #define STAGE_MAIN                      m_anStage.emplace(__LINE__, [this]()
-#define STAGE_SUB(i)                    ((m_iStageSub == ((i) - 1u)) && [&]() {m_iStageSub = (i); return true;}())
+#define STAGE_SUB(i)                    ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); return true;}())
 
-#define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_FINISH_NOW                {this->SkipStage();}
 #define STAGE_FINISH_AFTER(t)           {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
-
 #define STAGE_BOSS(e,p,d)               {if(STAGE_BEGINNING) (e).Resurrect((p) * FOREGROUND_AREA, (d)); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE                      {if(STAGE_BEGINNING) this->ActivateWave(); if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
+
+#define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
+#define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 
 #define STAGE_ADD_PATH(n)               const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)          const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
@@ -55,8 +55,8 @@
 #define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)
 #define STAGE_FOREACH_ENEMY_ALL(s,e,i)  (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)
 
-#define STAGE_GET_START(c)              {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} UNUSED coreUintW iDataIndex = 0u; UNUSED constexpr coreUintW iNewDataSize = (c);
-#define STAGE_GET_END                   {ASSERT(iDataIndex == iNewDataSize)}
+#define STAGE_GET_START(c)              {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} UNUSED coreUintW iDataIndex = 0u; UNUSED constexpr coreUintW iCurDataSize = (c);
+#define STAGE_GET_END                   {ASSERT(iDataIndex == iCurDataSize)}
 #define STAGE_GET_INT(n,...)            coreInt32&   n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT(n,...)           coreUint32&  n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_FLOAT(n,...)          coreFloat&   n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
@@ -75,11 +75,14 @@
     UNUSED const coreFloat fLifeOffset     = (a);                                                 \
     UNUSED coreFloat       fLifeTime       = (e)->GetLifeTime()       * fLifeSpeed - fLifeOffset; \
     UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset; \
-    if(!CONTAINS_FLAG(e->GetStatus(), ENEMY_STATUS_DEAD)) e->SetEnabled((fLifeTime >= 0.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+    if(!CONTAINS_FLAG(e->GetStatus(), ENEMY_STATUS_DEAD)) e->SetEnabled((fLifeTime >= 0.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE); \
+    if(e->GetPosition().xy() > coreVector2(1000.0f,1000.0f)) e->SetPosition(coreVector3(1000.0f,1000.0f,0.0f));
 
-#define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); return false;}())
-#define STAGE_TICK_TIME(c,o)            ((s_iTick = F_TO_UI(m_fStageTime * (c) - (o) - 1.0f)) != (F_TO_UI(m_fStageTimeBefore * (c) - (o) - 1.0f)))
-#define STAGE_TICK_LIFETIME(c,o)        ((s_iTick = F_TO_UI(fLifeTime    * (c) - (o) - 1.0f)) != (F_TO_UI(fLifeTimeBefore    * (c) - (o) - 1.0f)))
+#define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
+#define STAGE_REPEAT(x)                 {if(STAGE_BRANCH(x, x)) {}}
+
+#define STAGE_TICK_TIME(c,o)            ((m_fStageTimeBefore >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime * (c) - (o))) != (F_TO_UI(m_fStageTimeBefore * (c) - (o)))))
+#define STAGE_TICK_LIFETIME(c,o)        ((fLifeTimeBefore    >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime    * (c) - (o))) != (F_TO_UI(fLifeTimeBefore    * (c) - (o)))))
 
 #define STAGE_TIME_POINT(t)             (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)            (m_fStageTime <  (t))
@@ -88,9 +91,10 @@
 #define STAGE_BEGINNING                 (STAGE_TIME_POINT(0.0f))
 
 #define STAGE_LIFETIME_POINT(t)         (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
-#define STAGE_LIFETIME_BEFORE(t)        (fLifeTime <  (t))
+#define STAGE_LIFETIME_BEFORE(t)        (fLifeTime <  (t) && fLifeTime >= 0.0f)
 #define STAGE_LIFETIME_AFTER(t)         (fLifeTime >= (t))
 #define STAGE_LIFETIME_BETWEEN(t,u)     (InBetween(fLifeTime, (t), (u)))
+#define STAGE_TAKEOFF                   (STAGE_LIFETIME_POINT(0.0f) || ((fLifeTime == 0.0f) && (fLifeTimeBefore == 0.0f)))
 
 #define STAGE_HEALTHPCT_POINT(e,t)      ((e)->ReachedHealthPct(t) && [&]() {s_fHealthPctPoint = (t); return true;}())
 #define STAGE_HEALTHPCT_BEFORE(e,t)     ((e)->GetCurHealthPct() <  (t))

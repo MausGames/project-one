@@ -79,13 +79,14 @@ inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, c
 // value range helper-functions
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {
-    return (a <= x) && (x < b);
+    ASSERT(a <= b)
+    return (x >= a) && (x < b);
 }
 
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreInt32 InBetweenExt(const T& x, const S& a, const R& b)
 {
-    return (a <= b) ? (((a <= x) && (x < b)) ?  1 : 0) :
-                      (((b <= x) && (x < a)) ? -1 : 0);
+    return (a <= b) ? (((x >= a) && (x < b)) ?  1 : 0) :
+                      (((x >= b) && (x < a)) ? -1 : 0);
 }
 
 

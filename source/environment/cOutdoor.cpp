@@ -592,7 +592,7 @@ void cOutdoor::SetFlyOffset(const coreFloat fFlyOffset)
     ASSERT(F_TO_UI(m_fFlyOffset) < OUTDOOR_HEIGHT)
 
     // set position (XY only used in height-calculations)
-    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * -OUTDOOR_DETAIL, 0.0f)); // TODO: side    
+    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * -OUTDOOR_DETAIL, 0.0f)); // TODO: side     
 
     // calculate vertex and index offset
     m_iVertexOffset = F_TO_UI(m_fFlyOffset) * OUTDOOR_WIDTH;

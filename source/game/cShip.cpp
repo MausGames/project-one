@@ -250,8 +250,9 @@ void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     m_iCurHealth = m_iMaxHealth;
     m_iPreHealth = m_iMaxHealth;
     m_vOldPos    = vPosition;
-    this->SetPosition (coreVector3(vPosition,  0.0f));
-    this->SetDirection(coreVector3(vDirection, 0.0f));
+    this->SetPosition   (coreVector3(vPosition,  0.0f));
+    this->SetDirection  (coreVector3(vDirection, 0.0f));
+    this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));               
     this->RefreshColor(1.0f);
 
     // 

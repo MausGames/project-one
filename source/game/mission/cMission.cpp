@@ -95,12 +95,15 @@ void cMission::MoveBefore()
         m_fStageTimeBefore = m_fStageTime;
         m_fStageTime.Update(1.0f);
 
-        // 
-        m_anStage.back()();
-        if(m_anStage.empty())
+        if(m_fStageTime > 0.0f)
         {
             // 
-            g_pGame->StartOutro();
+            m_anStage.back()();
+            if(m_anStage.empty())
+            {
+                // 
+                g_pGame->StartOutro();
+            }
         }
     }
 
@@ -120,8 +123,8 @@ void cMission::MoveAfter()
 void cMission::SkipStage()
 {
     // 
-    m_fStageTime       = 0.0f;
-    m_fStageTimeBefore = 0.0f;
+    m_fStageTime       = -MISSION_STAGE_DELAY;
+    m_fStageTimeBefore = -MISSION_STAGE_DELAY;
     m_iStageSub        = 0u;
     m_anStage.pop_back();
 
@@ -180,16 +183,27 @@ void cMission::ActivateWave()
 void cMission::DeactivateWave()
 {
 
-    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
+    //g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    //{
 
         const coreFloat fTime  = MAX(g_pGame->GetTimeTable()->GetTimeWave(g_pGame->GetCurMissionIndex(), m_iCurWaveIndex), 0.0f);
         const coreFloat fScore = MAX(1000.0f * (1.0f - fTime * RCP(30.0f)), 0.0f);
 
-        g_pGame->GetCombatText()->AddBonus(F_TO_UI(fScore), pPlayer->GetPosition());
+        const coreVector3 vPos = cEnemy::GetLastDamaged() ? cEnemy::GetLastDamaged()->GetPosition() : coreVector3(0.0f,0.0f,0.0f);
+
+        //g_pGame->GetCombatText()->AddBonus(F_TO_UI(fScore), vPos);
+        //g_pGame->GetCombatText()->AddBonus(F_TO_UI(fScore), coreVector3(0.0f,0.0f,0.0f));  
         // TODO: only for player with most damage this wave 
 
-    });
+        g_pGame->GetInterface()->ShowScore(F_TO_UI(fScore));
+
+    //});
+
+    // 
+    const coreBool bAnimated = true;
+    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);
+    g_pGame->GetItemManager()->LoseItems();
+    // should be moves somewhere else, lie for boss 
 
 
 

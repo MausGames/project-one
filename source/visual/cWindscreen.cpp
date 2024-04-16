@@ -29,8 +29,8 @@ cWindscreen::cWindscreen()noexcept
 // destructor
 cWindscreen::~cWindscreen()
 {
-    // remove all additional objects
-    this->ClearObjects();
+    // remove all temporary objects
+    this->ClearAdds(false);
 }
 
 
@@ -42,9 +42,9 @@ void cWindscreen::Render()
     {
         glDisable(GL_DEPTH_TEST);
         {
-            // render all additional objects
-            FOR_EACH(it, m_apAddObject) (*it)->Render();
-            FOR_EACH(it, m_apAddList)   (*it)->Render();
+            // render all temporary objects
+            FOR_EACH(it, m_apAddList)
+                (*it)->Render();
 
             // render the ink
             this->__RenderInk();
@@ -59,7 +59,7 @@ void cWindscreen::Render()
 void cWindscreen::Move()
 {
     // 
-    m_bActive = (!m_apAddObject.empty() || !m_apAddList.empty() || !m_vInkAlpha.IsNull());
+    m_bActive = (!m_apAddList.empty() || !m_vInkAlpha.IsNull());
     if(m_bActive)
     {
         // 
@@ -85,9 +85,6 @@ void cWindscreen::Move()
             }
         };
 
-        // 
-        nControlAddFunc(&m_apAddObject);
-
         FOR_EACH_DYN(it, m_apAddList)
         {
             // 
@@ -105,9 +102,9 @@ void cWindscreen::Move()
             }
         }
 
-        // move all additional objects
-        FOR_EACH(it, m_apAddObject) (*it)->Move();
-        FOR_EACH(it, m_apAddList)   (*it)->MoveNormal();
+        // move all temporary objects
+        FOR_EACH(it, m_apAddList)
+            (*it)->MoveNormal();
 
         // move the ink
         this->__MoveInk();
@@ -116,20 +113,10 @@ void cWindscreen::Move()
 
 
 // ****************************************************************
-// add additional object
-void cWindscreen::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreFloat fLifeTime)
-{
-    ASSERT(pObject)
-
-    // set properties and add object
-    pObject->SetPosition(vRelativePos);
-    pObject->SetStatus  (coreMath::FloatToBits(fLifeTime));
-    m_apAddObject.push_back(pObject);
-}
-
+// add temporary object
 void cWindscreen::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreFloat fLifeTime, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey)
 {
-    ASSERT(pObject)
+    ASSERT(pObject && (fLifeTime > 0.0f))
 
     // check for available optimized list
     if(!m_apAddList.count(sListKey))
@@ -150,20 +137,29 @@ void cWindscreen::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 
 
 // ****************************************************************
-// remove all additional objects
-void cWindscreen::ClearObjects()
+// remove all temporary objects
+void cWindscreen::ClearAdds(const coreBool bAnimated)
 {
-    // delete objects and lists
-    FOR_EACH(it, m_apAddObject) MANAGED_DELETE(*it)
-    FOR_EACH(it, m_apAddList)
+    if(bAnimated)
     {
-        FOR_EACH(et, *(*it)->List()) MANAGED_DELETE(*et)
-        SAFE_DELETE(*it)
+        // 
+        FOR_EACH(it, m_apAddList)
+        {
+            FOR_EACH(et, *(*it)->List()) (*et)->SetStatus(coreMath::FloatToBits(MIN(coreMath::BitsToFloat((*et)->GetStatus()), 1.0f)));
+        }
     }
+    else
+    {
+        // delete objects and lists
+        FOR_EACH(it, m_apAddList)
+        {
+            FOR_EACH(et, *(*it)->List()) MANAGED_DELETE(*et)
+            SAFE_DELETE(*it)
+        }
 
-    // clear memory
-    m_apAddObject.clear();
-    m_apAddList  .clear();
+        // clear memory
+        m_apAddList.clear();
+    }
 }
 
 

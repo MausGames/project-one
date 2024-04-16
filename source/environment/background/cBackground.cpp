@@ -39,9 +39,9 @@ cBackground::~cBackground()
     // remove all persistent objects
     const auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
     {
+        // delete objects and lists
         FOR_EACH(it, *papList)
         {
-            // delete single objects within the list
             FOR_EACH(et, *(*it)->List()) POOLED_DELETE(s_MemoryPool, *et)
             SAFE_DELETE(*it)
         }
@@ -53,8 +53,8 @@ cBackground::~cBackground()
     nRemoveObjectsFunc(&m_apDecalObjectList);
     nRemoveObjectsFunc(&m_apAirObjectList);
 
-    // remove all additional objects
-    this->ClearObjects();
+    // remove all temporary objects
+    this->ClearAdds();
 
     // delete outdoor-surface object
     if(m_pOutdoor) m_pOutdoor->GetShadowMap()->ClearLists();
@@ -97,8 +97,8 @@ void cBackground::Render()
             cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
 
             // render all ground objects
-            FOR_EACH(it, m_apGroundObjectList)
-                (*it)->Render();
+            FOR_EACH(it, m_apGroundObjectList) (*it)->Render();
+            FOR_EACH(it, m_apGroundAddList)    (*it)->Render();
 
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
@@ -107,12 +107,8 @@ void cBackground::Render()
             glDisable(GL_DEPTH_TEST);
             {
                 // render all transparent ground objects
-                FOR_EACH(it, m_apDecalObjectList)
-                    (*it)->Render();
-
-                // render all additional objects (instancing first)
-                FOR_EACH(it, m_apAddList)   (*it)->Render();
-                FOR_EACH(it, m_apAddObject) (*it)->Render();
+                FOR_EACH(it, m_apDecalObjectList) (*it)->Render();
+                FOR_EACH(it, m_apDecalAddList)    (*it)->Render();
             }
             glDisable(GL_BLEND);
             glEnable (GL_DEPTH_TEST);
@@ -128,8 +124,8 @@ void cBackground::Render()
         glDisable(GL_DEPTH_TEST);
         {
             // render all air objects
-            FOR_EACH(it, m_apAirObjectList)
-                (*it)->Render();
+            FOR_EACH(it, m_apAirObjectList) (*it)->Render();
+            FOR_EACH(it, m_apAirAddList)    (*it)->Render();
         }
         glEnable(GL_DEPTH_TEST);
 
@@ -181,11 +177,10 @@ void cBackground::Move()
             coreBool bUpdate = false;
 
             // 
-            const coreFloat&               fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
+            const coreFloat                fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
             const std::vector<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
             const std::vector<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
 
-            // enable only objects in the current view
             FOR_EACH(et, *(*it)->List())
             {
                 coreObject3D* pObject = (*et);
@@ -232,30 +227,45 @@ void cBackground::Move()
     };
     const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotated45()).m12();
     nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE,         mRota);
-    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE,         mRota);
+    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE - 9.0f,  mRota);
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
 
-    // control all additional objects
-    const auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat fRange)
+    // control and move all temporary objects
+    const auto nControlAddFunc = [](coreLookupStr<coreBatchList*>* OUTPUT papList, const coreFloat fRange)
     {
-        FOR_EACH_DYN(it, *papObject)
+        // cache current camera position (to improve performance)
+        const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
+
+        FOR_EACH(it, *papList)
         {
-            // keep object while in current view
-            if(coreMath::IsNear((*it)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange)) DYN_KEEP(it)
-            else
+            FOR_EACH_DYN(et, *(*it)->List())
             {
-                // remove object when not visible anymore
-                MANAGED_DELETE(*it)
-                DYN_REMOVE(it, *papObject)
+                coreObject3D* pObject = (*et);
+
+                // 
+                const coreBool bIsVisible = coreMath::IsNear(pObject->GetPosition().y, vCameraPos.y, fRange);
+                const coreBool bIsAlive   = coreMath::IsNear(pObject->GetPosition().y, vCameraPos.y, fRange * BACKGROUND_ADD_EXTENSION);
+
+                // 
+                pObject->SetEnabled(bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
+                // keep object while in current view
+                if(bIsAlive) DYN_KEEP(it)
+                else
+                {
+                    // remove object when not visible anymore
+                    MANAGED_DELETE(pObject)
+                    DYN_REMOVE(et, *(*it)->List())
+                }
             }
+
+            // 
+            (*it)->MoveNormal();
         }
     };
-    nControlAddFunc(&m_apAddObject, BACKGROUND_OBJECT_RANGE - 9.0f);
-    FOR_EACH(it, m_apAddList) nControlAddFunc((*it)->List(), BACKGROUND_OBJECT_RANGE - 9.0f);
-
-    // move all additional objects
-    FOR_EACH(it, m_apAddObject) (*it)->Move();
-    FOR_EACH(it, m_apAddList)   (*it)->MoveNormal();
+    nControlAddFunc(&m_apGroundAddList, BACKGROUND_OBJECT_RANGE);
+    nControlAddFunc(&m_apDecalAddList,  BACKGROUND_OBJECT_RANGE - 9.0f);
+    nControlAddFunc(&m_apAirAddList,    BACKGROUND_OBJECT_RANGE - 11.0f);
 
     // call individual move routine
     this->__MoveOwn();
@@ -263,71 +273,76 @@ void cBackground::Move()
 
 
 // ****************************************************************
-// add additional object
-void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos)
-{
-    ASSERT(pObject)
-
-    // set position and add object
-    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
-    m_apAddObject.push_back(pObject);
+// add temporary object
+#define __ADD_OBJECT(x)                                                                            \
+{                                                                                                  \
+    ASSERT(pObject && (ABS(vRelativePos.y) <= BACKGROUND_OBJECT_RANGE * BACKGROUND_ADD_EXTENSION)) \
+                                                                                                   \
+    /* check for available optimized list */                                                       \
+    if(!(x).count(sListKey))                                                                       \
+    {                                                                                              \
+        /* create new list */                                                                      \
+        coreBatchList* pList = new coreBatchList(iCapacity);                                       \
+        pList->DefineProgram(sProgramInstancedName);                                               \
+                                                                                                   \
+        /* save new list */                                                                        \
+        (x).emplace(sListKey, pList);                                                              \
+    }                                                                                              \
+                                                                                                   \
+    /* set position and add object to optimized list */                                            \
+    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));   \
+    (x).at(sListKey)->BindObject(pObject);                                                         \
 }
 
-void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey)
-{
-    ASSERT(pObject)
+void cBackground::AddGround(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apGroundAddList)}
+void cBackground::AddDecal (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apDecalAddList)}
+void cBackground::AddAir   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apAirAddList)}
 
-    // check for available optimized list
-    if(!m_apAddList.count(sListKey))
-    {
-        // create new list
-        coreBatchList* pList = new coreBatchList(iCapacity);
-        pList->DefineProgram(sProgramInstancedName);
-
-        // save new list
-        m_apAddList.emplace(sListKey, pList);
-    }
-
-    // set position and add object to optimized list
-    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
-    m_apAddList.at(sListKey)->BindObject(pObject);
-}
+#undef __ADD_OBJECT
 
 
 // ****************************************************************
-// move additional objects (for infinite background)
-void cBackground::ShoveObjects(const coreFloat fOffset)
+// move temporary objects (for infinite background)
+void cBackground::ShoveAdds(const coreFloat fOffset)
 {
-    // update objects and lists
-    const auto nUpdatePosFunc = [&](std::vector<coreObject3D*>* OUTPUT papObject)
+    const auto nUpdatePosFunc = [&](coreLookupStr<coreBatchList*>* OUTPUT papList)
     {
-        FOR_EACH(it, *papObject)
+        // update objects and lists
+        FOR_EACH(it, *papList)
         {
-            // add offset to position
-            const coreVector3& vPos = (*it)->GetPosition();
-            (*it)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
+            FOR_EACH(et, *(*it)->List())
+            {
+                // add offset to position
+                const coreVector3& vPos = (*et)->GetPosition();
+                (*et)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
+            }
         }
     };
-    nUpdatePosFunc(&m_apAddObject);
-    FOR_EACH(it, m_apAddList) nUpdatePosFunc((*it)->List());
+    nUpdatePosFunc(&m_apGroundAddList);
+    nUpdatePosFunc(&m_apDecalAddList);
+    nUpdatePosFunc(&m_apAirAddList);
 }
 
 
 // ****************************************************************
-// remove all additional objects
-void cBackground::ClearObjects()
+// remove all temporary objects
+void cBackground::ClearAdds()
 {
-    // delete objects and lists
-    FOR_EACH(it, m_apAddObject) MANAGED_DELETE(*it)
-    FOR_EACH(it, m_apAddList)
+    const auto nRemoveAddsFunc = [](coreLookupStr<coreBatchList*>* OUTPUT papList)
     {
-        FOR_EACH(et, *(*it)->List()) MANAGED_DELETE(*et)
-        SAFE_DELETE(*it)
-    }
+        // delete objects and lists
+        FOR_EACH(it, *papList)
+        {
+            FOR_EACH(et, *(*it)->List()) MANAGED_DELETE(*et)
+            SAFE_DELETE(*it)
+        }
 
-    // clear memory
-    m_apAddObject.clear();
-    m_apAddList  .clear();
+        // clear memory
+        papList->clear();
+    };
+    nRemoveAddsFunc(&m_apGroundAddList);
+    nRemoveAddsFunc(&m_apDecalAddList);
+    nRemoveAddsFunc(&m_apAirAddList);
 }
 
 
@@ -335,7 +350,7 @@ void cBackground::ClearObjects()
 // 
 #define __SET_DENSITY(x)                                                                    \
 {                                                                                           \
-    ASSERT((iIndex < (x).size()) && (0.0f <= fDensity) && (fDensity <= 1.0f))               \
+    ASSERT((iIndex < (x).size()) && (fDensity >= 0.0f) && (fDensity <= 1.0f))               \
                                                                                             \
     /*  */                                                                                  \
     coreObject3D* pBase = (x)[iIndex]->List()->front();                                     \

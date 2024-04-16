@@ -280,6 +280,93 @@ cGrassBackground::cGrassBackground()noexcept
         ASSERT(pList1->GetCurCapacity() == GRASS_CLOUD_RESERVE)
     }
 
+
+
+
+
+    // allocate animal lists
+    pList1 = new coreBatchList(SEA_ANIMAL_1_RESERVE);
+    pList1->DefineProgram("object_ground_inst_program");
+
+    pList2 = new coreBatchList(SEA_ANIMAL_2_RESERVE);
+    pList2->DefineProgram("object_ground_inst_program");
+    {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineTexture(0u, "environment_sea_diff.png");
+        oBase.DefineTexture(1u, "environment_sea_norm.png");
+        oBase.DefineProgram("object_ground_program");
+
+        for(coreUintW i = 0u; i < SEA_ANIMAL_NUM; ++i)
+        {
+            for(coreUintW j = 8u; j--; )   // tries
+            {
+                // calculate position and height
+                const coreVector2 vPosition   = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_ANIMAL_NUM);
+                const coreFloat   fHeight     = m_pOutdoor->RetrieveBackHeight(vPosition);
+                const coreFloat   fHeightUp   = m_pOutdoor->RetrieveBackHeight(coreVector2(vPosition.x,     vPosition.y + OUTDOOR_DETAIL));
+                const coreFloat   fHeightDown = m_pOutdoor->RetrieveBackHeight(coreVector2(vPosition.x, MAX(vPosition.y - OUTDOOR_DETAIL, I_TO_F(OUTDOOR_VIEW / 2u))));
+
+                // test for valid values
+                if((fHeight > fHeightDown) && (fHeight < fHeightUp) &&
+                   (fHeight > -22.0f)      && (fHeight < -16.0f)    && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+                {
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
+                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, 25.0f) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 4.0f))
+                    {
+                        // 
+                        const coreVector3 vDirection   = m_pOutdoor->RetrieveBackNormal(vPosition);
+                        const coreVector3 vTangent     = coreVector3::Cross(vDirection, -CAMERA_DIRECTION).Normalized();
+                        const coreVector3 vOrientation = coreVector3::Cross(vDirection, vTangent);
+
+                        // determine object type
+                        const coreBool bType = Core::Rand->Bool(0.75f) ? true : false;
+
+                        // create object
+                        coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
+                        pObject->DefineModel(bType ? "environment_seashell.md3" : "environment_starfish.md3");
+
+                        // set object properties
+                        pObject->SetPosition   (coreVector3(vPosition, 0.0f));
+                        pObject->SetSize       (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(2.2f, 2.6f));
+                        pObject->SetDirection  (vDirection);
+                        pObject->SetOrientation(vOrientation);
+                        pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.7f, 0.85f));
+
+                        // add object to the list
+                        if(bType) pList1->BindObject(pObject);
+                             else pList2->BindObject(pObject);
+                    }
+                }
+            }
+        }
+
+        // 
+        this->_StoreHeight(pList1, 0.9f);
+        this->_StoreHeight(pList2, 0.9f);
+        this->_StoreNormalList(pList1);
+        this->_StoreNormalList(pList2);
+
+        // post-process lists and add them to the ground
+        cBackground::_FillInfinite(pList1, SEA_ANIMAL_1_RESERVE);
+        m_apGroundObjectList.push_back(pList1);
+
+        cBackground::_FillInfinite(pList2, SEA_ANIMAL_2_RESERVE);
+        m_apGroundObjectList.push_back(pList2);
+
+        // 
+        m_pOutdoor->GetShadowMap()->BindList(pList1);
+        m_pOutdoor->GetShadowMap()->BindList(pList2);
+    }
+
+
+
+
+
+
+
     // load nature sound-effect
     m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
     m_pNatureSound.OnUsableOnce([this, pResource = m_pNatureSound]()

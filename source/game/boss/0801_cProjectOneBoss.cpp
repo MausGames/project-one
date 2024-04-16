@@ -57,12 +57,38 @@ void cProjectOneBoss::__MoveOwn()
 {
     // ################################################################
     // 
-    if(m_iPhase == 0u)
+     if(m_iPhase == 0u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
+        PHASE_CONTROL_PAUSE(0u, 0.6f)
+        {
+            cEnemySquad* pSquad = g_pGame->GetCurMission()->GetEnemySquad(0u);
+
+            pSquad->ForEachEnemy([](cEnemy* OUTPUT pEnemy, const coreUintW i)
+            {
+                pEnemy->Kill(true);
+            });
+
+            g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                const coreVector2 vDir = (pPlayer->GetPosition().xy() - this->GetPosition().xy()).Normalized();
+
+                pPlayer->SetForce(vDir * 120.0f);
+            });
+
+            g_pSpecialEffects->MacroExplosionDarkBig(coreVector3(0.0f, FOREGROUND_AREA.y, 0.0f));
+
+            ++m_iPhase;
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 1u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK)
         {
             // 
-            this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.8f), fTime);
+            this->DefaultMoveLerp(coreVector2(0.0f,1.2f), coreVector2(0.0f,0.8f), fTime);
 
             // 
             //if(PHASE_TIME_POINT(0.85f))
@@ -76,7 +102,7 @@ void cProjectOneBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 1u)
+    else if(m_iPhase == 2u)
     {
         PHASE_CONTROL_PAUSE(0u, 2.0f)
         {

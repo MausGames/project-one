@@ -186,7 +186,7 @@ void cTimeTable::Reset()
     m_fTimeEvent = 0.0f;
     m_fTimeTotal = 0.0f;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_afTimeMission[j] = 0.0f;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_BOSSES; ++i) m_aafTimeBoss[j][i] = -INTERFACE_BANNER_DURATION;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_BOSSES; ++i) m_aafTimeBoss[j][i] = -INTERFACE_BANNER_DURATION_BOSS;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_WAVES;  ++i) m_aafTimeWave[j][i] = 0.0f;
 }
 

@@ -40,10 +40,7 @@ void cBullet::Move()
     this->__MoveOwn();
 
     // deactivate bullet when leaving the defined area
-    if(((this->GetPosition().x < -FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
-        (this->GetPosition().x >  FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
-        (this->GetPosition().y < -FOREGROUND_AREA.y * BULLET_AREA_FACTOR) ||
-        (this->GetPosition().y >  FOREGROUND_AREA.y * BULLET_AREA_FACTOR)) && (m_fFlyTime >= 1.0f))
+    if(!IN_FOREGROUND_AREA(this->GetPosition(), BULLET_AREA_FACTOR) && (m_fFlyTime >= 1.0f))
         this->Deactivate(false);
 
     // move the 3d-object

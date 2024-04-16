@@ -78,6 +78,9 @@ private:
     coreLookup<const coreObject3D*, coreUint32> m_aCollision;   // 
 
 
+    coreObject3D* pTest;
+
+
 public:
     cPlayer()noexcept;
     ~cPlayer()final;

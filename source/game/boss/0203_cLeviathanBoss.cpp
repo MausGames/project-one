@@ -690,8 +690,7 @@ void cLeviathanBoss::__MoveOwn()
             const coreVector2 vProjectedPos = g_pForeground->Project3D(vPos);
 
             // 
-            if((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f) &&
-               (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f))
+            if(IN_FOREGROUND_AREA(vProjectedPos, 1.1f))
             {
                 // 
                 if(pPart == &m_Head)
@@ -908,7 +907,7 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
                 pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
 
                 // add object to background or windscreen
-                if(bGround) g_pEnvironment->GetBackground()->AddObject(pObject, vDecalPos,       128u, "effect_decal_single_inst_program", LIST_KEY);
+                if(bGround) g_pEnvironment->GetBackground()->AddDecal (pObject, vDecalPos,       128u, "effect_decal_single_inst_program", LIST_KEY);
                        else g_pWindscreen                  ->AddObject(pObject, vDecalPos, 3.0f, 128u, "effect_decal_single_inst_program", LIST_KEY);
 
                 // 
