@@ -24,6 +24,7 @@ cMenuNavigator::cMenuNavigator()noexcept
 , m_bPressed       (false)
 , m_bGrabbed       (false)
 , m_fGrabTime      (1.0f)
+, m_vGrabColor     (coreVector3(0.0f,0.0f,0.0f))
 , m_vMouseOffset   (coreVector2(0.0f,0.0f))
 , m_vCurPos        (HIDDEN_POS)
 , m_vCurSize       (coreVector2(0.0f,0.0f))
@@ -119,9 +120,10 @@ void cMenuNavigator::Move()
         const coreObject2D* pScroll = this->GetCurScroll();
         if(pScroll)
         {
-            const coreVector2 vPos = GetTranslationArea(*pScroll);
-            vNewPos.x = CLAMP(vNewPos.x, vPos.x - pScroll->GetSize().x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f - m_vCurSize.x * 0.5f);
-            vNewPos.y = CLAMP(vNewPos.y, vPos.y - pScroll->GetSize().y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f - m_vCurSize.y * 0.5f);
+            const coreVector2 vPos  = MapToAxis(GetTranslationArea(*pScroll), g_vHudDirection);
+            const coreVector2 vSize = pScroll->GetSize();
+            vNewPos.x = CLAMP(vNewPos.x, vPos.x - vSize.x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + vSize.x * 0.5f - m_vCurSize.x * 0.5f);
+            vNewPos.y = CLAMP(vNewPos.y, vPos.y - vSize.y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + vSize.y * 0.5f - m_vCurSize.y * 0.5f);
         }
 
         if(m_vCurPos == HIDDEN_POS)
@@ -161,9 +163,10 @@ void cMenuNavigator::Move()
             const coreObject2D* pScroll2 = this->GetCurScroll();
             if(pScroll2)
             {
-                const coreVector2 vPos = GetTranslationArea(*pScroll2);
-                vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll2->GetSize().x * 0.5f, vPos.x + pScroll2->GetSize().x * 0.5f);
-                vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll2->GetSize().y * 0.5f, vPos.y + pScroll2->GetSize().y * 0.5f);
+                const coreVector2 vPos  = GetTranslationArea(*pScroll2);
+                const coreVector2 vSize = IsHorizontal(g_vHudDirection) ? pScroll2->GetSize().yx() : pScroll2->GetSize();
+                vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - vSize.x * 0.5f, vPos.x + vSize.x * 0.5f);
+                vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - vSize.y * 0.5f, vPos.y + vSize.y * 0.5f);
             }
             Core::Input->SetMousePosition(vNewTarget);   // for focus
         }
@@ -198,7 +201,7 @@ void cMenuNavigator::Move()
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
     {
-        m_aCursor[i].SetColor3 (m_bGrabbed ? g_pMenu->GetHighlightColor() : coreVector3(1.0f,1.0f,1.0f));
+        m_aCursor[i].SetColor3 (m_bGrabbed ? (m_vGrabColor.IsNull() ? g_pMenu->GetHighlightColor() : m_vGrabColor) : coreVector3(1.0f,1.0f,1.0f));
         m_aCursor[i].SetEnabled(this->GetEnabled());
         m_aCursor[i].Move();
     }
@@ -551,9 +554,10 @@ void cMenuNavigator::Update()
         const coreObject2D* pScroll = this->GetCurScroll();
         if(pScroll)
         {
-            const coreVector2 vPos = GetTranslationArea(*pScroll);
-            vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f);
-            vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f);
+            const coreVector2 vPos  = GetTranslationArea(*pScroll);
+            const coreVector2 vSize = IsHorizontal(g_vHudDirection) ? pScroll->GetSize().yx() : pScroll->GetSize();
+            vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - vSize.x * 0.5f, vPos.x + vSize.x * 0.5f);
+            vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - vSize.y * 0.5f, vPos.y + vSize.y * 0.5f);
         }
         Core::Input->SetMousePosition(vNewTarget);   // for focus and click
     }

@@ -85,6 +85,9 @@ cTorusBoss::cTorusBoss()noexcept
     this->AddStatus(ENEMY_STATUS_SECRET);
 
     // 
+    PHASE_HEALTH_GOAL({7500, 6300, 5600, 4200, 3500, 2800, 1400, 0})
+
+    // 
     m_Emitter.DefineModel  ("ship_boss_torus_emitter.md3");
     m_Emitter.DefineTexture(0u, "effect_energy.png");
     m_Emitter.DefineProgram("effect_energy_invert_program");

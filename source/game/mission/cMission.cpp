@@ -375,7 +375,10 @@ void cMission::DeactivateWave()
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)   // # before __CloseSegment
     {
-        pPlayer->HealShield(pPlayer->GetMaxShield() / 5);
+        if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+        {
+            pPlayer->HealShield(MAX(pPlayer->GetMaxShield() / 5, 1));
+        }
 
         const coreUint32 iCombo = pPlayer->GetScoreTable()->GetCurCombo();
         if(iCombo)

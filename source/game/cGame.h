@@ -17,6 +17,7 @@
 // TODO 3: repair enemy only in coop ? (not duel)
 // TODO 4: play-sounds in special-effects klasse verschieben
 // TODO 3: repair enemy sollte auf selber höhe wie m_aPlayer[i].RenderMiddle(); oder als erstes in TOP gezeichnet werden
+// TODO 3: bei restart blendet die musik sprunghaft wieder ein (mission, segment)
 
 
 // ****************************************************************

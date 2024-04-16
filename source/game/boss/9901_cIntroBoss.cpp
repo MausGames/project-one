@@ -50,6 +50,9 @@ cIntroBoss::cIntroBoss()noexcept
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
+    PHASE_HEALTH_GOAL({4400})
+
+    // 
     m_Blade.DefineModelHigh("ship_boss_intro_sword_blade_high.md3");
     m_Blade.DefineModelLow ("ship_boss_intro_sword_blade_low.md3");
     m_Blade.DefineVolume   ("ship_boss_intro_sword_blade_volume.md3");

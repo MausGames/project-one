@@ -676,7 +676,7 @@ cTeslaBullet::cTeslaBullet()noexcept
 void cTeslaBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 10.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -685,9 +685,15 @@ void cTeslaBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vFor
 void cTeslaBullet::__ReflectOwn()
 {
     // 
+    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, this->GetPosition().z));   // move to tip, to account for resetting the length
+
+    // 
     m_fFade = 0.0f;
     this->SetSize (coreVector3(0.0f,0.0f,0.0f));
     this->SetAlpha(0.0f);
+
+    // 
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -699,13 +705,17 @@ void cTeslaBullet::__MoveOwn()
     this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
+
+    const coreFloat fRelSpeed = m_fSpeed / (cTeslaBullet::ConfigSpeed()*BULLET_SPEED_FACTOR);
+
     // update animation
-    m_fAnimation.UpdateMod(-0.2f * m_fAnimSpeed, -1.0f);
+    m_fAnimation.UpdateMod(-0.2f * fRelSpeed * m_fAnimSpeed, -1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
-    m_fFade.Update(1.0f);
-    this->SetSize(coreVector3(2.5f,2.5f,2.5f) * MIN1(12.0f * m_fFade) * m_fScale);
+    m_fFade.Update(1.0f * fRelSpeed);
+    const coreFloat fLen = MIN1(12.0f * m_fFade) * 1.0f;
+    this->SetSize(coreVector3(coreVector2(1.0f,1.0f) * fLen * 2.5f * m_fScale, 1.0f));
     this->SetAlpha(MIN1(15.0f * m_fFade));
 
     // 
@@ -723,6 +733,8 @@ void cTeslaBullet::__MoveOwn()
         g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
     }
 }
+
+
 // ****************************************************************
 // constructor
 cFinalBullet::cFinalBullet()noexcept

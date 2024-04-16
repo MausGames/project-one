@@ -11,8 +11,7 @@
 // shader input
 flat varying vec4  v_v4ShipLight;    // simplified light vector (w = base blink intensity (to highlight successful hits))
 varying      vec3  v_v3ShipView;     // simplified view vector
-varying      vec3  v_v3ShipNormal;   // simplified normal vector
-varying      float v_v1Depth;        // 
+varying      vec4  v_v4ShipNormal;   // simplified normal vector (w = depth darkening)
 
 
 void FragmentMain()
@@ -48,7 +47,7 @@ void FragmentMain()
 
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_v4ShipLight.xyz);
-    vec3  v3BumpNormal   = normalize(v_v3ShipNormal);
+    vec3  v3BumpNormal   = normalize(v_v4ShipNormal.xyz);
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
 
     // calculate dot-3 reflection factor
@@ -78,7 +77,7 @@ void FragmentMain()
 #if defined(_P1_DEPTH_)
 
     // 
-    float v1Depth = v_v1Depth;
+    float v1Depth = v_v4ShipNormal.w;
 
 #else
 
@@ -93,6 +92,4 @@ void FragmentMain()
 
     // draw final color
     gl_FragColor = vec4((v3Diffuse + v3Specular) * mix(vec3(1.0), v3Highlight, v4TexColor.a) + v3Blink + vec3(coreDither() / 50.0), u_v4Color.a);
-    
-//gl_FragColor = vec4(vec3(0.05), gl_FragColor.a); // [A1]
 }

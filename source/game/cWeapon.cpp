@@ -716,8 +716,7 @@ void cWaveWeapon::__PrefetchOwn()
 // ****************************************************************
 // constructor
 cTeslaWeapon::cTeslaWeapon()noexcept
-: m_iShotType     (0)
-, m_iStrikeType   (0)
+: m_iStrikeType   (0)
 , m_fStrikeOffset (0.0f)
 {
     // set base fire-rate
@@ -841,21 +840,23 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
 void cTeslaWeapon::__ShootOwn()
 {
     // 
-    if(++m_iShotType >= 4) m_iShotType = 0;
-
-    // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
-    const coreVector2 vTan = coreVector2((m_iShotType < 3) ? (0.04f * I_TO_F(m_iShotType-1)) : 0.0f, 0.0f);
+
 
     // 
     const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+    
+    cBulletManager* pManager = m_pOwner->HasStatus(PLAYER_STATUS_TOP) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
+    
+    const coreVector2 vOffset = vDir * (cTeslaBullet::ConfigSpeed() * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
+
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cTeslaBullet>(6 * iSign, 3.0f, m_pOwner, vPos, (vDir + vTan).Normalized()));
+    this->_MakeWhite(pManager->AddBullet<cTeslaBullet>(6 * iSign, cTeslaBullet::ConfigSpeed(), m_pOwner, vPos + vOffset, vDir))->ChangeScale(1.0f)->ChangeHeight(m_pOwner->GetPosition().z);
 
     // play bullet sound-effect
-    //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_TESLA);
+    g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
 }
 
 
@@ -889,7 +890,9 @@ void cEnemyWeapon::__ShootOwn()
     {
         const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 2.0f) * 5.0f) + fBase);
 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cViewBullet>(1, 4.0f, m_pOwner, vPos, vDir))->ChangeSize(1.5f);
+        const coreVector2 vOffset = vDir * (4.0f * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
+
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cViewBullet>(1, 4.0f, m_pOwner, vPos + vOffset, vDir))->ChangeSize(1.5f);
     }
 
     // play bullet sound-effect

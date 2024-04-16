@@ -194,11 +194,11 @@ void cShadow::Recompile()
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
         coreProgramPtr& pHandle  = s_apHandle[i];
-        const coreChar* pcConfig = PRINT("%s%s%s%s%s%s", PRINT(SHADER_SHADOW(%u), cShadow::IsSupported() ? g_CurConfig.Graphics.iShadow : 0u), CORE_SHADER_OPTION_VIEWDIR,
-                                                         (i == SHADOW_HANDLE_OBJECT_INST   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? CORE_SHADER_OPTION_INSTANCING : "",
-                                                         (i == SHADOW_HANDLE_OBJECT_WAVE   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? SHADER_WAVE                   : "",
-                                                         (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW                   : "",
-                                                         (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT                  : "");
+        const coreChar* pcConfig = PRINT("%s%s%s%s%s", PRINT(SHADER_SHADOW(%u), cShadow::IsSupported() ? g_CurConfig.Graphics.iShadow : 0u),
+                                                       (i == SHADOW_HANDLE_OBJECT_INST   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? CORE_SHADER_OPTION_INSTANCING : "",
+                                                       (i == SHADOW_HANDLE_OBJECT_WAVE   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? SHADER_WAVE                   : "",
+                                                       (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW                   : "",
+                                                       (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT                  : "");
 
         // change configuration of related shaders
         for(coreUintW j = 0u, je = pHandle->GetNumShaders(); j < je; ++j)

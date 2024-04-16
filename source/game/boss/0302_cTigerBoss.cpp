@@ -81,6 +81,9 @@ cTigerBoss::cTigerBoss()noexcept
     this->Configure(TIGER_DAMAGE * 117, 0u, COLOR_SHIP_YELLOW);
     this->AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
 
+    // 
+    PHASE_HEALTH_GOAL({TIGER_DAMAGE * 117, TIGER_DAMAGE * 83, TIGER_DAMAGE * 77, TIGER_DAMAGE * 61, TIGER_DAMAGE * 21, TIGER_DAMAGE * 5, 0})
+
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrack); ++i)
     {
         // 

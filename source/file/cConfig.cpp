@@ -232,6 +232,7 @@ void LoadConfig()
     g_OldConfig.Game.iBackSpeed     = Core::Config->GetInt(CONFIG_GAME_BACK_SPEED);
     g_OldConfig.Game.iUpdateFreq    = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
     g_OldConfig.Game.iPureMode      = Core::Config->GetInt(CONFIG_GAME_PURE_MODE);
+    g_OldConfig.Game.iLeaderboard   = Core::Config->GetInt(CONFIG_GAME_LEADERBOARD);
     g_OldConfig.Game.iVersion       = Core::Config->GetInt(CONFIG_GAME_VERSION);
 
     // 
@@ -307,6 +308,7 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GAME_BACK_SPEED,     g_OldConfig.Game.iBackSpeed);
     Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,    g_OldConfig.Game.iUpdateFreq);
     Core::Config->SetInt(CONFIG_GAME_PURE_MODE,      g_OldConfig.Game.iPureMode);
+    Core::Config->SetInt(CONFIG_GAME_LEADERBOARD,    g_OldConfig.Game.iLeaderboard);
     Core::Config->SetInt(CONFIG_GAME_VERSION,        g_OldConfig.Game.iVersion);
 
     // 
@@ -475,6 +477,10 @@ void UpdateInput()
             //if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
             //if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
             if(HAS_BIT(oMap.iActionPress, 7u)) g_MenuInput.bPause  = true;
+
+            // (ignore HUD rotations) 
+                 if(!coreMath::IsNear(oMap.vMove.x, 0.0f)) g_MenuInput.iMove = (oMap.vMove.x > 0.0f) ? 4u : 2u;
+            else if(!coreMath::IsNear(oMap.vMove.y, 0.0f)) g_MenuInput.iMove = (oMap.vMove.y > 0.0f) ? 1u : 3u;
         }
     }
 
@@ -685,11 +691,7 @@ void UpdateInput()
     }
 
     // 
-         if(!coreMath::IsNear(g_TotalInput.vMove.x, 0.0f)) g_MenuInput.iMove = (g_TotalInput.vMove.x > 0.0f) ? 4u : 2u;
-    else if(!coreMath::IsNear(g_TotalInput.vMove.y, 0.0f)) g_MenuInput.iMove = (g_TotalInput.vMove.y > 0.0f) ? 1u : 3u;
-
-    // 
-    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(UP),    CORE_INPUT_HOLD)) g_MenuInput.iMove = 1u;
+         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(UP),    CORE_INPUT_HOLD)) g_MenuInput.iMove = 1u;
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_HOLD)) g_MenuInput.iMove = 2u;
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(DOWN),  CORE_INPUT_HOLD)) g_MenuInput.iMove = 3u;
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_HOLD)) g_MenuInput.iMove = 4u;

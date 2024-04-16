@@ -69,6 +69,9 @@ cGemingaBoss::cGemingaBoss()noexcept
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
+    PHASE_HEALTH_GOAL({8600})
+
+    // 
     m_Sphere.DefineModelHigh("object_sphere.md3");
     m_Sphere.DefineModelLow ("object_sphere.md3");
     m_Sphere.SetSize        (this->GetSize() * 4.0f);

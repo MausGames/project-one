@@ -21,8 +21,7 @@ varying      vec4  v_v4ShadowCoord;   // pixel coordinates viewed from the light
 varying      vec2  v_v2Border;        // 
 flat varying vec4  v_v4ShipLight;     // simplified light vector (w = base blink intensity (to highlight successful hits))
 varying      vec3  v_v3ShipView;      // simplified view vector
-varying      vec3  v_v3ShipNormal;    // simplified normal vector
-varying      float v_v1Depth;         // 
+varying      vec4  v_v4ShipNormal;    // simplified normal vector (w = depth darkening)
 
 
 void VertexMain()
@@ -70,10 +69,10 @@ void VertexMain()
     coreLightingTransform(v4NewPosition.xyz);
 
     // 
-    v_v4ShipLight  = vec4(-u_av4LightDir[0].xyz, v1Blink);
-    v_v3ShipView   = u_v3CamPosition - v4NewPosition.xyz;   // # no normalization
-    v_v3ShipNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
+    v_v4ShipLight      = vec4(-u_av4LightDir[0].xyz, v1Blink);
+    v_v3ShipView       = u_v3CamPosition - v4NewPosition.xyz;   // # no normalization
+    v_v4ShipNormal.xyz = coreQuatApply(u_v4Rotation, a_v3RawNormal);
 
     // 
-    v_v1Depth = v4NewPosition.z * 0.1 + 0.8;
+    v_v4ShipNormal.w = v4NewPosition.z * 0.1 + 0.8;
 }

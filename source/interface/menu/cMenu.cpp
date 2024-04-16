@@ -378,7 +378,7 @@ void cMenu::Move()
                     else
                     {
                         // 
-                        m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+                        m_BridgeMenu.ReturnMenu(m_BridgeMenu.HasUnlocks() ? SURFACE_TITLE : SURFACE_GAME, false, true);
 
                         // 
                         m_GameMenu.ChangeSurface(SURFACE_GAME_MAIN, 0.0f);
@@ -654,8 +654,20 @@ void cMenu::Move()
             }
             else if(m_PauseMenu.GetStatus() == 4)
             {
-                // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, true, true);
+                if(g_pGame->GetKind() == GAME_KIND_ALL)
+                {
+                    // 
+                    m_BridgeMenu.ReturnMenu(SURFACE_TITLE, true, true);
+                }
+                else
+                {
+                    // 
+                    m_BridgeMenu.ReturnMenu(m_BridgeMenu.HasUnlocks() ? SURFACE_TITLE : SURFACE_GAME, true, true);
+
+                    // 
+                    m_GameMenu.ChangeSurface(SURFACE_GAME_MAIN, 0.0f);
+                    m_GameMenu.LoadValues();
+                }
 
                 // 
                 this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
@@ -758,7 +770,11 @@ void cMenu::Move()
                 else
                 {
                     // 
-                    m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+                    m_BridgeMenu.ReturnMenu(m_BridgeMenu.HasUnlocks() ? SURFACE_TITLE : SURFACE_GAME, false, true);
+
+                    // 
+                    m_GameMenu.ChangeSurface(SURFACE_GAME_MAIN, 0.0f);
+                    m_GameMenu.LoadValues();
 
                     // 
                     this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
@@ -1222,8 +1238,9 @@ const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const co
 // 
 const coreChar* cMenu::GetStoreText()
 {
+    static const coreBool bItch = coreData::FileExists("data/other/itch.txt");
     static const coreBool bEpic = coreData::FileExists("data/other/epic.txt");
-    return bEpic ? "TO_EPIC" : "TO_STEAM";
+    return bItch ? "TO_ITCH" : bEpic ? "TO_EPIC" : "TO_STEAM";
 }
 
 
@@ -1231,8 +1248,9 @@ const coreChar* cMenu::GetStoreText()
 // 
 void cMenu::OpenStoreLink()
 {
+    static const coreBool bItch = coreData::FileExists("data/other/itch.txt");
     static const coreBool bEpic = coreData::FileExists("data/other/epic.txt");
-    SDL_OpenURL(bEpic ? "https://store.epicgames.com/p/eigengrau-62aef0" : "https://store.steampowered.com/app/1624320/Eigengrau/");
+    SDL_OpenURL(bItch ? "https://mausgames.itch.io/eigengrau" : bEpic ? "https://store.epicgames.com/p/eigengrau-62aef0" : "https://store.steampowered.com/app/1624320/Eigengrau/");
 }
 
 
@@ -1269,6 +1287,8 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const co
                               pButton              ->SetColor3(vColor * fLight);
     if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * fLight);
             
+    const coreBool bClicked = pButton->IsClicked();
+
     if(bGrow)
     {
         const coreVector2 vBasePos = coreVector2(pButton->GetAlignment().x ? oData.vPosition.x : pButton->GetPosition().x, pButton->GetAlignment().y ? oData.vPosition.y : pButton->GetPosition().y);
@@ -1292,7 +1312,7 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const co
         m_apNewButton2[pMenu] = pButton;
     }
     
-    if(pButton->IsClicked())
+    if(bClicked)
     {
         if(bSound) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
     }
@@ -1570,7 +1590,7 @@ void cMenu::__EndGame()
     // 
     if(!g_pSave->GetHeader().oProgress.bFirstPlay)
     {
-        ADD_BIT_EX(g_pSave->EditProgress()->aiState, STATE_AFTER_FIRST)
+        ADD_BIT_EX(g_pSave->EditProgress()->aiState, STATE_AFTER_FIRST)   // TODO 1: not immediately checked when returning from single stage (wrong order)
     }
 
     // 

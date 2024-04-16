@@ -20,6 +20,7 @@ cBoss::cBoss()noexcept
 , m_vLastPosition    (coreVector2(FLT_MAX,FLT_MAX))
 , m_vLastDirection   (coreVector3(0.0f,0.0f,0.0f))
 , m_vLastOrientation (coreVector3(0.0f,0.0f,0.0f))
+, m_piHealthGoal     (NULL)
 , m_iPhase           (0u)
 , m_fPhaseTime       (0.0f)
 , m_fPhaseTimeBefore (0.0f)

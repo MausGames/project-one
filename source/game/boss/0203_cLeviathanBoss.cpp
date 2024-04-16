@@ -77,6 +77,9 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
+    PHASE_HEALTH_GOAL({9700, 8000, 5000, 3200, 2400, 1700, 0})
+
+    // 
     m_Head.DefineModelHigh     ("ship_boss_leviathan_head_high.md3");
     m_Head.DefineModelLow      ("ship_boss_leviathan_head_low.md3");
     m_Head.DefineVolume        ("ship_boss_leviathan_head_volume.md3");

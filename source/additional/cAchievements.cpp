@@ -258,7 +258,7 @@ void CheckAchievements()
 // 
 void InitLeaderboards()
 {
-    if(g_bDemoVersion || !g_bLeaderboards || DEFINED(_CORE_SWITCH_)) return;
+    if(g_bDemoVersion || !g_bLeaderboards) return;
 
     // 
     if(s_bInitLeaderboards) return;
@@ -365,7 +365,7 @@ static coreBool IsPure(const sScoreData& oData)
 // 
 void UploadLeaderboardsArcade(const coreUint32 iScore, const coreUint32 iTimeShifted)
 {
-    if(g_bDemoVersion || !g_bLeaderboards || DEFINED(_CORE_SWITCH_)) return;
+    if(g_bDemoVersion || !g_bLeaderboards || !g_CurConfig.Game.iLeaderboard) return;
 
     ASSERT(STATIC_ISVALID(g_pGame))
 
@@ -418,7 +418,7 @@ void UploadLeaderboardsArcade(const coreUint32 iScore, const coreUint32 iTimeShi
 
 void UploadLeaderboardsMission(const coreUintW iMissionIndex, const coreUint32 iScore, const coreUint32 iTimeShifted)
 {
-    if(g_bDemoVersion || !g_bLeaderboards || DEFINED(_CORE_SWITCH_)) return;
+    if(g_bDemoVersion || !g_bLeaderboards || !g_CurConfig.Game.iLeaderboard) return;
 
     ASSERT(STATIC_ISVALID(g_pGame))
     ASSERT(iMissionIndex < SCORE_MISSIONS)
@@ -472,7 +472,7 @@ void UploadLeaderboardsMission(const coreUintW iMissionIndex, const coreUint32 i
 
 void UploadLeaderboardsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex, const coreUint32 iScore, const coreUint32 iTimeShifted)
 {
-    if(g_bDemoVersion || !g_bLeaderboards || DEFINED(_CORE_SWITCH_)) return;
+    if(g_bDemoVersion || !g_bLeaderboards || !g_CurConfig.Game.iLeaderboard) return;
 
     ASSERT(STATIC_ISVALID(g_pGame))
     ASSERT(iMissionIndex < SCORE_MISSIONS)
@@ -530,13 +530,19 @@ void UploadLeaderboardsSegment(const coreUintW iMissionIndex, const coreUintW iS
 // 
 void CheckLeaderboards()
 {
-    if(g_bDemoVersion || !g_bLeaderboards || DEFINED(_CORE_SWITCH_)) return;
+    if(g_bDemoVersion || !g_bLeaderboards || !g_CurConfig.Game.iLeaderboard) return;
 
     const std::time_t iNewTime = std::time(NULL);
-    const coreBool    bTick    = (iNewTime >= s_iTime + 10u);
+    const coreBool    bTick    = (iNewTime >= s_iTime + SCORE_LIMIT_UPLOAD_DELAY);
 
     if(!bTick) return;
     s_iTime = iNewTime;
+
+    // 
+    if(g_pSave->GetScoreQueue()->empty()) return;
+
+    // 
+    if(!Core::Platform->HasConnection()) return;
 
     // ...
 
@@ -561,6 +567,8 @@ void CheckLeaderboards()
         return (A->iSegmentIndex < B->iSegmentIndex);
     });
 
+    coreUintW iRateLimit = SCORE_LIMIT_UPLOAD_RATE;
+
     FOR_EACH(it, *g_pSave->GetScoreQueue())
     {
         cSave::sScorePack* pCur = (*it);
@@ -577,6 +585,8 @@ void CheckLeaderboards()
 
             // ...
         }
+
+        if(--iRateLimit == 0u) break;
     }
 }
 
@@ -586,6 +596,12 @@ void CheckLeaderboards()
 const sScoreData* GetScoreData(const coreScore* pScore)
 {
     static sScoreData s_Static;
+
+    if(pScore->iDataSize < sizeof(sScoreData))
+    {
+        std::memset(&s_Static, 0, sizeof(sScoreData));
+        return &s_Static;
+    }
 
     const sScoreData* pData = r_cast<const sScoreData*>(pScore->aData);
 

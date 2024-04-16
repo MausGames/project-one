@@ -185,6 +185,9 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     this->AddStatus(ENEMY_STATUS_SECRET);
 
     // 
+    PHASE_HEALTH_GOAL({0})
+
+    // 
     constexpr coreVector3 avColor[] =
     {
         COLOR_ENERGY_YELLOW,
@@ -5579,7 +5582,10 @@ void cProjectOneBoss::__EndExplosion(const coreBool bClear)
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->HealShield(pPlayer->GetMaxShield() / 10);
+        if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+        {
+            pPlayer->HealShield(MAX(pPlayer->GetMaxShield() / 10, 1));
+        }
 
         pPlayer->GetScoreTable()->CancelCooldown();
         pPlayer->GetScoreTable()->ResetOverride();

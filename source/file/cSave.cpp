@@ -233,8 +233,12 @@ void cSave::SaveFile()
 
     m_iToken = Core::Manager::Resource->AttachFunction([this]()
     {
+    #if !defined(_CORE_SWITCH_)
+
         // 
         coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));
+
+    #endif
 
         // 
         sHeader* pHeader   = r_cast<sHeader*>(s_aHeaderData);
@@ -269,6 +273,9 @@ void cSave::SaveFile()
                  if(iAvailable < 1u * 1024u * 1024u)                                    m_eStatus = SAVE_STATUS_ERROR_SPACE;
             else if(!coreData::FolderWritable(coreData::StrDirectory(m_sPath.c_str()))) m_eStatus = SAVE_STATUS_ERROR_ACCESS;
             else                                                                        m_eStatus = SAVE_STATUS_ERROR_UNKNOWN;
+
+            // 
+            m_iActive = 2u;
 
             Core::Log->Warning("Save (%s) could not be saved (status %u)", m_sPath.c_str(), coreUint32(m_eStatus));
             return CORE_OK;

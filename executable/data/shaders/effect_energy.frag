@@ -49,6 +49,4 @@ void FragmentMain()
     // draw blended color
     float v1Full = max(v_v1Strength + v1Detail, 0.0);
     gl_FragColor = vec4(u_v4Color.rgb * v1Full + v3Blink, u_v4Color.a * min(v1Full, 1.0));
-    
-//gl_FragColor = vec4(vec3(0.05), gl_FragColor.a); // [A1]
 }

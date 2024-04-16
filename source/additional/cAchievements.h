@@ -18,24 +18,28 @@
 
 // ****************************************************************
 // 
-#define SCORE_FILE_MAGIC        (UINT_LITERAL("P1  ") % 0xFFFFu)   // 
-#define SCORE_FILE_VERSION      (0x0003u)                          // 
+#define SCORE_FILE_MAGIC        (UINT_LITERAL("P1  ") % 0xFFFFu)         // 
+#define SCORE_FILE_VERSION      (0x0003u)                                // 
 
-#define SCORE_PLAYERS           (PLAYERS)                          // 
-#define SCORE_MISSIONS          (MISSIONS - 2u)                    // (aligned to 2) 
-#define SCORE_MISSIONS_EX       (MISSIONS - 3u + CONTINUES)        // 
-#define SCORE_SEGMENTS          (SEGMENTS)                         // 
-#define SCORE_PURES             (2u)                               // 
-#define SCORE_TYPES             (GAME_TYPE_MAX)                    // 
-#define SCORE_DIFFICULTIES      (GAME_DIFFICULTY_MAX)              // 
-#define SCORE_EQUIP_WEAPONS     (EQUIP_WEAPONS)                    // 
-#define SCORE_EQUIP_SUPPORTS    (EQUIP_SUPPORTS)                   // 
+#define SCORE_PLAYERS           (PLAYERS)                                // 
+#define SCORE_MISSIONS          (MISSIONS - 2u)                          // (aligned to 2) 
+#define SCORE_MISSIONS_EX       (MISSIONS - 3u + CONTINUES)              // 
+#define SCORE_SEGMENTS          (SEGMENTS)                               // 
+#define SCORE_PURES             (2u)                                     // 
+#define SCORE_TYPES             (GAME_TYPE_MAX)                          // 
+#define SCORE_DIFFICULTIES      (GAME_DIFFICULTY_MAX)                    // 
+#define SCORE_EQUIP_WEAPONS     (EQUIP_WEAPONS)                          // 
+#define SCORE_EQUIP_SUPPORTS    (EQUIP_SUPPORTS)                         // 
 
-#define SCORE_PURE_GAMESPEED    (100u)                             // 
-#define SCORE_PURE_BACKROTATION (1u)                               // 
-#define SCORE_PURE_BACKSPEED    (100u)                             // 
-#define SCORE_PURE_UPDATEFREQ   (60u)                              // 
-#define SCORE_PURE_SHIELD       (0u)                               // 
+#define SCORE_PURE_GAMESPEED    (100u)                                   // 
+#define SCORE_PURE_BACKROTATION (1u)                                     // 
+#define SCORE_PURE_BACKSPEED    (100u)                                   // 
+#define SCORE_PURE_UPDATEFREQ   (60u)                                    // 
+#define SCORE_PURE_SHIELD       (0u)                                     // 
+
+#define SCORE_LIMIT_COOLDOWN     (DEFINED(_CORE_SWITCH_) ? 1.2f : 0.0f)   // 
+#define SCORE_LIMIT_UPLOAD_RATE  (DEFINED(_CORE_SWITCH_) ? 3u   : 0u)     // 
+#define SCORE_LIMIT_UPLOAD_DELAY (8u)                                     // 
 
 STATIC_ASSERT(SCORE_PURE_UPDATEFREQ >= F_TO_UI(FRAMERATE_MIN))
 

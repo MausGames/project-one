@@ -77,9 +77,10 @@ private:
     coreUint8 m_iFirst;                              // 
     coreUint8 m_iBack;                               // 
 
-    coreBool m_bPressed;                             // 
-    coreBool m_bGrabbed;                             // 
-    coreFlow m_fGrabTime;                            // 
+    coreBool    m_bPressed;                          // 
+    coreBool    m_bGrabbed;                          // 
+    coreFlow    m_fGrabTime;                         // 
+    coreVector3 m_vGrabColor;                        // 
 
     coreList<coreUint8> m_aiLock;                    // 
     coreList<coreUint8> m_aiLastPack;                // 
@@ -154,6 +155,9 @@ public:
 
     // 
     inline coreObject2D* GetCurObject()const {return m_pCurObject;}
+
+    // 
+    inline void SetGrabColor(const coreVector3 vGrabColor) {m_vGrabColor = vGrabColor;}
 
     // 
     static void GlobalInit();

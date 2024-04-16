@@ -83,6 +83,9 @@ cCholBoss::cCholBoss()noexcept
     this->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
 
     // 
+    PHASE_HEALTH_GOAL({5500})
+
+    // 
     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
     {
         m_aWing[i].DefineModelHigh     ("ship_boss_chol_wing_high.md3");
@@ -320,7 +323,7 @@ void cCholBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(20u)
-            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(70u)                                                              
+            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(70u)                                                              
         });
     }
 

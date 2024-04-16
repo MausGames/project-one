@@ -43,6 +43,9 @@ cNautilusBoss::cNautilusBoss()noexcept
     this->Configure(8000, 0u, COLOR_SHIP_PURPLE);
 
     // 
+    PHASE_HEALTH_GOAL({8000, 0})
+
+    // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClaw); ++i)
     {
         m_aClaw[i].DefineModelHigh("ship_boss_nautilus_claw_high.md3");

@@ -1047,7 +1047,7 @@ void cInterface::Move()
         }
         else m_fTrophyBump = 0.0f;
 
-        const coreBool bShowTrophy = (g_pSave->GetHeader().oProgress.aiAdvance[iMissionIndex] > m_iTrophySegment + 1u) && (iMissionIndex < MISSION_ATER) && !g_bDemoVersion;
+        const coreBool bShowTrophy = (!g_pSave->GetHeader().oProgress.bFirstPlay && !g_bDemoVersion && (iMissionIndex < MISSION_ATER));
 
         m_Trophy    .SetEnabled((bShowTrophy)                                       ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         m_TrophyMark.SetEnabled((bShowTrophy && (bTrophyReceived || bTrophyFailed)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
@@ -1055,13 +1055,15 @@ void cInterface::Move()
     }
     else if(!bInGame)
     {
+        const coreBool bShowTrophy = (!g_pSave->GetHeader().oProgress.bFirstPlay && !g_bDemoVersion);
+
         m_fTrophyBump    = 0.0f;
         m_iTrophySegment = 0u;
         m_bTrophyState   = true;
 
-        m_Trophy    .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        m_Trophy    .SetEnabled(bShowTrophy ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         m_TrophyMark.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        m_TrophyWave.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        m_TrophyWave.SetEnabled(bShowTrophy ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
     
     m_fTrophyBump.UpdateMin(6.0, 1.0f);
@@ -1070,7 +1072,7 @@ void cInterface::Move()
     const coreBool  bHasShield       = (bInGame && g_pGame->GetPlayer(1u)->HasStatus(PLAYER_STATUS_SHIELDED));
     const coreFloat fAlphaTrophyFull = fAlphaSegmentFull * ((bInGame && g_pGame->IsMulti()) ? fTrophyCover : fSegmentCover);
 
-    m_Trophy.SetPosition(nFlipFunc((bInGame && g_pGame->IsMulti()) ? coreVector2(-0.016f,0.08f + (bHasShield ? 0.03f : 0.0f)) : coreVector2(-0.016f, -0.105f + (m_bSegmentSmall ? 0.013f : 0.0f) + (m_SegmentBest.IsEnabled(CORE_OBJECT_ENABLE_ALL) ? 0.0f : 0.04f)), &m_Trophy));
+    m_Trophy.SetPosition(nFlipFunc((bInGame && g_pGame->IsMulti()) ? coreVector2(-0.016f,0.08f + (bHasShield ? 0.03f : 0.0f)) : coreVector2(-0.016f, m_SegmentName.GetPosition().y - 0.1f + (m_bSegmentSmall ? 0.013f : 0.0f) + (m_SegmentBest.IsEnabled(CORE_OBJECT_ENABLE_ALL) ? 0.0f : 0.04f)), &m_Trophy));
     m_Trophy.SetAlpha   (fAlphaTrophyFull * (m_bTrophyState ? 1.0f : 0.5f));
     m_Trophy.Move();
 

@@ -214,7 +214,6 @@ private:
 class cTeslaWeapon final : public cWeapon
 {
 private:
-    coreInt8  m_iShotType;       // 
     coreUint8 m_iStrikeType;     // 
     coreFloat m_fStrikeOffset;   // 
 

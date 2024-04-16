@@ -32,6 +32,8 @@ void FragmentMain()
     // always lookup full normal map (less register pressure)
     vec4 v4FullNormal = coreTexture2D(2, v_av2TexCoord[0]);
 
+#if !defined(GL_ES)
+
     if(v_v3Border.z <= 0.0)   // # performance boost
     {
         // lookup only lower outdoor textures
@@ -45,14 +47,17 @@ void FragmentMain()
         v3TexColor  = coreTexture2D(0, v_av2TexCoord[0]).rgb;
     }
     else
+
+#endif
+
     {
         // lookup all outdoor textures
         vec3 v3FullColor1 = coreTexture2D(1, v_av2TexCoord[0]).rgb;
         vec3 v3FullColor2 = coreTexture2D(0, v_av2TexCoord[0]).rgb;
 
         // mix between both layers
-        v2TexNormal = mix(v4FullNormal.zw, v4FullNormal.xy, v_v3Border.z);
-        v3TexColor  = mix(v3FullColor1,    v3FullColor2,    v_v3Border.z);
+        v2TexNormal = mix(v4FullNormal.zw, v4FullNormal.xy, coreSaturate(v_v3Border.z));
+        v3TexColor  = mix(v3FullColor1,    v3FullColor2,    coreSaturate(v_v3Border.z));
     }
 
 #endif

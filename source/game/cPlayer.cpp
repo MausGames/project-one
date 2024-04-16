@@ -1045,6 +1045,8 @@ void cPlayer::HealHealth(const coreUint8 iHealth)
 // 
 void cPlayer::HealShield(const coreUint8 iShield)
 {
+    ASSERT(HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
     // 
     m_iCurShield = MIN(m_iCurShield + iShield, m_iMaxShield);
 }

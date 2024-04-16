@@ -1286,19 +1286,14 @@ void cCalorMission::__MoveOwnAfter()
         // 
         const coreFloat   fOffset = I_TO_F(i) * (1.0f/3.0f);
         const coreVector2 vDir    = coreVector2::Direction((2.0f*PI) * m_fAnimation);
-        //const coreVector2 vDir    = coreVector2::Direction((-6.0f*PI) * m_fAnimation);
 
         // 
         pHail->SetDirection(coreVector3(vDir, 0.0f));
         pHail->SetTexOffset(coreVector2(0.0f, FRACT(0.7f * m_fAnimation + fOffset)));
-        
-        
-       // const coreVector2 vDir2    = coreVector2::Direction((2.0f*PI) * m_fAnimation);
 
         // 
         pWave->SetPosition (pHail->GetPosition ());
         pWave->SetDirection(pHail->GetDirection() * -1.0f);
-        //pWave->SetDirection(coreVector3(vDir2, 0.0f));
         pWave->SetTexOffset(pHail->GetTexOffset());
     }
 

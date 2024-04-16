@@ -133,6 +133,8 @@
 #define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)   // NOLINT
 #define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b, LERP_LINEAR)
 
+#define PHASE_HEALTH_GOAL(...)          {static constexpr coreInt32 A[] = __VA_ARGS__; m_piHealthGoal = A; /*for(coreUintW i = 0u; i < ARRAY_SIZE(A) - 1u; ++i) ASSERT(A[i] > A[i + 1u])*/}
+
 #define PHASE_TIME_POINT(t)             (InBetween((t), fTimeBefore, fTime))
 #define PHASE_TIME_BEFORE(t)            (fTime <  (t))
 #define PHASE_TIME_AFTER(t)             (fTime >= (t))
@@ -183,6 +185,8 @@ protected:
     coreVector2 m_vLastPosition;              // 
     coreVector3 m_vLastDirection;             // 
     coreVector3 m_vLastOrientation;           // 
+
+    const coreInt32* m_piHealthGoal;          // 
 
     coreUint8 m_iPhase;                       // 
     coreFlow  m_fPhaseTime;                   // 

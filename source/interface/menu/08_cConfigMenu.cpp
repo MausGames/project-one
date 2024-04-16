@@ -116,6 +116,10 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_GAME_VERSION);
     #endif
     aiSkip.insert(ENTRY_INPUT_ACTION10);
+    if(!g_bLeaderboards && !DEFINED(_CORE_DEBUG_))
+    {
+        aiSkip.insert(ENTRY_GAME_LEADERBOARD);
+    }
 
     coreUint8 iOffset = 0u;
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
@@ -284,6 +288,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_BackSpeed,       GAME_BACKSPEED,       0.31f)
         __SET_OPTION(m_UpdateFreq,      GAME_UPDATEFREQ,      0.31f)
         __SET_OPTION(m_PureMode,        GAME_PUREMODE,        0.31f)
+        __SET_OPTION(m_Leaderboard,     GAME_LEADERBOARD,     0.31f)
         __SET_OPTION(m_Version,         GAME_VERSION,         0.31f)
 
         m_Language     .SetEndless(true);
@@ -319,8 +324,9 @@ cConfigMenu::cConfigMenu()noexcept
         m_Navigator.BindObject(&m_BackRotation,    &m_CombatText,     NULL, &m_BackSpeed,       NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
         m_Navigator.BindObject(&m_BackSpeed,       &m_BackRotation,   NULL, &m_UpdateFreq,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
         m_Navigator.BindObject(&m_UpdateFreq,      &m_BackSpeed,      NULL, &m_PureMode,        NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_PureMode,        &m_UpdateFreq,     NULL, &m_Version,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_Version,         &m_PureMode,       NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_PureMode,        &m_UpdateFreq,     NULL, &m_Leaderboard,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_Leaderboard,     &m_PureMode,       NULL, &m_Version,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_Version,         &m_Leaderboard,    NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
     }
     #undef __SET_OPTION
 
@@ -566,6 +572,8 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 50u; i <= 200u; i += 5u) m_BackSpeed.AddEntry(PRINT("%zu%%", i), i);
     m_PureMode       .AddEntryLanguage("VALUE_OFF",              0u);
     m_PureMode       .AddEntryLanguage("VALUE_ON",               1u);
+    m_Leaderboard    .AddEntryLanguage("VALUE_OFF",              0u);
+    m_Leaderboard    .AddEntryLanguage("VALUE_ON",               1u);
     m_Version        .AddEntry        ("1.0.0",                  1u);
     m_Version        .AddEntryLanguage("VERSION_LATEST",         0u);   // TODO 1: "Latest (1.2.0)"
 
@@ -647,6 +655,7 @@ cConfigMenu::cConfigMenu()noexcept
     if(!m_BackSpeed      .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_BackSpeed);
     if(!m_UpdateFreq     .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_UpdateFreq);
     if(!m_PureMode       .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_PureMode);
+    if(!m_Leaderboard    .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_Leaderboard);
     if(!m_Version        .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_Version);
 
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_VideoBox);
@@ -1060,6 +1069,7 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_BackSpeed);
             cMenu::UpdateSwitchBox(&m_UpdateFreq);
             cMenu::UpdateSwitchBox(&m_PureMode);
+            cMenu::UpdateSwitchBox(&m_Leaderboard);
             cMenu::UpdateSwitchBox(&m_Version);
 
             // 
@@ -1205,6 +1215,7 @@ void cConfigMenu::CheckValues()
                            (m_BackSpeed      .GetCurValue() != (g_OldConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_OldConfig.Game.iBackSpeed))    ||
                            (m_UpdateFreq     .GetCurValue() != (g_OldConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_OldConfig.Game.iUpdateFreq))   ||
                            (m_PureMode       .GetCurValue() !=  g_OldConfig.Game.iPureMode)                                                             ||
+                           (m_Leaderboard    .GetCurValue() !=  g_OldConfig.Game.iLeaderboard)                                                          ||
                            (m_Version        .GetCurValue() !=  g_OldConfig.Game.iVersion)                                                              ||
                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
@@ -1275,6 +1286,7 @@ void cConfigMenu::LoadValues()
     m_BackSpeed    .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_CurConfig.Game.iBackSpeed);
     m_UpdateFreq   .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_CurConfig.Game.iUpdateFreq);
     m_PureMode     .SelectValue(g_CurConfig.Game.iPureMode);
+    m_Leaderboard  .SelectValue(g_CurConfig.Game.iLeaderboard);
     m_Version      .SelectValue(g_CurConfig.Game.iVersion);
 
     // 
@@ -1361,6 +1373,7 @@ void cConfigMenu::SaveValues()
     g_CurConfig.Game.iBackSpeed     = m_PureMode     .GetCurValue() ? g_CurConfig.Game.iBackSpeed    : m_BackSpeed   .GetCurValue();
     g_CurConfig.Game.iUpdateFreq    = m_PureMode     .GetCurValue() ? g_CurConfig.Game.iUpdateFreq   : m_UpdateFreq  .GetCurValue();
     g_CurConfig.Game.iPureMode      = m_PureMode     .GetCurValue();
+    g_CurConfig.Game.iLeaderboard   = m_Leaderboard  .GetCurValue();
     g_CurConfig.Game.iVersion       = m_Version      .GetCurValue();
 
     // 

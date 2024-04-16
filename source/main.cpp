@@ -68,7 +68,7 @@ void CoreApp::Init()
     g_bDemoVersion = CoreApp::IsDemo();
 
     // 
-    g_bLeaderboards = !std::strcmp(Core::Platform->GetIdentifier(), "Steam");
+    g_bLeaderboards = !std::strcmp(Core::Platform->GetIdentifier(), "Steam") || DEFINED(_CORE_SWITCH_);
 
     // 
     InitAchievements();
@@ -690,7 +690,7 @@ static void DebugGame()
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;
-                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
+                oOptions.aaiWeapon [i][0] = cTeslaWeapon::ID;
                 oOptions.aaiSupport[i][0] = 0u;
             }
 

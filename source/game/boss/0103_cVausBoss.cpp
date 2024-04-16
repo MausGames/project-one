@@ -39,6 +39,9 @@ cVausBoss::cVausBoss()noexcept
     this->Configure(10000, 0u, COLOR_SHIP_YELLOW);
 
     // 
+    PHASE_HEALTH_GOAL({10000, 0})
+
+    // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCompanion); ++i)
     {
         m_aCompanion[i].DefineModelHigh("ship_boss_vaus_companion_high.md3");

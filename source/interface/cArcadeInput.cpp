@@ -123,9 +123,12 @@ void cArcadeInput::Move()
 
     // 
     m_Navigator.Update();
+
+    // 
+    const coreChar cChar = TO_UPPER(Core::Input->GetKeyboardChar());
     
     
-    if(g_MenuInput.bCancel)
+    if(g_MenuInput.bCancel && (cChar != ARCADE_COMMAND_DEL))
     {
         // 
         if(!m_sTextValue.empty()) {m_sTextValue.pop_back(); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);}
@@ -133,8 +136,6 @@ void cArcadeInput::Move()
     }
     
 
-    // 
-    const coreChar cChar = TO_UPPER(Core::Input->GetKeyboardChar());
 
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)

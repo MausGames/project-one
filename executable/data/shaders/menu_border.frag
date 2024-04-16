@@ -34,15 +34,15 @@ void FragmentMain()
     {
         // 
     #if defined(_P1_DIRECT_)
-        float fFactor = max(v_v1Factor, 0.0);
+        float v1Factor = max(v_v1Factor, 0.0);
     #else
-        const float fFactor = 1.0;
+        const float v1Factor = 1.0;
     #endif
 
         // lookup texture
         float v1Detail = coreTexture2D(0, v_av2TexCoord[0]).r;
 
         // draw interior with detail map
-        gl_FragColor = vec4(vec3((v1Detail + c_v1Black) * fFactor), u_v4Color.a);
+        gl_FragColor = vec4(vec3((v1Detail + c_v1Black) * v1Factor), u_v4Color.a);
     }
 }

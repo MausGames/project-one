@@ -76,6 +76,9 @@ cMessierBoss::cMessierBoss()noexcept
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_BOTTOM);
 
     // 
+    PHASE_HEALTH_GOAL({6300})
+
+    // 
     for(coreUintW i = 0u; i < MESSIER_SHELLS; ++i)
     {
         m_aShell[i].DefineModelHigh(i ? "ship_boss_messier_inside_high.md3"   : "ship_boss_messier_outside_high.md3");

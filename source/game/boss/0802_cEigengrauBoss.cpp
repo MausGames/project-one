@@ -83,6 +83,9 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     this->Configure(12000, 0u, coreVector3(0.0f,0.0f,0.0f), false, true);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
+    // 
+    PHASE_HEALTH_GOAL({0})
+
     for(coreUintW i = 0u; i < EIGENGRAU_LAYERS; ++i)
     {
         // 

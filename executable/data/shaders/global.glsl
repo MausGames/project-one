@@ -627,11 +627,11 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     void VertexMain();
     void ShaderMain()
     {
-        #if defined(GL_ES)
-            #define CORE_OVERFLOW_GUARD(i, n) (i)
-        #else
-            #define CORE_OVERFLOW_GUARD(i, n) (min(i, (n) - 1))
-        #endif
+    #if defined(GL_ES)
+        #define CORE_OVERFLOW_GUARD(i, n) (i)
+    #else
+        #define CORE_OVERFLOW_GUARD(i, n) (min(i, (n) - 1))
+    #endif
 
         // compatibility for Intel and macOS
         v_v4VarColor   = vec4(0.0);
@@ -647,11 +647,12 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
 
         a_v2LowPosition = a_v3RawPosition.xy;
         a_v2LowTexCoord = vec2(0.5 + a_v3RawPosition.x, 0.5 - a_v3RawPosition.y);
+
         VertexMain();
 
-        #if !((CORE_GL_VERSION >= 110) || (CORE_GL_ES_VERSION >= 300))
-            v_v3TangentPos = v_v3TangentCam - v_v3TangentPos;
-        #endif
+    #if defined(GL_ES)
+        v_v3TangentPos = v_v3TangentCam - v_v3TangentPos;
+    #endif
     }
 
 #endif // _CORE_VERTEX_SHADER_
@@ -762,7 +763,11 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     #endif
 
     // pre-calculated view direction
-    vec3 v_v3ViewDir;
+    #if defined(GL_ES)
+        #define v_v3ViewDir (v_v3TangentPos)
+    #else
+        #define v_v3ViewDir (v_v3TangentCam - v_v3TangentPos)
+    #endif
 
     // remapped variables
     #if defined(_CORE_OPTION_INSTANCING_)
@@ -775,14 +780,6 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     void FragmentMain();
     void ShaderMain()
     {
-    #if defined(_CORE_OPTION_VIEWDIR_)
-        #if (CORE_GL_VERSION >= 110) || (CORE_GL_ES_VERSION >= 300)
-            v_v3ViewDir = v_v3TangentCam - v_v3TangentPos;
-        #else
-            v_v3ViewDir = v_v3TangentPos;
-        #endif
-    #endif
-
         FragmentMain();
     }
 

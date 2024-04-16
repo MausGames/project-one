@@ -85,6 +85,9 @@ cZerothBoss::cZerothBoss()noexcept
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
+    PHASE_HEALTH_GOAL({19000})
+
+    // 
     for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i)
     {
         coreHashString sModelHigh;

@@ -181,11 +181,14 @@ void cMainMenu::Move()
             }
             else if(m_ScoreButton.IsClicked())
             {
-                // 
-                m_iStatus = 2;
+                if(Core::Platform->EnsureConnection())
+                {
+                    // 
+                    m_iStatus = 2;
 
-                // 
-                m_ScoreNew.Resolve();
+                    // 
+                    m_ScoreNew.Resolve();
+                }
             }
             else if(m_ReplayButton.IsClicked())
             {
@@ -230,6 +233,10 @@ void cMainMenu::Move()
                         Core::System->Quit();
                 });
             }
+
+            // 
+            m_ScoreButton.SetOverride(g_CurConfig.Game.iLeaderboard ? 0 : -1);
+            if(!g_CurConfig.Game.iLeaderboard) m_ScoreNew.SetAlpha(0.0f);
 
             // 
             cMenu::UpdateButton(&m_StartButton,   &m_Navigator, m_StartButton  .IsFocused());

@@ -1281,7 +1281,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))   // # skip replay
             {
                 // create rumble effect
-                const coreFloat fFinal = CLAMP01(fStrength * I_TO_F(iRumble) * 0.1f * (DEFINED(_CORE_SWITCH) ? 0.1f : 1.0f));
+                const coreFloat fFinal = CLAMP01(fStrength * I_TO_F(iRumble) * 0.1f * (DEFINED(_CORE_SWITCH) ? 0.05f : 1.0f));
                 Core::Input->JoystickRumble(iJoystickID, fFinal, fFinal, iLengthMs);
 
                 // 

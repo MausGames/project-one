@@ -66,6 +66,7 @@
 #define CONFIG_GAME_BACK_SPEED       "Game",     "BackSpeed",                            (100)
 #define CONFIG_GAME_UPDATE_FREQ      "Game",     "UpdateFreq",                           (0)
 #define CONFIG_GAME_PURE_MODE        "Game",     "PureMode",                             (0)
+#define CONFIG_GAME_LEADERBOARD      "Game",     "Leaderboard",                          (1)
 #define CONFIG_GAME_VERSION          "Game",     "Version",                              (0)
 
 #define CONFIG_LEGACY_ROTATION_TURN  "Legacy",   "RotationTurn",                         (0)
@@ -170,6 +171,7 @@ struct sConfig final
         coreUint8  iBackSpeed;       // 
         coreUint16 iUpdateFreq;      //   TODO 1: cannot be handled by switchbox8 (make sure to handle cMenu::UpdateSwitchBox)
         coreUint8  iPureMode;        // 
+        coreUint8  iLeaderboard;     // 
         coreUint16 iVersion;         //   TODO 1: cannot be handled by switchbox8
     }
     Game;

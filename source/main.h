@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.2.6 (https://www.maus-games.at)                             |//
+//| Project One v1.2.7 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -53,10 +53,8 @@
 // TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types, blender decimate tool factor ~0.1)
 // TODO 1: all sounds need IsUsable checks
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
-// TODO 3: skip rendering (like in pause) when update frequency is >= 2x of the refresh rate
 // TODO 3: for uneven resolutions, some objects need g_vGameResolution.AspectRatio() (on both axes, with max(1.0f)): menu transition, postprocessing
 // TODO 4: change arrays of structs to structs of arrays where possible (also in engine)
-// TODO 2: test maximum number of replays, provide upper limit, define communication when approaching or reaching limit
 // TODO 2: prevent shaking of center-aligned rectified animated text (did I mean something like seconds?)
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 // TODO 2: fix broken pw-database printing on MacOS (maybe put TODO into engine) (maybe related to geteuid<>getuid) (# replaced geteuid with getuid, which seems to be correct'er, just need to check if that was the issue on macos)
@@ -65,7 +63,6 @@
 // TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
 // TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
-// TODO 3: object_tetra_top und object_cube_top brauchen gute outline
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 // TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
@@ -87,7 +84,6 @@
 // Public Feedback and Suggestions:
 // TODO 3: improve player ship visuals
 // TODO 3: improve bloom without affecting visibility, or make configurable
-// TODO 5: (match-2 mechanic ?)
 // TODO 3: D4Windows anschauen, ob sie maus steuert und controller gleichzeitig verwendet (vielleicht wegen gyro oder accelerometer ?)
 
 // Merged List:
@@ -259,7 +255,8 @@ constexpr sVersion g_aVersion[] =
     {"1.2.3", 4u},
     {"1.2.4", 5u},
     {"1.2.5", 6u},
-    {"1.2.6", 7u}
+    {"1.2.6", 7u},
+    {"1.2.7", 8u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 
@@ -325,8 +322,9 @@ enum eMedal : coreUint8
     MEDAL_TYPE_ARCADE = MEDAL_TYPE_MISSION,
     MEDAL_TYPE_MAX,
 
-    MEDAL_MARGIN_MISSION = 3u,
-    MEDAL_MARGIN_ARCADE  = 25u
+    MEDAL_MARGIN_MISSION      = 3u,
+    MEDAL_MARGIN_MISSION_ATER = 1u,
+    MEDAL_MARGIN_ARCADE       = 25u
 };
 
 // 

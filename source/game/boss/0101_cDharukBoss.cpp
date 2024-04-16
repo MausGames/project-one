@@ -51,6 +51,9 @@ cDharukBoss::cDharukBoss()noexcept
     this->Configure(3100, 0u, COLOR_SHIP_RED);
     this->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
 
+    // 
+    PHASE_HEALTH_GOAL({3100, 2400, 1000, 0})
+
     // create duplicate object
     m_Duplicate.DefineModelHigh("ship_boss_dharuk_high.md3");
     m_Duplicate.DefineModelLow ("ship_boss_dharuk_low.md3");

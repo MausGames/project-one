@@ -415,6 +415,7 @@ public:
     static constexpr coreBool        ConfigShadow              () {return false;}
     static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 32u;}
+    static constexpr coreFloat       ConfigSpeed               () {return 3.0f;}
 
 
 private:

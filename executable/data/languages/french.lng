@@ -17,6 +17,7 @@ $EXTRAS = EXTRAS
 $SETTINGS = PARAMÈTRES
 
 $TO_STEAM = OUVRIR STEAM
+$TO_ITCH = OUVRIR ITCH.IO
 $TO_EPIC = EPIC GAMES STORE
 $TO_SWITCH = NINTENDO ESHOP
 $CREDITS = CRÉDITS
@@ -85,7 +86,7 @@ $CONFIG_INPUT_ACTION6 = Tirer vers le bas
 $CONFIG_INPUT_ACTION7 = Tirer vers la droite
 $CONFIG_INPUT_ACTION8 = Pause
 $CONFIG_INPUT_ACTION9 = Tir rapide
-$CONFIG_INPUT_ACTION10 = Activer/désactiver Tir rapide
+$CONFIG_INPUT_ACTION10 = Activer Tir rapide
 $CONFIG_GAME_LANGUAGE = Langue
 $CONFIG_GAME_GAMEDIRECTION = Défilement
 $CONFIG_GAME_MIRRORMODE = Mode miroir
@@ -96,6 +97,7 @@ $CONFIG_GAME_BACKROTATION = Rotation de l'arrière-plan
 $CONFIG_GAME_BACKSPEED = Vitesse de l'arrière-plan
 $CONFIG_GAME_UPDATEFREQ = Fréquence de mise à jour
 $CONFIG_GAME_PUREMODE = Mode standard
+$CONFIG_GAME_LEADERBOARD = Classements en ligne
 $CONFIG_GAME_VERSION = Version
 
 $CONFIG_VIDEO_MONITOR_DESC = #
@@ -146,6 +148,7 @@ $CONFIG_GAME_BACKROTATION_DESC = #
 $CONFIG_GAME_BACKSPEED_DESC = #
 $CONFIG_GAME_UPDATEFREQ_DESC = Mises à jour du gameplay par seconde
 $CONFIG_GAME_PUREMODE_DESC = #
+$CONFIG_GAME_LEADERBOARD_DESC = #
 $CONFIG_GAME_VERSION_DESC = #
 
 $GAME_TYPE = Type de partie
@@ -254,7 +257,7 @@ $INPUT_KEYBOARD = Clavier
 $INPUT_JOYSTICK = Manette
 
 $INFORMATION_RESTART = Le jeu va redémarrer
-$QUESTION_SAVE = Sauvegarder les modifications ?
+$QUESTION_CONFIG_SAVE = Sauvegarder les modifications ?
 $QUESTION_IMPORT = Importer une sauvegarde de la démo ?
 $QUESTION_RESTART = Redémarrer le jeu ?
 $QUESTION_EXIT_GAME = Quitter le jeu ?
