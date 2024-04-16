@@ -34,6 +34,15 @@ cSarosBoss::cSarosBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cSarosBoss::~cSarosBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cSarosBoss::__MoveOwn()
 {

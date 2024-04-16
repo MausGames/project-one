@@ -441,7 +441,7 @@ cRayBullet::cRayBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // 
-    this->SetCollisionModifier(coreVector3(1.05f,1.0f,3.0f));
+    this->SetCollisionModifier(coreVector3(1.07f,1.0f,3.0f));
 }
 
 
@@ -459,7 +459,7 @@ void cRayBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce
 void cRayBullet::__ReflectOwn()
 {
     // 
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, 0.0f));   // move to tip, to account for resetting the length
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, this->GetPosition().z));   // move to tip, to account for resetting the length
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // 
@@ -477,7 +477,7 @@ void cRayBullet::__ReflectOwn()
 void cRayBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     
@@ -530,7 +530,7 @@ void cPulseBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vFor
 void cPulseBullet::__ReflectOwn()
 {
     // 
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, 0.0f));   // move to tip, to account for resetting the length
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, this->GetPosition().z));   // move to tip, to account for resetting the length
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // 
@@ -548,7 +548,7 @@ void cPulseBullet::__MoveOwn()
     m_fSpeed += 2.5f * BULLET_SPEED_FACTOR * TIME;
 
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     const coreFloat fRelSpeed = m_fSpeed / (3.0f*BULLET_SPEED_FACTOR);
@@ -594,7 +594,7 @@ void cSurgeBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vFor
 void cSurgeBullet::__ReflectOwn()
 {
     // 
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, 0.0f));   // move to tip, to account for resetting the length
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, this->GetPosition().z));   // move to tip, to account for resetting the length
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // 
@@ -609,7 +609,7 @@ void cSurgeBullet::__ReflectOwn()
 void cSurgeBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
@@ -665,7 +665,7 @@ void cTeslaBullet::__ReflectOwn()
 void cTeslaBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
@@ -1129,9 +1129,9 @@ void cViewBullet::__MoveOwn()
 cCardBullet::cCardBullet()noexcept
 {
     // load object resources
-    this->DefineModel  ("bullet_quad.md3");
+    this->DefineModel  ("object_cube_top.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_direct_program");
+    this->DefineProgram("effect_energy_bullet_invert_program");
 }
 
 
@@ -1160,10 +1160,11 @@ void cCardBullet::__MoveOwn()
     m_fSpeed = m_fSpeed - 40.0f * TIME;
 
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
     m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (9.0f*PI)), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, FRACT(m_fAnimation * 0.625f)));
 
     // update fade

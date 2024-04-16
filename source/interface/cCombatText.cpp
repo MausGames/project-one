@@ -338,15 +338,16 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
     const coreVector2 vOnScreen = cCombatText::__TransformPosition(vPosition);
 
     // 
-    m_BadgeIcon.SetCenter(vOnScreen);
-    m_BadgeIcon.SetAlpha (0.0f);
+    m_BadgeIcon.SetCenter   (vOnScreen);
+    m_BadgeIcon.SetAlpha    (0.0f);
+    m_BadgeIcon.SetTexOffset(coreVector2(iValue ? 0.0f : 0.5f, 0.0f));
 
     // 
     m_BadgeBack.SetCenter(vOnScreen);
     m_BadgeBack.SetAlpha (0.0f);
 
     // 
-    m_BadgeLabel.SetText  ((HAS_BIT(g_CurConfig.Game.iCombatText, 2u) && iValue) ? PRINT("-%u", iValue) : "");
+    m_BadgeLabel.SetText  ("");//(HAS_BIT(g_CurConfig.Game.iCombatText, 2u) && iValue) ? PRINT("-%u", iValue) : "");
     m_BadgeLabel.SetCenter(vOnScreen);
     m_BadgeLabel.SetAlpha (0.0f);
 

@@ -424,6 +424,9 @@ void cRutilusMission::DisableSafe(const coreBool bAnimated)
         // 
         m_Safe.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         g_pGlow->UnbindObject(&m_Safe);
+
+        // 
+        this->__UpdateAreaSpeed();
     }
 }
 
@@ -624,7 +627,11 @@ coreFloat cRutilusMission::CalcAreaSpeed(const coreVector2 vPosition, const core
     const coreVector2 vDiff2 = vPosition - vTestPos2;
 
     // 
-    return LERP(fSpeedSlow, fSpeedFast, STEPH3(fTestFromSq1, fTestToSq1, vDiff1.LengthSq()) - STEPH3(fTestFromSq2, fTestToSq2, vDiff2.LengthSq()) + 1.0f);
+    const coreFloat fValue1 = m_aArea[0].IsEnabled(CORE_OBJECT_ENABLE_ALL) ? STEPH3(fTestFromSq1, fTestToSq1, vDiff1.LengthSq()) : 1.0f;
+    const coreFloat fValue2 = m_Safe    .IsEnabled(CORE_OBJECT_ENABLE_ALL) ? STEPH3(fTestFromSq2, fTestToSq2, vDiff2.LengthSq()) : 1.0f;
+
+    // 
+    return LERP(fSpeedSlow, fSpeedFast, fValue1 - fValue2 + 1.0f);
 }
 
 
@@ -838,6 +845,11 @@ void cRutilusMission::__MoveOwnAfter()
                         if(iNewWarnDir) m_aiWarnDir[i] = iNewWarnDir;
                         m_abWarn[i] = bNewWarn;
 
+                        if(!SameDirection90(pPlayer->GetDirection().xy(), oPlate.GetDirection().xy()))
+                        {
+                            g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
+                        }
+
                         pPlayer->SetDirection(oPlate.GetDirection());
                         pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
                         break;
@@ -915,7 +927,7 @@ void cRutilusMission::__MoveOwnAfter()
     }
 
     // 
-    if(m_aArea[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    if(m_aArea[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE) || m_Safe.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         this->__UpdateAreaSpeed();
     }

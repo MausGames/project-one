@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_SCROLLBOX_H_
 #define _P1_GUARD_SCROLLBOX_H_
 
+// TODO 1: add animations to force player-focus (pulsating arrows when scrolling possible ?)
+
 
 // ****************************************************************
 // 

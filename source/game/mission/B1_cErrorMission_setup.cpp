@@ -113,18 +113,18 @@ void cErrorMission::__SetupOwn()
             });                                                                         \
         }
 
-        SINGLE_ENEMY_SQUAD(cScoutEnemy,   COLOR_SHIP_YELLOW,  -0.6f)
-        SINGLE_ENEMY_SQUAD(cWarriorEnemy, COLOR_SHIP_ORANGE,  -0.4f)
-        SINGLE_ENEMY_SQUAD(cStarEnemy,    COLOR_SHIP_RED,     -0.2f)
-        SINGLE_ENEMY_SQUAD(cMinerEnemy,   COLOR_SHIP_MAGENTA,  0.0f)
-        SINGLE_ENEMY_SQUAD(cArrowEnemy,   COLOR_SHIP_PURPLE,   0.2f)
-        SINGLE_ENEMY_SQUAD(cFreezerEnemy, COLOR_SHIP_BLUE,     0.4f)
-        SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_CYAN,     0.6f)
-        SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_GREEN,    0.8f)
+        SINGLE_ENEMY_SQUAD(cScoutEnemy,   COLOR_SHIP_YELLOW,  -0.7f)
+        SINGLE_ENEMY_SQUAD(cWarriorEnemy, COLOR_SHIP_ORANGE,  -0.5f)
+        SINGLE_ENEMY_SQUAD(cStarEnemy,    COLOR_SHIP_RED,     -0.3f)
+        SINGLE_ENEMY_SQUAD(cMinerEnemy,   COLOR_SHIP_MAGENTA, -0.1f)
+        SINGLE_ENEMY_SQUAD(cArrowEnemy,   COLOR_SHIP_PURPLE,   0.1f)
+        SINGLE_ENEMY_SQUAD(cFreezerEnemy, COLOR_SHIP_BLUE,     0.3f)
+        SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_CYAN,     0.5f)
+        SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_GREEN,    0.7f)
 
         STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
-
+#if !defined(_CORE_DEBUG_)
     // ################################################################
     // invincibility switches every few seconds (old version)
     // blinken wie in zelda  
@@ -1585,6 +1585,8 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // ################################################################
+    
+#endif
 }
 
 

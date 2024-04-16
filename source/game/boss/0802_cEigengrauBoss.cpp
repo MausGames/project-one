@@ -36,8 +36,6 @@
 // TODO 1: improve bullet depth überlagerung
 // TODO 1: post-processing fehlt und farben sind anders, fix glow and distortion on extended viewport
 // TODO 1: boss sollte vielleicht eigenen shader haben, zum rand hin weniger transparenz (spherisch ?) statt ganz flach
-// TODO 1: [MF] MAIN: sound
-// TODO 1: [MF] sound when fragment-board splits up, sound when bullet flies past player
 // (TODO 1: sinus-line gegner sieht man schlecht von oben kommen (vielleicht beim ersten gegner ein loch lassen um (überraschendes) erstes ausweichen zu erleichtern))
 // (TODO 1: handle farb-änderung von adds)
 
@@ -52,6 +50,7 @@
 #define ROTA_VALUE (0u)
 #define PLAYER_POS (1u)   // # uses 1u - 2u
 #define HEART_BEAT (3u)
+#define ENV_SPEED  (4u)
 
 
 // ****************************************************************
@@ -171,6 +170,15 @@ cEigengrauBoss::cEigengrauBoss()noexcept
 
     // 
     m_pHeartSound = Core::Manager::Resource->Get<coreSound>("effect_heart.wav");
+}
+
+
+// ****************************************************************
+// destructor
+cEigengrauBoss::~cEigengrauBoss()
+{
+    // 
+    this->Kill(false);
 }
 
 
@@ -305,13 +313,13 @@ void cEigengrauBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
-            g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
-
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
                 m_avVector[PLAYER_POS + i].xy(pPlayer->GetPosition().xy());
             });
+
+            m_avVector[ENV_SPEED].x = g_pEnvironment->GetSpeed();
         }
 
         PHASE_CONTROL_TIMER(0u, 0.3f, LERP_SMOOTH)
@@ -325,6 +333,8 @@ void cEigengrauBoss::__MoveOwn()
 
                 pPlayer->SetPosition(coreVector3(vPos, 0.0f));
             });
+
+            g_pEnvironment->SetTargetSpeedNow(LERPH3(m_avVector[ENV_SPEED].x, 0.0f, fTime));
 
             g_fShiftMode = fTime;
 
@@ -448,7 +458,7 @@ void cEigengrauBoss::__MoveOwn()
             this->SetAlpha(BLENDH3(MIN1(fTime * 2.0f)));
 
             g_pPostProcessing->SetFrameValue(1.0f + CLAMP01(fTime * 2.0f - 1.0f));
-            
+
             for(coreUintW i = 0u; i < POST_WALLS; ++i)
             {
                 const coreVector2 vResolution = Core::System->GetResolution();
@@ -484,7 +494,7 @@ void cEigengrauBoss::__MoveOwn()
         {
             this->__AddBulletBurst();
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
@@ -517,7 +527,7 @@ void cEigengrauBoss::__MoveOwn()
             this->__AddBulletLine(iDamage, 5.0f, vPos, vDir);
             this->__AddBulletLine(iDamage, 5.0f, vPos, vDir.Rotated90());
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         m_fRotaSpeed = 1.5f * (1.0f - STEP(0.8f, 0.9f, fCurHealthPct));
@@ -570,7 +580,7 @@ void cEigengrauBoss::__MoveOwn()
             this->__AddBullet(5, 5.0f, vPos, ((coreVector3( vRota3, 0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
             this->__AddBullet(5, 5.0f, vPos, ((coreVector3(-vRota3, 0.0f) - this->GetPosition()).Normalized() + vOffset).Normalized());
             
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.7f)
@@ -607,7 +617,7 @@ void cEigengrauBoss::__MoveOwn()
                 this->__AddBullet(6, 5.0f, vPos, vDir);
             }
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         m_fRotaSpeed = 1.0f * (1.0f - STEP(0.6f, 0.69f, fCurHealthPct));
@@ -643,7 +653,7 @@ void cEigengrauBoss::__MoveOwn()
 
             this->__AddBulletLine(5, 5.0f, vPos, vDir);
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.5f)
@@ -717,7 +727,7 @@ void cEigengrauBoss::__MoveOwn()
                     }
                 }
 
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             });
         }
 
@@ -757,7 +767,7 @@ void cEigengrauBoss::__MoveOwn()
 
             this->__AddBullet(5, 5.0f, coreVector3(0.0f, 0.0f, this->GetPosition().z), coreVector3(0.0f,0.0f,1.0f));
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         m_fRotaSpeed = 1.0f * (1.0f - STEP(0.3f, 0.39f, fCurHealthPct));
@@ -808,7 +818,7 @@ void cEigengrauBoss::__MoveOwn()
                 this->__AddBulletLine(5, 5.0f, vPos2, vDir2);
             }
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.2f)
@@ -866,7 +876,7 @@ void cEigengrauBoss::__MoveOwn()
                 this->__AddBulletLine(5, 5.0f, vBase.Rotated90() * LERP(fSide, SIGN(fSide) * 3.5f, 0.1f) * 30.0f, vBase);
             }
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(fCurHealthPct <= 0.05f)
@@ -895,6 +905,8 @@ void cEigengrauBoss::__MoveOwn()
         if(PHASE_BEGINNING2)
         {
             m_fLightningDelay = 10.0f;
+
+            //pBackground->SetColor(cDarkBackground::Color, cDarkBackground::Color2);
 
             this->_EndBoss();
 

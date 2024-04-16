@@ -22,6 +22,7 @@
 // TODO 1: [MF] check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
 // TODO 4: remove counters and vectors (first remove usage)
 // TODO 1: [MF] change boss names: MESSIER -> SAROS, GEMINGA -> NAGUAL(?)    and check boss titles again
+// TODO 1: remove leviathan demo code + in-mission
 
 
 // ****************************************************************
@@ -127,8 +128,8 @@
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c,    [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
-#define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)
+#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c,    [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)   // NOLINT
+#define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)   // NOLINT
 #define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b, LERP_LINEAR)
 
 #define PHASE_TIME_POINT(t)             (InBetween((t), fTimeBefore, fTime))
@@ -252,61 +253,6 @@ protected:
 class cDharukBoss final : public cBoss
 {
 private:
-    cCustomEnemy  m_Duplicate;                               // 
-    coreBatchList m_DuplicateTrail;                          // 
-    coreObject3D  m_aDuplicateRaw[DHARUK_DUPLICATE_RAWS];    // 
-
-    coreBatchList m_Boomerang;                               // 
-    coreBatchList m_BoomerangTrail;                          // 
-    coreObject3D  m_aBoomerangRaw[DHARUK_BOOMERANGS_RAWS];   // 
-
-    coreObject3D m_Summon;                                   // 
-
-    coreUint8 m_iPackedDir;                                  // 
-    coreFlow  m_fAnimation;                                  // animation value
-
-
-public:
-    cDharukBoss()noexcept;
-
-    DISABLE_COPY(cDharukBoss)
-    ASSIGN_ID_EX(101, "DHARUK", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
-
-
-private:
-    // execute own routines
-    void __ResurrectOwn  ()final;
-    void __KillOwn       (const coreBool bAnimated)final;
-    void __RenderOwnUnder()final;
-    void __RenderOwnOver ()final;
-    void __MoveOwn       ()final;
-
-    // 
-    void __EnableDuplicate ();
-    void __DisableDuplicate(const coreBool bAnimated);
-
-    // 
-    void __EnableBoomerang (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
-    void __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
-
-    // 
-    void __EnableSummon (const coreVector2 vPosition);
-    void __DisableSummon(const coreBool bAnimated);
-
-    // 
-    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
-    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold);
-    void        __EncodeDirection(const coreUintW iIndex, const coreVector2 vDirection);
-    coreVector2 __DecodeDirection(const coreUintW iIndex);
-};
-
-
-// TODO 1: change sub-boss to boss, and remove original boss
-// ****************************************************************
-// Dharuk sub-boss class
-class cDharukSubBoss final : public cBoss
-{
-private:
     cCustomEnemy  m_Duplicate;                                  // 
     coreBatchList m_DuplicateTrail;                             // 
     coreObject3D  m_aDuplicateRaw[DHARUK_DUPLICATE_RAWS];       // 
@@ -327,9 +273,10 @@ private:
 
 
 public:
-    cDharukSubBoss()noexcept;
+    cDharukBoss()noexcept;
+    ~cDharukBoss()final;
 
-    DISABLE_COPY(cDharukSubBoss)
+    DISABLE_COPY(cDharukBoss)
     ASSIGN_ID_EX(101, "DHARUK", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
 
     // 
@@ -416,6 +363,7 @@ private:
 
 public:
     cTorusBoss()noexcept;
+    ~cTorusBoss()final;
 
     DISABLE_COPY(cTorusBoss)
     ASSIGN_ID_EX(102, "TORUS", COLOR_MENU_GREEN, COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
@@ -481,6 +429,7 @@ private:
 
 public:
     cVausBoss()noexcept;
+    ~cVausBoss()final;
 
     DISABLE_COPY(cVausBoss)
     ASSIGN_ID_EX(103, "VAUS", COLOR_MENU_YELLOW, COLOR_MENU_YELLOW, coreVector2(-1.0f,-1.0f))
@@ -512,6 +461,7 @@ private:
 
 public:
     cNautilusBoss()noexcept;
+    ~cNautilusBoss()final;
 
     DISABLE_COPY(cNautilusBoss)
     ASSIGN_ID_EX(201, "NAUTILUS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -537,21 +487,9 @@ private:
 // Amemasu boss class
 class cAmemasuBoss final : public cBoss
 {
-private:
-    cCustomEnemy m_Top;                 // 
-    cCustomEnemy m_Bottom;              // 
-
-    cCustomEnemy m_Tooth[4];            // 
-
-    coreFloat m_fMouthAngle;            // 
-
-    coreSpline2 m_ChangePath;           // 
-
-    coreTexturePtr m_apStomachTex[4];   // 
-
-
 public:
     cAmemasuBoss()noexcept;
+    ~cAmemasuBoss()final;
 
     DISABLE_COPY(cAmemasuBoss)
     ASSIGN_ID_EX(202, "AMEMASU", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -559,9 +497,7 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn()final;
-    void __KillOwn     (const coreBool bAnimated)final;
-    void __MoveOwn     ()final;
+    void __MoveOwn()final;
 };
 
 
@@ -597,6 +533,7 @@ private:
 
 public:
     cLeviathanBoss()noexcept;
+    ~cLeviathanBoss()final;
 
     DISABLE_COPY(cLeviathanBoss)
     ASSIGN_ID_EX(203, "LEVIATHAN", COLOR_MENU_CYAN, COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
@@ -647,6 +584,7 @@ class cUrticaBoss final : public cBoss
 {
 public:
     cUrticaBoss()noexcept;
+    ~cUrticaBoss()final;
 
     DISABLE_COPY(cUrticaBoss)
     ASSIGN_ID_EX(301, "URTICA", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -697,6 +635,7 @@ private:
 
 public:
     cTigerBoss()noexcept;
+    ~cTigerBoss()final;
 
     DISABLE_COPY(cTigerBoss)
     ASSIGN_ID_EX(302, "TIGER MK-III", COLOR_MENU_YELLOW, COLOR_MENU_YELLOW, coreVector2(0.0f,0.0f))
@@ -754,6 +693,7 @@ class cLuciferBoss final : public cBoss
 {
 public:
     cLuciferBoss()noexcept;
+    ~cLuciferBoss()final;
 
     DISABLE_COPY(cLuciferBoss)
     ASSIGN_ID_EX(303, "L.U.C.I.F.E.R.", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -771,6 +711,7 @@ class cQuaternionBoss final : public cBoss
 {
 public:
     cQuaternionBoss()noexcept;
+    ~cQuaternionBoss()final;
 
     DISABLE_COPY(cQuaternionBoss)
     ASSIGN_ID_EX(401, "QUATERNION", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -788,6 +729,7 @@ class cSarosBoss final : public cBoss
 {
 public:
     cSarosBoss()noexcept;
+    ~cSarosBoss()final;
 
     DISABLE_COPY(cSarosBoss)
     ASSIGN_ID_EX(402, "SAROS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -842,6 +784,7 @@ private:
 
 public:
     cMessierBoss()noexcept;
+    ~cMessierBoss()final;
 
     DISABLE_COPY(cMessierBoss)
     ASSIGN_ID_EX(403, "MESSIER 87", COLOR_MENU_MAGENTA, COLOR_MENU_MAGENTA, coreVector2(0.75f,0.0f))
@@ -877,6 +820,9 @@ private:
     void __DisableHole(const coreBool bAnimated);
 
     // 
+    void __SetWavePosition(const coreVector2 vPosition);
+
+    // 
     void     __AddBullet  (const coreUintW iType, const coreFloat fSpeed, const coreVector2 vPosition, const coreVector2 vDirection);
     coreBool __PhaseTicker(const coreUintW iIndex, const coreFloat fRate);
 };
@@ -888,6 +834,7 @@ class cTartarusBoss final : public cBoss
 {
 public:
     cTartarusBoss()noexcept;
+    ~cTartarusBoss()final;
 
     DISABLE_COPY(cTartarusBoss)
     ASSIGN_ID_EX(501, "TARTARUS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -905,6 +852,7 @@ class cPhalarisBoss final : public cBoss
 {
 public:
     cPhalarisBoss()noexcept;
+    ~cPhalarisBoss()final;
 
     DISABLE_COPY(cPhalarisBoss)
     ASSIGN_ID_EX(502, "PHALARIS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -949,6 +897,7 @@ private:
 
 public:
     cCholBoss()noexcept;
+    ~cCholBoss()final;
 
     DISABLE_COPY(cCholBoss)
     ASSIGN_ID_EX(503, "CHOL", COLOR_MENU_ORANGE, COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
@@ -1004,6 +953,7 @@ class cFenrirBoss final : public cBoss
 {
 public:
     cFenrirBoss()noexcept;
+    ~cFenrirBoss()final;
 
     DISABLE_COPY(cFenrirBoss)
     ASSIGN_ID_EX(601, "FENRIR", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -1021,6 +971,7 @@ class cShelobBoss final : public cBoss
 {
 public:
     cShelobBoss()noexcept;
+    ~cShelobBoss()final;
 
     DISABLE_COPY(cShelobBoss)
     ASSIGN_ID_EX(602, "SHELOB", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -1051,6 +1002,7 @@ private:
     coreObject3D m_Indicator;                   // 
 
     cCustomEnemy m_aIce        [ZEROTH_ICES];   // 
+    coreUint8    m_aiIceDir    [ZEROTH_ICES];   // 
     coreBool     m_abIcePreview[ZEROTH_ICES];   // 
 
     coreVector2 m_vGlobalDir;                   // 
@@ -1060,6 +1012,7 @@ private:
 
 public:
     cZerothBoss()noexcept;
+    ~cZerothBoss()final;
 
     DISABLE_COPY(cZerothBoss)
     ASSIGN_ID_EX(603, "ZEROTH", COLOR_MENU_BLUE, COLOR_MENU_BLUE, coreVector2(0.25f,0.25f))
@@ -1105,6 +1058,7 @@ class cOrlacBoss final : public cBoss
 {
 public:
     cOrlacBoss()noexcept;
+    ~cOrlacBoss()final;
 
     DISABLE_COPY(cOrlacBoss)
     ASSIGN_ID_EX(701, "ORLAC", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -1127,7 +1081,7 @@ private:
     cCustomEnemy m_Top;                // 
     cCustomEnemy m_Bottom;             // 
 
-    cDharukSubBoss m_Dharuk;           // 
+    cDharukBoss m_Dharuk;              // 
 
     coreFloat m_fMouthAngle;           // 
 
@@ -1143,6 +1097,7 @@ private:
 
 public:
     cGemingaBoss()noexcept;
+    ~cGemingaBoss()final;
 
     DISABLE_COPY(cGemingaBoss)
     ASSIGN_ID_EX(702, "GEMINGA", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
@@ -1171,6 +1126,7 @@ class cNagualBoss final : public cBoss
 {
 public:
     cNagualBoss()noexcept;
+    ~cNagualBoss()final;
 
     DISABLE_COPY(cNagualBoss)
     ASSIGN_ID_EX(703, "NAGUAL", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
@@ -1223,6 +1179,8 @@ private:
     coreFlow  m_fPatternValue;                        // 
     coreFlow  m_fPatternStrength;                     // 
     coreUint8 m_iPatternType;                         // 
+    
+    coreSoundPtr m_pNightmareSound;                   // 
 
     coreBool m_bDead;                                 // 
 
@@ -1260,6 +1218,7 @@ private:
 
 public:
     cProjectOneBoss()noexcept;
+    ~cProjectOneBoss()final;
 
     DISABLE_COPY(cProjectOneBoss)
     ASSIGN_ID(801, "P1")
@@ -1381,6 +1340,7 @@ private:
 
 public:
     cEigengrauBoss()noexcept;
+    ~cEigengrauBoss()final;
 
     DISABLE_COPY(cEigengrauBoss)
     ASSIGN_ID_EX(802, "EIGENGRAU", COLOR_MENU_WHITE, COLOR_MENU_WHITE, coreVector2(0.0f,0.5f))
@@ -1430,6 +1390,7 @@ private:
 
 public:
     cIntroBoss()noexcept;
+    ~cIntroBoss()final;
 
     DISABLE_COPY(cIntroBoss)
     ASSIGN_ID_EX(9901, "SHINAI", COLOR_MENU_PURPLE, COLOR_MENU_PURPLE, coreVector2(0.0f,0.25f))

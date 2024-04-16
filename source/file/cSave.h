@@ -21,7 +21,6 @@
 // TODO 1: scoring + leaderboard also needs to be version specific
 // TODO 1: check for, and ask for import of savegame (+ whole user folder?) from demo (Steam) (save_demo.p1sv or user_demo_1000 folder, could also be general, if savegame is (also) stored globally (delete copy after import)), if no save is available on startup -> needs own menu state in intro menu (show date-time of file, maybe also some meta-data (name, time played, max mission))
 // TODO 1: [MF] mission-all stats need to be handled correctly (segment <> mission <> all <> arcade <> global, for extra menu)
-// TODO 1: [MF] achievement badges sollten als secret badges verwendet werden (silberner stern -5)
 
 
 // ****************************************************************

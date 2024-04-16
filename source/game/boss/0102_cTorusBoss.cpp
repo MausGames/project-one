@@ -24,8 +24,7 @@
 // TODO 1: hard mode: all object behaviors increase, gelber angriff is undurchdringbar (7 statt 3 geschosse)
 // TODO 1: hard mode: neue beschwörung die nicht zerstört werden kann (vielleicht finaler ball kann nicht zerstört werden)
 // TODO 3: purple helper shield wird unter laser gezeichnet
-// TODO 1: [MF] MAIN: medal goal (nochmal prüfen, nichts abziehen), explosion (verbessern: schneller, mit kleiner explosion um drehung anzustoßen), regular score, sound, background rota/speed
-// TODO 1: [MF] alle phasen nochmal für verbesserungen anschauen
+// TODO 1: [MF] MAIN: sound
 
 
 // ****************************************************************
@@ -301,6 +300,23 @@ cTorusBoss::cTorusBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cTorusBoss::~cTorusBoss()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    this->__DisableSummon(false);
+    for(coreUintW i = 0u; i < TORUS_TURRETS;  ++i) this->__DisableTurret (i, false);
+    for(coreUintW i = 0u; i < TORUS_GUNNERS;  ++i) this->__DisableGunner (i, false);
+    for(coreUintW i = 0u; i < TORUS_CHARGERS; ++i) this->__DisableCharger(i, false);
+    for(coreUintW i = 0u; i < TORUS_DRIVERS;  ++i) this->__DisableDriver (i, false);
+    for(coreUintW i = 0u; i < TORUS_WAVERS;   ++i) this->__DisableWaver  (i, false);
+}
+
+
+// ****************************************************************
 // 
 void cTorusBoss::__ResurrectOwn()
 {
@@ -334,34 +350,16 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
 
     // 
-    for(coreUintW i = 0u; i < TORUS_BARRIERS; ++i)
-        pMission->DisableBarrier(i, bAnimated);
-
-    // 
+    for(coreUintW i = 0u; i < TORUS_BARRIERS; ++i) pMission->DisableBarrier(i, bAnimated);
     pMission->DisableShadow(0u, bAnimated);
 
     // 
     this->__DisableSummon(bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
-        this->__DisableTurret(i, bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
-        this->__DisableGunner(i, bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < TORUS_CHARGERS; ++i)
-        this->__DisableCharger(i, bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < TORUS_DRIVERS; ++i)
-        this->__DisableDriver(i, bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < TORUS_WAVERS; ++i)
-        this->__DisableWaver(i, bAnimated);
+    for(coreUintW i = 0u; i < TORUS_TURRETS;  ++i) this->__DisableTurret (i, bAnimated);
+    for(coreUintW i = 0u; i < TORUS_GUNNERS;  ++i) this->__DisableGunner (i, bAnimated);
+    for(coreUintW i = 0u; i < TORUS_CHARGERS; ++i) this->__DisableCharger(i, bAnimated);
+    for(coreUintW i = 0u; i < TORUS_DRIVERS;  ++i) this->__DisableDriver (i, bAnimated);
+    for(coreUintW i = 0u; i < TORUS_WAVERS;   ++i) this->__DisableWaver  (i, bAnimated);
 
     // 
     g_pGlow->UnbindObject(&m_Emitter);
@@ -482,6 +480,7 @@ void cTorusBoss::__MoveOwn()
                 this->ChangeToBottom();
 
                 g_pSpecialEffects->ExternPlayPosition(m_pFireSound, this, 0.0f, 0.8f, true, SOUND_EFFECT, coreVector3(0.0f,100.0f,0.0f));
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_EFFECT_SHAKE_2);
             }
 
             if(PHASE_TIME_BEFORE(0.85f))
@@ -656,7 +655,8 @@ void cTorusBoss::__MoveOwn()
                     m_aiCounter[CRASH_COUNT] += 1;
 
                     g_pSpecialEffects->CreateSplashColor(this->GetPosition() + coreVector3(8.0f * AlongCrossNormal(this->GetPosition().xy()), 0.0f), 25.0f, 10u, COLOR_ENERGY_WHITE * 0.8f);
-                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.4f, 1.0f, SOUND_EFFECT_DUST);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                 }
             });
         }
@@ -670,7 +670,7 @@ void cTorusBoss::__MoveOwn()
 
                 m_aiCounter[TURRET_DIR] = F_TO_SI(m_avVector[GRIND_VALUE].x) % 2;
 
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.4f, 1.0f, SOUND_EFFECT_DUST);
             }
         }
     }
@@ -695,6 +695,7 @@ void cTorusBoss::__MoveOwn()
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
 
                 this->__EnableDriver(MIN(coreMath::BitScanFwd(~m_iDriverActive), TORUS_DRIVERS - 1u), this->GetPosition().xy(), -this->GetPosition().xy().Normalized());
                 m_aiCounter[DRIVER_COUNT] += 1;
@@ -726,6 +727,7 @@ void cTorusBoss::__MoveOwn()
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             if(F_TO_SI(m_avVector[GRIND_VALUE].x) % 2 == m_aiCounter[TURRET_DIR])
             {
@@ -770,6 +772,7 @@ void cTorusBoss::__MoveOwn()
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             this->__EnableGunner(F_TO_UI(m_avVector[GRIND_VALUE].x + 0.5f) % TORUS_GUNNERS, this->GetPosition().xy());
         }
@@ -782,6 +785,7 @@ void cTorusBoss::__MoveOwn()
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             if(this->GetCurHealth() < 2800)
             {
@@ -976,7 +980,7 @@ void cTorusBoss::__MoveOwn()
             m_avVector[TUMBLE_DIRECTION].z = g_pEnvironment->GetDirection().Angle();
         }
 
-        PHASE_CONTROL_TIMER(1u, 0.5f, LERP_BREAK)
+        PHASE_CONTROL_TIMER(1u, 0.5f, LERP_SMOOTH)
         {
             g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fTime)));
         });
@@ -986,7 +990,8 @@ void cTorusBoss::__MoveOwn()
             if(PHASE_BEGINNING)
             {
                 pMission->EnableShadow(0u, this, m_avVector[JUMP_TARGET].xy(), false);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH_2);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                 g_pSpecialEffects->ExternPlayPosition(m_pWooshSound, this, 0.0f, 1.5f, true, SOUND_EFFECT, this->GetPosition());
             }
@@ -1026,6 +1031,7 @@ void cTorusBoss::__MoveOwn()
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         });
     }
@@ -1083,6 +1089,8 @@ void cTorusBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_INC
+
+            g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,0.0f), 10.0f);
         });
 
         m_aiCounter[EMIT_STATUS] = 0;
@@ -1167,6 +1175,7 @@ void cTorusBoss::__MoveOwn()
 
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                     g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
                 }
                 else
                 {
@@ -1176,8 +1185,8 @@ void cTorusBoss::__MoveOwn()
                     switch(m_aiCounter[SLIDE_COUNT])
                     {
                     default: ASSERT(false)
-                    case 1: fSide =  0.7f; break;
-                    case 2: fSide = -0.7f; break;
+                    case 1: fSide =  0.4f; break;
+                    case 2: fSide = -0.4f; break;
                     case 3: fSide =  0.0f; break;
                     }
 
@@ -1267,7 +1276,7 @@ void cTorusBoss::__MoveOwn()
             vNewOri.yz(coreVector2::Direction((6.0f*PI) * fTime));
 
             this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + m_avVector[TUMBLE_DIRECTION].xy(), fTime);
-            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fTime)));
+            //g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fTime)));   end rotation
 
             if(PHASE_FINISHED)
             {
@@ -1280,9 +1289,18 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 151u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.35f)
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_BREAK_REV)
         {
-            PHASE_CHANGE_INC
+            vNewOri.yz(coreVector2::Direction((-2.0f*PI) * fTime));
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC
+
+                g_pSpecialEffects->MacroDestructionDark(this);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
+            }
         });
     }
 
@@ -1290,14 +1308,13 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 152u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK_REV)
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
         {
-            const coreFloat fHeight = LERP(0.0f, WATER_HEIGHT, fTime);
+            const coreFloat fHeight = LERPBR(0.0f, WATER_HEIGHT, fTime);
 
-            this->SetPosition(coreVector3(m_vLastPosition * FOREGROUND_AREA, fHeight));
+            this->SetPosition(coreVector3(m_vLastPosition * FOREGROUND_AREA * LERP(1.0f, 0.5f, fTime), fHeight));
 
-            
-            vNewOri.yz(coreVector2::Direction((-2.0f*PI) * fTime));
+            vNewOri.yz(coreVector2::Direction((-6.0f*PI) * fTime));
 
             if(PHASE_FINISHED)
             {
@@ -1311,6 +1328,7 @@ void cTorusBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
                 g_pSpecialEffects->SlowScreen(4.0f);
 
                 // load object resources
@@ -1689,7 +1707,7 @@ void cTorusBoss::__MoveOwn()
             coreVector2 avDir[3];
 
             // 
-            avDir[0] = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i - 2u) * 8.0f)) * mRota;
+            avDir[0] = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i - 2u) * 9.0f)) * mRota;
             avDir[1] = avDir[0].Rotated120();
             avDir[2] = avDir[1].Rotated120();
 

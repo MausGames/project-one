@@ -20,7 +20,6 @@ cMossBackground::cMossBackground()noexcept
 , m_iThunderIndex    (Core::Rand->Uint(ARRAY_SIZE(m_apThunder) - 1u))
 , m_Loaded           ()
 , m_bEnableLightning (true)
-, m_bEnableHeadlight (false)
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -202,7 +201,7 @@ cMossBackground::cMossBackground()noexcept
     m_Rain.DefineProgram("effect_weather_rain_moss_program");
     m_Rain.SetPosition  (coreVector2(0.0f,0.0f));
     m_Rain.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
-    m_Rain.SetAlpha     (0.6f);
+    m_Rain.SetAlpha     (0.55f);
 
     // 
     m_Lightning.DefineProgram("menu_color_program");
@@ -215,6 +214,9 @@ cMossBackground::cMossBackground()noexcept
     m_apThunder[0] = Core::Manager::Resource->Get<coreSound>("environment_thunder_01.wav");
     m_apThunder[1] = Core::Manager::Resource->Get<coreSound>("environment_thunder_02.wav");
     m_apThunder[2] = Core::Manager::Resource->Get<coreSound>("environment_thunder_03.wav");
+
+    // 
+    m_Headlight.SetAlpha(0.0f);
 }
 
 
@@ -289,7 +291,7 @@ void cMossBackground::__RenderOwnAfter()
         m_Lightning.Render();
 
         // 
-        if(m_bEnableHeadlight) m_Headlight.Render();
+        if(m_Headlight.GetAlpha()) m_Headlight.Render();
     }
     glEnable(GL_DEPTH_TEST);
 }
@@ -301,7 +303,7 @@ void cMossBackground::__MoveOwn()
 {
     // 
     const coreVector2 vEnvMove   = coreVector2(0.3f,1.0f) * (-0.35f * MAX0(g_pEnvironment->GetSpeed()));
-    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 6.0f;
+    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.5f;
     const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f, -m_vRainMove.Length()) + vEnvMove) * (1.0f * TIME);
 
     // 
@@ -384,7 +386,7 @@ void cMossBackground::__MoveOwn()
 void cMossBackground::__UpdateOwn()
 {
     // 
-    if(m_bEnableHeadlight) m_Headlight.UpdateDefault(0u);
+    if(m_Headlight.GetAlpha()) m_Headlight.UpdateDefault(0u);
 }
 
 

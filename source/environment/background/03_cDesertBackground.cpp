@@ -422,7 +422,7 @@ void cDesertBackground::__MoveOwn()
             // 
             if(fEnvFlyOffset * OUTDOOR_DETAIL < m_vGroundPos.y) m_vGroundPos.y -= I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL;
         
-            const coreFloat fOffest = 12.0f * OUTDOOR_DETAIL;
+            const coreFloat fOffest = 14.0f * OUTDOOR_DETAIL;
             
             // 
             const coreVector2 vPrevGroundPos = m_vGroundPos;
@@ -478,12 +478,12 @@ void cDesertBackground::__CreateTrail(const coreUintW iIndex, const coreVector3 
 
             // 
             const coreVector3 vNewHit      = LERP(vOldHit, vRelIntersection, fMin*RCP(fLen));
-            const coreVector2 vOldOnScreen = g_pForeground->Project2D(vOldHit);
-            const coreVector2 vNewOnScreen = g_pForeground->Project2D(vNewHit);
+            //const coreVector2 vOldOnScreen = g_pForeground->Project2D(vOldHit);
+            //const coreVector2 vNewOnScreen = g_pForeground->Project2D(vNewHit);
 
             // 
-            if(((ABS(vOldOnScreen.x) < 0.65f) && (ABS(vOldOnScreen.y) < 0.65f)) ||    
-               ((ABS(vNewOnScreen.x) < 0.65f) && (ABS(vNewOnScreen.y) < 0.65f)))     
+           // if(((ABS(vOldOnScreen.x) < 0.65f) && (ABS(vOldOnScreen.y) < 0.65f)) ||    
+           //    ((ABS(vNewOnScreen.x) < 0.65f) && (ABS(vNewOnScreen.y) < 0.65f)))     
             {
                 // 
                 const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;

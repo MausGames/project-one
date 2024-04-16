@@ -32,14 +32,12 @@
 // TODO 4: remove direct access with .List() or Raw containers in all missions (change to Getters)
 // TODO 4: change fangs back from cLodObject to coreObject3D, if lod not required (other objects as well ? (low == high))
 // TODO 3: hail should only use one batchlist, both can be merged
-// TODO 3: [MF] cMission::Close() sollte auch nach dem finalen/secret boss aufgerufen werden (mission und/oder segment ?)
 // TODO 3: manual/tutorial might react strange on inverted and toggled firing mode, because iActionHold is inspected
-// TODO 1: [MF] wenn P1 oder Eigengrau besiegt wird, beim ersten mal kommen immer credits, danach kommen keine bei single segment und single mission, aber immer bei arcade
-// TODO 1: [MF] handle Ater mission, P1, Eigengrau (menu, flow)
 // TODO 1: [MF] add 3 different pearl-collect-pitch tracks (wave, boss, p1) and reset state properly
 // TODO 3: flash-teleportation (mission, boss, p1) should be by the player doing the most damage, not the last attacker
 // TODO 4: there are multiple "Aim" objects (mission + boss)
 // TODO 2: STAGE_GET_UINT64 and STAGE_GET_UINT64_ARRAY hat falsches alignment (undefined behaviour) (+ reorder iLineTouch)
+// TODO 3: also wrap all object-iterations in g_pGame->IsTask()
 
 
 // ****************************************************************
@@ -182,8 +180,9 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN(...)                        if([this]() {static constexpr coreUint8 A[] = __VA_ARGS__; return cMission::_TakeRange(m_iTakeFrom, m_iTakeTo, A, ARRAY_SIZE(A));}()) m_anStage.emplace(__LINE__, [this]()
+#define STAGE_MAIN(...)                        if([this]() {static constexpr coreUint8 A[] = __VA_ARGS__; return cMission::_TakeRange(m_iTakeFrom, m_iTakeTo, A, ARRAY_SIZE(A));}()) this->_AddStage(__LINE__, [this]()
 #define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); m_fStageSubTime = 0.0f; m_fStageSubTimeBefore = 0.0f; return true;}())
+#define STAGE_PRE()                            []()
 
 #define STAGE_FINISH_NOW                       {this->SkipStage();}
 #define STAGE_FINISH_PLAY                      {if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW}
@@ -208,17 +207,17 @@
 #define STAGE_ADD_PATH(n)                      coreSpline2* const OUTPUT n = this->_AddPath    (__LINE__,      [&](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 cEnemySquad* const OUTPUT n = this->_AddSquad<t>(__LINE__, (c), [&](cEnemySquad* OUTPUT n)
 
-#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)
-#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)
-#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)
+#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_THIS                              this
 
-#define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)
-#define STAGE_FOREACH_PLAYER_ALL(e,i)          g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)
-#define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)
-#define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_PLAYER_ALL(e,i)          g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 
 #define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ALIGNED_DELETE(m_piData) STATIC_ASSERT((c) <= 0xFFu) m_iDataSize = (c); m_piData = ALIGNED_NEW(coreUint32, m_iDataSize, ALIGNMENT_CACHE); std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
 #define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
@@ -316,6 +315,7 @@ protected:
     coreUintW m_iCurBossIndex;                              // index of the active boss (or error-value)
     coreUintW m_iCurWaveIndex;                              // 
     coreUintW m_iCurSegmentIndex;                           // 
+    coreUintW m_iLastSegmentIndex;                          // 
 
     coreMap<coreUint16, std::function<void()>> m_anStage;   // 
     coreMap<coreUint16, coreSpline2*>          m_apPath;    // 
@@ -419,18 +419,19 @@ public:
     inline void ResetCollEnemyBullet () {m_nCollEnemyBullet  = NULL;}
 
     // access mission objects
-    inline cBoss*           GetBoss           (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
-    inline cBoss*           GetCurBoss        ()const                       {return m_pCurBoss;}
-    inline const coreUintW& GetCurBossIndex   ()const                       {return m_iCurBossIndex;}
-    inline const coreUintW& GetCurWaveIndex   ()const                       {return m_iCurWaveIndex;}
-    inline const coreUintW& GetCurSegmentIndex()const                       {return m_iCurSegmentIndex;}
-    inline cEnemySquad*     GetEnemySquad     (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
-    inline const coreUint8& GetStageSub       ()const                       {return m_iStageSub;}
-    inline const coreFloat* GetMedalGoal      ()const                       {return m_pfMedalGoal;}
-    inline const coreUint8& GetRecordBroken   ()const                       {return m_iRecordBroken;}
-    inline const coreUint8& GetTakeFrom       ()const                       {return m_iTakeFrom;}
-    inline const coreUint8& GetTakeTo         ()const                       {return m_iTakeTo;}
-    inline const coreBool&  GetDelay          ()const                       {return m_bDelay;}
+    inline cBoss*           GetBoss            (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
+    inline cBoss*           GetCurBoss         ()const                       {return m_pCurBoss;}
+    inline const coreUintW& GetCurBossIndex    ()const                       {return m_iCurBossIndex;}
+    inline const coreUintW& GetCurWaveIndex    ()const                       {return m_iCurWaveIndex;}
+    inline const coreUintW& GetCurSegmentIndex ()const                       {return m_iCurSegmentIndex;}
+    inline const coreUintW& GetLastSegmentIndex()const                       {return m_iLastSegmentIndex;}
+    inline cEnemySquad*     GetEnemySquad      (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
+    inline const coreUint8& GetStageSub        ()const                       {return m_iStageSub;}
+    inline const coreFloat* GetMedalGoal       ()const                       {return m_pfMedalGoal;}
+    inline const coreUint8& GetRecordBroken    ()const                       {return m_iRecordBroken;}
+    inline const coreUint8& GetTakeFrom        ()const                       {return m_iTakeFrom;}
+    inline const coreUint8& GetTakeTo          ()const                       {return m_iTakeTo;}
+    inline const coreBool&  GetDelay           ()const                       {return m_bDelay;}
 
     // get object properties
     virtual const coreChar* GetMusicName()const {return "";}
@@ -438,7 +439,8 @@ public:
 
 protected:
     // 
-    //template <typename F> void _AddStage(const coreUint16 iCodeLine, F&& nInitFunc);   // []()  -> void
+    template <typename F, typename G> FORCE_INLINE void _AddStage(const coreUint16 iCodeLine, F&& nBodyFunc, G&& nPreFunc);   // []() -> void, []() -> void
+    template <typename F>             FORCE_INLINE void _AddStage(const coreUint16 iCodeLine, F&& nBodyFunc);                 // []() -> void
 
     // 
     template             <typename F> RETURN_RESTRICT coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
@@ -501,6 +503,7 @@ private:
     const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
     coreVector2   m_avBarrierPos  [VIRIDO_BARRIERS];        // 
     coreVector2   m_avBarrierDir  [VIRIDO_BARRIERS];        // 
+    coreFloat     m_fBarrierRange;                          // 
     coreBool      m_bBarrierSlow;                           // 
     coreBool      m_bBarrierClamp;                          // 
     coreBool      m_bBarrierReflect;                        // 
@@ -530,6 +533,7 @@ private:
     coreObject3D  m_aBeanRaw[VIRIDO_BEANS_RAWS];            // 
 
     cCustomEnemy m_Globe;                                   // 
+    coreObject3D m_GlobeWave;                               // 
 
     coreObject3D m_Target;                                  // 
     coreObject3D m_aTargetWave[2];                          // 
@@ -583,6 +587,10 @@ public:
     void DisableBean(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableGlobe ();
+    void DisableGlobe(const coreBool bAnimated);
+
+    // 
     void EnableTarget ();
     void DisableTarget(const coreBool bAnimated);
 
@@ -596,9 +604,10 @@ public:
 
     // 
     void        SetBarrierScale  (const coreUintW iIndex, const coreFloat fScale);
-    inline void SetBarrierSlow   (const coreBool bSlow)    {m_bBarrierSlow    = bSlow;}
-    inline void SetBarrierClamp  (const coreBool bClamp)   {m_bBarrierClamp   = bClamp;}
-    inline void SetBarrierReflect(const coreBool bReflect) {m_bBarrierReflect = bReflect;}
+    inline void SetBarrierRange  (const coreFloat fRange)   {m_fBarrierRange   = fRange;}
+    inline void SetBarrierSlow   (const coreBool  bSlow)    {m_bBarrierSlow    = bSlow;}
+    inline void SetBarrierClamp  (const coreBool  bClamp)   {m_bBarrierClamp   = bClamp;}
+    inline void SetBarrierReflect(const coreBool  bReflect) {m_bBarrierReflect = bReflect;}
 
     // 
     inline void SetLaserIgnore(const coreUint8 iIgnore) {m_iLaserIgnore = iIgnore;}
@@ -1117,6 +1126,8 @@ private:
     coreFlow      m_afShineTime[GELU_SHINES];        // 
     coreUint16    m_iShineActive;                    // 
 
+    cCustomEnemy m_Surfer;                           // 
+
     coreVector2 m_avOldPos[GELU_POSITIONS];          // 
     coreUint32  m_iTouchState;                       // 
 
@@ -1486,7 +1497,8 @@ private:
     cTurf    m_Turf;                // 
     coreBool m_bTurfState;          // 
 
-    coreBool m_Secret;              // 
+    coreBool  m_bSecret;            // 
+    coreUint8 m_iCredits;           // 
 
 
 public:
@@ -1501,7 +1513,10 @@ public:
     void LoadInnerMission   (const coreInt32 iID);
 
     // 
-    inline void LaunchSecret() {m_Secret = true;}
+    void TransformPlayers();
+
+    // 
+    inline void LaunchSecret() {m_bSecret = true;}
 
     // 
     inline RETURN_NONNULL cMission* GetInnerMission()const {ASSERT(m_pInnerMission) return m_pInnerMission;}
@@ -1658,11 +1673,20 @@ private:
 
 // ****************************************************************
 // 
-//template <typename F> void cMission::_AddStage(const coreUint16 iCodeLine, F&& nInitFunc)
-//{
-//    // 
-//    m_anStage.emplace(iCodeLine, nInitFunc);
-//}
+template <typename F, typename G> FORCE_INLINE void cMission::_AddStage(const coreUint16 iCodeLine, F&& nBodyFunc, G&& nPreFunc)
+{
+    // 
+    nPreFunc();
+
+    // 
+    m_anStage.emplace(iCodeLine, nBodyFunc);
+}
+
+template <typename F> FORCE_INLINE void cMission::_AddStage(const coreUint16 iCodeLine, F&& nBodyFunc)
+{
+    // 
+    m_anStage.emplace(iCodeLine, nBodyFunc);
+}
 
 
 // ****************************************************************

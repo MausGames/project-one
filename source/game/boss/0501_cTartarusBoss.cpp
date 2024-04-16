@@ -34,6 +34,15 @@ cTartarusBoss::cTartarusBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cTartarusBoss::~cTartarusBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cTartarusBoss::__MoveOwn()
 {

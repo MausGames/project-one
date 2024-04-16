@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_DISTORTION_H_
 #define _P1_GUARD_DISTORTION_H_
 
-// TODO 1: [MF] when resetting resource-manager, while distortion is active during pause, the whole screen is shifted
-
 
 // ****************************************************************
 // distortion definitions

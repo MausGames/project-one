@@ -20,7 +20,6 @@
 // TODO 1: completely remove PlayerSide aiming (for coop)
 // TODO 3: normale gruppen-gegner mit TOP haben doppelte outline (einmal im batch, und einmal durch TOP)
 // TODO 3: warrior model eiert etwas beim drehen um die Z-achse (siehe secret enemies bei mimic-wave)
-// TODO 2: [MF] preload enemies (and bullets? + player-bullets) used in specific stage, before entering stage for the first time (same for bullets, maybe add to stage-specification) -> change m_anStage.emplace into a function receiving enemy and bullet list to immediately prefetch
 
 
 // ****************************************************************
@@ -77,7 +76,7 @@ protected:
     coreUint8 m_iLastAttacker;     // 
     coreBool  m_bWasDamaged;       // 
     coreUint16 m_iScore;
-    coreInt16  m_iExtraDamage;
+    coreInt8  m_iExtraDamage;
     coreInt32 m_iDamageForwarded;   // 
 
     coreSet<cEnemy*> m_apMember;   // 
@@ -534,7 +533,7 @@ public:
     ASSIGN_ID(9, "UFO")
 
     // get object properties
-    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_02;}
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_06;}
 
 
 private:
@@ -555,7 +554,7 @@ public:
     ASSIGN_ID(10, "Core")
 
     // get object properties
-    inline eSoundEffect GetExplosionSound()const final {return SOUND_PLACEHOLDER;}
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_06;}
 };
 
 

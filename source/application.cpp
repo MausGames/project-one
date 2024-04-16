@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                    = "0.2.2";
+const coreChar* const CoreApp::Settings::Version                    = "0.3.0";
 const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement             = true;
@@ -308,6 +308,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_xboxone.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_xboxone.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_keyboard.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_keyboard.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_arrow.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_arrow.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
     Core::Manager::Resource->Load<coreTexture>("menu_badge.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_badge.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_cursor.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_cursor.png");
@@ -561,6 +562,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("badge.wav",                CORE_RESOURCE_UPDATE_AUTO, "data/sounds/badge.wav");
     Core::Manager::Resource->Load<coreSound>("bullet_hit.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
     Core::Manager::Resource->Load<coreSound>("bullet_reflect.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_reflect.wav");
+    Core::Manager::Resource->Load<coreSound>("bullet_vanish.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_vanish.wav");
     Core::Manager::Resource->Load<coreSound>("continue_tick.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_tick.wav");
     Core::Manager::Resource->Load<coreSound>("continue_accept.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_accept.wav");
     Core::Manager::Resource->Load<coreSound>("effect_beep.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_beep.wav");
@@ -576,7 +578,11 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("effect_nightmare.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_nightmare.wav");
     Core::Manager::Resource->Load<coreSound>("effect_pearl.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_pearl.wav");
     Core::Manager::Resource->Load<coreSound>("effect_shake.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_shake.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_shake_2.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_shake_2.wav");
     Core::Manager::Resource->Load<coreSound>("effect_success.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_success.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_swipe.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_swipe.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_swipe_2.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_swipe_2.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_swipe_3.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_swipe_3.wav");
     Core::Manager::Resource->Load<coreSound>("effect_tank.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_tank.wav");
     Core::Manager::Resource->Load<coreSound>("effect_vacuum.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_vacuum.wav");
     Core::Manager::Resource->Load<coreSound>("effect_woosh.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_woosh.wav");
@@ -615,7 +621,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("menu_sub_out.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/menu_sub_out.wav");
     Core::Manager::Resource->Load<coreSound>("menu_switch_disabled.wav", CORE_RESOURCE_UPDATE_AUTO, "data/sounds/menu_switch_disabled.wav");
     Core::Manager::Resource->Load<coreSound>("menu_switch_enabled.wav",  CORE_RESOURCE_UPDATE_AUTO, "data/sounds/menu_switch_enabled.wav");
-    Core::Manager::Resource->Load<coreSound>("player_cancel.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_cancel.wav");
     Core::Manager::Resource->Load<coreSound>("player_explosion.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_explosion.wav");
     Core::Manager::Resource->Load<coreSound>("player_feel.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_feel.wav");
     Core::Manager::Resource->Load<coreSound>("player_interrupt.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/player_interrupt.wav");

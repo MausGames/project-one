@@ -328,7 +328,7 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     // 
     for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
     {
-        pHeader->oProgress.aiAdvance[i] = CLAMP(pHeader->oProgress.aiAdvance[i], 0u, SAVE_SEGMENTS);
+        pHeader->oProgress.aiAdvance[i] = CLAMP(pHeader->oProgress.aiAdvance[i], 0u, SAVE_SEGMENTS+1u);
     }
     for(coreUintW i = 0u; i < SAVE_TYPES; ++i)
     {

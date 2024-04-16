@@ -34,6 +34,15 @@ cNagualBoss::cNagualBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cNagualBoss::~cNagualBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cNagualBoss::__MoveOwn()
 {

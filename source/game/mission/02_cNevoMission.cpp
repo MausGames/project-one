@@ -327,6 +327,12 @@ cNevoMission::~cNevoMission()
     this->DisableTrend    (false);
     this->DisableContainer(false);
     this->DisableRanges   (false);
+
+    if(g_bDemoVersion)
+    {
+        // 
+        if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
+    }
 }
 
 
@@ -1287,6 +1293,9 @@ void cNevoMission::__MoveOwnAfter()
 
             // 
             pBullet->Reflect(pContainer, vIntersection.xy());
+
+            // 
+            g_pGame->PlayReflectSound(vIntersection);
         });
     }
 
@@ -1373,7 +1382,7 @@ void cNevoMission::__MoveOwnAfter()
 
             pBulletPlayer->Deactivate(true);
 
-            g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLACEHOLDER);
+            g_pGame->PlayVanishSound(vIntersection);
         });
     }
 }

@@ -9,8 +9,7 @@
 #include "main.h"
 
 // TODO 1: hard mode: x3 gegner und x3 attacks (= x9)
-// TODO 1: [MF] MAIN: task-check, badges, sound
-// TODO 1: [MF] add some gimmick, as this part can become boring for advanced players: https://youtu.be/RENI2gk0ZJA?t=567    badges     update stage 3 (not enough enemies), 4 (too short), 5 (too slow/boring)
+// TODO 1: hard mode: helfer kommen in den wellen vor und greifen mit an
 
 
 // ****************************************************************
@@ -76,7 +75,10 @@ void cIntroMission::__SetupOwn()
         else
         {
             g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-            g_pEnvironment->SetTargetSpeedNow(4.0f);
+
+            g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+            g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+            g_pEnvironment->SetTargetSpeedNow    (4.0f);
 
             g_pGame->StartIntro();
 
@@ -105,7 +107,7 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // wait for play
-    STAGE_MAIN({TAKE_ALWAYS})
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_PLAY
     });
@@ -114,8 +116,8 @@ void cIntroMission::__SetupOwn()
     // simple without attacks 1
     // teaches: moving (general), shooting (general, sustained), combo, enemies from every side, enemies fly infinite (#1), segment structure, sub-stage structure
     // - 5: from different side than previous group, to not fly into players
+    // TASK: hit all additional enemies
     // ACHIEVEMENT: destroy all enemies without pressing a single button
-    // TODO 1: [MF] badge
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -143,13 +145,23 @@ void cIntroMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(1u + GAME_PLAYERS * 2u)
+        STAGE_ADD_SQUAD(pSquad2, cCinderEnemy, 4u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
+            });
+        });
+
+        STAGE_GET_START(2u + GAME_PLAYERS * 2u)
+            STAGE_GET_UINT       (iExtraState)
             STAGE_GET_UINT       (iAnyButton)
             STAGE_GET_UINT_ARRAY (aiInputState, GAME_PLAYERS)
             STAGE_GET_FLOAT_ARRAY(afInputDelay, GAME_PLAYERS)
         STAGE_GET_END
 
-        if(STAGE_CLEARED)
+        if(pSquad1->IsFinished())
         {
                  if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
             else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  6u, 11u)
@@ -157,9 +169,19 @@ void cIntroMission::__SetupOwn()
             else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 18u, 23u)
             else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 24u, 29u)
             else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 30u, 35u)
-            else
+            else if(STAGE_SUB(7u))
             {
+                pSquad2->ClearEnemies(true);
+
                 if(!iAnyButton) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+            }
+
+            if(!m_bFirstPlay && g_pGame->IsTask())
+            {
+                     if(m_iStageSub == 2u) STAGE_RESURRECT(pSquad2, 0u, 0u)
+                else if(m_iStageSub == 3u) STAGE_RESURRECT(pSquad2, 1u, 1u)
+                else if(m_iStageSub == 4u) STAGE_RESURRECT(pSquad2, 2u, 2u)
+                else if(m_iStageSub == 5u) STAGE_RESURRECT(pSquad2, 3u, 3u)
             }
         }
 
@@ -216,7 +238,55 @@ void cIntroMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE(0u, "0-1", {7.0f, 10.0f, 14.0f, 17.0f, 34.0f})
+        if(g_pGame->IsTask())
+        {
+            STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
+            {
+                constexpr coreFloat afOffset[] = {0.0f, 0.0f, 0.0f, 0.0f};
+                constexpr coreUint8 aiStep  [] = {3u,   1u,   3u,   1u};
+                ASSERT(i < ARRAY_SIZE(afOffset))
+                ASSERT(i < ARRAY_SIZE(aiStep))
+
+                const coreFloat fTime   = pEnemy->GetLifeTime();
+                const coreFloat fHeight = LERP(1.3f, 0.9f, SIN(fTime * (1.0f*PI)));
+
+                pEnemy->SetPosition(coreVector3(afOffset[i], fHeight, 0.0f) * FOREGROUND_AREA3);
+
+                pEnemy->ToAxis(StepRotated90(aiStep[i]));
+
+                if(pEnemy->ReachedDeath())
+                {
+                    if(++iExtraState >= pSquad2->GetNumEnemies())
+                    {
+                        STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                    }
+                    else
+                    {
+                        g_pGame->GetCombatText()->DrawProgress(iExtraState, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iExtraState, pSquad2->GetNumEnemies()), SOUND_ITEM_COLLECT);
+                    }
+                }
+
+                if(fTime >= 1.0f)
+                {
+                    pEnemy->Kill(false);
+                }
+            });
+        }
+
+        STAGE_WAVE(0u, "0-1", {4.0f, 6.0f + 5.0f, 8.0f + 5.0f, 10.0f + 5.0f, 20.0f + 5.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cStarEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -225,6 +295,7 @@ void cIntroMission::__SetupOwn()
     // [deprecated] - 2: enemies cannot be killed in one run by shooting upwards, so they may fly another run
     // seiten-gruppen sollten mit delay anfangen, damit man zeit hat das badge zu verstehen
     // angriffs-gruppe muss auf der seite anfangen, damit der spieler nicht zu sehr vom ersten angriff des spiels überrascht wird
+    // TASK: destroy enemies up and down
     // ACHIEVEMENT: destroy only one enemy per turn
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
@@ -322,6 +393,16 @@ void cIntroMission::__SetupOwn()
                 else if(i < 24u) pEnemy->Rotate90 ();
                 else if(i < 36u) pEnemy->Rotate180();
                 else if(i < 48u) pEnemy->Rotate180()->InvertX();
+
+                if(!m_bFirstPlay && pEnemy->ReachedDeath() && (!g_pGame->IsEasy() || ((i % 4u) < 2u)))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = pEnemy->AimAtPlayerDual(pEnemy->LastAttackerIndex()).Normalized();
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+
+                    g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+                }
             }
             else
             {
@@ -346,7 +427,7 @@ void cIntroMission::__SetupOwn()
                 }
             }
 
-            if((i < 24u) && pEnemy->ReachedDeath() && (m_iStageSub == 2u))
+            if(g_pGame->IsTask() && (i < 24u) && pEnemy->ReachedDeath() && (m_iStageSub == 2u))
             {
                 STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
             }
@@ -368,6 +449,7 @@ void cIntroMission::__SetupOwn()
         if(STAGE_CLEARED)
         {
             coreBool bBadge = true;
+
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
                 if(aiLastPack[i] == 0xFFu) bBadge = false;
@@ -376,7 +458,18 @@ void cIntroMission::__SetupOwn()
             if(bBadge) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
         }
 
-        STAGE_WAVE(1u, "0-2", {7.0f, 10.0f, 14.0f, 17.0f, 34.0f})
+        if(STAGE_BEGINNING)
+        {
+            g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,1.0f).Normalized(), 10.0f);
+        }
+
+        STAGE_WAVE(1u, "0-2", {8.0f, 12.0f + 5.0f, 16.0f + 5.0f, 20.0f + 5.0f, 40.0f + 5.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cConeBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cFlipBullet>();
     });
 
     // ################################################################
@@ -392,13 +485,29 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(1.0f,1.0f).Normalized());
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // simple with attacks
     // teaches: dodging attack (#2), invincibility, damaging touch, badge (#1)
     // geschwindigkeit des charges sollte am anfang hoch sein, damit der spieler (nahezu) unmöglich ausweichen kann
     // chargende gegner aus der ecke werden nicht so wahrscheinlich schon beim spawnen getötet, zusätzlich sind sie eine kurze zeit immun
     // erster chargender gegner kommt von dort wo der spieler unwahrscheinlicher ist
+    // TASK: collect all items
     // ACHIEVEMENT: merge 4 enemies
-    // TODO 1: [MF] badge
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -415,6 +524,8 @@ void cIntroMission::__SetupOwn()
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
                 pEnemy->Configure(4, 0u, cIntroMission::__GetEnemyColor(i));
+
+                if(i >= 24u) pEnemy->AddStatus(ENEMY_STATUS_TOP);
             });
 
             const auto nInitFunc = [&](const coreUintW iIndex, const coreVector2 vPos, const coreVector2 vDir)
@@ -433,17 +544,40 @@ void cIntroMission::__SetupOwn()
             nInitFunc(31u, coreVector2(-1.2f,-1.2f), coreVector2( 1.0f, 1.0f).Normalized());
         });
 
-        if(STAGE_CLEARED)
+        STAGE_ADD_SQUAD(pSquad2, cFreezerEnemy, 8u)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
-            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  4u,  7u)
-            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1,  8u, 11u)
-            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 12u, 15u)
-            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 16u, 23u)
-            else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 24u, 24u)
-            else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 25u, 25u)
-            else if(STAGE_SUB(8u)) STAGE_RESURRECT(pSquad1, 26u, 27u)
-            else if(STAGE_SUB(9u)) STAGE_RESURRECT(pSquad1, 28u, 31u)
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
+            });
+        });
+
+        STAGE_GET_START(1u)
+            STAGE_GET_UINT(iCardCount)
+        STAGE_GET_END
+
+        if(pSquad1->IsFinished())
+        {
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  8u, 11u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 12u, 15u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 16u, 23u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 24u, 24u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 25u, 25u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 26u, 27u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 28u, 31u)
+            else if(STAGE_SUB(10u))
+            {
+                pSquad2->ClearEnemies(true);
+            }
+
+            if(!m_bFirstPlay && g_pGame->IsTask())
+            {
+                     if(m_iStageSub == 1u) STAGE_RESURRECT(pSquad2, 0u, 3u)
+                else if(m_iStageSub == 2u) STAGE_RESURRECT(pSquad2, 4u, 7u)
+            }
         }
 
         coreVector2 vSharedPos = coreVector2(0.0f,0.0f);
@@ -480,7 +614,7 @@ void cIntroMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = pEnemy->AimAtPlayerDual((i / 4u) % 2u).Normalized();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.6f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.6f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
 
                     g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                 }
@@ -491,18 +625,30 @@ void cIntroMission::__SetupOwn()
 
                 if(STAGE_SUBTIME_AFTER(fDelay))
                 {
+                    STAGE_LIFETIME(pEnemy, 1.2f, 1.2f * fDelay)
+
                     const coreVector2 vTarget = pEnemy->NearestPlayerDual(i % 2u)->GetPosition().xy();
                     const coreFloat   fTime   = BLENDB(MIN1(pEnemy->GetLifeTime() - fDelay));
 
                     pEnemy->DefaultMoveTarget(vTarget, LERP(120.0f, 50.0f, fTime), LERP(10.0f, 2.0f, fTime));
 
-                    if(fTime < 0.5f)
+                    if(fTime < 0.3f)
                     {
                         pEnemy->AddStatus(ENEMY_STATUS_GHOST_BULLET);
                     }
                     else
                     {
                         pEnemy->RemoveStatus(ENEMY_STATUS_GHOST_BULLET);
+                    }
+
+                    if(!m_bFirstPlay && STAGE_TICK_LIFETIME(10.0f, 0.0f) && (!g_pGame->IsEasy() || (s_iTick < 4u)))
+                    {
+                        const coreVector2 vPos = pEnemy->GetPosition ().xy();
+                        const coreVector2 vDir = pEnemy->GetDirection().xy();
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
+
+                        g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                     }
                 }
             }
@@ -521,18 +667,93 @@ void cIntroMission::__SetupOwn()
             if(!g_pForeground->IsVisiblePoint(vCurPos))        bShared = false;
         });
 
+        if(!m_bFirstPlay && g_pGame->IsTask())
+        {
+            STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
+            {
+                STAGE_LIFETIME(pEnemy, 1.2f, 0.25f * I_TO_F(i % 4u))
+
+                const coreVector2 vFactor = coreVector2(((i % 8u) < 4u) ? 1.0f : -1.0f, 1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.1f);
+
+                if(pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime))
+                {
+                    pEnemy->Kill(false);
+                }
+
+                if(pEnemy->ReachedDeath())
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = coreVector2(0.0f,1.0f);
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cCardBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.7f)->AddStatus(BULLET_STATUS_GHOST);
+                }
+            });
+
+            g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cCardBullet>([&](cCardBullet* OUTPUT pBullet)
+            {
+                STAGE_FOREACH_PLAYER(pPlayer, i)
+                {
+                    const coreVector2 vDiff = pBullet->GetPosition().xy() - pPlayer->GetPosition().xy();
+                    if(vDiff.LengthSq() < POW2(7.0f))
+                    {
+                        pBullet->Deactivate(true);
+
+                        if(++iCardCount >= pSquad2->GetNumEnemies())
+                        {
+                            STAGE_BADGE(0u, BADGE_EASY, pBullet->GetPosition())
+                        }
+                        else
+                        {
+                            g_pGame->GetCombatText()->DrawCountdown(iCardCount, pSquad2->GetNumEnemies(), pBullet->GetPosition());
+                            g_pSpecialEffects->PlaySound(pBullet->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCardCount, pSquad2->GetNumEnemies()), SOUND_ITEM_COLLECT);
+                        }
+                    }
+                });
+            });
+        }
+
         if(bShared && (pSquad1->GetNumEnemiesAlive() == 4u))
         {
             STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(vSharedPos, 0.0f))
         }
 
-        STAGE_WAVE(2u, "0-3", {13.0f, 19.0f, 26.0f, 32.0f, 64.0f})
+        if(STAGE_BEGINNING)
+        {
+            g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,0.0f), 10.0f);
+        }
+
+        STAGE_WAVE(2u, "0-3", {11.0f, 16.0f + 5.0f, 22.0f + 5.0f, 27.0f + 5.0f, 54.0f + 5.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cFreezerEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cSpearBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cTriangleBullet>();
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(1.0f,0.0f));
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
     // simple with heavy attacks
     // teaches: enemy health, causing damage, moving slow, small hitbox, badge (#2)
     // gegner unten sollten möglichst nah am rand sein, damit der spieler sich drehen muss
+    // TASK: try to destroy the impaled enemy
     // ACHIEVEMENT: only do damage during odd seconds
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
@@ -580,6 +801,16 @@ void cIntroMission::__SetupOwn()
                  if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1, 0u, 0u)
             else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 1u, 1u)
             else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 2u, 3u)
+            else if(STAGE_SUB(4u))
+            {
+                g_pGame->GetBulletManagerEnemy()->ResetOrder();
+            }
+        }
+
+        if(STAGE_BEGINNING)
+        {
+            constexpr coreUint8 aiNewOrder[] = {cWaveBullet::ID, cViewBullet::ID};
+            g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
         }
 
         if(m_iStageSub == 1u)
@@ -625,15 +856,36 @@ void cIntroMission::__SetupOwn()
                 m_Intro.SetPosition (vBossPos);
                 m_Intro.SetDirection(vBossDir);
 
-                const coreFloat fPercent = pEnemy->GetCurHealthPct();
-
-                if(fPercent <= 0.0f)
+                if(g_pGame->IsTask())
                 {
-                    pEnemy->AddStatus(ENEMY_STATUS_GHOST_BULLET);
+                    const coreFloat fPercent = pEnemy->GetCurHealthPct();
 
-                    STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                    if(fPercent <= 0.0f)
+                    {
+                        pEnemy->AddStatus(ENEMY_STATUS_GHOST_BULLET);
+
+                        STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                    }
+                    else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - fPercent) * 100.0f)), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
                 }
-                else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - fPercent) * 100.0f)), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+
+                if(!m_bFirstPlay && STAGE_TICK_LIFETIME(g_pGame->IsEasy() ? 1.5f : 3.0f, 0.0f))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+
+                    for(coreUintW j = 50u; j--; )
+                    {
+                        if(((j / 2u) % 5u) != ((s_iTick * 3u) % 5u)) continue;
+
+                        const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) / 50.0f * (1.0f*PI));
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.3f, pEnemy, vPos,  vDir)->ChangeSize(1.8f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.3f, pEnemy, vPos, -vDir)->ChangeSize(1.8f);
+                    }
+
+                    g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+                }
             }
             else
             {
@@ -680,12 +932,40 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        if(STAGE_CLEARED)
+        if(!bPostpone && STAGE_CLEARED)
         {
             if(!HAS_BIT(iTimeState, 2u)) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
         }
 
-        if(!bPostpone) STAGE_WAVE(3u, "0-4", {6.0f, 9.0f, 12.0f, 15.0f, 30.0f})
+        if(STAGE_BEGINNING)
+        {
+            g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,-1.0f).Normalized(), 10.0f);
+        }
+
+        if(!bPostpone) STAGE_WAVE(3u, "0-4", {7.0f, 10.0f + 5.0f, 14.0f + 5.0f, 17.0f + 5.0f, 34.0f + 5.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cWaveBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cViewBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cCardBullet>();
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(1.0f,-1.0f).Normalized());
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -697,6 +977,7 @@ void cIntroMission::__SetupOwn()
     // side waves and side enemies need to be alternating, also in relation to hole-positions
     // delay between full waves needs to be adjusted to show alle effects even in the worst-case position of the player
     // last enemy shows, that not all enemies can be killed in one go, under some conditions
+    // TASK: move through all the bullet walls
     // ACHIEVEMENT: neither cause nor take any damage
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
@@ -734,8 +1015,10 @@ void cIntroMission::__SetupOwn()
             else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 7u,  7u)
             else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 8u,  8u)
             else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 9u, 10u)
-            else
+            else if(STAGE_SUB(11u))
             {
+                g_pGame->GetBulletManagerEnemy()->ResetOrder();
+
                 if(!iDamageState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
             }
 
@@ -743,6 +1026,12 @@ void cIntroMission::__SetupOwn()
             pSquad1->GetEnemy(4u)->RefreshColor();
             pSquad1->GetEnemy(6u)->SetCurHealthPct(0.1f);
             pSquad1->GetEnemy(6u)->RefreshColor();
+        }
+
+        if(STAGE_BEGINNING)
+        {
+            constexpr coreUint8 aiNewOrder[] = {cQuadBullet::ID, cOrbBullet::ID};
+            g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
         }
 
         const coreFloat fBulletSpeed = g_pGame->IsEasy() ? 0.8f : 1.1f;
@@ -770,21 +1059,29 @@ void cIntroMission::__SetupOwn()
                 }
             }
 
-            g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+            if(g_pGame->IsTask())
             {
-                STAGE_FOREACH_PLAYER(pPlayer, i)
+                g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
                 {
-                    const coreUint32 iDamage = pBullet->GetDamage();
-
-                    if((iDamage < 5u) && (iDamage > iWaveCount) && (pBullet->GetPosition().y < pPlayer->GetPosition().y))
+                    STAGE_FOREACH_PLAYER(pPlayer, i)
                     {
-                        if(++iWaveCount == 4u) STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
-                        else g_pGame->GetCombatText()->DrawProgress(iWaveCount, 4u, pPlayer->GetPosition());
+                        const coreUint32 iDamage = pBullet->GetDamage();
 
-                        g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iWaveCount, 4u), SOUND_ITEM_COLLECT);
-                    }
+                        if((iDamage < 5u) && (iDamage > iWaveCount) && (pBullet->GetPosition().y < pPlayer->GetPosition().y))
+                        {
+                            if(++iWaveCount == 4u)
+                            {
+                                STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
+                            }
+                            else
+                            {
+                                g_pGame->GetCombatText()->DrawProgress(iWaveCount, 4u, pPlayer->GetPosition());
+                                g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iWaveCount, 4u), SOUND_ITEM_COLLECT);
+                            }
+                        }
+                    });
                 });
-            });
+            }
         }
 
         coreBool bPostpone = false;
@@ -836,6 +1133,17 @@ void cIntroMission::__SetupOwn()
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, fSpeed, pEnemy, vPos - vTan, vDir)->ChangeSize(1.9f);
                     }
                 }
+
+                if(!m_bFirstPlay && STAGE_TICK_LIFETIME(8.0f, 0.0f))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = MapToAxis(coreVector2::Direction((I_TO_F((s_iTick * 2u) % 5u) - 2.0f) * 0.2f), pEnemy->GetDirection().xy());
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.5f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
+
+                    g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 10.0f, 1u, COLOR_ENERGY_CYAN);
+                    g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+                }
             }
             else
             {
@@ -867,7 +1175,34 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(4u, "0-5", {17.0f, 25.0f, 34.0f, 42.0f, 84.0f})
+        if(STAGE_BEGINNING)
+        {
+            g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,-1.0f), 10.0f);
+        }
+
+        if(!bPostpone) STAGE_WAVE(4u, "0-5", {19.0f, 28.0f + 5.0f, 38.0f + 5.0f, 47.0f + 5.0f, 94.0f + 5.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMinerEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cOrbBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cQuadBullet>();
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,-1.0f));
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -885,6 +1220,11 @@ void cIntroMission::__SetupOwn()
         });
 
         STAGE_BOSS(m_Intro, {70.0f, 105.0f, 140.0, 175.0f, 350.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->PrefetchBoss();
     });
 
     // ################################################################

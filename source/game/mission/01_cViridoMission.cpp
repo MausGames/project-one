@@ -20,6 +20,7 @@ cViridoMission::cViridoMission()noexcept
 , m_apBarrierOwner  {}
 , m_avBarrierPos    {}
 , m_avBarrierDir    {}
+, m_fBarrierRange   (1.0f)
 , m_bBarrierSlow    (false)
 , m_bBarrierClamp   (true)
 , m_bBarrierReflect (true)
@@ -228,6 +229,14 @@ cViridoMission::cViridoMission()noexcept
     m_Globe.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
 
     // 
+    m_GlobeWave.DefineModel  ("object_tetra_top.md3");
+    m_GlobeWave.DefineTexture(0u, "effect_energy.png");
+    m_GlobeWave.DefineProgram("effect_energy_flat_invert_program");
+    m_GlobeWave.SetColor3    (COLOR_ENERGY_PURPLE * 0.6f);
+    m_GlobeWave.SetTexSize   (coreVector2(1.0f,1.0f) * 0.4f);
+    m_GlobeWave.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     m_Target.DefineModel  ("object_sphere.md3");
     m_Target.DefineTexture(0u, "effect_energy.png");
     m_Target.DefineProgram("effect_energy_flat_invert_program");
@@ -268,9 +277,6 @@ cViridoMission::cViridoMission()noexcept
 cViridoMission::~cViridoMission()
 {
     // 
-    m_Globe.Kill(false);
-
-    // 
     g_pGlow->UnbindList(&m_Ball);
     g_pGlow->UnbindList(&m_BallTrail);
     g_pGlow->UnbindList(&m_Barrier1);
@@ -289,6 +295,7 @@ cViridoMission::~cViridoMission()
     for(coreUintW i = 0u; i < VIRIDO_SHADOWS;  ++i) this->DisableShadow (i, false);
     for(coreUintW i = 0u; i < VIRIDO_HINTS;    ++i) this->DisableHint   (i, false);
     for(coreUintW i = 0u; i < VIRIDO_BEANS;    ++i) this->DisableBean   (i, false);
+    this->DisableGlobe (false);
     this->DisableTarget(false);
 }
 
@@ -614,6 +621,40 @@ void cViridoMission::DisableBean(const coreUintW iIndex, const coreBool bAnimate
 
 // ****************************************************************
 // 
+void cViridoMission::EnableGlobe()
+{
+    WARN_IF(m_GlobeWave.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableGlobe(false);
+
+    // 
+    m_Globe.Resurrect();
+
+    // 
+    m_GlobeWave.SetAlpha   (0.0f);
+    m_GlobeWave.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_GlobeWave);
+}
+
+
+// ****************************************************************
+// 
+void cViridoMission::DisableGlobe(const coreBool bAnimated)
+{
+    if(!m_GlobeWave.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Globe.Kill(false);
+
+    // 
+    m_GlobeWave.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_GlobeWave);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->CreateSplashColor(m_Globe.GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_PURPLE);
+}
+
+
+// ****************************************************************
+// 
 void cViridoMission::EnableTarget()
 {
     // 
@@ -794,6 +835,9 @@ void cViridoMission::__RenderOwnUnder()
     // 
     m_Bean.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Bean);
+
+    // 
+    m_GlobeWave.Render();
 }
 
 
@@ -976,7 +1020,7 @@ void cViridoMission::__MoveOwnAfter()
             // 
             cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, vRayPos, vRayDir, &oBarrier, [&](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount, const coreBool bFirstHit)
             {
-                if(ABS(pfHitDistance[0]) > oBarrier.GetCollisionRange().x) return;
+                if(ABS(pfHitDistance[0]) > oBarrier.GetCollisionRange().x * m_fBarrierRange) return;
 
                 // 
                 const coreVector2 vDiff = pPlayer->GetPosition().xy() - oBarrier.GetPosition().xy();
@@ -1087,16 +1131,13 @@ void cViridoMission::__MoveOwnAfter()
         }
     }
 
-    //if(!SPECIAL_FROZEN)
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
     {
-        // 
-        for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
-        {
-            const coreObject3D& oBarrier = m_aBarrierRaw[i];
+        const coreObject3D& oBarrier = m_aBarrierRaw[i];
 
-            m_avBarrierPos[i] = oBarrier.GetPosition ().xy();
-            m_avBarrierDir[i] = oBarrier.GetDirection().xy();
-        }
+        m_avBarrierPos[i] = oBarrier.GetPosition ().xy();   // old frozen
+        m_avBarrierDir[i] = oBarrier.GetDirection().xy();
     }
 
     // 
@@ -1122,9 +1163,9 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         pWave->SetPosition (pLaser->GetPosition ());
-        pWave->SetSize     (pLaser->GetSize     () * (1.0f + 3.0f * fValue));
+        pWave->SetSize     (pLaser->GetSize     () * LERP(1.0f, 4.0f, fValue));
         pWave->SetDirection(pLaser->GetDirection());
-        pWave->SetAlpha    (1.0f - fValue);
+        pWave->SetAlpha    (1.0f - BLENDH3(fValue));
         pWave->SetTexOffset(pLaser->GetTexOffset());
         
         STATIC_ASSERT(VIRIDO_LASERS <= sizeof(m_iLaserIgnore)*8u)
@@ -1238,16 +1279,13 @@ void cViridoMission::__MoveOwnAfter()
         });
     }
 
-    //if(!SPECIAL_FROZEN)
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
     {
-        // 
-        for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
-        {
-            const coreObject3D* pLaser = (*m_Laser.List())[i];
+        const coreObject3D* pLaser = (*m_Laser.List())[i];
 
-            m_avLaserPos[i] = pLaser->GetPosition ().xy();
-            m_avLaserDir[i] = pLaser->GetDirection().xy();
-        }
+        m_avLaserPos[i] = pLaser->GetPosition ().xy();   // old frozen
+        m_avLaserDir[i] = pLaser->GetDirection().xy();
     }
 
     // 
@@ -1338,8 +1376,19 @@ void cViridoMission::__MoveOwnAfter()
     // 
     if(!m_Globe.HasStatus(ENEMY_STATUS_DEAD))
     {
+        // 
         m_Globe.SetDirection(coreVector3(coreVector2::Direction((4.0f*PI) * m_fAnimation), 0.0f));
         m_Globe.SetTexOffset(coreVector2(0.0f, 0.5f * m_fAnimation));
+        m_Globe.coreObject3D::Move();
+
+        const coreFloat fTime = FRACT(7.0f * m_fAnimation);
+
+        m_GlobeWave.SetPosition (m_Globe.GetPosition ());
+        m_GlobeWave.SetSize     (m_Globe.GetSize     () * LERPB(1.0f, 1.5f, fTime));
+        m_GlobeWave.SetDirection(m_Globe.GetDirection());
+        m_GlobeWave.SetTexOffset(m_Globe.GetTexOffset());
+        m_GlobeWave.SetAlpha    (1.0f - BLENDH3(fTime));
+        m_GlobeWave.Move();
     }
 
     // 
@@ -1450,6 +1499,9 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         pBullet->Reflect(pBall, vIntersection.xy());
+
+        // 
+        g_pGame->PlayReflectSound(vIntersection);
     });
 
     // 

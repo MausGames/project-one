@@ -64,6 +64,18 @@ cNautilusBoss::cNautilusBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cNautilusBoss::~cNautilusBoss()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    this->__DisableBullet(false);
+}
+
+
+// ****************************************************************
 // 
 void cNautilusBoss::__ResurrectOwn()
 {
@@ -87,10 +99,10 @@ void cNautilusBoss::__ResurrectOwn()
 void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pWindscreen->GetInk()->Disable(bAnimated ? NAUTILUS_INK_SPEED : 0.0f);
+    this->__DisableBullet(bAnimated);
 
     // 
-    this->__DisableBullet(bAnimated);
+    g_pWindscreen->GetInk()->Disable(bAnimated ? NAUTILUS_INK_SPEED : 0.0f);
 }
 
 

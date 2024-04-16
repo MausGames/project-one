@@ -100,7 +100,7 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    coreBool m_bBurst;   // 
+    coreUint8 m_iBurst;   // 
     
     coreObject3D m_aMuzzle[2];   //
     coreFlow m_fMuzzleTime;
@@ -260,10 +260,6 @@ private:
 // final weapon class
 class cFinalWeapon final : public cWeapon
 {
-private:
-    coreBool m_bBurst;   // 
-
-
 public:
     cFinalWeapon()noexcept;
 
@@ -278,7 +274,6 @@ public:
 
 private:
     // execute own routines
-    void __ReleaseOwn (const coreUint8 iMode)final;
     void __ShootOwn   ()final;
     void __PrefetchOwn()final;
 };

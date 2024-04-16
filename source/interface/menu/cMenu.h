@@ -45,7 +45,10 @@
 // TODO 1: click-wave when clicking on active button or tab (not for switch-box), what about stage tile ?
 // TODO 4: remove unnecessary tiles, medals, and others related to the missing Ater segments (and possible second bosses everywhere else)
 // TODO 3: check render-reihenfolge (bind-object) in ALLEN menüs und view-boxen
-// TODO 1: [MF] invisible medal and survive bonus in Intro (first) and Ater ? Intro already has it, but maybe not clearly for user
+// TODO 1: show mission summary for Ater before arcade summary on ?
+// TODO 1: show player separation for arcade summary
+// TODO 3: add auto-scroll for armory-segment-switch, for shoulder-buttons and arrow-keys
+// TODO 1: [MF] neue level sollten fragezeichen haben, bis condition wie bei boss??? erfüllt wurde
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
 // NOTE: every object in menu needs outline: weapons, medals, icons
@@ -68,8 +71,9 @@
 #define MENU_GAME_ARMORIES            (6u)
 #define MENU_GAME_FIRSTS              (4u)
 #define MENU_GAME_DEMOS               (5u)
+#define MENU_GAME_ARROWS              (MENU_GAME_SEGMENTS - 1u)
 #define MENU_GAME_ARMORY_MEDALS       (9u + 1u)
-#define MENU_GAME_ARMORY_BADGES       (BADGES - 3u)
+#define MENU_GAME_ARMORY_BADGES       (BADGES - 4u)
 #define MENU_GAME_ARMORY_BADGES_ALL   (MENU_GAME_ARMORY_BADGES * WAVES)
 #define MENU_GAME_ARMORY_HELPERS      (8u)
 #define MENU_GAME_ARMORY_ICONS        (9u)
@@ -437,6 +441,7 @@ private:
     cGuiObject m_aaSegmentBack[MENU_GAME_MISSIONS][MENU_GAME_SEGMENTS];   // 
     cGuiObject m_aaSegmentMedal[MENU_GAME_MISSIONS][MENU_GAME_SEGMENTS];   // 
     cGuiObject m_aaSegmentBadge[MENU_GAME_MISSIONS][MENU_GAME_SEGMENTS][MENU_GAME_ARMORY_BADGES];   // 
+    cGuiObject m_aaSegmentArrow[MENU_GAME_MISSIONS][MENU_GAME_ARROWS];                // 
     cGuiObject m_aSegmentCursor    [2];                           // 
     coreUint8  m_aiSegmentSelection[2];                           // 
     coreFlow   m_fSegmentTime;                                    // 
@@ -481,6 +486,7 @@ private:
     cGuiObject m_aArmoryBadgeWave[MENU_GAME_ARMORY_BADGES_ALL];   // 
     cGuiObject m_aArmoryBadgeBack[MENU_GAME_ARMORY_BADGES];       // 
     cGuiLabel  m_aArmoryBadgeDesc[MENU_GAME_ARMORY_BADGES];       // 
+    cGuiObject m_aArmoryHelperBack;                               // 
     cGuiObject m_aArmoryHelper   [MENU_GAME_ARMORY_HELPERS];      // 
     cGuiObject m_aArmoryHelperWave[MENU_GAME_ARMORY_HELPERS];      //    
     cGuiObject m_aArmoryIcon     [MENU_GAME_ARMORY_ICONS];        // 
@@ -987,6 +993,7 @@ private:
 
 #define MENU_SUMMARY_ENTRIES_SEGMENT (3u)
 #define MENU_SUMMARY_SIDES (2u)
+#define MENU_SUMMARY_BADGES (BADGES - 4u)
 
     cGuiLabel m_aSegmentName [MENU_SUMMARY_ENTRIES_SEGMENT];                       // 
     cGuiLabel m_aaSegmentValue[MENU_SUMMARY_ENTRIES_SEGMENT][MENU_SUMMARY_SIDES];                       // 
@@ -995,6 +1002,9 @@ private:
     cGuiLabel m_aSegmentShift[MENU_SUMMARY_SIDES];                       // 
     
     cGuiObject m_SegmentMedal;
+    
+    cGuiObject m_aSegmentBadge    [MENU_SUMMARY_BADGES];
+    cGuiObject m_aSegmentBadgeWave[MENU_SUMMARY_BADGES];
     
     coreUint8 m_iSelection;
     
@@ -1266,6 +1276,8 @@ private:
     coreUint8 m_iTransitionState;        // 
     coreMenu* m_pTransitionMenu;         // 
     
+    coreFlow m_fVolume;
+    
     coreBool m_bStarted;
 
     static coreVector3 m_vHighlightColor;       // 
@@ -1316,6 +1328,9 @@ public:
     
     inline const coreVector3& GetHighlightColor()const {return m_vHighlightColor;}
     inline const coreVector3& GetButtonColor()const {return m_vButtonColor;}
+    
+    // 
+    coreFloat GetVolume()const;
 
     // 
     static void UpdateLanguageFont();
@@ -1329,7 +1344,7 @@ public:
     static const coreChar* GetSegmentLetters(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 
     // menu helper routines
-    static void UpdateButton        (coreButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow = true);
+    static void UpdateButton        (coreButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow = true, const coreBool bSound = true);
     static void UpdateButton        (coreButton*    OUTPUT pButton, const coreBool bFocused, const coreBool bGrow = true);
     static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor);
     static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused);

@@ -28,6 +28,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_fMusicSpeed         (0.0f)
 , m_fMusicVolume        (1.0f)
 , m_fHitDelay           (0.0f)
+, m_fVanishDelay        (0.0f)
 , m_bDefeatDelay        (false)
 , m_iContinues          ((g_bDemoVersion || !g_pSave->GetHeader().oProgress.bFirstPlay) ? GAME_CONTINUES : 0u)
 , m_iDepthLevel         (0u)
@@ -126,9 +127,9 @@ cGame::~cGame()
     }
     else
     {
-        g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION, 0.5f);
-        g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE,      0.5f);
-        g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED,     0.5f);
+        g_pEnvironment->SetTargetDirectionLerp(ENVIRONMENT_DEFAULT_DIRECTION, 5.0f);
+        g_pEnvironment->SetTargetSideLerp     (ENVIRONMENT_DEFAULT_SIDE,      5.0f);
+        g_pEnvironment->SetTargetSpeedLerp    (ENVIRONMENT_DEFAULT_SPEED,     5.0f);
     }
 
     // 
@@ -467,6 +468,13 @@ void cGame::Render()
             // render high-priority bullet manager
             m_BulletManagerEnemy.Render();
             m_BulletManagerEnemy.RenderAfter();
+            
+            if(m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cRayBullet>())
+            {
+                DEPTH_PUSH
+                m_BulletManagerPlayerTop.Render();
+                m_BulletManagerPlayerTop.RenderAfter();
+            }
 
             // render top objects
             m_EnemyManager.RenderTop();
@@ -505,6 +513,8 @@ void cGame::Move()
     {
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             m_aPlayer[i].MoveFrozen();
+        
+        this->__HandleDefeat();
         return;
     }
 
@@ -562,7 +572,8 @@ void cGame::Move()
     // 
     this->__HandleDefeat();
     
-    m_fHitDelay.UpdateMax(-20.0f, 0.0f);
+    m_fHitDelay   .UpdateMax(-20.0f, 0.0f);
+    m_fVanishDelay.UpdateMax(-20.0f, 0.0f);
     
     //if(HAS_FLAG(m_iStatus, GAME_STATUS_PLAY)) g_pEnvironment->SetTargetSide(m_aPlayer[0].GetPosition().xy() * 0.03f, 10.0f);
 }
@@ -599,7 +610,7 @@ void cGame::MoveAlways()
         if(!m_fMusicFade) g_MusicPlayer.Stop();
     }
 
-    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * (g_pMenu->IsPaused() ? 0.3f : 1.0f) * m_fMusicVolume * MUSIC_VOLUME);
+    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * g_pMenu->GetVolume() * m_fMusicVolume * MUSIC_VOLUME);
 }
 
 
@@ -676,11 +687,8 @@ void cGame::LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom, 
 // 
 void cGame::LoadNextMission()
 {
-    if((m_Options.iKind == GAME_KIND_ALL) || (m_Options.iKind == GAME_KIND_MISSION))
-    {
-        // 
-        m_pCurMission->Close();
-    }
+    // 
+    this->CloseMission();
 
     if((m_Options.iKind == GAME_KIND_ALL) && (m_iCurMissionIndex + 1u < m_iNumMissions))
     {
@@ -694,6 +702,21 @@ void cGame::LoadNextMission()
         // 
         REMOVE_FLAG(m_iStatus, GAME_STATUS_OUTRO)
         ADD_FLAG   (m_iStatus, GAME_STATUS_FINISHED)
+    }
+}
+
+
+// ****************************************************************
+// 
+void cGame::CloseMission()
+{
+    if(m_pCurMission->GetID() != cNoMission::ID)
+    {
+        if((m_Options.iKind == GAME_KIND_ALL) || (m_Options.iKind == GAME_KIND_MISSION))
+        {
+            // 
+            m_pCurMission->Close();
+        }
     }
 }
 
@@ -761,11 +784,6 @@ void cGame::StartOutro(const coreUint8 iType)
 
     // 
     g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_END(m_pCurMission->GetID()));
-
-    // 
-    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION, 1.0f);
-    //g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE,      1.0f);
-    //g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED,     1.0f);
     
     if(m_iOutroType == GAME_OUTRO_BEGINNING)
     {
@@ -812,6 +830,18 @@ void cGame::PlayReflectSound(const coreVector3 vPosition)
 
 // ****************************************************************
 // 
+void cGame::PlayVanishSound(const coreVector3 vPosition)
+{
+    if(!m_fVanishDelay)
+    {
+        m_fVanishDelay = 1.0f;
+        g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BULLET_VANISH);
+    }
+}
+
+
+// ****************************************************************
+// 
 void cGame::UseContinue()
 {
     ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
@@ -846,11 +876,6 @@ void cGame::UseContinue()
 
     // 
     m_TimeTable.RevertSegment(iMissionIndex, iSegmentIndex);
-
-    // 
-    g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
-    g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
-    g_pEnvironment->SetTargetSpeedNow    (ENVIRONMENT_DEFAULT_SPEED);
 
     // 
     g_pSave->EditGlobalStats      ()                            ->iContinuesUsed += 1u;
@@ -911,6 +936,7 @@ void cGame::RepairPlayer()
 
         // 
         g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_REPAIR);
+        g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_BIG, 500u);
 
         // 
         pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;
@@ -997,6 +1023,22 @@ coreVector3 cGame::CalculateCamShift()const
     vShift /= I_TO_F(this->GetNumPlayers());
 
     return vShift * g_fShiftMode * 1.5f;
+}
+
+
+// ****************************************************************
+// 
+void cGame::PrefetchBoss()
+{
+    // 
+    m_BulletManagerEnemy.PrefetchBullet<cOrbBullet>     ();
+    m_BulletManagerEnemy.PrefetchBullet<cConeBullet>    ();
+    m_BulletManagerEnemy.PrefetchBullet<cWaveBullet>    ();
+    m_BulletManagerEnemy.PrefetchBullet<cSpearBullet>   ();
+    m_BulletManagerEnemy.PrefetchBullet<cTriangleBullet>();
+    m_BulletManagerEnemy.PrefetchBullet<cFlipBullet>    ();
+    m_BulletManagerEnemy.PrefetchBullet<cQuadBullet>    ();
+    m_BulletManagerEnemy.PrefetchBullet<cViewBullet>    ();
 }
 
 
@@ -1479,7 +1521,7 @@ void cGame::__HandleCollisions()
                     }
 
                     // 
-                    if(!pEnemy->ReachedDeath()) this->PlayHitSound(vIntersection);
+                    if(!pEnemy->ReachedDeath() && (pBullet->GetID() != cFinalBullet::ID)) this->PlayHitSound(vIntersection);   // TODO 1: alle anderen stellen, wo PlayHitSound aufgerufen wird, ignorieren ReachedDeath
                 }
 
                 if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))

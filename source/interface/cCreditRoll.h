@@ -61,6 +61,7 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryMusic[
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntrySounds[] =
 {
+    "Albert Fernández",
     "Audible Dread",
     "FuseHive",
     "J.BoB",
@@ -102,7 +103,6 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryFonts[
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryLibraries[] =
 {
-    "epic_online_services",
     "forsyth_too",
     "glew",
     "imgui",
@@ -113,7 +113,6 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryLibrar
     "stb_dxt",
     "stb_sprintf",
     "stb_vorbis",
-    "steamworks",
     "xxhash",
     "zstd"
 };

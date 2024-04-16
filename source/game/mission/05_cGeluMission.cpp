@@ -209,6 +209,17 @@ cGeluMission::cGeluMission()noexcept
     }
 
     // 
+    m_Surfer.DefineModelHigh("object_cube_top.md3");
+    m_Surfer.DefineModelLow ("object_cube_top.md3");
+    m_Surfer.DefineVolume   ("object_cube_volume.md3");
+    m_Surfer.DefineTexture  (0u, "effect_energy.png");
+    m_Surfer.DefineProgram  ("effect_energy_flat_invert_program");
+    m_Surfer.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.5f);
+    m_Surfer.SetTexSize     (coreVector2(1.0f,1.0f) * 0.4f);
+    m_Surfer.Configure      (1000, 0u, COLOR_ENERGY_YELLOW * 0.8f);
+    m_Surfer.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_TOP | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
+
+    // 
     g_pGlow->BindList(&m_Way);
     g_pGlow->BindList(&m_WayArrow);
     g_pGlow->BindList(&m_Orb);
@@ -224,6 +235,9 @@ cGeluMission::cGeluMission()noexcept
 // destructor
 cGeluMission::~cGeluMission()
 {
+    // 
+    m_Surfer.Kill(false);
+
     // 
     g_pGlow->UnbindList(&m_Way);
     g_pGlow->UnbindList(&m_WayArrow);
@@ -395,7 +409,11 @@ void cGeluMission::DisableOrb(const coreUintW iIndex, const coreBool bAnimated)
         m_afOrbTime[iIndex] = -1.0f;
 
         // 
-        if(bAnimated) g_pSpecialEffects->CreateSplashColor(oOrb.GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_CYAN);
+        if(bAnimated)
+        {
+            g_pSpecialEffects->CreateSplashColor(oOrb.GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_CYAN);
+            g_pSpecialEffects->PlaySound(oOrb.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
+        }
     }
 
     // 
@@ -644,8 +662,7 @@ void cGeluMission::__MoveOwnAfter()
         if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        //if(!SPECIAL_FROZEN) 
-            m_avOldPos[i] = oFang.GetPosition().xy();
+        m_avOldPos[i] = oFang.GetPosition().xy();   // old frozen
 
         // 
         const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
@@ -663,7 +680,8 @@ void cGeluMission::__MoveOwnAfter()
                         this->DisableFang(i, true);
                         this->AddExtraScore(d_cast<cPlayer*>(pBullet->GetOwner()), 40u, oFang.GetPosition());
 
-                        g_pSpecialEffects->PlaySound(oFang.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_07);
+                        g_pSpecialEffects->PlaySound(oFang.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+                        g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                     }
                 }
             }
@@ -731,8 +749,7 @@ void cGeluMission::__MoveOwnAfter()
         if(!bFree) pArrow->SetDirection(pWay->GetDirection());
 
         // 
-        //if(!SPECIAL_FROZEN) 
-            m_avOldPos[i] = pWay->GetPosition().xy();
+        m_avOldPos[i] = pWay->GetPosition().xy();   // old frozen
 
         // 
         if(HAS_BIT(m_iWayActive, i))
@@ -963,6 +980,13 @@ void cGeluMission::__MoveOwnAfter()
 
     // 
     m_Shine.MoveNormal();
+
+    // 
+    if(!m_Surfer.HasStatus(ENEMY_STATUS_DEAD))
+    {
+        m_Surfer.SetDirection(coreVector3(coreVector2::Direction((8.0f*PI) * m_fAnimation), 0.0f));
+        m_Surfer.SetTexOffset(coreVector2(0.0f, 0.5f * m_fAnimation));
+    }
 }
 
 

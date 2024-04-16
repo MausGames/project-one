@@ -15,6 +15,7 @@
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
 // TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
+// TODO 4: play-sounds in special-effects klasse verschieben
 
 
 // ****************************************************************
@@ -236,6 +237,7 @@ private:
     coreFloat m_fMusicVolume;               // 
     
     coreFlow m_fHitDelay;
+    coreFlow m_fVanishDelay;                // 
     coreBool m_bDefeatDelay;                // 
 
     coreUint8 m_iContinues;                 // 
@@ -275,6 +277,7 @@ public:
     void LoadMissionID   (const coreInt32 iID,    const coreUint8 iTakeFrom = 0u, const coreUint8 iTakeTo = TAKE_MISSION);
     void LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom = 0u, const coreUint8 iTakeTo = TAKE_MISSION);
     void LoadNextMission();
+    void CloseMission();
 
     // 
     void StartIntro();
@@ -287,6 +290,7 @@ public:
     // 
     void PlayHitSound    (const coreVector3 vPosition);
     void PlayReflectSound(const coreVector3 vPosition);
+    void PlayVanishSound (const coreVector3 vPosition);
 
     // 
     void UseContinue();
@@ -317,6 +321,9 @@ public:
     inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
     inline void KillHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) m_aHelper[i].Kill(false);}
     //inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
+
+    // 
+    void PrefetchBoss();
 
     // 
     RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2 vPosition);

@@ -13,7 +13,8 @@
 // TODO 2: realtime language update (also combat text, LUCKY, HIT, etc.), boss-titles, mission-titles, time-bonus
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 // TODO 4: merge wave time and boss time if possible
-// TODO 1: [MF] sterne anzeigen in score banner und wave summary
+// TODO 1: [MF] sterne anzeigen in score banner
+// TODO 3: add animation to combo bar, combo value, score (consider sustained fire on boss, e.g. on Eigengrau)
 
 
 // ****************************************************************
@@ -21,7 +22,7 @@
 #define INTERFACE_VIEWS                   (PLAYERS)        // number of player views
 #define INTERFACE_LIVES                   (LIVES)          // 
 #define INTERFACE_FRAGMENTS               (FRAGMENTS)      // 
-#define INTERFACE_BADGES                  (BADGES  - 3u)   // 
+#define INTERFACE_BADGES                  (BADGES  - 4u)   // 
 #define INTERFACE_HELPERS                 (HELPERS - 1u)   // 
 #define INTERFACE_BOSS_DELAY              (1.5f)           // 
 #define INTERFACE_DIALOGS                 (2u)             // 
@@ -46,7 +47,8 @@
 
 #define INTERFACE_FRAGMENT_SPEED          (1.5f)           // 
 #define INTERFACE_FRAGMENT_DURATION       (5.0f)           // 
-#define INTERFACE_FRAGMENT_DURATION_EXT   (8.0f)           // 
+#define INTERFACE_FRAGMENT_DURATION_2     (6.0f)           // 
+#define INTERFACE_FRAGMENT_DURATION_EXT   (9.0f)           // 
 #define INTERFACE_FRAGMENT_SCALE          (0.4f)           // 
 #define INTERFACE_FRAGMENT_TYPE_SHOW      (0xFFu)          // 
 #define INTERFACE_FRAGMENT_TYPE_HIDE      (0xFEu)          // 

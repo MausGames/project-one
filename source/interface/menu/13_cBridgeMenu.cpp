@@ -116,7 +116,7 @@ void cBridgeMenu::Move()
                     }
                 }
 
-                if(m_fReturnTimer >= 1.5f)
+                if(m_fReturnTimer >= (m_bFade ? 1.5f : 0.5f))
                 {
                     if(this->HasUnlocks())
                     {
@@ -270,7 +270,7 @@ void cBridgeMenu::Move()
                 // 
                 g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
 
-                if(m_fReturnTimer >= 1.5f)
+                if(m_fReturnTimer >= 1.0f)
                 {
                     // 
                     m_iStatus = 4;
@@ -305,7 +305,7 @@ void cBridgeMenu::Move()
                     ASSERT(g_pMenu->IsPaused())      
                 }
 
-                if(m_fReturnTimer >= 1.5f)
+                if(m_fReturnTimer >= 1.0f)
                 {
                     // 
                     m_iStatus = 5;

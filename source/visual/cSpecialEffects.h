@@ -14,7 +14,6 @@
 // TODO 3: particles should not overdraw outlines (at least color-particles)
 // TODO 3: make lightning owner-sticky with position-offset
 // TODO 3: don't invoke special-effects out of view (though consider effect-radius)
-// TODO 3: [MF] adjust rumble to be not toooo strong (and not be annoying)
 // TODO 1: [MF] check for all locations where deep particles would make sense (or invert everything ?)
 // TODO 4: remove effect_energy_ring_program if not required anymore (+file +define)
 // TODO 4: think about merging *Color and *Dark functions, as they are mostly identical
@@ -25,7 +24,7 @@
 // TODO 3: options to completely disable certain sound effects: turn, player shooting
 // TODO 3: update 3d-sound settings in real-time (store position)
 // TODO 3: move some global sound effects to local pointers (where it makes sense), to reduce permanent memory load
-// TODO 1: [MF] find all old/prev position code and use SPECIAL_FROZEN where applicable (sollte auch was spezielles für bullet-move und ähnliches sein, wo TIME direkt verwendet wird)
+// TODO 1: no rumble in replays (might already be possible, but still check e.g. for NULL)
 
 
 // ****************************************************************
@@ -35,6 +34,7 @@
 #define SPECIAL_BLASTS           (8u)        // number of energy-blasts
 #define SPECIAL_EXPLOSION        (8u)        // 
 #define SPECIAL_ICONS            (PLAYERS)   // 
+#define SPECIAL_PLAYERS          (PLAYERS)   // 
 
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)     // 
 #define SPECIAL_LIGHTNING_CUTOUT (0.5f)      // 
@@ -58,14 +58,15 @@
 #define SPECIAL_LIGHTNING_BIG    (27.0f)
 #define SPECIAL_BLAST_SMALL       (2.0f), (3.5f)
 #define SPECIAL_BLAST_BIG         (4.0f), (3.5f)
-#define SPECIAL_RUMBLE_DEFAULT    (0.4f), (120u)
+#define SPECIAL_RUMBLE_SMALL      (0.25f)
+#define SPECIAL_RUMBLE_BIG        (0.5f)
 #define SPECIAL_SHAKE_TINY        (0.4f)
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
 #define SPECIAL_RELATIVE            (coreVector3(0.0f,0.0f,0.0f))
 #define SPECIAL_SOUND_MEDAL(x)      (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
-#define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.3f, STEP(1.0f, I_TO_F(y), I_TO_F(x))))
+#define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.3f, STEP(1.0f, I_TO_F((y) - 1u), I_TO_F(x))))
 
 #define SPECIAL_FROZEN (TIME < 0.001f)
 
@@ -76,7 +77,6 @@ enum eSoundEffect : coreUint8
     SOUND_PLAYER_TURN,
     SOUND_PLAYER_INTERRUPT,
     SOUND_PLAYER_REPAIR,
-    SOUND_PLAYER_CANCEL,
 
     SOUND_ENEMY_EXPLOSION_01,
     SOUND_ENEMY_EXPLOSION_02,
@@ -98,6 +98,7 @@ enum eSoundEffect : coreUint8
 
     SOUND_BULLET_HIT,
     SOUND_BULLET_REFLECT,
+    SOUND_BULLET_VANISH,
 
     SOUND_SHIELD_HIT,
     SOUND_SHIELD_DESTROY,
@@ -142,20 +143,21 @@ enum eSoundEffect : coreUint8
     SOUND_MENU_SUB_IN,
     SOUND_MENU_SUB_OUT,
 
-    SOUND_EFFECT_BEEP,
-    SOUND_EFFECT_CHARGE_IN,
-    SOUND_EFFECT_CHARGE_OUT,
     SOUND_EFFECT_DUST,
     SOUND_EFFECT_ERROR,
-    SOUND_EFFECT_FAILURE,
     SOUND_EFFECT_FIRE_START,
     SOUND_EFFECT_PEARL,
     SOUND_EFFECT_SHAKE,
+    SOUND_EFFECT_SHAKE_2,
     SOUND_EFFECT_SUCCESS,
+    SOUND_EFFECT_SWIPE,
+    SOUND_EFFECT_SWIPE_2,
+    SOUND_EFFECT_SWIPE_3,
     SOUND_EFFECT_WOOSH,
     SOUND_EFFECT_WOOSH_2,
 
     SOUND_PLACEHOLDER,
+    SOUND_NONE,
 
     SOUND_MAX
 };
@@ -207,8 +209,12 @@ private:
     coreUint64           m_aiSoundGuard[2];                 // (to reduce multiple same sound-effects within one frame) 
     coreList<cSoundData> m_aSoundData;                      // 
 
+    coreFlow  m_afRumbleTime    [SPECIAL_PLAYERS];          // 
+    coreFloat m_afRumbleStrength[SPECIAL_PLAYERS];          // 
+
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
+    coreFloat m_fShakeOverride;                             // 
     coreUint8 m_iShakeCount;                                // 
 
     coreFloat m_fFreezeTime;                                // 
@@ -296,6 +302,8 @@ public:
     // 
     void ShakeScreen(const coreFloat fStrength);
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
+    
+    inline void OverrideShake(const coreFloat fOverride) {ASSERT((fOverride >= 0.0f) && (fOverride <= 1.0f)) m_fShakeOverride = fOverride;}
 
     // 
     void FreezeScreen(const coreFloat fTime);

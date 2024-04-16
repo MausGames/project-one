@@ -327,30 +327,53 @@ void UpdateInput()
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
 
-            if(iJoystickID < s_avOldStick.size())
+            if((iJoystickID < s_avOldStick.size()))
             {
-                // TODO 1: statt old-stick sollte die spieler-richtung verwendet werden, so wie bei control mode
-                
-                if(!STATIC_ISVALID(g_pGame)) s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
-                
-                const coreVector2 vOldStick = s_avOldStick[iJoystickID];
-                coreVector2 vNewStick = Core::Input->GetJoystickRelativeR(iJoystickID);
-                
-                const coreBool bValid = (vNewStick.LengthSq() >= POW2(0.7f));
-                if(!vNewStick.IsNull()) vNewStick = vNewStick.Normalized();
-                
-                for(coreUintW j = 0u; j < 4u; ++j)
+                if(STATIC_ISVALID(g_pGame))
                 {
-                    const coreVector2 vBase = StepRotated90(j);
-                    const coreBool bOldState = (!vOldStick.IsNull() && (coreVector2::Dot(vOldStick, vBase) >= (1.0f / SQRT2)));
-                    const coreBool bNewState = (!vNewStick.IsNull() && (coreVector2::Dot(vNewStick, vBase) >= (bOldState ? 0.01f : (vOldStick.IsNull() ? (1.0f / SQRT2) : 0.8f))) && (bOldState || bValid));
+                    const sGameInput* pCheck = NULL;
+                    for(coreUintW j = 0u; j < INPUT_TYPES; ++j)
+                    {
+                        if(g_CurConfig.Input.aiType[j] == i)
+                        {
+                            pCheck = &g_aGameInput[j];
+                            break;
+                        }
+                    }
                     
-                    if(!bOldState &&  bNewState) ADD_BIT(oMap.iActionPress,   3u + j)
-                    if( bOldState && !bNewState) ADD_BIT(oMap.iActionRelease, 3u + j)
-                    if( bNewState)               ADD_BIT(oMap.iActionHold,    3u + j)
+                    coreVector2 vPlayerDir;
+                    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+                    {
+                        const sGameInput* pInput = pPlayer->GetInput();
+                        if((pInput == &g_TotalInput) || (pInput == pCheck)) vPlayerDir = pPlayer->GetDirection().xy();
+                    });
+                    
+                    coreVector2 vNewStick = Core::Input->GetJoystickRelativeR(iJoystickID);
+                    if(vNewStick.IsNull()) s_avOldStick[iJoystickID] = vPlayerDir;
+                    
+                    const coreVector2 vOldStick = s_avOldStick[iJoystickID];
+                    
+                    const coreBool bValid = (vNewStick.LengthSq() >= POW2(0.7f));
+                    if(!vNewStick.IsNull()) vNewStick = vNewStick.Normalized();
                     
                     
-                    if(!bOldState && bNewState) s_avOldStick[iJoystickID] = vNewStick.IsNull() ? coreVector2(0.0f,0.0f) : AlongCrossNormal(vNewStick);
+                    for(coreUintW j = 0u; j < 4u; ++j)
+                    {
+                        const coreVector2 vBase = StepRotated90(j);
+                        const coreBool bOldState = (!vOldStick.IsNull() && (coreVector2::Dot(vOldStick, vBase) >= (1.0f / SQRT2)));
+                        const coreBool bNewState = (!vNewStick.IsNull() && (coreVector2::Dot(vNewStick, vBase) >= (bOldState ? 0.01f : (vOldStick.IsNull() ? (1.0f / SQRT2) : 0.8f))) && (bOldState || bValid));
+                        
+                        if(!bOldState &&  bNewState) ADD_BIT(oMap.iActionPress,   3u + j)
+                        if( bOldState && !bNewState) ADD_BIT(oMap.iActionRelease, 3u + j)
+                        if( bNewState)               ADD_BIT(oMap.iActionHold,    3u + j)
+                        
+                        
+                        if(!bOldState && bNewState) s_avOldStick[iJoystickID] = vNewStick.IsNull() ? coreVector2(0.0f,0.0f) : AlongCrossNormal(vNewStick);
+                    }
+                }
+                else
+                {
+                    s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
                 }
             }
             

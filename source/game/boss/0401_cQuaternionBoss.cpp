@@ -34,6 +34,15 @@ cQuaternionBoss::cQuaternionBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cQuaternionBoss::~cQuaternionBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cQuaternionBoss::__MoveOwn()
 {

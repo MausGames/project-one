@@ -89,9 +89,10 @@ public:
     void DrawPoint(const coreObject3D* pObject);
 
     // 
-    void PlayFlicker (const coreUint8 iShatter);
-    void StopFlicker ();
-    void ResetFlicker();
+    void PlayFlicker   (const coreUint8 iShatter);
+    void PlayFlickerNow(const coreUint8 iShatter);
+    void StopFlicker   ();
+    void ResetFlicker  ();
 
     // 
     inline void BlendOut() {ASSERT(!m_fBlend) m_fBlend = 1.0f;}

@@ -51,9 +51,6 @@ cBoss::cBoss()noexcept
 cBoss::~cBoss()
 {
     // 
-    this->Kill(false);
-
-    // 
     g_pGame->GetEnemyManager()->UnbindEnemy(this);
 }
 
@@ -206,6 +203,7 @@ void cBoss::_UpdateBoss()
                     g_pGame->GetCombatText()->DrawText(Core::Language->GetString("UNKNOWN"), pHelper->GetPosition(), COLOR_MENU_INSIDE);
 
                     g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_HELPER);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                     if(this->HasAllHelpers())
                     {
@@ -307,7 +305,6 @@ void cBoss::_CreateFragment(const coreUint8 iType)
 // 
 UNITY_BUILD
 #include "0101_cDharukBoss.cpp"
-#include "0101_cDharukSubBoss.cpp"
 #include "0102_cTorusBoss.cpp"
 #include "0103_cVausBoss.cpp"
 #include "0201_cNautilusBoss.cpp"

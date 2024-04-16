@@ -34,6 +34,15 @@ cLuciferBoss::cLuciferBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cLuciferBoss::~cLuciferBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cLuciferBoss::__MoveOwn()
 {

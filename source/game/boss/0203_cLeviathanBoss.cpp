@@ -18,6 +18,7 @@
 // TODO 1: hard-mode: alle laser-einschläge erzeugen zusätzliche geschosse (betrifft alle phasen außer grow-bullet und arrow)
 // TODO 1: quad-bullet teppich verdeckt laser-einschlag
 // TODO 1: [MF] ACHIEVEMENT: name (), description (), 
+// TODO 1: [MF] improve plate phase
 
 // NOTE: never ever use exactly 4 rays with equal distribution, the resulting laser+fire pattern does NOT look good
 
@@ -155,6 +156,19 @@ cLeviathanBoss::cLeviathanBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cLeviathanBoss::~cLeviathanBoss()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    for(coreUintW i = 0u; i < LEVIATHAN_RAYS;  ++i) this->__DisableRay (i, false);
+    for(coreUintW i = 0u; i < LEVIATHAN_MARKS; ++i) this->__DisableMark(i, false);
+}
+
+
+// ****************************************************************
 // 
 void cLeviathanBoss::ResurrectDemo()
 {
@@ -200,27 +214,19 @@ void cLeviathanBoss::__KillOwn(const coreBool bAnimated)
     cNevoMission* pMission = d_cast<cNevoMission*>(g_pGame->GetCurMission());
 
     // 
-    for(coreUintW i = 0u; i < NEVO_TILES; ++i)
-        pMission->DisableTile(i, bAnimated);
+    for(coreUintW i = 0u; i < NEVO_TILES;  ++i) pMission->DisableTile (i, bAnimated);
+    for(coreUintW i = 0u; i < NEVO_ARROWS; ++i) pMission->DisableArrow(i, bAnimated);
 
     // 
-    for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
-        pMission->DisableArrow(i, bAnimated);
+    pMission->ResetCollEnemyBullet();
 
     // 
-    for(coreUintW i = 0u; i < LEVIATHAN_RAYS; ++i)
-        this->__DisableRay(i, bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < LEVIATHAN_MARKS; ++i)
-        this->__DisableMark(i, bAnimated);
+    for(coreUintW i = 0u; i < LEVIATHAN_RAYS;  ++i) this->__DisableRay (i, bAnimated);
+    for(coreUintW i = 0u; i < LEVIATHAN_MARKS; ++i) this->__DisableMark(i, bAnimated);
 
     // 
     for(coreUintW i = 0u; i < LEVIATHAN_PARTS; ++i)
         this->__GetPart(i)->Kill(bAnimated);
-
-    // 
-    pMission->ResetCollEnemyBullet();
 
     // 
     g_pGlow->UnbindList(&m_Ray);
@@ -626,6 +632,8 @@ void cLeviathanBoss::__MoveOwn()
                 }
 
                 this->__DisableRay(0, true);
+
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
         }
         else
@@ -1034,7 +1042,7 @@ void cLeviathanBoss::__MoveOwn()
 
                 const coreFloat fSpeed = 1.1f * (1.0f + 0.08f * I_TO_F(iTick % 10u));
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, fSpeed, this, vPos, vDir)->ChangeSize(1.8f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, fSpeed, this, vPos, vDir)->ChangeSize(1.9f);
 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_GREEN);
                 g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
@@ -1290,6 +1298,7 @@ void cLeviathanBoss::__MoveOwn()
 
             g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(pPart->GetPosition());
             g_pSpecialEffects->PlaySound(pPart->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_05);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
@@ -1324,6 +1333,7 @@ void cLeviathanBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (m_Head.GetPosition());
                 g_pSpecialEffects->CreateSplashDark(m_Head.GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (m_Head.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (m_Head.GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
                 g_pSpecialEffects->SlowScreen(4.0f);
             }
             else
@@ -1375,6 +1385,7 @@ void cLeviathanBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (pPlayer->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
                 g_pSpecialEffects->SlowScreen(4.0f);
             
             pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
@@ -1504,19 +1515,36 @@ void cLeviathanBoss::__MoveOwn()
 
     if(m_bActive)
     {
-        if(m_iPhase >= 50u)
+        if((m_iPhase >= 10u) && !((m_iPhase >= 30u) && (m_iPhase < 40u)))
         {
-            PHASE_CONTROL_TIMER(4u, 0.05f, LERP_SMOOTH)
+            if(m_aiCounter[CYCLE_COUNT] == 0)
             {
-                g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(0.0f*PI, -3.0f*PI, fTime)));
-            });
+                PHASE_CONTROL_TIMER(4u, 0.05f, LERP_SMOOTH)
+                {
+                    g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(0.0f*PI, 3.0f*PI, fTime)));
+                });
+            }
+            else if(m_aiCounter[CYCLE_COUNT] == 1)
+            {
+                PHASE_CONTROL_TIMER(4u, 0.05f, LERP_SMOOTH)
+                {
+                    g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(3.0f*PI, 0.0f*PI, fTime)));
+                });
+            }
+            else if(m_aiCounter[CYCLE_COUNT] == 2)
+            {
+                PHASE_CONTROL_TIMER(4u, 0.05f, LERP_SMOOTH)
+                {
+                    g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(0.0f*PI, 3.0f*PI, fTime)));
+                });
+            }
         }
     }
     else
     {
         PHASE_CONTROL_TIMER(4u, 0.25f, LERP_BREAK)
         {
-            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[ENV_ROTATION].y, 0.0f*PI, fTime)));
+            //g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[ENV_ROTATION].y, 0.0f*PI, fTime)));   end rotation
         });
     }
 
@@ -1548,6 +1576,8 @@ void cLeviathanBoss::__MoveOwn()
             if(pBulletEnemy->GetID() != cQuadBullet::ID) return;
 
             pBulletEnemy->Deactivate(true, vIntersection.xy(), pBulletPlayer->GetFlyDir());
+
+            g_pGame->PlayVanishSound(pBulletEnemy->GetPosition());
         });
 
         const coreVector2 vMove1 = coreVector2(0.0f, -10.0f * fQuadSpeed) * TIME;
@@ -1676,6 +1706,7 @@ void cLeviathanBoss::__MoveOwn()
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             g_pSpecialEffects->PlaySound(pPart->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
             g_pSpecialEffects->PlaySound(pPart->GetPosition(), 0.4f, 1.0f, SOUND_EFFECT_FIRE_START);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
     }
 
@@ -1819,6 +1850,7 @@ void cLeviathanBoss::__MoveOwn()
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos.xy(), fHeight), 50.0f, 15u, COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
                 g_pSpecialEffects->PlaySound(coreVector3(vPos.xy(), fHeight), 0.4f, bNewHidden ? 2.0f : 1.2f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                 // 
                 const coreBool    bRotated   = i % 2u;
@@ -2210,7 +2242,9 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
             }
 
             // 
-            g_pSpecialEffects->ShakeScreen(0.1f + 0.3f * SIN(PI * fTime));
+            const coreFloat fStrength = 0.1f + 0.3f * SIN(PI * fTime);
+            g_pSpecialEffects->ShakeScreen(fStrength);
+            g_pSpecialEffects->RumblePlayer(NULL, fStrength, 250u);
 
             // 
             vOldHit = vNewHit;
@@ -2325,6 +2359,7 @@ void cLeviathanBoss::__RefreshHealth(const coreInt32 iHead, const coreInt32 iBod
             g_pSpecialEffects->CreateSplashSmoke(pPart->GetPosition(), 30.0f, 30u, coreVector3(1.0f,1.0f,1.0f));
             g_pSpecialEffects->CreateSplashColor(pPart->GetPosition(), 50.0f, 15u, COLOR_ENERGY_WHITE * 0.8f);
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
     }
 }

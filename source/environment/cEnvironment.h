@@ -15,6 +15,7 @@
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
 // TODO 3: remove unused mix types, or init them on demand
 // TODO 4: check if m_afStrength != 0.0f is required and remove otherwise
+// TODO 3: da is ein 1-frame delay für TargetNow funktionen
 
 
 // ****************************************************************
@@ -50,11 +51,13 @@ private:
     coreTimer   m_TransitionTime;                        // background-transition timer
     coreVector2 m_vTransitionDir;                        // 
 
-    coreVector2 m_avDirection[2];                        // background direction (0 = current value, 1 = target value)
-    coreVector2 m_avSide     [2];                        // background position offset
-    coreFloat   m_afSpeed    [2];                        // movement speed
-    coreFloat   m_afHeight   [2];                        // 
+    coreVector2 m_avDirection[3];                        // background direction (0 = current value, 1 = target value, 2 = old value)
+    coreVector2 m_avSide     [3];                        // background position offset
+    coreFloat   m_afSpeed    [3];                        // movement speed
+    coreFloat   m_afHeight   [3];                        // 
     coreFloat   m_afStrength [4];                        // 
+    coreFlow    m_afLerp     [4];                        // 
+    coreFloat   m_afFactor   [4];                        // 
 
     coreFloat   m_fFlyOffset;                            // global fly offset (directly accessed by background objects)
     coreFloat   m_fFlyShove;                             // 
@@ -98,14 +101,18 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 
     // set target transformation properties
-    inline void SetTargetDirection   (const coreVector2 vDirection, const coreFloat fStrength) {m_avDirection[1] = vDirection; m_afStrength[0] = fStrength; ASSERT(vDirection.IsNormalized()) if(!g_CurConfig.Game.iBackRotation) m_avDirection[1] = ENVIRONMENT_DEFAULT_DIRECTION;}
-    inline void SetTargetSide        (const coreVector2 vSide,      const coreFloat fStrength) {m_avSide     [1] = vSide;      m_afStrength[1] = fStrength;}
-    inline void SetTargetSpeed       (const coreFloat   fSpeed,     const coreFloat fStrength) {m_afSpeed    [1] = fSpeed;     m_afStrength[2] = fStrength; m_afSpeed[1] *= I_TO_F(g_CurConfig.Game.iBackSpeed) / 100.0f;}
-    inline void SetTargetHeight      (const coreFloat   fHeight,    const coreFloat fStrength) {m_afHeight   [1] = fHeight;    m_afStrength[3] = fStrength;}
-    inline void SetTargetDirectionNow(const coreVector2 vDirection)                            {this->SetTargetDirection(vDirection, 0.0f); m_avDirection[0] = m_avDirection[1];}
-    inline void SetTargetSideNow     (const coreVector2 vSide)                                 {this->SetTargetSide     (vSide,      0.0f); m_avSide     [0] = m_avSide     [1];}
-    inline void SetTargetSpeedNow    (const coreFloat   fSpeed)                                {this->SetTargetSpeed    (fSpeed,     0.0f); m_afSpeed    [0] = m_afSpeed    [1];}
-    inline void SetTargetHeightNow   (const coreFloat   fHeight)                               {this->SetTargetHeight   (fHeight,    0.0f); m_afHeight   [0] = m_afHeight   [1];}
+    inline void SetTargetDirection    (const coreVector2 vDirection, const coreFloat fStrength) {m_avDirection[1] = vDirection; m_afStrength[0] = fStrength; m_afLerp[0] = 0.0f; ASSERT(vDirection.IsNormalized()) if(!g_CurConfig.Game.iBackRotation) m_avDirection[1] = ENVIRONMENT_DEFAULT_DIRECTION;}
+    inline void SetTargetSide         (const coreVector2 vSide,      const coreFloat fStrength) {m_avSide     [1] = vSide;      m_afStrength[1] = fStrength; m_afLerp[1] = 0.0f;}
+    inline void SetTargetSpeed        (const coreFloat   fSpeed,     const coreFloat fStrength) {m_afSpeed    [1] = fSpeed;     m_afStrength[2] = fStrength; m_afLerp[2] = 0.0f; m_afSpeed[1] *= I_TO_F(g_CurConfig.Game.iBackSpeed) / 100.0f;}
+    inline void SetTargetHeight       (const coreFloat   fHeight,    const coreFloat fStrength) {m_afHeight   [1] = fHeight;    m_afStrength[3] = fStrength; m_afLerp[3] = 0.0f;}
+    inline void SetTargetDirectionNow (const coreVector2 vDirection)                            {this->SetTargetDirection(vDirection, 0.0f); m_avDirection[0] = m_avDirection[1];}
+    inline void SetTargetSideNow      (const coreVector2 vSide)                                 {this->SetTargetSide     (vSide,      0.0f); m_avSide     [0] = m_avSide     [1];}
+    inline void SetTargetSpeedNow     (const coreFloat   fSpeed)                                {this->SetTargetSpeed    (fSpeed,     0.0f); m_afSpeed    [0] = m_afSpeed    [1];}
+    inline void SetTargetHeightNow    (const coreFloat   fHeight)                               {this->SetTargetHeight   (fHeight,    0.0f); m_afHeight   [0] = m_afHeight   [1];}
+    inline void SetTargetDirectionLerp(const coreVector2 vDirection, const coreFloat fTime)     {this->SetTargetDirection(vDirection, 0.0f); m_avDirection[2] = m_avDirection[0]; m_afLerp[0] = 1.0f; m_afFactor[0] = -RCP(fTime); m_avDirection[1].x = m_avDirection[1].Angle(); m_avDirection[2].x = m_avDirection[2].Angle();}
+    inline void SetTargetSideLerp     (const coreVector2 vSide,      const coreFloat fTime)     {this->SetTargetSide     (vSide,      0.0f); m_avSide     [2] = m_avSide     [0]; m_afLerp[1] = 1.0f; m_afFactor[1] = -RCP(fTime);}
+    inline void SetTargetSpeedLerp    (const coreFloat   fSpeed,     const coreFloat fTime)     {this->SetTargetSpeed    (fSpeed,     0.0f); m_afSpeed    [2] = m_afSpeed    [0]; m_afLerp[2] = 1.0f; m_afFactor[2] = -RCP(fTime);}
+    inline void SetTargetHeightLerp   (const coreFloat   fHeight,    const coreFloat fTime)     {this->SetTargetHeight   (fHeight,    0.0f); m_afHeight   [2] = m_afHeight   [0]; m_afLerp[3] = 1.0f; m_afFactor[3] = -RCP(fTime);}
 
     // get current transformation properties
     inline const coreVector2& GetDirection()const {return m_avDirection[0];}

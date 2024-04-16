@@ -33,6 +33,7 @@ cMenu::cMenu()noexcept
 , m_TransitionTime   (coreTimer(1.3f, 0.0f, 1u))
 , m_iTransitionState (0u)
 , m_pTransitionMenu  (NULL)
+, m_fVolume  (1.0f)
 , m_bStarted (false)
 //, m_vHighlightColor  (COLOR_MENU_WHITE)
 {
@@ -303,10 +304,10 @@ void cMenu::Move()
                     else
                     {
                         // 
-                        m_BridgeMenu.ReturnMenu(SURFACE_GAME, false, false);
+                        m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
 
                         // 
-                        m_GameMenu.ChangeSurface((g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_MISSION : SURFACE_GAME_SEGMENT, 0.0f);
+                        m_GameMenu.ChangeSurface(/*(g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_MISSION :*/ SURFACE_GAME_SEGMENT, 0.0f);
                         m_GameMenu.LoadValues();
 
                         // 
@@ -563,10 +564,6 @@ void cMenu::Move()
                 // 
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
 
-                #if defined(_CORE_DEBUG_)
-                    if(STATIC_ISVALID(g_pGame))
-                #endif
-
                 // 
                 g_pGame->LoadNextMission();
             }
@@ -577,6 +574,9 @@ void cMenu::Move()
 
                 // 
                 this->ChangeSurface(SURFACE_CREDITS, 0.0f);
+
+                // 
+                g_pGame->CloseMission();
             }
             else if(m_SummaryMenu.GetStatus() == 3)
             {
@@ -783,6 +783,15 @@ void cMenu::Move()
     m_Tooltip   .Move();
     m_PauseLayer.Move();
     
+    if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)))
+    {
+        m_fVolume.UpdateMax(-0.5f, 0.0f);
+    }
+    else
+    {
+        m_fVolume.UpdateMin(0.5f, 1.0f);
+    }
+    
     
     const eSaveStatus eStatus = g_pSave->GetStatus();
     if((eStatus != SAVE_STATUS_OK) && !STATIC_ISVALID(g_pGame) && !m_MsgBox.IsVisible())
@@ -916,6 +925,14 @@ void cMenu::SetButtonColor(const coreVector3 vColor)
 
 // ****************************************************************
 // 
+coreFloat cMenu::GetVolume()const
+{
+    return (this->IsPaused() ? 0.3f : 1.0f) * LERPH3(0.5f, 1.0f, m_fVolume);
+}
+
+
+// ****************************************************************
+// 
 void cMenu::UpdateLanguageFont()
 {
     // 
@@ -1018,7 +1035,7 @@ const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const co
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow, const coreBool bSound)
 {
     ASSERT(pButton)
 
@@ -1073,7 +1090,7 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, co
     
     if(pButton->IsClicked())
     {
-        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
+        if(bSound) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
     }
 }
 

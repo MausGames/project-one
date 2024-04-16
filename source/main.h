@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.2.2 (https://www.maus-games.at)                             |//
+//| Project One v0.3.0 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -92,9 +92,8 @@
 // TODO 3: remove unused mechanics (#ifdef would be enough) so they don't take up code and memory
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
 // TODO 1: [MF] all music files need equal base volume
-// TODO 1: [MF] all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data (should already be done), also shorten sound front and back (make sure there is no micro-sound), also make mono if better
+// TODO 1: [MF] all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data (should already be done), also shorten sound front and back (make sure there is no micro-sound), also make mono if better, also rename and sort (similar sounds, parallel play)
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
-// TODO 1: [MF] alle sound-effekte bei denen man was einsammeln soll, prüfen ob pitch-inkrement verwendet werden soll
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
 // TODO 4: MIN1, MAX0, CLAMP01, BLEND* everywhere possible
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
@@ -104,12 +103,13 @@
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
 // TODO 3: sphere model kann ungenau sein, vor allem bei der area-bubble bei P1 magenta phase
 // TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
-// TODO 1: [MF] immer barrel roll bei waves und bosses, wenn sich phasen ändern, manuell für multi-sub-phasen (e.g. mehrere einzelne gegner mit selber logik) (oder vorzeitig, e.g. chol magenta wave änderung)
-// TODO 1: [MF] pirate version on modified steam dll
+// TODO 1: in-game achievements menu, bei credits+passwort, freifliegendes menü zum scrollen, links icons (steam-icons, stage von stage-textur, rest von neuer gemergter textur (0 + 1 together)), rechts description
+// TODO 1: [MF] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
+// TODO 3: rogue like mode (grey mode), with negative effects to select
+// TODO 1: [MF] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
 
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
-// TODO 1: [MF] menu musik wie bei XC3
 // TODO 3: player shooting wie ikaruga, RSG (single shot + vulkan)
 // TODO 5: plant movement
 // TODO 1: [MF] musik: bongos am ende von mission_03 entfernen, mission 04 laute piano-note bei ~01:08 und ~3:17, boss_08 wiederholt ständig den anfangs-jingle
@@ -121,11 +121,11 @@
 // TODO 1: [MF] fixup update frequency (allow less than 60?, how to communicate increases? (on low speed))
 // TODO 3: [MF] rename level to section/stage !!!! in store page and game
 // TODO 3: [MF] remap stage to area !!!! in store page and game
-// TODO 1: [MF] in selection mode übergang zu nächstem level muss super-smooth sein (black transition entfernen), wie bei super meat boy (+ wenn man ins erste level geht ohne dass das zweite freigeschalten wurde kommt intro) (wenn man single spielt und gerade das nächste freigeschalten hat gibts Next Level statt Play Again)
 // TODO 1: [MF] finish all achievement names and descriptions
 // TODO 1: [MF] finish all badge descriptions
 // TODO 1: [MF] track all sound credits
 // TODO 1: improve stage icons
+// TODO 1: [MF] praise the player ! https://www.youtube.com/watch?v=fryDyXROp8A
 
 // Public Feedback and Suggestions:
 // TODO 3: improve player ship visuals
@@ -138,8 +138,8 @@
 // TODO 4: MAX SERIES überall entfernen (im frontend)   überall nach maxseries suchen und ausbessern, außerdem nur relevant auf segment-ebene
 // TODO 3: difficulty wird zu game mode sobald prismatc etc freigeschalten wurde
 // TODO 3: ich könnte sterne im game-menü anzeigen
-// TODO 3: [MF] add more details to cloud background (transparent enemy ships far in the back ?)
-// TODO 3: [MF] einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
+// TODO 3: add more details to cloud background (transparent enemy ships far in the back ? like Ikagura and RSG)
+// TODO 3: einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
 // TODO 3: emscripten demo für v0.2.0
 // TODO 1: [MF] ACHIEVEMENTS
 // TODO 1: [MF] final fantasy ending screen (objekt in mitte (fragment, Sonic) darüber text THE END ?), "thank you for playing" beim tod von P1, in normalem playthorugh kommen credits über alle backgrounds, die grau werden und verrotten (turf brennt sich langsam ein), beim echten playthrough sind sie bunt
@@ -148,6 +148,8 @@
 // TODO 3: gegner und geschosse am rand müssen gut sichtbar bleiben, wenn interface im inneren ist
 // TODO 1: [MF] P1 flies fast across summary screen after you, when you finish a mission for the first time (+ weißer helfer)
 // TODO 1: [MF] ruhige piano musik im menü (breath of the wild)
+// TODO 1: [MF] menu musik wie bei XC3
+// TODO 1: [MF] find and implement more unlocks (at least 5 in total): shield-upgrade (>30, nach 1 weiteren spiel-start nach first play), ###
 
 // Cleanup Task List:
 // TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet
@@ -164,7 +166,7 @@
 
 #if defined(_CORE_MSVC_)
     #pragma warning(disable : 4189)   // local variable is initialized but not referenced
-#elif defined(_CORE_GCC_) || defined(_CORE_CLANG_)
+#else
     #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #endif
 

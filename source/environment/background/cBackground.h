@@ -39,6 +39,7 @@
 // TODO 3: caustics for sea background (Worley noise)
 // TODO 3: vielleicht visual height + Z reinrechnen für visibility calculations (dann kann große view range reduziert werden)
 // TODO 3: background object replication bug (wo objekte zu nah zusammen sind an der replikations-linie) (bei fly offset 145 in center), fällt fast nicht auf, nur bei sting-only snow background
+// TODO 2: bei background-density interpolation, wenn infinity-jump durchgeführt wird, poppen objekte noch immer rein/raus
 
 
 // ****************************************************************
@@ -514,7 +515,6 @@ private:
     cHeadlight m_Headlight;             // 
 
     coreBool m_bEnableLightning;        // 
-    coreBool m_bEnableHeadlight;        // 
 
 
 public:
@@ -530,7 +530,7 @@ public:
     // 
     inline void SetRainMove       (const coreVector2 vMove)   {m_vRainMove        = vMove;}
     inline void SetEnableLightning(const coreBool    bEnable) {m_bEnableLightning = bEnable;}
-    inline void SetEnableHeadlight(const coreBool    bEnable) {m_bEnableHeadlight = bEnable;}
+    inline void SetEnableHeadlight(const coreBool    bEnable) {m_Headlight.SetAlpha(bEnable ? 1.0f : 0.0f);}
 
     // 
     inline cHeadlight* GetHeadlight() {return &m_Headlight;}

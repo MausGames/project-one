@@ -18,7 +18,7 @@
 // TODO 3: also invert with full mirror mode (like interface, maybe move outside ?) (even more, like summary and continue menu) (should it be a 3rd option ? Off, Light, Full)
 // TODO 1: [MF] alle stellen mit DrawProgress und vielleicht DrawCountdown (1, 2, 3, ...) brauchen sound effect
 // TODO 5: size-bump für critical (https://youtu.be/mfr7mGW6Z2U?t=17)
-// TODO 1: [MF] achievement badge star
+// TODO 1: [MF] achievement badge star (silber drehung ohne text) (+ stern position anpassen ? default is player 1)
 // TODO 2: es könnten mehrere badge stars gleichzeitig benötigt werden
 
 

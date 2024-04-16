@@ -19,6 +19,8 @@ cEnvironment::cEnvironment()noexcept
 , m_TransitionTime  (coreTimer(1.3f, 0.0f, 1u))
 , m_vTransitionDir  (coreVector2(0.0f,0.0f))
 , m_afStrength      {}
+, m_afLerp          {}
+, m_afFactor        {}
 , m_fFlyOffset      (0.0f)
 , m_fFlyShove       (0.0f)
 , m_fSideOffset     (0.0f)
@@ -125,6 +127,12 @@ void cEnvironment::Move()
     if(m_afStrength[1] > 0.0f) m_avSide     [0] = m_avSide  [0] + (m_avSide  [1] - m_avSide  [0]) * (TIME * m_afStrength[1]);
     if(m_afStrength[2] > 0.0f) m_afSpeed    [0] = m_afSpeed [0] + (m_afSpeed [1] - m_afSpeed [0]) * (TIME * m_afStrength[2]);
     if(m_afStrength[3] > 0.0f) m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (TIME * m_afStrength[3]);
+
+    // 
+    if(m_afLerp[0] > 0.0f) {m_afLerp[0].UpdateMax(m_afFactor[0], 0.0f); m_avDirection[0] = coreVector2::Direction(m_avDirection[2].x + AngleDiff(m_avDirection[1].x, m_avDirection[2].x) * (m_afLerp[0] ? (1.0f - BLENDS(m_afLerp[0])) : 1.0f));}
+    if(m_afLerp[1] > 0.0f) {m_afLerp[1].UpdateMax(m_afFactor[1], 0.0f); m_avSide     [0] = LERP(m_avSide  [2], m_avSide  [1], m_afLerp[1] ? (1.0f - BLENDS(m_afLerp[1])) : 1.0f);}
+    if(m_afLerp[2] > 0.0f) {m_afLerp[2].UpdateMax(m_afFactor[2], 0.0f); m_afSpeed    [0] = LERP(m_afSpeed [2], m_afSpeed [1], m_afLerp[2] ? (1.0f - BLENDS(m_afLerp[2])) : 1.0f);}
+    if(m_afLerp[3] > 0.0f) {m_afLerp[3].UpdateMax(m_afFactor[3], 0.0f); m_afHeight   [0] = LERP(m_afHeight[2], m_afHeight[1], m_afLerp[3] ? (1.0f - BLENDS(m_afLerp[3])) : 1.0f);}
 
     // calculate global fly offset
     m_fFlyOffset += TIME * m_afSpeed[0];

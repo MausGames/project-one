@@ -235,7 +235,8 @@ public:
 
     // 
     inline coreBool IsNormal     ()const {return (!this->IsRolling() && !this->IsFeeling() && !this->IsIgnoring());}
-    inline coreBool IsRolling    ()const {return (m_iRollDir    != PLAYER_NO_ROLL);}
+    inline coreBool IsRolling    ()const {return false;}
+    inline coreBool IsRolling2   ()const {return (m_iRollDir    != PLAYER_NO_ROLL);}
     inline coreBool IsFeeling    ()const {return (m_fFeelTime   >  PLAYER_NO_FEEL);}
     inline coreBool IsIgnoring   ()const {return (m_fIgnoreTime >  PLAYER_NO_IGNORE);}
     inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}

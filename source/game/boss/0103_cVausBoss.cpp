@@ -49,6 +49,15 @@ cVausBoss::cVausBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cVausBoss::~cVausBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cVausBoss::__ResurrectOwn()
 {
@@ -71,10 +80,7 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     pMission->DisableBall(0u, bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        pMission->DisablePaddle(i, bAnimated);
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i) pMission->DisablePaddle(i, bAnimated);
 }
 
 

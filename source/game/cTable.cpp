@@ -582,7 +582,7 @@ coreFloat cTimeTable::GetTimeSegmentSafe()const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->GetTimeSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    return this->GetTimeSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetLastSegmentIndex());
 }
 
 
@@ -598,7 +598,7 @@ coreInt32 cTimeTable::GetShiftSegmentSafe()const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->GetShiftSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    return this->GetShiftSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetLastSegmentIndex());
 }
 
 
@@ -614,5 +614,5 @@ coreFloat cTimeTable::GetTimeShiftedSegmentSafe()const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->GetTimeShiftedSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    return this->GetTimeShiftedSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetLastSegmentIndex());
 }

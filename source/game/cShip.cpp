@@ -294,8 +294,7 @@ void cShip::_EnableBlink()const
 void cShip::_UpdateAlwaysBefore()
 {
     // 
-    //if(!SPECIAL_FROZEN) 
-        m_vOldPos = this->GetPosition().xy();
+    m_vOldPos = this->GetPosition().xy();   // old frozen
 }
 
 

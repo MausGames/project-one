@@ -13,7 +13,7 @@
 // TODO 1: transfer to Core Engine
 // TODO 5: should low quality option also affect ship models, or vegetation density, or sprite density, or FB resolution ?
 // TODO 5: don't input-check inactive input-sets in multiplayer
-// TODO 1: [MF] controller input mapping should be tied to the GUID
+// TODO 1: controller input mapping should be tied to the GUID
 // TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 // TODO 3: last-used input type might get disconnected, without reset

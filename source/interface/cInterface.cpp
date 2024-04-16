@@ -749,7 +749,7 @@ void cInterface::Move()
 
     const coreFloat* pfMedalGoal  = g_pGame->GetCurMission()->GetMedalGoal();
     const coreFloat  fTimeShifted = g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe();
-    if(pfMedalGoal && fTime && !m_iFakeEnd)
+    if(pfMedalGoal && fTime && !m_iFakeEnd    && (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT))
     {
         const coreUint8 iNewMedal = cGame::CalcMedal(fTimeShifted, pfMedalGoal);
 
@@ -767,7 +767,7 @@ void cInterface::Move()
         m_fAlphaGoal.UpdateMax(-2.0f, 0.0f);
     }
 
-    if(fTime)
+    if(fTime    && (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT))
     {
         m_fGoalBump.UpdateMax(-4.0f, 0.0f);
         m_GoalMedal.SetSize(coreVector2(1.0f,1.0f) * LERPBR(0.04f, 0.06f, m_fGoalBump));
@@ -881,6 +881,7 @@ void cInterface::Move()
         
         
         const coreBool bIntro = (g_pGame->GetCurMission()->GetID() == cIntroMission::ID);
+        const coreBool bIntroShow = !bIntro || ((i < 1u) && !d_cast<cIntroMission*>(g_pGame->GetCurMission())->GetFirstPlay());
         const coreUintW iNum = bIntro ? 1u : INTERFACE_BADGES;
         
         const coreFloat fOffset = m_aBadge[i].GetAlignment().x ? ((0.007f + I_TO_F((m_aBadge[i].GetAlignment().x > 0.0f) ? i : (iNum - i - 1u)) * 0.06f) * SIGN(m_aBadge[i].GetAlignment().x)) : ((I_TO_F(i) - I_TO_F(iNum - 1u) * 0.5f) * 0.06f);
@@ -889,7 +890,7 @@ void cInterface::Move()
         
         m_aBadge[i].SetPosition (nFlipFunc(coreVector2(fOffset, 0.005f), &m_aBadge[i]) - m_aBadge[i].GetAlignment() * (vNewSize - 0.063f) * 0.5f);
         m_aBadge[i].SetSize     (vNewSize);
-        m_aBadge[i].SetDirection(coreVector2::Direction(m_fRotation + (2.0f*PI) * fBump + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_BADGES))));
+        m_aBadge[i].SetDirection(coreVector2::Direction(m_fRotation + (2.0f*PI) * fBump + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
         m_aBadge[i].SetTexOffset(coreVector2(bRealState ? 0.0f : 0.5f, 0.0f));
         m_aBadge[i].SetAlpha    (fAlphaBadgeFull * (bRealState ? 1.0f : 0.5f));
         m_aBadge[i].Move();
@@ -903,8 +904,8 @@ void cInterface::Move()
 
         
         // 
-        m_aBadge    [i].SetEnabled((!bIntro || bRealState) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-        m_aBadgeWave[i].SetEnabled((!bIntro || bRealState) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        m_aBadge    [i].SetEnabled((bIntroShow || bRealState) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        m_aBadgeWave[i].SetEnabled((bIntroShow || bRealState) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
 
     // check for active banner
@@ -1054,6 +1055,7 @@ void cInterface::Move()
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
                 g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_FRAGMENT_IMPACT);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
 
             const coreVector2 vDir = FRAGMENT_DIRECTION;
@@ -1065,6 +1067,7 @@ void cInterface::Move()
             g_pGame->SetMusicVolume(LERP(1.0f, 0.2f, fVisibility));
         }
 
+        // handle plate destruction
         if(fFragment > INTERFACE_FRAGMENT_DURATION)
         {
             for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS - 1u; ++i)
@@ -1072,20 +1075,21 @@ void cInterface::Move()
                 const coreVector2 vDir = FRAGMENT_DIRECTION;
                 const coreVector2 vPos = MapToAxisInv(FRAGMENT_POSITION(i), vDir) * INTERFACE_FRAGMENT_SCALE;
 
-                const coreFloat fTime2 = CLAMP01(fFragment - INTERFACE_FRAGMENT_DURATION - I_TO_F(i) * 0.3f);
+                const coreFloat fTime2 = CLAMP01(fFragment - INTERFACE_FRAGMENT_DURATION_2 - I_TO_F(i) * 0.3f);
 
-                m_aFragment[i].SetPosition(vPos + ((i == 8u) ? coreVector2(0.0f,1.0f) : vPos.Normalized()) * LERPBR(0.0f, 1.5f, fTime2) + m_aFragmentTable[0].GetPosition());
-                // TODO 1: Condition 'i==8u' is always false
+                m_aFragment[i].SetPosition(vPos + vPos.Normalized() * LERPBR(0.0f, 1.5f, fTime2) + m_aFragmentTable[0].GetPosition());
             }
 
-            m_aFragment[8].SetDirection(coreVector2::Direction(STEPBR(INTERFACE_FRAGMENT_DURATION, INTERFACE_FRAGMENT_DURATION_EXT, fFragment) * (4.0f*PI) - (0.25f*PI)));
+            m_aFragment[8].SetDirection(coreVector2::Direction(BLENDH3(STEPBR(INTERFACE_FRAGMENT_DURATION, INTERFACE_FRAGMENT_DURATION_EXT, fFragment)) * (4.0f*PI) - (0.25f*PI)));
         }
 
         // 
         for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS; ++i)
         {
+            const coreFloat fDistance = (m_aFragment[i].GetPosition() - m_aFragmentTable[0].GetPosition()).Length();
+
             m_aFragment[i].SetTexOffset(coreVector2(0.0f, fOffset));
-            m_aFragment[i].SetAlpha    (fFragmentAlpha);
+            m_aFragment[i].SetAlpha    (fFragmentAlpha * (1.0f - STEPH3(1.0f, 1.5f, fDistance)));
             m_aFragment[i].Move();
         }
 

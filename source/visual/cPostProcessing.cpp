@@ -397,7 +397,7 @@ void cPostProcessing::__UpdateInterior()
         const coreFloat fOffset = I_TO_F(i) / I_TO_F(POST_BORDERS);
 
         m_aBorder[i].SetPosition (this->GetPosition ());
-        m_aBorder[i].SetSize     (this->GetSize     () + fScale);
+        m_aBorder[i].SetSize     (this->GetSize     () * (1.0f + fScale));
         m_aBorder[i].SetDirection(this->GetDirection());
         m_aBorder[i].SetTexOffset(coreVector2(0.15f,0.15f) * (m_fAnimation + fOffset));
         m_aBorder[i].Move();
@@ -416,7 +416,7 @@ void cPostProcessing::__UpdateWall()
     const coreUintW   iAdd        = IsHorizontal(vResolution) ? POST_WALLS_BASE : 0u;
 
     // change ordering depending on game-rotation and mirror-mode
-    const coreVector2 vBaseDir  = this->GetDirection();
+    const coreVector2 vBaseDir  = m_vDirectionConfig;//this->GetDirection();
     const coreVector2 vBaseSize = this->GetSize();
     const coreVector2 vSwap     = (vBaseDir.yx() + vBaseDir.InvertedX()) * (IsHorizontal(vBaseDir) ? vBaseSize.yx() : vBaseSize).Processed(SIGN);
     const coreUintW   iAdd2     = IsHorizontal(vBaseDir) ? POST_WALLS_BASE : 0u;

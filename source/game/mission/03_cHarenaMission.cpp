@@ -595,20 +595,24 @@ void cHarenaMission::__MoveOwnAfter()
             if(HAS_BIT(m_iSpikeGood, i))
             {
                 // 
-                     if(fCur < m_afSpikeMax[i] - HARENA_SPIKE_FADE) {const coreFloat fVal = MIN((fCur)                                         * 4.0f, 1.0f); fMark = fVal;        vColor = LERPH3(vColor,            COLOR_ENERGY_BLUE, fVal);}
-                else if(fCur < m_afSpikeMax[i])                     {const coreFloat fVal = MIN((fCur - (m_afSpikeMax[i] - HARENA_SPIKE_FADE)) * 4.0f, 1.0f); fMark = 1.0f - fVal; vColor = LERPH3(COLOR_ENERGY_BLUE, vColor,            fVal);}
+                     if(fCur < m_afSpikeMax[i] - HARENA_SPIKE_FADE) {const coreFloat fVal = MIN1((fCur)                                         * 4.0f); fMark = fVal;        vColor = LERPH3(vColor,            COLOR_ENERGY_BLUE, fVal);}
+                else if(fCur < m_afSpikeMax[i])                     {const coreFloat fVal = MIN1((fCur - (m_afSpikeMax[i] - HARENA_SPIKE_FADE)) * 4.0f); fMark = 1.0f - fVal; vColor = LERPH3(COLOR_ENERGY_BLUE, vColor,            fVal);}
                 else
                 {
                     m_afSpikeCur[i] = 0.0f;
                     m_afSpikeMax[i] = 0.0f;
                 }
+
+                // 
+                fMark  = LERPH3(0.5f, 1.0f, fMark);
+                fMark *= 1.0f + 0.07f * SIN(fCur * (2.0f*PI));
             }
             else
             {
                 // 
-                     if(fCur < HARENA_SPIKE_LAUNCH)                 {const coreFloat fVal = MIN((fCur)                                         * 5.0f, 1.0f); fHeight = ParaLerp(-9.0f, -2.95f, -3.0f, fVal); vColor = LERPH3(vColor,            COLOR_SHIP_PURPLE, fVal);}
-                else if(fCur < m_afSpikeMax[i] - HARENA_SPIKE_FADE) {const coreFloat fVal = MIN((fCur - (HARENA_SPIKE_LAUNCH))                 * 5.0f, 1.0f); fHeight = ParaLerp(-3.0f,  0.0f,  -0.5f, fVal); vColor = LERPH3(COLOR_SHIP_PURPLE, COLOR_SHIP_RED,    fVal);}
-                else if(fCur < m_afSpikeMax[i])                     {const coreFloat fVal = MIN((fCur - (m_afSpikeMax[i] - HARENA_SPIKE_FADE)) * 4.0f, 1.0f); fHeight = LERPH3  (-0.5f,         -9.0f, fVal); vColor = LERPH3(COLOR_SHIP_RED,    vColor,            fVal);}
+                     if(fCur < HARENA_SPIKE_LAUNCH)                 {const coreFloat fVal = MIN1((fCur)                                         * 5.0f); fHeight = ParaLerp(-9.0f, -2.95f, -3.0f, fVal); vColor = LERPH3(vColor,            COLOR_SHIP_PURPLE, fVal);}
+                else if(fCur < m_afSpikeMax[i] - HARENA_SPIKE_FADE) {const coreFloat fVal = MIN1((fCur - (HARENA_SPIKE_LAUNCH))                 * 5.0f); fHeight = ParaLerp(-3.0f,  0.0f,  -0.5f, fVal); vColor = LERPH3(COLOR_SHIP_PURPLE, COLOR_SHIP_RED,    fVal);}
+                else if(fCur < m_afSpikeMax[i])                     {const coreFloat fVal = MIN1((fCur - (m_afSpikeMax[i] - HARENA_SPIKE_FADE)) * 4.0f); fHeight = LERPH3  (-0.5f,         -9.0f, fVal); vColor = LERPH3(COLOR_SHIP_RED,    vColor,            fVal);}
                 else
                 {
                     m_afSpikeCur[i] = 0.0f;

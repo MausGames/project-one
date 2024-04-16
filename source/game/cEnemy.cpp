@@ -148,13 +148,12 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         if(iDamage)
         {
             // 
-            const coreInt32 iPower = (bMulti || bNeutral || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
+            const coreInt32 iPower = (bMulti || bNeutral || (this->GetCurHealth() == 1)) ? 1 : GAME_PLAYERS;
             
             const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 110 : 100);
             
             const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 100, iElement, vImpact) / iPower);
-            ASSERT(!(this->GetMaxHealth() % iPower))
-
+            ASSERT(coreMath::IsAligned(this->GetMaxHealth(), iPower))   // ???
             
             m_iExtraDamage = iTotal % 100;
 

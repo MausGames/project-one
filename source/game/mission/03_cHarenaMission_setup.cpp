@@ -32,7 +32,10 @@ void cHarenaMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cDesertBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-        g_pEnvironment->SetTargetSpeedNow(6.0f);
+
+        g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+        g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+        g_pEnvironment->SetTargetSpeedNow    (6.0f);
 
         g_pGame->StartIntro();
 
@@ -95,13 +98,12 @@ void cHarenaMission::__SetupOwn()
     // bei order-wave sollten keine 3 hintereinander von ein-und-derselben position angreifbar sein (2 ist ok, weil das logisch ist), wenn möglich keine 2 felder bewegen zwischen 2 angriffen und drehung nur um 90 grad
     // bei threshold wave sollte der threshold verschoben sein, damit spieler nicht mit seitlichem angriff trifft, und gegner geschosse schräg fliegen (schöner)
     // memory (unsichtbare gegner die man treffen kann) hat überhaupt nicht funktioniert, hat zu wenig tension erzeugt, und war zu leicht (einfach nieder-mähen), aber gut für badge
-    // TASK: let the very last enemy survive, alone
     // TASK: destroy all broken enemies on their first appearance
-    // TASK: kill 4 very quick enemies before they disappear
+    // TASK: let the very last enemy survive, alone
+    // TASK EXTRA: kill 4 very quick enemies before they disappear
+    // ACHIEVEMENT: follow the head of the snake group for at least 10 seconds
     // TODO 1: hardmode: bad visibility (sand storm) in einer der missionen hier, muss vielleicht sinus-förmig (oder anders) ganz verschwinden, auch geschosse wegen pressure
     // TODO 1: hardmode: enemies also shoot when getting invisible
-    // TODO 1: [MF] MAIN: background rota/speed
-    // TODO 1: [MF] ACHIEVEMENT: name (), description (), touch N enemies before they appear for the first time / ####
     m_aInsanityStage[0] = [this]()
     {
         STAGE_ADD_PATH(pPath1)
@@ -151,20 +153,21 @@ void cHarenaMission::__SetupOwn()
         constexpr coreUint32 iSnakeCount = 6u;
         constexpr coreFloat  fQuickDelay = 1.8f;
 
-        STAGE_GET_START(12u + iSnakeCount)
-            STAGE_GET_UINT      (iStateActive)
-            STAGE_GET_UINT      (iStateGhost)
-            STAGE_GET_FLOAT     (fChangeTime)
-            STAGE_GET_UINT      (iChangeCount)
-            STAGE_GET_UINT_ARRAY(aiSnakeIndex, iSnakeCount)
-            STAGE_GET_UINT      (iSnakeShift,  iSnakeShift = iSnakeCount)
-            STAGE_GET_FLOAT     (fLastValue)
-            STAGE_GET_UINT      (iLastDual)
-            STAGE_GET_UINT      (iFlipShow)
-            STAGE_GET_UINT      (iFlipHide)
-            STAGE_GET_UINT      (iFlipCount)
-            STAGE_GET_UINT      (iQuickCount)
-            STAGE_GET_UINT      (iBlockShot)
+        STAGE_GET_START(12u + iSnakeCount + GAME_PLAYERS)
+            STAGE_GET_UINT       (iStateActive)
+            STAGE_GET_UINT       (iStateGhost)
+            STAGE_GET_FLOAT      (fChangeTime)
+            STAGE_GET_UINT       (iChangeCount)
+            STAGE_GET_UINT_ARRAY (aiSnakeIndex, iSnakeCount)
+            STAGE_GET_UINT       (iSnakeShift,  iSnakeShift = iSnakeCount)
+            STAGE_GET_FLOAT      (fLastValue)
+            STAGE_GET_UINT       (iLastDual)
+            STAGE_GET_UINT       (iFlipShow)
+            STAGE_GET_UINT       (iFlipHide)
+            STAGE_GET_UINT       (iFlipCount)
+            STAGE_GET_UINT       (iQuickCount)
+            STAGE_GET_UINT       (iBlockShot)
+            STAGE_GET_FLOAT_ARRAY(afFollowTime, GAME_PLAYERS)
         STAGE_GET_END
 
         if(STAGE_CLEARED)
@@ -428,6 +431,23 @@ void cHarenaMission::__SetupOwn()
                     aiSnakeIndex[0] = 0u;
                 }
             }
+
+            STAGE_FOREACH_PLAYER(pPlayer, i)
+            {
+                const coreFloat   fOffset = (0.25f/5.0f) + (1.0f/5.0f) * I_TO_F(iSnakeCount - iSnakeShift);
+                const coreVector2 vPos    = pPath1->CalcPosition(FMOD(MAX0(fChangeTime - fOffset), pPath1->GetTotalDistance()));
+                const coreVector2 vDiff   = pPlayer->GetPosition().xy() - vPos * FOREGROUND_AREA;
+
+                if(vDiff.LengthSq() < POW2(10.0f))
+                {
+                    afFollowTime[i] += 1.0f * TIME;
+                    if(afFollowTime[i] >= 10.0f) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, pPlayer->GetPosition())
+                }
+                else
+                {
+                    afFollowTime[i] = 0.0f;
+                }
+            });
         }
         else if(m_iStageSub == 10u)
         {
@@ -716,7 +736,7 @@ void cHarenaMission::__SetupOwn()
 
                     if(!g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy()))
                     {
-                        STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                        STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
 
                         pEnemy->Kill(true);
                         STAGE_DELAY_END
@@ -736,8 +756,15 @@ void cHarenaMission::__SetupOwn()
 
                         if(pEnemy->ReachedDeath())
                         {
-                            if(++iFlipCount == ARRAY_SIZE(aiFlip)) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
-                            else g_pGame->GetCombatText()->DrawProgress(iFlipCount, ARRAY_SIZE(aiFlip), pEnemy->GetPosition());
+                            if(++iFlipCount == ARRAY_SIZE(aiFlip))
+                            {
+                                STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                            }
+                            else
+                            {
+                                g_pGame->GetCombatText()->DrawProgress(iFlipCount, ARRAY_SIZE(aiFlip), pEnemy->GetPosition());
+                                g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlipCount, ARRAY_SIZE(aiFlip)), SOUND_ITEM_COLLECT);
+                            }
                         }
                     }
                     else if(HAS_BIT(iFlipShow, iFlipIndex))
@@ -751,7 +778,10 @@ void cHarenaMission::__SetupOwn()
                 {
                     pEnemy->DefaultRotate(pEnemy->GetLifeTime() * 5.0f);
                 }
+            }
 
+            if(g_pGame->IsTaskExtra())
+            {
                 if(i >= 56u && i < 60u)
                 {
                     if(pEnemy->ReachedDeath())
@@ -764,11 +794,24 @@ void cHarenaMission::__SetupOwn()
             this->CrashEnemy(pEnemy);
         });
 
-        if(!m_iInsanity) if(!bPostpone) STAGE_WAVE(0u, "3-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // DREIZEHN
+        if(!m_iInsanity)
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,1.0f).Normalized(), 30.0f);
+            }
+
+            if(!bPostpone) STAGE_WAVE(0u, "3-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // DREIZEHN
+        }
     };
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         m_aInsanityStage[0]();
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cConeBullet>();
     });
 
     // ################################################################
@@ -776,6 +819,15 @@ void cHarenaMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         g_pGame->KillHelpers();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(1.0f,1.0f).Normalized());
 
         STAGE_FINISH_NOW
     });
@@ -796,15 +848,13 @@ void cHarenaMission::__SetupOwn()
     // during rotation, if move pattern moves against rotation the enemy stays in the air, which looks weird
     // hiding current enemy movement did not add any value, especially on rotating 8 enemies it is just too overwhelming (maybe for hard mode ? might be too light, also change pattern or order ?)
     // first enemy flies from below maybe through player, to show there is no harm
-    // TASK: collect all eggs
     // TASK: kill golden enemy
+    // TASK: collect all eggs
     // ACHIEVEMENT: attack every enemy once as the wrong target
     // TODO 1: hardmode: big can change, like in tiger boss, just (iBig << 1u), maybe not on the first 1-2 hits
     // TODO 5: coop: ein gegner muss innerhalb des zeitlimits von beiden erwischt werden
     // TODO 5: idea: gegner die eng zusammen gehen
-    // TODO 1: [MF] add sound effect when the correct target was hit (ka-ching), also when the wrong was hit (düd-düüd)
-    // TODO 1: [MF] MAIN: badges, sound
-    // TODO 1: [MF] badge: ride the wave
+    // TODO 5: badge: ride the wave
     m_aInsanityStage[1] = [this]()
     {
         constexpr coreUintW iNumEnemies = 8u;
@@ -899,13 +949,14 @@ void cHarenaMission::__SetupOwn()
                         REMOVE_BIT(iGold, i)
 
                         g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_YELLOW);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
                     }
                     else if(!HAS_BIT(iBig, i))
                     {
                         nPunishFunc(pEnemy);
 
-                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_07);
-                        //g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FAILURE);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
+                        g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                         ADD_BIT(iRevengeState, i)
                         if(iRevengeState == BITLINE(iNumEnemies)) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, pEnemy->GetPosition())
@@ -937,8 +988,7 @@ void cHarenaMission::__SetupOwn()
                         }
 
                         g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_BLUE);
-                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_07);
-                        //g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SUCCESS);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
                     }
                 }
 
@@ -1190,26 +1240,34 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        for(coreUintW i = 0u; i < HARENA_EGGS; ++i)
+        if(g_pGame->IsTask())
         {
-            coreObject3D* pEgg = this->GetEgg(i);
-            if(!pEgg->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            pEgg->SetPosition(coreVector3((StepRotated45X(i) * mRotaAbs) * 0.95f * FOREGROUND_AREA, 0.0f));
-
-            STAGE_FOREACH_PLAYER(pPlayer, j)
+            for(coreUintW i = 0u; i < HARENA_EGGS; ++i)
             {
-                const coreVector2 vDiff = pEgg->GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(vDiff.LengthSq() < POW2(5.0f))
+                coreObject3D* pEgg = this->GetEgg(i);
+                if(!pEgg->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                pEgg->SetPosition(coreVector3((StepRotated45X(i) * mRotaAbs) * 0.95f * FOREGROUND_AREA, 0.0f));
+
+                STAGE_FOREACH_PLAYER(pPlayer, j)
                 {
-                    this->DisableEgg(i, true);
+                    const coreVector2 vDiff = pEgg->GetPosition().xy() - pPlayer->GetPosition().xy();
+                    if(vDiff.LengthSq() < POW2(5.0f))
+                    {
+                        this->DisableEgg(i, true);
 
-                    if(++iEggState >= HARENA_EGGS) STAGE_BADGE(2u, BADGE_HARD, pEgg->GetPosition())
-                    else g_pGame->GetCombatText()->DrawCountdown(iEggState, HARENA_EGGS, pEgg->GetPosition());
-
-                    g_pSpecialEffects->PlaySound(pEgg->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iEggState, HARENA_EGGS), SOUND_PLACEHOLDER);
-                }
-            });
+                        if(++iEggState >= HARENA_EGGS)
+                        {
+                            STAGE_BADGE(1u, BADGE_NORMAL, pEgg->GetPosition())
+                        }
+                        else
+                        {
+                            g_pGame->GetCombatText()->DrawCountdown(iEggState, HARENA_EGGS, pEgg->GetPosition());
+                            g_pSpecialEffects->PlaySound(pEgg->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iEggState, HARENA_EGGS), SOUND_ITEM_COLLECT);
+                        }
+                    }
+                });
+            }
         }
 
         m_iStageSub = MAX(m_iStageSub, iPoints + 1u);
@@ -1220,12 +1278,22 @@ void cHarenaMission::__SetupOwn()
 
             pBackground->SetVeilAlpha(STEPH3(0.0f, 30.0f, m_fStageTime));
 
+            if(STAGE_BEGINNING)
+            {
+                g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,0.0f), 30.0f);
+            }
+
             STAGE_WAVE(1u, "3-2", {45.0f, 65.0f, 90.0f, 110.0f, 220.0f})   // VIERZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         m_aInsanityStage[1]();
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cViewBullet>();
     });
 
     // ################################################################
@@ -1256,6 +1324,8 @@ void cHarenaMission::__SetupOwn()
         pBackground->SetGroundDensity(5u, 0.0f);
         pBackground->SetTrail(false);
 
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(1.0f,0.0f));
+
         STAGE_FINISH_NOW
     });
 
@@ -1283,14 +1353,13 @@ void cHarenaMission::__SetupOwn()
     // moving enemies need to look into their fly-direction, to not cause teleportation when hitting them outside the view (though it's more likely they are hit from where they come and not from where they go)
     // sandstorm hides shadow artifacts
     // player can kill a lot of sub-groups by staying at the bottom
-    // TASK: collect N flummies at the end
     // TASK: destroy all unshielded enemies
+    // TASK: collect enough flummies at the end
     // ACHIEVEMENT: dance at least 30 seconds with the final enemy without getting hit
     // TODO 1: hardmode: every enemy attacks, or explodes into bullets
     // TODO 1: hardmode: N infinity enemies or bullets
     // TODO 5: coop: abwechselnd gegner treffen
     // TODO 1: moving tower sollte nicht in seine (exakte) flug-richtung schießen
-    // TODO 1: [MF] MAIN: task-check, coop, regular score, badges, sound
     m_aInsanityStage[2] = [this]()
     {
         constexpr coreUintW iNumEnemies = 61u;
@@ -1308,7 +1377,7 @@ void cHarenaMission::__SetupOwn()
         constexpr coreUint8 aiTarget[] = {2u, 13u, 20u, 34u, 37u, 45u, 49u};
         const auto nIsTargetFunc = [&](const coreUint8 iIndex)
         {
-            return (!m_iInsanity && std::memchr(aiTarget, iIndex, ARRAY_SIZE(aiTarget)));
+            return (!m_iInsanity && g_pGame->IsTask() && std::memchr(aiTarget, iIndex, ARRAY_SIZE(aiTarget)));
         };
 
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, iNumEnemies)
@@ -1371,68 +1440,82 @@ void cHarenaMission::__SetupOwn()
 
         if(m_iStageSub == 100u)
         {
-            if(STAGE_BEGINNING2)
+            if(g_pGame->IsTask())
             {
-                const cEnemy* pBig = pSquad1->GetEnemy(iBigIndex);
-
-                for(coreUintW i = 0u; i < HARENA_FLUMMIS; ++i)
+                if(STAGE_BEGINNING2)
                 {
-                    this->EnableFlummi(i);
+                    const cEnemy* pBig = pSquad1->GetEnemy(iBigIndex);
 
-                    this->GetFlummi(i)->SetPosition(pBig->GetPosition());
-                    aiFlummiDir[i] = coreVector2::Direction(I_TO_F(i) / I_TO_F(HARENA_FLUMMIS) * (2.0f*PI)).PackFloat2x16();
+                    for(coreUintW i = 0u; i < HARENA_FLUMMIS; ++i)
+                    {
+                        this->EnableFlummi(i);
+
+                        this->GetFlummi(i)->SetPosition(pBig->GetPosition());
+                        aiFlummiDir[i] = coreVector2::Direction(I_TO_F(i) / I_TO_F(HARENA_FLUMMIS) * (2.0f*PI)).PackFloat2x16();
+                    }
+
+                    g_pSpecialEffects->CreateSplashColor(pBig->GetPosition(), 100.0f, 20u, COLOR_ENERGY_ORANGE);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
                 }
+                else if(STAGE_SUBTIME_AFTER(6.0f))
+                {
+                    STAGE_DELAY_END
 
-                g_pSpecialEffects->CreateSplashColor(pBig->GetPosition(), 100.0f, 20u, COLOR_ENERGY_ORANGE);
-            }
-            else if(STAGE_SUBTIME_AFTER(6.0f))
-            {
-                STAGE_DELAY_END
+                    for(coreUintW i = 0u; i < HARENA_FLUMMIS; ++i)
+                    {
+                        coreObject3D* pFlummi = this->GetFlummi(i);
+                        if(!pFlummi->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                        this->DisableFlummi(i, false);
+
+                        g_pSpecialEffects->CreateBlowColor(pFlummi->GetPosition(), pFlummi->GetPosition().Normalized(), 50.0f, 10u, COLOR_ENERGY_ORANGE);
+                    }
+                }
 
                 for(coreUintW i = 0u; i < HARENA_FLUMMIS; ++i)
                 {
                     coreObject3D* pFlummi = this->GetFlummi(i);
                     if(!pFlummi->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-                    this->DisableFlummi(i, false);
+                    coreVector2 vCurPos = pFlummi->GetPosition().xy();
+                    coreVector2 vCurDir = coreVector2::UnpackFloat2x16(aiFlummiDir[i]);
 
-                    g_pSpecialEffects->CreateBlowColor(pFlummi->GetPosition(), pFlummi->GetPosition().Normalized(), 50.0f, 10u, COLOR_ENERGY_ORANGE);
+                    vCurPos += vCurDir * ((30.0f + 5.0f * I_TO_F(i % 3u)) * TIME);
+                    STATIC_ASSERT(coreMath::IsAligned(HARENA_FLUMMIS, 3u))
+
+                         if((vCurPos.x < -FOREGROUND_AREA.x * 1.1f) && (vCurDir.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + FOREGROUND_AREA.x * 1.1f); vCurDir.x =  ABS(vCurDir.x);}
+                    else if((vCurPos.x >  FOREGROUND_AREA.x * 1.1f) && (vCurDir.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - FOREGROUND_AREA.x * 1.1f); vCurDir.x = -ABS(vCurDir.x);}
+                         if((vCurPos.y < -FOREGROUND_AREA.y * 1.1f) && (vCurDir.y < 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y + FOREGROUND_AREA.y * 1.1f); vCurDir.y =  ABS(vCurDir.y);}
+                    else if((vCurPos.y >  FOREGROUND_AREA.y * 1.1f) && (vCurDir.y > 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y - FOREGROUND_AREA.y * 1.1f); vCurDir.y = -ABS(vCurDir.y);}
+
+                    pFlummi->SetPosition(coreVector3(vCurPos, 0.0f));
+                    aiFlummiDir[i] = vCurDir.PackFloat2x16();
+
+                    STAGE_FOREACH_PLAYER(pPlayer, j)
+                    {
+                        const coreVector2 vDiff = pFlummi->GetPosition().xy() - pPlayer->GetPosition().xy();
+                        if(vDiff.LengthSq() < POW2(5.0f))
+                        {
+                            this->DisableFlummi(i, true);
+
+                            if(++iFlummiCollect >= iFlummiRequire)
+                            {
+                                STAGE_BADGE(1u, BADGE_NORMAL, pFlummi->GetPosition())
+                            }
+                            else
+                            {
+                                g_pGame->GetCombatText()->DrawCountdown(iFlummiCollect, iFlummiRequire, pFlummi->GetPosition());
+                            }
+
+                            g_pSpecialEffects->PlaySound(pFlummi->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlummiCollect, iFlummiRequire), SOUND_ITEM_COLLECT);   // always
+                        }
+                    });
                 }
             }
-        }
-
-        for(coreUintW i = 0u; i < HARENA_FLUMMIS; ++i)
-        {
-            coreObject3D* pFlummi = this->GetFlummi(i);
-            if(!pFlummi->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            coreVector2 vCurPos = pFlummi->GetPosition().xy();
-            coreVector2 vCurDir = coreVector2::UnpackFloat2x16(aiFlummiDir[i]);
-
-            vCurPos += vCurDir * ((30.0f + 5.0f * I_TO_F(i % 3u)) * TIME);
-            STATIC_ASSERT(coreMath::IsAligned(HARENA_FLUMMIS, 3u))
-
-                 if((vCurPos.x < -FOREGROUND_AREA.x * 1.1f) && (vCurDir.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + FOREGROUND_AREA.x * 1.1f); vCurDir.x =  ABS(vCurDir.x);}
-            else if((vCurPos.x >  FOREGROUND_AREA.x * 1.1f) && (vCurDir.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - FOREGROUND_AREA.x * 1.1f); vCurDir.x = -ABS(vCurDir.x);}
-                 if((vCurPos.y < -FOREGROUND_AREA.y * 1.1f) && (vCurDir.y < 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y + FOREGROUND_AREA.y * 1.1f); vCurDir.y =  ABS(vCurDir.y);}
-            else if((vCurPos.y >  FOREGROUND_AREA.y * 1.1f) && (vCurDir.y > 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y - FOREGROUND_AREA.y * 1.1f); vCurDir.y = -ABS(vCurDir.y);}
-
-            pFlummi->SetPosition(coreVector3(vCurPos, 0.0f));
-            aiFlummiDir[i] = vCurDir.PackFloat2x16();
-
-            STAGE_FOREACH_PLAYER(pPlayer, j)
+            else
             {
-                const coreVector2 vDiff = pFlummi->GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(vDiff.LengthSq() < POW2(5.0f))
-                {
-                    this->DisableFlummi(i, true);
-
-                    if(++iFlummiCollect >= iFlummiRequire) STAGE_BADGE(0u, BADGE_EASY, pFlummi->GetPosition())
-                    else g_pGame->GetCombatText()->DrawCountdown(iFlummiCollect, iFlummiRequire, pFlummi->GetPosition());
-
-                    g_pSpecialEffects->PlaySound(pFlummi->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlummiCollect, iFlummiRequire), SOUND_PLACEHOLDER);
-                }
-            });
+                STAGE_DELAY_END
+            }
         }
 
         for(coreUintW i = 0u; i < HARENA_FLOORS; ++i)
@@ -1463,8 +1546,15 @@ void cHarenaMission::__SetupOwn()
 
             if(nIsTargetFunc(i) && pEnemy->ReachedDeath())   // killed by player
             {
-                if(++iKillCount == ARRAY_SIZE(aiTarget)) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
-                else g_pGame->GetCombatText()->DrawProgress(iKillCount, ARRAY_SIZE(aiTarget), pEnemy->GetPosition());
+                if(++iKillCount == ARRAY_SIZE(aiTarget))
+                {
+                    STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                }
+                else
+                {
+                    g_pGame->GetCombatText()->DrawProgress(iKillCount, ARRAY_SIZE(aiTarget), pEnemy->GetPosition());
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iKillCount, ARRAY_SIZE(aiTarget)), SOUND_PLACEHOLDER);
+                }
             }
 
             if(STAGE_TAKEOFF)
@@ -1669,12 +1759,11 @@ void cHarenaMission::__SetupOwn()
 
             const coreFloat fFactor     = bBig ? 1.5f : 1.0f;
             const coreFloat fScale      =       1.3f - 0.3f * STEPH3( 0.0f,  3.0f, afHeight[i]);
-            const coreFloat fAlpha      = 1.0f;//      1.0f - 0.9f * STEPH3( 0.0f, 54.0f, afHeight[i]);
-            const coreFloat fVisibility = CLAMP(1.0f - 1.0f * STEPH3(35.0f, 54.0f, afHeight[i]), (pEnemy->GetAlpha() / fAlpha), 1.0f);
-            const coreFloat fVisibility2 = CLAMP(1.0f - 1.0f * STEPH3(49.0f, 54.0f, afHeight[i]), (pEnemy->GetAlpha() / fAlpha), 1.0f);
+            const coreFloat fVisibility = CLAMP(1.0f - 1.0f * STEPH3(35.0f, 54.0f, afHeight[i]), pEnemy->GetAlpha(), 1.0f);
+            const coreFloat fAlpha      = CLAMP(1.0f - 1.0f * STEPH3(49.0f, 54.0f, afHeight[i]), pEnemy->GetAlpha(), 1.0f);
 
             pEnemy->SetSize (coreVector3(1.0f,1.0f,1.0f) * fVisibility * fScale * fFactor);
-            pEnemy->SetAlpha(fVisibility2 * fAlpha);
+            pEnemy->SetAlpha(fAlpha);
 
             if(pEnemy->HasStatus(ENEMY_STATUS_HIDDEN) && fVisibility)
             {
@@ -1743,11 +1832,24 @@ void cHarenaMission::__SetupOwn()
 
         m_iStageSub = MAX(m_iStageSub, iPoints + 1u);
 
-        if(!m_iInsanity) STAGE_WAVE(2u, "3-3", {40.0f, 60.0f, 80.0f, 100.0f, 200.0f})   // FÜNFZEHN
+        if(!m_iInsanity)
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,-1.0f), 30.0f);
+            }
+
+            STAGE_WAVE(2u, "3-3", {40.0f, 60.0f, 80.0f, 100.0f, 200.0f})   // FÜNFZEHN
+        }
     };
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         m_aInsanityStage[2]();
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMinerEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cQuadBullet>();
     });
 
     // ################################################################
@@ -1774,6 +1876,8 @@ void cHarenaMission::__SetupOwn()
         cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
 
         pBackground->SetVeilAlpha(1.0f);
+
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,-1.0f));
 
         STAGE_FINISH_NOW
     });
@@ -1809,7 +1913,6 @@ void cHarenaMission::__SetupOwn()
     // ACHIEVEMENT: never destroy one of the small enemies
     // TODO 1: hardmode: every killed enemy makes an attack (target single ?)
     // TODO 1: pacifist: holes in line border attack
-    // TODO 1: [MF] MAIN: task-check, badges, sound, background rota/speed
     m_aInsanityStage[3] = [this]()
     {
         constexpr coreUintW iNumEnemies = 170u;
@@ -1910,10 +2013,13 @@ void cHarenaMission::__SetupOwn()
                     aiByteType[i] = iType;
                     aiVector  [i] = coreVector2(0.0f,0.0f).PackFloat2x16();   // reset
 
-                    nSetState(i, iState);
+                    if(g_pGame->IsTask())
+                    {
+                        nSetState(i, iState);
 
-                    if(iState == 2u) pCurrent->SetBaseColor(COLOR_SHIP_BLACK, false, true);
-                                else pCurrent->SetBaseColor(COLOR_SHIP_MAGENTA);
+                        if(iState == 2u) pCurrent->SetBaseColor(COLOR_SHIP_BLACK, false, true);
+                                    else pCurrent->SetBaseColor(COLOR_SHIP_MAGENTA);
+                    }
 
                     d_cast<cArrowEnemy*>(pCurrent)->SetAngle(0.0f);
 
@@ -1953,17 +2059,34 @@ void cHarenaMission::__SetupOwn()
                 iTakeStart = MIN(iTakeStart, i);
                 iLoopKill  = iLoopKill + 1u;
 
-                const coreUint8 iState = nGetState(i);
+                if(g_pGame->IsTask())
+                {
+                    const coreUint8 iState = nGetState(i);
 
-                if(iState == 1u)
-                {
-                    if(++iInitCount >= 20u) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
-                    else g_pGame->GetCombatText()->DrawCountdown(iInitCount, 20u, pEnemy->GetPosition());
-                }
-                else if(iState == 2u)
-                {
-                    if(++iBreakCount == ARRAY_SIZE(aaiBreak)) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
-                    else g_pGame->GetCombatText()->DrawProgress(iBreakCount, ARRAY_SIZE(aaiBreak), pEnemy->GetPosition());
+                    if(iState == 1u)
+                    {
+                        if(++iInitCount >= 20u)
+                        {
+                            STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                        }
+                        else
+                        {
+                            g_pGame->GetCombatText()->DrawCountdown(iInitCount, 20u, pEnemy->GetPosition());
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iInitCount, 20u), SOUND_PLACEHOLDER);
+                        }
+                    }
+                    else if(iState == 2u)
+                    {
+                        if(++iBreakCount == ARRAY_SIZE(aaiBreak))
+                        {
+                            STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
+                        }
+                        else
+                        {
+                            g_pGame->GetCombatText()->DrawProgress(iBreakCount, ARRAY_SIZE(aaiBreak), pEnemy->GetPosition());
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iBreakCount, ARRAY_SIZE(aaiBreak)), SOUND_ITEM_COLLECT);
+                        }
+                    }
                 }
             }
         });
@@ -2012,6 +2135,8 @@ void cHarenaMission::__SetupOwn()
 
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
         }
+
+        g_pSpecialEffects->OverrideShake(0.5f);
 
         if(m_iStageSub == 1u)
         {
@@ -2387,6 +2512,11 @@ void cHarenaMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         m_aInsanityStage[3]();
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
     });
 
     // ################################################################
@@ -2428,12 +2558,11 @@ void cHarenaMission::__SetupOwn()
     // spieler muss genau sehen wo bald stacheln kommen und wo gefahr ist (einfärben der platten und stacheln)
     // TASK: collect all the good plates
     // TASK: a single enemy with lots of health needs to be killed, but disappears after some time
+    // ACHIEVEMENT: only move along the middle line until everything goes silent
     // TODO 1: hard mode: infinity movement (only X or Y always, even with possible pattern issues, though maybe some have nice transitions) (also enemies ?)
     // TODO 1: dünklere kreise sollten auf der platte sein, wo die stacheln raus kommen ? 
-    // TODO 1: [MF] badge: % time moving on purple plates
-    // TODO 1: [MF] badge: touch each plate at least once (needs visual highlight)
-    // TODO 1: [MF] MAIN: task-check, extra score, badges, sound, background rota/speed
-    // TODO 1: [MF] ACHIEVEMENT: name (), description (), stay on 10 plates when an enemy is currently spawning there (find)
+    // TODO 5: badge: % time moving on purple plates
+    // TODO 5: badge: touch each plate at least once (needs visual highlight)
     m_aInsanityStage[4] = [this]()
     {
         constexpr coreUintW iNumData  = 16u;
@@ -2455,7 +2584,8 @@ void cHarenaMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(5u + iNumData)
+        STAGE_GET_START(6u + iNumData)
+            STAGE_GET_UINT       (iMiddleState)
             STAGE_GET_UINT       (iFlipCount)
             STAGE_GET_UINT       (iGoodCount)
             STAGE_GET_UINT       (iSpikeCount)
@@ -2497,7 +2627,7 @@ void cHarenaMission::__SetupOwn()
                 else if(STAGE_SUB( 5u)) {STAGE_RESURRECT(pSquad1, 24u, 29u) fEnemyDelay = 4.0f;}
                 else if(STAGE_SUB( 6u)) {STAGE_RESURRECT(pSquad1, 58u, 58u) fEnemyDelay = 0.0f;}
                 else if(STAGE_SUB( 7u)) {STAGE_RESURRECT(pSquad1, 30u, 37u) fEnemyDelay = 5.0f;}
-                else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1, 38u, 41u) fEnemyDelay = 2.0f;}
+                else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1, 38u, 41u) fEnemyDelay = 2.0f; if(!iMiddleState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))}
                 else if(STAGE_SUB( 9u))
                 {
                     for(coreUintW i = 0u; i < HARENA_SPIKES; ++i)
@@ -2556,7 +2686,7 @@ void cHarenaMission::__SetupOwn()
                 const coreUintW iColumn = iIndex % HARENA_SPIKE_DIMENSION;
                 const coreUintW iRow    = iIndex / HARENA_SPIKE_DIMENSION;
 
-                this->LaunchSpike(nToIndexFunc(iColumn, iRow), 2.0f * fTickTime, (iSpikeCount == 8u));
+                this->LaunchSpike(nToIndexFunc(iColumn, iRow), 2.0f * fTickTime, g_pGame->IsTask() && (iSpikeCount == 8u));
 
                 iSpikeCount += 1u;
             }
@@ -2573,7 +2703,7 @@ void cHarenaMission::__SetupOwn()
                 const coreUintW iRow2 = (iSpikeCount + 3u) % HARENA_SPIKE_DIMENSION;
 
                                       this->LaunchSpike(nToIndexFunc(iColumn1, iRow1), 2.0f * fTickTime);
-                if(iSpikeCount >= 3u) this->LaunchSpike(nToIndexFunc(iColumn2, iRow2), 2.0f * fTickTime, (iSpikeCount == 11u));
+                if(iSpikeCount >= 3u) this->LaunchSpike(nToIndexFunc(iColumn2, iRow2), 2.0f * fTickTime, g_pGame->IsTask() && (iSpikeCount == 11u));
 
                 iSpikeCount += 1u;
             }
@@ -2589,7 +2719,7 @@ void cHarenaMission::__SetupOwn()
                 {
                     const coreUintW iRealColumn = (i % 2u) ? ((HARENA_SPIKE_DIMENSION - 1u) - iColumn) : iColumn;
 
-                    this->LaunchSpike(nToIndexFunc(iRealColumn, i), 2.0f * fTickTime, (iSpikeCount == 3u) && (i == 1u));
+                    this->LaunchSpike(nToIndexFunc(iRealColumn, i), 2.0f * fTickTime, g_pGame->IsTask() && (iSpikeCount == 3u) && (i == 1u));
                 }
 
                 iSpikeCount += 1u;
@@ -2607,7 +2737,7 @@ void cHarenaMission::__SetupOwn()
 
                     if(((iColumn + iRow + iSpikeCount) % (HARENA_SPIKE_DIMENSION / 2u))) continue;
 
-                    this->LaunchSpike(i, 2.0f * fTickTime, (iSpikeCount == 2u) && (i == 28u));
+                    this->LaunchSpike(i, 2.0f * fTickTime, g_pGame->IsTask() && (iSpikeCount == 2u) && (i == 28u));
                 }
 
                 iSpikeCount += 1u;
@@ -2634,7 +2764,7 @@ void cHarenaMission::__SetupOwn()
                 {
                     if(i == iSkip) continue;
 
-                    this->LaunchSpike(nToIndexFunc(iColumn, i), 2.0f * fTickTime, (iSpikeCount == 15u) && (i == 2u));
+                    this->LaunchSpike(nToIndexFunc(iColumn, i), 2.0f * fTickTime, g_pGame->IsTask() && (iSpikeCount == 15u) && (i == 2u));
                 }
 
                 iSpikeCount += 1u;
@@ -2677,7 +2807,7 @@ void cHarenaMission::__SetupOwn()
 
                     if((HAS_BIT(iQuad, 0u) != ((iColumn % 2u) != 0u)) || (HAS_BIT(iQuad, 1u) != ((iRow % 2u) != 0u))) continue;
 
-                    this->LaunchSpike(i, 2.0f * fTickTime, (iSpikeCount == 3u) && (i == 20u));
+                    this->LaunchSpike(i, 2.0f * fTickTime, g_pGame->IsTask() && (iSpikeCount == 3u) && (i == 20u));
                 }
 
                 iSpikeCount += 1u;
@@ -2744,8 +2874,15 @@ void cHarenaMission::__SetupOwn()
                         {
                             this->RetractSpike(i);
 
-                            if(++iGoodCount == 6u) STAGE_BADGE(1u, BADGE_NORMAL, pBoard->GetPosition())
-                            else g_pGame->GetCombatText()->DrawProgress(iGoodCount, 6u, pBoard->GetPosition());
+                            if(++iGoodCount == 6u)
+                            {
+                                STAGE_BADGE(0u, BADGE_EASY, pBoard->GetPosition())
+                            }
+                            else
+                            {
+                                g_pGame->GetCombatText()->DrawProgress(iGoodCount, 6u, pBoard->GetPosition());
+                                g_pSpecialEffects->PlaySound(pBoard->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iGoodCount, 6u), SOUND_ITEM_COLLECT);
+                            }
                         }
                         else
                         {
@@ -2766,11 +2903,18 @@ void cHarenaMission::__SetupOwn()
                         if(vDiff.LengthSq() < POW2(pBoard->GetCollisionRange().x))
                         {
                             pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.2f, SOUND_EFFECT_SWIPE);
                         }
                     });
                 }
             }
         }
+
+        STAGE_FOREACH_PLAYER(pPlayer, i)
+        {
+            if(!coreMath::IsNear(pPlayer->GetPosition().x, 0.0f)) iMiddleState = true;
+        });
 
         coreBool bPostpone = false;
 
@@ -2858,9 +3002,9 @@ void cHarenaMission::__SetupOwn()
 
                 pEnemy->SetPosition(coreVector3(vPos, 0.0f));
 
-                if(pEnemy->ReachedDeath())
+                if(g_pGame->IsTask() && pEnemy->ReachedDeath())
                 {
-                    STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                    STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
                 }
 
                 if(fTime >= 1.0f)
@@ -2901,12 +3045,21 @@ void cHarenaMission::__SetupOwn()
             pBackground->SetGroundDensity(0u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
             pBackground->SetGroundDensity(1u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
 
+            if(STAGE_BEGINNING)
+            {
+                g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,1.0f), 30.0f);
+            }
+
             if(!bPostpone) STAGE_WAVE(4u, "3-5", {65.0f, 95.0f, 130.0f, 160.0f, 320.0f})   // SIEBZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         m_aInsanityStage[4]();
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cFreezerEnemy>();
     });
 
     // ################################################################
@@ -2921,9 +3074,11 @@ void cHarenaMission::__SetupOwn()
         STAGE_FINISH_NOW
     });
 
+#if defined(_P1_UNUSED_)
+
     // ################################################################
     // wait for play
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_FINISH_PLAY
     });
@@ -2938,7 +3093,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: simon says, linear up and down, to make distinction easy, and to prevent accidental hits (order forward, backward, mirrored, to stay fair but variable)
     // TODO 1: static assertion, keine der chief-order darf enemy-count übersteigen
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         UNUSED STAGE_ADD_PATH(pPath1)          
         {
@@ -3066,16 +3221,37 @@ void cHarenaMission::__SetupOwn()
         });
 
         STAGE_WAVE(5u, "3-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // ACHTZEHN
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cStarEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMinerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cFreezerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMeteorEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cOrbBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cConeBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cWaveBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cSpearBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cTriangleBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cFlipBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cQuadBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cViewBullet>();
     });
 
     // ################################################################
     // reset helper
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
+
+#endif
 
     // ################################################################
     // change background appearance
@@ -3085,6 +3261,8 @@ void cHarenaMission::__SetupOwn()
 
         pBackground->SetGroundDensity(0u, 0.0f);
         pBackground->SetGroundDensity(1u, 0.0f);
+
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,1.0f));
 
         STAGE_FINISH_NOW
     });
@@ -3101,6 +3279,15 @@ void cHarenaMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Tiger, {140.0f, 210.0f, 280.0, 350.0f, 700.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMinerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cFreezerEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cRocketBullet>();
+        g_pGame->PrefetchBoss();
     });
 
     // ################################################################

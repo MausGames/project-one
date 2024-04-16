@@ -65,7 +65,7 @@ cCloudBackground::cCloudBackground()noexcept
     m_Rain.DefineProgram("effect_weather_rain_cloud_program");
     m_Rain.SetPosition  (coreVector2(0.0f,0.0f));
     m_Rain.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
-    m_Rain.SetAlpha     (0.6f);
+    m_Rain.SetAlpha     (0.55f);
 
     // 
     m_Cover.DefineTexture(0u, "environment_clouds_grey.png");
@@ -163,7 +163,7 @@ void cCloudBackground::__MoveOwn()
 {
     // 
     const coreVector2 vEnvMove   = coreVector2(0.3f,1.0f) * (-0.35f * MAX0(g_pEnvironment->GetSpeed()));
-    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 6.0f;
+    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.5f;
     const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f, -m_vRainMove.Length()) + vEnvMove) * (1.0f * TIME);
 
     // 

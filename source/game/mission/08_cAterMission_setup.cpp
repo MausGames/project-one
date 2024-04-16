@@ -32,7 +32,10 @@ void cAterMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-        g_pEnvironment->SetTargetSpeedNow(4.0f);
+
+        g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+        g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+        g_pEnvironment->SetTargetSpeedNow    (4.0f);
 
         g_pGame->StartIntro();
 
@@ -91,7 +94,15 @@ void cAterMission::__SetupOwn()
             });
         });
 
-        STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f, 480.0f})
+        if(g_pGame->IsEasy()) STAGE_BOSS(m_ProjectOne, {300.0f, 450.0f,  600.0,  750.0f, 1500.0f})
+                         else STAGE_BOSS(m_ProjectOne, {600.0f, 900.0f, 1200.0, 1500.0f, 3000.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMeteorEnemy>();
+        g_pGame->PrefetchBoss();
     });
 
     // ################################################################
@@ -107,7 +118,7 @@ void cAterMission::__SetupOwn()
             iBonus2 = MAX(iBonus2, 1u);
         }
 
-        if(m_Secret)
+        if(m_bSecret)
         {
             STAGE_FINISH_NOW
         }
@@ -121,7 +132,7 @@ void cAterMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        if(m_Secret)
+        if(m_bSecret)
         {
             STAGE_FINISH_NOW
         }
@@ -129,7 +140,15 @@ void cAterMission::__SetupOwn()
         {
             if(STAGE_BEGINNING)
             {
-                g_pGame->StartOutro(GAME_OUTRO_ENDING_NORMAL);
+                if(m_iCredits < 1u)
+                {
+                    g_pGame->StartOutro(GAME_OUTRO_ENDING_NORMAL);
+                }
+                else
+                {
+                    ASSERT(m_iTakeTo != TAKE_MISSION)
+                    g_pGame->StartOutro(GAME_OUTRO_SEGMENT);
+                }
 
                 g_MusicPlayer.SelectName("ending_normal.ogg");
                 g_MusicPlayer.Play();
@@ -151,9 +170,37 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // 
+    STAGE_MAIN({TAKE_TRAINING, 6u})
+    {
+        this->TransformPlayers();
+
+        cDarkBackground* pBackground = d_cast<cDarkBackground*>(g_pEnvironment->GetBackground());
+
+        for(coreUintW i = 0u; i < DARK_BLOCKS; ++i)
+        {
+            pBackground->SetBlockHeight(i, 0.0f);
+            pBackground->SetBlockColor (i, DARK_COLOR_DEFAULT * 0.5f);
+        }
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_TRAINING, 6u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // 
     STAGE_MAIN({TAKE_ALWAYS, 5u, 6u})
     {
-        STAGE_BOSS(m_Eigengrau, {141.0f, 210.0f, 280.0f, 350.0f, 700.0f})
+        STAGE_BOSS(m_Eigengrau, {140.0f + 1.0f, 210.0f, 280.0f, 350.0f, 700.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cTiltBullet>();
     });
 
     // ################################################################
@@ -162,6 +209,7 @@ void cAterMission::__SetupOwn()
     {
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
+            pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE);
             pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE_2);
         });
 
@@ -174,7 +222,15 @@ void cAterMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            g_pGame->StartOutro(GAME_OUTRO_ENDING_SECRET);
+            if(m_iCredits < 2u)
+            {
+                g_pGame->StartOutro(GAME_OUTRO_ENDING_SECRET);
+            }
+            else
+            {
+                ASSERT(m_iTakeTo != TAKE_MISSION)
+                g_pGame->StartOutro(GAME_OUTRO_SEGMENT);
+            }
         }
     });
 

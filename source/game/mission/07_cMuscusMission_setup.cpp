@@ -44,7 +44,10 @@ void cMuscusMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-        g_pEnvironment->SetTargetSpeedNow(6.0f);
+
+        g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+        g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+        g_pEnvironment->SetTargetSpeedNow    (6.0f);
 
         g_pGame->StartIntro();
 
@@ -114,13 +117,13 @@ void cMuscusMission::__SetupOwn()
     // currently blending-in and blending-out is binary (which is much smoother), except in 6x6 wave, where it gets mixed with the lerp-value, to make sure no enemy is visible inside the cone
     // TASK: destroy all hidden enemies
     // TASK: touch an invisible enemy
+    // TASK EXTRA: charge the sun
     // ACHIEVEMENT: destroy 5 enemies while no light is shining on them
-    // TODO 1: [MF] badge: let them all stare at you (keep all in 6x6 visible for 1 second)
-    // TODO 1: [MF] badge: etwas einsammeln/berühren, dass man nur mit licht sieht, nur in bestimmter phase, N items
-    // TODO 1: [MF] badge: ein objekt mit licht aufladen
+    // COOP: active light alternates between players
+    // TODO 5: badge: let them all stare at you (keep all in 6x6 visible for 1 second)
+    // TODO 5: badge: etwas einsammeln/berühren, dass man nur mit licht sieht, nur in bestimmter phase, N items
     // TODO 1: hardmode: zusätzliche Mario geister die man nicht töten kann (vlt. nur einer)
     // TODO 1: disable shadow and water-reflection (completely) for segments in darkness, to hide popping artifacts (though only for shadow)
-    // TODO 1: [MF] MAIN: task-check, badges, sound
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumData = 36u;
@@ -138,7 +141,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * ((i == 23u || i == 27u) ? 2.3f : 1.6f));
-                pEnemy->Configure((i == 23u || i == 27u) ? 120 : 10, 0u, COLOR_SHIP_GREEN);
+                pEnemy->Configure((i == 27u) ? 240 : (i == 23u) ? 120 : 10, 0u, COLOR_SHIP_GREEN);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
@@ -217,7 +220,10 @@ void cMuscusMission::__SetupOwn()
                 else if(m_iStageSub == 17u) STAGE_RESURRECT(pSquad2, 2u, 2u)
                 else if(m_iStageSub == 18u) STAGE_RESURRECT(pSquad2, 3u, 3u)
                 else if(m_iStageSub == 20u) STAGE_RESURRECT(pSquad2, 4u, 4u)
+            }
 
+            if(g_pGame->IsTaskExtra())
+            {
                 if(m_iStageSub == 18u)
                 {
                     this->EnableSun();
@@ -299,7 +305,7 @@ void cMuscusMission::__SetupOwn()
                 m_fSunValue.UpdateMin(0.4f, 1.0f);
                 if(m_fSunValue >= 1.0f)
                 {
-                    STAGE_BADGE(1u, BADGE_NORMAL, m_Sun.GetPosition())
+                    STAGE_BADGE(2u, BADGE_HARD, m_Sun.GetPosition())
                 }
                 else if(STAGE_TICK_FREE(30.0f, 0.0f))
                 {
@@ -338,7 +344,7 @@ void cMuscusMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i >= 6u && i < 16u) ? 0.85f : 1.0f, (i == 6u) ? 1.3f : ((i == 19u) ? 2.0f : ((i >= 8u && i < 16u) ? (0.5f * I_TO_F((i - 8u) % 4u) + ((i < 12u) ? 4.0f : 0.0f)) : 0.0f)))
+            STAGE_LIFETIME(pEnemy, (i >= 6u && i < 16u) ? 0.85f : 1.0f, (i == 6u) ? 1.3f : ((i == 19u) ? 2.0f : ((i >= 8u && i < 16u) ? (0.5f * I_TO_F((i - 8u) % 4u) + ((i >= 8u && i < 12u) ? 0.5f : 0.0f)) : 0.0f)))
 
             coreBool bDisappear = false;
             coreBool bInverted  = false;
@@ -374,7 +380,7 @@ void cMuscusMission::__SetupOwn()
                 pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
 
                      if(i <  8u) pEnemy->Rotate90 ();
-                else if(i < 12u) pEnemy->Rotate90 ()->InvertY();
+                else if(i < 12u) pEnemy->Rotate90 ();
                 else if(i < 14u) {}
                 else if(i < 16u) pEnemy->Rotate180();
             }
@@ -550,7 +556,7 @@ void cMuscusMission::__SetupOwn()
                 pEnemy->AddStatus(ENEMY_STATUS_HIDDEN);
             }
 
-            if(i < 6u || (i >= 16u && i < 24u) || i == 27u || bShootWave)
+            if(i < 6u || (i >= 16u && i < 24u) || bShootWave)
             {
                 if(STAGE_TICK_LIFETIME((i == 23u) ? 3.0f : 2.0f, 0.0f) || bShootWave)
                 {
@@ -573,12 +579,12 @@ void cMuscusMission::__SetupOwn()
 
             if((i >= 6u && i < 16u) || (i >= 24u && i < 29u))
             {
-                if(!pEnemy->GetAlpha() && STAGE_TICK_LIFETIME(20.0f / fLifeSpeed, 0.0f))
+                if((!pEnemy->GetAlpha() || (i == 27u)) && STAGE_TICK_LIFETIME(20.0f / fLifeSpeed, 0.0f))
                 {
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = g_pGame->IsEasy() ? ((i < 12u || i == 28u) ? -pEnemy->GetPosition().xy().Normalized() : pEnemy->GetDirection().xy()) : pEnemy->AimAtPlayerDual(i % 2u).Normalized();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.9f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (i == 27u) ? 0.0f : 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.9f);
 
                     g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_BLUE);
                     g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
@@ -621,12 +627,24 @@ void cMuscusMission::__SetupOwn()
 
             if(pEnemy->ReachedDeath())
             {
-                if(++iHiddenState >= pSquad2->GetNumEnemies()) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
-                else g_pGame->GetCombatText()->DrawProgress(iHiddenState, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
+                if(++iHiddenState >= pSquad2->GetNumEnemies())
+                {
+                    STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
+                }
+                else
+                {
+                    g_pGame->GetCombatText()->DrawProgress(iHiddenState, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iHiddenState, pSquad2->GetNumEnemies()), SOUND_ITEM_COLLECT);
+                }
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(0u, "7-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // SIEBENUNDDREISSIG
+        if(!bPostpone) STAGE_WAVE(0u, "7-1", {55.0f, 80.0f, 110.0f, 135.0f, 270.0f})   // SIEBENUNDDREISSIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cOrbBullet>();
     });
 
     // ################################################################
@@ -673,12 +691,11 @@ void cMuscusMission::__SetupOwn()
     // TASK: touch all diamond fields
     // TASK: spin once against direction of last line
     // ACHIEVEMENT: finish the stage without ever letting a damaging field disappear
-    // TODO 1: [MF] badge: show arrows how to pass through holes ##
-    // TODO 1: [MF] badge: attack enemies in certain order in last wave oder left-right oder up-down wave, oder in einzel-wave davor
-    // TODO 1: [MF] badge: get N blocks (count-down) at N places at the bottom
+    // TODO 5: badge: show arrows how to pass through holes ##
+    // TODO 5: badge: attack enemies in certain order in last wave oder left-right oder up-down wave, oder in einzel-wave davor
+    // TODO 5: badge: get N blocks (count-down) at N places at the bottom
     // TODO 1: hard mode: alles 45 grad gedreht
     // TODO 1: hard mode: der rand is mit generates zugedeckt (man sieht die ecken?)
-    // TODO 1: [MF] MAIN: task-check, badges, sound
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep        = 0.275f;
@@ -1024,6 +1041,9 @@ void cMuscusMission::__SetupOwn()
 
                     g_pSpecialEffects->MacroEruptionColorSmall(pHelper->GetPosition(), coreVector2(1.0f,0.0f), COLOR_ENERGY_GREEN);
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
+                    g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                 }
             }
         }
@@ -1046,6 +1066,8 @@ void cMuscusMission::__SetupOwn()
                     this->DisableGenerate(i, true);
 
                 g_pSpecialEffects->MacroExplosionColorBig(coreVector3(0.0f,0.0f,0.0f), COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->PlaySound(coreVector3(0.0f,0.0f,0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
+                g_pSpecialEffects->PlaySound(coreVector3(0.0f,0.0f,0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
 
                 cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
 
@@ -1132,8 +1154,15 @@ void cMuscusMission::__SetupOwn()
             {
                 this->TestGenerate(i, false);
 
-                if(++iTouchState >= ARRAY_SIZE(aaiTouch)) STAGE_BADGE(1u, BADGE_NORMAL, pGenerate->GetPosition())
-                else g_pGame->GetCombatText()->DrawProgress(iTouchState, ARRAY_SIZE(aaiTouch), pGenerate->GetPosition());
+                if(++iTouchState >= ARRAY_SIZE(aaiTouch))
+                {
+                    STAGE_BADGE(0u, BADGE_EASY, pGenerate->GetPosition())
+                }
+                else
+                {
+                    g_pGame->GetCombatText()->DrawProgress(iTouchState, ARRAY_SIZE(aaiTouch), pGenerate->GetPosition());
+                    g_pSpecialEffects->PlaySound(pGenerate->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iTouchState, ARRAY_SIZE(aaiTouch)), SOUND_ITEM_COLLECT);
+                }
             }
 
             if(aiGenerateType[i] < 8u)
@@ -1216,12 +1245,16 @@ void cMuscusMission::__SetupOwn()
 
                 if(GET_BITVALUE(iAroundState, 2u, i * 2u) == BITLINE(2u))
                 {
-                    STAGE_BADGE(2u, BADGE_HARD, pPlayer->GetPosition())
+                    STAGE_BADGE(1u, BADGE_NORMAL, pPlayer->GetPosition())
                 }
             });
         }
 
         STAGE_WAVE(1u, "7-2", {60.0f, 90.0f, 120.0f, 150.0f, 300.0f})   // ACHTUNDDREISSIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cStarEnemy>();
     });
 
     // ################################################################
@@ -1269,15 +1302,16 @@ void cMuscusMission::__SetupOwn()
     // bouncy balls sollten nicht zu niedrig bouncen (sonst zu leicht), und konsistente X geschwindigkeit haben (sonst zu schwer, bräuchten alle andere bewegungs-geschwindigkeit vom spieler)
     // von unten kommende bouncy balls sollten nicht zu nah am rand sein, schaut besser aus und is angenehmer zu fangen wenn man einen (am rand) verpasst
     // geschoss-abstände bei den kontinuierlichen angriffen sollten breit genug sein, damit man durch kann, aber nicht zu breit um gefährlich/blockierend zu bleiben, vor allem beim folgenden gegner wichtig
-    // TASK: find all hidden pearls
     // TASK: try to destroy the enemy with your normal weapon / attack enemy when his shield is down, until his health is gone
+    // TASK: find all hidden pearls
     // ACHIEVEMENT: strike the enemy only while its shield is up
+    // TODO 1: hardmode: two enemies
+    // TODO 1: hardmode: fake pearls inbetween/mixed (blocky)
     // TODO 1: background side-movement might be easier for direct attack from top
     // TODO 1: striking pearls sollten sich strecken (direction anpassen + Y size größer + leichte XY size kleiner) (schon mit partikeln gemacht ?)
     // TODO 1: striking attack sollte weiter weggehn wenn sie näher bei target sind, vielleicht beschleunigt das mehr
     // TODO 1: maybe also update strike-spline target tangent in real-time (e.g. when enemy moves into strike the animation gets slower)
-    // TODO 1: [MF] badge: fang den blauen flummi in der flummi phase (verchwindet bei X), oder der vom boss wie ein geschoss erzeugt wird
-    // TODO 1: [MF] MAIN: task-check, hard idea, badges, sound, background rota/speed
+    // TODO 5: badge: fang den blauen flummi in der flummi phase (verchwindet bei X), oder der vom boss wie ein geschoss erzeugt wird
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iHiddenFirst = 31u;
@@ -1360,11 +1394,17 @@ void cMuscusMission::__SetupOwn()
             if(bActive)
             {
                 pKnight->AddStatus(ENEMY_STATUS_INVINCIBLE);
+
+                g_pSpecialEffects->CreateWhirlColor(pKnight->GetPosition(), SPECIAL_WHIRL_SMALL, COLOR_ENERGY_BLUE);
+                g_pSpecialEffects->PlaySound(pKnight->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SWIPE);
             }
             else
             {
                 pKnight->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+
                 g_pSpecialEffects->CreateWhirlColor(pKnight->GetPosition(), SPECIAL_WHIRL_SMALL, COLOR_ENERGY_BLUE);
+                g_pSpecialEffects->PlaySound(pKnight->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SWIPE_3);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
         };
 
@@ -1396,6 +1436,11 @@ void cMuscusMission::__SetupOwn()
             if(m_iStageSub == 8u)
             {
                 fEnemySide = pKnight->GetPosition().x;
+            }
+
+            if(m_iStageSub == 10u)
+            {
+                g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,1.0f), 10.0f);
             }
 
             vEnemyOldPos = pKnight->GetPosition().xy() / FOREGROUND_AREA;
@@ -1431,16 +1476,6 @@ void cMuscusMission::__SetupOwn()
                     this->DisablePearl(i + iHiddenFirst, false);
                 }
             }
-        }
-
-        if(m_iStageSub == 8u)   // TODO 1: [MF] cleanup
-        {
-            //g_pEnvironment->SetTargetSideNow(coreVector2(pKnight->GetPosition().x * 0.2f, 0.0f));
-            //g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPS(0.0f*PI, 0.5f*PI, MIN1(m_fStageSubTime * 0.5f))));
-        }
-        else if(m_iStageSub == 11u)
-        {
-            //g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPS(0.5f*PI, 0.0f*PI, MIN1(m_fStageSubTime * 0.5f))));
         }
 
         if(!pKnight->HasStatus(ENEMY_STATUS_DEAD) && (pKnight->GetCurHealth() > 0))
@@ -1622,8 +1657,15 @@ void cMuscusMission::__SetupOwn()
                     const coreBool bHidden = HAS_BIT(m_iPearlHidden, j);
                     if(bHidden)
                     {
-                        if(++iHiddenFound >= iHiddenCount) STAGE_BADGE(1u, BADGE_NORMAL, pPearl->GetPosition())
-                        else g_pGame->GetCombatText()->DrawProgress(iHiddenFound, iHiddenCount, pPearl->GetPosition());
+                        if(++iHiddenFound >= iHiddenCount)
+                        {
+                            STAGE_BADGE(1u, BADGE_NORMAL, pPearl->GetPosition())
+                        }
+                        else
+                        {
+                            g_pGame->GetCombatText()->DrawProgress(iHiddenFound, iHiddenCount, pPearl->GetPosition());
+                            g_pSpecialEffects->PlaySound(pPearl->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iHiddenFound, iHiddenCount), SOUND_ITEM_COLLECT);
+                        }
                     }
 
                     pPlayer->GetScoreTable()->RefreshCooldown();
@@ -1697,6 +1739,8 @@ void cMuscusMission::__SetupOwn()
 
                 pEnemy->SetPosition (coreVector3(vPos, 0.0f));
                 pEnemy->SetDirection(coreVector3(vDir, 0.0f));
+
+                g_pEnvironment->SetTargetDirectionNow(coreVector2(vPos.x, FOREGROUND_AREA.y * 6.0f).Normalized());
 
                 fEnemySide = vPos.x;
             }
@@ -1854,7 +1898,9 @@ void cMuscusMission::__SetupOwn()
                 STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
 
                 nSetShieldFunc(true);
+
                 g_pSpecialEffects->MacroExplosionDarkSmall(pEnemy->GetPosition());
+                g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
             }
         });
 
@@ -1882,6 +1928,11 @@ void cMuscusMission::__SetupOwn()
         }
 
         STAGE_WAVE(2u, "7-3", {60.0f, 90.0f, 120.0f, 150.0f, 300.0f})   // NEUNUNDDREISSIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cQuadBullet>();
     });
 
     // ################################################################
@@ -1930,13 +1981,12 @@ void cMuscusMission::__SetupOwn()
     // spawnende trail gegner dürfen niemals mit spieler kollidieren
     // es sollten immer min 2 gegner bei den wave gruppen für coop sein
     // in der multi-wave gruppe sollten manche gegner auf einer anderen höhe sein, damit man nicht schnell die gesamte gruppe zerstören kann wenn man sich schnell dreht
-    // TASK: destroy all quick enemies
-    // TASK: teleport N times for only a very short distance
+    // TASK: teleport 5 times for only a very short distance
     // TASK: jump over 3 lines at once
+    // TASK EXTRA: destroy all quick enemies
     // ACHIEVEMENT: travel a large total distance through teleportation (3332.5 normal, 6419.2 exaggerated)
     // TODO 1: hardmode: all cinder enemies attack after teleportation, or teleportation attacks you
     // TODO 1: hardmode: something dangerous will be left behind after teleportation
-    // TODO 1: [MF] MAIN: sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData    = 16u;
@@ -1963,7 +2013,7 @@ void cMuscusMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
                 pEnemy->Configure((i < 96u) ? 4 : 8, 0u, COLOR_SHIP_PURPLE);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
             });
@@ -2080,8 +2130,15 @@ void cMuscusMission::__SetupOwn()
                     {
                         if(fLen < 6.0f)
                         {
-                            if(++iShortMade >= iShortCount) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
-                            else g_pGame->GetCombatText()->DrawProgress(iShortMade, iShortCount, pEnemy->GetPosition());
+                            if(++iShortMade >= iShortCount)
+                            {
+                                STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                            }
+                            else
+                            {
+                                g_pGame->GetCombatText()->DrawProgress(iShortMade, iShortCount, pEnemy->GetPosition());
+                                g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iShortMade, iShortCount), SOUND_ITEM_COLLECT);
+                            }
                         }
 
                         if(m_iStageSub >= 16u)
@@ -2093,7 +2150,7 @@ void cMuscusMission::__SetupOwn()
                                 else if(vNewPos.y < afLineHeight[i] * FOREGROUND_AREA.y) bBigJump = false;
                             }
 
-                            if(bBigJump) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                            if(bBigJump) STAGE_BADGE(2u, BADGE_NORMAL, pEnemy->GetPosition())
                         }
                     }
 
@@ -2103,6 +2160,8 @@ void cMuscusMission::__SetupOwn()
                         pPlayer->SetDirection(pEnemy->GetDirection());
 
                         g_pSpecialEffects->MacroExplosionColorBig(vNewPos, COLOR_ENERGY_MAGENTA);
+                        g_pSpecialEffects->PlaySound(vNewPos, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
+                        g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_BIG, 250u);
                     }
 
                     if(bHelper)
@@ -2351,10 +2410,17 @@ void cMuscusMission::__SetupOwn()
 
                 pEnemy->ToAxis(StepRotated90(iStep));
 
-                if(g_pGame->IsTask() && pEnemy->ReachedDeath())
+                if(g_pGame->IsTaskExtra() && pEnemy->ReachedDeath())
                 {
-                    if(++iQuickState >= 7u) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
-                    else g_pGame->GetCombatText()->DrawCountdown(iQuickState, 7u, pEnemy->GetPosition());
+                    if(++iQuickState >= 7u)
+                    {
+                        STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                    }
+                    else
+                    {
+                        g_pGame->GetCombatText()->DrawCountdown(iQuickState, 7u, pEnemy->GetPosition());
+                        g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iQuickState, 7u), SOUND_PLACEHOLDER);
+                    }
                 }
             }
             else if(i < 160u)
@@ -2471,7 +2537,16 @@ void cMuscusMission::__SetupOwn()
             m_Geminga.SetAlpha(fAlpha * 0.2f);
         }
 
+             if((m_iStageSub ==  4u) && STAGE_BEGINNING2) g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f, 0.0f), 10.0f);
+        else if((m_iStageSub == 12u) && STAGE_BEGINNING2) g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,-1.0f), 10.0f);
+
         if(!bPostpone) STAGE_WAVE(3u, "7-4", {55.0f, 80.0f, 110.0f, 135.0f, 270.0f})   // VIERZIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMinerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cViewBullet>();
     });
 
     // ################################################################
@@ -2489,6 +2564,15 @@ void cMuscusMission::__SetupOwn()
         });
 
         m_Geminga.Kill(false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,-1.0f));
 
         STAGE_FINISH_NOW
     });
@@ -2512,9 +2596,8 @@ void cMuscusMission::__SetupOwn()
     // similar to zelda water boss https://youtu.be/HRQXOCU8OWA?t=1005
     // TASK: destroy all zombies
     // TASK: touch the helper for N seconds
-    // TASK: never touch any of the enemies
+    // TASK EXTRA: never touch any of the enemies
     // TODO 1: hard-mode: geschoss-linie die im kreis rotiert, bei allen stages!, auch bei legion, gegen legion rotation (andere bullet-farbe)
-    // TODO 1: [MF] MAIN: sound
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumEnemies = 40u;
@@ -2646,7 +2729,7 @@ void cMuscusMission::__SetupOwn()
                 });
             }
 
-            const coreVector2 vEnvDir = coreVector2::Direction((-4.0f*PI) * STEPH3(0.0f, 80.0f, m_fStageSubTime));
+            const coreVector2 vEnvDir = coreVector2::Direction(LERP(-1.0f*PI, -6.0f*PI, STEPH3(0.0f, 80.0f, m_fStageSubTime)));
             g_pEnvironment->SetTargetDirectionNow(vEnvDir);
         }
 
@@ -2668,6 +2751,7 @@ void cMuscusMission::__SetupOwn()
 
                     g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), -pEnemy->GetPosition().Normalized(), 100.0f, 20u, COLOR_ENERGY_CYAN);
                     g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                 }
             }
 
@@ -2689,8 +2773,15 @@ void cMuscusMission::__SetupOwn()
 
                         afAliveTime[i] = 0.0f;
 
-                        if(++iAlivePoints >= iNumRepeats) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
-                        else g_pGame->GetCombatText()->DrawProgress(iAlivePoints, iNumRepeats, pEnemy->GetPosition());
+                        if(++iAlivePoints >= iNumRepeats)
+                        {
+                            STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                        }
+                        else
+                        {
+                            g_pGame->GetCombatText()->DrawProgress(iAlivePoints, iNumRepeats, pEnemy->GetPosition());
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iAlivePoints, iNumRepeats), SOUND_ITEM_COLLECT);
+                        }
 
                         g_pSpecialEffects->MacroExplosionDarkSmall(pEnemy->GetPosition());
                         g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
@@ -2754,7 +2845,7 @@ void cMuscusMission::__SetupOwn()
                 {
                     if(++iHelperTouch >= 300u)
                     {
-                        STAGE_BADGE(2u, BADGE_HARD, pHelper->GetPosition())
+                        STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
                     }
                     else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.1f", 5.0f - FloorFactor(I_TO_F(iHelperTouch) / 60.0f, 10.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE);
                 }
@@ -2845,7 +2936,11 @@ void cMuscusMission::__SetupOwn()
                     pEnemy->SetPosition (coreVector3(vNewPos, 0.0f));
                     pEnemy->SetDirection(coreVector3(vNewDir, 0.0f));
 
-                    if((fTime == 0.0f) && (fTime2 != 0.0f)) g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetPosition().Normalized(), 50.0f, 5u, COLOR_ENERGY_WHITE * 0.8f);
+                    if((fTime == 0.0f) && (fTime2 != 0.0f))
+                    {
+                        g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetPosition().Normalized(), 50.0f, 5u, COLOR_ENERGY_WHITE * 0.8f);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS((i * 7u) % 40u, 40u), SOUND_EFFECT_WOOSH_2);
+                    }
                 }
                 else
                 {
@@ -2868,9 +2963,8 @@ void cMuscusMission::__SetupOwn()
                 }
             }
 
-            if(g_pGame->IsTask())
+            if(g_pGame->IsTaskExtra())
             {
-
                 STAGE_FOREACH_PLAYER(pPlayer, j)
                 {
                     const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
@@ -3114,13 +3208,16 @@ void cMuscusMission::__SetupOwn()
                 }
 
                 if((pBullet->GetPosition().xy().LengthSq() < POW2(2.0f)) || (pBullet->GetFlyTime() >= 10.0f))
+                {
                     pBullet->Deactivate(true);
+                    g_pGame->PlayVanishSound(pBullet->GetPosition());
+                }
             });
         }
 
-        if(g_pGame->IsTask() && STAGE_CLEARED)
+        if(g_pGame->IsTaskExtra() && STAGE_CLEARED)
         {
-            if(!iEnemyTouch) STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
+            if(!iEnemyTouch) STAGE_BADGE(2u, BADGE_HARD, pHelper->GetPosition())
         }
 
         cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
@@ -3147,6 +3244,11 @@ void cMuscusMission::__SetupOwn()
         }
 
         STAGE_WAVE(4u, "7-5", {85.0f, 125.0f, 170.0f, 210.0f, 420.0f})   // EINUNDVIERZIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cTriangleBullet>();
     });
 
     // ################################################################
@@ -3163,9 +3265,11 @@ void cMuscusMission::__SetupOwn()
         STAGE_FINISH_NOW
     });
 
+#if defined(_P1_UNUSED_)
+
     // ################################################################
     // wait for play
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_FINISH_PLAY
     });
@@ -3183,7 +3287,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: weakpoint dies faster, whole wave needs to be faster
     // TODO 1: actually damage and blink other enemy
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -3338,13 +3442,43 @@ void cMuscusMission::__SetupOwn()
         });
 
         STAGE_WAVE(5u, "7-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // ZWEIUNDVIERZIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cStarEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMinerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cFreezerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMeteorEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cOrbBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cConeBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cWaveBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cSpearBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cTriangleBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cFlipBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cQuadBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cViewBullet>();
     });
 
     // ################################################################
     // reset helper
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         g_pGame->KillHelpers();
+
+        STAGE_FINISH_NOW
+    });
+
+#endif
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,1.0f));
 
         STAGE_FINISH_NOW
     });
@@ -3381,6 +3515,12 @@ void cMuscusMission::__SetupOwn()
         });
 
         STAGE_BOSS(m_Geminga, {190.0f, 285.0f, 380.0, 475.0f, 950.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+        g_pGame->PrefetchBoss();
     });
 
     // ################################################################

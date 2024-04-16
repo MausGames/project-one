@@ -34,6 +34,15 @@ cOrlacBoss::cOrlacBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cOrlacBoss::~cOrlacBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cOrlacBoss::__MoveOwn()
 {

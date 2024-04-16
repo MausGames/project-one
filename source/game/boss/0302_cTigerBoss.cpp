@@ -29,7 +29,6 @@
 // TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
 // TODO 1: [MF] improve/fix beam effect + aiming + collision detection
 // TODO 1: [MF] ACHIEVEMENT: name (), description (), spin around the boss 10 times without getting hit
-// TODO 1: [MF] vielleicht in grüner phase im mittel pause machen und nach unten bewegen, bei wechsel auf raketen wieder mittig
 // TODO 5: (mines need to be enemies to allow blinking, combo/chain)
 // TODO 5: (in die stacheln schießen erzeugt effekt (knusprig))
 // TODO 5: (make sure to disable wind on boss-death (hard if necessary))
@@ -197,6 +196,20 @@ cTigerBoss::cTigerBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cTigerBoss::~cTigerBoss()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    this->__DisableBeam(false);
+    for(coreUintW i = 0u; i < TIGER_AIMS;  ++i) this->__DisableAim   (i, false);
+    for(coreUintW i = 0u; i < TIGER_SIDES; ++i) this->__DisableStings(i, false);
+}
+
+
+// ****************************************************************
 // 
 void cTigerBoss::__ResurrectOwn()
 {
@@ -224,14 +237,8 @@ void cTigerBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
     this->__DisableBeam(bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
-        this->__DisableAim(i, bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < TIGER_SIDES; ++i)
-        this->__DisableStings(i, bAnimated);
+    for(coreUintW i = 0u; i < TIGER_AIMS;  ++i) this->__DisableAim   (i, bAnimated);
+    for(coreUintW i = 0u; i < TIGER_SIDES; ++i) this->__DisableStings(i, bAnimated);
 
     // 
     if(m_pTankSound->EnableRef(this)) m_pTankSound->Stop();
@@ -545,11 +552,24 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 43u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.5f)
-        {
-            this->__SwitchWeapon(1u);
+        //PHASE_CONTROL_PAUSE(0u, 0.5f)
+        //{
+        //    this->__SwitchWeapon(1u);
+//
+        //    PHASE_CHANGE_INC
+        //});
 
-            PHASE_CHANGE_INC
+        PHASE_CONTROL_TIMER(0u, 0.25f, LERP_SMOOTH)
+        {
+            m_avVector[POS_OFFSET].y = LERP(0.0f, -40.0f, fTime);
+
+            if(PHASE_TIME_POINT(0.5f))
+            {
+                this->__SwitchWeapon(1u);
+            }
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
         });
     }
 
@@ -577,11 +597,24 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 51u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.4f)   // longer
-        {
-            this->__SwitchWeapon(4u);
+        //PHASE_CONTROL_PAUSE(0u, 0.4f)   // longer
+        //{
+        //    this->__SwitchWeapon(4u);
+//
+        //    PHASE_CHANGE_INC
+        //});
 
-            PHASE_CHANGE_INC
+        PHASE_CONTROL_TIMER(0u, 0.25f, LERP_SMOOTH)
+        {
+            m_avVector[POS_OFFSET].y = LERP(-40.0f, 0.0f, fTime);
+
+            if(PHASE_TIME_POINT(0.5f))
+            {
+                this->__SwitchWeapon(4u);
+            }
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
         });
     }
 
@@ -589,7 +622,7 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 52u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.2f)   // longer
+        PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
             pMission->ChangeInsanity(5u);
 
@@ -653,6 +686,7 @@ void cTigerBoss::__MoveOwn()
 
             g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             PHASE_CHANGE_INC
         });
@@ -697,6 +731,7 @@ void cTigerBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
                 g_pSpecialEffects->SlowScreen(4.0f);
 
                 // load object resources
@@ -856,7 +891,7 @@ void cTigerBoss::__MoveOwn()
     // ################################################################
     // ################################################################
 
-    if(m_iPhase >= 50u)
+    if(m_iPhase >= 60u)
     {
         m_avVector[VEIL_VALUE].x = MAX0(m_avVector[VEIL_VALUE].x - 0.1f * TIME);
     }
@@ -1137,7 +1172,7 @@ void cTigerBoss::__MoveOwn()
     {
         m_fWeaponChange.Update(1.0f);
 
-        m_aWeapon[0].SetSize(this->GetSize() * BLENDB(MIN1(m_fWeaponChange)) * 1.3f);
+        m_aWeapon[0].SetSize(this->GetSize() * BLENDB(MIN1(m_fWeaponChange)) * 1.3f * (((m_iWeaponType == 1u) || (m_iWeaponType == 2u) || (m_iWeaponType == 4u)) ? 1.05f : 1.0f));
 
         const coreVector3 vPos  = m_aWeaponOld[0].GetPosition() + coreVector3(vEnvDirection * (fEnvSpeed * TIME * -10.0f), 0.0f);
         const coreMatrix3 mRota = coreMatrix4::RotationZ(-15.0f * TIME).m123();
@@ -1278,14 +1313,14 @@ void cTigerBoss::__MoveOwn()
     
     if(m_iWeaponType == 1u)
     {
-        const coreVector3 vOffset = m_aWeapon[0].GetDirection().RotatedZ90() * 1.55f;
+        const coreVector3 vOffset = m_aWeapon[0].GetDirection().RotatedZ90() * (0.95f * m_aWeapon[0].GetSize().x);
 
         m_aWeapon[1].SetPosition(m_aWeapon[0].GetPosition() + vOffset);
         m_aWeapon[2].SetPosition(m_aWeapon[0].GetPosition() - vOffset);
     }
     if(m_iWeaponTypeOld == 1u)
     {
-        const coreVector3 vOffset = m_aWeaponOld[0].GetDirection().RotatedZ90() * 1.55f;
+        const coreVector3 vOffset = m_aWeaponOld[0].GetDirection().RotatedZ90() * (0.95f * m_aWeaponOld[0].GetSize().x);
 
         m_aWeaponOld[1].SetPosition(m_aWeaponOld[0].GetPosition() + vOffset);
         m_aWeaponOld[2].SetPosition(m_aWeaponOld[0].GetPosition() - vOffset);
@@ -1476,6 +1511,7 @@ void cTigerBoss::__EnableBeam(const coreVector2 vPosition)
 
     g_pSpecialEffects->MacroExplosionColorBig(vImpact, COLOR_ENERGY_MAGENTA);
     g_pSpecialEffects->PlaySound(vImpact, 0.8f, 1.0f, SOUND_EFFECT_FIRE_START);
+    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
     
     
     
@@ -1615,6 +1651,13 @@ void cTigerBoss::__SwitchWeapon(const coreUintW iType)
 {
     ASSERT(iType < TIGER_WEAPONS)
 
+    // 0: orange
+    // 1: green
+    // 2: red
+    // 3: purple
+    // 4: rocket
+    // 5: nothing
+
     for(coreUintW i = 0u; i < TIGER_SUBS; ++i)
     {
         // 
@@ -1635,18 +1678,16 @@ void cTigerBoss::__SwitchWeapon(const coreUintW iType)
     m_iWeaponType    = iType;
     m_fWeaponChange  = 0.0f;
 
-
     // 
     if(!this->HasStatus(ENEMY_STATUS_DEAD))
     {
         g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
-        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
     }
 
-    m_aiCounter[WEAPON_SHOT] = 0;   // TODO 1: [MF] wave-weapon might be activated too early
-    
     // 
     PHASE_RESET(3u)
+    m_aiCounter[WEAPON_SHOT] = 0;
 }
 
 
@@ -1745,6 +1786,7 @@ void cTigerBoss::__ShootWeapon()
 
         g_pSpecialEffects->CreateSplashColor(coreVector3(vHit, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE * 0.8f);
         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
     }
 }
 
@@ -1759,6 +1801,7 @@ void cTigerBoss::__CauseBeamDamage(cPlayer* OUTPUT pTarget)
         this->TakeDamage(TIGER_DAMAGE, ELEMENT_NEUTRAL, HIDDEN_POS, pTarget, true);
 
         g_pGame->GetCombatText()->DrawText(Core::Language->GetString("HIT"), this->GetPosition(), COLOR_MENU_MAGENTA);
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
     }
 
     g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)

@@ -27,12 +27,12 @@
 // schnee sollte erst nach bounce-transition verschwinden, als zusätzliche steigerung dieser phase
 // transition in drag-phase kann nicht an jeder schnittstelle passieren, weil das plötzliche bremsen dann komisch wirkt (zb. nach der bogen-bewegung)
 // spieler kann bei schwing-phase einfach stehen bleiben und alle rand-geschosse werden sauber zerstört, aber der zusätzliche boss-angriff bringt ihn dazu sich zu bewegen (geschwindigkeit der rand-geschosse sollte nicht weiter erhöht werden, weil es sonst zu schwer wird in kombination mit boss-angriff)
+// ACHIEVEMENT: touch all the fresh ice-cubes
+// COOP: only one player is chained to the boss
 // TODO 1: hard mode: gleiten
-// TODO 1: [MF] besserer effekt wenn eis in boss einschlägt
 // TODO 1: [MF] andere position für orange helper
 // TODO 1: [MF] green-wave und laser phase etwas verbessern (vor allem der fehlende angriff bei green-wave is seltsam)
-// TODO 1: [MF] MAIN: sound
-// TODO 1: [MF] ACHIEVEMENT: name (), description (), destroy one ice cube with another ice cube (#schlecht) / in laser-phase go around boss N times against rotation without taking damage (#geht nicht)
+// TODO 1: [MF] MAIN: sound (laser sound)
 // TODO 1: in finaler phase, flip-bullets und partikel sollten unter gegner sein (auch im level), aber cone-bullets drüber, kann man das im bullet-manager aufteilen ? oder eigener bullet-manager für boss (nur für cone) [[das ganze is aber ziemlich orsch, normale gegner können (derzeit) nicht TOP gemacht werden]]
 // TODO 1: boss should bounce around in the final phase if all players are dead (instead of just standing still)
 // TODO 1: chain should break on game over instead of just disappear (also in wave) (not when zero-length)
@@ -41,15 +41,16 @@
 // ****************************************************************
 // counter identifier
 #define ICE_INDEX   (0u)
-#define EVADE_COUNT (1u)
-#define STAR_HOLD   (2u)
-#define STAR_COUNT  (3u)
-#define DRAG_COUNT  (4u)
-#define DRAG_SIDE   (5u)
-#define CRASH_COUNT (6u)
-#define SLAP_COUNT  (7u)
-#define FLY_COUNT   (8u)
-#define DIR_FIELD   (9u)
+#define ICE_TOUCH   (1u)
+#define EVADE_COUNT (2u)
+#define STAR_HOLD   (3u)
+#define STAR_COUNT  (4u)
+#define DRAG_COUNT  (5u)
+#define DRAG_SIDE   (6u)
+#define CRASH_COUNT (7u)
+#define SLAP_COUNT  (8u)
+#define FLY_COUNT   (9u)
+#define DIR_FIELD   (10u)
 
 
 // ****************************************************************
@@ -60,6 +61,7 @@
 #define SHOT_TARGET   (3u)
 #define ENV_ROTATION  (4u)
 #define SLAP_ROTATION (5u)
+#define ROTA_VALUE    (6u)
 
 
 // ****************************************************************
@@ -69,6 +71,7 @@ cZerothBoss::cZerothBoss()noexcept
 , m_vLaserDir    (coreVector2(0.0f,0.0f))
 , m_fLaserTime   (0.0f)
 , m_iLaserLimb   (0u)
+, m_aiIceDir     {}
 , m_abIcePreview {}
 , m_vGlobalDir   (coreVector2(0.0f,1.0f))
 , m_fAnimation   (0.0f)
@@ -146,12 +149,24 @@ cZerothBoss::cZerothBoss()noexcept
         m_aIce[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
         m_aIce[i].SetTexSize     (coreVector2(0.25f,0.25f));
         m_aIce[i].Configure      (3500, 0u, coreVector3(1.0f,1.0f,1.0f));
-        m_aIce[i].AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
+        m_aIce[i].AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST_BULLET | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
 
         ASSERT(coreMath::IsAligned(m_aIce[i].GetMaxHealth(), GAME_PLAYERS))
     }
 
     STATIC_ASSERT(offsetof(cZerothBoss, m_aLimb) < offsetof(cZerothBoss, m_Body))   // initialization order for collision detection
+}
+
+
+// ****************************************************************
+// destructor
+cZerothBoss::~cZerothBoss()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    this->__DisableLaser(false);
 }
 
 
@@ -224,10 +239,7 @@ void cZerothBoss::__KillOwn(const coreBool bAnimated)
         cCalorMission* pMission = d_cast<cCalorMission*>(g_pGame->GetCurMission());
 
         // 
-        for(coreUintW i = 0u; i < CALOR_STARS; ++i)
-            pMission->DisableStar(i, bAnimated);
-
-        // 
+        for(coreUintW i = 0u; i < CALOR_STARS; ++i) pMission->DisableStar(i, bAnimated);
         pMission->DisableSnow(bAnimated);
 
         // 
@@ -350,6 +362,7 @@ void cZerothBoss::__MoveOwn()
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
             for(coreUintW i = 0u; i < CALOR_STARS; ++i)
@@ -391,7 +404,9 @@ void cZerothBoss::__MoveOwn()
             if(PHASE_MAINTIME_BEFORE(0.5f)) m_aLimb[ZEROTH_LIMB_TAIL].AddStatus(ENEMY_STATUS_GHOST);
         }
 
-        const coreVector2 vRota = coreVector2::Direction(m_fPhaseTime * -1.0f);
+        m_avVector[ROTA_VALUE].x += -1.0f * TIME * MIN1(m_fPhaseTime * 1.0f);
+
+        const coreVector2 vRota = coreVector2::Direction(m_avVector[ROTA_VALUE].x);
 
         for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i)
         {
@@ -484,18 +499,21 @@ void cZerothBoss::__MoveOwn()
             this->_ResurrectHelper(ELEMENT_ORANGE, false);
         }
 
-        if(m_aiCounter[EVADE_COUNT] > 0)
+        // TODO 1: [MF]
+        //if(m_aiCounter[EVADE_COUNT] > 0)
         {
             PHASE_CONTROL_TICKER(1u, 0u, 5.0f, LERP_LINEAR)
             {
-                if((iTick % 5u) < 5u - MIN(m_aiCounter[EVADE_COUNT], 3)) return;
+                if((iTick % 5u) < 5u - MIN(m_aiCounter[EVADE_COUNT] + 1, 3)) return;
                 if(g_pGame->IsEasy() && ((iTick % 10u) >= 5u)) return;
 
                 const coreVector2 vBase = nGetShootPos();
 
                 for(coreUintW j = 6u; j--; )
                 {
-                    const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) * ((2.0f/6.0f)*PI) + I_TO_F(iTick) * ((0.25f/6.0f)*PI));
+                    //const coreVector2 vDir = MapToAxis(coreVector2::Direction(I_TO_F(j) * ((2.0f/6.0f)*PI) + 0.0f*I_TO_F(iTick) * ((0.25f/6.0f)*PI)), this->GetDirection().xy());
+                    //const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) * ((2.0f/6.0f)*PI) + I_TO_F(iTick) * ((0.25f/6.0f)*PI   * I_TO_F(MAX(m_aiCounter[EVADE_COUNT] - 3, 1))));
+                    const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) * ((2.0f/6.0f)*PI) + I_TO_F(iTick) * ((1.0f/6.0f)*PI));
                     const coreVector2 vPos = vBase + vDir * ZEROTH_RADIUS_BULLET;
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.8f);
@@ -529,7 +547,7 @@ void cZerothBoss::__MoveOwn()
     // 
     else if(m_iPhase == 20u)
     {
-        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
             PHASE_CHANGE_INC
         });
@@ -541,7 +559,7 @@ void cZerothBoss::__MoveOwn()
     {
         const coreFloat fCurHealthPct = this->GetCurHealthPct();
 
-        if(PHASE_BEGINNING2)
+        if(PHASE_MAINTIME_POINT(0.5f))
         {
             pMission->EnableSnow();
 
@@ -551,7 +569,7 @@ void cZerothBoss::__MoveOwn()
 
         m_avVector[LASER_MOVE].x += 1.0f * TIME;
 
-        const coreFloat fSpeed = 0.075f * LERP(1.0f, 0.5f, STEP(0.95f, 1.0f, fCurHealthPct)) * (g_pGame->IsEasy() ? 0.7f : 1.1f);
+        const coreFloat fSpeed = 0.075f * LERP(1.0f, 0.5f, STEP(0.95f, 1.0f, fCurHealthPct)) * MIN1(m_fPhaseTime * 1.0f) * (g_pGame->IsEasy() ? 0.7f : 1.1f);
 
         PHASE_CONTROL_TIMER(0u, fSpeed, LERP_LINEAR)
         {
@@ -641,6 +659,11 @@ void cZerothBoss::__MoveOwn()
             m_Body.AddStatus(ENEMY_STATUS_INVINCIBLE);
 
             this->__DisableLaser(true);
+
+            if(!HAS_BIT(m_aiCounter[ICE_TOUCH], 1u))
+            {
+                pMission->GiveBadge(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f));
+            }
         }
     }
 
@@ -730,7 +753,7 @@ void cZerothBoss::__MoveOwn()
                 const coreVector2 vDir = MapToAxis(StepRotated90(i), this->GetDirection().xy());
                 const coreVector2 vPos = vBase + vDir * ZEROTH_RADIUS_BULLET;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.6f, this, vPos, vDir)->ChangeSize(1.9f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.6f, this, vPos, vDir)->ChangeSize(2.1f)->AddStatus(BULLET_STATUS_IMMORTAL);
             }
 
             g_pSpecialEffects->CreateSplashColor(coreVector3(vBase, 0.0f), 25.0f, 5u, COLOR_ENERGY_BLUE);
@@ -835,10 +858,12 @@ void cZerothBoss::__MoveOwn()
         {
             if(this->WasDamaged())
             {
+                const coreVector3 vPos = m_aIce[i].GetPosition();
+
                 m_aiCounter[SLAP_COUNT] += 1;
 
                 m_avVector[SLAP_ROTATION].x = 1.0f;
-                m_avVector[SLAP_ROTATION].y = m_aIce[i].GetPosition().x;
+                m_avVector[SLAP_ROTATION].y = vPos.x;
 
                 if(m_aiCounter[SLAP_COUNT] >= 4)
                 {
@@ -876,9 +901,13 @@ void cZerothBoss::__MoveOwn()
                 {
                     if(this->_ResurrectHelper(ELEMENT_RED, true))
                     {
-                        g_pGame->GetHelper(ELEMENT_RED)->SetPosition(m_aIce[i].GetPosition());
+                        g_pGame->GetHelper(ELEMENT_RED)->SetPosition(vPos);
                     }
                 }
+
+                g_pSpecialEffects->MacroExplosionDarkBig(vPos);
+                g_pSpecialEffects->PlaySound(vPos, 1.2f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
 
                 break;
             }
@@ -1086,6 +1115,7 @@ void cZerothBoss::__MoveOwn()
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_CYAN);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
             this->SetPosition      (coreVector3(vPos, 0.0f));
@@ -1186,6 +1216,7 @@ void cZerothBoss::__MoveOwn()
                     g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
                     g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_05);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                 }
                 else
                 {
@@ -1254,7 +1285,7 @@ void cZerothBoss::__MoveOwn()
 
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
-            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[ENV_ROTATION].x, 0.0f*PI, fTime)));
+            //g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[ENV_ROTATION].x, 0.0f*PI, fTime)));   end rotation
         });
 
         PHASE_CONTROL_TIMER(1u, 0.25f, LERP_SMOOTH)
@@ -1296,6 +1327,8 @@ void cZerothBoss::__MoveOwn()
             {
                 pMission->DisableStar(i, true);
             });
+
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
     }
 
@@ -1343,6 +1376,7 @@ void cZerothBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
                 g_pSpecialEffects->SlowScreen(4.0f);
             }
         }
@@ -1495,6 +1529,9 @@ void cZerothBoss::__MoveOwn()
 
                 pMission->CatchObject(m_aiCounter[STAR_COUNT], pPlayer);
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_GHOST);
+
+                g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.5f, SOUND_EFFECT_DUST);
+                g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
             }
         }
         else if(bTurn)
@@ -1533,6 +1570,8 @@ void cZerothBoss::__MoveOwn()
 
                 g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPos, 0.0f), coreVector2(0.0f,-1.0f), COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_05);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                 PHASE_CHANGE_INC
             }
@@ -1591,6 +1630,8 @@ void cZerothBoss::__MoveOwn()
                 g_pGame->GetBulletManagerEnemy()->ClearBulletsTyped<cOrbBullet>(true);
 
                 g_pSpecialEffects->MacroExplosionColorBig(pMission->GetStar(0u)->GetPosition(), COLOR_ENERGY_WHITE * 0.8f);
+                g_pSpecialEffects->PlaySound(pMission->GetStar(0u)->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         });
     }
@@ -1634,10 +1675,18 @@ void cZerothBoss::__MoveOwn()
     {
         if(fStarLength >= 0.0f)
         {
-            const coreVector2 vPos = this->GetPosition().xy() + this->GetDirection().xy() * (6.0f + fStarLength);
+            const coreVector2 vOldPos = pMission->GetStar(0u)->GetPosition().xy();
+            const coreVector2 vNewPos = this->GetPosition().xy() + this->GetDirection().xy() * (6.0f + fStarLength);
 
             for(coreUintW i = 0u; i < CALOR_STARS; ++i)
-                pMission->GetStar(i)->SetPosition(coreVector3(vPos, 0.0f));
+            {
+                pMission->GetStar(i)->SetPosition(coreVector3(vNewPos, 0.0f));
+            }
+
+            if(InBetweenExt(0.0f, vOldPos.x, vNewPos.x) == ((m_iPhase == 201u) ? -1 : 1))
+            {
+                g_pSpecialEffects->PlaySound(coreVector3(vOldPos, 0.0f), 1.0f, 0.7f, SOUND_EFFECT_WOOSH);
+            }
         }
     }
 
@@ -1663,8 +1712,8 @@ void cZerothBoss::__MoveOwn()
 
     if(m_avVector[SLAP_ROTATION].x)
     {
-        m_avVector[SLAP_ROTATION].x = MAX0(m_avVector[SLAP_ROTATION].x - 1.0f * TIME);
-        //g_pEnvironment->SetTargetSideNow(coreVector2(SIN(BLENDBR(m_avVector[SLAP_ROTATION].x) * (1.0f*PI)) * SIGN(m_avVector[SLAP_ROTATION].y) * -15.0f, 0.0f));
+        m_avVector[SLAP_ROTATION].x = MAX0(m_avVector[SLAP_ROTATION].x - 2.0f * TIME);
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(SIN(BLENDBR(m_avVector[SLAP_ROTATION].x) * (1.0f*PI)) * SIGN(m_avVector[SLAP_ROTATION].y), 5.0f).Normalized());
     }
 
     if(m_Laser.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
@@ -1715,9 +1764,10 @@ void cZerothBoss::__MoveOwn()
             // 
             g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition() + vBaseDir * ZEROTH_RADIUS, vBaseDir.xy(), COLOR_ENERGY_BLUE);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             // 
-            this->__CreateCube(vHit * 0.93f, AlongCrossNormal(vHit), true);
+            this->__CreateCube(vHit, -AlongCrossNormal(vHit), true);
         }
 
         if(fNewTime >= 1.0f)
@@ -1782,8 +1832,8 @@ void cZerothBoss::__MoveOwn()
         cCustomEnemy& oIce = m_aIce[i];
         if(oIce.HasStatus(ENEMY_STATUS_DEAD)) continue;
 
-        const coreFloat   fLerp = LERPB(1.0f, 0.0f, MIN1(oIce.GetLifeTime() * 0.5f));
-        const coreVector2 vMove = m_abIcePreview[i] ? (AlongCrossNormal(oIce.GetPosition().xy()) * 0.5f) : coreVector2(0.0f,1.0f);
+        const coreFloat   fLerp = m_abIcePreview[i] ? 1.0f : LERPB(1.0f, 0.0f, MIN1(oIce.GetLifeTime() * 0.5f));
+        const coreVector2 vMove = UnpackDirection(m_aiIceDir[i]);
         const coreVector2 vPos  = oIce.GetPosition ().xy() + vMove * (40.0f * TIME * fLerp);
         const coreVector2 vDir  = oIce.GetDirection().xy() * coreMatrix3::Rotation(10.0f * TIME * fLerp).m12();
 
@@ -1791,8 +1841,22 @@ void cZerothBoss::__MoveOwn()
         oIce.SetPosition (coreVector3(vPos, 0.0f));
         oIce.SetDirection(coreVector3(vDir, 0.0f));
 
-        // 
-        if(m_abIcePreview[i] && (oIce.GetLifeTime() >= 2.0f)) this->__DestroyCube(i, false);
+        if(m_abIcePreview[i])
+        {
+            // 
+            if(!g_pForeground->IsVisibleObject(&oIce)) this->__DestroyCube(i, false);
+
+            // 
+            cPlayer::TestCollision(PLAYER_TEST_ALL, &oIce, [this](const cPlayer* pPlayer, const cCustomEnemy* pIce, const coreVector3 vIntersection, const coreBool bFirstHit)
+            {
+                ADD_BIT(m_aiCounter[ICE_TOUCH], 0u)
+            });
+        }
+
+        if(pSnow->IsActive())
+        {
+            pSnow->DrawPoint(vPos, 5.0f, SNOW_TYPE_REMOVE);
+        }
     }
 
     // 
@@ -1852,7 +1916,7 @@ void cZerothBoss::__MoveOwn()
     {
         const coreFloat fTime = pOrangeHelper->GetLifeTime() * 0.2f;
 
-        pOrangeHelper->SetPosition(coreVector3(0.0f, -1.3f + 0.5f * SIN(fTime * (1.0f*PI)), 0.0f) * FOREGROUND_AREA3);
+        pOrangeHelper->SetPosition(coreVector3(-1.3f + 0.5f * SIN(fTime * (1.0f*PI)), 0.0f, 0.0f) * FOREGROUND_AREA3);
 
         if(fTime >= 1.0f) this->_KillHelper(ELEMENT_ORANGE, false);
     }
@@ -1936,7 +2000,7 @@ void cZerothBoss::__MoveOwn()
     {
         const coreFloat fTime = pGreenHelper->GetLifeTime() * 0.2f;
 
-        pGreenHelper->SetPosition(coreVector3(0.0f, 1.3f - 0.5f * SIN(fTime * (1.0f*PI)), 0.0f) * FOREGROUND_AREA3);
+        pGreenHelper->SetPosition(coreVector3(1.3f - 0.5f * SIN(fTime * (1.0f*PI)), 0.0f, 0.0f) * FOREGROUND_AREA3);
 
         if(fTime >= 1.0f) this->_KillHelper(ELEMENT_GREEN, false);
     }
@@ -2025,7 +2089,11 @@ void cZerothBoss::__CreateCube(const coreVector2 vPosition, const coreVector2 vD
     cCustomEnemy& oIce = m_aIce[m_aiCounter[ICE_INDEX]];
 
     // 
+    m_aiIceDir    [m_aiCounter[ICE_INDEX]] = PackDirection(vDirection);
     m_abIcePreview[m_aiCounter[ICE_INDEX]] = bPreview;
+
+    // 
+    if(bPreview) REMOVE_BIT(m_aiCounter[ICE_TOUCH], 0u)
 
     // 
     if(bPreview) oIce.ChangeToNormal();
@@ -2053,6 +2121,15 @@ void cZerothBoss::__DestroyCube(const coreUintW iIndex, const coreBool bAnimated
 
     // 
     if(oIce.HasStatus(ENEMY_STATUS_DEAD)) return;
+
+    // 
+    if(m_abIcePreview[iIndex])
+    {
+        if(!HAS_BIT(m_aiCounter[ICE_TOUCH], 0u))
+        {
+            ADD_BIT(m_aiCounter[ICE_TOUCH], 1u)
+        }
+    }
 
     // 
     for(coreUintW i = 0u; i < CALOR_STARS; ++i)

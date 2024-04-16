@@ -794,6 +794,7 @@ void cCalorMission::__MoveOwnBefore()
                     if((fOldStuck < 1.0f) && (m_afSnowStuck[i] >= 1.0f))
                     {
                         g_pSpecialEffects->CreateSplashDot(pPlayer->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
+                        g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
                     }
                 }
             }
@@ -898,6 +899,8 @@ void cCalorMission::__MoveOwnMiddle()
                         {
                             // 
                             this->CatchObject(i, pEnemy);
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.5f, SOUND_EFFECT_DUST);
+                            //g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
 
                             // 
                             pPlayer->GetScoreTable()->RefreshCooldown();
@@ -924,6 +927,8 @@ void cCalorMission::__MoveOwnMiddle()
                             if((pBullet->GetID() != cFlipBullet::ID) && (pBullet->GetID() != cTriangleBullet::ID)) return;
 
                             pBullet->Deactivate(true, vIntersection.xy());
+
+                            g_pGame->PlayVanishSound(pBullet->GetPosition());
                         });
 
                         // 
@@ -950,6 +955,8 @@ void cCalorMission::__MoveOwnMiddle()
 
                                 // 
                                 if(bOther) this->UncatchObject(1u - i);
+                                
+                                //g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
 
                                 // 
                                 if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
@@ -1236,6 +1243,7 @@ void cCalorMission::__MoveOwnAfter()
         // 
         m_Bull.SetDirection(coreVector3(coreVector2::Direction((-4.0f*PI) * m_fAnimation), 0.0f));
         m_Bull.SetTexOffset(coreVector2(0.0f, -0.5f * m_fAnimation));
+        m_Bull.coreObject3D::Move();
 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBullWave); ++i)
         {
@@ -1324,6 +1332,8 @@ void cCalorMission::__MoveOwnAfter()
                         if((pBullet->GetID() != cFlipBullet::ID) && (pBullet->GetID() != cTriangleBullet::ID)) return;
 
                         pBullet->Deactivate(true, vIntersection.xy());
+
+                        g_pGame->PlayVanishSound(pBullet->GetPosition());
                     });
                 }
             }

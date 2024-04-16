@@ -34,6 +34,15 @@ cShelobBoss::cShelobBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cShelobBoss::~cShelobBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cShelobBoss::__MoveOwn()
 {

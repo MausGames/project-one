@@ -34,6 +34,15 @@ cFenrirBoss::cFenrirBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cFenrirBoss::~cFenrirBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cFenrirBoss::__MoveOwn()
 {

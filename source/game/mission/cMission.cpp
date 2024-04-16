@@ -23,6 +23,7 @@ cMission::cMission()noexcept
 , m_iCurBossIndex       (MISSION_NO_BOSS)
 , m_iCurWaveIndex       (MISSION_NO_WAVE)
 , m_iCurSegmentIndex    (MISSION_NO_SEGMENT)
+, m_iLastSegmentIndex   (MISSION_NO_SEGMENT)
 , m_piData              (NULL)
 , m_iDataSize           (0u)
 , m_iStageNum           (0u)
@@ -191,7 +192,11 @@ void cMission::MoveBefore()
             if(m_anStage.empty())
             {
                 g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? GAME_OUTRO_MISSION : GAME_OUTRO_SEGMENT);
-                if(m_iTakeTo == TAKE_MISSION) g_pGame->FadeMusic(0.3f);
+
+                if((m_iTakeTo == TAKE_MISSION) || ((m_iTakeTo == 5u) && (g_pGame->GetCurMissionIndex() != MISSION_ATER)))
+                {
+                    g_pGame->FadeMusic(0.3f);
+                }
             }
         }
     }
@@ -274,9 +279,10 @@ void cMission::ActivateBoss(const cBoss* pBoss)
     ASSERT(iIndex < MISSION_BOSSES)
 
     // 
-    m_pCurBoss         = m_apBoss[iIndex];
-    m_iCurBossIndex    = iIndex;
-    m_iCurSegmentIndex = MISSION_BOSS_TO_SEGMENT(m_iCurBossIndex);
+    m_pCurBoss          = m_apBoss[iIndex];
+    m_iCurBossIndex     = iIndex;
+    m_iCurSegmentIndex  = MISSION_BOSS_TO_SEGMENT(m_iCurBossIndex);
+    m_iLastSegmentIndex = m_iCurSegmentIndex;
 
     // 
     this->__OpenSegment();
@@ -320,8 +326,9 @@ void cMission::ActivateWave(const coreUintW iIndex, const coreChar* pcName)
 
     // 
     ASSERT(iIndex < MISSION_WAVES)
-    m_iCurWaveIndex    = iIndex;
-    m_iCurSegmentIndex = MISSION_WAVE_TO_SEGMENT(m_iCurWaveIndex);
+    m_iCurWaveIndex     = iIndex;
+    m_iCurSegmentIndex  = MISSION_WAVE_TO_SEGMENT(m_iCurWaveIndex);
+    m_iLastSegmentIndex = m_iCurSegmentIndex;
 
     // 
     this->__OpenSegment();
@@ -392,12 +399,13 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->GetDataTable()->GiveBadge(iIndex);
+        pPlayer->GetDataTable()->GiveBadge(iIndex);   // TODO 1: [MF] stats should not be changed here for achievements
+        pPlayer->StartRolling();   // # also for achievements
     });
 
     // 
     const coreUint32 iBonus = cGame::CalcBonusBadge(iBadge);
-    if(DEFINED(_CORE_DEBUG_) || iBonus)
+    if(iBonus)
     {
         // 
         g_pGame->GetTimeTable()->AddShiftGood(iBonus);
@@ -415,13 +423,15 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
         g_pSave->EditLocalStatsArcade ()->iShiftGoodAdded += iBonus;
         g_pSave->EditLocalStatsMission()->iShiftGoodAdded += iBonus;
         g_pSave->EditLocalStatsSegment()->iShiftGoodAdded += iBonus;
-
-        // 
-        g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
-
-        // 
-        g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
     }
+
+    if(iBonus)   // TODO 1                     
+    // 
+    g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
+
+    // 
+    g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
+    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
     // 
     if(iBadge == BADGE_ACHIEVEMENT)
@@ -519,6 +529,7 @@ void cMission::__CloseSegment()
 
     // 
     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SPECIAL_SOUND_MEDAL(iMedal));
+    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
     // 
     g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)

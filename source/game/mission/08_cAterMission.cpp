@@ -15,7 +15,8 @@ cAterMission::cAterMission()noexcept
 : m_pInnerMission (NULL)
 , m_iNextID       (-1)
 , m_bTurfState    (false)
-, m_Secret        (false)
+, m_bSecret       (false)
+, m_iCredits      ((g_pGame->GetKind() == GAME_KIND_ALL) ? 0u : (g_pSave->GetHeader().oProgress.aiAdvance[MISSION_ATER] - 6u))
 {
     // 
     m_apBoss[0] = &m_ProjectOne;
@@ -69,6 +70,37 @@ void cAterMission::LoadInnerMission(const coreInt32 iID)
     SAFE_DELETE(pOldMission)
 
     Core::Log->Info("Inner Mission (%s) created", m_pInnerMission->GetName());
+}
+
+
+// ****************************************************************
+// 
+void cAterMission::TransformPlayers()
+{
+    cPlayer* pPlayer = g_pGame->GetPlayer(0u);
+
+    // 
+    pPlayer->Configure  (PLAYER_SHIP_P1);
+    pPlayer->EquipWeapon(0u, cFinalWeapon::ID);
+    pPlayer->EquipShield(0);
+    pPlayer->SetScale   (1.5f / PLAYER_SIZE_FACTOR);
+    pPlayer->SetRainbow (true);
+
+    if(g_pGame->IsMulti())
+    {
+        cPlayer* pOther = g_pGame->GetPlayer(1u);
+
+        // 
+        pOther->EquipWeapon(0u, cFinalWeapon::ID);
+        pOther->EquipShield(0);
+        pOther->SetScale   (1.5f / PLAYER_SIZE_FACTOR);
+        pOther->SetRainbow (true);
+    }
+
+    // 
+    g_pGame->GetInterface()->UpdateEnabled();
+
+    STATIC_ASSERT(GAME_PLAYERS == 2u)
 }
 
 

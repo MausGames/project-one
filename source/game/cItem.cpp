@@ -263,6 +263,7 @@ void cFragmentItem::Move()
             // 
             g_pSpecialEffects->MacroExplosionDarkBig(m_pTarget->GetPosition());
             g_pSpecialEffects->PlaySound(m_pTarget->GetPosition(), 1.0f, 1.0f, SOUND_FRAGMENT_COLLECT);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             // 
             this->Destroy(false);

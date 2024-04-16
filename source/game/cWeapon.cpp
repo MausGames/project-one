@@ -125,7 +125,7 @@ void cWeapon::_TrackBullet()
 // ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
-: m_bBurst  (false)
+: m_iBurst  (0u)
 , m_fMuzzleTime (0.0f)
 , m_iMuzzleTick (0u)
 {
@@ -221,8 +221,10 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
 // 
 void cRayWeapon::__ReleaseOwn(const coreUint8 iMode)
 {
+    if(m_iBurst == 1u) m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+    
     // 
-    m_bBurst = false;
+    m_iBurst = 0u;
 }
 
 
@@ -240,27 +242,31 @@ void cRayWeapon::__ShootOwn()
 
     // 
     const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
+    
+    cBulletManager* pManager = m_pOwner->HasStatus(PLAYER_STATUS_TOP) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
 
     // 
-    if(!m_bBurst)
+    if(!m_iBurst)
     {
-        m_bBurst = true;
+        m_iBurst = 1u;
 
         // (# bit less, as it basically merges upcoming damage) 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(5 * iSign, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(pManager->AddBullet<cRayBullet>(5 * iSign, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.25f)->ChangeHeight(m_pOwner->GetPosition().z);
 
         // 
-        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
+        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
 
         // play bullet sound-effect
         g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 0.8f, SOUND_WEAPON_RAY);
     }
     else
     {
+        m_iBurst = 2u;
+
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos - vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
-        //this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos + vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
+        this->_MakeWhite(pManager->AddBullet<cRayBullet>(1 * iSign, 8.0f, m_pOwner, vPos - vTan*1.55f, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
+        //this->_MakeWhite(pManager->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
 
         // play bullet sound-effect
         g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
@@ -588,7 +594,7 @@ void cEnemyWeapon::__ShootOwn()
     }
 
     // play bullet sound-effect
-    g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+    g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
 }
 
 
@@ -603,19 +609,9 @@ void cEnemyWeapon::__PrefetchOwn()
 // ****************************************************************
 // constructor
 cFinalWeapon::cFinalWeapon()noexcept
-: m_bBurst (false)
 {
     // set base fire-rate
     m_CooldownTimer.SetSpeed(20.0f);
-}
-
-
-// ****************************************************************
-// 
-void cFinalWeapon::__ReleaseOwn(const coreUint8 iMode)
-{
-    // 
-    m_bBurst = false;
 }
 
 
@@ -635,32 +631,11 @@ void cFinalWeapon::__ShootOwn()
     const coreVector3 vRealDir  = coreVector3(vDir, 0.0f) * mTiltMat;
     //const coreVector3 vRealTan  = coreVector3(vTan, 0.0f) * mTiltMat;
 
-/*
-    // 
-    if(!m_bBurst)
-    {
-        m_bBurst = true;
 
-        // (# bit less, as it basically merges upcoming damage) 
-        this->_MakeWhite(pManager->AddBullet<cFinalBullet>(5, 8.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f)->SetTiltProperties(m_pOwner->GetPosition(), vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
+    this->_MakeWhite(pManager->AddBullet<cFinalBullet>(2, 16.0f, m_pOwner, vPos, vDir))->ChangeScale(1.5f)->SetTiltProperties(m_pOwner->GetPosition(), vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
 
-        // 
-        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
-
-        // play bullet sound-effect
-        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 0.8f, SOUND_WEAPON_RAY);
-    }
-    else*/
-    {
-        // 
-        //this->_MakeWhite(pManager->AddBullet<cFinalBullet>(1, 8.0f, m_pOwner, vPos + vTan*1.55f, vDir))->SetTiltProperties(m_pOwner->GetPosition() + vRealTan*3.0f, vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
-        //this->_MakeWhite(pManager->AddBullet<cFinalBullet>(1, 8.0f, m_pOwner, vPos - vTan*1.55f, vDir))->SetTiltProperties(m_pOwner->GetPosition() - vRealTan*3.0f, vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
-        
-        this->_MakeWhite(pManager->AddBullet<cFinalBullet>(2, 16.0f, m_pOwner, vPos, vDir))->ChangeScale(1.5f)->SetTiltProperties(m_pOwner->GetPosition(), vRealDir)->ChangeHeight(m_pOwner->GetPosition().z);
-
-        // play bullet sound-effect
-        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
-    }
+    // play bullet sound-effect
+    g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
 }
 
 

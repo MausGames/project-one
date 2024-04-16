@@ -441,6 +441,7 @@ void cExtraMenu::LoadMissions()
 
     // 
     m_FilterMission.AddEntryLanguage("GAME_GLOBAL", 255u);
+    m_FilterMission.AddEntryLanguage("GAME_ARCADE", 254u);
     for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i)
     {
         const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < MISSION_BASE) ? 1u : 0u);
@@ -469,8 +470,32 @@ void cExtraMenu::LoadSegments(const coreUintW iMissionIndex)
     m_FilterSegment.ClearEntries();
 
     // 
-    if(iMissionIndex < MISSIONS)
+    if(iMissionIndex == 255u)
     {
+        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+
+        m_FilterSegment   .SetOverride(-1);
+        m_FilterType      .SetOverride(-1);
+        m_FilterDifficulty.SetOverride(-1);
+
+        m_FilterType      .GetCaption()->SetText("-");
+        m_FilterDifficulty.GetCaption()->SetText("-");
+    }
+    else if(iMissionIndex == 254u)
+    {
+        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+
+        m_FilterSegment   .SetOverride(-1);
+        m_FilterType      .SetOverride(0);
+        m_FilterDifficulty.SetOverride(0);
+
+        m_FilterType      .Next(); m_FilterType      .Previous();
+        m_FilterDifficulty.Next(); m_FilterDifficulty.Previous();
+    }
+    else
+    {
+        ASSERT(iMissionIndex < MISSIONS)
+
         const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[iMissionIndex] * ((iMissionIndex < MISSION_BASE) ? 1u : 0u);
         const coreUint8 iMin     = (iMissionIndex == MISSION_ATER) ? 5u : 0u;
         const coreUint8 iMax     = (iMissionIndex == MISSION_ATER) ? 7u : 6u;
@@ -487,17 +512,6 @@ void cExtraMenu::LoadSegments(const coreUintW iMissionIndex)
 
         m_FilterType      .Next(); m_FilterType      .Previous();
         m_FilterDifficulty.Next(); m_FilterDifficulty.Previous();
-    }
-    else
-    {
-        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
-
-        m_FilterSegment   .SetOverride(-1);
-        m_FilterType      .SetOverride(-1);
-        m_FilterDifficulty.SetOverride(-1);
-
-        m_FilterType      .GetCaption()->SetText("-");
-        m_FilterDifficulty.GetCaption()->SetText("-");
     }
 
     // 
@@ -557,6 +571,44 @@ void cExtraMenu::__UpdateStats()
         nSetStatFunc("STAT_MEDALS_EARNED",          "%'u",                     oStats.aiMedalsEarned[MEDAL_BRONZE] + oStats.aiMedalsEarned[MEDAL_SILVER] + oStats.aiMedalsEarned[MEDAL_GOLD] + oStats.aiMedalsEarned[MEDAL_PLATINUM] + oStats.aiMedalsEarned[MEDAL_DARK]);
         nSetStatFunc("STAT_BADGES_EARNED",          "%'u",                     oStats.iBadgesEarned);
         nSetStatFunc("STAT_HELPER_HIT",             "%'u",                     oStats.iHelperHit);
+
+        m_FilterIcon.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+    }
+    else if(iMissionValue == 254u)
+    {
+        const auto&     oStats      = g_pSave->GetHeader().aaaLocalStatsArcade[iTypeValue][iModeValue][iDifficultyValue];
+        const coreInt32 iBestShift  = coreInt32(oStats.iTimeBestShiftBad)  - coreInt32(oStats.iTimeBestShiftGood);
+        const coreInt32 iWorstShift = coreInt32(oStats.iTimeWorstShiftBad) - coreInt32(oStats.iTimeWorstShiftGood);
+        const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  10.0f);
+        const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), 10.0f);
+
+        nSetStatFunc("STAT_SCORE_BEST",             "%'u",      oStats.iScoreBest);
+        nSetStatFunc("STAT_SCORE_WORST",            "%'u",      oStats.iScoreWorst);
+        nSetStatFunc("STAT_SCORE_TOTAL",            "%'llu",    oStats.iScoreTotal);
+        nSetStatFunc("STAT_TIME_BEST_SHIFTED",      "%.1f %+d", fBestTime, iBestShift);
+        nSetStatFunc("STAT_TIME_BEST_RAW",          "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBest),  10.0f));
+        nSetStatFunc("STAT_TIME_WORST_SHIFTED",     "%.1f %+d", fWorstTime, iWorstShift);
+        nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), 10.0f));
+        nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), 10.0f));
+        nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
+        nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
+        nSetStatFunc("STAT_DAMAGE_GIVEN",           "%'llu",    oStats.iDamageGiven);
+        nSetStatFunc("STAT_DAMAGE_TAKEN",           "%'u",      oStats.iDamageTaken);
+        nSetStatFunc("STAT_CONTINUES_USED",         "%'u",      oStats.iContinuesUsed);
+        nSetStatFunc("STAT_REPAIRS_USED",           "%'u",      oStats.iRepairsUsed);
+        nSetStatFunc("STAT_SHIFT_GOOD_ADDED",       "%'u",      oStats.iShiftGoodAdded);
+        nSetStatFunc("STAT_SHIFT_BAD_ADDED",        "%'u",      oStats.iShiftBadAdded);
+        nSetStatFunc("STAT_MOVES_MADE",             "%'llu",    oStats.iMovesMade);
+        nSetStatFunc("STAT_TURNS_MADE",             "%'u",      oStats.iTurnsMade);
+        nSetStatFunc("STAT_BULLETS_SHOT",           "%'llu",    oStats.iBulletsShot);
+        nSetStatFunc("STAT_MEDALS_EARNED_BRONZE",   "%'u",      oStats.aiMedalsEarned[MEDAL_BRONZE]);
+        nSetStatFunc("STAT_MEDALS_EARNED_SILVER",   "%'u",      oStats.aiMedalsEarned[MEDAL_SILVER]);
+        nSetStatFunc("STAT_MEDALS_EARNED_GOLD",     "%'u",      oStats.aiMedalsEarned[MEDAL_GOLD]);
+        nSetStatFunc("STAT_MEDALS_EARNED_PLATINUM", "%'u",      oStats.aiMedalsEarned[MEDAL_PLATINUM]);
+        nSetStatFunc("STAT_MEDALS_EARNED_DARK",     "%'u",      oStats.aiMedalsEarned[MEDAL_DARK]);
+        nSetStatFunc("STAT_MEDALS_EARNED",          "%'u",      oStats.aiMedalsEarned[MEDAL_BRONZE] + oStats.aiMedalsEarned[MEDAL_SILVER] + oStats.aiMedalsEarned[MEDAL_GOLD] + oStats.aiMedalsEarned[MEDAL_PLATINUM] + oStats.aiMedalsEarned[MEDAL_DARK]);
+        nSetStatFunc("STAT_BADGES_EARNED",          "%'u",      oStats.iBadgesEarned);
+        nSetStatFunc("STAT_HELPER_HIT",             "%'u",      oStats.iHelperHit);
 
         m_FilterIcon.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
     }

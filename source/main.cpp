@@ -14,7 +14,6 @@ coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
 coreBool        g_bTiltMode       = false;
 coreFloat       g_fShiftMode      = 0.0f;
 coreBool        g_bDemoVersion    = false;
-coreBool        g_bPirateVersion  = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -362,6 +361,38 @@ void CoreApp::Move()
 
     // 
     UpdateListener();
+    
+    
+    cBackground* pCurBackground = g_pEnvironment->GetBackground();
+    cBackground* pOldBackground = g_pEnvironment->GetOldBackground();
+
+    const coreInt32 iCurID = pCurBackground->GetID();
+    const coreInt32 iOldID = pOldBackground ? pOldBackground->GetID() : cNoBackground::ID;
+
+    coreFloat fCurFactor = 0.0f;
+    coreFloat fOldFactor = 0.0f;
+
+         if(iCurID == cMossBackground   ::ID) fCurFactor = d_cast<cMossBackground*>   (pCurBackground)->GetHeadlight()->GetAlpha();
+    else if(iCurID == cStomachBackground::ID) fCurFactor = d_cast<cStomachBackground*>(pCurBackground)->GetHeadlight()->GetAlpha();
+    else if(iCurID == cDarkBackground   ::ID) fCurFactor = d_cast<cDarkBackground*>   (pCurBackground)->GetHeadlight()->GetAlpha();
+
+         if(iOldID == cMossBackground   ::ID) fOldFactor = d_cast<cMossBackground*>   (pOldBackground)->GetHeadlight()->GetAlpha();
+    else if(iOldID == cStomachBackground::ID) fOldFactor = d_cast<cStomachBackground*>(pOldBackground)->GetHeadlight()->GetAlpha();
+    else if(iOldID == cDarkBackground   ::ID) fOldFactor = d_cast<cDarkBackground*>   (pOldBackground)->GetHeadlight()->GetAlpha();
+
+    coreVector2 vTarget = coreVector2(0.0f,0.0f);
+    if(STATIC_ISVALID(g_pGame))
+    {
+        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            vTarget += pPlayer->GetPosition().xy();
+        });
+        vTarget *= RCP(I_TO_F(g_pGame->GetNumPlayers()));
+    }
+
+    g_pEnvironment->SetTargetSide(vTarget * (0.1f * LERP(fOldFactor, fCurFactor, g_pEnvironment->RetrieveTransitionBlend(pCurBackground))), 10.0f);
+    
+    
 
     // debug and test game
     if(Core::Debug->IsEnabled()) DebugGame();
@@ -570,10 +601,20 @@ static void ReshapeGame()
         {
             Timeless([]()
             {
-                g_pGame->GetCurMission()->MoveAfter();
+                g_pGame->GetCurMission()->MoveAfter();   // update manuals
             });
             g_pMenu->InvokePauseStep();
         }
+    }
+    
+    if(STATIC_ISVALID(g_pGame))    // usually only during a game   // TODO 1: this is called during Move()
+    {
+    // refresh frame-buffers        
+    g_pGlow->Update();
+    Timeless([]()
+    {
+        g_pDistortion->Update();
+    });
     }
     
 

@@ -34,6 +34,15 @@ cPhalarisBoss::cPhalarisBoss()noexcept
 
 
 // ****************************************************************
+// destructor
+cPhalarisBoss::~cPhalarisBoss()
+{
+    // 
+    this->Kill(false);
+}
+
+
+// ****************************************************************
 // 
 void cPhalarisBoss::__MoveOwn()
 {

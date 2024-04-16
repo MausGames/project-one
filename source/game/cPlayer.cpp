@@ -404,7 +404,7 @@ void cPlayer::Move()
             const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
             ASSERT(vFinal.IsNormalized())
             
-            const coreVector2 vFlip = vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f);
+            const coreVector2 vFlip = (vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f)).Processed(SIGN);
             
             const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
             
@@ -489,7 +489,7 @@ void cPlayer::Move()
         if(m_fRollTime >= 1.0f) this->EndRolling();
 
         // 
-        m_fRollTime.Update(this->IsRolling() ? PLAYER_ROLL_SPEED : -PLAYER_ROLL_COOLDOWN);
+        m_fRollTime.Update(this->IsRolling2() ? PLAYER_ROLL_SPEED : -PLAYER_ROLL_COOLDOWN);
         m_fRollTime = CLAMP01(m_fRollTime);
 
         // 
@@ -498,7 +498,7 @@ void cPlayer::Move()
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
         {
             // 
-            if(this->IsRolling())
+            if(this->IsRolling2())
             {
                 const coreFloat fAngle = LERPB(0.0f, 8.0f*PI, m_fRollTime);
                 const coreFloat fSide  = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), UnpackDirection(m_iRollDir)));
@@ -766,10 +766,13 @@ void cPlayer::Move()
         
         m_vMenuColor = vLevelColor;
         m_vLedColor  = vLedColor;
-
-        if(g_pEnvironment->GetBackground()->GetID() == cDarkBackground::ID)
+    
+        //if(g_pGame->GetPlayerIndex(this) == 0u)
         {
-            d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vLevelColor);
+            if(g_pEnvironment->GetBackground()->GetID() == cDarkBackground::ID)
+            {
+                d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vLevelColor);
+            }
         }
     }
         
@@ -815,7 +818,7 @@ void cPlayer::MoveFrozen()
             const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
             ASSERT(vFinal.IsNormalized())
             
-            const coreVector2 vFlip = vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f);
+            const coreVector2 vFlip = (vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f)).Processed(SIGN);
             
             const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
             
@@ -920,7 +923,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
                 // 
                 if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.1f);
-                g_pSpecialEffects->RumblePlayer(this, 0.25f, 250u);
+                g_pSpecialEffects->RumblePlayer(this, m_iCurShield ? SPECIAL_RUMBLE_SMALL : SPECIAL_RUMBLE_BIG, 250u);
             }
             else
             {
@@ -930,7 +933,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
                 // 
                 if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.2f);
-                g_pSpecialEffects->RumblePlayer(this, 0.5f, 250u);
+                g_pSpecialEffects->RumblePlayer(this, SPECIAL_RUMBLE_BIG, 250u);
             }
 
             // 
@@ -943,7 +946,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
             // 
             if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(1.5f);
-            g_pSpecialEffects->RumblePlayer(this, 0.5f, 500u);
+            g_pSpecialEffects->RumblePlayer(this, SPECIAL_RUMBLE_BIG, 500u);
         }
 
         // 
@@ -1106,7 +1109,7 @@ void cPlayer::ShowCircle()
 // 
 void cPlayer::StartRolling(const coreVector2 vDirection)
 {
-    WARN_IF(this->IsRolling()) return;
+    //WARN_IF(this->IsRolling()) return;
 
     // 
     m_fRollTime = 0.0f;
@@ -1127,7 +1130,7 @@ void cPlayer::StartRolling()
 // 
 void cPlayer::EndRolling()
 {
-    if(!this->IsRolling()) return;
+    if(!this->IsRolling2()) return;
 
     // 
     m_fRollTime = 1.0f;

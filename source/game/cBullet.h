@@ -95,7 +95,7 @@ public:
     inline cBullet* ChangeHeight           (const coreFloat fValue)  {this->SetPosition         (coreVector3(this->GetPosition().xy(), fValue)); return this;}   // not related to tilting
     inline cBullet* ChangeSize             (const coreFloat fFactor) {this->SetSize             (this->GetSize   () * fFactor);                  return this;}
     inline cBullet* ChangeTexSize          (const coreFloat fFactor) {this->SetTexSize          (this->GetTexSize() * fFactor);                  return this;}
-    inline cBullet* ChangeCollisionModifier(const coreFloat fValue)  {this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * fValue);          return this;}
+    inline cBullet* ChangeCollisionModifier(const coreFloat fValue)  {this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * fValue);          return this;}   // # unhandled change
 
     // 
     inline void     AddStatus   (const coreInt32 iStatus)      {ADD_FLAG       (m_iStatus, iStatus)}
@@ -579,7 +579,7 @@ public:
     ASSIGN_ID(8, "Spear")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f) * 0.9f); this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR); m_fAnimation = 0.15f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f) * 0.8f); this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR); m_fAnimation = 0.15f; m_fFade = 0.0f;}
 
     // change default color
     inline cSpearBullet* MakeWhite  () {this->_MakeWhite  (0.8f); return this;}
@@ -769,10 +769,10 @@ public:
     ASSIGN_ID(13, "Card")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeWhite(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cCardBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
+    inline cCardBullet* MakeWhite  () {this->_MakeWhite  (0.5f); return this;}
     inline cCardBullet* MakeYellow () {ASSERT(false)             return this;}
     inline cCardBullet* MakeOrange () {ASSERT(false)             return this;}
     inline cCardBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
@@ -780,10 +780,10 @@ public:
     inline cCardBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
     inline cCardBullet* MakeBlue   () {ASSERT(false)             return this;}
     inline cCardBullet* MakeCyan   () {this->_MakeCyan   (0.9f); return this;}
-    inline cCardBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cCardBullet* MakeGreen  () {this->_MakeGreen  (0.8f); return this;}
 
     // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_invert_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 

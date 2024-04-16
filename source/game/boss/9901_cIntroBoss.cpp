@@ -17,7 +17,7 @@
 // ACHIEVEMENT: keep the extra enemy alive, until the boss gets rid of it
 // TODO 1: hard: shield, verfolgt spieler (vielleicht front), und wehrt angriffe ab
 // TODO 5: das erste fragment bekommt man im intro (die mitte der tafel, das viereck), und saugt einen ein und zerstört das schiff, und erzeugt eine graue kopie (Eigengrau) -> erst dann bekommt man blauen schein und quad, auch health-icon anders
-// TODO 1: [MF] MAIN: sound
+// TODO 1: [MF] sounds verbessern
 
 
 // ****************************************************************
@@ -71,6 +71,15 @@ cIntroBoss::cIntroBoss()noexcept
     m_Shield.Configure      (1, 0u, COLOR_SHIP_PURPLE);
     m_Shield.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
     m_Shield.SetParent      (this);
+}
+
+
+// ****************************************************************
+// destructor
+cIntroBoss::~cIntroBoss()
+{
+    // 
+    this->Kill(false);
 }
 
 
@@ -192,6 +201,11 @@ void cIntroBoss::__MoveOwn()
             this->DefaultMoveLerp  (m_vLastPosition, coreVector2(0.0f,0.0f), fTime);
             this->DefaultRotateLerp(-1.0f*PI,        -12.0f*PI,              fTime);
 
+            if(PHASE_TIME_POINT(0.1f) || PHASE_TIME_POINT(0.3f) || PHASE_TIME_POINT(0.5f) || PHASE_TIME_POINT(0.7f) || PHASE_TIME_POINT(0.9f))
+            {
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH);
+            }
+
             if(PHASE_TIME_POINT(0.5f))
             {
                 this->__ResurrectHelperIntro(ELEMENT_BLUE, false);
@@ -221,6 +235,11 @@ void cIntroBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
         {
+            if(PHASE_BEGINNING)
+            {
+                g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,1.0f), 10.0f);
+            }
+
             this->DefaultMoveLerp(coreVector2(-1.8f,0.9f), coreVector2(-1.0f,0.9f), fTime);
             this->SetDirection   (coreVector3(1.0f,0.0f,0.0f));
 
@@ -237,7 +256,7 @@ void cIntroBoss::__MoveOwn()
         {
             if(PHASE_TIME_POINT(0.2f))
             {
-                g_pSpecialEffects->PlaySound(coreVector3(-1.0f,0.0f,0.0f) * FOREGROUND_AREA3, 1.0f, 0.6f, SOUND_PLACEHOLDER);
+                //g_pSpecialEffects->PlaySound(coreVector3(-1.0f,0.0f,0.0f) * FOREGROUND_AREA3, 1.0f, 0.6f, SOUND_EFFECT_WOOSH);
             }
 
             this->DefaultMoveLerp(coreVector2(-1.0f,0.9f), coreVector2(-1.0f,-1.0f), fTime);
@@ -257,6 +276,11 @@ void cIntroBoss::__MoveOwn()
             this->DefaultMoveLerp  (coreVector2(-1.0f,-1.0f), coreVector2(1.0f,-1.0f), fTime);
             this->DefaultRotateLerp(1.5f*PI,                  -3.5f*PI,                fTime);
 
+            if(PHASE_TIME_POINT(0.3f) || PHASE_TIME_POINT(0.7f))
+            {
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH);
+            }
+
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
         });
@@ -270,7 +294,7 @@ void cIntroBoss::__MoveOwn()
         {
             if(PHASE_TIME_POINT(0.1f) || PHASE_TIME_POINT(0.6f))
             {
-                g_pSpecialEffects->PlaySound(coreVector3(1.0f,0.0f,0.0f) * FOREGROUND_AREA3, 1.0f, 0.6f, SOUND_PLACEHOLDER);
+                //g_pSpecialEffects->PlaySound(coreVector3(1.0f,0.0f,0.0f) * FOREGROUND_AREA3, 1.0f, 0.6f, SOUND_EFFECT_WOOSH);
             }
 
             this->DefaultMoveLerp(coreVector2(1.0f,-1.0f), coreVector2(1.0f,3.8f), fTime);
@@ -299,6 +323,11 @@ void cIntroBoss::__MoveOwn()
             this->DefaultMoveLerp  (coreVector2(1.0f,1.0f), coreVector2(0.0f,0.8f), fTime);
             this->DefaultRotateLerp(0.5f*PI,                5.0f*PI,                fTime);
 
+            if(PHASE_TIME_POINT(0.3f) || PHASE_TIME_POINT(0.7f))
+            {
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH);
+            }
+
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
         });
@@ -325,6 +354,11 @@ void cIntroBoss::__MoveOwn()
         {
             this->DefaultMoveLerp(coreVector2(0.0f,0.8f), coreVector2(0.0f,-0.9f), ParaLerp(0.0f, -0.1f, 1.0f, fTime));
 
+            if(PHASE_TIME_POINT(0.6f))
+            {
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.6f, SOUND_EFFECT_WOOSH);
+            }
+
             if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_INC
@@ -345,6 +379,8 @@ void cIntroBoss::__MoveOwn()
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_SHAKE_2);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
 
                 if(this->__ResurrectHelperIntro(ELEMENT_PURPLE, true))
                 {
@@ -390,7 +426,7 @@ void cIntroBoss::__MoveOwn()
 
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 5u, COLOR_ENERGY_YELLOW);
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY * 0.5f);
-            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_EFFECT_DUST);
         }
 
         if(this->GetCurHealth() < 600)
@@ -399,6 +435,7 @@ void cIntroBoss::__MoveOwn()
 
             g_pSpecialEffects->MacroExplosionDarkSmall(coreVector3(coreVector2(fSide, -1.1f) * FOREGROUND_AREA, 0.0f));
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             this->__ResurrectHelperIntro(ELEMENT_YELLOW, false);
         }
@@ -424,12 +461,19 @@ void cIntroBoss::__MoveOwn()
 
         vCircleData.y += vCircleData.x * 0.8f * TIME;
 
+        const coreVector2 vOldPos = this->GetPosition().xy();
+
         const coreFloat   fLen = LERP(0.0f, 0.8f, 0.5f + 0.5f * SIN(vCircleData.y * (0.125f*PI) - (0.5f*PI))) + LERPBR(0.0f, 1.4f * SQRT2, CLAMP01(vCircleData.z - 1.0f));
         const coreVector2 vDir = coreVector2::Direction(vCircleData.y * (1.0f*PI));
         const coreVector2 vPos = vDir * fLen * FOREGROUND_AREA;
 
         this->SetPosition (coreVector3(vPos, 0.0f));
         this->SetDirection(coreVector3(vDir, 0.0f));
+
+        if(InBetweenExt(0.0f, vOldPos.x, vPos.x) == 1)
+        {
+            //g_pSpecialEffects->PlaySound(coreVector3(vOldPos, 0.0f), 1.0f, 0.6f, SOUND_EFFECT_WOOSH);
+        }
 
         if(PHASE_MAINTIME_POINT(6.0f))
         {
@@ -469,7 +513,7 @@ void cIntroBoss::__MoveOwn()
         {
             if(PHASE_TIME_POINT(0.15f) || PHASE_TIME_POINT(0.65f))
             {
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.8f, SOUND_PLACEHOLDER);
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH);
             }
 
             const coreFloat   fValue = COS(fTime * (2.0f*PI));
@@ -479,6 +523,12 @@ void cIntroBoss::__MoveOwn()
 
             this->SetPosition (coreVector3(vPos, 0.0f) * FOREGROUND_AREA3);
             this->SetDirection(coreVector3(vDir, 0.0f));
+
+            if(this->ReachedHealth(1500))
+            {
+                g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+            }
 
             if(PHASE_FINISHED)
             {
@@ -549,6 +599,11 @@ void cIntroBoss::__MoveOwn()
 
             this->SetDirection(coreVector3(vDir, 0.0f));
 
+            if(PHASE_TIME_POINT(0.3f) || PHASE_TIME_POINT(0.7f))
+            {
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH);
+            }
+
             if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_INC
@@ -568,7 +623,12 @@ void cIntroBoss::__MoveOwn()
         {
             this->DefaultMoveLerp(m_vLastPosition, m_avVector[LAST_TARGET].xy(), ParaLerp(0.0f, -0.1f, 1.0f, fTime));
 
-            if((m_aiCounter[RUSH_COUNT] == 1) && PHASE_TIME_POINT(0.5f))
+            if(PHASE_TIME_POINT(0.6f))
+            {
+                //g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.6f, SOUND_EFFECT_WOOSH);
+            }
+
+            if(PHASE_TIME_POINT(0.5f) && (m_aiCounter[RUSH_COUNT] == 1))
             {
                 if(this->__ResurrectHelperIntro(ELEMENT_MAGENTA, true))
                 {
@@ -605,10 +665,13 @@ void cIntroBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.08f, LERP_HERMITE3)
         {
-            const coreFloat fOffset = SIN(fTime * (2.0f*PI)) * 0.5f;
+            const coreFloat   fOffset = SIN(fTime * (2.0f*PI)) * 0.5f;
+            const coreVector2 vNewPos = coreVector2(fOffset, LERP(m_vLastPosition.y, 0.1f, fTime));
 
-            this->SetPosition      (coreVector3(fOffset, LERP(m_vLastPosition.y, 0.1f, fTime), 0.0f) * FOREGROUND_AREA3);
+            this->SetPosition      (coreVector3(vNewPos * FOREGROUND_AREA, 0.0f));
             this->DefaultRotateLerp(1.0f*PI, 9.0f*PI, fTime);
+
+            g_pEnvironment->SetTargetDirectionNow(-coreVector2(fOffset, 0.6f).Normalized());
 
             if(PHASE_TIME_POINT(0.75f))
             {
@@ -668,6 +731,7 @@ void cIntroBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
                 g_pSpecialEffects->SlowScreen(4.0f);
 
                 PHASE_CHANGE_INC
@@ -683,7 +747,7 @@ void cIntroBoss::__MoveOwn()
         {
             m_avVector[BURST_DATA].x = fTime;
 
-            if(PHASE_FINISHED)
+            if(PHASE_TIME_AFTER(0.5f))
             {
                 this->Kill(false);
             }
@@ -786,7 +850,7 @@ void cIntroBoss::__MoveOwn()
 
         pOrangeHelper->SetPosition(coreVector3(vPos, 0.0f));
 
-        if(fTime >= 1.0f) this->_KillHelper(ELEMENT_ORANGE, false);
+        if((fTime >= 1.0f) || (m_iPhase != 40u)) this->_KillHelper(ELEMENT_ORANGE, false);
     }
 
     // 

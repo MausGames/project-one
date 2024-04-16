@@ -54,7 +54,7 @@ cDarkBackground::cDarkBackground()noexcept
             // set object properties
             pBlock->SetPosition(coreVector3(0.0f, 0.0f, DARK_HEIGHT + m_afStartHeight[i]));
             pBlock->SetSize    (coreVector3(0.5f,0.5f,0.5f) * DARK_DETAIL);
-            pBlock->SetColor4  (coreVector4(vColor, 1.0f) * Core::Rand->Float(0.85f, 1.0f));
+            pBlock->SetColor4  (coreVector4(vColor, 1.0f) * Core::Rand->Float(0.65f, 1.0f));
             
             const coreUintW iType = ((i + (i / DARK_BLOCKS_X)) * 3u) % 8u;
             pBlock->SetTexSize  (coreVector2(0.25f,0.5f));
@@ -172,7 +172,7 @@ void cDarkBackground::__MoveOwn()
     if(!this->IsDissolved())
     {
         // 
-        const coreVector2 vCamPos = g_pEnvironment->GetCameraPos().xy();
+        const coreVector2 vCamPos = g_pEnvironment->GetCameraPos().xy() - g_pEnvironment->GetSideOffset();
         const coreFloat   fRange  = I_TO_F(DARK_BLOCKS_Y) * DARK_DETAIL * 0.5f;
 
         // 

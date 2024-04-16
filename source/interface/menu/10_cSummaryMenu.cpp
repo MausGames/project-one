@@ -279,6 +279,16 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_SegmentMedal.DefineProgram("default_2d_program");
     m_SegmentMedal.SetPosition  (coreVector2(0.0f,-0.1f));
     m_SegmentMedal.SetTexSize   (coreVector2(0.25f,0.25f));
+
+    for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i)
+    {
+        m_aSegmentBadge[i].DefineTexture(0u, "menu_badge.png");
+        m_aSegmentBadge[i].DefineProgram("default_2d_program");
+        m_aSegmentBadge[i].SetTexSize   (coreVector2(0.5f,1.0f));
+
+        m_aSegmentBadgeWave[i].DefineTexture(0u, "effect_headlight_point.png");
+        m_aSegmentBadgeWave[i].DefineProgram("menu_single_program");
+    }
     
     
 
@@ -370,6 +380,9 @@ cSummaryMenu::cSummaryMenu()noexcept
         this->BindObject(j, &m_BackgroundMain);
         this->BindObject(j, &m_Icon);
         this->BindObject(j, &m_SegmentMedal);
+
+        for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i) this->BindObject(j, &m_aSegmentBadgeWave[i]);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i) this->BindObject(j, &m_aSegmentBadge    [i]);
 
         this->BindObject(j, &m_NextButton);
         this->BindObject(j, &m_AgainButton);
@@ -466,7 +479,7 @@ void cSummaryMenu::Move()
             const coreFloat fBlendIn  = m_fIntroTimer;
             const coreFloat fBlendOut = 1.0f - m_fOutroTimer;
             
-            const auto nBlendMedalFunc = [&](cGuiObject* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold, const eSoundEffect eSoundIndex = SOUND_PLACEHOLDER)
+            const auto nBlendMedalFunc = [&](cGuiObject* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold, const eSoundEffect eSoundIndex = SOUND_NONE)
             {
                 const coreFloat fFadeIn     = CLAMP01((fBlendIn - fThreshold) * 10.0f);
                 const coreInt32 iStatusdOld = pMedal->GetStatus();
@@ -481,10 +494,10 @@ void cSummaryMenu::Move()
                 pMedal->Move();
 
                 // 
-                if(pMedal->GetEnabled() && !iStatusdOld && iStatusdNew && (eSoundIndex != SOUND_PLACEHOLDER)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, eSoundIndex);
+                if(pMedal->GetEnabled() && !iStatusdOld && iStatusdNew && (eSoundIndex != SOUND_NONE)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, eSoundIndex);
             };
             
-            const auto nAlphaFunc = [&](coreObject2D* OUTPUT pObject, const coreFloat fTime, const eSoundEffect eSoundIndex = SOUND_PLACEHOLDER)
+            const auto nAlphaFunc = [&](coreObject2D* OUTPUT pObject, const coreFloat fTime, const eSoundEffect eSoundIndex = SOUND_NONE)
             {
                 const coreFloat        fFade       = fTime * fBlendOut;
                 const coreObjectEnable eEnabledOld = pObject->GetEnabled();
@@ -494,7 +507,7 @@ void cSummaryMenu::Move()
                 pObject->SetEnabled(eEnabledNew);
 
                 // 
-                if(!eEnabledOld && eEnabledNew && (eSoundIndex != SOUND_PLACEHOLDER)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, eSoundIndex);
+                if(!eEnabledOld && eEnabledNew && (eSoundIndex != SOUND_NONE)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, eSoundIndex);
             };
             
             nAlphaFunc(&m_ArcadeHeader, CLAMP01(m_fIntroTimer));
@@ -749,7 +762,6 @@ void cSummaryMenu::Move()
     case SURFACE_SUMMARY_SEGMENT_SOLO:
     case SURFACE_SUMMARY_SEGMENT_COOP:
         {
-            // TODO 1: not available after both bonus-mission bosses
             if(m_NextButton.IsClicked())
             {
                 // 
@@ -767,11 +779,6 @@ void cSummaryMenu::Move()
                  
                 g_pGame->FadeMusic(0.7f);
             }
-
-            // 
-            cMenu::UpdateButton(&m_NextButton,  m_NextButton .IsFocused());
-            cMenu::UpdateButton(&m_AgainButton, m_AgainButton.IsFocused());
-            cMenu::UpdateButton(&m_ExitButton,  m_ExitButton .IsFocused());
             
             
             // 
@@ -832,7 +839,27 @@ void cSummaryMenu::Move()
                     // 
                     if(pMedal->GetEnabled() && !iStatusdOld && iStatusdNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, bMission ? SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]) : SOUND_SUMMARY_MEDAL);
                 };
-                nBlendMedalFunc(&m_SegmentMedal, 0.13f, 2.6f, true);
+                nBlendMedalFunc(&m_SegmentMedal, 0.13f, 2.2f, true);
+
+                // 
+                const auto nBlendBadgeFunc = [&](cGuiObject* OUTPUT pBadge, cGuiObject* OUTPUT pWave, const coreFloat fThreshold)
+                {
+                    const coreFloat fFadeIn = CLAMP01((fBlendIn - fThreshold) * 10.0f);
+
+                    // 
+                    pBadge->SetSize (coreVector2(0.07f,0.07f) * LERP(1.5f, 1.0f, fFadeIn));
+                    pBadge->SetAlpha(MIN(fFadeIn, fBlendOut));
+
+                    // 
+                    pBadge->Move();
+
+                    pWave->SetSize (pBadge->GetSize () * 0.7f);
+                    pWave->SetAlpha(pBadge->GetAlpha());
+        
+                    pWave->Move();
+                    
+                };
+                for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i) nBlendBadgeFunc(&m_aSegmentBadge[i], &m_aSegmentBadgeWave[i], 2.3f + 0.1f * I_TO_F(i));
 
                 // 
                 const auto nBlendLabelFunc = [&](cGuiLabel* OUTPUT pName, cGuiLabel* OUTPUT pValue1, cGuiLabel* OUTPUT pValue2, cGuiLabel* OUTPUT pPart, const coreFloat fThreshold)
@@ -855,7 +882,7 @@ void cSummaryMenu::Move()
                     // 
                     if(!eEnabledOld && eEnabledNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_SUMMARY_TEXT);
                 };
-                for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES_SEGMENT; ++i) nBlendLabelFunc(&m_aSegmentName[i], &m_aaSegmentValue[i][0], &m_aaSegmentValue[i][1], m_aaSegmentPart[i], 1.0f + 0.8f * I_TO_F(i));
+                for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES_SEGMENT; ++i) nBlendLabelFunc(&m_aSegmentName[i], &m_aaSegmentValue[i][0], &m_aaSegmentValue[i][1], m_aaSegmentPart[i], 1.0f + 0.6f * I_TO_F(i));
 
                 // 
                 const auto nSignalFunc = [&](cGuiLabel* OUTPUT pSignal, const coreObject2D* pParent, const coreBool bCondition, const eSoundEffect eSoundIndex)
@@ -913,6 +940,26 @@ void cSummaryMenu::Move()
                 
                 m_Icon.SetSize(coreVector2(0.3f,0.3f) * LERPB(0.85f, 1.0f, fVisibility));
                 m_Icon.Move();
+            }
+
+            // 
+            cMenu::UpdateButton(&m_NextButton,  m_NextButton .IsFocused());   // after SetAlpha
+            cMenu::UpdateButton(&m_AgainButton, m_AgainButton.IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,  m_ExitButton .IsFocused());
+            
+            const coreFloat fRotation = coreFloat(Core::System->GetTotalTime());
+
+            for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i)
+            {
+                if(m_aSegmentBadgeWave[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+                {
+                    m_aSegmentBadge[i].SetDirection(coreVector2::Direction(fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
+                }
+                else
+                {
+                    m_aSegmentBadge[i].SetDirection(coreVector2(0.0f,1.0f));
+                }
+                m_aSegmentBadge[i].Move();
             }
             
             
@@ -1314,14 +1361,15 @@ void cSummaryMenu::ShowSegment()
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
     const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetTakeFrom();
-    //const coreBool  bBoss         = MISSION_SEGMENT_IS_BOSS(iSegmentIndex);
+    const coreBool  bBoss         = MISSION_SEGMENT_IS_BOSS(iSegmentIndex);
+    const coreBool  bIntro        = (iMissionIndex == MISSION_INTRO);
 
     // 
     m_aHeader[0].SetText(PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iMissionIndex, iSegmentIndex)));
     m_aHeader[1].SetText(g_pGame->GetCurMission()->GetName());
 
     // 
-    m_Icon.SetColor3   (g_aMissionData[iMissionIndex].vColor * 0.8f);
+    m_Icon.SetColor3   (((iMissionIndex == MISSION_ATER) ? g_pEnvironment->GetBackground()->GetColor() : g_aMissionData[iMissionIndex].vColor) * 0.8f);
     m_Icon.SetTexOffset(g_aMissionData[iMissionIndex].vIcon);
 
     // 
@@ -1369,16 +1417,36 @@ void cSummaryMenu::ShowSegment()
 
     // 
     const coreUint8 iMedal = g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(iMissionIndex, iSegmentIndex);
-    cMenu::ApplyMedalTexture(&m_SegmentMedal, iMedal, MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
+    cMenu::ApplyMedalTexture(&m_SegmentMedal, iMedal, bBoss ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
 
     // 
     m_aiApplyMedal[0] = iMedal;
+
+    // 
+    for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i)
+    {
+        const coreBool bState = g_pGame->GetPlayer(0u)->GetDataTable()->GetBadge(i, iMissionIndex, iSegmentIndex);
+
+        // 
+        m_aSegmentBadge[i].SetPosition (m_SegmentMedal.GetPosition() + coreVector2(0.11f, ((I_TO_F(i) - 0.5f) * -0.06f) * (bIntro ? 0.0f : 1.0f)));
+        m_aSegmentBadge[i].SetTexOffset(coreVector2(bState ? 0.0f : 0.5f, 0.0f));
+        m_aSegmentBadge[i].SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (bState ? 1.0f : 0.5f));
+        m_aSegmentBadge[i].SetEnabled  (((!bIntro || (i == 0u)) && !bBoss) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
+        // 
+        m_aSegmentBadgeWave[i].SetPosition(m_aSegmentBadge[i].GetPosition());
+        m_aSegmentBadgeWave[i].SetEnabled (bState ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    }
 
     // 
     const coreUint8 iRecordBroken = g_pGame->GetCurMission()->GetRecordBroken();
     SET_BIT(m_iSignalActive, 2u, HAS_BIT(iRecordBroken, 0u))
     SET_BIT(m_iSignalActive, 3u, HAS_BIT(iRecordBroken, 1u))
     //SET_BIT(m_iSignalActive, 4u, HAS_BIT(iRecordBroken, 2u))
+
+    // 
+    const coreBool bNoNext = (iMissionIndex >= MISSION_ATER) && bBoss;
+    m_NextButton.SetOverride(bNoNext ? -1 : 0);
 
     // 
     this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_SEGMENT_COOP : SURFACE_SUMMARY_SEGMENT_SOLO, 0.0f);
@@ -1391,7 +1459,7 @@ void cSummaryMenu::ShowBeginning()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
-    // 
+    // (hidden bonus and medal) 
     this->ShowMission();
 
     // 
@@ -1405,7 +1473,7 @@ void cSummaryMenu::ShowEndingNormal()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
-    // 
+    // (hidden bonus and medal) 
     this->ShowMission();
 
     // 
@@ -1419,7 +1487,7 @@ void cSummaryMenu::ShowEndingSecret()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
-    // 
+    // (hidden bonus and medal) 
     this->ShowMission();
 
     // 

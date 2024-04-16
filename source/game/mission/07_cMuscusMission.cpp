@@ -595,6 +595,7 @@ void cMuscusMission::__MoveOwnAfter()
                 // 
                 g_pSpecialEffects->CreateSplashColor(pGenerate->GetPosition(), SPECIAL_SPLASH_SMALL, pGenerate->GetColor3() / 0.7f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                g_pSpecialEffects->PlaySound(pGenerate->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
             });
         }
     }

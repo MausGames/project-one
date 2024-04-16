@@ -33,7 +33,10 @@ void cGeluMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cVolcanoBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-        g_pEnvironment->SetTargetSpeedNow(6.0f);
+
+        g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+        g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+        g_pEnvironment->SetTargetSpeedNow    (6.0f);
 
         g_pGame->StartIntro();
 
@@ -81,14 +84,12 @@ void cGeluMission::__SetupOwn()
     // in 2 lines should move over the center
     // in 1 enemies should not reach bottom
     // in 1 and 2 back of enemies should not be reachable without shooting at them first
-    // TASK: collect all coins in the dungeon
     // TASK: hit specific enemies to reactivate them
+    // TASK: collect all coins in the dungeon
     // ACHIEVEMENT: hit every enemy at least one time
     // TODO 1: hardmode: force is much stronger, and all enemies bounce at some point
     // TODO 1: hardmode: enemies get bigger, based on life or force
     // TODO 1: // 0b1101'1011u, // 0b1101'1011u, ?
-    // TODO 1: [MF] MAIN: task-check, badges, sound
-    // TODO 1: [MF] s_aiMark anpassen, is derzeit viel viel zu leicht
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fDungeonFactor  = 0.095f;
@@ -140,8 +141,10 @@ void cGeluMission::__SetupOwn()
 
         constexpr coreUint8 aiDungeonCoin[] =
         {
-            0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
-            0b0001'1000u,
+            0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+            0b0000'1000u,
+            0u, 0u, 0u, 0u, 0u, 0u,
+            0b0001'0000u,
             0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
             0b0000'0100u,
             0u, 0u, 0u, 0u,
@@ -161,7 +164,7 @@ void cGeluMission::__SetupOwn()
 
         STATIC_ASSERT(ARRAY_SIZE(aiDungeon) == ARRAY_SIZE(aiDungeonCoin))
 
-        static constexpr coreUint8 s_aiMark[] = {10u, 18u, 27u, 32u, 44u, 66u, 76u, 82u, 88u};
+        static constexpr coreUint8 s_aiMark[] = {10u, 18u, 27u, 32u, 44u, 66u, 75u, 80u, 88u};   // # needs to be static
         const auto nIsMarkFunc = [&](const coreUint8 iIndex)
         {
             return std::memchr(s_aiMark, iIndex, ARRAY_SIZE(s_aiMark));
@@ -190,7 +193,7 @@ void cGeluMission::__SetupOwn()
 
                 pEnemy->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
 
-                if(nIsMarkFunc(i)) pEnemy->SetBaseColor(COLOR_SHIP_BLACK, false, true);
+                if(g_pGame->IsTask() && nIsMarkFunc(i)) pEnemy->SetBaseColor(COLOR_SHIP_BLACK, false, true);
 
                 if(i < 40u)
                 {
@@ -232,7 +235,7 @@ void cGeluMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(180u)
+        STAGE_GET_START(181u)
             STAGE_GET_VEC2_ARRAY(avForce,     80u, for(coreUintW i = 0u; i < 80u; ++i) avForce[i] = ((i < 72u) ? 85.0f : 100.0f) * pSquad1->GetEnemy(i)->GetDirection().xy();)
             STAGE_GET_VEC2_ARRAY(avBouncePos, 2u,  avBouncePos[0] = 1.2f * SQRT2 * FOREGROUND_AREA;        avBouncePos[1] = avBouncePos[0].InvertedX();)
             STAGE_GET_VEC2_ARRAY(avBounceDir, 2u,  avBounceDir[0] = coreVector2(-1.5f,-1.0f).Normalized(); avBounceDir[1] = coreVector2(1.0f,-1.5f).Normalized();)
@@ -248,6 +251,7 @@ void cGeluMission::__SetupOwn()
             STAGE_GET_UINT      (iMarkCount)
             STAGE_GET_UINT      (iHitField)
             STAGE_GET_UINT      (iHitCount)
+            STAGE_GET_UINT      (iShakeState)
         STAGE_GET_END
 
         ASSERT(pSquad1->GetNumEnemiesAlive() <= sizeof(iHitField)*8u)
@@ -287,6 +291,7 @@ void cGeluMission::__SetupOwn()
 
             pBullet->Deactivate(true);
             pBullet->AddStatus(BULLET_STATUS_GHOST);
+            g_pGame->PlayHitSound(vIntersection);
 
             if(pEnemy->ReachedDeath())
             {
@@ -299,16 +304,24 @@ void cGeluMission::__SetupOwn()
                 iHitCount += 1u;
             }
 
-            if(nIsMarkFunc(i) && !HAS_BIT(iMarkState, nGetMarkIndex(i)))
+            if(g_pGame->IsTask() && nIsMarkFunc(i) && !HAS_BIT(iMarkState, nGetMarkIndex(i)))
             {
                 ADD_BIT(iMarkState, nGetMarkIndex(i))
 
-                if(++iMarkCount >= ARRAY_SIZE(s_aiMark)) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
-                else g_pGame->GetCombatText()->DrawProgress(iMarkCount, ARRAY_SIZE(s_aiMark), pEnemy->GetPosition());
-
                 pEnemy->SetBaseColor(COLOR_SHIP_RED);
 
+                if(++iMarkCount >= ARRAY_SIZE(s_aiMark))
+                {
+                    STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                }
+                else
+                {
+                    g_pGame->GetCombatText()->DrawProgress(iMarkCount, ARRAY_SIZE(s_aiMark), pEnemy->GetPosition());
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iMarkCount, ARRAY_SIZE(s_aiMark)), SOUND_PLACEHOLDER);
+                }
+
                 g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
+                g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
             }
         });
 
@@ -322,7 +335,7 @@ void cGeluMission::__SetupOwn()
             else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 88u, 95u)   // #
             else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 80u, 87u)   // #
             else if(STAGE_SUB(8u)) STAGE_RESURRECT(pSquad1, 96u, 96u + iDungeonEnemies - 1u)
-            else
+            else if(STAGE_SUB(9u))
             {
                 constexpr coreUintW iMargin = 4u;
                 if(iHitCount >= 96u + iDungeonTotal - iMargin) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
@@ -397,13 +410,16 @@ void cGeluMission::__SetupOwn()
 
                     if(HAS_BIT(iLevelCoin, j))
                     {
-                        const coreUintW iIndex = coreMath::BitScanFwd(~coreUint64(iDragActiveCoin));
-                        ASSERT(iIndex < GELU_COINS)
+                        if(g_pGame->IsTask())
+                        {
+                            const coreUintW iIndex = coreMath::BitScanFwd(~coreUint64(iDragActiveCoin));
+                            ASSERT(iIndex < GELU_COINS)
 
-                        this->EnableCoin(iIndex);
-                        ADD_BIT(iDragActiveCoin, iIndex)
+                            this->EnableCoin(iIndex);
+                            ADD_BIT(iDragActiveCoin, iIndex)
 
-                        this->GetCoin(iIndex)->SetPosition(coreVector3(vPos * FOREGROUND_AREA + vCorr, 0.0f));
+                            this->GetCoin(iIndex)->SetPosition(coreVector3(vPos * FOREGROUND_AREA + vCorr, 0.0f));
+                        }
                     }
                 }
             }
@@ -448,8 +464,18 @@ void cGeluMission::__SetupOwn()
 
                     if(fDragOffset >= fDungeonMax)
                     {
+                        if(!iShakeState && (vNewPos.y < 0.0f))
+                        {
+                            iShakeState = 1u;
+
+                            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+                            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
+                        }
+
                         vNewPos.y = MAX(vNewPos.y, 0.0f);
                     }
+
                     if(vNewPos.y < -1.3f * FOREGROUND_AREA.y)
                     {
                         REMOVE_BIT(iDragActive, i - 96u)
@@ -460,8 +486,9 @@ void cGeluMission::__SetupOwn()
                 }
             }
 
-                 if(i == 72u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(1.0f*PI, 0.0f*PI, pEnemy->GetCurHealthPct())), 1.0f);
-            else if(i == 80u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(2.0f*PI, 1.0f*PI, pEnemy->GetCurHealthPct())), 1.0f);
+                 if(i == 72u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP((1.0f/3.0f)*PI, (0.0f/3.0f)*PI, pEnemy->GetCurHealthPct())), 1.0f);
+            else if(i == 88u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP((2.0f/3.0f)*PI, (1.0f/3.0f)*PI, pEnemy->GetCurHealthPct())), 1.0f);
+            else if(i == 80u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP((3.0f/3.0f)*PI, (2.0f/3.0f)*PI, pEnemy->GetCurHealthPct())), 1.0f);
 
             if(STAGE_TICK_LIFETIME(0.75f * (0.8f / fLifeSpeed), 0.0f) && (!g_pGame->IsEasy() || !(s_iTick % 2u)))
             {
@@ -478,7 +505,7 @@ void cGeluMission::__SetupOwn()
                 }
             }
 
-            if(nIsMarkFunc(i))
+            if(g_pGame->IsTask() && nIsMarkFunc(i))
             {
                 if(!HAS_BIT(iMarkState, nGetMarkIndex(i)))
                 {
@@ -497,35 +524,43 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        for(coreUintW i = 0u; i < GELU_COINS; ++i)
+        if(g_pGame->IsTask())
         {
-            coreObject3D* pCoin = this->GetCoin(i);
-            if(!pCoin->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            const coreVector2 vNewPos = pCoin->GetPosition().xy() + coreVector2(0.0f, -fDragForce * TIME);
-
-            if(vNewPos.y < -1.3f * FOREGROUND_AREA.y)
+            for(coreUintW i = 0u; i < GELU_COINS; ++i)
             {
-                this->DisableCoin(i, false);
-                REMOVE_BIT(iDragActiveCoin, i)
-            }
+                coreObject3D* pCoin = this->GetCoin(i);
+                if(!pCoin->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-            pCoin->SetPosition(coreVector3(vNewPos, 0.0f));
+                const coreVector2 vNewPos = pCoin->GetPosition().xy() + coreVector2(0.0f, -fDragForce * TIME);
 
-            STAGE_FOREACH_PLAYER(pPlayer, j)
-            {
-                const coreVector2 vDiff = pCoin->GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(vDiff.LengthSq() < POW2(5.0f))
+                if(vNewPos.y < -1.3f * FOREGROUND_AREA.y)
                 {
-                    this->DisableCoin(i, true);
+                    this->DisableCoin(i, false);
                     REMOVE_BIT(iDragActiveCoin, i)
-
-                    if(++iCoinState >= 8u) STAGE_BADGE(2u, BADGE_HARD, pCoin->GetPosition())
-                    else g_pGame->GetCombatText()->DrawCountdown(iCoinState, 8u, pCoin->GetPosition());
-
-                    g_pSpecialEffects->PlaySound(pCoin->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCoinState, 8u), SOUND_ITEM_COLLECT);
                 }
-            });
+
+                pCoin->SetPosition(coreVector3(vNewPos, 0.0f));
+
+                STAGE_FOREACH_PLAYER(pPlayer, j)
+                {
+                    const coreVector2 vDiff = pCoin->GetPosition().xy() - pPlayer->GetPosition().xy();
+                    if(vDiff.LengthSq() < POW2(5.0f))
+                    {
+                        this->DisableCoin(i, true);
+                        REMOVE_BIT(iDragActiveCoin, i)
+
+                        if(++iCoinState >= 8u)
+                        {
+                            STAGE_BADGE(1u, BADGE_NORMAL, pCoin->GetPosition())
+                        }
+                        else
+                        {
+                            g_pGame->GetCombatText()->DrawCountdown(iCoinState, 8u, pCoin->GetPosition());
+                            g_pSpecialEffects->PlaySound(pCoin->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCoinState, 8u), SOUND_ITEM_COLLECT);
+                        }
+                    }
+                });
+            }
         }
 
         if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
@@ -547,6 +582,11 @@ void cGeluMission::__SetupOwn()
         }
 
         STAGE_WAVE(0u, "5-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // FÜNFUNDZWANZIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cSpearBullet>();
     });
 
     // ################################################################
@@ -557,6 +597,15 @@ void cGeluMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < GELU_COINS; ++i)
             this->DisableCoin(i, false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,-1.0f));
 
         STAGE_FINISH_NOW
     });
@@ -587,9 +636,9 @@ void cGeluMission::__SetupOwn()
     // erste box-bewegung muss abseits sein, damit eine bewegung entsteht bei egal welcher start-position
     // enemies are ghost+hidden, to prevent them from getting shot and rendering shadow, if they start in middle but are behind wall
     // gegner sieht man orsch unter den stacheln (müssen groß, andersfarbig und weit genug weg sein von wand)
-    // TASK: attack walls in certain order during the box phase
-    // TASK: find and destroy all hidden enemies
     // TASK: destroy specific enemies first
+    // TASK: attack walls in certain order during the box phase
+    // TASK EXTRA: find and destroy all hidden enemies
     // ACHIEVEMENT: never hit the walls / never miss any shot
     // TODO 1: hard mode: attacking the border creates attacks (stings fly away, and respawn a second later ?)
     // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
@@ -658,7 +707,7 @@ void cGeluMission::__SetupOwn()
             STAGE_GET_UINT       (iOutsideHit)
         STAGE_GET_END
 
-        const auto nFlashFunc = [](const coreUint8 iTarget)
+        const auto nFlashFunc = [](const coreUint8 iTarget, const coreBool bRumble = true)
         {
             g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](const cBullet* pBullet)
             {
@@ -669,6 +718,7 @@ void cGeluMission::__SetupOwn()
             });
 
             g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+            if(bRumble) g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         };
 
         const auto nHighlightFunc = [](const coreUint8 iOld, const coreUint8 iNew)
@@ -687,16 +737,17 @@ void cGeluMission::__SetupOwn()
 
         const auto nAdvanceOrderFunc = [&]()
         {
-            nFlashFunc(BIT(iOrderWall));
+            nFlashFunc(BIT(iOrderWall), false);
 
             nHighlightFunc(iOrderWall, aiBoxOrder[iOrderState]);
             iOrderWall = aiBoxOrder[iOrderState];
         };
 
-        const auto nShakeFunc = []()
+        const auto nShakeFunc = [](const coreBool bRumble = true)
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+            if(bRumble) g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
         };
 
         if(pSquad1->IsFinished())
@@ -729,7 +780,7 @@ void cGeluMission::__SetupOwn()
                 m_Chol.ResurrectIntro(0u);
             }
 
-            if(g_pGame->IsTask())
+            if(g_pGame->IsTaskExtra())
             {
                      if(m_iStageSub == 13u) STAGE_RESURRECT(pSquad2, 0u, 1u)
                 else if(m_iStageSub == 22u) pSquad2->ClearEnemies(true);
@@ -904,7 +955,7 @@ void cGeluMission::__SetupOwn()
                 {
                     if(++iOrderState >= ARRAY_SIZE(aiBoxOrder) - 1u)
                     {
-                        STAGE_BADGE(2u, BADGE_HARD, pBullet->GetOwner()->GetPosition())
+                        STAGE_BADGE(1u, BADGE_NORMAL, pBullet->GetOwner()->GetPosition())
                     }
 
                     nAdvanceOrderFunc();
@@ -1036,7 +1087,8 @@ void cGeluMission::__SetupOwn()
                     iWallBullets += 1u;
                 }
 
-                nShakeFunc();
+                nShakeFunc(false);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
             if(iWallBullets == iTotalBullets)
@@ -1047,10 +1099,10 @@ void cGeluMission::__SetupOwn()
                     {
                         const coreVector2 vPos = pPlayer->GetPosition().xy();
 
-                        if((vPos.x <= vPlayerAreaFromPre.x + CORE_MATH_PRECISION) ||
-                           (vPos.x >= vPlayerAreaToPre  .x - CORE_MATH_PRECISION) ||
-                           (vPos.y <= vPlayerAreaFromPre.y + CORE_MATH_PRECISION) ||
-                           (vPos.y >= vPlayerAreaToPre  .y - CORE_MATH_PRECISION))
+                        if(((vPos.x <= vPlayerAreaFromPre.x + CORE_MATH_PRECISION) && HAS_BIT(iActive, 0u)) ||
+                           ((vPos.x >= vPlayerAreaToPre  .x - CORE_MATH_PRECISION) && HAS_BIT(iActive, 1u)) ||
+                           ((vPos.y <= vPlayerAreaFromPre.y + CORE_MATH_PRECISION) && HAS_BIT(iActive, 2u)) ||
+                           ((vPos.y >= vPlayerAreaToPre  .y - CORE_MATH_PRECISION) && HAS_BIT(iActive, 3u)))
                         {
                             pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vPos);
                             if(m_iStageSub >= 11u) for(coreUintW j = 0u; j < POST_WALLS; ++j) afOffTarget[j] = -1.0f;
@@ -1241,12 +1293,29 @@ void cGeluMission::__SetupOwn()
 
             if(pEnemy->ReachedDeath())
             {
-                if(++iHiddenState >= pSquad2->GetNumEnemies()) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
-                else g_pGame->GetCombatText()->DrawProgress(iHiddenState, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
+                if(++iHiddenState >= pSquad2->GetNumEnemies())
+                {
+                    STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                }
+                else
+                {
+                    g_pGame->GetCombatText()->DrawProgress(iHiddenState, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iHiddenState, pSquad2->GetNumEnemies()), SOUND_PLACEHOLDER);
+                }
             }
         });
 
+        if(STAGE_BEGINNING)
+        {
+            g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,0.0f), 30.0f);
+        }
+
         STAGE_WAVE(1u, "5-2", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // SECHSUNDZWANZIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cFreezerEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cConeBullet>();
     });
 
     // ################################################################
@@ -1273,6 +1342,8 @@ void cGeluMission::__SetupOwn()
 
         pBackground->SetGroundDensity(1u, 0.0f);
 
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(1.0f,0.0f));
+
         STAGE_FINISH_NOW
     });
 
@@ -1292,12 +1363,11 @@ void cGeluMission::__SetupOwn()
     // in kreuz-tunnel, gegner von angriffen zu entkoppeln erhöhte engagement, im zweiten teil die gegner seitlich statt im tunnel bewegen zu lassen macht es weniger einfach alle zu töten, weil man fürs ausweichen nicht ständig draufhalten kann
     // TASK: destroy the elevator robotnik enemy
     // TASK: collect all gap objects
-    // TASK: touch all black stones
+    // TASK EXTRA: touch all black stones
     // ACHIEVEMENT: destroy 30 enemies from inside the rocks
     // TODO 1: hardmode: blocks have stings (but not always, and they attack certain areas, e.g in the tunnel from both sides), enemies start attacking
     // TODO 1: move shake (and color management if not yet) to mission code, it's only visual
     // TODO 1: smoke zwischen bewegenden steinen (smoke+partikel? oder nur smoke?)
-    // TODO 1: [MF] MAIN: task-check, badges ?, sound
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = GELU_FANG_STEP;
@@ -1414,6 +1484,7 @@ void cGeluMission::__SetupOwn()
             {
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->PlaySound  (SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
             return CLAMP01(fNew * RCP(fDelay));
@@ -1680,30 +1751,38 @@ void cGeluMission::__SetupOwn()
                 nMoveFunc(pEnemy, (((i - 80u) % GELU_FANGS_DIMENSION) % 2u) ? -1.5f : 1.0f);
             });
 
-            for(coreUintW i = 0u; i < GELU_GAPS; ++i)
+            if(g_pGame->IsTask())
             {
-                coreObject3D* pGap = this->GetGap(i);
-                if(!pGap->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-                nMoveFunc(pGap, (i % 2u) ? -1.5f : 1.0f);
-
-                if(this->IsGapActive(i))
+                for(coreUintW i = 0u; i < GELU_GAPS; ++i)
                 {
-                    STAGE_FOREACH_PLAYER(pPlayer, j)
+                    coreObject3D* pGap = this->GetGap(i);
+                    if(!pGap->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                    nMoveFunc(pGap, (i % 2u) ? -1.5f : 1.0f);
+
+                    if(this->IsGapActive(i))
                     {
-                        const coreVector2 vDiff = MapToAxisInv(pGap->GetPosition().xy() - pPlayer->GetPosition().xy(), pGap->GetDirection().xy());
-
-                        if((ABS(vDiff.x) < pGap->GetCollisionRange().x) &&
-                           (ABS(vDiff.y) < pGap->GetCollisionRange().y))
+                        STAGE_FOREACH_PLAYER(pPlayer, j)
                         {
-                            this->DisableGap(i, true);
+                            const coreVector2 vDiff = MapToAxisInv(pGap->GetPosition().xy() - pPlayer->GetPosition().xy(), pGap->GetDirection().xy());
 
-                            if(++iGapCollected >= GELU_GAPS) STAGE_BADGE(1u, BADGE_NORMAL, pGap->GetPosition())
-                            else g_pGame->GetCombatText()->DrawProgress(iGapCollected, GELU_GAPS, pGap->GetPosition());
+                            if((ABS(vDiff.x) < pGap->GetCollisionRange().x) &&
+                               (ABS(vDiff.y) < pGap->GetCollisionRange().y))
+                            {
+                                this->DisableGap(i, true);
 
-                            g_pSpecialEffects->PlaySound(pGap->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iGapCollected, GELU_GAPS), SOUND_ITEM_COLLECT);
-                        }
-                    });
+                                if(++iGapCollected >= GELU_GAPS)
+                                {
+                                    STAGE_BADGE(1u, BADGE_NORMAL, pGap->GetPosition())
+                                }
+                                else
+                                {
+                                    g_pGame->GetCombatText()->DrawProgress(iGapCollected, GELU_GAPS, pGap->GetPosition());
+                                    g_pSpecialEffects->PlaySound(pGap->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iGapCollected, GELU_GAPS), SOUND_ITEM_COLLECT);
+                                }
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -1730,6 +1809,7 @@ void cGeluMission::__SetupOwn()
 
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                     g_pSpecialEffects->PlaySound(coreVector3(nFangPositionFunc(iStompTarget + GELU_FANGS_DIMENSION * 2u) * FOREGROUND_AREA, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->RumblePlayer(NULL, iStompInvert ? SPECIAL_RUMBLE_BIG : SPECIAL_RUMBLE_SMALL, 250u);
                 }
 
                 if(fStompTime >= 0.5f)
@@ -1769,7 +1849,7 @@ void cGeluMission::__SetupOwn()
                 cLodObject& oHole     = m_aFangRaw[iElevatorState + 2u * GELU_FANGS_DIMENSION];
                 cEnemy*     pRobotnik = pSquad2->GetEnemy(0u);
 
-                if(iStompCount == 8u)
+                if((iStompCount == 8u) && !pRobotnik->HasStatus(ENEMY_STATUS_DEAD))
                 {
                     oHole.SetAlpha(0.0f);
 
@@ -1803,7 +1883,7 @@ void cGeluMission::__SetupOwn()
                 oFang.SetColor3((m_iStageSub == 19u) ? (COLOR_SHIP_YELLOW * 0.3f) : GELU_FANG_COLOR);
             }
 
-            if((m_iStageSub >= 10u) && (m_iStageSub < 17u))
+            if(g_pGame->IsTaskExtra() && (m_iStageSub >= 10u) && (m_iStageSub < 17u))
             {
                 // 11 18  >  0 3
                 // 06 13  >  1 2
@@ -1953,7 +2033,14 @@ void cGeluMission::__SetupOwn()
             pBackground->SetGroundDensity(0u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
         }
 
+        if((m_iStageSub == 10u) && STAGE_BEGINNING2) g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,1.0f), 10.0f);
+
         STAGE_WAVE(2u, "5-3", {55.0f, 80.0f, 110.0f, 135.0f, 270.0f})   // SIEBENUNDZWANZIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cFlipBullet>();
     });
 
     // ################################################################
@@ -2010,20 +2097,23 @@ void cGeluMission::__SetupOwn()
     // in rail-sequence, make sure enemies are stretched out, so player has to move all the way, and nearly touch the sides, and enemies do not die too quickly
     // in 3. grid, 2/2+2/3 (X/Y, start 0, oben links) is ne todesfalle
     // TASK: touch every orb at least once (collect all shines)
+    // TASK: hit all additional targets
     // ACHIEVEMENT: be on top of an orb which does not exist anymore
     // TODO 1: hardmode: crossing lines ?
     // TODO 1: hardmode: a bug trying to follow and bite you
     // TODO 1: add input-cache du allow quick movement, e.g. right up up right down
-    // TODO 1: [MF] badge: collect yellow blocks as badge (+ extra score ?)
-    // TODO 1: [MF] badge: move along a marked line after another
-    // TODO 1: [MF] badge: guitar hero
-    // TODO 1: [MF] badge: items in finaler phase einsammeln die von oben herunterfliegen
-    // TODO 1: [MF] MAIN: task-check, badges, sound
+    // TODO 5: badge: collect yellow blocks as badge (+ extra score ?)
+    // TODO 5: badge: move along a marked line after another
+    // TODO 5: badge: guitar hero
+    // TODO 5: badge: items in finaler phase einsammeln die von oben herunterfliegen
+    // TODO 1: [MF] improve surfer visuals (add wave) (look at globe)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
         constexpr coreUintW iOrbNum = 16u;
         STATIC_ASSERT(iOrbNum <= GELU_ORBS)
+
+        constexpr coreUint8 aiSurf[] = {11u, 22u, 33u, 44u, 55u};
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -2045,16 +2135,19 @@ void cGeluMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.7f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.8f);
                 pEnemy->Configure((i < 55u) ? 4 : 8, 0u, COLOR_SHIP_MAGENTA);
             });
         });
 
-        STAGE_GET_START(3u * GAME_PLAYERS + 2u)
+        STAGE_GET_START(3u * GAME_PLAYERS + 6u)
             STAGE_GET_UINT_ARRAY(aiTarget,  GAME_PLAYERS)
             STAGE_GET_VEC2_ARRAY(avOldMove, GAME_PLAYERS)
+            STAGE_GET_VEC2      (vSurferMove)
+            STAGE_GET_UINT      (iSurferCount)
             STAGE_GET_UINT      (iShineCollected)
             STAGE_GET_UINT      (iBulletTick)
+            STAGE_GET_UINT      (iBulletCount)
         STAGE_GET_END
 
         // 12 13 14 15
@@ -2177,22 +2270,30 @@ void cGeluMission::__SetupOwn()
                         if(this->IsLineEnabled(i)) this->DisableLine(i, true);
                     }
                 }
+
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.5f, 1.0f, SOUND_EFFECT_SWIPE);
             }
+
+            const auto nDisableFunc = [this](const coreUintW iIndex)
+            {
+                this->DisableOrb(iIndex, true);
+                g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
+            };
 
             switch(m_iStageSub)
             {
-            case 20u: this->DisableOrb( 3u, true); break;
-            case 22u: this->DisableOrb(15u, true); pHelper->Resurrect(true); break;
-            case 25u: this->DisableOrb( 0u, true); break;
-            case 27u: this->DisableOrb(12u, true); break;
-            case 30u: this->DisableOrb( 8u, true); break;
-            case 31u: this->DisableOrb(14u, true); break;
-            case 32u: this->DisableOrb( 1u, true); break;
-            case 33u: this->DisableOrb( 7u, true); break;
-            case 34u: this->DisableOrb(13u, true); break;
-            case 35u: this->DisableOrb( 4u, true); break;
-            case 36u: this->DisableOrb(11u, true); break;
-            case 37u: this->DisableOrb( 2u, true); break;
+            case 20u: nDisableFunc( 3u); break;
+            case 22u: nDisableFunc(15u); pHelper->Resurrect(true); break;
+            case 25u: nDisableFunc( 0u); break;
+            case 27u: nDisableFunc(12u); break;
+            case 30u: nDisableFunc( 8u); break;
+            case 31u: nDisableFunc(14u); break;
+            case 32u: nDisableFunc( 1u); break;
+            case 33u: nDisableFunc( 7u); break;
+            case 34u: nDisableFunc(13u); break;
+            case 35u: nDisableFunc( 4u); break;
+            case 36u: nDisableFunc(11u); break;
+            case 37u: nDisableFunc( 2u); break;
             }
 
             if((m_iStageSub == 17u) || (m_iStageSub == 29u) || (m_iStageSub == 38u))
@@ -2200,15 +2301,18 @@ void cGeluMission::__SetupOwn()
                 iBulletTick = 0u;
             }
 
-            if(m_iStageSub == 5u)
+            if(g_pGame->IsTask())
             {
-                for(coreUintW i = 0u; i < iOrbNum; ++i)
-                    this->EnableShine(i);
-            }
-            else if(m_iStageSub == 37u)
-            {
-                for(coreUintW i = 0u; i < iOrbNum; ++i)
-                    this->DisableShine(i, true);
+                if(m_iStageSub == 5u)
+                {
+                    for(coreUintW i = 0u; i < iOrbNum; ++i)
+                        this->EnableShine(i);
+                }
+                else if(m_iStageSub == 37u)
+                {
+                    for(coreUintW i = 0u; i < iOrbNum; ++i)
+                        this->DisableShine(i, true);
+                }
             }
         }
 
@@ -2283,9 +2387,8 @@ void cGeluMission::__SetupOwn()
                 });
 
                 g_pSpecialEffects->MacroExplosionColorBig(m_aOrbRaw[5].GetPosition(), COLOR_ENERGY_CYAN);
+                g_pSpecialEffects->PlaySound(m_aOrbRaw[5].GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
             }
-
-            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPS(-0.25f*PI, 0.0f*PI, STEP(0.0f, 0.5f, m_fStageSubTime))));
         }
 
         if(STAGE_BEGINNING)
@@ -2300,8 +2403,6 @@ void cGeluMission::__SetupOwn()
         {
             for(coreUintW i = 0u; i < iOrbNum; ++i)
                 m_aOrbRaw[i].SetPosition(coreVector3(LERPB(nPosFromFunc(i), nPosToFunc(i), CLAMP01(m_fStageTime - 2.0f * (1.0f - (I_TO_F(i) / I_TO_F(GELU_ORBS - 1u))))), 0.0f));
-
-            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPS(0.0f*PI, -0.25f*PI, STEP(0.0f, 3.0f, m_fStageTime))));
         }
         else if(STAGE_TIME_POINT(3.0f))
         {
@@ -2323,6 +2424,9 @@ void cGeluMission::__SetupOwn()
                 g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
                 g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
             });
+
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.5f, 1.0f, SOUND_EFFECT_SWIPE);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
         else
         {
@@ -2385,23 +2489,32 @@ void cGeluMission::__SetupOwn()
                 }
             });
 
-            for(coreUintW i = 0u; i < GELU_SHINES; ++i)
+            if(g_pGame->IsTask())
             {
-                const coreObject3D& oShine = m_aShineRaw[i];
-                if(!this->IsShineActive(i)) continue;
-
-                STAGE_FOREACH_PLAYER(pPlayer, j)
+                for(coreUintW i = 0u; i < GELU_SHINES; ++i)
                 {
-                    const coreVector2 vDiff = oShine.GetPosition().xy() - pPlayer->GetPosition().xy();
-                    if(vDiff.LengthSq() < POW2(5.0f))
+                    const coreObject3D& oShine = m_aShineRaw[i];
+                    if(!this->IsShineActive(i)) continue;
+
+                    STAGE_FOREACH_PLAYER(pPlayer, j)
                     {
-                        this->DisableShine(i, true);
+                        const coreVector2 vDiff = oShine.GetPosition().xy() - pPlayer->GetPosition().xy();
+                        if(vDiff.LengthSq() < POW2(5.0f))
+                        {
+                            this->DisableShine(i, true);
 
-                        if(++iShineCollected >= GELU_SHINES) STAGE_BADGE(1u, BADGE_NORMAL, oShine.GetPosition())
-
-                        g_pSpecialEffects->PlaySound(oShine.GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
-                    }
-                });
+                            if(++iShineCollected >= GELU_SHINES)
+                            {
+                                STAGE_BADGE(0u, BADGE_EASY, oShine.GetPosition())
+                            }
+                            else
+                            {
+                                g_pGame->GetCombatText()->DrawCountdown(iShineCollected, GELU_SHINES, oShine.GetPosition());
+                                g_pSpecialEffects->PlaySound(oShine.GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iShineCollected, GELU_SHINES), SOUND_ITEM_COLLECT);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -2490,6 +2603,17 @@ void cGeluMission::__SetupOwn()
                     {
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, pSquad1->GetEnemy(0u), vPos - vDir * (I_TO_F(i) * 3.0f), vDir)->ChangeSize(2.2f);
                     }
+
+                    if(g_pGame->IsTask())
+                    {
+                        if((++iBulletCount < 256u) && std::memchr(aiSurf, iBulletCount, ARRAY_SIZE(aiSurf)))
+                        {
+                            m_Surfer.Resurrect();
+                            m_Surfer.SetPosition(coreVector3(vPos - vDir * 14.0f, 0.0f));
+
+                            vSurferMove = vDir * (1.0f * BULLET_SPEED_FACTOR);
+                        }
+                    }
                 };
 
                 if(m_iStageSub < 17u)
@@ -2536,7 +2660,48 @@ void cGeluMission::__SetupOwn()
             }
         }
 
+        if(g_pGame->IsTask() && !m_Surfer.HasStatus(ENEMY_STATUS_DEAD))
+        {
+            const coreVector2 vNewPos = m_Surfer.GetPosition().xy() + vSurferMove * TIME;
+
+            if(((vNewPos.x < -FOREGROUND_AREA.x * 1.3f) && (vSurferMove.x < 0.0f)) ||
+               ((vNewPos.x >  FOREGROUND_AREA.x * 1.3f) && (vSurferMove.x > 0.0f)) ||
+               ((vNewPos.y < -FOREGROUND_AREA.y * 1.3f) && (vSurferMove.y < 0.0f)) ||
+               ((vNewPos.y >  FOREGROUND_AREA.y * 1.3f) && (vSurferMove.y > 0.0f)))
+            {
+                m_Surfer.Kill(false);
+            }
+
+            m_Surfer.SetPosition(coreVector3(vNewPos, 0.0f));
+
+            if(m_Surfer.WasDamaged())
+            {
+                m_Surfer.Kill(false);
+
+                if(++iSurferCount == ARRAY_SIZE(aiSurf))
+                {
+                    STAGE_BADGE(1u, BADGE_NORMAL, m_Surfer.GetPosition())
+                }
+                else
+                {
+                    g_pGame->GetCombatText()->DrawProgress(iSurferCount, ARRAY_SIZE(aiSurf), m_Surfer.GetPosition());
+                    g_pSpecialEffects->PlaySound(m_Surfer.GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iSurferCount, ARRAY_SIZE(aiSurf)), SOUND_PLACEHOLDER);
+                }
+
+                g_pSpecialEffects->MacroExplosionColorSmall(m_Surfer.GetPosition(), COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->PlaySound(m_Surfer.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+            }
+        }
+
+             if((m_iStageSub ==  1u) && STAGE_BEGINNING2) g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,1.0f).Normalized(), 10.0f);
+        else if((m_iStageSub == 37u) && STAGE_BEGINNING2) g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,1.0f),              10.0f);
+
         STAGE_WAVE(3u, "5-4", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // ACHTUNDZWANZIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cStarEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cWaveBullet>();
     });
 
     // ################################################################
@@ -2553,6 +2718,8 @@ void cGeluMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < GELU_SHINES; ++i)
             this->DisableShine(i, false);
+
+        m_Surfer.Kill(false);
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -2594,7 +2761,6 @@ void cGeluMission::__SetupOwn()
     // TODO 1: hardmode: no arrows visible, maybe under exception (timed, blinking, when disabled)
     // TODO 1: [MF] I beat DDR, even though I got crushed and moved through blocks
     // TODO 1: [MF] add dance fail condition ? (m_iTouchState & m_iWayVisible) && (m_iWayGhost & m_iWayVisible)
-    // TODO 1: [MF] MAIN: task-check, badges, sound
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreFloat fStep        = GELU_WAY_STEP;
@@ -2642,7 +2808,7 @@ void cGeluMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
                 pEnemy->Configure(10, 0u, COLOR_SHIP_BLUE);
             });
         });
@@ -2662,12 +2828,15 @@ void cGeluMission::__SetupOwn()
 
         const auto nFreeFunc = [&]()
         {
-            for(coreUintW i = 0u; i < ARRAY_SIZE(aaiFree); ++i)
+            if(g_pGame->IsTask())
             {
-                if((aaiFree[i][0] == m_iStageSub) && (aaiFree[i][1] == iPatternReset))
+                for(coreUintW i = 0u; i < ARRAY_SIZE(aaiFree); ++i)
                 {
-                    this->SetWayFree(iCreateStart - 1u, true);
-                    break;
+                    if((aaiFree[i][0] == m_iStageSub) && (aaiFree[i][1] == iPatternReset))
+                    {
+                        this->SetWayFree(iCreateStart - 1u, true);
+                        break;
+                    }
                 }
             }
         };
@@ -2752,7 +2921,12 @@ void cGeluMission::__SetupOwn()
                 fCheckerBreak += 1.0f * TIME * fFactor;
                 vMove         *= 1.0f - STEPH3(0.6f, 0.72f, fCheckerBreak);
 
-                if(InBetween(0.72f, fOldBreak, fCheckerBreak)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                if(InBetween(0.72f, fOldBreak, fCheckerBreak))
+                {
+                    g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
+                }
             }
         }
 
@@ -2896,11 +3070,18 @@ void cGeluMission::__SetupOwn()
                 {
                     nDestroyWayFunc(i);
 
-                    if(++iFreeState >= ARRAY_SIZE(aaiFree)) STAGE_BADGE(1u, BADGE_NORMAL, pWay->GetPosition())
-                    else g_pGame->GetCombatText()->DrawProgress(iFreeState, ARRAY_SIZE(aaiFree), pWay->GetPosition());
+                    if(++iFreeState >= ARRAY_SIZE(aaiFree))
+                    {
+                        STAGE_BADGE(1u, BADGE_NORMAL, pWay->GetPosition())
+                    }
+                    else
+                    {
+                        g_pGame->GetCombatText()->DrawProgress(iFreeState, ARRAY_SIZE(aaiFree), pWay->GetPosition());
+                        g_pSpecialEffects->PlaySound(pWay->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFreeState, ARRAY_SIZE(aaiFree)), SOUND_ITEM_COLLECT);
+                    }
 
                     g_pSpecialEffects->CreateBreakupColor(pWay, 80.0f, 15u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->PlaySound(pWay->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
+                    g_pSpecialEffects->PlaySound(pWay->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
                 }
             }
         }
@@ -2915,7 +3096,7 @@ void cGeluMission::__SetupOwn()
                 bPostpone = true;
             }
 
-            if(iDanceIndex < ARRAY_SIZE(aiDancePattern))
+            if(g_pGame->IsTask() && (iDanceIndex < ARRAY_SIZE(aiDancePattern)))
             {
                 for(coreUintW i = 0u; i < GELU_WAYS; ++i)
                 {
@@ -2934,7 +3115,7 @@ void cGeluMission::__SetupOwn()
                                 {
                                     if(++iDanceIndex >= ARRAY_SIZE(aiDancePattern))
                                     {
-                                        STAGE_BADGE(2u, BADGE_HARD, pPlayer->GetPosition())
+                                        STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
                                     }
                                 }
                             }
@@ -2948,15 +3129,6 @@ void cGeluMission::__SetupOwn()
         {
             if(m_abCrushInside[j]) ADD_BIT(iTouchState, j)
         });
-
-        if(m_iStageSub == 8u)
-        {
-            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPS(0.0f*PI, 0.25f*PI, STEP(0.0f, 3.0f, m_fStageSubTime))));
-        }
-        else if(m_iStageSub >= 13u)
-        {
-            g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERPS(0.25f*PI, 0.0f*PI, STEP(0.0f, 3.0f, m_fStageSubTime))));
-        }
 
         if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
         {
@@ -3059,11 +3231,19 @@ void cGeluMission::__SetupOwn()
             }
         });
 
+             if((m_iStageSub ==  1u) && STAGE_BEGINNING2) g_pEnvironment->SetTargetDirectionLerp(coreVector2(-1.0f,1.0f).Normalized(), 10.0f);
+        else if((m_iStageSub == 10u) && STAGE_BEGINNING2) g_pEnvironment->SetTargetDirectionLerp(coreVector2( 0.0f,1.0f),              10.0f);
+
         if(!bPostpone)
         {
             if(g_pGame->IsEasy()) STAGE_WAVE(4u, "5-5", {70.0f, 100.0f, 135.0f, 165.0f, 325.0f})   // NEUNUNDZWANZIG
                              else STAGE_WAVE(4u, "5-5", {65.0f,  95.0f, 130.0f, 160.0f, 320.0f})
         }
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cOrbBullet>();
     });
 
     // ################################################################
@@ -3083,9 +3263,11 @@ void cGeluMission::__SetupOwn()
         STAGE_FINISH_NOW
     });
 
+#if defined(_P1_UNUSED_)
+
     // ################################################################
     // wait for play
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_FINISH_PLAY
     });
@@ -3114,7 +3296,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: fixe position, wie minenfeld, ferne gegner greifen an
     // TODO 1: add bouncy ball, which enemies evade
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)
         {
@@ -3242,13 +3424,43 @@ void cGeluMission::__SetupOwn()
         });
 
         STAGE_WAVE(5u, "5-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // DREISSIG
+    },
+    STAGE_PRE()
+    {
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cScoutEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cWarriorEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cStarEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cArrowEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMinerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cFreezerEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cCinderEnemy>();
+        g_pGame->GetEnemyManager()->PrefetchEnemy<cMeteorEnemy>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cOrbBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cConeBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cWaveBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cSpearBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cTriangleBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cFlipBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cQuadBullet>();
+        g_pGame->GetBulletManagerEnemy()->PrefetchBullet<cViewBullet>();
     });
 
     // ################################################################
     // reset helper
-    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         g_pGame->KillHelpers();
+
+        STAGE_FINISH_NOW
+    });
+
+#endif
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,1.0f));
 
         STAGE_FINISH_NOW
     });
@@ -3265,6 +3477,10 @@ void cGeluMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Chol, {145.0f, 215.0f, 290.0, 360.0f, 720.0f})
+    },
+    STAGE_PRE()
+    {
+        g_pGame->PrefetchBoss();
     });
 
     // ################################################################
