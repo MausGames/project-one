@@ -30,7 +30,7 @@
 
 // ****************************************************************
 // message box class
-class cMsgBox final : public coreFullscreen
+class cMsgBox final : public coreObject2D
 {
 public:
     coreObject2D m_Box;                                      // 

@@ -8,6 +8,11 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+coreUint16  cMission::s_iTick           = 0u;
+coreFloat   cMission::s_fLifeTimePoint  = 0.0f;
+coreFloat   cMission::s_fHealthPctPoint = 0.0f;
+coreVector2 cMission::s_vPositionPoint  = coreVector2(0.0f,0.0f);
+
 
 // ****************************************************************
 // constructor
@@ -17,14 +22,12 @@ cMission::cMission()noexcept
 , m_iCurBossIndex    (MISSION_NO_BOSS)
 , m_iCurWaveCount    (0u)
 , m_iCurWaveIndex    (MISSION_NO_WAVE)
-, m_piInt            (NULL)
-, m_pfFloat          (NULL)
-, m_iIntSize         (0u)
-, m_iFloatSize       (0u)
+, m_piData           (NULL)
+, m_iDataSize        (0u)
 , m_iStageNum        (0u)
-, m_fStageWait       (0.0f)
 , m_fStageTime       (0.0f)
 , m_fStageTimeBefore (0.0f)
+, m_iStageSub        (0u)
 {
 }
 
@@ -43,8 +46,7 @@ cMission::~cMission()
     m_apSquad.clear();
 
     // 
-    ZERO_DELETE(m_piInt)
-    ZERO_DELETE(m_pfFloat)
+    ZERO_DELETE(m_piData)
 }
 
 
@@ -89,24 +91,16 @@ void cMission::MoveBefore()
 {
     if(!m_anStage.empty())
     {
-        if(m_fStageWait > 0.0f)
-        {
-            // 
-            m_fStageWait.Update(-1.0f);
-        }
-        else
-        {
-            // 
-            m_fStageTimeBefore = m_fStageTime;
-            m_fStageTime.Update(1.0f);
+        // 
+        m_fStageTimeBefore = m_fStageTime;
+        m_fStageTime.Update(1.0f);
 
+        // 
+        m_anStage.back()();
+        if(m_anStage.empty())
+        {
             // 
-            m_anStage.back()();
-            if(m_anStage.empty())
-            {
-                // 
-                g_pGame->StartOutro();
-            }
+            g_pGame->StartOutro();
         }
     }
 
@@ -126,7 +120,9 @@ void cMission::MoveAfter()
 void cMission::SkipStage()
 {
     // 
-    m_fStageTime = 0.0f;
+    m_fStageTime       = 0.0f;
+    m_fStageTimeBefore = 0.0f;
+    m_iStageSub        = 0u;
     m_anStage.pop_back();
 
     // 
@@ -138,8 +134,7 @@ void cMission::SkipStage()
     m_apSquad.clear();
 
     // 
-    std::memset(m_piInt,   0, sizeof(coreInt16) * m_iIntSize);
-    std::memset(m_pfFloat, 0, sizeof(coreFloat) * m_iFloatSize);
+    std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
 
     // 
     g_pGame->GetShieldManager()->ClearShields(true);

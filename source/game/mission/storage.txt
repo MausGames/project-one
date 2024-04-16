@@ -84,7 +84,7 @@
             });
         });
 
-        STAGE_GET_START(1u, 1u)
+        STAGE_GET_START(2u)
         STAGE_GET_INT  (iSide)
         STAGE_GET_FLOAT(fStop, fStop = pPath1->TranslateDistance(1u, 0.0f))
         STAGE_GET_END
@@ -193,7 +193,7 @@
             });
         });
 
-        STAGE_GET_START(20u, 0u)
+        STAGE_GET_START(20u)
         STAGE_GET_INT_ARRAY(aiLane, 20u,
         {
             constexpr coreInt16 x[] = {1,0,2,3,1,2,1,2,0,2,1,3,2,1,0,1,2,3,1,2};

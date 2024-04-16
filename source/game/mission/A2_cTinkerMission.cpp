@@ -63,7 +63,7 @@ void cTinkerMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(1u, 0u)
+        STAGE_GET_START(1u)
             STAGE_GET_UINT(iGroup)
         STAGE_GET_END
 
@@ -97,7 +97,7 @@ void cTinkerMission::__SetupOwn()
 
             const coreVector2 vDir = StepRotated90(i);
 
-            if(STAGE_TICK(10u))
+            if(STAGE_TICK_LIFETIME(6.0f, 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
 
@@ -198,7 +198,7 @@ void cTinkerMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(0u, 2u)
+        STAGE_GET_START(2u)
             STAGE_GET_VEC2(vLastPosition, vLastPosition = g_pGame->GetPlayer(0u)->GetPosition().xy())
         STAGE_GET_END
 

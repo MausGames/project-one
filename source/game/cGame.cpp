@@ -195,8 +195,7 @@ void cGame::Move()
             m_aPlayer[i].Move();
 
         // move all enemies
-        if(!m_pCurMission->IsWaiting())
-            m_EnemyManager.Move();
+        m_EnemyManager.Move();
     }
     m_pCurMission->MoveAfter();
 
@@ -250,6 +249,10 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
     // 
     m_ItemManager.ClearItems(true);
+
+    // 
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Kill(true);
 
     // 
     m_EnemyManager.ClearEnemies(true);
@@ -686,6 +689,10 @@ void cGame::__HandleCollisions()
     // 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
+        // 
+        if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
+           (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
+
 
         if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
         {

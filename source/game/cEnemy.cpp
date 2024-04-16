@@ -30,16 +30,6 @@ cEnemy::cEnemy()noexcept
 
 
 // ****************************************************************
-// destructor
-cEnemy::~cEnemy()
-{
-    // 
-    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
-        this->Kill(false);
-}
-
-
-// ****************************************************************
 // configure the enemy
 void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted)
 {
@@ -192,9 +182,6 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     m_fLifeTime       = 0.0f;
     m_fLifeTimeBefore = 0.0f;
 
-    // 
-    if(STATIC_ISVALID(g_pGame) && bSingle) g_pGame->GetEnemyManager()->BindEnemy(this);
-
     if(bEnergy)
     {
         // add ship to glow and outline
@@ -232,15 +219,10 @@ void cEnemy::Kill(const coreBool bAnimated)
     const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
-    if(STATIC_ISVALID(g_pGame))
-    {
-        // 
-        g_pGame->GetShieldManager()->UnbindEnemy(this);
+    // 
+    if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
 
-        // 
-        if(bSingle) g_pGame->GetEnemyManager()->UnbindEnemy(this);
-    }
-
+    // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         // 
@@ -817,4 +799,19 @@ cCustomEnemy::cCustomEnemy()noexcept
 {
     // 
     this->AddStatus(ENEMY_STATUS_SINGLE);
+
+    // 
+    g_pGame->GetEnemyManager()->BindEnemy(this);
+}
+
+
+// ****************************************************************
+// destructor
+cCustomEnemy::~cCustomEnemy()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    g_pGame->GetEnemyManager()->UnbindEnemy(this);
 }

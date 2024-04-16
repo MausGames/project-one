@@ -114,7 +114,7 @@ private:
 
 // ****************************************************************
 // 
-// TODO: ineinander verschachtelter rotierender würfel
+// TODO: ineinander verschachtelter rotierender wuerfel  
 class cCubeItem final : public cItem
 {
 private:

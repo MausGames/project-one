@@ -656,5 +656,5 @@ void cAmemasuBoss::__MoveOwn()
 // dabei wird background geändert (transition typ ausprobieren)
 // spieler fliegen von unten rein in neuen background (andere dinge von oben)
 // umgekehrt beim ausspucken
-// sobald boss nicht mehr sichtbar ist spieler einfliegen um übergang kurz zu halten
+// sobald boss nicht mehr sichtbar ist spieler einfliegen um uebergang kurz zu halten
 // schießt dann torpedos von unten nach oben

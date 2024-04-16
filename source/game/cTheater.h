@@ -57,7 +57,7 @@ public:
     void Move();
 
     // 
-    template <typename T> RETURN_RESTRICT T* AddMute(const coreVector3& vPosition, const coreVector2& vDirection);
+    template <typename T> RETURN_RESTRICT T* AddMute(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
     void ClearMutes(const coreBool bAnimated);
 
     // 
@@ -72,10 +72,11 @@ private:
 
 // ****************************************************************
 // 
-template <typename T> RETURN_RESTRICT T* cTheater::AddMute(const coreVector3& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cTheater::AddMute(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor)
 {
     // 
     T* pEnemy = new T();
+    pEnemy->Configure  (100, vColor);
     pEnemy->AddStatus  (ENEMY_STATUS_SINGLE);
     pEnemy->Resurrect  (vPosition.xy(), vDirection);
     pEnemy->SetPosition(vPosition);   // # to override height

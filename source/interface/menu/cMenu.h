@@ -381,6 +381,8 @@ private:
     coreSwitchBoxU8 m_HudType;
     sPlayerInput    m_aInput[MENU_CONFIG_INPUTS];
 
+    coreButton m_SwapInput;
+
 
 public:
     cConfigMenu()noexcept;
@@ -560,24 +562,24 @@ public:
 class cMenu final : public coreMenu
 {
 private:
-    cIntroMenu* m_pIntroMenu;       // intro menu object (dynamically unloaded)
-    cTitleMenu* m_pTitleMenu;       // title menu object (dynamically unloaded)
+    cIntroMenu* m_pIntroMenu;     // intro menu object (dynamically unloaded)
+    cTitleMenu* m_pTitleMenu;     // title menu object (dynamically unloaded)
 
-    cMainMenu    m_MainMenu;        // main menu object
-    cGameMenu    m_GameMenu;        // game menu object
-    cScoreMenu   m_ScoreMenu;       // score menu object
-    cReplayMenu  m_ReplayMenu;      // replay menu object
-    cConfigMenu  m_ConfigMenu;      // config menu object
-    cExtraMenu   m_ExtraMenu;       // extra menu object
-    cPauseMenu   m_PauseMenu;       // pause menu object
-    cSummaryMenu m_SummaryMenu;     // summary menu object
-    cDefeatMenu  m_DefeatMenu;      // defeat menu object
+    cMainMenu    m_MainMenu;      // main menu object
+    cGameMenu    m_GameMenu;      // game menu object
+    cScoreMenu   m_ScoreMenu;     // score menu object
+    cReplayMenu  m_ReplayMenu;    // replay menu object
+    cConfigMenu  m_ConfigMenu;    // config menu object
+    cExtraMenu   m_ExtraMenu;     // extra menu object
+    cPauseMenu   m_PauseMenu;     // pause menu object
+    cSummaryMenu m_SummaryMenu;   // summary menu object
+    cDefeatMenu  m_DefeatMenu;    // defeat menu object
 
-    cMsgBox  m_MsgBox;              // message box overlay
-    cTooltip m_Tooltip;             // tooltip overlay
+    cMsgBox  m_MsgBox;            // message box overlay
+    cTooltip m_Tooltip;           // tooltip overlay
 
-    coreFullscreen m_PauseLayer;    // 
-    coreUint32     m_iPauseFrame;   // 
+    coreObject2D m_PauseLayer;    // 
+    coreUint32   m_iPauseFrame;   // 
 
 
 public:

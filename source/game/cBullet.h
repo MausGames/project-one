@@ -183,7 +183,7 @@ public:
     template <typename T> void PrefetchBullet();
 
     // 
-    inline coreUintW                       GetNumBullets     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}
+    inline coreUintW                       GetNumBullets     ()const {const std::vector<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType); return count_if(oBulletList.begin(), oBulletList.end(), [](const coreObject3D* pObject) {return pObject;});}
     template <typename T> inline coreUintW GetNumBulletsTyped()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.List()->size() : 0u;}
 };
 

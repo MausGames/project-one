@@ -218,6 +218,8 @@ void cViridoMission::__SetupOwn()
             STAGE_FINISH_NOW
     });
 
+    /*
+
     // ################################################################
     // 
     STAGE_MAIN
@@ -394,12 +396,16 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_CLEARED
     });
 
+    */
+
     // ################################################################
     // 
     STAGE_MAIN
     {
         STAGE_BOSS(m_Dharuk, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
+
+    /*
 
     // ################################################################
     // 
@@ -436,6 +442,8 @@ void cViridoMission::__SetupOwn()
 
         STAGE_FINISH_CLEARED
     });
+
+    */
 
     // ################################################################
     // 
@@ -457,6 +465,8 @@ void cViridoMission::__SetupOwn()
         STAGE_BOSS(m_Torus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
+    /*
+
     // ################################################################
     // 
     STAGE_MAIN
@@ -492,6 +502,8 @@ void cViridoMission::__SetupOwn()
 
         STAGE_FINISH_CLEARED
     });
+
+    */
 
     // ################################################################
     // 

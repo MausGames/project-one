@@ -121,8 +121,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_aArrow[1].SetText(ICON_ARROW_LEFT);
     m_aArrow[2].SetText(ICON_ARROW_DOWN);
     m_aArrow[3].SetText(ICON_ARROW_RIGHT);
-    m_aArrow[4].SetText(ICON_BURN);
-    m_aArrow[5].SetText(ICON_FEATHER_ALT);
+    m_aArrow[4].SetText("SWORD");
+    m_aArrow[5].SetText("SHIELD");
     m_aArrow[6].SetText(ICON_UNDO_ALT);
     m_aArrow[7].SetText(ICON_REDO_ALT);
     m_aArrow[8].SetText(ICON_PAUSE_CIRCLE);
@@ -218,6 +218,15 @@ cConfigMenu::cConfigMenu()noexcept
         m_aInput[i].oHeader.SetPosition(oLast.GetPosition() - coreVector2(oLast.GetSize().x * 0.5f, 0.05f));
         m_aInput[i].oHeader.SetColor3  (COLOR_MENU_WHITE);
     }
+
+
+
+    m_SwapInput.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_SwapInput.SetPosition (coreVector2(-0.2f, m_aLabel[ENTRY_INPUT_TYPE].GetPosition().y));
+    m_SwapInput.SetSize     (coreVector2(0.03f,0.03f));
+    m_SwapInput.GetCaption()->SetText("<>");
+
+
 
     // fill configuration entries
     const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_keylist();
@@ -317,6 +326,10 @@ cConfigMenu::cConfigMenu()noexcept
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
             this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
     }
+
+
+
+    this->BindObject(SURFACE_CONFIG_INPUT, &m_SwapInput);
 }
 
 
@@ -391,6 +404,22 @@ void cConfigMenu::Move()
 
     case SURFACE_CONFIG_INPUT:
         {
+
+
+            if(m_SwapInput.IsClicked())
+            {
+                std::swap(g_CurConfig.Input.aiType[0], g_CurConfig.Input.aiType[1]);
+
+                for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+                    m_aInput[i].oType.SelectValue(g_CurConfig.Input.aiType[i]);
+
+                this->__LoadInputs();
+            }
+
+            cMenu::UpdateButton(&m_SwapInput, m_SwapInput.IsFocused());
+
+
+
             for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
             {
                 sPlayerInput& oInput = m_aInput[i];
@@ -431,6 +460,9 @@ void cConfigMenu::Move()
                 }
 
                 // 
+                if(oInput.oRumble.IsClickedArrow()) g_CurConfig.Input.aiRumble[i] = oInput.oRumble.GetCurEntry().tValue;
+
+                // 
                 cMenu::UpdateSwitchBox(&oInput.oType);
                 cMenu::UpdateSwitchBox(&oInput.oRumble);
 
@@ -445,8 +477,8 @@ void cConfigMenu::Move()
 
                     if(oButton.IsClicked())
                     {
-                        const coreChar* pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
-                        const coreUint8 iType  = oInput.oType.GetCurEntry().tValue;
+                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
+                        const coreUint8& iType  = oInput.oType.GetCurEntry().tValue;   // # referenced in lambda
 
                         // 
                         g_pMenu->GetMsgBox()->ShowMapping(pcText, iType, [&](const coreInt32 iAnswer, const coreInt16 iKey)
@@ -915,6 +947,9 @@ void cConfigMenu::__LoadInputs()
         nLockFunc(!bKeyboard, &oInput.oMoveDown,                       SDL_GetKeyName(CORE_INPUT_CHAR(DOWN)));
         nLockFunc(!bKeyboard, &oInput.oMoveRight,                      SDL_GetKeyName(CORE_INPUT_CHAR(RIGHT)));
         nLockFunc( bKeyboard, &oInput.aAction[INPUT_KEYS_ACTION - 1u], SDL_GetKeyName(CORE_INPUT_CHAR(ESCAPE)));
+
+        // 
+        oInput.oRumble.SetOverride(bKeyboard ? -1 : 0);
     }
 }
 

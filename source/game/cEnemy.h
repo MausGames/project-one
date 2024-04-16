@@ -20,7 +20,7 @@
 // enemy definitions
 #define ENEMY_SET_INIT    (8u)      // initial size when creating a new enemy set
 #define ENEMY_SET_COUNT   (8u)      // 
-#define ENEMY_AREA_FACTOR (1.2f)    // 
+//#define ENEMY_AREA_FACTOR (1.2f)    // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
 enum eEnemyStatus : coreUint16
@@ -50,7 +50,7 @@ protected:
 
 public:
     cEnemy()noexcept;
-    virtual ~cEnemy()override;
+    virtual ~cEnemy()override = default;
 
     FRIEND_CLASS(cEnemyManager)
     ENABLE_COPY (cEnemy)
@@ -219,7 +219,7 @@ public:
     inline void UnbindEnemy(cEnemy* pEnemy) {ASSERT( m_apAdditional.count(pEnemy)) m_apAdditional.erase (pEnemy);}
 
     // 
-    inline coreUintW GetNumEnemiesAlive()const {return Core::Manager::Object->GetObjectList(TYPE_ENEMY).size() - std::count_if(m_apAdditional.begin(), m_apAdditional.end(), [](const cEnemy* pEnemy) {return pEnemy->IsChild();});}
+    inline coreUintW GetNumEnemiesAlive()const {const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY); return count_if(oEnemyList.begin(), oEnemyList.end(), [](const coreObject3D* pObject) {return pObject && !d_cast<const cEnemy*>(pObject)->IsChild();});}
 };
 
 
@@ -352,6 +352,7 @@ class cCustomEnemy final : public cEnemy
 {
 public:
     cCustomEnemy()noexcept;
+    ~cCustomEnemy()final;
 
     ENABLE_COPY(cCustomEnemy)
     ASSIGN_ID(666, "Custom")

@@ -71,37 +71,24 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        if(STAGE_TIME_POINT(3.0f))
-        {
-            g_pGame->GetInterface()->ShowStory("A game by Martin Mauersics");
-        }
-
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-0.8f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(-0.4f,-1.2f), coreVector2(0.0f,-1.0f), 2.5f);
+            pPath1->AddNode(coreVector2(-0.6f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2( 0.4f,-1.2f), coreVector2(0.0f,-1.0f));
             pPath1->Refine();
-        });
-
-        STAGE_ADD_PATH(pPath2)
-        {
-            pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(-0.4f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath2->AddNode(coreVector2( 0.6f,-1.2f), coreVector2(0.0f,-1.0f));
-            pPath2->Refine();
         });
 
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 16u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(20, (i & 0x01u) ? COLOR_SHIP_ORANGE : COLOR_SHIP_RED, true);
-                pEnemy->Resurrect();
+                pEnemy->Configure(4, COLOR_SHIP_RED, true);
+                if(i < 8u) pEnemy->Resurrect();
             });
         });
 
-        STAGE_GET_START(1u, 0u)
+        STAGE_GET_START(1u)
             STAGE_GET_UINT(iBulletShot)
         STAGE_GET_END
 
@@ -114,26 +101,24 @@ void cIntroMission::__SetupOwn()
             g_pGame->ActivatePacifist();
         }
 
+        if(STAGE_CLEARED && STAGE_SUB(1u))
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                if(i >= 8u) pEnemy->Resurrect();
+            });
+        }
+
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.9f, 0.219f * I_TO_F(i))
+            STAGE_LIFETIME(pEnemy, 0.9f, 0.22f * I_TO_F(i % 8u))
 
-            coreSpline2* pCurPath;
-            if((i < 8u) || STAGE_BRANCH(pPath2->GetTotalDistance(), pPath2->GetTotalDistance()))
-            {
-                pCurPath = pPath2;
-            }
-            else
-            {
-                pCurPath = pPath2;
-            }
+            if(STAGE_BRANCH(pPath1->GetTotalDistance(), pPath1->GetTotalDistance())) {}
 
-            const coreVector2 vFactor = coreVector2((i & 0x02u) ? -1.0f : 1.0f, (pCurPath == pPath1) ? -1.0f : 1.0f);
+            const coreVector2 vFactor = coreVector2((i < 8u)    ? -1.0f : 1.0f, 1.0f);
             const coreVector2 vOffset = coreVector2((i & 0x01u) ? -0.1f : 0.1f, 0.0f);
 
-            pEnemy->DefaultMovePath(pCurPath, vFactor, vOffset * vFactor, fLifeTime);
-
-        //    if(i < 8u) STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
         STAGE_WAVE
@@ -143,74 +128,105 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        if(STAGE_TIME_POINT(3.0f))
-        {
-            g_pGame->GetInterface()->ShowStory("revived from the dead");
-        }
-
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-1.2f, 1.0f),  coreVector2(1.0f, 0.0f));
-            pPath1->AddStop(coreVector2( 0.8f, 0.3f),  coreVector2(1.0f, 0.0f));
+            pPath1->AddNode(coreVector2(-1.2f, 0.4f), coreVector2(1.0f,0.0f));
+            pPath1->AddNode(coreVector2( 1.2f,-0.4f), coreVector2(1.0f,0.0f));
             pPath1->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 12u)
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 16u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(40, (i & 0x01u) ? COLOR_SHIP_ORANGE : COLOR_SHIP_RED, true);
+                pEnemy->Configure(4, COLOR_SHIP_RED, true);
+                if(i < 8u) pEnemy->Resurrect();
+            });
+        });
+
+        if(STAGE_CLEARED && STAGE_SUB(1u))
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                if(i >= 8u) pEnemy->Resurrect();
+            });
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.9f, 0.21f * I_TO_F(i % 8u))
+
+            if(STAGE_BRANCH(pPath1->GetTotalDistance(), pPath1->GetTotalDistance())) {}
+
+            const coreVector2 vFactor = coreVector2((i < 8u) ? -1.0f : 1.0f, 1.0f);
+            const coreVector2 vOffset = coreVector2(0.0f, 0.4f + ((i & 0x02u) ? -0.1f : 0.1f));
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+            if(STAGE_LIFETIME_POINT(0.3f) || STAGE_LIFETIME_POINT(0.4f) || STAGE_LIFETIME_POINT(0.5f))
+            {
+                const coreVector2 vPos = pEnemy->GetPosition().xy();
+                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.6f, pEnemy, vPos, vDir)->ChangeSize(1.2f);
+            }
+        });
+
+        STAGE_WAVE
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.4f,1.4f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.4f,0.6f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 2u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(200, (i & 0x01u) ? COLOR_SHIP_ORANGE : COLOR_SHIP_RED, true);
                 pEnemy->Resurrect();
+
+                pEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * 2.0f);
             });
         });
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 1.9f, 0.2f * I_TO_F(i))
+            STAGE_LIFETIME(pEnemy, 1.2f, 0.0f)
 
             if(STAGE_LIFETIME_BEFORE(pPath1->GetTotalDistance()))
             {
-                const coreVector2 vFactor = coreVector2((i < 6u) ? 1.0f : -1.0f, 1.0f);
-                const coreVector2 vOffset = coreVector2(I_TO_F(i % 6u) * -0.2f,                    (i < 6u) ? -0.1f : 0.1f);
+                const coreVector2 vFactor = coreVector2((i & 0x01u) ? 1.0f : -1.0f, 1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
 
                 pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-                pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
             }
-            else
+
+            if(STAGE_TICK_LIFETIME(20.0f, 0.0f))
             {
+                const coreUint16 iTick = s_iTick % 80u;
+                //if((iTick < 10u) || (iTick >= 20u && iTick < 30u))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * DEG_TO_RAD(9.0f));
 
+                    if(i) vDir = vDir.InvertedX();
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.2f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.2f);
+                }
             }
-
         });
 
-        STAGE_WAVE
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-
-        // direction change
-        STAGE_WAVE
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-
-        // roll
-        STAGE_WAVE
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-
-        // stronger wave
         STAGE_WAVE
     });
 
@@ -271,4 +287,9 @@ void cIntroMission::__SetupOwn()
 // 
 void cIntroMission::__MoveOwnBefore()
 {
+    //if(CONTAINS_FLAG(g_pGame->GetPlayer(0u)->GetStatus(), PLAYER_STATUS_DEAD)) return;
+    //
+    //g_pEnvironment->SetTargetDirection(
+    //coreVector2(g_pGame->GetPlayer(0u)->GetPosition().x / FOREGROUND_AREA.x * 0.2f, 1.0f).Normalized()
+    //);
 }
