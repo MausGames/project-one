@@ -12,15 +12,11 @@
 // ****************************************************************
 // constructor
 cOutdoor::cOutdoor()noexcept
-: 
-
- m_aiHeight {},
-m_iVertexOffset (0u)
+: m_aiHeight      {}
+, m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
-
-, m_iHandleIndex (0u)
-
+, m_iHandleIndex  (0u)
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
 , m_afLerpMul     {}
@@ -28,11 +24,6 @@ m_iVertexOffset (0u)
 , m_aiLerpRange   {}
 , m_afLerpData    {}
 {
-
-    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
-    // 
-    m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
-    m_LightMap.Create(coreVector2(4.0f,4.0f), CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 
 cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept
@@ -44,9 +35,6 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
     this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
     this->LerpHeightNow(1.0f, 0.0f);
 
-    m_LightMap.Delete();
-    m_LightMap.DetachTargets();
-    
     // 
     m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
     m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
@@ -90,7 +78,7 @@ void cOutdoor::Render()
     });
 
     // enable light map
-    m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);
+    if(m_LightMap.GetIdentifier()) m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);
 }
 
 void cOutdoor::RenderLight()
@@ -552,9 +540,22 @@ FUNC_LOCAL coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
 // 
 void cOutdoor::UpdateLightMap()
 {
+    if(!m_LightMap.GetIdentifier()) return;
+
     // 
     m_LightMap.StartDraw();
     this->RenderLight();
+}
+
+
+// ****************************************************************
+// 
+void cOutdoor::InvalidateLightMap()
+{
+    if(!m_LightMap.GetIdentifier()) return;
+
+    // 
+    m_LightMap.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
 }
 
 

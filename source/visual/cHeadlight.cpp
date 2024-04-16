@@ -12,6 +12,8 @@
 // ****************************************************************
 // constructor
 cHeadlight::cHeadlight()noexcept
+: m_Flicker  (coreTimer(1.0f, 10.0f, 7u))
+, m_iShatter (0u)
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
 
@@ -32,6 +34,10 @@ cHeadlight::cHeadlight()noexcept
     m_Spot .DefineProgram("default_2d_program");
     m_Point.DefineTexture(0u, "effect_headlight_point.png");
     m_Point.DefineProgram("default_2d_program");
+
+    // 
+    m_pFlickerSound = Core::Manager::Resource->Get<coreSound>("effect_flicker.wav");
+    m_pShatterSound = Core::Manager::Resource->Get<coreSound>("effect_shatter.wav");
 }
 
 
@@ -39,6 +45,9 @@ cHeadlight::cHeadlight()noexcept
 // destructor
 cHeadlight::~cHeadlight()
 {
+    // 
+    this->StopFlicker();
+
     // explicitly undefine to detach textures
     this->Undefine();
 }
@@ -60,6 +69,26 @@ void cHeadlight::Render()
 // 
 void cHeadlight::Update()
 {
+    if(m_Flicker.GetStatus())
+    {
+        // 
+        m_Flicker.Update(1.0f);
+        if(m_Flicker.GetStatus())
+        {
+            // 
+            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * m_Flicker.GetValue(CORE_TIMER_GET_NORMAL));
+        }
+        else
+        {
+            // 
+            this->StopFlicker();
+            if(m_iShatter == 2u) m_pShatterSound->PlayRelative(NULL, 0.7f, 1.0f, false, SOUND_EFFECT);
+
+            // 
+            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * (m_iShatter ? 0.0f : 1.0f));
+        }
+    }
+
     if(!m_aSpotCommand.empty() || !m_aPointCommand.empty())
     {
         // 
@@ -155,6 +184,27 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
     // 
     if(!pObject->GetModel().IsUsable()) return;
     this->DrawPoint(pObject->GetPosition(), coreVector2(3.0f,3.0f) * (pObject->GetModel()->GetBoundingRadius() * pObject->GetSize().Max()));
+}
+
+
+// ****************************************************************
+// 
+void cHeadlight::PlayFlicker(const coreUint8 iShatter)
+{
+    // 
+    m_Flicker.Play(CORE_TIMER_PLAY_RESET);
+    m_pFlickerSound->PlayRelative(this, 3.0f, 1.0f, true, SOUND_EFFECT);
+
+    // 
+    ASSERT(m_iShatter != 2u)
+    m_iShatter = iShatter;
+}
+
+void cHeadlight::StopFlicker()
+{
+    // 
+    m_Flicker.Stop();
+    if(m_pFlickerSound->EnableRef(this)) m_pFlickerSound->Stop();
 }
 
 

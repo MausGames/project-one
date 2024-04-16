@@ -127,6 +127,14 @@ void cMossBackground::__RenderOwnAfter()
         m_Lightning.Render();
     }
     glEnable(GL_DEPTH_TEST);
+    
+    
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        //m_Headlight.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -140,13 +148,13 @@ void cMossBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (1.0f * Core::System->GetTime());
 
     // 
-    m_Rain.SetDirection(m_vRainDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12());
+    m_Rain.SetDirection(MapToAxisInv(m_vRainDirection.InvertedX(), g_pEnvironment->GetDirection()));
     m_Rain.SetTexSize  (vTexSize);
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Rain.Move();
 
     // 
-    m_fLightningDelay.Update(-1.0f);
+    //m_fLightningDelay.Update(-1.0f);
     if(m_fLightningDelay <= 0.0f)
     {
         // 
@@ -190,4 +198,13 @@ void cMossBackground::__MoveOwn()
     // 
     if(m_pRainSound->EnableRef(this))
         m_pRainSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+}
+
+
+// ****************************************************************
+// 
+void cMossBackground::__UpdateOwn()
+{
+    // 
+    m_Headlight.UpdateDefault();
 }

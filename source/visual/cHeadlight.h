@@ -15,6 +15,7 @@
 // TODO: slow up and down glowing
 // TODO: old flickering effect and sound
 // TODO: activation-animation (e.g. for player or boss spot-lights)
+// TODO: use simpler shader for light (single-channel only)
 
 
 // ****************************************************************
@@ -52,6 +53,12 @@ private:
     coreObject2D m_Spot;                          // 
     coreObject2D m_Point;                         // 
 
+    coreSoundPtr m_pFlickerSound;                 // 
+    coreSoundPtr m_pShatterSound;                 // 
+
+    coreTimer m_Flicker;                          // 
+    coreUint8 m_iShatter;                         // 
+
 
 public:
     cHeadlight()noexcept;
@@ -70,6 +77,10 @@ public:
     void DrawSpot (const coreVector3& vPosition, const coreVector2& vSize, const coreVector2& vDirection);
     void DrawPoint(const coreVector3& vPosition, const coreVector2& vSize);
     void DrawPoint(const coreObject3D* pObject);
+
+    // 
+    void PlayFlicker(const coreUint8 iShatter);
+    void StopFlicker();
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}

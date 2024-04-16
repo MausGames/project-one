@@ -31,63 +31,58 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // bomberman hero
-    // + and x
-    // moving bombs
-    // multiple bombs with different timer
-    // super-huge bomb
-    // bombs dont affect each other
-    // blast only has instant damage (not lingering), not outline, and (blast thickness <= bomb thickness) (never more)
-    // rotation (inklusive explosions-indikator)
-    // anzeigen explosions-indikator wie bei leviathan laser
-    //
-    // bombs straight, don't move (during warning) or only slight, from above (2 tick)
-    // bombs from above 45deg, constant speed, bounce 0.7f x (2 tick)
-    // bombs rotating from sides (no rotation on explosion, because instant damage) (4 tick)
-    
-    // bombs +
-    // bombs x
-    // bombs +,x moving linear
-    // bombs rotating
+    // gegner fliegt auf den spieler zu, weniger nervig, spieler muss trotzdem manchmal ausweichen, lebenspunkte müssen dementsprechend hoch sein um den burst auszugleichen
+    // diagonal position makes linear bombs stronger, linear position makes diagonal bombs stronger
+    // make sure there is a pause between 4 and 5, make sure to start 5 from different side then 4
+    // consistent explosion delays make it easier to focus one the enemies simultaneously
+    // letting the enemy spawn bombs made the pattern too simple, a separate spawner creates more pressure
+    // TODO: if not used otherwise, hide helper in bomb, it flies away on burst-line
+    // TODO: maybe two from XY at the same time
+    // TODO: maybe only diagonal position on linear explosion and vice-versa
+    // TODO: 2-3 quickly after another, with pattern or just aim
+    // TODO: reference: Monolith
     STAGE_MAIN
     {
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-1.2f, 1.2f), coreVector2(1.0f,-1.0f).Normalized());
-            pPath1->AddNode(coreVector2( 1.2f,-1.2f), coreVector2(1.0f,-1.0f).Normalized());
-            pPath1->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 24u)
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 24u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(30, COLOR_SHIP_YELLOW);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
+                pEnemy->Configure(50, COLOR_SHIP_RED);
             });
         });
 
-        STAGE_GET_START(4u + NEVO_BOMBS * 4u)
-            STAGE_GET_VEC3       (vHelperData, vHelperData = coreVector3(1.0f,0.0f,0.0f))
-            STAGE_GET_UINT       (iBombIndex)
-            STAGE_GET_UINT_ARRAY (aiType,  NEVO_BOMBS)
+        STAGE_GET_START(8u + NEVO_BOMBS * 4u)
+            STAGE_GET_VEC2       (vClusterPos, vClusterPos = coreVector2(-1.2f,0.5f) * FOREGROUND_AREA)
+            STAGE_GET_VEC2       (vClusterDir, vClusterDir = coreVector2( 1.0f,0.0f))
+            STAGE_GET_UINT       (iCurBomb)
+            STAGE_GET_UINT       (iCurEnemy)
+            STAGE_GET_UINT       (iWarpCount)
+            STAGE_GET_UINT       (iRotaCount)
             STAGE_GET_FLOAT_ARRAY(afDelay, NEVO_BOMBS)
             STAGE_GET_VEC2_ARRAY (avMove,  NEVO_BOMBS)
+            STAGE_GET_UINT_ARRAY (aiType,  NEVO_BOMBS)
         STAGE_GET_END
+
+        const auto nTargetFunc = [](const coreBool bType, const coreVector2& vTarget, coreVector2* OUTPUT pvPos, coreVector2* OUTPUT pvForce)
+        {
+            ASSERT(pvPos && pvForce)
+
+            const coreVector2 vAxis  = bType ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
+            const coreVector2 vSign  = vTarget.Processed(SIGN) * FOREGROUND_AREA;
+            const coreVector2 vClamp = vTarget.Processed(CLAMP, -(FOREGROUND_AREA.x - 10.0f), (FOREGROUND_AREA.x - 10.0f));
+
+            (*pvPos)   = -1.2f * vSign * vAxis + vClamp * vAxis.yx();
+            (*pvForce) = (vTarget + vSign) * vAxis;
+        };
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  5u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  6u, 11u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 12u, 17u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 18u, 23u)
-        }
-
-        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
-
-        if(STAGE_BEGINNING)
-        {
-            pHelper->Resurrect();
-            pHelper->SetPosition(coreVector3(-1.2f,0.5f,0.0f) * FOREGROUND_AREA3);
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1,  8u, 12u)
+            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 13u, 17u)
+            else if(STAGE_SUB(5u)) STAGE_RESSURECT(pSquad1, 18u, 23u)
         }
 
         if(STAGE_CLEARED)
@@ -98,175 +93,110 @@ void cNevoMission::__SetupOwn()
             for(coreUintW i = 0u; i < NEVO_BLASTS; ++i)
                 this->DisableBlast(i, true);
         }
-
-        const auto nTargetFunc = [](const coreBool bType, const coreVector2& vTarget, coreVector2* OUTPUT pvPos, coreVector2* OUTPUT pvForce)
+        else
         {
-            ASSERT(pvPos && pvForce)
+            vClusterPos += vClusterDir * (30.0f * Core::System->GetTime());
 
-            const coreVector2 vAxis = bType ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
-            const coreVector2 vSide = vTarget.Processed(SIGN) * FOREGROUND_AREA;
-
-            (*pvPos)   = -1.2f * vSide * vAxis + vTarget * vAxis.yx();
-            (*pvForce) = (vTarget + vSide) * vAxis;
-        };
-
-        coreVector2 vHelperPos = pHelper->GetPosition().xy();
-        vHelperPos += vHelperData.xy() * (30.0f * Core::System->GetTime());
-
-        if(((vHelperPos.x < -FOREGROUND_AREA.x * 1.2f) && (vHelperData.x < 0.0f)) ||
-           ((vHelperPos.x >  FOREGROUND_AREA.x * 1.2f) && (vHelperData.x > 0.0f)) ||
-           ((vHelperPos.y < -FOREGROUND_AREA.y * 1.2f) && (vHelperData.y < 0.0f)) ||
-           ((vHelperPos.y >  FOREGROUND_AREA.y * 1.2f) && (vHelperData.y > 0.0f)))
-        {
-            const cPlayer* pPlayer = g_pGame->FindPlayerDual(0u); // TODO   
-
-            coreVector2 vPos, pvForce;
-            nTargetFunc(IsHorizontal(vHelperData.xy()), pPlayer->GetPosition().xy(), &vPos, &pvForce);
-
-            vHelperPos = vPos;
-            vHelperData.xy(pvForce.Normalized());
-        }
-
-        pHelper->SetPosition(coreVector3(vHelperPos, 0.0f));
-
-        for(coreUintW i = 0u; i < NEVO_BOMBS; ++i)
-        {
-            cLodObject& oBomb = m_aBombRaw[i];
-
-            if(oBomb.IsEnabled(CORE_OBJECT_ENABLE_ALL))
+            if(((vClusterPos.x < -FOREGROUND_AREA.x * 1.2f) && (vClusterDir.x < 0.0f)) ||
+               ((vClusterPos.x >  FOREGROUND_AREA.x * 1.2f) && (vClusterDir.x > 0.0f)) ||
+               ((vClusterPos.y < -FOREGROUND_AREA.y * 1.2f) && (vClusterDir.y < 0.0f)) ||
+               ((vClusterPos.y >  FOREGROUND_AREA.y * 1.2f) && (vClusterDir.y > 0.0f)))
             {
-                const coreFloat fPrevDelay = afDelay[i];
-                afDelay[i] += 1.0f * Core::System->GetTime();
+                const cPlayer* pPlayer = g_pGame->FindPlayerDual((((iWarpCount++) % 4u) < 2u) ? 0u : 1u);
 
-                if((fPrevDelay < 2.0f) && (afDelay[i] >= 2.0f))
-                    this->EnableBlast(i);
+                coreVector2 vPos, vForce;
+                nTargetFunc(IsHorizontal(vClusterDir), pPlayer->GetPosition().xy(), &vPos, &vForce);
 
-                if(aiType[i] == 1u) 
-                {
-                    // stand still
-                }
-                else if(aiType[i] == 2u)
-                {
-                    const coreVector2 vNewPos = oBomb.GetPosition().xy() + avMove[i] * Core::System->GetTime();
-
-                    oBomb.SetPosition(coreVector3(vNewPos, 0.0f));
-
-                         if((vNewPos.x < -FOREGROUND_AREA.x * 1.1f) && (avMove[i].x < 0.0f)) avMove[i].x =  ABS(avMove[i].x);
-                    else if((vNewPos.x >  FOREGROUND_AREA.x * 1.1f) && (avMove[i].x > 0.0f)) avMove[i].x = -ABS(avMove[i].x);
-                         if((vNewPos.y < -FOREGROUND_AREA.y * 1.1f) && (avMove[i].y < 0.0f)) avMove[i].y =  ABS(avMove[i].y);
-                    else if((vNewPos.y >  FOREGROUND_AREA.y * 1.1f) && (avMove[i].y > 0.0f)) avMove[i].y = -ABS(avMove[i].y);
-                }
-                else if(aiType[i] == 3u)
-                {
-                    oBomb.SetPosition (coreVector3(oBomb.GetPosition().xy() + avMove[i] * Core::System->GetTime(), 0.0f));
-                    oBomb.SetDirection(coreVector3(coreVector2::Direction(afDelay[i] * ((i % 2u) ? 1.0f : -1.0f)), 0.0f));
-
-                    avMove[i] *= FrictionFactor(1.5f);
-                }
+                vClusterPos = vPos;
+                vClusterDir = vForce.Normalized();
             }
 
-            if(this->GetBombGone(i))
+            for(coreUintW i = 0u; i < NEVO_BOMBS; ++i)
             {
-                const coreVector2 vPos = oBomb.GetPosition ().xy();
-                const coreVector2 vDir = oBomb.GetDirection().xy();
+                cLodObject& oBomb = m_aBombRaw[i];
 
-                STAGE_FOREACH_PLAYER(pPlayer, j)
+                if(oBomb.IsEnabled(CORE_OBJECT_ENABLE_ALL))
                 {
-                    const coreVector2 vDiff = MapToAxis(pPlayer->GetPosition().xy() - vPos, vDir.InvertedX());
+                    const coreFloat fPrevDelay = afDelay[i];
+                    afDelay[i] += 1.0f * Core::System->GetTime();
 
-                    if((ABS(vDiff.x) < 3.0f) || (ABS(vDiff.y) < 3.0f))
+                    if(InBetween(2.0f, fPrevDelay, afDelay[i]))
+                        this->EnableBlast(i);
+
+                    if(aiType[i] >= 1u)
                     {
-                        if(pPlayer->IsNormal()) pPlayer->TakeDamage(10, ELEMENT_ORANGE, pPlayer->GetPosition().xy());
+                        oBomb.SetPosition(coreVector3(oBomb.GetPosition().xy() + avMove[i] * Core::System->GetTime(), 0.0f));
+                        avMove[i] *= FrictionFactor(1.5f);
                     }
-                });
+                    if(aiType[i] == 2u)
+                    {
+                        oBomb.SetDirection(coreVector3(coreVector2::Direction(afDelay[i] * ((i % 2u) ? 1.0f : -1.0f)), 0.0f));
+                    }
+                }
 
-                afDelay[i] = 0.0f;
+                if(this->GetBombGone(i))
+                {
+                    const coreVector2 vPos = oBomb.GetPosition ().xy();
+                    const coreVector2 vDir = oBomb.GetDirection().xy();
+
+                    STAGE_FOREACH_PLAYER(pPlayer, j)
+                    {
+                        const coreVector2 vDiff = MapToAxisInv(pPlayer->GetPosition().xy() - vPos, vDir);
+
+                        if((ABS(vDiff.x) < 3.0f) || (ABS(vDiff.y) < 3.0f))
+                        {
+                            if(pPlayer->IsNormal()) pPlayer->TakeDamage(10, ELEMENT_ORANGE, pPlayer->GetPosition().xy());
+                        }
+                    });
+
+                    afDelay[i] = 0.0f;
+                }
             }
-        }
 
-        if(m_iStageSub == 1u)
-        {
-            if(g_pForeground->IsVisiblePoint(pHelper->GetPosition().xy()) &&
-               (IsHorizontal(vHelperData.xy()) ? STAGE_POSITION_POINT(pHelper, 0.0f, x) : STAGE_POSITION_POINT(pHelper, 0.0f, y)))
+            if(STAGE_TICK_FREE(0.75f, 0.0f) && (iRotaCount || (s_iTick % 2u)))
             {
-                const coreUintW iIndex  = (iBombIndex++) % NEVO_BOMBS;
-                
-                this->EnableBomb(iIndex, true);
-                
-                m_aBombRaw[iIndex].SetPosition (coreVector3(s_vPositionPoint, 0.0f));
-                m_aBombRaw[iIndex].SetDirection(coreVector3(0.0f,1.0f,0.0f));
-                
-                aiType[iIndex] = 1u;
+                const cPlayer*    pPlayer = g_pGame->FindPlayerDual(((s_iTick % 8u) < 4u) ? 0u : 1u);   // TODO: tick-1 ? 
+                const coreBool    bType   = (m_iStageSub <= 2u) ? true : ((m_iStageSub <= 4u) ? false : !((iRotaCount++) % 2u));
+                const coreUintW   iNum    = (m_iStageSub == 3u || m_iStageSub == 4u) ? 3u : 1u;
+                const coreVector2 vOffset = StepRotated45((s_iTick % 8u) / 2u);   // TODO: tick-1 ? 
+
+                coreVector2 vPos, vForce;
+                nTargetFunc(bType, pPlayer->GetPosition().xy(), &vPos, &vForce);
+
+                for(coreUintW i = 0u; i < iNum; ++i)
+                {
+                    const coreUintW iIndex = (iCurBomb + i) % NEVO_BOMBS;
+
+                    this->EnableBomb(iIndex, false);
+
+                    m_aBombRaw[iIndex].SetPosition (coreVector3(vPos + 10.0f * (vOffset * (I_TO_F(i) - 0.5f * I_TO_F(iNum - 1u)) - vForce.Normalized()), 0.0f));
+                    m_aBombRaw[iIndex].SetDirection((m_iStageSub % 2u) ? coreVector3(0.0f,1.0f,0.0f) : coreVector3(1.0f,1.0f,0.0f).Normalized());
+
+                    avMove[iIndex] = 1.5f * vForce;
+                    aiType[iIndex] = (m_iStageSub == 5u) ? 2u : 1u;
+                }
+
+                iCurBomb += (m_iStageSub == 5u) ? 1u : 3u;
             }
-        }
-        else if(m_iStageSub == 2u)
-        {
-            if(g_pForeground->IsVisiblePoint(pHelper->GetPosition().xy()) &&
-                    ((IsHorizontal(vHelperData.xy()) ? STAGE_POSITION_POINT(pHelper,  0.5f * FOREGROUND_AREA.x, x) : STAGE_POSITION_POINT(pHelper,  0.5f * FOREGROUND_AREA.y, y)) ||
-                     (IsHorizontal(vHelperData.xy()) ? STAGE_POSITION_POINT(pHelper, -0.5f * FOREGROUND_AREA.x, x) : STAGE_POSITION_POINT(pHelper, -0.5f * FOREGROUND_AREA.y, y))))
+
+            STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
             {
-                const coreUintW iIndex  = (iBombIndex++) % NEVO_BOMBS;
-                
-                this->EnableBomb(iIndex, true);
-                
-                m_aBombRaw[iIndex].SetPosition (coreVector3(s_vPositionPoint, 0.0f));
-                m_aBombRaw[iIndex].SetDirection(coreVector3(coreVector2(1.0f,1.0f).Normalized(), 0.0f));
-                
-                aiType[iIndex] = 1u;
-            }
+                if(iCurEnemy == i)
+                {
+                    if(pEnemy->ReachedDeath()) iCurEnemy += 1u;
+
+                    coreVector2 vRealDir = vClusterDir;
+                    for(coreUintW j = 1u; j < m_iStageSub; ++j) vRealDir = vRealDir.Rotated90();
+
+                    pEnemy->SetPosition (coreVector3(vClusterPos, 0.0f));
+                    pEnemy->SetDirection(coreVector3(vRealDir,    0.0f));
+                }
+                else
+                {
+                    pEnemy->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+                }
+            });
         }
-        else if(m_iStageSub == 3u)
-        {
-            if(g_pForeground->IsVisiblePoint(pHelper->GetPosition().xy()) &&
-                    ((IsHorizontal(vHelperData.xy()) ? STAGE_POSITION_POINT(pHelper,  0.5f * FOREGROUND_AREA.x, x) : STAGE_POSITION_POINT(pHelper,  0.5f * FOREGROUND_AREA.y, y)) ||
-                     (IsHorizontal(vHelperData.xy()) ? STAGE_POSITION_POINT(pHelper, -0.5f * FOREGROUND_AREA.x, x) : STAGE_POSITION_POINT(pHelper, -0.5f * FOREGROUND_AREA.y, y))))
-            {
-                const coreUintW iIndex  = (iBombIndex++) % NEVO_BOMBS;
-                
-                this->EnableBomb(iIndex, true);
-                
-                m_aBombRaw[iIndex].SetPosition (coreVector3(s_vPositionPoint, 0.0f));
-                m_aBombRaw[iIndex].SetDirection((iIndex % 2u) ? coreVector3(coreVector2(1.0f,1.0f).Normalized(), 0.0f) : coreVector3(0.0f,1.0f,0.0f));
-
-                avMove[iIndex] = 30.0f * vHelperData.xy().Rotated90() * ((coreVector2::Dot(vHelperData.xy().Rotated90(), s_vPositionPoint) < 0.0f) ? -1.0f : 1.0f);
-                aiType[iIndex] = 2u;
-            }
-        }
-        else if(m_iStageSub == 4u)
-        {
-            if(!CONTAINS_FLAG(pHelper->GetStatus(), HELPER_STATUS_DEAD))
-            {
-                if(!g_pForeground->IsVisibleObject(pHelper))
-                    pHelper->Kill(false);
-            }
-            else if(STAGE_TICK_FREE(0.75f, 0.0f))
-            {
-                const cPlayer*  pPlayer = g_pGame->FindPlayerDual(((s_iTick % 4u) < 2u) ? 0u : 1u);
-                const coreUintW iIndex  = (iBombIndex++) % NEVO_BOMBS;
-
-                this->EnableBomb(iIndex, false);
-
-                coreVector2 vPos, pvForce;
-                nTargetFunc(s_iTick % 2u, pPlayer->GetPosition().xy(), &vPos, &pvForce);
-
-                m_aBombRaw[iIndex].SetPosition(coreVector3(vPos, 0.0f));
-
-                avMove[iIndex] = 1.5f * pvForce;
-                aiType[iIndex] = 3u;
-            }
-        }
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 0.5f, pPath1->GetTotalDistance() * 0.5f * I_TO_F((i % 6u) / 3u) + 0.2f * I_TO_F(i % 3u))
-
-            STAGE_REPEAT(pPath1->GetTotalDistance())
-
-            const coreVector2 vFactor = coreVector2(((i % 6u) < 3u) ? 1.0f : -1.0f, 1.0f);
-            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-
-            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-        });
 
         STAGE_WAVE("SECHSZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
@@ -281,7 +211,267 @@ void cNevoMission::__SetupOwn()
         for(coreUintW i = 0u; i < NEVO_BLASTS; ++i)
             this->DisableBlast(i, false);
 
-        g_pGame->GetHelper(ELEMENT_YELLOW)->Kill(false);
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // switch everything on
+    // 3: in last sub-pattern, either outer or middle tile already marked, as otherwise it would be too easy to activate all
+    // 3: for coop, make sure tiles are equally distributed
+    // 1,2: blending in tiles needs to be equally delayed, to not favor certain start-positions
+    // enemies need to die fast after loosing invincibility
+    // TODO: ON tiles have X (eher nicht, schlecht in japan) or other distinct difference (maybe only in lower-right corner)
+    // TODO: wenn letztes tile schrumpft kommen funken bei size=0 und grüner helfer erscheint und fliegt weg
+    // TODO: badge, helper marks N fields to active in that order
+    STAGE_MAIN
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(-0.8f, 1.2f), coreVector2(1.6f,-2.4f).Normalized());
+            pPath1->AddNode(coreVector2( 0.8f,-1.2f), coreVector2(1.6f,-2.4f).Normalized());
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 30u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
+                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+            });
+        });
+
+        STAGE_GET_START(5u + GAME_PLAYERS)
+            STAGE_GET_UINT      (iTileState)
+            STAGE_GET_UINT      (iTileDone)
+            STAGE_GET_UINT      (iTileWait)
+            STAGE_GET_FLOAT     (fTileMove)
+            STAGE_GET_UINT      (iGauntlet)
+            STAGE_GET_UINT_ARRAY(aiRemember, GAME_PLAYERS)
+        STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  9u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 10u, 19u)
+            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 20u, 29u)
+
+            for(coreUintW i = 0u; i < NEVO_TILES; ++i)
+                this->DisableTile(i, true);
+
+            iTileWait = 0u;
+        }
+
+        if(!iTileWait)
+        {
+            if(!m_aTileRaw[0].IsEnabled(CORE_OBJECT_ENABLE_ALL))
+            {
+                STATIC_ASSERT(NEVO_TILES == 16u)
+
+                if(m_iStageSub == 1u)
+                {
+                    for(coreUintW i = 0u; i < 9u; ++i)
+                        this->EnableTile(i, 3u);
+                }
+                else if(m_iStageSub == 2u)
+                {
+                    for(coreUintW i = 0u; i < 16u; ++i)
+                        this->EnableTile(i, 4u);
+                }
+                else if(m_iStageSub == 3u)
+                {
+                    if(!iGauntlet) iGauntlet = 1u;
+                }
+
+                iTileState = 0u;
+                iTileDone  = 0u;
+                iTileWait  = 1u;
+
+                std::memset(aiRemember, 0, sizeof(coreUint32) * GAME_PLAYERS);
+            }
+        }
+
+        if(iGauntlet)
+        {
+            if(iGauntlet == 1u)
+            {
+                this->EnableTile(2u, 4u);
+
+                iGauntlet += 1u;
+            }
+            else if(iGauntlet == 3u)
+            {
+                this->EnableTile(8u,  4u);
+                this->EnableTile(14u, 4u);
+
+                iGauntlet += 1u;
+            }
+            else if(iGauntlet == 5u)
+            {
+                this->EnableTile(1u, 4u);
+                this->EnableTile(7u, 4u);
+
+                fTileMove  = 0.0f;
+                iGauntlet += 1u;
+            }
+            else if(iGauntlet == 6u)
+            {
+                fTileMove += 0.6f * Core::System->GetTime();
+
+                m_aTileRaw[1].SetPosition(coreVector3(LERPS(coreVector2(-0.25f,0.75f), coreVector2(-0.25f,-0.75f), fTileMove) * (FOREGROUND_AREA * 1.1f), 0.0f));
+                m_aTileRaw[7].SetPosition(coreVector3(LERPS(coreVector2( 0.75f,0.25f), coreVector2(-0.75f, 0.25f), fTileMove) * (FOREGROUND_AREA * 1.1f), 0.0f));
+            }
+            else if(iGauntlet == 7u)
+            {
+                this->EnableTile(12u, 4u);
+                this->EnableTile(13u, 4u);
+
+                m_aTileRaw[12].SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+                m_aTileRaw[13].SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+                fTileMove  = 0.0f;
+                iGauntlet += 1u;
+            }
+            else if(iGauntlet == 8u)
+            {
+                fTileMove += 1.0f * Core::System->GetTime();
+
+                const coreVector2 vPos = coreVector2::Direction(fTileMove);
+                const coreVector2 vDir = coreVector2::Direction(fTileMove * -2.0f);
+
+                m_aTileRaw[12].SetPosition(coreVector3(vPos * (FOREGROUND_AREA *  0.5f), 0.0f));
+                m_aTileRaw[13].SetPosition(coreVector3(vPos * (FOREGROUND_AREA * -0.5f), 0.0f));
+
+                m_aTileRaw[12].SetDirection(coreVector3(vDir, 0.0f));
+                m_aTileRaw[13].SetDirection(coreVector3(vDir, 0.0f));
+            }
+            else if(iGauntlet == 9u)
+            {
+                this->EnableTile(9u,  4u);
+                this->EnableTile(10u, 4u);
+                this->EnableTile(11u, 4u);
+
+                m_aTileRaw[9] .SetPosition(coreVector3(0.0f,0.0f,0.0f));
+                m_aTileRaw[10].SetPosition(coreVector3(0.0f,0.0f,0.0f));
+                m_aTileRaw[11].SetPosition(coreVector3(0.0f,0.0f,0.0f));
+
+                m_aTileRaw[9] .SetSize(m_aTileRaw[9] .GetSize() * 0.7f * 3.0f);
+                m_aTileRaw[10].SetSize(m_aTileRaw[10].GetSize() * 0.7f * 2.0f);
+                m_aTileRaw[11].SetSize(m_aTileRaw[11].GetSize() * 0.7f);
+
+                iTileState = BIT(10u);
+                iGauntlet += 1u;
+            }
+        }
+
+        coreBool bComplete = !iTileDone;
+
+        if(!iTileDone)
+        {
+            for(coreUintW i = 0u; i < NEVO_TILES; ++i)
+            {
+                coreObject3D& oTile = m_aTileRaw[i];
+                if(!oTile.IsEnabled(CORE_OBJECT_ENABLE_ALL) || (m_afTileTime[i] < 0.0f)) continue;
+
+                STAGE_FOREACH_PLAYER(pPlayer, j)
+                {
+                    if(pPlayer->IsRolling()) return;
+
+                    const coreVector2 vDiff = MapToAxisInv(pPlayer->GetPosition().xy() - oTile.GetPosition().xy(), oTile.GetDirection().xy());
+
+                    if((ABS(vDiff.x) < oTile.GetCollisionRange().x) &&
+                       (ABS(vDiff.y) < oTile.GetCollisionRange().y))
+                    {
+                        if(!CONTAINS_BIT(aiRemember[j], i)) TOGGLE_BIT(iTileState, i)
+                        ADD_BIT(aiRemember[j], i)
+                    }
+                    else
+                    {
+                        REMOVE_BIT(aiRemember[j], i)
+                    }
+                });
+
+                if(CONTAINS_BIT(iTileState, i))
+                {
+                    oTile.SetColor3(COLOR_ENERGY_YELLOW);
+                }
+                else
+                {
+                    oTile.SetColor3(COLOR_ENERGY_BLUE);
+                    bComplete = false;
+                }
+            }
+        }
+
+        if(bComplete)
+        {
+            if(iGauntlet && (iGauntlet < 10u))
+            {
+                for(coreUintW i = 0u; i < NEVO_TILES; ++i)
+                    this->DisableTile(i, true);
+
+                iGauntlet += 1u;
+                bComplete  = false;
+            }
+            else
+            {
+                for(coreUintW i = 0u; i < NEVO_TILES; ++i)
+                    m_aTileRaw[i].SetColor3(COLOR_ENERGY_GREEN);
+            }
+        }
+
+        if(bComplete) iTileDone = 1u;
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.8f, 0.2f * I_TO_F(i % 5u) + (((i % 10u) < 5u) ? 0.0f : (0.5f * pPath1->GetTotalDistance())))
+
+            STAGE_REPEAT(pPath1->GetTotalDistance())
+
+            const coreVector2 vFactor = coreVector2(((i % 10u) < 5u) ? 1.0f : -1.0f, (i < 20u) ? 1.0f : -1.0f);
+            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                 if(i >= 10u && i < 15u) pEnemy->Rotate90();
+            else if(i >= 15u && i < 20u) pEnemy->Rotate270();
+
+            if(!(i % 5u) && STAGE_TICK_TIME(0.8f, 0.0f))
+            {
+                const coreVector2 vPos  = pEnemy->GetPosition ().xy();
+                const coreFloat   fBase = pEnemy->GetDirection().xy().Rotated90().Angle();
+
+                for(coreUintW j = 5u; j--; )
+                {
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 2.0f) * 8.0f) + fBase);
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.5f, pEnemy, vPos,  vDir)->ChangeSize(1.3f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.5f, pEnemy, vPos, -vDir)->ChangeSize(1.3f);
+                }
+            }
+
+            if(bComplete)
+            {
+                if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
+                {
+                    pEnemy->SetBaseColor(COLOR_SHIP_BLUE);
+                    pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+
+                    g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_BLUE);
+                }
+            }
+        });
+
+        STAGE_WAVE("SIEBZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // reset all tiles
+    STAGE_MAIN
+    {
+        for(coreUintW i = 0u; i < NEVO_TILES; ++i)
+            this->DisableTile(i, false);
 
         STAGE_FINISH_NOW
     });

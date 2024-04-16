@@ -238,7 +238,7 @@ cGameMenu::cGameMenu()noexcept
 
 
     
-    m_TrainingTab.SetOverride(-1);   // TODO
+    //m_TrainingTab.SetOverride(-1);   // TODO
     
     m_aShipInput[0] = {};
     m_aShipInput[1] = {};
@@ -491,7 +491,8 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_WorldMap.EnablePin(i, (g_pSave->GetHeader().oProgress.aiAdvance[i] != 0u), (i == WORLDMAP_PINS - 1u));
+        const coreBool bEnable = (g_pSave->GetHeader().oProgress.aiAdvance[i] != 0u);
+        m_WorldMap.EnablePin(i, bEnable, bEnable || (i == WORLDMAP_PINS - 1u));
     }
 
     // 

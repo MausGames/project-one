@@ -48,8 +48,6 @@ cMainMenu::cMainMenu()noexcept
     m_ExitButton.SetSize      (m_StartButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
-
-    
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_MenuInput);
 
 

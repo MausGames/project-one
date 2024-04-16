@@ -86,6 +86,8 @@ private:
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
     coreUint8 m_iShakeCount;                                // 
 
+    coreFloat m_fFreezeTime;
+
     coreUint8 m_iBreakupCount;                              // 
 
     coreBool m_bActive;                                     // 
@@ -143,6 +145,10 @@ public:
     // 
     void ShakeScreen(const coreFloat fStrength);
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
+
+    // 
+    void FreezeScreen(const coreFloat fTime);
+    inline const coreFloat& GetFreezeTime()const {return m_fFreezeTime;}
 
     // 
     void MacroExplosionColorSmall        (const coreVector3& vPosition, const coreVector3& vColor);

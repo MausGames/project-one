@@ -52,7 +52,7 @@ public:
     coreBool TestCollision(const coreVector2& vPosition)const;
 
     // 
-    inline coreBool IsActive()const {return m_fVisibility;}
+    inline coreBool IsActive()const {return (m_fVisibility != 0.0f);}
 
 
 private:

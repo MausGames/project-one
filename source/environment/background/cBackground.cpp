@@ -141,7 +141,7 @@ void cBackground::Render()
     {
         // invalidate shadow and light map
         if(g_CurConfig.Graphics.iShadow) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
-        m_pOutdoor->GetLightMap()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+        m_pOutdoor->InvalidateLightMap();
     }
 }
 

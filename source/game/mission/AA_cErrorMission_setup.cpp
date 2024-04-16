@@ -32,8 +32,6 @@ void cErrorMission::__SetupOwn()
     // ################################################################
     // ################################################################
 
-
-
     /*
     // ################################################################
     // template
@@ -47,16 +45,23 @@ void cErrorMission::__SetupOwn()
             pPath1->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 1u)
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 2u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->Configure(50, COLOR_SHIP_ORANGE);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
-
-                pEnemy->Resurrect();
             });
         });
+
+        //STAGE_GET_START(1u)
+        //STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 1u)
+        }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -1171,7 +1176,7 @@ void cErrorMission::__SetupOwn()
 
                 pEnemy->Resurrect();
 
-                pEnemy->GiveShield(ELEMENT_BLUE);             
+                //pEnemy->GiveShield(ELEMENT_BLUE);             
             });
         });
 
@@ -1224,7 +1229,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, I_TO_F(i % 5u) * 0.1f)
 
-            const coreVector2 vFlyDir = coreVector2::Direction(DEG_TO_RAD(((i % 5u) + (((i % 10u) < 5u) ? 10u : 4u)) * 30.0f));
+            const coreVector2 vFlyDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F((i % 5u) + (((i % 10u) < 5u) ? 10u : 4u)) * 30.0f));
             const coreVector2 vFlyPos = vFlyDir * pPath2->CalcPosition(CLAMP(fLifeTime, 0.0f, pPath2->GetTotalDistance())).y;
 
             pEnemy->SetPosition(coreVector3(vFlyPos * FOREGROUND_AREA, 0.0f));

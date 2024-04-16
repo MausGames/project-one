@@ -91,8 +91,6 @@
 #define LERP_SMOOTH_REV (&LerpSmoothRev)
 #define LERP_BREAK      (&LERPB<coreFloat>)
 #define LERP_BREAK_REV  (&LerpBreakRev)
-#define LERP_HERMITE3   (&LERPH3<coreFloat>)
-#define LERP_HERMITE5   (&LERPH5<coreFloat>)
 
 
 // ****************************************************************

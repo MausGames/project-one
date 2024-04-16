@@ -21,6 +21,7 @@
 // TODO: bullet -> to POD-type with single parent object
 // TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
+// TODO: dynamic depth needs to consider outline when calculating distance
 
 
 // ****************************************************************
@@ -79,7 +80,8 @@ public:
     void Deactivate(const coreBool bAnimated);
 
     // 
-    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal = coreVector2(0.0f,0.0f));
+    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal);
+    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreFloat    fSharpness);
 
     // 
     inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); return this;}
@@ -138,6 +140,9 @@ private:
 
     // 
     inline void __SetColorRand(const coreVector3& vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}
+
+    // 
+    void __Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal, const coreFloat fSharpness);
 };
 
 
@@ -889,7 +894,6 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     pSet->iCurBullet = iSize - 1u;
     return this->AddBullet<T>(iDamage, fSpeed, pOwner, vPosition, vDirection);
 }
-
 
 
 // ****************************************************************

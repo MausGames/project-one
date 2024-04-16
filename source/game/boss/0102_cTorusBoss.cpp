@@ -1145,7 +1145,6 @@ void cTorusBoss::__DisableSummon()
 // 
 void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosition)
 {
-    // 
     ASSERT(iIndex < TORUS_TURRETS)
     cCustomEnemy* pTurret = &m_aTurret       [iIndex];
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
@@ -1175,7 +1174,6 @@ void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosi
 // 
 void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimated)
 {
-    // 
     ASSERT(iIndex < TORUS_TURRETS)
     cCustomEnemy* pTurret = &m_aTurret       [iIndex];
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
@@ -1200,7 +1198,6 @@ void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimate
 // 
 void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosition)
 {
-    // 
     ASSERT(iIndex < TORUS_GUNNERS)
     cCustomEnemy* pGunner = &m_aGunner       [iIndex];
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
@@ -1233,7 +1230,6 @@ void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosi
 // 
 void cTorusBoss::__DisableGunner(const coreUintW iIndex, const coreBool bAnimated)
 {
-    // 
     ASSERT(iIndex < TORUS_GUNNERS)
     cCustomEnemy* pGunner = &m_aGunner       [iIndex];
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];

@@ -28,6 +28,7 @@
 // TODO: stages in GameMenu should be called segments
 // TODO: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
 // TODO: every object in menu needs outline: weapon icons
+// TODO: custom resolution should be stored when switching monitors
 
 
 // ****************************************************************
@@ -378,7 +379,7 @@ public:
     void SaveValues();
 
     // 
-    inline const coreUint8& GetMissionIndex   ()const                       {return m_WorldMap.GetSelectionIndex();}
+    inline const coreInt32& GetMissionID      ()const                       {return m_WorldMap.GetSelectionID();}
     inline const coreUint8& GetSelectedPlayers()const                       {return m_Players.GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedWeapon (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedSupport(const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}

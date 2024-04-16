@@ -10,12 +10,10 @@
 #ifndef _P1_GUARD_SHIELD_H_
 #define _P1_GUARD_SHIELD_H_
 
-// TODO: deprecated class, remove or disable
-
 
 // ****************************************************************
 // shield definitions
-#define SHIELD_SHIELDS (1u)//(16u)   // 
+#define SHIELD_SHIELDS (64u)   // 
 
 
 // ****************************************************************
@@ -26,10 +24,8 @@ private:
     coreObject3D  m_aShield[SHIELD_SHIELDS];   // 
     coreBatchList m_ShieldList;                // 
 
-    cEnemy*   m_apOwner  [SHIELD_SHIELDS];     // 
-    coreUint8 m_aiElement[SHIELD_SHIELDS];     // 
-    coreInt16 m_aiHealth [SHIELD_SHIELDS];     // 
-    coreFlow  m_afExtent [SHIELD_SHIELDS];     // 
+    cEnemy*  m_apOwner  [SHIELD_SHIELDS];      // 
+    coreFlow m_afExtent [SHIELD_SHIELDS];      // 
 
     coreFlow m_fAnimation;                     // 
 
@@ -45,13 +41,10 @@ public:
     void Move();
 
     // 
-    void AbsorbDamage(cEnemy* pEnemy, coreInt32* OUTPUT piDamage, const coreUint8 iElement);
-
-    // 
     void ClearShields(const coreBool bAnimated);
 
     // 
-    void BindEnemy  (cEnemy* pEnemy, const coreUint8 iElement, const coreInt16 iHealth = 0);
+    void BindEnemy  (cEnemy* pEnemy);
     void UnbindEnemy(cEnemy* pEnemy);
 };
 

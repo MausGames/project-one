@@ -284,7 +284,7 @@ void InitDirection()
 void InitFramerate()
 {
     // calculate logical and physical frame time
-    if(!STATIC_ISVALID(g_pGame)) m_dLogicalTime  = (1.0   / coreDouble(CLAMP(g_CurConfig.Game.iUpdateFreq, FRAMERATE_MIN, FRAMERATE_MAX)));
+    if(!STATIC_ISVALID(g_pGame)) m_dLogicalTime  = (1.0   / coreDouble(CLAMP(g_CurConfig.Game.iUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX))));
                                  m_dPhysicalTime = (100.0 / coreDouble(MAX  (g_CurConfig.Game.iGameSpeed,  1u))) * m_dLogicalTime;
 
     if(Core::Config->GetBool(CORE_CONFIG_SYSTEM_VSYNC))
@@ -349,6 +349,14 @@ static void LockFramerate()
 
     // override frame time
     if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = coreFloat(m_dLogicalTime);
+    
+    
+    coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
+    if(fFreezeTime)
+    {
+        fFreezeTime = MAX(fFreezeTime - Core::System->GetTime(), 0.0f);
+        c_cast<coreFloat&>(Core::System->GetTime()) *= 0.001f;
+    }
 }
 
 

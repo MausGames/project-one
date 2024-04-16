@@ -17,6 +17,7 @@
 // TODO: render wind, bubble, etc. in group for coop
 // TODO: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
 // TODO: orange/red exhaust for second ship ?
+// TODO: when applying force with (all) objects (collision with container) always quantizise 4 or 8, but not in general (wind)
 
 
 // ****************************************************************
@@ -25,7 +26,7 @@
 #define PLAYER_EQUIP_SUPPORTS     (EQUIP_SUPPORTS)  // 
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
-#define PLAYER_COLLISION_MIN      (0.2f)            // 
+#define PLAYER_COLLISION_MIN      (0.15f)           // 
 #define PLAYER_DOT_SIZE           (0.55f)           // 
 #define PLAYER_WIND_SIZE          (4.5f)            // 
 #define PLAYER_BUBBLE_SIZE        (6.0f)            // 
@@ -41,6 +42,7 @@
 #define PLAYER_SHIP_ATK  (0u)        // 
 #define PLAYER_SHIP_DEF  (1u)        // 
 #define PLAYER_SHIP_P1   (2u)        // 
+#define PLAYER_WAS_ROLL  (0xFEu)     // 
 #define PLAYER_NO_ROLL   (0xFFu)     // 
 #define PLAYER_NO_FEEL   (-100.0f)   // 
 #define PLAYER_NO_IGNORE (-100.0f)   // 
@@ -123,7 +125,6 @@ public:
     void Configure   (const coreUintW iShipType, const coreVector3& vColor);
     void EquipWeapon (const coreUintW iIndex, const coreInt32 iID);
     void EquipSupport(const coreUintW iIndex, const coreInt32 iID);
-    void GiveShield  ();
 
     // render and move the player
     void Render      ()final;
@@ -141,7 +142,8 @@ public:
     // 
     void StartRolling(const coreVector2& vDirection);
     void EndRolling  ();
-    inline coreBool IsRolling()const {return (m_iRollDir != PLAYER_NO_ROLL);}
+    inline coreBool IsRolling ()const {return (m_iRollDir != PLAYER_WAS_ROLL) && (m_iRollDir != PLAYER_NO_ROLL);}
+    inline coreBool WasRolling()const {return (m_iRollDir == PLAYER_WAS_ROLL);}
 
     // 
     void StartFeeling(const coreFloat fTime, const coreUint8 iType);
@@ -200,6 +202,9 @@ public:
 
 
 private:
+    // 
+    void __EquipShield();
+
     // 
     coreBool __TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);
     coreBool __NewCollision        (const coreObject3D* pObject);

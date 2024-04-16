@@ -11,7 +11,7 @@
 #define _P1_GUARD_OUTDOOR_H_
 
 // TODO: definitions for algorithms (background names ?)
-// TODO: add F16C SSE to RetrieveBackHeight
+// TODO: add F16C SSE to RetrieveBackHeight (put values into an uint64 and convert to vec4 ?)
 // TODO: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
 // TODO: outdoor parameters are reset on engine-reset !!!    
 // TODO: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file
@@ -129,6 +129,7 @@ public:
     inline cShadow*         GetShadowMap() {return &m_ShadowMap;}
     inline coreFrameBuffer* GetLightMap () {return &m_LightMap;}
     void UpdateLightMap();
+    void InvalidateLightMap();
 
     // set object properties
     void SetFlyOffset(const coreFloat fFlyOffset);
@@ -153,9 +154,11 @@ template <typename F> void cOutdoor::__Render(const coreProgramPtr& pProgram, F&
     if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
 
     // check for model status
+    ASSERT(m_pModel)
     if(!m_pModel.IsUsable()) return;
 
     // enable the shader-program
+    ASSERT(pProgram)
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
 

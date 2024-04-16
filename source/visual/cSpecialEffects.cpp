@@ -24,6 +24,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
 , m_iShakeCount      (0u)
+, m_fFreezeTime      (0.0f)
 , m_iBreakupCount    (0u)
 , m_bActive          (false)
 {
@@ -425,7 +426,7 @@ void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFl
     // 
     const coreModel*   pModel           = pObject->GetModelLow().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
-    ASSERT(pvVertexPosition)
+    ASSERT(pModel->GetNumClusters())
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
@@ -457,7 +458,7 @@ void cSpecialEffects::CreateBreakupDark(const cLodObject* pObject, const coreFlo
     // 
     const coreModel*   pModel           = pObject->GetModelLow().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
-    ASSERT(pvVertexPosition)
+    ASSERT(pModel->GetNumClusters())
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
@@ -691,6 +692,14 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
         // 
         this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
     }
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::FreezeScreen(const coreFloat fTime)
+{
+    m_fFreezeTime = fTime;
 }
 
 

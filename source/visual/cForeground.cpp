@@ -78,6 +78,10 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
     ASSERT(pObject)
 
     // 
+    if(!InBetween(CAMERA_POSITION.z - pObject->GetPosition().z, Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip()))
+        return false;
+
+    // 
     const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());
     const coreFloat   fRange        = pObject->GetModel().IsUsable() ? (pObject->GetModel()->GetBoundingRange() * pObject->GetSize()).Max() : 0.0f;
 

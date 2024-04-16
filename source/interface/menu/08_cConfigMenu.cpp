@@ -583,7 +583,7 @@ void cConfigMenu::Move()
                 this->__UpdateInterface();
 
             // 
-            m_aCueRota[0].SetDirection(MapToAxis(g_pPostProcessing->GetDirection(), g_vHudDirection.InvertedX()));
+            m_aCueRota[0].SetDirection(MapToAxisInv(g_pPostProcessing->GetDirection(), g_vHudDirection));
 
             // 
             m_TextSize  .SetOverride(-1);   // TODO: enable 
@@ -611,7 +611,7 @@ void cConfigMenu::Move()
         break;
     }
 
-    if(m_SaveButton.IsClicked())   // TODO: + CTRL+S
+    if(m_SaveButton.IsClicked())
     {
         // 
         this->SaveValues();
@@ -797,12 +797,12 @@ void cConfigMenu::SaveValues()
                             (m_RenderQuality.GetCurEntry().tValue != g_CurConfig.Graphics.iRender);
 
     // 
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
-    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
-    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
     g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
@@ -838,8 +838,10 @@ void cConfigMenu::SaveValues()
 
     if(bReset)
     {
+        const coreVector2 vSafeResolution = vCurResolution.IsNull() ? Core::System->GetDisplayData(iCurMonitor).vDesktopRes : vCurResolution;
+
         // 
-        InitResolution(vCurResolution); // TODO: don't forward (0.0f,0.0f)
+        InitResolution(vSafeResolution);
         Core::Reset();
 
         // 

@@ -180,7 +180,6 @@ cViridoMission::~cViridoMission()
 // 
 void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
 {
-    // 
     ASSERT(iIndex < VIRIDO_BALLS)
     coreObject3D* pBall  = (*m_Ball     .List())[iIndex];
     coreObject3D* pTrail = (*m_BallTrail.List())[iIndex*VIRIDO_TRAILS];
@@ -209,7 +208,6 @@ void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosi
 // 
 void cViridoMission::DisableBall(const coreUintW iIndex, const coreBool bAnimated)
 {
-    // 
     ASSERT(iIndex < VIRIDO_BALLS)
     coreObject3D* pBall  = (*m_Ball     .List())[iIndex];
     coreObject3D* pTrail = (*m_BallTrail.List())[iIndex*VIRIDO_TRAILS];
@@ -598,7 +596,7 @@ void cViridoMission::__MoveOwnAfter()
         const coreFloat fValue = FRACT(10.0f * m_fAnimation);
 
         // 
-        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * 0.8f * m_fAnimation);
+        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * FRACT(0.8f * m_fAnimation));
 
         // 
         pWave->SetPosition (pLaser->GetPosition ());
@@ -722,7 +720,7 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
-        pBullet->Reflect(pBall, vIntersection.xy());
+        pBullet->Reflect(pBall, vIntersection.xy(), 3.0f);
     });
 
     // 
@@ -745,6 +743,7 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         pBullet->Reflect(pBarrier, vIntersection.xy(), pBarrier->GetDirection().xy());
+        // TODO: add small offset from the owner-position, to create more visible reflection
     });
 
     // 

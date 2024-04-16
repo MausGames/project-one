@@ -17,6 +17,8 @@ cNevoMission::cNevoMission()noexcept
 , m_Blast       (NEVO_BLASTS)
 , m_BlastLine   (NEVO_BLASTS * NEVO_LINES)
 , m_afBlastTime {}
+, m_Tile        (NEVO_TILES)
+, m_afTileTime  {}
 , m_vForce      (coreVector2(0.0f,0.0f))
 , m_vImpact     (coreVector2(0.0f,0.0f))
 , m_bClamp      (false)
@@ -77,6 +79,26 @@ cNevoMission::cNevoMission()noexcept
     }
 
     // 
+    m_Tile.DefineProgram("object_tile_inst_program");
+    {
+        for(coreUintW i = 0u; i < NEVO_TILES_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pTile = &m_aTileRaw[i];
+            pTile->DefineModel  (Core::Manager::Object->GetLowQuad());
+            pTile->DefineTexture(0u, "menu_background_black.png");
+            pTile->DefineProgram("object_tile_program");
+
+            // set object properties
+            pTile->SetAlpha  (0.7f);
+            pTile->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Tile.BindObject(pTile);
+        }
+    }
+
+    // 
     m_Container.DefineModelHigh("object_container_high.md3");
     m_Container.DefineModelLow ("object_container_low.md3");
     m_Container.DefineTexture  (0u, "ship_enemy.png");
@@ -104,6 +126,7 @@ cNevoMission::~cNevoMission()
     // 
     for(coreUintW i = 0u; i < NEVO_BOMBS;  ++i) this->DisableBomb (i, false);
     for(coreUintW i = 0u; i < NEVO_BLASTS; ++i) this->DisableBlast(i, false);
+    for(coreUintW i = 0u; i < NEVO_TILES;  ++i) this->DisableTile (i, false);
 
     // 
     this->DisableContainer(false);
@@ -153,7 +176,6 @@ void cNevoMission::DisableBomb(const coreUintW iIndex, const coreBool bAnimated)
 // 
 void cNevoMission::EnableBlast(const coreUintW iIndex)
 {
-    // 
     ASSERT(iIndex < NEVO_BLASTS)
     coreObject3D* pBlast = (*m_Blast    .List())[iIndex];
     coreObject3D* pLine  = (*m_BlastLine.List())[iIndex*NEVO_LINES];
@@ -179,7 +201,6 @@ void cNevoMission::EnableBlast(const coreUintW iIndex)
 // 
 void cNevoMission::DisableBlast(const coreUintW iIndex, const coreBool bAnimated)
 {
-    // 
     ASSERT(iIndex < NEVO_BLASTS)
     coreObject3D* pBlast = (*m_Blast    .List())[iIndex];
     coreObject3D* pLine  = (*m_BlastLine.List())[iIndex*NEVO_LINES];
@@ -197,6 +218,48 @@ void cNevoMission::DisableBlast(const coreUintW iIndex, const coreBool bAnimated
         nExitFunc(pBlast);
         for(coreUintW i = 0u; i < NEVO_LINES; ++i) nExitFunc(pLine + i);
     }
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::EnableTile(const coreUintW iIndex, const coreUintW iDimension)
+{
+    ASSERT(iIndex < NEVO_TILES)
+    coreObject3D& oTile = m_aTileRaw[iIndex];
+
+    // 
+    WARN_IF(oTile.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_afTileTime[iIndex] = 1.0f;
+
+    // 
+    const coreFloat   fScale = RCP(I_TO_F(iDimension)) * FOREGROUND_AREA.x * 2.2f;
+    const coreVector2 vPos   = (coreVector2(I_TO_F(iIndex % iDimension), I_TO_F(iIndex / iDimension)) - 0.5f * I_TO_F(iDimension - 1u)).InvertedY() * fScale;
+
+    // 
+    oTile.SetPosition(coreVector3(vPos, 0.0f));
+    oTile.SetSize    (coreVector3(0.0f, 0.0f, fScale - 1.0f));
+    oTile.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::DisableTile(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < NEVO_TILES)
+    coreObject3D& oTile = m_aTileRaw[iIndex];
+
+    // 
+    if(!oTile.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    if(m_afTileTime[iIndex] > 0.0f) m_afTileTime[iIndex] = -1.0f;
+
+    // 
+    if(!bAnimated) oTile.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -235,6 +298,15 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(m_Container.GetPosition());
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::__RenderOwnBottom()
+{
+    // 
+    m_Tile.Render();
 }
 
 
@@ -316,17 +388,18 @@ void cNevoMission::__MoveOwnAfter()
         STATIC_ASSERT(NEVO_BOMBS == NEVO_BLASTS)
 
         // 
-        const coreBool  bWarn  = (fTime < 1.0f);
-        const coreFloat fLerp  = 1.0f - POW(fTime - 1.0f, 9.0f);
-        const coreFloat fBlend = CLAMP((fTime - 1.0f) * 20.0f, 0.0f, 1.0f);
-        const coreFloat fSize  = bWarn ? (2.0f)                  : (LERP(1.0f, 4.0f, fLerp) * fBlend);
-        const coreFloat fAlpha = bWarn ? (0.6f * (1.0f - fTime)) : (LERP(0.0f, 1.0f, fLerp) * fBlend);
+        const coreBool  bWarn   = (fTime < 1.0f);
+        const coreFloat fLerp   = 1.0f - POW(fTime - 1.0f, 9.0f);
+        const coreFloat fBlend  = CLAMP((fTime - 1.0f) * 20.0f, 0.0f, 1.0f);
+        const coreFloat fSize   = bWarn ? (2.0f)                  : (LERP(1.0f, 4.0f, fLerp) * fBlend);
+        const coreFloat fAlpha  = bWarn ? (0.6f * (1.0f - fTime)) : (LERP(0.0f, 1.0f, fLerp) * fBlend);
+        const coreFloat fOffset = FRACT(2.4f * m_fAnimation * (bWarn ? 0.35f : -1.0f));
 
         // 
         pBlast->SetPosition (coreVector3(vBasePos, 0.0f));
         pBlast->SetSize     (coreVector3(2.0f,2.0f,2.0f) * fSize);
         pBlast->SetAlpha    (bWarn ? 0.0f : fAlpha);
-        pBlast->SetTexOffset(coreVector2(0.0f, -2.5f * m_fAnimation).Processed(FRACT));
+        pBlast->SetTexOffset(coreVector2(0.0f, FRACT(-2.5f * m_fAnimation)));
 
         for(coreUintW j = 0u; j < NEVO_LINES; ++j)
         {
@@ -341,7 +414,7 @@ void cNevoMission::__MoveOwnAfter()
             pLine->SetDirection(coreVector3(vDir, 0.0f));
             pLine->SetSize     (coreVector3(fSize, pLine->GetSize().y, fSize));
             pLine->SetAlpha    (fAlpha);
-            pLine->SetTexOffset((coreVector2(2.4f,2.4f) * m_fAnimation * (bWarn ? 0.35f : -1.0f)).Processed(FRACT));   // TODO: move outside  
+            pLine->SetTexOffset(coreVector2(1.0f,1.0f) * fOffset);
         }
     }
 
@@ -350,31 +423,34 @@ void cNevoMission::__MoveOwnAfter()
     m_BlastLine.MoveNormal();
 
     // 
-    const auto nPlayerPushFunc = [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+    for(coreUintW i = 0u; i < NEVO_TILES; ++i)
     {
-        if(!bFirstHit) return;
+        coreObject3D& oTile = m_aTileRaw[i];
+        if(!oTile.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        coreFloat fScale;
+        if(m_afTileTime[i] > 0.0f)
+        {
+            // 
+            m_afTileTime[i].UpdateMin(2.0f, 2.0f);
+            fScale = LERPB(0.0f, 1.0f, m_afTileTime[i] - 1.0f);
+        }
+        else
+        {
+            // 
+            m_afTileTime[i].UpdateMax(-2.0f, -2.0f);
+            fScale = LERPB(1.0f, 0.0f, -m_afTileTime[i] - 1.0f);
+
+            // 
+            if(m_afTileTime[i] <= -2.0f) this->DisableTile(i, false);
+        }
 
         // 
-        const coreVector2 vDiff = pPlayer->GetOldPos() - pObject->GetPosition().xy();
-        pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
-
-        // 
-        g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE);
-        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-    };
+        oTile.SetSize(coreVector3(fScale, fScale, 1.0f) * oTile.GetSize().z);
+    }
 
     // 
-    const auto nBulletReflectFunc = [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
-    {
-        if(!bFirstHit) return;
-
-        // 
-        pBullet->Reflect(pObject, vIntersection.xy());
-    };
-
-    // 
-    //cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_NEVO_BOMB, nPlayerPushFunc);
-    //Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_NEVO_BOMB, nBulletReflectFunc);
+    m_Tile.MoveNormal();
 
     if(m_Container.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
@@ -407,8 +483,27 @@ void cNevoMission::__MoveOwnAfter()
         m_Container.ActivateModelLowOnly();
         {
             // 
-            cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, nPlayerPushFunc);
-            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, nBulletReflectFunc);
+            cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+            {
+                if(!bFirstHit) return;
+
+                // 
+                const coreVector2 vDiff = pPlayer->GetOldPos() - pContainer->GetPosition().xy();
+                pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
+
+                // 
+                g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            });
+
+            // 
+            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+            {
+                if(!bFirstHit) return;
+
+                // 
+                pBullet->Reflect(pContainer, vIntersection.xy(), 3.0f);
+            });
         }
         m_Container.ActivateModelDefault();
     }

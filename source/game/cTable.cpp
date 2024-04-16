@@ -328,7 +328,8 @@ void cTimeTable::Update()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    if(!Core::System->GetTime()) return;
+    //if(!Core::System->GetTime()) return;
+    if(Core::System->GetTime() < 0.001f) return;
     ASSERT(Core::System->GetTime() == m_fFrameTime)
 
     // 

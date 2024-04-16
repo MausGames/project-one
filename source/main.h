@@ -80,8 +80,11 @@
 // TODO: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
 // TODO: make sure shaders use 0.5,0.5 for pixel centers
 // TODO: check for single-channel menu_background_black
-// TODO: make energy texture sharper
-// TODO: implement custom identifier for game, for replay, save, other comptability
+// TODO: make energy texture sharper (offline upsampling)
+// TODO: implement custom identifier for game, for replay, save, other compatibility
+// TODO: check for merging varyings with component = # and layoutEx (or merge manually)
+// TODO: use only 6 (or 8) pixel texture with nearest filtering for enemies
+// TODO: indicator when controls are enabled again (blinking und peeping sound)
 
 
 // ****************************************************************
@@ -137,9 +140,11 @@
 #define COLOR_MENU_BLACK     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
 #define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO: improve use Jetbrains Git colors ?
 #define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f))   // TODO: improve 
-#define COLOR_MENU_RED       (coreVector3(1.000f, 0.275f, 0.275f))   // TODO: improve !! those colors may be used in 3d objects too
+#define COLOR_MENU_RED       (coreVector3(1.000f, 0.225f, 0.225f))   // TODO: improve !! those colors may be used in 3d objects too
+#define COLOR_MENU_MAGENTA   (coreVector3(1.000f, 0.310f, 0.720f))   // TODO: improve 
 #define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO: improve 
 #define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))   // TODO: improve 
+#define COLOR_MENU_CYAN      (coreVector3(0.000f, 0.789f, 0.876f))   // TODO: improve 
 #define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))   // TODO: improve 
 #define COLOR_ENERGY_WHITE   (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
@@ -155,15 +160,14 @@
 #define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f,  95.0f/100.0f,  95.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_MAGENTA   (coreVector3(330.0f/360.0f,  70.0f/100.0f,  80.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_MAGENTA   (coreVector3(330.0f/360.0f,  65.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())   // TODO: remove ??? 
-#define COLOR_SHIP_BROWN     (coreVector3( 40.0f/360.0f,  95.0f/100.0f,  70.0f/100.0f).HsvToRgb())   // TODO: remove ??? 
-#define COLOR_SHIP_ICE       (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HsvToRgb())   // TODO: remove ??? 
+#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
+#define COLOR_CHAIN(x)       (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
 
 // shader modifiers
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_ (" #x ") \n"   // full_transition
@@ -199,6 +203,7 @@ enum eType : coreInt32
 
     TYPE_CHROMA,
     TYPE_ITEM,
+    TYPE_SHIELD,
 
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,

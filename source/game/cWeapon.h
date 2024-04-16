@@ -12,6 +12,7 @@
 
 // TODO: weapons may have to share their cooldown (not relevant on single-weapon setup)
 // TODO: remove render functions if not required
+// TODO: sound and visual effect for charging pulse
 
 
 // ****************************************************************

@@ -8,66 +8,11 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO: get rid of m_anStage.emplace(__LINE__, [=]
-
 
 // ****************************************************************
 // setup the Virido mission
 void cViridoMission::__SetupOwn()
 {
-    /*
-    const auto nBallSyncFunc = [this](const coreVector2& vBallPos, const coreVector2& vBallDir)
-    {
-        coreObject3D* pBall = this->GetBall(0u);
-
-        if(STAGE_BEGINNING && !pBall->GetType())
-        {
-            this->EnableBall(0u, vBallPos, vBallDir);
-            STAGE_FINISH_NOW
-        }
-        else
-        {
-            STAGE_GET_START(5u)
-                STAGE_GET_UINT (iMoveState)
-                STAGE_GET_FLOAT(fMoveBegin)
-                STAGE_GET_FLOAT(fMoveEnd)
-                STAGE_GET_FLOAT(fMoveLength)
-                STAGE_GET_FLOAT(fMoveTime)
-            STAGE_GET_END
-
-            if(!iMoveState && CONTAINS_BIT(this->GetBounceState(), 7u))
-            {
-                iMoveState  = 1u;
-                fMoveBegin  = pBall->GetPosition().xy().Angle();
-                fMoveEnd    = fMoveBegin + AngleDiff(vBallPos.Angle(), fMoveBegin);
-                fMoveLength = vBallPos.Processed(ABS).Max();
-            }
-
-            if(iMoveState)
-            {
-                fMoveTime += 0.5f * Core::System->GetTime();
-
-                if(fMoveTime >= 1.0f)
-                {
-                    g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vBallPos, 0.0f), vBallDir, COLOR_ENERGY_GREEN);
-
-                    pBall->SetPosition (coreVector3(vBallPos, 0.0f));
-                    pBall->SetDirection(coreVector3(vBallDir, 0.0f));
-                    STAGE_FINISH_NOW
-                }
-                else
-                {
-                    const coreFloat   fAngle = LERPS(fMoveBegin, fMoveEnd, fMoveTime);
-                    const coreVector2 vDir   = coreVector2::Direction(fAngle);
-                    const coreVector2 vPos   = vDir * (RCP(vDir.Processed(ABS).Max()) * fMoveLength);
-
-                    pBall->SetPosition(coreVector3(vPos, 0.0f));
-                }
-            }
-        }
-    };
-    */
-
     // ################################################################
     // 
     STAGE_MAIN
@@ -111,6 +56,95 @@ void cViridoMission::__SetupOwn()
             STAGE_FINISH_NOW
     });
 
+    // ################################################################
+    // enemies survive invincible
+    // soll man schaffen ohne drehen und rollen
+    // gegner-angriffe sollen noch nicht gezielt sein (auch wenn es im intro schon war)
+    // bewegungen wie bei alter erster gruppe für mehr dynamic, 3 reihen links rechts links, frei aufgeteilt oder kleine gruppe
+    // gegner sind in gruppen unverwundbar und sterben gemeinsam, nicht sub-stages
+    // 
+    // 2 3er
+    // 4 2er, abstand übereinander
+    // street middle
+    // 3er links rechts ???
+    // 1er links rechts
+    STAGE_MAIN
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,0.0f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 38u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.35f);
+                pEnemy->Configure(4, COLOR_SHIP_BLUE);
+                pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
+            });
+        });
+
+        constexpr coreUintW aaiPair[][2] = {{ 0u,  1u}, { 2u,  3u}, { 4u,  5u},
+                                            { 6u,  8u}, { 7u,  9u}, {10u, 12u}, {11u, 13u},
+                                            {14u, 15u}, {16u, 17u}, {18u, 19u}, {20u, 21u},
+                                            {22u, 24u}, {23u, 28u}, {25u, 27u}, {26u, 33u},
+                                            {29u, 30u}, {31u, 36u}, {32u, 34u}, {35u, 37u}};
+
+        for(coreUintW i = 0u; i < ARRAY_SIZE(aaiPair); ++i)
+        {
+            cEnemy* A = pSquad1->GetEnemy(aaiPair[i][0]);
+            cEnemy* B = pSquad1->GetEnemy(aaiPair[i][1]);
+
+            if((A->GetCurHealth() == 0) && (B->GetCurHealth() == 0))
+            {
+                A->Kill(true);
+                B->Kill(true);
+            }
+        }
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  5u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  6u, 13u)
+            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 14u, 21u)
+            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 22u, 37u)
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 1.2f, 0.0f)
+
+            const coreFloat x1 = (i < 22u) ? (I_TO_F(i % 2u) * 0.25f - 0.125f) : (I_TO_F((i - 22u) % 4u) * 0.25f - 0.375f);
+            const coreFloat x2 = (i < 6u) ? (I_TO_F(i / 2u) * 0.5f - 0.5f) : ((i < 14u) ? (I_TO_F((i - 6u) / 4u) * 1.0f - 0.5f) : 0.0f);
+            const coreFloat y  = (i < 14u) ? (((i / 2u) % 2u) ? 0.8f : 0.0f) : ((i < 22u) ? (I_TO_F((i - 14u) / 2u) * 0.25f) : (I_TO_F((i - 22u) / 4u) * 0.25f));
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2(x1 + x2, y);
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+            pEnemy->SetDirection   (coreVector3(0.0f,-1.0f,0.0f));
+
+            if((i < 24u) || STAGE_LIFETIME_BEFORE(1.2f))
+            {
+                if(STAGE_TICK_LIFETIME(0.7f, (i % 2u) ? 0.5f : 0.0f))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition ().xy();
+                    const coreVector2 vDir = coreVector2(0.0f,-1.0f);
+                    const coreVector2 vTan = vDir.Rotated90() * 1.5f;
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.2f, pEnemy, vPos + vTan, vDir)->ChangeSize(1.25f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.2f, pEnemy, vPos - vTan, vDir)->ChangeSize(1.25f);
+                }
+            }
+        });
+
+        STAGE_WAVE("EINS", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+/*
     // ################################################################
     // top, bottom, side groups creating bullet carpet
     // - all: bullet patterns provide a lot of safe space, so players have time to think
@@ -172,7 +206,7 @@ void cViridoMission::__SetupOwn()
             const coreVector2 vFactor = coreVector2(((i % 12u) < 6u) ? 1.0f : -1.0f, (i >= 6u && i < 12u) ? -1.0f : ((i < 24u) ? 1.0f : 0.0f));
             const coreVector2 vOffset = coreVector2(0.0f, (i >= 6u && i < 12u) ? -0.1f : ((i < 24u) ? 0.0f : ((i < 30u) ? 0.8f : 0.9f)));
 
-            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);
+            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);   // TODO: vOffset * vFactor
 
             if((i < 24u) || STAGE_LIFETIME_BEFORE(1.2f))
             {
@@ -189,13 +223,14 @@ void cViridoMission::__SetupOwn()
 
         STAGE_WAVE("EINS", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-
+*/
     // ################################################################
     // shields on sides to force attacks from certain directions
     // - 3: starts with offset, to not fly into players
     // - 4: reflect all bullets and players with force, except with barrel roll
     // - 5: arranged to allow only one kill per turn, and to improve coop gameplay
     // TODO: barriers have cut-off outline in maze-group   
+    // TODO: bullets (even single, like pulse) should be reflected with offset to highlight reflection (not 180 degree)
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -301,7 +336,7 @@ void cViridoMission::__SetupOwn()
             const coreVector2 vFactor = coreVector2((i >= 8u) ? 0.0f : ((i <= 1u || i >= 4u) ? ((i % 2u) ? 0.5f : -0.5f) : -1.0f), (i <= 1u || i >= 8u) ? ((i >= 14u) ? -1.0f : 1.0f) : ((i % 2u) ? 1.0f : -1.0f));
             const coreVector2 vOffset = coreVector2((i >= 8u) ? ((i >= 14u) ? ((I_TO_F((i-14u) % 2u) - 0.5f) * 0.38f) : ((I_TO_F(i-8u) - 2.5f) * 0.38f)) : 0.0f, (i >= 14u) ? (I_TO_F((i-14u) / 2u) * 0.38f) : 0.0f);
 
-            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);
+            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);   // TODO: vOffset * vFactor
 
             if(i == 2u || i == 3u || i == 4u || i == 5u) pEnemy->Rotate90();
 
@@ -462,7 +497,7 @@ void cViridoMission::__SetupOwn()
             pLaser->SetPosition (coreVector3(vLerpPos, 0.0f));
             pLaser->SetDirection(coreVector3(vLerpDir, 0.0f));
 
-            if(STAGE_TICK_TIME(12.0f, 0.0f) && ((s_iTick % 12u) < 3u))
+            if(STAGE_TICK_TIME(12.0f, 0.0f) && ((s_iTick % 12u) < 3u))   // TODO: tick-1 ? 
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
@@ -490,6 +525,8 @@ void cViridoMission::__SetupOwn()
     // - all: cinders have low health, to make killing them with accidental hits easier
     // - all: cinders start at corners, to reduce accidental hits when enemies fly in
     // - all: arrows spawn with offset, to reduce accidental killing them before getting visible
+    // TODO: too similar to meteor wave
+    // TODO: spawn small enemies from all sides
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -721,6 +758,7 @@ void cViridoMission::__SetupOwn()
     // enemy has weakpoint which he keeps away from player
     // - all: miners rotation start against fly direction, to make evading the initial attack easier
     // - 2: cinders in pair always rotate together away from player when one is shot from outer direction, to prevent ping-pong effect
+    // TODO: miner should be grey ?   
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -747,7 +785,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(1, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(1, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -929,8 +967,8 @@ void cViridoMission::__SetupOwn()
                     {
                         const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) + 0.5f * I_TO_F(iNewTick % 2u)) * 45.0f));
 
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, pEnemy, vPos,  vDir)->ChangeSize(1.2f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, pEnemy, vPos, -vDir)->ChangeSize(1.2f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, pEnemy, vPos,  vDir)->ChangeSize(1.3f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.9f, pEnemy, vPos, -vDir)->ChangeSize(1.3f);
                     }
                 }
 
@@ -957,6 +995,7 @@ void cViridoMission::__SetupOwn()
     // snake is also bad 
     // bit-matrix or clearing on contact is bad 
     // start direction against whirl direction to not clutter the bullets and show the whirl effect   
+    // TODO: handle dodge and enemy inside   
     STAGE_MAIN
     {
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 16u)
@@ -1195,6 +1234,7 @@ void cViridoMission::__SetupOwn()
     // enemies jump into camera
     // - all: target shadow is essential, to communicate direct targeting in third sub-stage
     // - 1,2: bullet patterns provide a lot of safe space, as jumping into the camera may overwhelm the player
+    // TODO: check for and fix shadow artifacts, when jumping behind near clipping plane of shadow viewport (maybe fade out near plane)
     STAGE_MAIN
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 20u)
@@ -1365,18 +1405,12 @@ void cViridoMission::__SetupOwn()
     //});
 
     // ################################################################
-    // ball sync 1
-    //m_anStage.emplace(__LINE__, [=]()
-    //{
-    //    nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
-    //});
-
-    // ################################################################
     // enemy charges straight forward on death (r-type fish)
     // - 2: should start one same spot an opposite of first group, to reduce accidental collision (which is more likely with 2x2)  
     // no passive attack, not impact attack, no bounce, because it's too overwhelming together with the green ball  
     // fire speed fast enough to create visual line  
     // 2x2 instead of 1x4, to force player keeping fire at the same position while an enemy is already flying at them  
+    // TODO: give central effect to highlight damaging touch   
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -1425,6 +1459,7 @@ void cViridoMission::__SetupOwn()
 
             if(pEnemy->ReachedDeath())
             {
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             }
 
@@ -1464,23 +1499,8 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_COLL_PLAYER_ENEMY(pPlayer, pEnemy, vIntersection, bFirstHit)
-        {
-            if(!bFirstHit || pEnemy->GetCurHealth()) return;
-
-            pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-        });
-
         STAGE_WAVE("ELF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-
-    // ################################################################
-    // ball sync 2
-    //m_anStage.emplace(__LINE__, [=]()
-    //{
-    //    //nBallSyncFunc(coreVector2(41.8878708f,-41.7585716f), coreVector2(-0.5f,1.0f).Normalized());
-    //    nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
-    //});
 
     // ################################################################
     // bend
@@ -1579,7 +1599,7 @@ void cViridoMission::__SetupOwn()
 
             STAGE_FOREACH_ENEMY(pSquad1, pEnemy2, j)
             {
-                if(pEnemy == pEnemy2) return;
+                if(pEnemy == pEnemy2) return; // TODO: check for (j <= i), or add note for double-calculations
 
                 const coreVector2 vDiff  = pEnemy->GetPosition().xy() - pEnemy2->GetPosition().xy();
                 const coreFloat   fPower = POW2(pEnemy->GetCollisionRadius() * 2.0f) - vDiff.LengthSq();
@@ -1622,14 +1642,6 @@ void cViridoMission::__SetupOwn()
 
         STAGE_WAVE("ZWÖLF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-
-    // ################################################################
-    // ball sync 3
-    //m_anStage.emplace(__LINE__, [=]()
-    //{
-    //    //nBallSyncFunc(coreVector2(-42.0250816f,-0.525078177f), coreVector2(1.0f,1.0f).Normalized());
-    //    nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
-    //});
 
     // ################################################################
     // push
@@ -1689,7 +1701,7 @@ void cViridoMission::__SetupOwn()
             else if(i < 32u) iGroupNum = 4u;
             else             iGroupNum = 8u;
 
-            const coreFloat fPower = pBullet->GetDamage() * (g_pGame->GetCoop() ? 0.5f : 1.0f);
+            const coreFloat fPower = I_TO_F(pBullet->GetDamage()) * (g_pGame->GetCoop() ? 0.5f : 1.0f);
 
             coreVector2 vForceDir;
                  if(i < 16u) vForceDir   = fPower * 6.0f * coreVector2( 0.0f,-1.0f);
@@ -1758,19 +1770,12 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
-    // ball sync 4
-    //m_anStage.emplace(__LINE__, [=]()
-    //{
-    //    //nBallSyncFunc(coreVector2(-1.0f,1.0f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalized());
-    //    nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
-    //});
-
-    // ################################################################
     // can only kill in order
     // coop last enemy, need to work together   
     // abwechselnd links rechts 
     // doppelgruppe nur breites pattern um ausweichen zu erleichtern 
     // reihenfolge am weitesten entfernt 
+    // TODO: show 3142 group at start, matrix of enemies
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -1844,7 +1849,7 @@ void cViridoMission::__SetupOwn()
                 {
                     const coreVector2 vPos  = pEnemy->GetPosition ().xy();
                     const coreFloat   fBase = pEnemy->GetDirection().xy().Angle();
-                    const coreUintW   iType = 4u - ((iChiefNum == 9u) ? (s_iTick % 3u) : (((iChiefNum - 1u) / 2u) % 3u));
+                    const coreUintW   iType = 4u - ((iChiefNum == 9u) ? (s_iTick % 3u) : (((iChiefNum - 1u) / 2u) % 3u));   // TODO: tick-1 ? 
 
                     for(coreUintW j = 48u; j--; )
                     {
@@ -1860,14 +1865,6 @@ void cViridoMission::__SetupOwn()
 
         STAGE_WAVE("VIERZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-
-    // ################################################################
-    // ball sync 5
-    //m_anStage.emplace(__LINE__, [=]()
-    //{
-    //    //nBallSyncFunc(coreVector2(1.0f,1.0f) * FOREGROUND_AREA, coreVector2(-1.0f,-1.0f).Normalized());
-    //    nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
-    //});
 
     // ################################################################
     // ghost appears for few seconds (zelda wizzrobe)
@@ -2030,7 +2027,8 @@ void cViridoMission::__SetupOwn()
                 else if(i < 32u)
                 {
                     const coreBool bVertical = (i < 24u);
-                    if(bVertical == (iChangeCount % 2u))
+                    const coreBool bGroup    = (iChangeCount % 2u);
+                    if(bVertical == bGroup)
                     {
                         const coreFloat   fSide   = -0.95f + 1.9f/7.0f * I_TO_F((i - 16u) % 8u);
                         const coreVector2 vTarget = pEnemy->NearestPlayerDual((i / 8u) % 2u)->GetPosition().xy();
@@ -2123,13 +2121,6 @@ void cViridoMission::__SetupOwn()
     {
         STAGE_FINISH_AFTER(2.0f)
     });
-
-    // ################################################################
-    // ball sync 6
-    //m_anStage.emplace(__LINE__, [=]()
-    //{
-    //    //nBallSyncFunc(coreVector2(0.0f,-1.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
-    //});
 
     // ################################################################
     // boss 3

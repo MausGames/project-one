@@ -187,22 +187,9 @@ void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
     switch(iID)
     {
     default: ASSERT(false)
-    case 0u:                     break;
-    case 1u: this->GiveShield(); break;
+    case 0u:                        break;
+    case 1u: this->__EquipShield(); break;
     }
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::GiveShield()
-{
-    ASSERT( CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
-
-    // 
-    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-    this->SetMaxHealth(PLAYER_SHIELD);
 }
 
 
@@ -252,6 +239,10 @@ void cPlayer::Move()
 {
     // 
     this->_UpdateAlwaysBefore();
+
+    // 
+    if(m_iRollDir == PLAYER_WAS_ROLL)
+        m_iRollDir = PLAYER_NO_ROLL;
 
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
@@ -418,7 +409,7 @@ void cPlayer::Move()
             // 
             m_Shield.SetPosition   (this->GetPosition());
             m_Shield.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-            m_Shield.SetTexOffset  (coreVector2(fBounce + fExplosion, 1.0f));
+            m_Shield.SetTexOffset  (coreVector2(fBounce + fExplosion, 0.0f));
             m_Shield.SetAlpha      (MIN(POW2(m_fIgnoreTime) * 1.4f, 1.0f));
             m_Shield.Move();
         }
@@ -487,6 +478,9 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
                 this->SetDesaturate(PLAYER_DESATURATE);
                 this->StartFeeling (PLAYER_FEEL_TIME, 0u);
             }
+
+            // 
+            //g_pSpecialEffects->FreezeScreen(12.0f / FRAMERATE_MIN);
 
             // 
             m_fInterrupt = 0.0f;
@@ -601,7 +595,7 @@ void cPlayer::EndRolling()
 
     // 
     m_fRollTime = 1.0f;
-    m_iRollDir  = PLAYER_NO_ROLL;
+    m_iRollDir  = PLAYER_WAS_ROLL;
 
     // 
     this->DisableWind();
@@ -786,6 +780,19 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
     m_Exhaust.SetDirection(this->GetDirection());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::__EquipShield()
+{
+    ASSERT( CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
+    // 
+    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
+    this->SetMaxHealth(PLAYER_SHIELD);
 }
 
 

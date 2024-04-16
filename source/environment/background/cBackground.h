@@ -372,6 +372,10 @@ private:
     coreUint8    m_iThunderIndex;       // 
 
     coreSoundPtr m_pRainSound;          // 
+    
+    
+    
+    cHeadlight m_Headlight;   // 
 
 
 public:
@@ -383,12 +387,15 @@ public:
 
     // 
     inline void SetRainDirection(const coreVector2& vDirection) {m_vRainDirection = vDirection; ASSERT(vDirection.IsNormalized())}
+    
+        inline cHeadlight* GetHeadlight() {return &m_Headlight;}
 
 
 private:
     // execute own routines
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
+    void __UpdateOwn     ()final;
 };
 
 

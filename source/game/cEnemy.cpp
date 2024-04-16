@@ -36,16 +36,6 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const
 
 
 // ****************************************************************
-// 
-void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
-{
-    // 
-    ASSERT(STATIC_ISVALID(g_pGame))
-    g_pGame->GetShieldManager()->BindEnemy(this, iElement, iHealth);
-}
-
-
-// ****************************************************************
 // render the enemy
 void cEnemy::Render()
 {
@@ -91,6 +81,19 @@ void cEnemy::Move()
         }
 
 
+
+        if(STATIC_ISVALID(g_pGame)) 
+        {
+            if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
+            {
+                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->BindEnemy(this);
+            }
+            else
+            {
+                if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->UnbindEnemy(this);
+            }
+        }
+
         //this->SetTexSize  (coreVector2(1.2f,1.2f));
         //this->SetTexOffset(coreVector2(0.0f, FMOD(coreFloat(Core::System->GetTotalTime()) * -0.25f, -1.0f)));
     }
@@ -102,24 +105,18 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker)
+coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker)
 {
     // forward to parent
     if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
     if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
-        // 
-        const coreInt32 iPower = (pAttacker && (STATIC_ISVALID(g_pGame) && g_pGame->GetCoop())) ? 1 : GAME_PLAYERS;
-        iDamage *= iPower;
-
-        // 
-        if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
-
         if(iDamage > 0)
         {
             // 
-            const coreInt32 iTaken = this->_TakeDamage(iDamage, iElement, vImpact) / iPower;
+            const coreInt32 iPower = (pAttacker && STATIC_ISVALID(g_pGame) && g_pGame->GetCoop()) ? 1 : GAME_PLAYERS;
+            const coreInt32 iTaken = this->_TakeDamage(iDamage * iPower, iElement, vImpact);
 
             if(iTaken)
             {
@@ -279,7 +276,7 @@ void cEnemy::Kill(const coreBool bAnimated)
 void cEnemy::ResetProperties()
 {
     // set object properties
-    this->SetPosition   (coreVector3(1.0f, 1.0f,0.0f) * 1000.0f);
+    this->SetPosition   (coreVector3(HIDDEN_POS,0.0f));
     this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
     this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
@@ -442,9 +439,10 @@ void cEnemyManager::Render()
     }                                                                 \
 } 
 
-void cEnemyManager::RenderUnder() {__RENDER_OWN(__RenderOwnUnder)}
-void cEnemyManager::RenderOver () {__RENDER_OWN(__RenderOwnOver)}
-void cEnemyManager::RenderTop  () {__RENDER_OWN(__RenderOwnTop)}
+void cEnemyManager::RenderBottom() {__RENDER_OWN(__RenderOwnBottom)}
+void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
+void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
+void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)}
 
 #undef __RENDER_OWN
 
@@ -772,6 +770,22 @@ void cCinderEnemy::__MoveOwn()
 
     // rotate around the rotating direction axis
     this->DefaultMultiate(m_fAngle);
+}
+
+
+// ****************************************************************
+// constructor
+cMeteorEnemy::cMeteorEnemy()noexcept
+{
+    // load models
+    this->DefineModelHigh("meteor.md3");
+    this->DefineModelLow ("meteor.md3");
+    
+
+    this->DefineTexture(0u, "environment_stone_diff.png");
+    this->DefineTexture(1u, "environment_stone_norm.png");
+    
+    this->DefineProgram("object_meteor_blink_program");
 }
 
 

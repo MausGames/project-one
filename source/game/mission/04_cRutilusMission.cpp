@@ -14,6 +14,10 @@
 cRutilusMission::cRutilusMission()noexcept
 : m_avTeleporterPrev  {}
 , m_iTeleporterActive (2u)
+, m_Wave              (RUTILUS_WAVES_RAWS)
+, m_afWaveTime        {}
+, m_iWaveActive       (0u)
+, m_iWaveDir          (0u)
 , m_aiMoveFlip        {}
 , m_fAnimation        (0.0f)
 {
@@ -31,6 +35,32 @@ cRutilusMission::cRutilusMission()noexcept
         m_aTeleporter[i].SetColor3    (RUTILUS_TELEPORTER_COLOR(i) * 1.2f);
         m_aTeleporter[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     }
+
+    // 
+    m_Wave.DefineProgram("effect_energy_flat_spheric_inst_program");
+    {
+        for(coreUintW i = 0u; i < RUTILUS_WAVES_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pWave = &m_aWaveRaw[i];
+            //pWave->DefineModel  ("object_tube_open.md3");
+            pWave->DefineModel  ("object_sphere.md3");
+            pWave->DefineTexture(0u, "effect_energy.png");
+            pWave->DefineProgram("effect_energy_flat_spheric_program");
+
+            // set object properties
+            pWave->SetColor3 (COLOR_ENERGY_RED * 0.7f);
+            //pWave->SetTexSize(coreVector2(0.6f,2.4f));
+            pWave->SetTexSize(coreVector2(0.6f,2.4f) * 5.0f);
+            pWave->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Wave.BindObject(pWave);
+        }
+    }
+
+    // 
+    g_pGlow->BindList(&m_Wave);
 }
 
 
@@ -39,7 +69,11 @@ cRutilusMission::cRutilusMission()noexcept
 cRutilusMission::~cRutilusMission()
 {
     // 
+    g_pGlow->UnbindList(&m_Wave);
+
+    // 
     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) this->DisableTeleporter(i, false);
+    this->DisableWave(false);
 }
 
 
@@ -77,6 +111,65 @@ void cRutilusMission::DisableTeleporter(const coreUintW iIndex, const coreBool b
 
     // 
     if(bAnimated) cRutilusMission::__LineEffect(iIndex);
+}
+
+
+// ****************************************************************
+// 
+void cRutilusMission::EnableWave()
+{
+    coreObject3D& oWave = m_aWaveRaw[0];
+
+    // 
+    WARN_IF(oWave.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    ADD_BIT(m_iWaveActive, RUTILUS_WAVES)
+    m_iWaveDir = 0u;
+
+    // 
+    const auto nInitFunc = [this](coreObject3D* OUTPUT pObject, const coreFloat fOffset, const coreUintW iIndex)
+    {
+        m_afWaveTime[iIndex] = fOffset;
+
+        pObject->SetAlpha    (0.0f);
+        pObject->SetTexOffset(coreVector2(0.0f, fOffset));
+        pObject->SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+    };
+    for(coreUintW i = 0u; i < RUTILUS_WAVES; ++i) nInitFunc(&oWave + i, I_TO_F(i) / I_TO_F(RUTILUS_WAVES), i);
+}
+
+
+// ****************************************************************
+// 
+void cRutilusMission::DisableWave(const coreBool bAnimated)
+{
+    coreObject3D& oWave = m_aWaveRaw[0];
+
+    // 
+    if(!oWave.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    REMOVE_BIT(m_iWaveActive, RUTILUS_WAVES)
+
+    if(!bAnimated)
+    {
+        // 
+        const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+        {
+            pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        };
+        for(coreUintW i = 0u; i < RUTILUS_WAVES; ++i) nExitFunc(&oWave + i);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cRutilusMission::__RenderOwnBottom()
+{
+    // 
+    m_Wave.Render();
 }
 
 
@@ -139,6 +232,41 @@ void cRutilusMission::__MoveOwnAfter()
         oTeleporter.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.6f));
         oTeleporter.Move();
     }
+
+    // 
+    for(coreUintW i = 0u; i < RUTILUS_WAVES; ++i)
+    {
+        coreObject3D& oWave = m_aWaveRaw[i];
+        if(!oWave.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        const coreVector2 vDir  = CONTAINS_BIT(m_iWaveDir, 0u) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
+        const coreFloat   fSign = CONTAINS_BIT(m_iWaveDir, 1u) ? -1.0f : 1.0f;
+
+        // 
+        //m_afWaveTime[i].Update(0.7f * fSign);
+        m_afWaveTime[i].Update(0.4f * fSign);
+        if((m_afWaveTime[i] < 0.0f) || (m_afWaveTime[i] > 1.0f))
+        {
+            // 
+            m_afWaveTime[i] -= fSign;
+            SET_BIT(m_iWaveActive, i, CONTAINS_BIT(m_iWaveActive, RUTILUS_WAVES))
+
+            // 
+            oWave.SetDirection(coreVector3(vDir, 0.0f));
+        }
+
+        // 
+        oWave.SetPosition(m_aWaveRaw[0].GetPosition());
+        //oWave.SetSize    (coreVector3(10.0f * m_afWaveTime[i], 80.0f, 1.0f));
+        oWave.SetSize    (coreVector3(1.0f,1.0f,1.0f) * 30.0f * m_afWaveTime[i]);
+        oWave.SetAlpha   (MIN(1.0f - m_afWaveTime[i], 6.0f * m_afWaveTime[i], 1.0f) * (CONTAINS_BIT(m_iWaveActive, i) ? 1.0f : 0.0f));
+    }
+
+    // 
+    if(!m_iWaveActive) this->DisableWave(false);
+
+    // 
+    m_Wave.MoveNormal();
 
     if(m_iTeleporterActive == 1u)
     {
@@ -209,14 +337,14 @@ void cRutilusMission::__MoveOwnAfter()
             if(pPlayer->IsRolling()) return;
 
             // 
-            if(m_aiMoveFlip[i]) pInput->vMove = MapToAxis(pInput->vMove, UnpackDirection(m_aiMoveFlip[i]).InvertedX());
+            if(m_aiMoveFlip[i]) pInput->vMove = MapToAxisInv(pInput->vMove, UnpackDirection(m_aiMoveFlip[i]));
 
             // 
             coreVector2 vNewPos, vNewDir, vNewMoveDir;
             if(nTeleportFunc(pPlayer, pPlayer->GetMove(), &vNewPos, &vNewDir, &vNewMoveDir))
             {
                 // 
-                if(!vNewMoveDir.IsNull()) m_aiMoveFlip[i] = PackDirection(MapToAxis(vNewMoveDir, pInput->vMove.InvertedX()));
+                if(!vNewMoveDir.IsNull()) m_aiMoveFlip[i] = PackDirection(MapToAxisInv(vNewMoveDir, pInput->vMove));
 
                 // 
                 pPlayer->SetPosition (coreVector3(vNewPos, 0.0f));

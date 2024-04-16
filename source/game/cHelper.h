@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_HELPER_H_
 #define _P1_GUARD_HELPER_H_
 
-// TODO: make sure positions are reset to (1000.0f,1000.0f) between stages, not not cause accidental popping
+// TODO: make sure positions are reset to HIDDEN_POS between stages, not not cause accidental popping
 
 
 // ****************************************************************

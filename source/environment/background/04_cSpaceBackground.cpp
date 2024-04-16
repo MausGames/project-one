@@ -66,7 +66,7 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
-    m_Cover.SetColor3    (LERP(COLOR_MENU_RED, coreVector3(1.0f,1.0f,1.0f), 0.5f));
+    m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.5f));
 }
 
 

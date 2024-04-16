@@ -58,11 +58,11 @@ public:
     template <typename... A> void ShowText(const coreVector2& vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
     inline void                   ShowText(const coreVector2& vTarget, const coreFloat fWidth, const coreChar* pcText);
 
+    // 
+    inline void UseColor(const coreUintW iIndex, const coreVector3& vColor) {ASSERT(iIndex < TOOLTIP_LINES) m_aLine[iIndex].SetColor3(vColor);}
+
     // force update on next display
     inline void Invalidate() {m_pLastRef = NULL;}
-    
-    
-    inline void SetTextColor(const coreUintW iIndex, const coreVector3& vColor) {ASSERT(iIndex < TOOLTIP_LINES) m_aLine[iIndex].SetColor3(vColor);}
 
 
 private:

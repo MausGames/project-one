@@ -48,21 +48,25 @@
 #define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
 #define VIRIDO_BALL_SPEED           (1.5f)                                            // 
 
-#define NEVO_BOMBS                  (4u)                                              // 
+#define NEVO_BOMBS                  (6u)                                              // 
 #define NEVO_BOMBS_RAWS             (NEVO_BOMBS)                                      // 
 #define NEVO_LINES                  (4u)                                              // 
 #define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
+#define NEVO_TILES                  (16u)                                             // 
+#define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
+#define RUTILUS_WAVES               (4u)                                              // 
+#define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
 
 // ****************************************************************
 // stage management macros
 #define STAGE_MAIN                             m_anStage.emplace(__LINE__, [this]()
-#define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); return true;}())
+#define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); m_fStageSubTime = 0.0f; m_fStageSubTimeBefore = 0.0f; return true;}())
 
 #define STAGE_FINISH_NOW                       {this->SkipStage();}
 #define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
@@ -74,7 +78,7 @@
 #define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN {if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
-#define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT(((f) <= (t)) && ((t) < (s)->GetNumEnemies()))}
+#define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
 #define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
@@ -92,22 +96,22 @@
 #define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 #define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 
-#define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
+#define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c); const coreBool bStageBeginning = STAGE_BEGINNING;
 #define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
-#define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT(n,...)                 coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2(n,...)                  coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3(n,...)                  coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4(n,...)                  coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_INT_ARRAY(n,c,...)           coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT_ARRAY(n,c,...)          coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT_ARRAY(n,c,...)         coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2_ARRAY(n,c,...)          coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3_ARRAY(n,c,...)          coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4_ARRAY(n,c,...)          coreVector4* const OUTPUT n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT(n,...)                 coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2(n,...)                  coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3(n,...)                  coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4(n,...)                  coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_INT_ARRAY(n,c,...)           coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_UINT_ARRAY(n,c,...)          coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT_ARRAY(n,c,...)         coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2_ARRAY(n,c,...)          coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3_ARRAY(n,c,...)          coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4_ARRAY(n,c,...)          coreVector4* const OUTPUT n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
 
 #define STAGE_LIFETIME(e,m,a)                                                                         \
     UNUSED const coreFloat fLifeSpeed          = (m);                                                 \
@@ -130,6 +134,11 @@
 #define STAGE_TIME_AFTER(t)                    (m_fStageTime >= (t))
 #define STAGE_TIME_BETWEEN(t,u)                (InBetween(m_fStageTime, (t), (u)))
 #define STAGE_BEGINNING                        (STAGE_TIME_POINT(0.0f))
+
+#define STAGE_SUBTIME_POINT(t)                 (InBetween((t), m_fStageSubTimeBefore, m_fStageSubTime))
+#define STAGE_SUBTIME_BEFORE(t)                (m_fStageSubTime <  (t))
+#define STAGE_SUBTIME_AFTER(t)                 (m_fStageSubTime >= (t))
+#define STAGE_SUBTIME_BETWEEN(t,u)             (InBetween(m_fStageSubTime, (t), (u)))
 
 #define STAGE_LIFETIME_POINT(t)                (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
 #define STAGE_LIFETIME_BEFORE(t)               (fLifeTime     <  (t) && fLifeTime     >= 0.0f)
@@ -193,6 +202,8 @@ protected:
     coreFlow   m_fStageTime;                                   // 
     coreFloat  m_fStageTimeBefore;                             // 
     coreUint8  m_iStageSub;                                    // 
+    coreFlow   m_fStageSubTime;                                // 
+    coreFloat  m_fStageSubTimeBefore;                          // 
 
     const coreFloat* m_pfMedalGoal;                            // 
 
@@ -219,11 +230,12 @@ public:
     void Setup();
 
     // render and move the mission
-    void RenderUnder();
-    void RenderOver ();
-    void RenderTop  ();
-    void MoveBefore ();
-    void MoveAfter  ();
+    void RenderBottom();
+    void RenderUnder ();
+    void RenderOver  ();
+    void RenderTop   ();
+    void MoveBefore  ();
+    void MoveAfter   ();
 
     // 
     void            SkipStage ();
@@ -265,12 +277,13 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __SetupOwn      () {}
-    virtual void __RenderOwnUnder() {}
-    virtual void __RenderOwnOver () {}
-    virtual void __RenderOwnTop  () {}
-    virtual void __MoveOwnBefore () {}
-    virtual void __MoveOwnAfter  () {}
+    virtual void __SetupOwn       () {}
+    virtual void __RenderOwnBottom() {}
+    virtual void __RenderOwnUnder () {}
+    virtual void __RenderOwnOver  () {}
+    virtual void __RenderOwnTop   () {}
+    virtual void __MoveOwnBefore  () {}
+    virtual void __MoveOwnAfter   () {}
 
     // 
     void __OpenSegment ();
@@ -402,6 +415,10 @@ private:
     coreObject3D  m_aBlastRaw  [NEVO_BLASTS_RAWS];   // 
     coreFlow      m_afBlastTime[NEVO_BLASTS];        // 
 
+    coreBatchList m_Tile;                            // 
+    coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];     // 
+    coreFlow      m_afTileTime[NEVO_TILES];          // 
+
     cLodObject  m_Container;                         // 
     coreVector2 m_vForce;                            // 
     coreVector2 m_vImpact;                           // 
@@ -427,6 +444,10 @@ public:
     void DisableBlast(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableTile (const coreUintW iIndex, const coreUintW iDimension);
+    void DisableTile(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableContainer (const coreVector2& vPosition);
     void DisableContainer(const coreBool bAnimated);
 
@@ -446,9 +467,10 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn     ()final;
-    void __RenderOwnOver()final;
-    void __MoveOwnAfter ()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwnAfter   ()final;
 };
 
 
@@ -488,6 +510,12 @@ private:
     coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
     coreUint8    m_iTeleporterActive;                      // 
 
+    coreBatchList m_Wave;                                  // 
+    coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
+    coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
+    coreUint8     m_iWaveActive;                           // 
+    coreUint8     m_iWaveDir;                              // 
+
     coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
 
     coreFlow m_fAnimation;                                 // animation value
@@ -505,15 +533,20 @@ public:
     void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableWave ();
+    void DisableWave(const coreBool bAnimated);
+
+    // 
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
 
 
 private:
     // execute own routines
-    void __SetupOwn     ()final;
-    void __RenderOwnOver()final;
-    void __MoveOwnBefore()final;
-    void __MoveOwnAfter ()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwnBefore  ()final;
+    void __MoveOwnAfter   ()final;
 
     // 
     void __LineEffect(const coreUintW iIndex)const;
@@ -565,9 +598,9 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn      ()final;
-    void __RenderOwnUnder()final;
-    void __MoveOwnAfter  ()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

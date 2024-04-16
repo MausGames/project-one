@@ -214,7 +214,7 @@ coreBool cSnow::TestCollision(const coreVector2& vPosition)const
     const coreUintW iY = cSnow::__GetMapIndex(vPosition.y);
 
     // 
-    return m_piSnowData[iY * SNOW_SIZE + iX];
+    return (m_piSnowData[iY * SNOW_SIZE + iX] != 0x00u);
 }
 
 

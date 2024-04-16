@@ -250,7 +250,7 @@ void cShip::_Resurrect()
     // reset ship properties
     m_iCurHealth = m_iMaxHealth;
     m_iPreHealth = m_iMaxHealth;
-    m_vOldPos    = coreVector2(1000.0f,1000.0f);   // # for consistency
+    m_vOldPos    = HIDDEN_POS;   // # for consistency
     this->RefreshColor(1.0f);
 
     // 

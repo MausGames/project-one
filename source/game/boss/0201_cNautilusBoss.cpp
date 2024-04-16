@@ -70,7 +70,7 @@ void cNautilusBoss::__ResurrectOwn()
     cNevoMission* pMission = d_cast<cNevoMission*>(g_pGame->GetCurMission());
 
     // 
-    pMission->EnableContainer     (coreVector2(1000.0f,1000.0f));
+    pMission->EnableContainer     (HIDDEN_POS);
     pMission->SetContainerClamp   (false);
     pMission->SetContainerOverdraw(true);
 

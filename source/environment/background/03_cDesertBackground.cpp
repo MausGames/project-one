@@ -135,7 +135,7 @@ void cDesertBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (0.4f * Core::System->GetTime());
 
     // 
-    m_Sand.SetDirection(m_vSandDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12());
+    m_Sand.SetDirection(MapToAxisInv(m_vSandDirection.InvertedX(), g_pEnvironment->GetDirection()));
     m_Sand.SetTexSize  (vTexSize);
     m_Sand.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Sand.Move();

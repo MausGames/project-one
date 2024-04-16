@@ -31,10 +31,10 @@ cCalorMission::~cCalorMission()
 
 // ****************************************************************
 // 
-void cCalorMission::__RenderOwnUnder()
+void cCalorMission::__RenderOwnBottom()
 {
     // 
-    m_Snow.Render();   // TODO: disable depth-test (full), but would overdraw ships then, maybe just write    
+    m_Snow.Render();
 }
 
 

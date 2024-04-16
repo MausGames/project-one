@@ -118,6 +118,17 @@ cGame::~cGame()
 // render the game
 void cGame::Render()
 {
+    __DEPTH_GROUP_BOTTOM
+    {
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            m_EnemyManager.RenderBottom();
+            m_pCurMission->RenderBottom();
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
+
     __DEPTH_GROUP_SHIP   // # 1
     {
         // render all players
@@ -216,11 +227,10 @@ void cGame::Move()
 
     // 
     cHelper::GlobalUpdate();
-    
-    m_EnemyManager.MoveBefore();
-    // how to handle GetMove for player in mission-movebefore ???    
 
     // move the mission
+    m_EnemyManager.MoveBefore();
+    // how to handle GetMove for player in mission-movebefore ???    
     m_pCurMission->MoveBefore();
     {
         // move all players
@@ -888,13 +898,17 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            // 
+            if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DAMAGING))
+            {
+                // 
+                pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
+            }
+
             if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
                 const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-                pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
-                //pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+                pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
@@ -928,7 +942,6 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            // 
             if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
@@ -954,17 +967,14 @@ void cGame::__HandleCollisions()
                     // 
                     g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
                 }
-                else
+
+                if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
                 {
                     // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
                     if(!pEnemy->ReachedDeath())
                     {
-                        const coreVector2 vFlyDir = pBullet->GetFlyDir();
-                        const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
-                        const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
-
                         // 
-                        pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                        pBullet->Reflect(pEnemy, vIntersection.xy(), 20.0f);
                     }
                 }
             }
@@ -1006,6 +1016,13 @@ void cGame::__HandleCollisions()
         g_pSave->EditGlobalStats      ()->iItemsCollected += 1u;
         g_pSave->EditLocalStatsMission()->iItemsCollected += 1u;
         g_pSave->EditLocalStatsSegment()->iItemsCollected += 1u;
+    });
+
+    // 
+    Core::Manager::Object->TestCollision(TYPE_SHIELD, TYPE_BULLET_PLAYER, [](coreObject3D* OUTPUT pShield, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        // 
+        pBullet->Reflect(pShield, vIntersection.xy(), 3.0f);
     });
 
     // 

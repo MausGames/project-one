@@ -14,30 +14,30 @@
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
 // TODO: implement own enemy-types for custom-enemies which would require instancing
 // TODO: virtual void Render()override; -> final
-// TODO: remove "/ iPower"
 
 
 // ****************************************************************
 // enemy definitions
 #define ENEMY_SET_INIT    (8u)      // initial size when creating a new enemy set
-#define ENEMY_SET_COUNT   (8u)      // 
+#define ENEMY_SET_COUNT   (16u)     // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
 enum eEnemyStatus : coreUint16
 {
     ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
     ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
-    ENEMY_STATUS_BOSS        = 0x0004u,   // 
-    ENEMY_STATUS_SINGLE      = 0x0008u,   // 
-    ENEMY_STATUS_ENERGY      = 0x0010u,   // 
-    ENEMY_STATUS_CHILD       = 0x0020u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x0040u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x0100u,   // 
-    ENEMY_STATUS_GHOST       = 0x0200u,   // 
-    ENEMY_STATUS_HIDDEN      = 0x0400u,   // 
-    ENEMY_STATUS_WORTHLESS   = 0x0800u    // 
-};
+    ENEMY_STATUS_CHILD       = 0x0004u,   // 
+    ENEMY_STATUS_SHIELDED    = 0x0008u,   // 
+    ENEMY_STATUS_BOSS        = 0x0010u,   // 
+    ENEMY_STATUS_SINGLE      = 0x0020u,   // 
+    ENEMY_STATUS_ENERGY      = 0x0040u,   // 
+    ENEMY_STATUS_INVINCIBLE  = 0x0080u,   //    ### geschosse werden reflektiert (bubble)  
+    ENEMY_STATUS_DAMAGING    = 0x0100u,   //    ### kollision verursacht schaden (spikes)  
+    ENEMY_STATUS_IMMORTAL    = 0x0200u,   //    ### soll nicht sterben, geschosse gehen hindurch  
+    ENEMY_STATUS_GHOST       = 0x0400u,   // 
+    ENEMY_STATUS_HIDDEN      = 0x0800u,   // 
+    ENEMY_STATUS_WORTHLESS   = 0x1000u    // 
+};   // ### keine kollisionen mit spieler mehr    
 
 
 // ****************************************************************
@@ -60,15 +60,14 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure (const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted = false);
-    void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
+    void Configure(const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted = false);
 
     // render and move the enemy
     virtual void Render()override;
     void         Move  ()final;
 
     // reduce current health
-    coreInt32 TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);
+    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
@@ -91,6 +90,9 @@ public:
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
     inline const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
 
+    // enemy configuration values
+    static inline const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}
+
 
 protected:
     // 
@@ -99,12 +101,13 @@ protected:
 
 private:
     // own routines for derived classes (render functions executed by manager)
-    virtual void __ResurrectOwn  ()                         {}
-    virtual void __KillOwn       (const coreBool bAnimated) {}
-    virtual void __RenderOwnUnder()                         {}
-    virtual void __RenderOwnOver ()                         {}
-    virtual void __RenderOwnTop  ()                         {}
-    virtual void __MoveOwn       ()                         {}
+    virtual void __ResurrectOwn   ()                         {}
+    virtual void __KillOwn        (const coreBool bAnimated) {}
+    virtual void __RenderOwnBottom()                         {}
+    virtual void __RenderOwnUnder ()                         {}
+    virtual void __RenderOwnOver  ()                         {}
+    virtual void __RenderOwnTop   ()                         {}
+    virtual void __MoveOwn        ()                         {}
 };
 
 
@@ -143,11 +146,12 @@ public:
     DISABLE_COPY(cEnemyManager)
 
     // render and move the enemy manager
-    void Render     ();
-    void RenderUnder();
-    void RenderOver ();
-    void RenderTop  ();
-    void Move       ();
+    void Render      ();
+    void RenderBottom();
+    void RenderUnder ();
+    void RenderOver  ();
+    void RenderTop   ();
+    void Move        ();
     
     
     
@@ -365,6 +369,21 @@ private:
 
 
 // ****************************************************************
+// meteor enemy class
+class cMeteorEnemy final : public cEnemy
+{
+public:
+    cMeteorEnemy()noexcept;
+
+    ENABLE_COPY(cMeteorEnemy)
+    ASSIGN_ID(8, "Meteor")
+
+    // enemy configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_blink_inst_program";}
+};
+
+
+// ****************************************************************
 // custom enemy class
 class cCustomEnemy final : public cEnemy
 {
@@ -421,7 +440,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     STATIC_ASSERT(T::ID != cCustomEnemy::ID)
 
     // set shader-program
-    oEnemyActive.DefineProgram("object_ship_blink_inst_program");
+    oEnemyActive.DefineProgram(T::ConfigProgramInstancedName());
 
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)

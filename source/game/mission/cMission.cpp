@@ -17,20 +17,22 @@ coreVector2 cMission::s_vPositionPoint  = coreVector2(0.0f,0.0f);
 // ****************************************************************
 // constructor
 cMission::cMission()noexcept
-: m_apBoss           {}
-, m_pCurBoss         (NULL)
-, m_iCurBossIndex    (MISSION_NO_BOSS)
-, m_iCurWaveCount    (0u)
-, m_iCurWaveIndex    (MISSION_NO_WAVE)
-, m_iCurSegmentIndex (MISSION_NO_SEGMENT)
-, m_piData           (NULL)
-, m_iDataSize        (0u)
-, m_iStageNum        (0u)
-, m_fStageTime       (0.0f)
-, m_fStageTimeBefore (0.0f)
-, m_iStageSub        (0u)
-, m_pfMedalGoal      (NULL)
-, m_bBadgeGiven      (false)
+: m_apBoss              {}
+, m_pCurBoss            (NULL)
+, m_iCurBossIndex       (MISSION_NO_BOSS)
+, m_iCurWaveCount       (0u)
+, m_iCurWaveIndex       (MISSION_NO_WAVE)
+, m_iCurSegmentIndex    (MISSION_NO_SEGMENT)
+, m_piData              (NULL)
+, m_iDataSize           (0u)
+, m_iStageNum           (0u)
+, m_fStageTime          (0.0f)
+, m_fStageTimeBefore    (0.0f)
+, m_iStageSub           (0u)
+, m_fStageSubTime       (0.0f)
+, m_fStageSubTimeBefore (0.0f)
+, m_pfMedalGoal         (NULL)
+, m_bBadgeGiven         (false)
 {
 }
 
@@ -75,9 +77,10 @@ void cMission::Setup()
 
 // ****************************************************************
 // render the mission
-void cMission::RenderUnder() {this->__RenderOwnUnder();}
-void cMission::RenderOver () {this->__RenderOwnOver ();}
-void cMission::RenderTop  () {this->__RenderOwnTop  ();}
+void cMission::RenderBottom() {this->__RenderOwnBottom();}
+void cMission::RenderUnder () {this->__RenderOwnUnder ();}
+void cMission::RenderOver  () {this->__RenderOwnOver  ();}
+void cMission::RenderTop   () {this->__RenderOwnTop   ();}
 
 
 // ****************************************************************
@@ -92,6 +95,10 @@ void cMission::MoveBefore()
         // 
         m_fStageTimeBefore = m_fStageTime;
         m_fStageTime.Update(1.0f);
+
+        // 
+        m_fStageSubTimeBefore = m_fStageSubTime;
+        m_fStageSubTime.Update(1.0f);
 
         // 
         m_anStage.back()();
@@ -127,9 +134,11 @@ void cMission::SkipStage()
     if(m_piData) std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
 
     // 
-    m_fStageTime       = 0.0f;
-    m_fStageTimeBefore = 0.0f;
-    m_iStageSub        = 0u;
+    m_fStageTime          = 0.0f;
+    m_fStageTimeBefore    = 0.0f;
+    m_iStageSub           = 0u;
+    m_fStageSubTime       = 0.0f;
+    m_fStageSubTimeBefore = 0.0f;
 
     // 
     m_pfMedalGoal = NULL;

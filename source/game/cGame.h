@@ -82,15 +82,16 @@ static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
 
 // ****************************************************************
 // depth-level management
-#define DEPTH_PUSH            {g_pGame->PushDepthLevel(1u);}
-#define DEPTH_PUSH_DOUBLE     {g_pGame->PushDepthLevel(2u);}
-#define DEPTH_PUSH_SHIP       {g_pGame->PushDepthLevelShip();}
+#define DEPTH_PUSH           {g_pGame->PushDepthLevel(1u);}
+#define DEPTH_PUSH_DOUBLE    {g_pGame->PushDepthLevel(2u);}
+#define DEPTH_PUSH_SHIP      {g_pGame->PushDepthLevelShip();}
 
-#define __DEPTH_GROUP_SHIP    {this->ChangeDepthLevel(9u, 11u);}
-#define __DEPTH_GROUP_UNDER   {m_iDepthDebug = 11u;     m_iDepthLevel = 20u;}
-#define __DEPTH_GROUP_OVER    {m_iDepthDebug = BIT(7u); m_iDepthLevel = 9u;}
-#define __DEPTH_GROUP_TOP     {m_iDepthDebug = 0u;}
-#define __DEPTH_RESET         {this->ChangeDepthLevel(0u, 20u);}
+#define __DEPTH_GROUP_SHIP   {this->ChangeDepthLevel(9u, 11u);}
+#define __DEPTH_GROUP_BOTTOM {}
+#define __DEPTH_GROUP_UNDER  {m_iDepthDebug = 11u;     m_iDepthLevel = 20u;}
+#define __DEPTH_GROUP_OVER   {m_iDepthDebug = BIT(7u); m_iDepthLevel = 9u;}
+#define __DEPTH_GROUP_TOP    {m_iDepthDebug = 0u;}
+#define __DEPTH_RESET        {this->ChangeDepthLevel(0u, 20u);}
 
 
 // ****************************************************************

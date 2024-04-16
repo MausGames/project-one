@@ -112,7 +112,40 @@ void cBullet::Deactivate(const coreBool bAnimated)
 // 
 void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal)
 {
-    ASSERT(pObject && pObject->GetModel()->GetNumClusters())
+    if(coreVector2::Dot(m_vFlyDir, vForceNormal) >= 0.0f) return;
+    this->__Reflect(pObject, vIntersection, vForceNormal, 0.0f);
+}
+
+void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreFloat fSharpness)
+{
+    if(coreVector2::Dot(m_vFlyDir, this->GetPosition().xy() - vIntersection - m_vFlyDir * MAX(this->GetCollisionRadius(), m_fSpeed * Core::System->GetTime())) >= 0.0f) return;
+    this->__Reflect(pObject, vIntersection, coreVector2(0.0f,0.0f), fSharpness);
+}
+
+
+// ****************************************************************
+// 
+void cBullet::_EnableDepth(const coreProgramPtr& pProgram)const
+{
+    if(!pProgram.IsUsable()) return;
+
+    // 
+    pProgram->Enable();
+    pProgram->SendUniform("u_v1Depth", m_fDepth);
+}
+
+void cBullet::_EnableDepth()const
+{
+    // 
+    this->_EnableDepth(this->GetProgram());
+}
+
+
+// ****************************************************************
+// 
+void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal, const coreFloat fSharpness)
+{
+    ASSERT(pObject )//&& pObject->GetModel()->GetNumClusters())
 
     // increase intersection precision
     coreVector2 vHit = vIntersection;
@@ -152,12 +185,12 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersect
     const coreVector2 vPeak    = this->GetPosition().xy() + m_vFlyDir * fHitProj;
 
     // calculate reflection normal (approximation, sharp)
-    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vPeak - m_vFlyDir * 3.0f) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
+    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vPeak - 0.0f*m_vFlyDir * fSharpness) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
     if(coreVector2::Dot(m_vFlyDir, vNormal) >= 0.0f) return;
 
     // reflect bullet
     ASSERT(vNormal.IsNormalized())
-    m_vFlyDir = coreVector2::Reflect(m_vFlyDir, vNormal);
+    m_vFlyDir = vNormal;//coreVector2::Reflect(m_vFlyDir, vNormal);
 
     // set corrected position
     this->SetPosition(coreVector3(vPeak - m_vFlyDir * fHitProj, 0.0f));
@@ -167,24 +200,6 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersect
 
     // move the 3d-object
     this->coreObject3D::Move();   // for direction (and other) changes
-}
-
-
-// ****************************************************************
-// 
-void cBullet::_EnableDepth(const coreProgramPtr& pProgram)const
-{
-    if(!pProgram.IsUsable()) return;
-
-    // 
-    pProgram->Enable();
-    pProgram->SendUniform("u_v1Depth", m_fDepth);
-}
-
-void cBullet::_EnableDepth()const
-{
-    // 
-    this->_EnableDepth(this->GetProgram());
 }
 
 
@@ -256,7 +271,7 @@ void cBulletManager::Render()
 // move the bullet manager
 void cBulletManager::Move()
 {
-    coreVector2 vPrevPos    = coreVector2(1000.0f,1000.0f);
+    coreVector2 vPrevPos    = HIDDEN_POS;
     coreFloat   fPrevRadius = 0.0f;
     coreFloat   fDepth      = 0.0f;
 
@@ -411,7 +426,7 @@ void cRayBullet::__MoveOwn()
     this->SetTexOffset(coreVector2(0.35f, m_fAnimation));
 
     // update fade
-    m_fFade.Update(1.0f);
+    m_fFade.Update(1.5f);
     this->SetSize (coreVector3(3.7f, 3.7f * MIN(12.0f * m_fFade, 1.0f), 3.7f) * 0.5f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
