@@ -31,6 +31,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
 
     // configure the boss
     this->Configure(10000, COLOR_SHIP_GREY);
+    this->AddStatus(ENEMY_STATUS_IMMORTAL);
 }
 
 
@@ -172,7 +173,7 @@ void cProjectOneBoss::__MoveOwn()
                 const coreVector2 vPos = this->GetPosition().xy();
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(Core::Rand->Float(-90.0f, 90.0f) + 180.0f));
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.6f, this, vPos, vDir)/*->MakeWhite()*/->ChangeSize(1.2f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.6f, this, vPos, vDir)->MakeWhite()->ChangeSize(1.2f);
             });
 
             const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();

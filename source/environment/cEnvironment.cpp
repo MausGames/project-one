@@ -45,7 +45,7 @@ cEnvironment::cEnvironment()noexcept
 
     // load first background
     m_pBackground = new cNoBackground();
-    this->ChangeBackground(Core::Config->GetInt("Game", "Background", cCloudBackground::ID), ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
+    this->ChangeBackground(Core::Config->GetInt("Game", "Background", cCloudBackground::ID), ENVIRONMENT_MIX_WIPE, 0.75f, coreVector2(1.0f,0.0f));
 }
 
 

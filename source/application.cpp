@@ -9,7 +9,7 @@
 
 // ****************************************************************
 // project settings
-const coreChar* const CoreApp::Settings::Name                       = "Project One";
+const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
 const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
 const coreUint8       CoreApp::Settings::RenderBuffer::DepthSize    = 16u;
@@ -151,7 +151,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_detail_01.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_01.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_02.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_weapons.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapons.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", false);
+    Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png");
     Core::Manager::Resource->Load<coreTexture>("ship_player.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png");
 

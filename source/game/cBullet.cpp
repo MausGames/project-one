@@ -460,7 +460,7 @@ cConeBullet::cConeBullet()noexcept
     this->DefineProgram("effect_energy_bullet_program");
 
     // set object properties
-    this->SetTexSize(coreVector2(0.5f,0.2f));
+    this->SetTexSize(coreVector2(0.5f,0.2f) * 1.8f);
 }
 
 

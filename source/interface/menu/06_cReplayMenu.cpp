@@ -79,7 +79,7 @@ void cReplayMenu::Move()
 
             for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i)
             {
-                if(m_aLine[i].IsClicked()    || m_aName[i].IsClicked() || m_aTime[i].IsClicked())  
+                if(m_aLine[i].IsClicked() || m_aName[i].IsClicked() || m_aTime[i].IsClicked())  
                 {
                     if(i < m_aInfoList.size())
                     {
@@ -140,8 +140,8 @@ void cReplayMenu::LoadReplays()
     {
         const coreObjectEnable eEnabled = (i < m_aInfoList.size()) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
-        m_aLine[i].SetEnabled(eEnabled);
         m_aName[i].SetEnabled(eEnabled);
         m_aTime[i].SetEnabled(eEnabled);
+        m_aLine[i].SetEnabled(eEnabled);
     }
 }

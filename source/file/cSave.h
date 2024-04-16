@@ -21,12 +21,20 @@
 #define SAVE_FILE_MAGIC     (coreUint32('P1SV'))   // 
 #define SAVE_FILE_VERSION   (0x00000001u)          // 
 
+#define SAVE_MISSIONS       (MISSIONS)             // 
+#define SAVE_BOSSES         (BOSSES)               // 
+#define SAVE_WAVES          (WAVES)                // 
+
 
 // ****************************************************************
 // 
 class cSave final
 {
 private:
+    coreBool m_aabUnlockedBoss[SAVE_MISSIONS][SAVE_BOSSES];
+    coreBool m_aabUnlockedWave[SAVE_MISSIONS][SAVE_WAVES];
+
+    coreBool m_aabParticle[SAVE_MISSIONS][SAVE_BOSSES];
 
 
 public:

@@ -61,12 +61,18 @@ public:
     void     DefaultMultiate     (const coreFloat fAngle);
     void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
 
+    
+    inline cShip* InvertX  () {this->SetPosition( this->GetPosition().InvertedX ()); this->SetDirection( this->GetDirection().InvertedX ()); return this;}
+    inline cShip* InvertY  () {this->SetPosition( this->GetPosition().InvertedY ()); this->SetDirection( this->GetDirection().InvertedY ()); return this;}
+    inline cShip* Rotate90 () {this->SetPosition( this->GetPosition().RotatedZ90()); this->SetDirection( this->GetDirection().RotatedZ90()); return this;}
+    inline cShip* Rotate180() {this->SetPosition(-this->GetPosition());              this->SetDirection(-this->GetDirection());              return this;}
+
+
     // 
     void SetBaseColor(const coreVector3& vColor, const coreBool bInverted = false);
 
     // 
-    //inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
-    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f); this->SetColor3(LERP((coreVector3(  0.0f/360.0f,   0.0f/100.0f,  40.0f/100.0f).HsvToRgb()), this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY * 0.5f, this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
     inline void InvokeBlink ()                        {m_fBlink = 1.2f;}
 
@@ -74,6 +80,7 @@ public:
     inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedHealthPct(const coreFloat fHealthPct)const {return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedDeath    ()const                           {return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
+    inline coreBool WasDamaged      ()const                           {return (m_iCurHealth < m_iPreHealth);}
     inline coreBool WasTeleporting  ()const                           {return (this->GetMove().LengthSq() > (0.125f * FOREGROUND_AREA.x * FOREGROUND_AREA.y));}
 
     // add or remove status values
@@ -83,7 +90,7 @@ public:
     // set object properties
     inline void SetMaxHealth   (const coreInt32 iMaxHealth)    {m_iMaxHealth = iMaxHealth;}
     inline void SetCurHealth   (const coreInt32 iCurHealth)    {m_iCurHealth = iCurHealth;}
-    inline void SetCurHealthPct(const coreFloat fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct > 0.0f) && (fCurHealthPct <= 1.0f))}
+    inline void SetCurHealthPct(const coreFloat fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct >= 0.0f) && (fCurHealthPct <= 1.0f))}
 
     // get object properties
     inline       coreInt32    GetMaxHealth   ()const {return m_iMaxHealth;}

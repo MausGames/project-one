@@ -27,7 +27,6 @@
 // TODO: remove texture-sampling from lightning effect in moss
 // TODO: stomach should not create all vertices
 // TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
-// TODO: use scissor for transition, to reduce overhead
 
 
 // ****************************************************************

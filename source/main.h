@@ -68,8 +68,8 @@
 // TODO: replace / with RCP where possible
 // TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO: remove game_icon.png from resource-index if not required anymore
-// TODO: scissor out center when rendering fullscreen effects (e.g. water vignetting)
 // TODO: brown bullet, directional
+// TODO: ENABLE_BITWISE when ?
 
 
 // ****************************************************************
@@ -170,8 +170,6 @@
 enum eType : coreInt32
 {
     TYPE_PLAYER = 1,
-    TYPE_PLAYER_ROLL,
-    TYPE_PLAYER_FEEL,
     TYPE_ENEMY,
 
     TYPE_BULLET_PLAYER,
@@ -259,6 +257,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"
 #include "interface/cTooltip.h"
+#include "interface/cWorldMap.h"
 #include "interface/menu/cMenu.h"
 #include "game/cTable.h"
 #include "game/cBullet.h"

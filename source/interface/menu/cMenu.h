@@ -19,11 +19,13 @@
 // TODO: score-menu names must be sanitized
 // TODO: unload fonts currently not used (e.g. from score-menu)
 // TODO: options menu: ask if values should be discarded, ask if want to exit instead of saving
+// TODO: options menu: 15 second on video change, yes, no
 // TODO: rumble when changing rumble-option
 // TODO: display unattached joysticks and joystick names somehow
 // TODO: highlight which joystick is which input set
 // TODO: fix all g_vMenuCenter usages when changing aspect ratio
 // TODO: summary_ add separate total-score for each player
+// TODO: prevent interaction with next menu when doing animate-transition, e.g. focus, enabled_move
 
 
 // ****************************************************************
@@ -34,6 +36,9 @@
 #define MENU_CONTRAST_BLACK     (0.04f)    // black contrast value
 
 #define MENU_CONFIG_INPUTS      (PLAYERS)
+#define MENU_GAME_MISSIONS      (9u)
+#define MENU_GAME_STAGES        (18u)
+#define MENU_GAME_PLAYERS       (PLAYERS)
 #define MENU_SCORE_ENTRIES      (10u)
 #define MENU_REPLAY_ENTRIES     (5u)
 #define MENU_SUMMARY_ENTRIES    (BOSSES)
@@ -78,14 +83,16 @@
 #define SURFACE_MAX             (12u)
 
 #define SURFACE_INTRO_EMPTY     (0u)
-#define SURFACE_INTRO_LOGO      (1u)
+#define SURFACE_INTRO_MARTIN    (1u)
 #define SURFACE_INTRO_LANGUAGE  (2u)
 
 #define SURFACE_TITLE_DEFAULT   (0u)
 
 #define SURFACE_MAIN_DEFAULT    (0u)
 
-#define SURFACE_GAME_DEFAULT    (0u)
+#define SURFACE_GAME_STANDARD   (0u)
+#define SURFACE_GAME_TRAINING   (1u)
+#define SURFACE_GAME_ARMORY     (2u)
 
 #define SURFACE_SCORE_DEFAULT   (0u)
 
@@ -138,12 +145,13 @@
 #define ENTRY_INPUT               (11u + ENTRY_AUDIO)
 
 #define ENTRY_GAME_LANGUAGE       (0u  + ENTRY_INPUT)
-#define ENTRY_GAME_GAMEROTATION   (1u  + ENTRY_INPUT)
-#define ENTRY_GAME_GAMESCALE      (2u  + ENTRY_INPUT)
-#define ENTRY_GAME_HUDROTATION    (3u  + ENTRY_INPUT)
-#define ENTRY_GAME_HUDSCALE       (4u  + ENTRY_INPUT)
-#define ENTRY_GAME_HUDTYPE        (5u  + ENTRY_INPUT)
-#define ENTRY_MAX                 (6u  + ENTRY_INPUT)
+#define ENTRY_GAME_TEXTSIZE       (1u  + ENTRY_INPUT)
+#define ENTRY_GAME_GAMEROTATION   (2u  + ENTRY_INPUT)
+#define ENTRY_GAME_GAMESCALE      (3u  + ENTRY_INPUT)
+#define ENTRY_GAME_HUDROTATION    (4u  + ENTRY_INPUT)
+#define ENTRY_GAME_HUDSCALE       (5u  + ENTRY_INPUT)
+#define ENTRY_GAME_HUDTYPE        (6u  + ENTRY_INPUT)
+#define ENTRY_MAX                 (7u  + ENTRY_INPUT)
 
 
 // ****************************************************************
@@ -176,13 +184,11 @@
 class cIntroMenu final : public coreMenu
 {
 private:
-    coreObject2D m_MausLogo;                                   // Maus logo
+    coreLabel m_MartinMessage;                                 // 
 
     coreTimer m_IntroTimer;                                    // intro animation 
-    coreFloat m_fIntroAlpha;                                   // 
 
     coreLookup<std::string, coreButton*> m_apLanguageButton;   // list with buttons for valid language files
-    coreUint8 m_iSelected;                                     // current selected language button
 
 
 public:
@@ -202,6 +208,7 @@ class cTitleMenu final : public coreMenu
 {
 private:
     coreObject2D m_GameLogo;       // game logo
+    coreLabel m_GameNameTest;
 
     coreLabel m_StartMessage;      // 
     coreLabel m_aVersionInfo[2];   // hard-coded version info strings
@@ -248,15 +255,51 @@ class cGameMenu final : public coreMenu
 private:
     coreObject2D m_Background;      // 
 
+    coreButton m_StandardTab;               // 
+    coreButton m_TrainingTab;               // 
+
     coreButton m_StartButton;       // start button
+    coreButton m_CancelButton;      // cancel button
     coreButton m_BackButton;        // back button
 
-    coreLabel    m_aLabel[3];       // 
-    coreObject2D m_aLine [3];       // 
 
-    coreSwitchBoxU8 m_Mode;         // 
-    coreSwitchBoxU8 m_Difficulty;   // 
+    coreObject2D m_ArmoryBackground;
+
+    coreLabel m_MissionHeader;
+    coreLabel m_ArmoryHeader;
+
+    cWorldMap m_WorldMap;
+
+    
+    coreLabel    m_aMissionName[MENU_GAME_MISSIONS];   // 
+    coreObject2D m_aMissionLine[MENU_GAME_MISSIONS];   // 
+
+    coreObject2D m_StageArea;
+    coreButton   m_aStage[MENU_GAME_STAGES];
+
+
+    
+    coreLabel    m_aOptionName[3];   // 
+    coreObject2D m_aOptionLine[3];   // 
+
+
     coreSwitchBoxU8 m_Players;      // 
+    coreSwitchBoxU8 m_aWeapon [MENU_GAME_PLAYERS];      // 
+    coreSwitchBoxU8 m_aSupport[MENU_GAME_PLAYERS];      // 
+
+    coreObject2D m_aWeaponIcon [MENU_GAME_PLAYERS];      // 
+    coreObject2D m_aSupportIcon[MENU_GAME_PLAYERS];      // 
+
+
+
+
+
+    //coreLabel    m_aLabel[3];       // 
+    //coreObject2D m_aLine [3];       // 
+    //
+    //coreSwitchBoxU8 m_Mode;         // 
+    //coreSwitchBoxU8 m_Difficulty;   // 
+    //coreSwitchBoxU8 m_Players;      // 
 
 
 public:
@@ -268,9 +311,9 @@ public:
     void Move()final;
 
     // 
-    inline const coreUint8& GetSelectedMode      ()const {return m_Mode      .GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedDifficulty()const {return m_Difficulty.GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedPlayers   ()const {return m_Players   .GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedMode      ()const {return 0u;}
+    inline const coreUint8& GetSelectedDifficulty()const {return 0u;}
+    inline const coreUint8& GetSelectedPlayers   ()const {return m_Players.GetCurEntry().tValue;}
 };
 
 
@@ -283,10 +326,10 @@ private:
 
     coreButton m_BackButton;                     // back button
 
-    coreObject2D m_aLine [MENU_SCORE_ENTRIES];   // 
     coreLabel    m_aRank [MENU_SCORE_ENTRIES];   // 
     coreLabel    m_aName [MENU_SCORE_ENTRIES];   // 
     coreLabel    m_aScore[MENU_SCORE_ENTRIES];   // 
+    coreObject2D m_aLine [MENU_SCORE_ENTRIES];   // 
 
 
 public:
@@ -308,9 +351,9 @@ private:
 
     coreButton m_BackButton;                     // back button
 
-    coreObject2D m_aLine[MENU_REPLAY_ENTRIES];   // 
     coreLabel    m_aName[MENU_REPLAY_ENTRIES];   // 
     coreLabel    m_aTime[MENU_REPLAY_ENTRIES];   // 
+    coreObject2D m_aLine[MENU_REPLAY_ENTRIES];   // 
 
     std::vector<cReplay::sInfo> m_aInfoList;     // 
 
@@ -375,6 +418,7 @@ private:
     coreSwitchBoxU8 m_EffectVolume;
     coreSwitchBoxU8 m_AmbientSound;
     coreSwitchBoxU8 m_Language;
+    coreSwitchBoxU8 m_TextSize;
     coreSwitchBoxU8 m_GameRotation;
     coreSwitchBoxU8 m_GameScale;
     coreSwitchBoxU8 m_HudRotation;
@@ -494,7 +538,7 @@ private:
     coreFlow   m_fIntroTimer;                                       // 
     coreFlow   m_fOutroTimer;                                       // 
 
-    eSummaryState m_iState;                                         // 
+    eSummaryState m_eState;                                         // 
 
 
 public:
@@ -541,7 +585,7 @@ private:
     coreFlow m_fIntroTimer;                                // 
     coreFlow m_fOutroTimer;                                // 
 
-    eDefeatState m_iState;                                 // 
+    eDefeatState m_eState;                                 // 
 
 
 public:
@@ -561,27 +605,34 @@ public:
 
 // ****************************************************************
 // master menu class
-class cMenu final : public coreMenu
+class cMenu final : public coreMenu, public coreResourceRelation
 {
 private:
-    cIntroMenu* m_pIntroMenu;     // intro menu object (dynamically unloaded)
-    cTitleMenu* m_pTitleMenu;     // title menu object (dynamically unloaded)
+    cIntroMenu* m_pIntroMenu;            // intro menu object (dynamically unloaded)
+    cTitleMenu* m_pTitleMenu;            // title menu object (dynamically unloaded)
 
-    cMainMenu    m_MainMenu;      // main menu object
-    cGameMenu    m_GameMenu;      // game menu object
-    cScoreMenu   m_ScoreMenu;     // score menu object
-    cReplayMenu  m_ReplayMenu;    // replay menu object
-    cConfigMenu  m_ConfigMenu;    // config menu object
-    cExtraMenu   m_ExtraMenu;     // extra menu object
-    cPauseMenu   m_PauseMenu;     // pause menu object
-    cSummaryMenu m_SummaryMenu;   // summary menu object
-    cDefeatMenu  m_DefeatMenu;    // defeat menu object
+    cMainMenu    m_MainMenu;             // main menu object
+    cGameMenu    m_GameMenu;             // game menu object
+    cScoreMenu   m_ScoreMenu;            // score menu object
+    cReplayMenu  m_ReplayMenu;           // replay menu object
+    cConfigMenu  m_ConfigMenu;           // config menu object
+    cExtraMenu   m_ExtraMenu;            // extra menu object
+    cPauseMenu   m_PauseMenu;            // pause menu object
+    cSummaryMenu m_SummaryMenu;          // summary menu object
+    cDefeatMenu  m_DefeatMenu;           // defeat menu object
 
-    cMsgBox  m_MsgBox;            // message box overlay
-    cTooltip m_Tooltip;           // tooltip overlay
+    cMsgBox  m_MsgBox;                   // message box overlay
+    cTooltip m_Tooltip;                  // tooltip overlay
 
-    coreObject2D m_PauseLayer;    // 
-    coreUint32   m_iPauseFrame;   // 
+    coreObject2D m_PauseLayer;           // 
+    coreUint32   m_iPauseFrame;          // 
+
+    coreFrameBuffer m_aFrameBuffer[3];   // 
+    coreObject2D    m_MixObject;         // 
+
+    coreTimer m_TransitionTime;          // 
+    coreUint8 m_iTransitionState;        // 
+    coreMenu* m_pTransitionMenu;         // 
 
 
 public:
@@ -604,6 +655,9 @@ public:
     inline void InvokePauseStep() {m_iPauseFrame = Core::System->GetCurFrame();}
 
     // 
+    void AnimateSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed);
+
+    // 
     static void UpdateLanguageFont();
     static const coreLookup<std::string, std::string>& GetLanguageList();
 
@@ -615,6 +669,9 @@ public:
 
 
 private:
+    // reset with the resource manager
+    void __Reset(const coreResourceReset eInit)final;
+
     // 
     void __StartGame();
     void __EndGame();

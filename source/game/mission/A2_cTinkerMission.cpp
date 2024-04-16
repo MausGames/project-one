@@ -112,10 +112,10 @@ void cTinkerMission::__SetupOwn()
             STAGE_GET_VEC2(vForce)
         STAGE_GET_END
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, &vForce)
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, COLL_REF(vForce))
         {
             //vForce += (pEnemy->GetPosition().xy() - pBullet->GetPosition().xy()).Normalized() * 10.0f;
-            vForce -= pBullet->GetDirection().xy() * 5.0f;
+            vForce -= AlongCrossNormal(pBullet->GetFlyDir()) * 5.0f;
         });
 
         
@@ -1236,3 +1236,30 @@ void UnusedWaves()
 }
 
 #endif
+
+/*
+                const coreVector2 vPos = pEnemy->GetPosition().xy();
+
+                for(coreUintW j = 20u; j--; )
+                {
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 9.0f));
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (j & 0x01u) ? 0.6f : 0.7f, pEnemy, vPos,  vDir)->ChangeSize(1.3f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (j & 0x01u) ? 0.6f : 0.7f, pEnemy, vPos, -vDir)->ChangeSize(1.3f);
+                    // TODO: lower blue balls get overlapped 
+                }
+*/
+
+/*
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [this](cBullet* OUTPUT pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+        {
+            // 
+            if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+            pBulletPlayer->Deactivate(true, vIntersection.xy());
+
+            const coreInt32 iDamage = pBulletEnemy->GetDamage();
+            if(iDamage == 1) pBulletEnemy->Deactivate(true, vIntersection.xy());
+                        else pBulletEnemy->SetDamage(iDamage - 1);
+        });
+*/

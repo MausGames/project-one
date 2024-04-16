@@ -84,6 +84,7 @@ void LoadConfig()
     Core::Config->Load(true);
 
     // read game values
+    g_OldConfig.Game.iTextSize       = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
     g_OldConfig.Game.iGameRotation   = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
     g_OldConfig.Game.iGameScale      = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
     g_OldConfig.Game.iHudRotation    = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
@@ -133,6 +134,7 @@ void SaveConfig()
     g_OldConfig = g_CurConfig;
 
     // write game values
+    Core::Config->SetInt(CONFIG_GAME_TEXT_SIZE,      g_OldConfig.Game.iTextSize);
     Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION,  g_OldConfig.Game.iGameRotation);
     Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,     g_OldConfig.Game.iGameScale);
     Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,   g_OldConfig.Game.iHudRotation);

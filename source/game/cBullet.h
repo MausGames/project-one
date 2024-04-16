@@ -13,7 +13,7 @@
 // TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO: use prefetch with more precise numbers (also in enemy-manager)
 // TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
-// TODO: remove tons of template instantiations (also enemies ?)
+// TODO: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO: add memory pool object for bullets ? also for enemy
 // TODO: make ray bullet smoother geometrically (front round)
 // TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
@@ -283,7 +283,7 @@ public:
     inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); m_fAnimation = 0.0f;}
 
     // change default color
-    inline cOrbBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cOrbBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
     inline cOrbBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cOrbBullet* MakeOrange() {this->_MakeOrange(0.9f); return this;}
     inline cOrbBullet* MakeRed   () {this->_MakeRed   (0.9f); return this;}
@@ -316,7 +316,7 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.3f;}
 
     // change default color
     inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -735,7 +735,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     // increase list and pool size by 100%
     pSet->oBulletActive.Reallocate(iSize * 2u);
-    pSet->aBulletPool  .resize    (iSize * 2u);
+    pSet->aBulletPool  .resize    (iSize * 2u);   // TODO: high ChangeType impact, think of bullet creating other bullets   
 
     const coreUintW iAfter = P_TO_UI(pSet->aBulletPool.data());
 

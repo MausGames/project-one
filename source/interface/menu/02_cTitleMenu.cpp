@@ -21,9 +21,15 @@ cTitleMenu::cTitleMenu()noexcept
     m_GameLogo.SetSize      (coreVector2(1.0f,1.0f) * 0.52f);
     m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
 
+
+    m_GameNameTest.Construct  (MENU_FONT_STANDARD_5, MENU_OUTLINE_BIG);
+    m_GameNameTest.SetPosition(coreVector2(0.0f,0.10f));
+    m_GameNameTest.SetText    ("Eigengrau");
+
+
     m_StartMessage.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_StartMessage.SetPosition(coreVector2(0.0f,-0.24f));
-    m_StartMessage.SetText    ("Press Start");
+    m_StartMessage.SetText    ("Press Button");//"Press Start");
 
     m_aVersionInfo[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
     m_aVersionInfo[0].SetPosition (coreVector2(0.0f, 0.03f));
@@ -38,7 +44,8 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionInfo[1].SetText     (PRINT("Project One - v0.1.0a third edition - %s %.5s", __DATE__, __TIME__));
 
     // bind menu objects
-    this->BindObject(SURFACE_TITLE_DEFAULT, &m_GameLogo);
+    //this->BindObject(SURFACE_TITLE_DEFAULT, &m_GameLogo);
+    this->BindObject(SURFACE_TITLE_DEFAULT, &m_GameNameTest);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_StartMessage);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_aVersionInfo[0]);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_aVersionInfo[1]);

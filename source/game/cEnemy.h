@@ -41,10 +41,10 @@ enum eEnemyStatus : coreUint16
 class INTERFACE cEnemy : public cShip
 {
 protected:
-    coreFlow  m_fLifeTime;           // 
-    coreFloat m_fLifeTimeBefore;     // 
+    coreFlow  m_fLifeTime;         // 
+    coreFloat m_fLifeTimeBefore;   // 
 
-    coreSet<cEnemy*> m_apMember;     // 
+    coreSet<cEnemy*> m_apMember;   // 
 
 
 public:
@@ -261,6 +261,12 @@ public:
     ENABLE_COPY(cStarEnemy)
     ASSIGN_ID(3, "Star")
 
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
+
 
 private:
     // execute own routines
@@ -338,6 +344,9 @@ public:
 
     // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
 
 
 private:

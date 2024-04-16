@@ -367,7 +367,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
         const coreObject3D* pLastEmitter = apStrikeEmitter[iNum-1u];
 
         // 
-        if(++m_iStrikeType > 3u) m_iStrikeType = 0u;
+        if(++m_iStrikeType >= 4u) m_iStrikeType = 0u;
         const coreVector2 vTexSizeFactor = coreVector2((m_iStrikeType & 0x02u) ? -1.0f : 1.0f,
                                                        (m_iStrikeType & 0x01u) ? -1.0f : 1.0f);
 
@@ -417,7 +417,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
 void cTeslaWeapon::__ShootOwn()
 {
     // 
-    if(++m_iShotType > 3) m_iShotType = 0;
+    if(++m_iShotType >= 4) m_iShotType = 0;
 
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();

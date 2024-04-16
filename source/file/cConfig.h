@@ -37,6 +37,7 @@
 #define CONFIG_INPUT_MOVE_RIGHT(s) "Input",    PRINT("S%zu_MoveRight", (s)),           (CORE_INPUT_KEY(D))
 #define CONFIG_INPUT_ACTION(s,n)   "Input",    PRINT("S%zu_Action%zu", (s), (n) + 1u), ((n) + coreUintW(CORE_INPUT_KEY(1)))
 
+#define CONFIG_GAME_TEXT_SIZE      "Game",     "TextSize",                             (0)
 #define CONFIG_GAME_GAME_ROTATION  "Game",     "GameRotation",                         (0)
 #define CONFIG_GAME_GAME_SCALE     "Game",     "GameScale",                            (100)
 #define CONFIG_GAME_HUD_ROTATION   "Game",     "HudRotation",                          (0)
@@ -92,6 +93,7 @@ struct sConfig final
 
     struct
     {
+        coreUint8 iTextSize;       // 
         coreUint8 iGameRotation;   // 
         coreUint8 iGameScale;      // 
         coreUint8 iHudRotation;    // 

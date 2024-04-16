@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD__H_   
 #define _P1_GUARD__H_   
 
+// TODO: map for each menu item to get "next" menu item when moving in menu, simple spatial pre-processing step
+
 
 // ****************************************************************
 // 

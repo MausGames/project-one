@@ -32,7 +32,7 @@
 // message box class
 class cMsgBox final : public coreObject2D
 {
-public:
+private:
     coreObject2D m_Box;                                      // 
     coreLabel    m_Msg;                                      // 
     coreButton   m_Yes;                                      // 

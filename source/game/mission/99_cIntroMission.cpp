@@ -68,7 +68,8 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
-    // simple without attacks, show group bonus
+    // simple without attacks, show scoring
+    // - 5: from different side than previous group, to not fly into players
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -136,7 +137,8 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
-    // simple without attacks, show infinity groups
+    // simple without attacks, show wave gameplay
+    // - 2: enemies cannot be killed in one run by shooting upwards, so they may fly another run
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)

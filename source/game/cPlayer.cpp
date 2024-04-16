@@ -495,7 +495,6 @@ void cPlayer::StartRolling(const coreVector2& vDirection)
     m_iRollDir  = PackDirection(vDirection);
 
     // 
-    this->ChangeType(TYPE_PLAYER_ROLL);
     this->EnableWind(vDirection);
 }
 
@@ -511,7 +510,6 @@ void cPlayer::EndRolling()
     m_iRollDir  = PLAYER_NO_ROLL;
 
     // 
-    this->ChangeType(this->IsFeeling() ? TYPE_PLAYER_FEEL : TYPE_PLAYER);
     this->DisableWind();
 }
 
@@ -527,7 +525,6 @@ void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
     m_iFeelType = iType;
 
     // 
-    this->ChangeType(TYPE_PLAYER_FEEL);
     this->EnableBubble();
 
     // 
@@ -547,7 +544,6 @@ void cPlayer::EndFeeling()
     m_iFeelType = 0u;
 
     // 
-    this->ChangeType(this->IsRolling() ? TYPE_PLAYER_ROLL : TYPE_PLAYER);
     this->DisableBubble();
 }
 
@@ -588,6 +584,9 @@ void cPlayer::DisableWind()
 void cPlayer::EnableBubble()
 {
     WARN_IF(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Bubble.SetAlpha(0.0f);
 
     // 
     m_Bubble.SetEnabled(CORE_OBJECT_ENABLE_ALL);

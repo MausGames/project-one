@@ -12,19 +12,16 @@
 // ****************************************************************
 // constructor
 cIntroMenu::cIntroMenu()noexcept
-: coreMenu      (3u, SURFACE_INTRO_EMPTY)
-, m_IntroTimer  (coreTimer(2.5f, 0.5f, 1u))
-, m_fIntroAlpha (1.0f)
-, m_iSelected   (0u)
+: coreMenu     (3u, SURFACE_INTRO_EMPTY)
+, m_IntroTimer (coreTimer(3.0f, 0.5f, 1u))
 {
     // create menu objects
-    m_MausLogo.DefineTexture(0u, "maus_logo.png");
-    m_MausLogo.DefineProgram("default_2d_program");
-    m_MausLogo.SetPosition  (coreVector2(0.0f,0.0f));
-    m_MausLogo.SetSize      (coreVector2(2.0f,1.0f) * 0.2f);
+    m_MartinMessage.Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_MartinMessage.SetPosition(coreVector2(0.0f,0.0f));
+    m_MartinMessage.SetText    ("A Game by Martin Mauersics");
 
     // bind menu objects
-    this->BindObject(SURFACE_INTRO_LOGO, &m_MausLogo);
+    this->BindObject(SURFACE_INTRO_MARTIN, &m_MartinMessage);
 
     // 
     const coreBool bSelectLanguage = Core::Language->GetPath()[0] ? false : true;
@@ -58,7 +55,7 @@ cIntroMenu::cIntroMenu()noexcept
 
     // 
     m_IntroTimer.Play(CORE_TIMER_PLAY_RESET);
-    this->ChangeSurface(bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_LOGO, 1.0f);
+    g_pMenu->AnimateSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_MARTIN, 0.75f);
 }
 
 
@@ -84,8 +81,8 @@ void cIntroMenu::Move()
     if(this->GetCurSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        FOR_EACH(it, m_apLanguageButton) if((*it)->IsFocused())     m_iSelected =  coreUint8(it - m_apLanguageButton.begin());
-        FOR_EACH(it, m_apLanguageButton) cMenu::UpdateButton((*it), m_iSelected == coreUint8(it - m_apLanguageButton.begin()));
+        FOR_EACH(it, m_apLanguageButton)
+            cMenu::UpdateButton((*it), (*it)->IsFocused());
 
         // 
         FOR_EACH(it, m_apLanguageButton)
@@ -111,47 +108,43 @@ void cIntroMenu::Move()
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        if(!this->GetTransition().GetStatus()) this->ChangeSurface(SURFACE_INTRO_LOGO, 1.0f);
+        if(!this->GetTransition().GetStatus()) this->ChangeSurface(SURFACE_INTRO_MARTIN, 1.0f);
     }
     else
     {
         // 
-        m_MausLogo.SetAlpha(m_MausLogo.GetAlpha() * m_fIntroAlpha);
+        m_IntroTimer.Update(1.0f);
 
-        if(m_IntroTimer.Update(1.0f))
+        if(m_IntroTimer.GetStatus())
         {
-            // 
-            m_iStatus = 1;
-        }
 
-        if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
-        {
-            // 
-            const coreFloat fTime1 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
-            if(fTime1 < 1.0f)
+            if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 // 
-                m_fIntroAlpha = m_MausLogo.GetAlpha();
+                const coreFloat fTime1 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
+                if((fTime1 >= 1.7f) && (fTime1 < 2.0f))
+                {
+                    // 
+                    m_IntroTimer.SetValue(2.0f);
+                }
             }
-            if(fTime1 < 1.75f)
+
+            // 
+            const coreFloat fTime2 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
+            if(fTime2 >= 2.0f)
             {
                 // 
-                m_IntroTimer.SetValue(1.75f);
-            }
-        }
+                m_iStatus = 1;
 
-        // 
-        const coreFloat fTime2 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
-        if(fTime2 >= 1.0f)
-        {
-            // 
-            this->ChangeSurface(SURFACE_INTRO_EMPTY, 1.0f);
-        }
-        if(fTime2 >= 1.75f)
-        {
-            // 
-            g_pEnvironment->Activate();
-            g_pPostProcessing->SetWallOpacity(CLAMP(1.35f * (fTime2 - 1.75f), 0.0f, 1.0f));
+                // 
+                g_pEnvironment->Activate();
+                g_pPostProcessing->SetWallOpacity(CLAMP(1.35f * (fTime2 - 2.0f), 0.0f, 1.0f));
+            }
+            else if(fTime2 >= 1.0f)
+            {
+                // 
+                g_pMenu->AnimateSurface(this, SURFACE_INTRO_EMPTY, 0.75f);
+            }
         }
     }
 }

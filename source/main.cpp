@@ -440,6 +440,18 @@ static void DebugGame()
         }
     }
 
+    // damage enemies
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(I), CORE_INPUT_PRESS))
+    {
+        if(STATIC_ISVALID(g_pGame))
+        {
+            g_pGame->GetEnemyManager()->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
+            {
+                pEnemy->TakeDamage(10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+            });
+        }
+    }
+
     // damage boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
     {
@@ -499,8 +511,4 @@ static void DebugGame()
         Core::Debug->InspectValue("Bullets", coreUint32(g_pGame->GetBulletManagerPlayer()->GetNumBullets() + g_pGame->GetBulletManagerEnemy()->GetNumBullets()));
         Core::Debug->InspectValue("Enemies", coreUint32(Core::Manager::Object->GetObjectList(TYPE_ENEMY).size()));
     }
-
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_PRESS)) g_pSpecialEffects->CreateBlastSphere  (coreVector3(0.0f,0.0f,0.0f),                              SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_ENERGY_BLUE, 0.75f));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(U), CORE_INPUT_PRESS)) g_pSpecialEffects->CreateBlastQuad    (coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_ENERGY_BLUE, 0.75f));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(I), CORE_INPUT_PRESS)) g_pSpecialEffects->CreateBlastTriangle(coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_ENERGY_BLUE, 0.75f));
 }
