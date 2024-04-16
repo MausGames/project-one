@@ -20,14 +20,16 @@
 // TODO: shift spear-bullet collision like ray-bullet
 // TODO: bullet -> to POD-type with single parent object
 // TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
+// TODO: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
 
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT     (16u)     // initial size when creating a new bullet set
-#define BULLET_SET_COUNT    (16u)     // 
-#define BULLET_SPEED_FACTOR (30.0f)   // 
-#define BULLET_DEPTH_FACTOR (0.8f)    // 
+#define BULLET_SET_INIT         (16u)     // initial size when creating a new bullet set
+#define BULLET_SET_COUNT        (16u)     // 
+#define BULLET_SPEED_FACTOR     (30.0f)   // 
+#define BULLET_DEPTH_FACTOR     (0.8f)    // 
+#define BULLET_COLLISION_FACTOR (0.8f)    // (for enemy bullets) 
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
@@ -50,6 +52,7 @@ protected:
 
     coreFloat m_fDepth;              // 
     coreFlow  m_fAnimation;          // animation value
+    coreFlow  m_fFade;               // 
 
     coreUint8 m_iElement;            // 
 
@@ -79,25 +82,24 @@ public:
     void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
-    inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); 
-    //this->ChangeTexSize(fFactor); 
-    return this;}
-    inline cBullet* ChangeAlpha  (const coreFloat fFactor) {this->SetAlpha  (this->GetAlpha  () * fFactor); return this;}
+    inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); return this;}
     inline cBullet* ChangeTexSize(const coreFloat fFactor) {this->SetTexSize(this->GetTexSize() * fFactor); return this;}
 
-     
-    inline void SetDamage(const coreInt32    iDamage) {m_iDamage = iDamage;}
-    inline void SetSpeed (const coreFloat    fSpeed)  {m_fSpeed  = fSpeed * BULLET_SPEED_FACTOR;}
-    inline void SetFlyDir(const coreVector2& vFlyDir) {m_vFlyDir = vFlyDir;}
-     
+    // 
+    inline void SetDamage (const coreInt32    iDamage)  {m_iDamage  = iDamage;}
+    inline void SetSpeed  (const coreFloat    fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}
+    inline void SetFade   (const coreFloat    fFade)    {m_fFade    = fFade;}
+    inline void SetFlyTime(const coreFloat    fFlyTime) {m_fFlyTime = fFlyTime;}
+    inline void SetFlyDir (const coreVector2& vFlyDir)  {m_vFlyDir  = vFlyDir;}
 
     // get object properties
     inline const coreInt32&   GetDamage ()const {return m_iDamage;}
-    inline       coreFloat    GetSpeed  ()const {return m_fSpeed / BULLET_SPEED_FACTOR;}
+    inline       coreFloat    GetSpeed  ()const {return m_fSpeed * (1.0f / BULLET_SPEED_FACTOR);}
     inline       cShip*       GetOwner  ()const {return m_pOwner;}
     inline const coreUint8&   GetElement()const {return m_iElement;}
     inline const coreFloat&   GetFlyTime()const {return m_fFlyTime;}
     inline const coreVector2& GetFlyDir ()const {return m_vFlyDir;}
+    inline       coreVector2  GetFlyMove()const {return m_vFlyDir * (m_fSpeed * Core::System->GetTime());}
 
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
@@ -208,7 +210,7 @@ public:
 class cRayBullet final : public cBullet
 {
 private:
-    coreFlow m_fFade;   // 
+    coreFloat m_fScale;   // 
 
 
 public:
@@ -218,7 +220,10 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
+
+    // 
+    inline cRayBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
     inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -249,7 +254,7 @@ private:
 class cPulseBullet final : public cBullet
 {
 private:
-    coreFlow m_fFade;   // 
+    coreFloat m_fScale;   // 
 
 
 public:
@@ -259,7 +264,10 @@ public:
     ASSIGN_ID(2, "Pulse")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(1.0f,2.5f,1.0f) * 1.3f); this->SetTexSize(coreVector2(0.2f,0.4f)); m_fAnimation = 0.2f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.2f,0.4f)); m_fAnimation = 0.2f; m_fFade = 0.0f; m_fScale = 1.0f;}
+
+    // 
+    inline cPulseBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
     inline cPulseBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -279,36 +287,41 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
 // ****************************************************************
-// wave2 bullet class
-class cWave2Bullet final : public cBullet
+// surge bullet class
+class cSurgeBullet final : public cBullet
 {
 private:
-    coreFlow m_fFade;   // 
+    coreFloat m_fScale;   // 
 
 
 public:
-    cWave2Bullet()noexcept;
+    cSurgeBullet()noexcept;
 
-    ENABLE_COPY(cWave2Bullet)
-    ASSIGN_ID(14, "Wave2")
+    ENABLE_COPY(cSurgeBullet)
+    ASSIGN_ID(3, "Surge")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f; m_fFade = 0.0f; m_fScale = 1.0f;}
+
+    // 
+    inline cSurgeBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
-    inline cWave2Bullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
-    inline cWave2Bullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cWave2Bullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cWave2Bullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
-    inline cWave2Bullet* MakePurple() {ASSERT(false)            return this;}
-    inline cWave2Bullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cWave2Bullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cWave2Bullet* MakeGreen () {this->_MakeGreen (1.1f); return this;}
+    inline cSurgeBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
+    inline cSurgeBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cSurgeBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cSurgeBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
+    inline cSurgeBullet* MakePurple() {ASSERT(false)            return this;}
+    inline cSurgeBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cSurgeBullet* MakeCyan  () {ASSERT(false)            return this;}
+    inline cSurgeBullet* MakeGreen () {this->_MakeGreen (1.1f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -329,6 +342,8 @@ private:
 class cTeslaBullet final : public cBullet
 {
 private:
+    coreFloat m_fScale;          // 
+
     coreFlow m_fLightningTime;   // 
     coreBool m_bLightningSide;   // 
 
@@ -337,10 +352,13 @@ public:
     cTeslaBullet()noexcept;
 
     ENABLE_COPY(cTeslaBullet)
-    ASSIGN_ID(6, "Tesla")
+    ASSIGN_ID(4, "Tesla")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetTexSize(coreVector2(0.14f,0.14f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.14f,0.14f)); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f; m_fLightningTime = 1.0f;}
+
+    // 
+    inline cTeslaBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
     inline cTeslaBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -360,7 +378,9 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -372,10 +392,10 @@ public:
     cOrbBullet()noexcept;
 
     ENABLE_COPY(cOrbBullet)
-    ASSIGN_ID(3, "Orb")
+    ASSIGN_ID(5, "Orb")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
     inline cOrbBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -395,8 +415,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -408,10 +429,10 @@ public:
     cConeBullet()noexcept;
 
     ENABLE_COPY(cConeBullet)
-    ASSIGN_ID(4, "Cone")
+    ASSIGN_ID(6, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f); m_fAnimation = 0.3f;}
+    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f); m_fAnimation = 0.3f; m_fFade = 0.0f;}
 
     // change default color
     inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -431,8 +452,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -444,10 +466,10 @@ public:
     cWaveBullet()noexcept;
 
     ENABLE_COPY(cWaveBullet)
-    ASSIGN_ID(5, "Wave")
+    ASSIGN_ID(7, "Wave")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f;}
+    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f; m_fFade = 0.0f;}
 
     // change default color
     inline cWaveBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -467,8 +489,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -480,10 +503,10 @@ public:
     cSpearBullet()noexcept;
 
     ENABLE_COPY(cSpearBullet)
-    ASSIGN_ID(9, "Spear")
+    ASSIGN_ID(8, "Spear")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.15f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.15f; m_fFade = 0.0f;}
 
     // change default color
     inline cSpearBullet* MakeWhite () {this->_MakeWhite (0.8f); return this;}
@@ -503,8 +526,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -516,10 +540,10 @@ public:
     cTriangleBullet()noexcept;
 
     ENABLE_COPY(cTriangleBullet)
-    ASSIGN_ID(10, "Triangle")
+    ASSIGN_ID(9, "Triangle")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
     inline cTriangleBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -539,8 +563,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -552,10 +577,10 @@ public:
     cFlipBullet()noexcept;
 
     ENABLE_COPY(cFlipBullet)
-    ASSIGN_ID(11, "Flip")
+    ASSIGN_ID(10, "Flip")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); this->SetTexSize(coreVector2(0.4f,0.2f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); this->SetTexSize(coreVector2(0.4f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
     inline cFlipBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -575,8 +600,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -588,10 +614,10 @@ public:
     cQuadBullet()noexcept;
 
     ENABLE_COPY(cQuadBullet)
-    ASSIGN_ID(12, "Quad")
+    ASSIGN_ID(11, "Quad")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
     inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -611,8 +637,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -628,10 +655,10 @@ public:
     cMineBullet()noexcept;
 
     ENABLE_COPY(cMineBullet)
-    ASSIGN_ID(7, "Mine")
+    ASSIGN_ID(12, "Mine")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
@@ -646,6 +673,7 @@ public:
 private:
     // execute own routines
     void __ImpactOwn      (const coreVector2& vImpact)final;
+    void __ReflectOwn     ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };
@@ -659,10 +687,10 @@ public:
     cRocketBullet()noexcept;
 
     ENABLE_COPY(cRocketBullet)
-    ASSIGN_ID(8, "Rocket")
+    ASSIGN_ID(13, "Rocket")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
@@ -672,8 +700,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -689,10 +718,10 @@ public:
     cChromaBullet()noexcept;
 
     ENABLE_COPY(cChromaBullet)
-    ASSIGN_ID(13, "Chroma")
+    ASSIGN_ID(14, "Chroma")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_fScale = 1.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_fFade = 0.0f; m_fScale = 1.0f;}
 
     // 
     inline cChromaBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
@@ -705,8 +734,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 

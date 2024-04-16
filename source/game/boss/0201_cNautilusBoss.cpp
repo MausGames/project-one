@@ -156,7 +156,7 @@ void cNautilusBoss::__MoveOwn()
             //if((iTick / 5u) & 0x01u) g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos + vSide, -vDir)->ChangeSize(1.2f);
             //                    else g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos - vSide, -vDir)->ChangeSize(1.2f);
 
-            const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
+            const coreVector2 vPlayerPos = this->NearestPlayerSide()->GetPosition().xy();
             if((iTick / 5u) & 0x01u) g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos + vSide, (vPlayerPos - (vPos + vSide)).Normalized())->ChangeSize(1.2f);
                                 else g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos - vSide, (vPlayerPos - (vPos - vSide)).Normalized())->ChangeSize(1.2f);
 
@@ -233,7 +233,7 @@ void cNautilusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.15f, LERP_LINEAR)
         {
-            const cPlayer*  pPlayer = this->NearestPlayer();
+            const cPlayer*  pPlayer = this->NearestPlayerDual(m_aiCounter[DASH_SIDE]);
             const coreFloat fAim    = (pPlayer->GetPosition().x - this->GetPosition().x) * Core::System->GetTime() * fTime * 3.0f;
 
             this->SetPosition         (coreVector3(this->GetPosition().x + fAim, this->GetPosition().y, 0.0f));
@@ -442,7 +442,7 @@ void cNautilusBoss::__MoveOwn()
             const coreVector3 vPos = this->GetPosition();
 
             // 
-            this->__EnableBullet(vPos.xy(), this->NearestPlayer()->GetPosition().xy());
+            this->__EnableBullet(vPos.xy(), this->NearestPlayerDual(m_aiCounter[INK_INDEX])->GetPosition().xy());
 
             // 
             g_pSpecialEffects->CreateSplashSmoke(vPos, SPECIAL_SPLASH_TINY, coreVector3(0.1f,0.1f,0.1f));

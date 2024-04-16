@@ -23,6 +23,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
     // allocate smoke list
     pList1 = new coreBatchList(VOLCANO_SMOKE_RESERVE);
+                pList1->DefineProgram("effect_decal_color_inst_program");
     {
         for(coreUintW i = 0u; i < VOLCANO_SMOKE_NUM; ++i)
         {
@@ -43,6 +44,11 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
                     // add object to the list
                     pList1->BindObject(pObject);
+                    
+                    
+                    
+        pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
+        pObject->DefineProgram("effect_decal_color_program");
                 }
             }
         }

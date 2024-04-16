@@ -14,6 +14,7 @@
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
 // TODO: implement own enemy-types for custom-enemies which would require instancing
 // TODO: virtual void Render()override; -> final
+// TODO: remove "/ iPower"
 
 
 // ****************************************************************
@@ -76,13 +77,14 @@ public:
     void ResetProperties();
 
     // 
-    inline coreBool IsParent()const {return !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
-    inline coreBool IsChild ()const {return  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
+    inline coreBool IsParent()const {return !m_apMember.empty() && !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsChild ()const {return !m_apMember.empty() &&  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
 
     // 
-    cPlayer*    NearestPlayer(const coreUintW iIndex)const;
-    coreVector2 AimAtPlayer  (const coreUintW iIndex)const;
-    coreVector2 AimAtPlayer  (const cPlayer*  pPlayer)const;
+    cPlayer*    NearestPlayerSide()const;
+    cPlayer*    NearestPlayerDual(const coreUintW iIndex)const;
+    coreVector2 AimAtPlayerSide  ()const;
+    coreVector2 AimAtPlayerDual  (const coreUintW iIndex)const;
 
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
@@ -145,6 +147,24 @@ public:
     void RenderOver ();
     void RenderTop  ();
     void Move       ();
+    
+    
+    
+void MoveBefore()
+{
+    FOR_EACH(it, m_apAdditional)
+        (*it)->_UpdateAlwaysBefore();
+
+    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
+    {
+        if(!m_apEnemySet[i]) continue;
+        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
+
+        FOR_EACH(it, *pEnemyActive->List())
+            d_cast<cEnemy*>(*it)->_UpdateAlwaysBefore();
+    }
+}
+
 
     // add and remove enemies
     template <typename T> RETURN_RESTRICT T* AllocateEnemy();

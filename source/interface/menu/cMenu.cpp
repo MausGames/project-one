@@ -675,7 +675,7 @@ void cMenu::__Reset(const coreResourceReset eInit)
 {
     if(eInit)
     {
-        // --setopt=install_weak_deps=never
+        // 
         m_aFrameBuffer[0].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
         m_aFrameBuffer[1].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
         m_aFrameBuffer[2].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);

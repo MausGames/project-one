@@ -811,7 +811,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            const cPlayer*    pPlayer = pEnemy->NearestPlayer();
+            const cPlayer*    pPlayer = pEnemy->NearestPlayerDual(0u);
             const coreVector2 vDiff   = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
 
             if(coreVector2::Dot(vDiff, pEnemy->GetDirection().xy()) <= 0.0f)
@@ -984,7 +984,7 @@ void cErrorMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            const cPlayer*    pPlayer = pEnemy->NearestPlayer();
+            const cPlayer*    pPlayer = pEnemy->NearestPlayerDual(0u);
             const coreVector2 vDiff   = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
 
             if(coreVector2::Dot(vDiff, pEnemy->GetDirection().xy()) <= 0.0f)
@@ -1036,7 +1036,7 @@ void cErrorMission::__SetupOwn()
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
 
-            pEnemy->DefaultMoveTarget(pEnemy->NearestPlayer()->GetPosition().xy(), 20.0f, 2.0f);
+            pEnemy->DefaultMoveTarget(pEnemy->NearestPlayerDual(0u)->GetPosition().xy(), 20.0f, 2.0f);
             
 
         });
@@ -1109,8 +1109,8 @@ void cErrorMission::__SetupOwn()
 
             if(STAGE_TAKEOFF)
             {
-                afOldOffset[i % 4u] = pEnemy                 ->GetPosition().arr(bRotate);
-                afNewOffset[i % 4u] = pEnemy->NearestPlayer()->GetPosition().arr(bRotate);
+                afOldOffset[i % 4u] = pEnemy                       ->GetPosition().arr(bRotate);
+                afNewOffset[i % 4u] = pEnemy->NearestPlayerDual(0u)->GetPosition().arr(bRotate);
             }
             else if(STAGE_LIFETIME_BEFORE(1.0f))
             {
@@ -1232,7 +1232,7 @@ void cErrorMission::__SetupOwn()
             if(STAGE_TICK_LIFETIME(1.0f, 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+                const coreVector2 vDir = pEnemy->AimAtPlayerDual(0u).Normalized();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.2f);
             }

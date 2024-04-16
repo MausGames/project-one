@@ -308,7 +308,7 @@ void cViridoMission::__SetupOwn()
             if(STAGE_LIFETIME_AFTER(0.7f) && STAGE_TICK_LIFETIME(1.0f, 0.0f))
             {
                 const coreVector2 vPos  = pEnemy->GetPosition().xy();
-                const coreFloat   fBase = ((i >= 8u && i < 14u) ? pEnemy->GetDirection().xy() : pEnemy->AimAtPlayer()).Angle();
+                const coreFloat   fBase = ((i >= 8u && i < 14u) ? pEnemy->GetDirection().xy() : pEnemy->AimAtPlayerSide()).Angle();
 
                 for(coreUintW j = 3u; j--; )
                 {
@@ -516,9 +516,8 @@ void cViridoMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(3u)
-            STAGE_GET_UINT64(iLastEnemy)
-            STAGE_GET_UINT  (iBadgeState)
+        STAGE_GET_START(2u)
+            STAGE_GET_VEC2(vLastPos)
         STAGE_GET_END
 
         const auto nSpawnFunc = [&](const coreVector2 vPos, const coreUintW iIndex)
@@ -546,8 +545,8 @@ void cViridoMission::__SetupOwn()
         {
                  if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
             else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 4u)
-            else if(STAGE_SUB(3u)) nSpawnFunc(s_cast<const cEnemy*>(I_TO_P(iLastEnemy))->GetPosition().xy(), 5u);
-            else if(STAGE_SUB(4u)) nSpawnFunc(s_cast<const cEnemy*>(I_TO_P(iLastEnemy))->GetPosition().xy(), 6u);
+            else if(STAGE_SUB(3u)) nSpawnFunc(vLastPos, 5u);
+            else if(STAGE_SUB(4u)) nSpawnFunc(vLastPos, 6u);
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -566,7 +565,7 @@ void cViridoMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            pEnemy->DefaultMoveTarget(pEnemy->NearestPlayer()->GetPosition().xy(), LERPB(50.0f, 20.0f, MIN(pEnemy->GetLifeTime(), 1.0f)), 2.0f);
+            pEnemy->DefaultMoveTarget(pEnemy->NearestPlayerDual(i % 2u)->GetPosition().xy(), LERPB(50.0f, 20.0f, MIN(pEnemy->GetLifeTime(), 1.0f)), 2.0f);
 
             if(STAGE_LIFETIME_AFTER(0.4f) && STAGE_TICK_LIFETIME(6.0f, 0.0f))
             {
@@ -576,31 +575,27 @@ void cViridoMission::__SetupOwn()
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, pEnemy, vPos, vDir)->ChangeSize(1.1f);
             }
 
-            iLastEnemy = P_TO_UI(pEnemy);
+            vLastPos = pEnemy->GetPosition().xy();
         });
 
-        STAGE_COLL_PLAYER_ENEMY(pPlayer, pEnemy, vIntersection, bFirstHit, COLL_REF(iBadgeState))
+        STAGE_COLL_PLAYER_ENEMY(pPlayer, pEnemy, vIntersection, bFirstHit, COLL_THIS)
         {
             if(!bFirstHit || (pEnemy->GetID() != cCinderEnemy::ID)) return;
 
+            STAGE_BADGE(BADGE_EASY, pPlayer->GetPosition())
             pEnemy->TakeDamage(100, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
-
-            if(!iBadgeState)
-            {
-                iBadgeState = 1u;
-                STAGE_BADGE(BADGE_EASY, pPlayer->GetPosition())
-            }
         });
 
         STAGE_WAVE("VIER", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // enemies move and shoot with player
     // schießen auf cooldown der waffe
     // gegner müssen immer gegen schussrichtung schießen um leichte kills zu vermeiden (speziell wenn ihre richtung fix ist, oder eine ihrer pos-achsen)
     // gegner in 3, wenn sie von ner schräge kommen sieht man alle 4 selbst wenn man am rand oder der ecke fliegt, müssen aber weit genug vom rand spawnen um kollisionen zu vermeiden wenn spieler in ecke ist
     // enemies not visible are not allowed to shoot (especially in sub 3)
+    // in coop: wenn spieler stirbt soll ziel-spieler gewechselt werden, aber nicht bei wiederbelebung
     // TODO: flying directly between two enemies can cause infinity push between two enemies (especially in sub-phase 4)
     STAGE_MAIN
     {
@@ -613,36 +608,41 @@ STAGE_START_HERE
             });
         });
 
-        STAGE_GET_START(3u)
+        STAGE_GET_START(4u)
             STAGE_GET_VEC2 (vBaseRefPos)
+            STAGE_GET_UINT (iPlayerTarget, iPlayerTarget = 1u)
             STAGE_GET_FLOAT(vPlayerLerp)
         STAGE_GET_END
 
-        const cPlayer* pPlayer1 = g_pGame->FindPlayerDual(0u);
-        const cPlayer* pPlayer2 = g_pGame->FindPlayerDual(1u);
+        const cPlayer* pPlayer1 = g_pGame->GetPlayer(0u);
+        const cPlayer* pPlayer2 = g_pGame->GetPlayer(1u);
         STATIC_ASSERT(GAME_PLAYERS == 2u)
 
-        if(CONTAINS_FLAG(pPlayer1->GetStatus(), PLAYER_STATUS_DEAD)) vPlayerLerp = MIN(vPlayerLerp + 0.3f*Core::System->GetTime(), 1.0f);
-                                                                else vPlayerLerp = MAX(vPlayerLerp - 0.3f*Core::System->GetTime(), 0.0f);
+        const coreBool bCleared = STAGE_CLEARED;
 
-        if(STAGE_CLEARED)
+             if(CONTAINS_FLAG(pPlayer1->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 1u;
+        else if(CONTAINS_FLAG(pPlayer2->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 0u;
+        else if(bCleared)                                                 iPlayerTarget = 1u - iPlayerTarget;
+
+             if(bCleared)      vPlayerLerp = I_TO_F(iPlayerTarget);
+        else if(iPlayerTarget) vPlayerLerp = MIN(vPlayerLerp + 1.0f*Core::System->GetTime(), 1.0f);
+        else                   vPlayerLerp = MAX(vPlayerLerp - 1.0f*Core::System->GetTime(), 0.0f);
+
+        const coreVector2 vBasePos   = LERPS(pPlayer1->GetPosition ().xy(), pPlayer2->GetPosition ().xy(), vPlayerLerp) / FOREGROUND_AREA;
+        const coreVector2 vBaseDir   = LERPS(pPlayer1->GetDirection().xy(), pPlayer2->GetDirection().xy(), vPlayerLerp).Normalized();
+        const coreBool    bBaseShoot = pPlayer1->GetWeapon(0u)->GetCooldown() || pPlayer2->GetWeapon(0u)->GetCooldown();
+
+        if(bCleared)
         {
                  if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  3u)
             else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  4u, 11u)
             else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 12u, 19u)
-            //else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 20u, 27u)
 
-            const coreVector2 vPos = pPlayer1->GetPosition().xy();
+            const coreVector2 vPos = vBasePos;
             const coreVector2 vDir = -vPos.Normalized();
 
-            //if(m_iStageSub == 4u) vBaseRefPos = coreVector2(0.0f, SIGN(vPos.y) * -1.3f);
-            //                 else 
             vBaseRefPos = (vPos + vDir * g_pForeground->RayIntersection(vPos, vDir, 1.4f)) / FOREGROUND_AREA;
         }
-
-        const coreVector2 vBasePos   = LERP(pPlayer1->GetPosition ().xy(), pPlayer2->GetPosition ().xy(), vPlayerLerp) / FOREGROUND_AREA;
-        const coreVector2 vBaseDir   = LERP(pPlayer1->GetDirection().xy(), pPlayer2->GetDirection().xy(), vPlayerLerp).Normalized();
-        const coreBool    bBaseShoot = pPlayer1->GetWeapon(0u)->GetCooldown() || pPlayer2->GetWeapon(0u)->GetCooldown();
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -655,42 +655,31 @@ STAGE_START_HERE
             {
             default: ASSERT(false)
 
-            case  0u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f,-0.12f).Rotated45(); break; //vNewRefPos = vNewRefPos - coreVector2(-0.12f,-0.12f).Rotated135(); break;
-            case  1u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f,-0.12f).Rotated45(); break; //vNewRefPos = vNewRefPos - coreVector2( 0.12f,-0.12f).Rotated135(); break;
-            case  2u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f, 0.12f).Rotated45(); break; //vNewRefPos = vNewRefPos - coreVector2(-0.12f, 0.12f).Rotated135(); break;
-            case  3u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f, 0.12f).Rotated45(); break; //vNewRefPos = vNewRefPos - coreVector2( 0.12f, 0.12f).Rotated135(); break;
+            case  0u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f,-0.12f).Rotated45(); break;
+            case  1u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f,-0.12f).Rotated45(); break;
+            case  2u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f, 0.12f).Rotated45(); break;
+            case  3u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f, 0.12f).Rotated45(); break;
 
-            case  4u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f,-0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break; //vNewRefPos =  vNewRefPos.Rotated90() + coreVector2(-0.12f,-0.12f).Rotated45(); break;
-            case  5u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f,-0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break; //vNewRefPos =  vNewRefPos.Rotated90() + coreVector2( 0.12f,-0.12f).Rotated45(); break;
-            case  6u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f, 0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break; //vNewRefPos =  vNewRefPos.Rotated90() + coreVector2(-0.12f, 0.12f).Rotated45(); break;
-            case  7u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f, 0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break; //vNewRefPos =  vNewRefPos.Rotated90() + coreVector2( 0.12f, 0.12f).Rotated45(); break;
-            case  8u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f,-0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break; //vNewRefPos = -vNewRefPos.Rotated90() - coreVector2(-0.12f,-0.12f).Rotated45(); break;
-            case  9u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f,-0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break; //vNewRefPos = -vNewRefPos.Rotated90() - coreVector2( 0.12f,-0.12f).Rotated45(); break;
-            case 10u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f, 0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break; //vNewRefPos = -vNewRefPos.Rotated90() - coreVector2(-0.12f, 0.12f).Rotated45(); break;
-            case 11u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f, 0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break; //vNewRefPos = -vNewRefPos.Rotated90() - coreVector2( 0.12f, 0.12f).Rotated45(); break;
+            case  4u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f,-0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break;
+            case  5u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f,-0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break;
+            case  6u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f, 0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break;
+            case  7u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f, 0.12f).Rotated45(); vNewPos =  vNewPos.Rotated90(); break;
+            case  8u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f,-0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break;
+            case  9u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f,-0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break;
+            case 10u: vNewPos = -vNewPos * 0.85f + coreVector2(-0.12f, 0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break;
+            case 11u: vNewPos = -vNewPos * 0.85f + coreVector2( 0.12f, 0.12f).Rotated45(); vNewPos = -vNewPos.Rotated90(); break;
 
-            case 12u: vNewPos = vNewPos + coreVector2( 0.6f,  0.0f);  vNewRefPos = coreVector2( 1.4f, 0.0f); vNewRefPos = coreVector2( 0.0f, 1.4f); break;
-            case 13u: vNewPos = vNewPos + coreVector2(-0.6f,  0.0f);  vNewRefPos = coreVector2(-1.4f, 0.0f); vNewRefPos = coreVector2( 0.0f,-1.4f); break;
-            case 14u: vNewPos = vNewPos + coreVector2( 0.0f,  0.6f);  vNewRefPos = coreVector2( 0.0f, 1.4f); vNewRefPos = coreVector2(-1.4f, 0.0f); break;
-            case 15u: vNewPos = vNewPos + coreVector2( 0.0f, -0.6f);  vNewRefPos = coreVector2( 0.0f,-1.4f); vNewRefPos = coreVector2( 1.4f, 0.0f); break;
-            case 16u: vNewPos = vNewPos + coreVector2( 0.84f, 0.0f);  vNewRefPos = coreVector2( 1.4f, 0.0f); vNewRefPos = coreVector2( 0.0f, 1.4f); break;
-            case 17u: vNewPos = vNewPos + coreVector2(-0.84f, 0.0f);  vNewRefPos = coreVector2(-1.4f, 0.0f); vNewRefPos = coreVector2( 0.0f,-1.4f); break;
-            case 18u: vNewPos = vNewPos + coreVector2( 0.0f,  0.84f); vNewRefPos = coreVector2( 0.0f, 1.4f); vNewRefPos = coreVector2(-1.4f, 0.0f); break;
-            case 19u: vNewPos = vNewPos + coreVector2( 0.0f, -0.84f); vNewRefPos = coreVector2( 0.0f,-1.4f); vNewRefPos = coreVector2( 1.4f, 0.0f); break;
-
-            //case 20u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f - 0.6f; vNewPos.y =  0.96f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x;                         break;
-            //case 21u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f - 0.6f; vNewPos.y =  0.72f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x;                         break;
-            //case 22u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f - 0.6f; vNewPos.y = -0.96f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x; vNewRef.y = -vNewRef.y; break;
-            //case 23u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f - 0.6f; vNewPos.y = -0.72f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x; vNewRef.y = -vNewRef.y; break;
-            //case 24u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f + 0.6f; vNewPos.y =  0.96f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x;                         break;
-            //case 25u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f + 0.6f; vNewPos.y =  0.72f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x;                         break;
-            //case 26u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f + 0.6f; vNewPos.y = -0.96f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x; vNewRef.y = -vNewRef.y; break;
-            //case 27u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f + 0.6f; vNewPos.y = -0.72f * SIGN(vRefPos.y); vNewRef.x = vNewPos.x; vNewRef.y = -vNewRef.y; break;
+            case 12u: vNewPos = vNewPos + coreVector2( 0.6f,  0.0f);  vNewRefPos = coreVector2( 0.0f, 1.4f); break;
+            case 13u: vNewPos = vNewPos + coreVector2(-0.6f,  0.0f);  vNewRefPos = coreVector2( 0.0f,-1.4f); break;
+            case 14u: vNewPos = vNewPos + coreVector2( 0.0f,  0.6f);  vNewRefPos = coreVector2(-1.4f, 0.0f); break;
+            case 15u: vNewPos = vNewPos + coreVector2( 0.0f, -0.6f);  vNewRefPos = coreVector2( 1.4f, 0.0f); break;
+            case 16u: vNewPos = vNewPos + coreVector2( 0.84f, 0.0f);  vNewRefPos = coreVector2( 0.0f, 1.4f); break;
+            case 17u: vNewPos = vNewPos + coreVector2(-0.84f, 0.0f);  vNewRefPos = coreVector2( 0.0f,-1.4f); break;
+            case 18u: vNewPos = vNewPos + coreVector2( 0.0f,  0.84f); vNewRefPos = coreVector2(-1.4f, 0.0f); break;
+            case 19u: vNewPos = vNewPos + coreVector2( 0.0f, -0.84f); vNewRefPos = coreVector2( 1.4f, 0.0f); break;
             }
 
             vNewPos = LERPB(vNewRefPos, vNewPos, MIN(0.7f * fLifeTime, 1.0f));
-
-            //if(m_iStageSub == 4u) vNewPos.x = FMOD(vNewPos.x + SIGN(vNewPos.x) * 1.2f, 2.4f) - SIGN(vNewPos.x) * 1.2f;
 
             pEnemy->SetPosition (coreVector3(vNewPos * FOREGROUND_AREA, 0.0f));
             pEnemy->SetDirection(coreVector3(-vBaseDir,                 0.0f));
@@ -757,7 +746,7 @@ STAGE_START_HERE
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(1, COLOR_SHIP_YELLOW);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -814,7 +803,7 @@ STAGE_START_HERE
             if((i)    % 2u) pEnemy->Rotate180();
             if((i/2u) % 2u) pEnemy->Rotate90();
 
-            const coreFloat fTurn = coreVector2::Dot(pEnemy->AimAtPlayer().Normalized(), vShootDir.Rotated90());
+            const coreFloat fTurn = coreVector2::Dot(pEnemy->AimAtPlayerDual(i % 2u).Normalized(), vShootDir.Rotated90());
 
             pEnemy->SetDirection(coreVector3(STAGE_TAKEOFF ? -pEnemy->GetDirection().xy() : coreVector2::Direction(vShootDir.Angle() + MIN(ABS(fTurn) * 5.0f, 1.0f) * SIGN(fTurn) * -1.2f * Core::System->GetTime()), 0.0f));
 
@@ -892,6 +881,7 @@ STAGE_START_HERE
     // explode into bullets on death
     // - all: number of bullet waves is uneven, to create a better pattern visually
     // - all: number of enemies is uneven, to let them cross the center alternately, but still in equal distance
+    // TODO: slower with size
     STAGE_MAIN
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 9u)
@@ -1020,7 +1010,7 @@ STAGE_START_HERE
 
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            const coreVector2 vDiff   = pEnemy->AimAtPlayer ();
+            const coreVector2 vDiff   = pEnemy->AimAtPlayerDual((((i / 4u) % 2u) ? ((i / 2u) % 2u) : (i % 2u)) ? 0u : 1u);
             const coreVector2 vCurPos = pEnemy->GetPosition ().xy();
             coreVector2       vCurDir = pEnemy->GetDirection().xy();
 
@@ -1084,6 +1074,7 @@ STAGE_START_HERE
     // - all: bullet frequency is not too high, to better distinguish individual bullets
     // - all: enemy attack begins later, to not slow down bullets immediately after shooting
     // - 1,2: enemy path is not too wide, to not slow down bullets immediately after shooting
+    // TODO: enemy or golden ball (1-N) hides in blue balls, to attack for badge
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -1156,7 +1147,7 @@ STAGE_START_HERE
             if(STAGE_LIFETIME_AFTER_BASE(((i == 3u) ? pPath3 : pPath1)->GetTotalDistance()) && STAGE_TICK_LIFETIME_BASE(6.0f, (i == 2u) ? 0.5f : 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+                const coreVector2 vDir = pEnemy->AimAtPlayerDual(i % 2u).Normalized();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.9f, pEnemy, vPos, vDir)->ChangeSize(0.0f)->ChangeTexSize(3.0f);
                 if(i == 3u)
@@ -1305,7 +1296,7 @@ STAGE_START_HERE
                         }
                         else
                         {
-                            avNewPos  [i] = pEnemy->NearestPlayer()->GetPosition().xy();
+                            avNewPos  [i] = pEnemy->NearestPlayerDual(i % 2u)->GetPosition().xy();
                             avNewAngle[i] = avOldAngle[i] + 2.0f*PI;
                         }
 
@@ -1444,7 +1435,7 @@ STAGE_START_HERE
                 if(STAGE_TICK_TIME(30.0f, 0.0f))
                 {
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
-                    const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+                    const coreVector2 vDir = pEnemy->AimAtPlayerDual(i % 2u).Normalized();
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (i < 16u) ? 0.5f : 0.0f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
                 }
@@ -1455,7 +1446,7 @@ STAGE_START_HERE
                 const coreVector2 vOffset = coreVector2((I_TO_F(i % 4u) - 1.5f + (((i % 4u) < 2u) ? -1.0f : 1.0f)) * 0.22f, ((i % 8u) < 4u) ? 0.0f : 0.22f);
 
                 pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-                pEnemy->SetDirection   (coreVector3(pEnemy->AimAtPlayer().Normalized(), 0.0f));
+                pEnemy->SetDirection   (coreVector3(pEnemy->AimAtPlayerDual(i % 2u).Normalized(), 0.0f));
             }
             else
             {
@@ -1467,7 +1458,7 @@ STAGE_START_HERE
                 if(i >= 24u) pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy().Rotated90() * mRota, 0.0f));
                         else pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy()             * mRota, 0.0f));
 
-                pEnemy->SetDirection(coreVector3(pEnemy->AimAtPlayer().Normalized(), 0.0f));
+                pEnemy->SetDirection(coreVector3(pEnemy->AimAtPlayerDual(i % 2u).Normalized(), 0.0f));
             }
         });
 
@@ -1494,9 +1485,12 @@ STAGE_START_HERE
     // cannot throw enemies at each other, may cause unstable movement  
     // cannot let all enemies of a sub-wave pass a single point, too easy (includes circle movement)  
     // push-strength needs to be scaled to make sure that a whole 2x2 group can be killed in a single sweep by grazing one of their sides  
-    // on first sub-wave center group needs to move into player, as they will naturally try to shoot and dodge them, see the mechanic, and evade their first bullet-wave  
-    // make this wave easier for pros, as the enemy-movement might not be as deterministic  
+    //     on first sub-wave center group needs to move into player, as they will naturally try to shoot and dodge them, see the mechanic, and evade their first bullet-wave  
+    // make this wave easier for advanced players, as the enemy-movement might not be as deterministic  
     // difference between attackable and non-attackable must be very clear
+    //     on first wave, one of the up-flying enemies need to fly first with some delay, to show the bullet-attack
+    // coop: player not receiving two groups in second sub-wave needs to receive two groups in first sub-wave
+    // TODO: completely disable player-enemy collision, just in case
     STAGE_MAIN
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)
@@ -1521,7 +1515,7 @@ STAGE_START_HERE
         {
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            const coreVector2 vAlong = (i >= 12u && i < 36u) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
+            const coreVector2 vAlong = (i >= 12u && i < 36u) ? coreVector2(-1.0f,0.0f) : coreVector2(0.0f,1.0f);
             const coreVector2 vSide  = coreVector2(1.0f, ((i < 36u) && (((i + 4u) % 12u) < 8u)) ? -1.0f : 1.0f);
 
             const coreMatrix2 mTransform    = coreMatrix3::Scaling(vSide).m12() * coreMatrix3::Rotation(vAlong).m12();
@@ -1536,7 +1530,7 @@ STAGE_START_HERE
                 const coreUintW y2 = (i % 2u);
 
                 vTarget   = coreVector2(-0.7f + 0.7f * I_TO_F(x), -0.5f + 1.2f * I_TO_F(y) + 0.1f * I_TO_F(x2)) + 0.2f * coreVector2(-0.5f + 1.0f * I_TO_F(x2), -0.5f + 1.0f * I_TO_F(y2));
-                vTarget.y = vTarget.y - ((i < 12u) ? 1.0f : 1.2f) * fLifeTime + 0.8f * I_TO_F((x + 2u) % 3u) + 2.0f;
+                vTarget.y = vTarget.y - ((i < 12u) ? 1.0f : 1.2f) * fLifeTime + 0.8f * I_TO_F((x + 1u) % 3u) + 2.0f;
             }
             else
             {
@@ -1611,13 +1605,16 @@ STAGE_START_HERE
 
             const coreBool bInsideOld = g_pForeground->IsVisiblePoint(pEnemy->GetOldPos()        * vAlong);
             const coreBool bInsideNew = g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy() * vAlong);
+            const coreBool bForward   = (coreVector2::Dot(pEnemy->GetMove(), vAlong.InvertedX() * vSide.y) < 0.0f);
 
-            if((bInsideOld && !bInsideNew) || ((g_pGame->GetDifficulty() > 1u) && !bInsideOld && bInsideNew))
+            if(((bInsideOld && !bInsideNew) || ((g_pGame->GetDifficulty() > 1u) && !bInsideOld && bInsideNew)) && bForward)
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+                const coreVector2 vDir = ((i < 12u) ? pEnemy->AimAtPlayerDual((i / 8u) % 2u) : pEnemy->AimAtPlayerSide()).Normalized();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 3u, COLOR_ENERGY_ORANGE);
             }
         });
 
@@ -1640,7 +1637,6 @@ STAGE_START_HERE
     // in 2 lines should move over the center 
     // in 1 enemies should not reach bottom 
     // in 1 and 2 back of enemies should not be reachable without shooting at them first 
-    // TODO: turn middle line for coop ?   
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -1668,8 +1664,8 @@ STAGE_START_HERE
                     pEnemy->SetPosition (coreVector3(vPos * FOREGROUND_AREA, 0.0f));
                     pEnemy->SetDirection(coreVector3(vDir,                   0.0f));
 
-                         if(i >= 16u && i < 24u) pEnemy->Rotate90();
-                    else if(i >= 24u && i < 32u) pEnemy->Rotate270();
+                         if(i >= 16u && i < 24u) pEnemy->Rotate270();
+                    else if(i >= 24u && i < 32u) pEnemy->Rotate90();
                 }
             });
         });
@@ -1691,12 +1687,14 @@ STAGE_START_HERE
             else if(i < 32u) iGroupNum = 4u;
             else             iGroupNum = 8u;
 
+            const coreFloat fPower = pBullet->GetDamage() * (g_pGame->GetCoop() ? 0.5f : 1.0f);
+
             coreVector2 vForceDir;
-                 if(i < 16u) vForceDir = 6.0f * coreVector2( 0.0f,-1.0f);
-            else if(i < 24u) vForceDir = 6.0f * coreVector2(-1.0f, 0.0f);
-            else if(i < 32u) vForceDir = 6.0f * coreVector2( 1.0f, 0.0f);
-            else if(i < 40u) vForceDir = 6.0f * AlongCrossNormal(-pBullet->GetFlyDir());
-            else             fMillForce -= 0.4f;
+                 if(i < 16u) vForceDir   = fPower * 6.0f * coreVector2( 0.0f,-1.0f);
+            else if(i < 24u) vForceDir   = fPower * 6.0f * coreVector2( 1.0f, 0.0f);
+            else if(i < 32u) vForceDir   = fPower * 6.0f * coreVector2(-1.0f, 0.0f);
+            else if(i < 40u) vForceDir   = fPower * 6.0f * AlongCrossNormal(-pBullet->GetFlyDir());
+            else             fMillForce -= fPower * 0.4f;
 
             for(coreUintW j = coreMath::FloorAlign(i, iGroupNum), je = coreMath::CeilAlign(i + 1u, iGroupNum); j < je; ++j)
             {
@@ -1748,7 +1746,7 @@ STAGE_START_HERE
             if(STAGE_TICK_LIFETIME(20.0f * (0.8f / fLifeSpeed), 0.0f) && ((s_iTick % 20u) >= 18u))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+                const coreVector2 vDir = pEnemy->AimAtPlayerDual((i < 16u || i >= 40u) ? ((i / 4u) % 2u) : ((i < 32u) ? ((i / 8u) % 2u) : (i % 2u))).Normalized();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.25f);
             }
@@ -1876,6 +1874,7 @@ STAGE_START_HERE
     // 1: two different invincible states, hidden and flickering, to give the player perception of change while he has to wait (loadbar)
     // 3: pattern should not have too long straight lines, as this makes it too easy, and should have no corners, as this creates placement artifacts
     // 1: diamond shape to not be able to kill 2 groups at the same time
+    // TODO: maybe just a circle shape in last sub-stage (or double-circle)
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -1911,7 +1910,7 @@ STAGE_START_HERE
         constexpr coreUint64 iGroupF     = 0b11111111'00000000'0000'0000'0000'0000u;
         constexpr coreUint32 iSnakeCount = 6u;
 
-        STAGE_GET_START(8u + iSnakeCount)
+        STAGE_GET_START(9u + iSnakeCount)
             STAGE_GET_UINT64    (iStateActive)
             STAGE_GET_UINT64    (iStateGhost)
             STAGE_GET_FLOAT     (fChangeTime)
@@ -1919,6 +1918,7 @@ STAGE_START_HERE
             STAGE_GET_UINT_ARRAY(aiSnakeIndex, iSnakeCount)
             STAGE_GET_UINT      (iSnakeShift,  iSnakeShift = iSnakeCount)
             STAGE_GET_FLOAT     (fLastValue)
+            STAGE_GET_UINT      (iLastDual)
         STAGE_GET_END
 
         if(STAGE_CLEARED)
@@ -2031,7 +2031,7 @@ STAGE_START_HERE
                     if(bVertical == (iChangeCount % 2u))
                     {
                         const coreFloat   fSide   = -0.95f + 1.9f/7.0f * I_TO_F((i - 16u) % 8u);
-                        const coreVector2 vTarget = g_pGame->FindPlayerDual(((iChangeCount-1u) / 2u) % 2u)->GetPosition().xy();
+                        const coreVector2 vTarget = pEnemy->NearestPlayerDual((i / 8u) % 2u)->GetPosition().xy();
 
                         if(bVertical) pEnemy->SetPosition(coreVector3(vTarget.x, fSide * FOREGROUND_AREA.y, 0.0f));
                                  else pEnemy->SetPosition(coreVector3(fSide * FOREGROUND_AREA.x, vTarget.y, 0.0f));
@@ -2077,13 +2077,15 @@ STAGE_START_HERE
 
             if(!CONTAINS_BIT(iStateActive, i) && CONTAINS_BIT(iStateGhost, i))
             {
-                pEnemy->SetDirection(coreVector3(pEnemy->AimAtPlayer().Normalized(), 0.0f));
+                pEnemy->SetDirection(coreVector3(((i < 32u) ? pEnemy->AimAtPlayerDual((i / 8u) % 2u) : pEnemy->AimAtPlayerSide()).Normalized(), 0.0f));
                 pEnemy->SetAlpha    ((FRACT(fChangeTime * 20.0f) < 0.5f) ? 0.9f : 0.4f);
                 pEnemy->RemoveStatus(ENEMY_STATUS_HIDDEN);
             }
 
             if((m_iStageSub == 3u) && (pSquad1->GetNumEnemiesAlive() == 1u))
             {
+                if(!fLastValue) iLastDual = pEnemy->NearestPlayerSide() - g_pGame->GetPlayer(0u);
+
                 fLastValue += 0.8f * Core::System->GetTime();
 
                 if(fLastValue >= 1.8f)
@@ -2093,7 +2095,7 @@ STAGE_START_HERE
                 else
                 {
                     coreVector2 vPos = pEnemy->GetPosition().xy();
-                    coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+                    coreVector2 vDir = pEnemy->AimAtPlayerDual(iLastDual).Normalized();
 
                          if(fLastValue >= 1.5f) vDir *= coreMatrix3::Rotation(LERPB(0.0f*PI, -1.0f*PI, (fLastValue - 1.5f) / 0.3f)).m12();
                     else if(fLastValue >= 1.0f) vPos += vDir * (60.0f * (fLastValue - 1.5f) * Core::System->GetTime());

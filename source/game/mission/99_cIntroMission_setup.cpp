@@ -206,7 +206,7 @@ void cIntroMission::__SetupOwn()
             if(STAGE_TICK_LIFETIME(5.0f, 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
+                const coreVector2 vDir = pEnemy->AimAtPlayerDual((i < 16u) ? ((i / 4u) % 2u) : ((i / 8u) % 2u)).Normalized();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.6f, pEnemy, vPos, vDir)->MakeWhite()->ChangeSize(1.2f);
             }

@@ -372,7 +372,7 @@ void cAmemasuBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
         {
-            if(PHASE_BEGINNING) m_avVector[SMASH_POSITION].y = this->NearestPlayer()->GetPosition().y / FOREGROUND_AREA.y;
+            if(PHASE_BEGINNING) m_avVector[SMASH_POSITION].y = this->NearestPlayerDual(0u)->GetPosition().y / FOREGROUND_AREA.y;
 
             const coreVector2 vPos = coreVector2(LERP(m_vLastPosition.x, 0.85f, SIN(PI * fTime)), LERPS(m_vLastPosition.y, m_avVector[SMASH_POSITION].y, fTime)) * FOREGROUND_AREA;
 
@@ -537,7 +537,7 @@ void cAmemasuBoss::__MoveOwn()
     // 
     else if(m_iPhase == 50u)
     {
-        static cPlayer* pFollow = NULL; 
+        static coreUintW iFollow = 0u; 
         static coreVector2 vPrev = this->GetDirection().xy();  
         static coreVector2 vCur  = this->GetDirection().xy();  
         static coreFlow fTurn = 1.0f;
@@ -546,7 +546,7 @@ void cAmemasuBoss::__MoveOwn()
         {
             if(PHASE_BEGINNING)
             {
-                pFollow = this->NearestPlayer();
+                iFollow = 0u;
             }
 
             this->DefaultMoveForward(this->GetDirection().xy(), 15.0f);
@@ -568,7 +568,7 @@ void cAmemasuBoss::__MoveOwn()
                 }
             }
 
-            const coreVector2 vAim = this->AimAtPlayer(pFollow).Normalized();
+            const coreVector2 vAim = this->AimAtPlayerDual(iFollow).Normalized();
 
             if(coreVector2::Dot(vCur, vAim) <= (1.0f / SQRT2))// && coreMath::IsNear(m_fMouthAngle, 0.0f))
             {
@@ -609,7 +609,7 @@ void cAmemasuBoss::__MoveOwn()
         PHASE_CONTROL_TICKER(1u, 0u, 1.0f, LERP_LINEAR)
         {
             const coreVector2 vPos = coreVector2(0.0f/*FMOD(I_TO_F(iTick) * 0.7f, 2.0f) - 1.0f*/, 1.2f) * FOREGROUND_AREA;
-            const coreVector2 vDir = (g_pGame->FindPlayer(vPos)->GetPosition().xy() - vPos).Normalized(); // TODO: FindPlayer 
+            const coreVector2 vDir = (g_pGame->FindPlayerSide(vPos)->GetPosition().xy() - vPos).Normalized(); // TODO: FindPlayer 
 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.3f, this, vPos, vDir)->ChangeSize(1.2f);
         });

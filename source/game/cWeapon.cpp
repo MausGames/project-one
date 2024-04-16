@@ -100,7 +100,7 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
         if(m_CooldownTimer.GetStatus()) return;
 
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 5.0f, m_pOwner, vPos, vDir))->ChangeSize(1.3f);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 5.0f, m_pOwner, vPos, vDir))->ChangeScale(1.3f);
 
         // 
         m_CooldownTimer.SetValue(-1.1f);
@@ -192,7 +192,7 @@ void cPulseWeapon::__ShootOwn()
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(5 + 10 * F_TO_SI(m_fCharge), 3.0f, m_pOwner, vPos, vDir))->ChangeSize(1.2f + 0.4f * FLOOR(m_fCharge));
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(5 + 10 * F_TO_SI(m_fCharge), 3.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f + 0.4f * FLOOR(m_fCharge));
 
     // 
     m_fCharge = 0.0f;
@@ -234,8 +234,8 @@ void cWaveWeapon::__ShootOwn()
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cWave2Bullet>(2, 3.5f, m_pOwner, vPos,  vDir))->ChangeSize(1.8f);
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cWave2Bullet>(2, 3.5f, m_pOwner, vPos, -vDir))->ChangeSize(1.8f);
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2, 3.5f, m_pOwner, vPos,  vDir))->ChangeScale(1.8f);
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2, 3.5f, m_pOwner, vPos, -vDir))->ChangeScale(1.8f);
 
     // play bullet sound-effect
     m_pBulletSound->PlayPosition(NULL, 1.0f, 1.0f, false, SOUND_EFFECT, m_pOwner->GetPosition());

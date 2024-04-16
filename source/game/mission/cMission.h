@@ -47,6 +47,8 @@
 #define VIRIDO_SHADOWS_RAWS  (VIRIDO_SHADOWS)                        // 
 #define VIRIDO_BALL_SPEED    (1.5f)                                  // 
 
+#define RUTILUS_TELEPORTER   (2u)                                    // 
+
 
 // ****************************************************************
 // stage management macros
@@ -64,7 +66,7 @@
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
-#define STAGE_BADGE(b,p)                       {const coreUint32 A = cGame::CalcBonusBadge(b); STAGE_FOREACH_PLAYER(pPlayer, i) {pPlayer->GetDataTable()->GiveBadge(); pPlayer->GetScoreTable()->AddScore(A, false);}); g_pGame->GetCombatText()->AddBadge(A, (p));}
+#define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
@@ -74,6 +76,7 @@
 #define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
 #define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
+#define COLL_THIS                              this
 
 #define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
 #define STAGE_FOREACH_PLAYER_ALL(e,i)          g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
@@ -184,6 +187,8 @@ protected:
 
     const coreFloat* m_pfMedalGoal;                            // 
 
+    coreBool m_bBadgeGiven;                                    // 
+
     uCollPlayerEnemyType  m_nCollPlayerEnemy;                  // 
     uCollPlayerBulletType m_nCollPlayerBullet;                 // 
     uCollEnemyBulletType  m_nCollEnemyBullet;                  // 
@@ -225,6 +230,9 @@ public:
 
     // 
     inline void SetMedalGoal(const coreFloat* pfMedalGoal) {m_pfMedalGoal = pfMedalGoal; ASSERT(pfMedalGoal)}
+
+    // 
+    void GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition);
 
     // 
     inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
@@ -439,21 +447,40 @@ private:
 class cRutilusMission final : public cMission
 {
 private:
-    cQuaternionBoss m_Quaternion;   // 
-    cSarosBoss      m_Saros;        // 
-    cMessierBoss    m_Messier;      // 
+    cQuaternionBoss m_Quaternion;                     // 
+    cSarosBoss      m_Saros;                          // 
+    cMessierBoss    m_Messier;                        // 
+
+    coreObject3D m_aTeleporter    [RUTILUS_TELEPORTER];   // 
+    coreVector2  m_avTeleporterPos[RUTILUS_TELEPORTER];   // 
+
+    coreUint8 m_iMoveFlip;                            // 
+
+    coreFlow m_fAnimation;                            // animation value
 
 
 public:
     cRutilusMission()noexcept;
+    ~cRutilusMission()final;
 
     DISABLE_COPY(cRutilusMission)
     ASSIGN_ID(4, "Rutilus")
 
+    // 
+    void EnableTeleporter (const coreUintW iIndex, const coreVector2& vPosition);
+    void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn     ()final;
+    void __RenderOwnOver()final;
+    void __MoveOwnBefore()final;
+    void __MoveOwnAfter ()final;
+
+    // 
+    static coreUint8   __GetFlipType     (const coreVector2& vOldDir, const coreVector2& vNewDir);
+    static coreVector2 __GetFlipDirection(const coreVector2& vDir, const coreUint8 iType);
 };
 
 

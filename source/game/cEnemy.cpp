@@ -65,7 +65,7 @@ void cEnemy::Render()
 void cEnemy::Move()
 {
     // 
-    this->_UpdateAlwaysBefore();
+    //this->_UpdateAlwaysBefore();
 
     if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
     {
@@ -228,7 +228,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     
     
     
-        g_pGame->GetChromaManager()->AddChroma(this->GetPosition().xy(), coreVector2(0.0f,1.0f), CHROMA_SCALE_SMALL);     
+        //g_pGame->GetChromaManager()->AddChroma(this->GetPosition().xy(), coreVector2(0.0f,1.0f), CHROMA_SCALE_SMALL);     
         
 
     // 
@@ -290,7 +290,14 @@ void cEnemy::ResetProperties()
 
 // ****************************************************************
 // 
-cPlayer* cEnemy::NearestPlayer(const coreUintW iIndex)const
+cPlayer* cEnemy::NearestPlayerSide()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->FindPlayerSide(this->GetPosition().xy());
+}
+
+cPlayer* cEnemy::NearestPlayerDual(const coreUintW iIndex)const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
@@ -300,16 +307,16 @@ cPlayer* cEnemy::NearestPlayer(const coreUintW iIndex)const
 
 // ****************************************************************
 // 
-coreVector2 cEnemy::AimAtPlayer(const coreUintW iIndex)const
+coreVector2 cEnemy::AimAtPlayerSide()const
 {
     // 
-    return this->AimAtPlayer(this->NearestPlayer(iIndex));
+    return (this->NearestPlayerSide()->GetPosition().xy() - this->GetPosition().xy());
 }
 
-coreVector2 cEnemy::AimAtPlayer(const cPlayer* pPlayer)const
+coreVector2 cEnemy::AimAtPlayerDual(const coreUintW iIndex)const
 {
     // 
-    return (pPlayer->GetPosition().xy() - this->GetPosition().xy());
+    return (this->NearestPlayerDual(iIndex)->GetPosition().xy() - this->GetPosition().xy());
 }
 
 
@@ -356,8 +363,7 @@ cEnemyManager::cEnemyManager()noexcept
 : m_apEnemySet {}
 {
     // 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
-    // TODO   
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});   // TODO: remove 
 }
 
 
@@ -459,8 +465,6 @@ void cEnemyManager::Move()
         // move the enemy set
         pEnemyActive->MoveNormal();
     }
-
-    // 
 }
 
 

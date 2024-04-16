@@ -615,7 +615,7 @@ void cDharukBoss::__MoveOwn()
         {
             // 
             const coreVector2 vBossPos   = m_aiCounter[CURRENT_ITERATION] ? this->GetPosition().xy() : this->GetPosition().xy().InvertedY();
-            const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
+            const coreVector2 vPlayerPos = g_pGame->FindPlayerSide(vNewPos)->GetPosition().xy();
 
             // 
             const coreVector2 vTarget = m_aiCounter[BOOMERANG_TARGET] ? vBossPos : vPlayerPos;

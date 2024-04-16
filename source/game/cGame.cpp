@@ -202,6 +202,8 @@ void cGame::Move()
 
     // 
     this->__HandlePacifist();
+    
+    m_EnemyManager.MoveBefore();
 
     // move the mission
     m_pCurMission->MoveBefore();
@@ -501,35 +503,6 @@ void cGame::PushDepthLevelShip()
     // 
     ASSERT(m_iDepthDebug & BIT(7u))
     __DEPTH_GROUP_SHIP
-}
-
-
-// ****************************************************************
-// 
-RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
-{
-    // 
-    if(!m_bCoop) return &m_aPlayer[0];
-
-    // 
-    cPlayer*  pPlayer = &m_aPlayer[0];
-    coreFloat fLenSq  = FLT_MAX;
-
-    // 
-    this->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)
-    {
-        // 
-        const coreFloat fCurLenSq = (pCurPlayer->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq < fLenSq)
-        {
-            // 
-            pPlayer = pCurPlayer;
-            fLenSq  = fCurLenSq;
-        }
-    });
-
-    ASSERT(pPlayer)
-    return pPlayer;
 }
 
 
@@ -931,7 +904,7 @@ void cGame::__HandleCollisions()
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
+        if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {

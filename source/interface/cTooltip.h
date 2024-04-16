@@ -14,21 +14,23 @@
 // TODO: does not handle Kanji & Kana correctly
 // TODO: does not handle kerning (relevant ?)
 // TODO: (this + __LINE__ * 100u) may not handle implementation-split between cpp and h file
+//#define TOOLTIP_MOUSE         (Core::Input->GetMousePosition() * Core::System->GetResolution() * RCP(Core::System->GetResolution().Min()))
+//#define TOOLTIP_OBJECT(x)     (coreVector2((x).GetTransform()._31, (x).GetTransform()._32) * RCP(Core::System->GetResolution().Min()))
 
 
 // ****************************************************************
 // tooltip definitions
-#define TOOLTIP_LINES        (4u)                                         // number of available text lines
-#define TOOLTIP_LINE_HEIGHT  (0.022f)                                     // spacing between to text lines
-#define TOOLTIP_OUTLINE_SIZE (1u)                                         // default text outline size
-#define TOOLTIP_BORDER_SIZE  (coreVector2(0.02f,0.016f))                  // spacing between text and box-edge
-#define TOOLTIP_MOUSE_OFFSET (coreVector2(0.04f,0.0f))                    // position offset from mouse cursor (and for direction/alignment)
+#define TOOLTIP_LINES         (4u)                                         // number of available text lines
+#define TOOLTIP_LINE_HEIGHT   (0.022f)                                     // spacing between to text lines
+#define TOOLTIP_OUTLINE_SIZE  (MENU_OUTLINE_SMALL)                         // default text outline size
+#define TOOLTIP_BORDER_SIZE   (coreVector2(0.02f,0.016f))                  // spacing between text and box-edge
+#define TOOLTIP_CURSOR_OFFSET (coreVector2(0.04f,0.0f))                    // position offset from cursor (and for direction/alignment)
 
-#define TOOLTIP_PRINT(f,...) (this + __LINE__ * 100u), f, ##__VA_ARGS__   // specialized print-function for ShowText()
-#define TOOLTIP_ONELINER     (FLT_MAX)                                    // create tooltip without wrapping (infinite width)
+#define TOOLTIP_PRINT(f,...)  (this + __LINE__ * 100u), f, ##__VA_ARGS__   // specialized print-function for ShowText()
+#define TOOLTIP_ONELINER      (FLT_MAX)                                    // create tooltip without wrapping (infinite width)
 
-#define TOOLTIP_MOUSE        (Core::Input->GetMousePosition() * (Core::System->GetResolution() / Core::System->GetResolution().Min()))
-#define TOOLTIP_OBJECT(x)    (coreVector2((x).GetTransform()._31, (x).GetTransform()._32) / Core::System->GetResolution().Min())
+#define TOOLTIP_MOUSE         (Core::Input->GetMousePosition())
+#define TOOLTIP_OBJECT(x)     (coreVector2((x).GetTransform()._31, (x).GetTransform()._32) * RCP(Core::System->GetResolution().Min()))
 
 
 // ****************************************************************
@@ -74,13 +76,14 @@ private:
 // 
 template <typename... A> void cTooltip::ShowText(const coreVector2& vPosition, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs)
 {
-    // show tooltip at current mouse position
+    // show tooltip at current cursor position
     m_bDisplay = true;
-    this->SetCenter(MapToAxis(vPosition, g_vHudDirection));
+    this->SetCenter(vPosition);
 
     // check and save last reference-pointer (to prevent redundant update)
     if(m_pLastRef == pRef) return;
     m_pLastRef = pRef;
+    // this->SetCenter(MapToAxis(vPosition, g_vHudDirection));
 
     // forward copy of formatted string
     this->__ShowText(fWidth, PRINT(pcFormat, std::forward<A>(vArgs)...));

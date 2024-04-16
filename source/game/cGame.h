@@ -172,7 +172,6 @@ public:
     void PushDepthLevelShip();
 
     // 
-    RETURN_NONNULL cPlayer* FindPlayer    (const coreVector2& vPosition);
     RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2& vPosition);
     RETURN_NONNULL cPlayer* FindPlayerDual(const coreUintW    iIndex);
     template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void

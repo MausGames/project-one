@@ -176,7 +176,7 @@ void cProjectOneBoss::__MoveOwn()
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.6f, this, vPos, -vDir)->MakeWhite()->ChangeSize(1.3f);
             });
 
-            const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
+            const coreVector2 vPlayerPos = this->NearestPlayerDual(0u)->GetPosition().xy();
             //this->SetPosition(coreVector3(vPlayerPos.x, 0.8f * FOREGROUND_AREA.y, 0.0f));
 
             g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([&](cFlipBullet* OUTPUT pBullet)

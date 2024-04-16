@@ -50,14 +50,15 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_chroma.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_chroma.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3"); // TODO ###
+    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3"); // TODO ###
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_quad.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_quad.md3"); // TODO ###
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_tetra.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_triangle.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_teleporter.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_teleporter.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tetra.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra.md3"); // TODO ###
+    Core::Manager::Resource->Load<coreModel>  ("object_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_triangle.md3"); // TODO ###
     Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);
@@ -113,7 +114,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("effect_splatter.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_splatter.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
-    Core::Manager::Resource->Load<coreTexture>("environment_algae.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae.png");
+    //Core::Manager::Resource->Load<coreTexture>("environment_algae.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_grey.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_grey.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
