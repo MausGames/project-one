@@ -12,7 +12,7 @@
 //*-------------------------------------------------------------------------------*//
 //| Project One v0.1.0a (https://www.maus-games.at)                               |//
 //*-------------------------------------------------------------------------------*//
-//| Copyright (c) 2010-2019 Martin Mauersics                                      |//
+//| Copyright (c) 2010-2020 Martin Mauersics                                      |//
 //|                                                                               |//
 //| This software is provided 'as-is', without any express or implied             |//
 //| warranty. In no event will the authors be held liable for any damages         |//
@@ -75,6 +75,7 @@
 // TODO: default_black and default_white only 4x4
 // TODO: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
 // TODO: check all RCP for division by zero
+// TODO: reshape causes some batch-list to be initialized twice
 
 
 // ****************************************************************
@@ -96,6 +97,13 @@
     #endif
 #endif
 
+#if defined(_CORE_GCC_) || defined(_CORE_CLANG_)
+
+    #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+    #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
+
+#endif
+
 
 // ****************************************************************
 // general definitions
@@ -106,9 +114,9 @@
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
-#define SHIELD               (1u)//(100u)
-#define FRAMERATE_VALUE      (60.0f)
-#define FRAMERATE_TIME       (1.0f / FRAMERATE_VALUE)
+#define SHIELD               (100u)
+#define FRAMERATE_MIN        (60.0f)
+#define FRAMERATE_MAX        (240.0f)
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
 #define CAMERA_DIRECTION     (coreVector3(0.0f, 0.0f,  -1.0f))
 #define CAMERA_ORIENTATION   (coreVector3(0.0f, 1.0f,   0.0f))
@@ -226,6 +234,7 @@ enum eMedal : coreUint8
 };
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
+extern void InitDirection();                                  // 
 extern void InitFramerate();                                  // init frame rate properties (lock)
 
 
@@ -241,7 +250,7 @@ class cMission;
 // ****************************************************************
 // game headers
 extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 resolution
-extern coreVector2     g_vMenuCenter;       // pre-calculated menu center modifier
+extern coreVector2     g_vHudDirection;     // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 

@@ -18,7 +18,7 @@
 #if defined(_CORE_MSVC_)
     #define UNITY_BUILD __pragma(warning(disable : 4005))
 #else
-    #define UNITY_BUILD _Pragma("GCC diagnostic ignored \"-Wno-macro-redefined\"")
+    #define UNITY_BUILD _Pragma("GCC diagnostic ignored \"-Wmacro-redefined\"")
 #endif
 
 // sub-class type information macros
@@ -70,7 +70,7 @@ inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, c
 
 // ****************************************************************
 // value range helper-functions
-template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
+template <typename T, typename S, typename R> inline FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {
     ASSERT(a <= b)
     return (x >= a) && (x < b);
@@ -96,7 +96,7 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp
 // 
 inline coreFloat FUNC_PURE FrictionFactor(const coreFloat fStrength)
 {
-    return POW(1.0f - fStrength * (1.0f / FRAMERATE_VALUE), Core::System->GetTime() * FRAMERATE_VALUE);
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), Core::System->GetTime() * FRAMERATE_MIN);
 }
 
 

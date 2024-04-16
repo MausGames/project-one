@@ -14,8 +14,8 @@
 cTitleMenu::cTitleMenu()noexcept
 : coreMenu           (SURFACE_TITLE_MAX, SURFACE_TITLE_LOGO)
 , m_fPromptAnimation (-1.0f)
+, m_fPromptExpand    (0.0f)
 
-, m_fTest            (0.0f)
 , m_bTest2 (false)
 {
     // create menu objects
@@ -29,13 +29,13 @@ cTitleMenu::cTitleMenu()noexcept
     m_PromptText.SetTextLanguage("PROMPT");
 
     m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.03f));
-    m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f) * g_vMenuCenter);
+    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.035f));
+    m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f));
     m_aVersionText[0].SetAlignment(coreVector2(0.0f, 1.0f));
-    m_aVersionText[0].SetText     ("(c) 2010-2019 Martin Mauersics (@MausGames)");
+    m_aVersionText[0].SetText     ("(c) 2010-2020 Martin Mauersics (@MausGames)");
 
     m_aVersionText[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.02f));
+    m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.025f));
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetText     (PRINT("Project One - v0.1.0a third edition - %s %.5s", __DATE__, __TIME__));
@@ -99,13 +99,15 @@ void cTitleMenu::Move()
 
     if(m_bTest2)
     {
-        m_fTest.UpdateMin(5.0f, 1.0f);
+        m_fPromptExpand.UpdateMin(5.0f, 1.0f);
 
-        m_PromptText.SetScale(LERPB(1.0f, 1.1f, m_fTest));
-        m_PromptText.SetAlpha(LERPB(m_PromptText.GetAlpha(), 0.0f, MIN(m_fTest, 1.0f)));
+        m_PromptText.SetScale(LERPB(1.0f,                    1.1f, m_fPromptExpand));
+        m_PromptText.SetAlpha(LERPB(m_PromptText.GetAlpha(), 0.0f, MIN(m_fPromptExpand, 1.0f)));
 
-        if(m_fTest >= 1.0f)
+        if(m_fPromptExpand >= 1.0f)
         {
+            m_bTest2 = false;      
+            m_fPromptExpand = 0.0f;
             m_iStatus = 1;
         }
     }

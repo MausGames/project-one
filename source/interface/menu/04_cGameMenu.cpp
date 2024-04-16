@@ -110,7 +110,7 @@ cGameMenu::cGameMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_GAME_STAGES; ++i)
     {
-        const coreBool    bBoss = ((i % 6u) == 5u) ? true : false;
+        const coreBool    bBoss = MISSION_SEGMENT_IS_BOSS(i);
         const coreVector2 vPos  = bBoss ? coreVector2(0.0f, -0.07f * (I_TO_F(i / 6u) * 2.0f - 1.5f)) : coreVector2(0.07f * (I_TO_F(i % 6u) - 2.0f), -0.07f * (I_TO_F(i / 6u) * 2.0f - 2.5f));
         const coreVector2 vSize = bBoss ? coreVector2(0.35f,0.07f)                                   : coreVector2(0.07f,0.07f);
 
@@ -140,7 +140,9 @@ cGameMenu::cGameMenu()noexcept
 
     m_Players.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_Players.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition());
+    //m_Players.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition() + coreVector2(-0.125f,0.0f));
     m_Players.SetSize     (coreVector2( 0.47f,0.03f));
+    //m_Players.SetSize     (coreVector2( 0.22f,0.03f));
     m_Players.SetAlignment(coreVector2(-1.00f,0.00f));
     m_Players.SetEndless  (true);
     m_Players.GetCaption()->SetColor3(COLOR_MENU_WHITE);
@@ -233,6 +235,7 @@ cGameMenu::cGameMenu()noexcept
     m_aShipInput[0] = {};
     m_aShipInput[1] = {};
 
+    /*
     m_apShip[0] = new cPlayer();
     m_apShip[0]->Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED);
     m_apShip[0]->EquipWeapon(0u, cRayWeapon::ID);
@@ -251,6 +254,7 @@ cGameMenu::cGameMenu()noexcept
     m_apShip[0]->SetPosition(coreVector3(coreVector2(-0.5f,-0.65f) * FOREGROUND_AREA, 0.0f));
     m_apShip[1]->SetPosition(coreVector3(coreVector2( 0.5f,-0.65f) * FOREGROUND_AREA, 0.0f));
 
+     */
     //cBulletManager* P = g_pGame->GetBulletManagerPlayer();
     //CALL_CONSTRUCTOR(P, TYPE_BULLET_PLAYER)
 
@@ -262,8 +266,10 @@ cGameMenu::cGameMenu()noexcept
 
 cGameMenu::~cGameMenu()
 {
+    /*
     SAFE_DELETE(m_apShip[0])
     SAFE_DELETE(m_apShip[1])
+     */
 }
 
 
@@ -274,6 +280,7 @@ void cGameMenu::Render()
     this->coreMenu::Render();
 
 
+    /*
     glEnable(GL_DEPTH_TEST);
     m_apShip[0]->Render();
     m_apShip[1]->Render();
@@ -282,6 +289,7 @@ void cGameMenu::Render()
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(m_apShip[1]);
 
     glDisable(GL_DEPTH_TEST);
+     */
 }
 
 
@@ -289,9 +297,10 @@ void cGameMenu::Render()
 // move the game menu
 void cGameMenu::Move()
 {
-    
+    /*
     m_apShip[0]->Move();
     m_apShip[1]->Move();
+     */
 
     // move the menu
     this->coreMenu::Move();
@@ -378,6 +387,29 @@ void cGameMenu::Move()
                 m_aWeaponIcon [i].SetColor3(m_aWeapon [i].GetCaption()->GetColor3());
                 m_aSupportIcon[i].SetColor3(m_aSupport[i].GetCaption()->GetColor3());
             }
+
+
+            const coreBool bCoop = (m_Players.GetCurEntry().tValue > 1);
+            m_aWeapon [1].SetOverride(bCoop ? 0 : -1);
+            m_aSupport[1].SetOverride(bCoop ? 0 : -1);
+
+            if(false)
+            {
+                const coreVector2 vOffset = coreVector2(bCoop ? 0.25f : 0.125f, 0.0f);
+
+                m_aWeapon     [0].SetPosition(coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition() - vOffset);
+                m_aSupport    [0].SetPosition(coreVector2(-1.00f,1.00f) * m_aOptionName[2].GetPosition() - vOffset);
+                m_aWeaponIcon [0].SetPosition(m_aWeapon [0].GetPosition() + m_aWeapon [0].GetSize()*coreVector2(-0.5f,0.0f) + coreVector2(0.0f,0.05f));
+                m_aSupportIcon[0].SetPosition(m_aSupport[0].GetPosition() + m_aSupport[0].GetSize()*coreVector2(-0.5f,0.0f) + coreVector2(0.0f,0.05f));
+            }
+
+            {
+                m_aWeapon     [1].SetEnabled(bCoop ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                m_aSupport    [1].SetEnabled(bCoop ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                m_aWeaponIcon [1].SetEnabled(bCoop ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                m_aSupportIcon[1].SetEnabled(bCoop ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            }
+
         }
         break;
 

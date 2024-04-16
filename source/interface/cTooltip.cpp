@@ -25,6 +25,7 @@ cTooltip::cTooltip()noexcept
     this->SetAlignment(coreVector2(TOOLTIP_MOUSE_OFFSET.x ? SIGN(TOOLTIP_MOUSE_OFFSET.x) : 0.0f,
                                    TOOLTIP_MOUSE_OFFSET.y ? SIGN(TOOLTIP_MOUSE_OFFSET.y) : 0.0f));
     this->SetColor3   (COLOR_MENU_BLACK);
+    this->SetStyle    (CORE_OBJECT2D_STYLE_DEFAULT | CORE_OBJECT2D_STYLE_ASPECTCENTER);
 
     // create text lines
     for(coreUintW i = 0u; i < TOOLTIP_LINES; ++i)
@@ -32,6 +33,7 @@ cTooltip::cTooltip()noexcept
         m_aLine[i].Construct   (MENU_FONT_DYNAMIC_1, TOOLTIP_OUTLINE_SIZE);
         m_aLine[i].SetAlignment(coreVector2(1.0f,-1.0f));
         m_aLine[i].SetColor3   (COLOR_MENU_WHITE);
+        m_aLine[i].SetStyle    (CORE_OBJECT2D_STYLE_DEFAULT | CORE_OBJECT2D_STYLE_ASPECTCENTER);
     }
 }
 

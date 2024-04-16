@@ -319,7 +319,7 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.8f); m_fAnimation = 0.3f;}
+    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f); m_fAnimation = 0.3f;}
 
     // change default color
     inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}

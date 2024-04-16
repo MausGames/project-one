@@ -54,7 +54,7 @@ coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fS
 
     // 
     const coreVector2 vAim = vDiff.Normalized();
-    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fSpeedTurn * Core::System->GetTime())).Normalized(vAim);
+    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fSpeedTurn * Core::System->GetTime())).Normalized(vAim); // TODO: not time-portable   
     const coreVector2 vPos =  this->GetPosition ().xy() + vDir * (fSpeedMove * Core::System->GetTime());
 
     // 
@@ -134,7 +134,7 @@ coreBool cShip::DefaultRotateSmooth(const coreVector2& vDirection, const coreFlo
     // 
     const coreVector2 vAim = vDiff.Normalized();
     const coreFloat   fLen = SmoothTowards(vDiff.Length(), fDistThreshold);
-    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fLen * fSpeedTurn * Core::System->GetTime())).Normalized(vAim);
+    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fLen * fSpeedTurn * Core::System->GetTime())).Normalized(vAim); // TODO: not time-portable   
 
     // 
     this->SetDirection(coreVector3(vDir, 0.0f));
@@ -158,8 +158,8 @@ void cShip::DefaultRotateLerp(const coreFloat fFromAngle, const coreFloat fToAng
 void cShip::DefaultOrientate(const coreFloat fAngle)
 {
     // rotate around direction axis
-    const coreVector3& vDir = this->GetDirection();
-    const coreVector2  vOri = coreVector2::Direction(fAngle);
+    const coreVector3 vDir = this->GetDirection();
+    const coreVector2 vOri = coreVector2::Direction(fAngle);
     this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
 }
 
@@ -178,9 +178,9 @@ void cShip::DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fTo
 void cShip::DefaultAxiate(const coreFloat fAngle)
 {
     // 
-    const coreVector3& vDir  = this->GetDirection();
-    const coreVector3  vOri  = coreVector3::Cross(vDir, coreVector3::Cross(vDir, coreVector3(0.0f,0.0f,1.0f)).Normalized());
-    const coreMatrix3  mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
+    const coreVector3 vDir  = this->GetDirection();
+    const coreVector3 vOri  = coreVector3::Cross(vDir, coreVector3::Cross(vDir, coreVector3(0.0f,0.0f,1.0f)).Normalized());
+    const coreMatrix3 mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
     this->SetOrientation(vOri * mRota);
 }
 

@@ -33,7 +33,8 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_SHIELDED    = 0x0040u,   // 
     ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
     ENEMY_STATUS_IMMORTAL    = 0x0100u,   // 
-    ENEMY_STATUS_GHOST       = 0x0200u    // 
+    ENEMY_STATUS_GHOST       = 0x0200u,   // 
+    ENEMY_STATUS_HIDDEN      = 0x0400u    // 
 };
 
 
@@ -90,7 +91,7 @@ public:
 
 protected:
     // 
-    void _SetParent(cEnemy* OUTPUT pParent);
+    void _SetParent(cEnemy* OUTPUT_2 pParent);
 
 
 private:
@@ -101,44 +102,6 @@ private:
     virtual void __RenderOwnOver ()                         {}
     virtual void __RenderOwnTop  ()                         {}
     virtual void __MoveOwn       ()                         {}
-};
-
-
-// ****************************************************************
-// enemy squad class
-class cEnemySquad final
-{
-private:
-    std::vector<cEnemy*> m_apEnemy;   // 
-
-
-public:
-    cEnemySquad() = default;
-    ~cEnemySquad();
-
-    FRIEND_CLASS(cEnemyManager)
-    ENABLE_COPY (cEnemySquad)
-
-    // 
-    template <typename T> void AllocateEnemies(const coreUint8 iNumEnemies);
-    void FreeEnemies();
-    void ClearEnemies(const coreBool bAnimated);
-
-    // 
-    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
-    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
-    template <typename F> void ForEachEnemy   (F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
-    template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
-
-    // 
-    inline cEnemy*   GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
-    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = std::find(m_apEnemy.begin(), m_apEnemy.end(), pEnemy) - m_apEnemy.begin(); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
-
-    // 
-    inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
-    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
-    inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) * RCP(I_TO_F(this->GetNumEnemies()));}
-    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
 };
 
 
@@ -154,10 +117,10 @@ private:
     struct sRepeatEntry final
     {
         cEnemy*       pEnemy;       // 
-        coreUint8     iMaxRepeat;   // 
-        coreUint8     iCurRepeat;   // 
-        coreUint8     iMaxDelay;    // 
-        coreUint8     iCurDelay;    // 
+        coreUint16    iMaxRepeat;   // 
+        coreUint16    iCurRepeat;   // 
+        coreUint16    iMaxDelay;    // 
+        coreUint16    iCurDelay;    // 
         coreVariant16 oData;        // 
         uRepeatFunc   nFunction;    // 
     };
@@ -214,7 +177,7 @@ public:
     template <typename T> void PrefetchEnemy();
 
     // 
-    void AttachFunction(cEnemy* pEnemy, const coreUint8 iRepeat, const coreFloat fDelay, const coreVariant16& oData, uRepeatFunc nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUint8 iCurRepeat, const coreVariant16& oData) -> void
+    void AttachFunction(cEnemy* pEnemy, const coreUint16 iRepeat, const coreFloat fDelay, const coreVariant16& oData, uRepeatFunc nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUint16 iCurRepeat, const coreVariant16& oData) -> void
 
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}
@@ -222,6 +185,49 @@ public:
 
     // 
     inline coreUintW GetNumEnemiesAlive()const {coreUintW iNum = 0u; this->ForEachEnemy([&](void*) {++iNum;}); return iNum;}
+};
+
+
+// ****************************************************************
+// enemy squad class
+class cEnemySquad final
+{
+private:
+    std::vector<cEnemy*> m_apEnemy;   // 
+
+
+public:
+    cEnemySquad() = default;
+    ~cEnemySquad();
+
+    FRIEND_CLASS(cEnemyManager)
+    ENABLE_COPY (cEnemySquad)
+
+    // 
+    template <typename T> void AllocateEnemies(const coreUint8 iNumEnemies);
+    void FreeEnemies();
+    void ClearEnemies(const coreBool bAnimated);
+
+    // 
+    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
+    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
+    template <typename F> void ForEachEnemy   (F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+    template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+
+    // 
+    inline cEnemy*   GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
+    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = std::find(m_apEnemy.begin(), m_apEnemy.end(), pEnemy) - m_apEnemy.begin(); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
+
+    // 
+    inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
+    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) * RCP(I_TO_F(this->GetNumEnemies()));}
+    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+
+
+private:
+    // 
+    static cEnemyManager* __GetDefaultEnemyManager();
 };
 
 
@@ -408,50 +414,6 @@ private:
 
 
 // ****************************************************************
-// 
-template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnemies)
-{
-    ASSERT(m_apEnemy.empty())
-
-    // 
-    m_apEnemy.reserve(iNumEnemies);
-
-    // 
-    for(coreUintW i = iNumEnemies; i--; )
-    {
-        T* pEnemy = g_pGame->GetEnemyManager()->AllocateEnemy<T>();
-        m_apEnemy.push_back(pEnemy);
-    }
-}
-
-
-// ****************************************************************
-// 
-template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)const
-{
-    // 
-    for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
-    {
-        cEnemy* pEnemy = m_apEnemy[i];
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;    // # for scripting
-
-        // 
-        nFunction(pEnemy, i);
-    }
-}
-
-template <typename F> void cEnemySquad::ForEachEnemyAll(F&& nFunction)const
-{
-    // 
-    for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
-    {
-        // 
-        nFunction(m_apEnemy[i], i);
-    }
-}
-
-
-// ****************************************************************
 // constructor
 template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 {
@@ -567,6 +529,50 @@ template <typename T> void cEnemyManager::PrefetchEnemy()
         m_apEnemySet[T::ID] = new sEnemySet<T>();
 
         Core::Log->Info("Enemy Set (%s) created", T::Name);
+    }
+}
+
+
+// ****************************************************************
+// 
+template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnemies)
+{
+    ASSERT(m_apEnemy.empty())
+
+    // 
+    m_apEnemy.reserve(iNumEnemies);
+
+    // 
+    for(coreUintW i = iNumEnemies; i--; )
+    {
+        T* pEnemy = cEnemySquad::__GetDefaultEnemyManager()->AllocateEnemy<T>();
+        m_apEnemy.push_back(pEnemy);
+    }
+}
+
+
+// ****************************************************************
+// 
+template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)const
+{
+    // 
+    for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
+    {
+        cEnemy* pEnemy = m_apEnemy[i];
+        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;    // # for scripting
+
+        // 
+        nFunction(pEnemy, i);
+    }
+}
+
+template <typename F> void cEnemySquad::ForEachEnemyAll(F&& nFunction)const
+{
+    // 
+    for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
+    {
+        // 
+        nFunction(m_apEnemy[i], i);
     }
 }
 

@@ -75,7 +75,7 @@ void cNautilusBoss::__ResurrectOwn()
     pMission->SetContainerOverdraw(true);
 
     // 
-    g_pWindscreen->EnableInk(0u);
+    g_pWindscreen->EnableInk(false);
 
     // 
     m_aiCounter[CONTAINER_ATTACHED] = 1;
@@ -392,7 +392,7 @@ void cNautilusBoss::__MoveOwn()
 
         // 
         this->SetPosition (coreVector3(fCurX * FOREGROUND_AREA.x, this->GetPosition().yz()));
-        this->SetDirection(coreVector3(fCurX - fPrevX, Core::System->GetTime(), 0.0f).Normalized());
+        this->SetDirection(coreVector3(fCurX - fPrevX, Core::System->GetTime(), 0.0f).Normalized()); // TODO: not time-portable   
     }
 
     if(m_aiCounter[CONTAINER_ATTACHED])
@@ -439,7 +439,7 @@ void cNautilusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TICKER(3u, 0u, (2.0f/NAUTILUS_INK_TIME) - 0.03f, LERP_LINEAR)
         {
-            const coreVector3& vPos = this->GetPosition();
+            const coreVector3 vPos = this->GetPosition();
 
             // 
             this->__EnableBullet(vPos.xy(), this->NearestPlayer()->GetPosition().xy());
@@ -453,9 +453,9 @@ void cNautilusBoss::__MoveOwn()
     // 
     if(m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
-        const coreVector3& vPos    = m_InkBullet.GetPosition();
-        const coreVector3& vDir    = m_InkBullet.GetDirection();
-        const coreVector3  vNewPos = coreVector3(vPos.xy() + vDir.xy() * (40.0f * Core::System->GetTime()), 0.0f);
+        const coreVector3 vPos    = m_InkBullet.GetPosition();
+        const coreVector3 vDir    = m_InkBullet.GetDirection();
+        const coreVector3 vNewPos = coreVector3(vPos.xy() + vDir.xy() * (40.0f * Core::System->GetTime()), 0.0f);
 
         // 
         m_InkBullet.SetPosition (vNewPos);

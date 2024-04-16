@@ -653,8 +653,8 @@ void cAmemasuBoss::__MoveOwn()
 
 // spieler werden verschluckt, schiff-objekte werden versteckt
 // boss wird nach unten aus dem bildschirm interpoliert
-// dabei wird background ge‰ndert (transition typ ausprobieren)
+// dabei wird background ge√§ndert (transition typ ausprobieren)
 // spieler fliegen von unten rein in neuen background (andere dinge von oben)
 // umgekehrt beim ausspucken
 // sobald boss nicht mehr sichtbar ist spieler einfliegen um uebergang kurz zu halten
-// schieﬂt dann torpedos von unten nach oben
+// schie√üt dann torpedos von unten nach oben

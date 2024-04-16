@@ -22,10 +22,10 @@
 // TODO: rumble when changing rumble-option
 // TODO: display unattached joysticks and joystick names somehow
 // TODO: highlight which joystick is which input set
-// TODO: fix all g_vMenuCenter usages when changing aspect ratio
 // TODO: summary_ add separate total-score for each player
-// TODO: update texture filter and render quality i nrealtime
+// TODO: update texture filter and render quality in realtime
 // TODO: double initial languages by switching to two columns (on demand?)
+// TODO: stages in GameMenu should be called segments
 
 
 // ****************************************************************
@@ -63,12 +63,12 @@
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
 #define MENU_FONT_DEFAULT       "ethnocentric.ttf"
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",     (13u)
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",     (14u)//(13u)
 #define MENU_FONT_DYNAMIC_2     "dynamic_font",     (20u)
 #define MENU_FONT_DYNAMIC_3     "dynamic_font",     (30u)
 #define MENU_FONT_DYNAMIC_4     "dynamic_font",     (40u)
 #define MENU_FONT_DYNAMIC_5     "dynamic_font",     (70u)
-#define MENU_FONT_STANDARD_1    "ethnocentric.ttf", (13u)
+#define MENU_FONT_STANDARD_1    "ethnocentric.ttf", (14u)//(13u)
 #define MENU_FONT_STANDARD_2    "ethnocentric.ttf", (20u)
 #define MENU_FONT_STANDARD_3    "ethnocentric.ttf", (30u)
 #define MENU_FONT_STANDARD_4    "ethnocentric.ttf", (40u)
@@ -170,7 +170,7 @@ enum eEntry : coreUint8
 
     ENTRY_INPUT_TYPE = ENTRY_AUDIO,
     ENTRY_INPUT_RUMBLE,
-    ENTRY_INPUT_FIREMODE,
+    ENTRY_INPUT_FIREMODE = ENTRY_INPUT_RUMBLE,
     ENTRY_INPUT_MOVEUP,
     ENTRY_INPUT_MOVELEFT,
     ENTRY_INPUT_MOVEDOWN,
@@ -190,6 +190,7 @@ enum eEntry : coreUint8
     ENTRY_GAME_HUDROTATION,
     ENTRY_GAME_HUDSCALE,
     ENTRY_GAME_HUDTYPE,
+    ENTRY_GAME_UPDATEFREQ,
     ENTRY_GAME_MIRRORMODE,
     ENTRY_MAX
 };
@@ -256,9 +257,9 @@ private:
 
     coreLabel m_PromptText;         // 
     coreFlow  m_fPromptAnimation;   // 
+    coreFlow  m_fPromptExpand;   // 
 
     
-    coreFlow  m_fTest;   // 
     coreBool m_bTest2;
 
     coreLabel m_aVersionText[2];    // hard-coded version info strings 
@@ -343,7 +344,7 @@ private:
     coreObject2D    m_aSupportIcon[MENU_GAME_PLAYERS];   // 
 
 
-    cPlayer* m_apShip[2];
+    //cPlayer* m_apShip[2];
     sGameInput m_aShipInput[2];
 
     cMenuInput m_MenuInput;  
@@ -471,21 +472,22 @@ private:
 
 
 private:
-    coreObject2D m_Background;           // 
+    coreObject2D m_Background;              // 
 
-    coreButton m_VideoTab;               // 
-    coreButton m_AudioTab;               // 
-    coreButton m_InputTab;               // 
-    coreButton m_GameTab;                // 
+    coreButton m_VideoTab;                  // 
+    coreButton m_AudioTab;                  // 
+    coreButton m_InputTab;                  // 
+    coreButton m_GameTab;                   // 
 
-    coreButton m_SaveButton;             // save button
-    coreButton m_DiscardButton;          // discard button
-    coreButton m_BackButton;             // back button
+    coreButton m_SaveButton;                // save button
+    coreButton m_DiscardButton;             // discard button
+    coreButton m_BackButton;                // back button
 
-    coreLabel    m_aLabel[ENTRY_MAX];    // 
-    coreObject2D m_aLine [ENTRY_MAX];    // 
-    coreLabel    m_aArrow[INPUT_KEYS];   // 
-
+    coreLabel    m_aLabel   [ENTRY_MAX];    // 
+    coreObject2D m_aLine    [ENTRY_MAX];    // 
+    coreLabel    m_aCueInput[INPUT_KEYS];   // 
+    coreLabel    m_aCueRota [2];            // 
+cMenuInput m_MenuInput;  
     coreSwitchBoxU8 m_Monitor;
     coreSwitchBoxU8 m_Resolution;
     coreSwitchBoxU8 m_DisplayMode;
@@ -505,6 +507,7 @@ private:
     coreSwitchBoxU8 m_HudRotation;
     coreSwitchBoxU8 m_HudScale;
     coreSwitchBoxU8 m_HudType;
+    coreSwitchBoxU8 m_UpdateFreq;
     coreSwitchBoxU8 m_MirrorMode;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
@@ -512,11 +515,6 @@ private:
 
     coreUintW                          m_iCurMonitorIndex;
     coreLookup<coreUintW, std::string> m_asCurResolution;
-
-
-
-    
-    cMenuInput m_MenuInput;  
 
 
 public:
@@ -736,9 +734,8 @@ public:
 class cMenu final : public coreMenu, public coreResourceRelation
 {
 private:
-    cIntroMenu* m_pIntroMenu;            // intro menu object (dynamically unloaded)
-    cTitleMenu* m_pTitleMenu;            // title menu object (dynamically unloaded)
-
+    cIntroMenu   m_IntroMenu;            // intro menu object
+    cTitleMenu   m_TitleMenu;            // title menu object
     cMainMenu    m_MainMenu;             // main menu object
     cGameMenu    m_GameMenu;             // game menu object
     cScoreMenu   m_ScoreMenu;            // score menu object
@@ -757,7 +754,7 @@ private:
     coreUint32   m_iPauseFrame;          // 
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
-    coreFullscreen  m_MixObject;         // 
+    coreObject2D    m_MixObject;         // 
 
     coreTimer m_TransitionTime;          // 
     coreUint8 m_iTransitionState;        // 

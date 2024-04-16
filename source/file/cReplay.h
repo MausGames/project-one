@@ -67,7 +67,12 @@ public:
 
         coreUint32 iExecutableHash;                                                        // 
         coreUint32 iReplayHash;                                                            // 
-        coreUint32 iBodySize;
+        coreUint32 iBodySize;                                                              // 
+
+        // coreUint64 iCustomData (also save)
+        // game version (make all gameplay changes with if/else)
+        // update frequency
+        coreUint8 iCheated; // mark the replay as not compatible with regular clients
 
         coreUint8  iGameMode;                                                              // 
         coreUint8  iGameDifficulty;                                                        // 

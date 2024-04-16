@@ -73,7 +73,8 @@ public:
     void SetBaseColor(const coreVector3& vColor, const coreBool bInverted = false);
 
     // 
-    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY * 0.5f, this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    //inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY * 0.5f, this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY * 0.5f, this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
     inline void InvokeBlink ()                        {m_fBlink = 1.2f;}
 

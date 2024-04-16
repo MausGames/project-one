@@ -30,7 +30,7 @@ cBlur::cBlur(const coreTextureSpec& oTextureSpec, const coreFloat fScale, const 
 
     // create transformer object
     m_Transformer.SetSize (coreVector2(1.0f,1.0f) * m_fScale);
-    m_Transformer.SetAlpha(1.0f - m_fAttenuation * FRAMERATE_TIME);
+    m_Transformer.SetAlpha(1.0f - m_fAttenuation);
     m_Transformer.Move();
 }
 

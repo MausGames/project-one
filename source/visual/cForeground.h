@@ -65,7 +65,7 @@ public:
     coreBool IsVisibleObject(const coreObject3D* pObject)const;
 
     // 
-    coreFloat RayIntersection(const coreVector2& vPosition, const coreVector2& cDirection, const coreFloat fFactor = 1.1f)const;
+    coreFloat RayIntersection(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fFactor = 1.1f)const;
 
 
 private:

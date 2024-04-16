@@ -50,7 +50,7 @@ cGame::cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const co
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_GREEN);//COLOR_SHIP_BLUE);
         for(coreUintW i = 0u; i < PLAYER_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oConfig.aaiWeapon [1][i]);
         for(coreUintW i = 0u; i < PLAYER_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oConfig.aaiSupport[1][i]);
 
@@ -159,18 +159,15 @@ void cGame::Render()
     {
         DEPTH_PUSH_DOUBLE
 
+        // render special-effects
+        g_pSpecialEffects->Render();
+
         // render high-priority bullet manager
         m_BulletManagerEnemy.Render();
 
         // render top objects
         m_EnemyManager.RenderTop();
         m_pCurMission->RenderTop();
-    }
-
-    __DEPTH_GROUP_SPECIAL
-    {
-        // render special-effects
-        g_pSpecialEffects->Render();
 
         glDisable(GL_DEPTH_TEST);
         {
@@ -225,10 +222,6 @@ void cGame::Move()
 
     // 
     this->__HandleDefeat();
-
-    // move all overlay objects
-    m_CombatText.Move();
-    m_Interface .Move();
 }
 
 
@@ -239,6 +232,16 @@ void cGame::RenderOverlay()
     // render combat text and interface
     m_CombatText.Render();
     m_Interface .Render();
+}
+
+
+// ****************************************************************
+// move the overlay separately
+void cGame::MoveOverlay()
+{
+    // move combat text and interface
+    m_CombatText.Move();
+    m_Interface .Move();
 }
 
 
@@ -452,10 +455,12 @@ void cGame::PushDepthLevelShip()
 // 
 RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 {
-    // TODO: change targeting here 
-
     // 
     if(!m_bCoop) return &m_aPlayer[0];
+
+    // 
+    if(!coreMath::IsNear(vPosition.x, 0.0f)) return &m_aPlayer[(vPosition.x > 0.0f) ? 1u : 0u];
+    if(!coreMath::IsNear(vPosition.y, 0.0f)) return &m_aPlayer[(vPosition.y > 0.0f) ? 0u : 1u];
 
     // 
     cPlayer*  pPlayer = &m_aPlayer[0];
@@ -672,7 +677,7 @@ void cGame::__HandleDefeat()
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
-            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - pPlayer->GetFeelTime(), 0.0f, 1.0f));
+            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
             if(bDefeated && m_bCoop && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
             {
@@ -715,7 +720,8 @@ void cGame::__HandleDefeat()
             // 
             pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
             pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
-            pPlayer->StartFeeling   (PLAYER_FEEL_TIME, 0u);
+            pPlayer->SetDesaturate  (PLAYER_DESATURATE);
+            pPlayer->StartFeeling   (PLAYER_FEEL_TIME_REPAIR, 0u);
 
             // 
             SAFE_DELETE(m_pRepairEnemy)
@@ -782,7 +788,11 @@ void cGame::__HandleCollisions()
             // 
             const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
             pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
-            pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+
+
+            if(pEnemy->GetLifeTime() >= 0.5f) pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+
+
 
             // 
             g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
@@ -800,7 +810,7 @@ void cGame::__HandleCollisions()
 
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-        //pBullet->Deactivate(true, vIntersection.xy());
+                pBullet->Deactivate(true, vIntersection.xy());
         // aber minen und raketen sollten explodieren 
 
         

@@ -14,6 +14,8 @@ sGameInput g_aGameInput[INPUT_TYPES] = {{}};
 sGameInput g_TotalInput              = {};
 sMenuInput g_MenuInput               = {};
 
+static coreBool m_abFireToggle[INPUT_TYPES + 1u] = {};
+
 
 // ****************************************************************
 // check configuration for valid values
@@ -91,6 +93,7 @@ void LoadConfig()
     g_OldConfig.Game.iHudRotation    = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
     g_OldConfig.Game.iHudScale       = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
     g_OldConfig.Game.iHudType        = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
+    g_OldConfig.Game.iUpdateFreq     = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
     g_OldConfig.Game.iMirrorMode     = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
 
     // read graphics values
@@ -145,6 +148,7 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,   g_OldConfig.Game.iHudRotation);
     Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,      g_OldConfig.Game.iHudScale);
     Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,       g_OldConfig.Game.iHudType);
+    Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,    g_OldConfig.Game.iUpdateFreq);
     Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,    g_OldConfig.Game.iMirrorMode);
 
     // write graphics values
@@ -222,9 +226,9 @@ void UpdateInput()
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
             {
-                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j);
-                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j);
-                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j);
+                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j)
+                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
+                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
             }
         }
         else   // # joystick/gamepad
@@ -240,23 +244,26 @@ void UpdateInput()
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
             {
-                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j);
-                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j);
-                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j);
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j)
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
             }
         }
 
         if(!oMap.vMove.IsNull())
         {
             // 
-            const coreVector2& vGame  = g_pPostProcessing->GetDirection();
-            const coreVector2  vHud   = coreVector2(0.0f,1.0f).InvertedX();   // TODO 
-            const coreVector2  vFinal = MapToAxis(vGame, vHud);
+            const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+            const coreVector2 vHud   = g_vHudDirection.InvertedX();
+            const coreVector2 vFinal = MapToAxis(vGame, vHud);
             ASSERT(vFinal.IsNormalized())
 
             // 
             oMap.vMove = MapToAxis(oMap.vMove, vFinal);
             oMap.vMove = oMap.vMove.NormalizedUnsafe();
+
+            // 
+            if(g_pPostProcessing->GetSize().x < 0.0f) oMap.vMove = oMap.vMove.InvertedX();
         }
 
         // 
@@ -283,6 +290,43 @@ void UpdateInput()
             if(CONTAINS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
         }
     }
+
+    // 
+    const auto nFireModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iToggleIndex)
+    {
+        const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
+        if(iFireMode == 1u)
+        {
+            // 
+            const coreBool bPress   = CONTAINS_BIT(pInput->iActionPress,   0u);
+            const coreBool bRelease = CONTAINS_BIT(pInput->iActionRelease, 0u);
+            const coreBool bHold    = CONTAINS_BIT(pInput->iActionHold,    0u);
+
+            SET_BIT(pInput->iActionPress,   0u,  bRelease)
+            SET_BIT(pInput->iActionRelease, 0u,  bPress)
+            SET_BIT(pInput->iActionHold,    0u, !bHold)
+        }
+        else if(iFireMode == 2u)
+        {
+            // 
+            const coreBool bPress = CONTAINS_BIT(pInput->iActionPress, 0u);
+            if(bPress) m_abFireToggle[iToggleIndex] = !m_abFireToggle[iToggleIndex];
+
+            SET_BIT(pInput->iActionPress,   0u,  m_abFireToggle[iToggleIndex] && bPress)
+            SET_BIT(pInput->iActionRelease, 0u, !m_abFireToggle[iToggleIndex] && bPress)
+            SET_BIT(pInput->iActionHold,    0u,  m_abFireToggle[iToggleIndex])
+        }
+
+        // 
+        if((iFireMode != 2u) || !STATIC_ISVALID(g_pGame))
+            m_abFireToggle[iToggleIndex] = false;
+
+        // 
+        SET_BIT(pInput->iStatus, 0u, m_abFireToggle[iToggleIndex])
+    };
+    nFireModeFunc(&g_aGameInput[0], 0u, 0u);
+    nFireModeFunc(&g_aGameInput[1], 1u, 1u);
+    nFireModeFunc(&g_TotalInput,    0u, 2u);
 
     // 
          if(!coreMath::IsNear(g_TotalInput.vMove.x, 0.0f)) g_MenuInput.iMove = (g_TotalInput.vMove.x > 0.0f) ? 4u : 2u;

@@ -561,7 +561,7 @@ void cTorusBoss::__MoveOwn()
             coreObject3D* pHull   = &m_aGunnerHullRaw[i];
             if(!pGunner->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-            const coreVector3& vSize = pGunner->GetSize();
+            const coreVector3 vSize = pGunner->GetSize();
 
             // 
             const coreFloat   fMoveSide = CONTAINS_BIT(m_iGunnerMove, i) ? -1.0f : 1.0f;
@@ -670,8 +670,8 @@ void cTorusBoss::__MoveOwn()
 
             for(coreUintW j = 0u; j < 3u; ++j)
             {
-                const coreVector2& vDir = avDir[j];
-                const coreVector2  vPos = this->GetPosition().xy() + vDir * 8.0f;
+                const coreVector2 vDir = avDir[j];
+                const coreVector2 vPos = this->GetPosition().xy() + vDir * 8.0f;
 
                 // 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, this, vPos, vDir)->ChangeSize(1.2f);

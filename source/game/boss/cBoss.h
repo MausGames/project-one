@@ -262,7 +262,7 @@ class cVausBoss final : public cBoss
 {
 private:
     cCustomEnemy m_aCompanion[2];   // 
-    coreUint8    m_iScoutOrder;     // 
+    //coreUint8    m_iScoutOrder;     // 
 
 
 public:
@@ -758,8 +758,8 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
     }
     else
     {
-        ASSERT(s_cast<void*>(nLerpFunc) == s_cast<void*>(LERP_LINEAR))
-        ASSERT(fRate <= FRAMERATE_VALUE)
+        ASSERT(r_cast<void*>(nLerpFunc) == r_cast<void*>(LERP_LINEAR))
+        ASSERT(fRate <= FRAMERATE_MIN)
 
         // 
         if(oTimer.Update(fRate)) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);

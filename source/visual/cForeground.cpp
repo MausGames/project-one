@@ -89,18 +89,18 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
 
 // ****************************************************************
 // 
-coreFloat cForeground::RayIntersection(const coreVector2& vPosition, const coreVector2& cDirection, const coreFloat fFactor)const
+coreFloat cForeground::RayIntersection(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fFactor)const
 {
-    ASSERT(cDirection.IsNormalized())
+    ASSERT(vDirection.IsNormalized())
 
     // 
-    if(coreMath::IsNear(cDirection.x, 0.0f)) return (FOREGROUND_AREA.y * fFactor) - vPosition.y * cDirection.y;
-    if(coreMath::IsNear(cDirection.y, 0.0f)) return (FOREGROUND_AREA.x * fFactor) - vPosition.x * cDirection.x;
+    if(coreMath::IsNear(vDirection.x, 0.0f)) return (FOREGROUND_AREA.y * fFactor) - vPosition.y * vDirection.y;
+    if(coreMath::IsNear(vDirection.y, 0.0f)) return (FOREGROUND_AREA.x * fFactor) - vPosition.x * vDirection.x;
 
     // 
-    const coreVector2 vCorner = (FOREGROUND_AREA * fFactor) * cDirection.Processed(SIGN);
+    const coreVector2 vCorner = (FOREGROUND_AREA * fFactor) * vDirection.Processed(SIGN);
     const coreVector2 vDiff   = vCorner - vPosition;
-    const coreVector2 vLength = vDiff / cDirection;
+    const coreVector2 vLength = vDiff / vDirection;
 
     return vLength.Min();
 }

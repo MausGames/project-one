@@ -44,7 +44,7 @@ void cMenuInput::Move()
     }
 
 
-    Core::Input->ShowCursor(s_bJoystick ? false : true);
+    Core::Input->ShowCursor(!s_bJoystick);
 
     //coreBool bReset = true;
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
@@ -81,7 +81,10 @@ void cMenuInput::Move()
         }
 
 
-        const coreVector2& vRelative = Core::Input->GetJoystickRelativeL(i);
+        // TODO: make this file time-independent 
+
+
+        const coreVector2 vRelative = Core::Input->GetJoystickRelativeL(i);
 
         if(!vRelative.IsNull())
         {
@@ -94,7 +97,7 @@ void cMenuInput::Move()
 
                 if(m_pCurObject == NULL)
                 {
-                    ASSERT(!m_apObject.empty());
+                    ASSERT(!m_apObject.empty())
                     m_pCurObject = m_apObject.front();
                     m_pCurTab = NULL;
                 }

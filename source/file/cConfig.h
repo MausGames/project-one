@@ -46,6 +46,7 @@
 #define CONFIG_GAME_HUD_ROTATION   "Game",     "HudRotation",                          (0)
 #define CONFIG_GAME_HUD_SCALE      "Game",     "HudScale",                             (100)
 #define CONFIG_GAME_HUD_TYPE       "Game",     "HudType",                              (0)
+#define CONFIG_GAME_UPDATE_FREQ    "Game",     "UpdateFreq",                           (60)
 #define CONFIG_GAME_MIRROR_MODE    "Game",     "MirrorMode",                           (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
@@ -106,6 +107,7 @@ struct sConfig final
         coreUint8 iHudRotation;    // 
         coreUint8 iHudScale;       // 
         coreUint8 iHudType;        // 
+        coreUint8 iUpdateFreq;     // 
         coreUint8 iMirrorMode;     // 
     }
     Game;
@@ -117,17 +119,17 @@ struct sGameInput final
     coreUint8   iActionPress;     // action press (bitfields)
     coreUint8   iActionRelease;   // action release
     coreUint8   iActionHold;      // action hold
+    coreUint8   iStatus;          // 
 };
 
 struct sMenuInput final
 {
-    coreUint8 iMove       : 3;   // 
-    coreBool  bAccept     : 1;   // 
-    coreBool  bCancel     : 1;   // 
-    coreBool  bPause      : 1;   // 
-    coreBool  bScreenshot : 1;   // 
+    coreUint8 iMove;         // 
+    coreBool  bAccept;       // 
+    coreBool  bCancel;       // 
+    coreBool  bPause;        // 
+    coreBool  bScreenshot;   // 
 };
-STATIC_ASSERT(sizeof(sMenuInput) == 1u)
 
 extern sConfig    g_CurConfig;                 // current and active configuration structure
 extern sConfig    g_OldConfig;                 // handle for old values

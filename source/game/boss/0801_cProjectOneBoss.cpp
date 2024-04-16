@@ -48,7 +48,7 @@ void cProjectOneBoss::__ResurrectOwn()
 void cProjectOneBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
-    this->_EndBoss(bAnimated);
+    //this->_EndBoss(bAnimated);
 }
 
 
@@ -184,7 +184,7 @@ void cProjectOneBoss::__MoveOwn()
                 if(pBullet->GetFlyTime() >= 2.0f) return;
 
                 const coreVector2 vAim = (vPlayerPos - pBullet->GetPosition().xy()).Normalized();
-                const coreVector2 vDir = (pBullet->GetFlyDir() + vAim * (2.0f * Core::System->GetTime())).Normalized(vAim);
+                const coreVector2 vDir = (pBullet->GetFlyDir() + vAim * (2.0f * Core::System->GetTime())).Normalized(vAim); // TODO: not time-portable   
 
                 pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * Core::System->GetTime());   
                 pBullet->SetFlyDir(vDir);
@@ -192,10 +192,10 @@ void cProjectOneBoss::__MoveOwn()
 
             g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                if(pPlayer->IsFeeling()) pPlayer->Kill(false);
+                if(pPlayer->IsFeeling() || pPlayer->IsIgnoring()) pPlayer->Kill(false);
             });
         }
     }
 
-    // startest mit rotation nach links, lädt strahl auf, schießt strahl, sinusbewegung nach rechts bis ende
+    // startest mit rotation nach links, lÃ¤dt strahl auf, schieÃŸt strahl, sinusbewegung nach rechts bis ende
 }

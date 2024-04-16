@@ -66,7 +66,7 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
 
     // init label object
     oLabel.SetText  (pcText);
-    oLabel.SetCenter(g_pForeground->Project2D(vPosition) * g_vMenuCenter);
+    oLabel.SetCenter(g_pForeground->Project2D(vPosition));
     oLabel.SetColor4(coreVector4(vColor, 0.0f));
 
     // start animation timer

@@ -22,7 +22,7 @@ cFinishMenu::cFinishMenu()noexcept
     m_Background.DefineTexture(1u, "menu_background_black.png");
     m_Background.DefineProgram("menu_animate_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetCenter    (coreVector2(0.0f,0.1f) * g_vMenuCenter);
+    m_Background.SetCenter    (coreVector2(0.0f,0.1f));
 
     m_ThankYouText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_ThankYouText.SetPosition    (coreVector2(0.0f,0.05f));
@@ -108,7 +108,7 @@ void cFinishMenu::Move()
                 if((m_fIntroTimer >= MENU_FINISH_BANNER_ANIMATION) && (m_eState < FINISH_WAIT)) m_eState = FINISH_WAIT;
 
                 // calculate visibility and animation value
-                const coreFloat fVisibility = MIN(m_fIntroTimer, MENU_FINISH_BANNER_SPEED_REV - m_fOutroTimer) * MENU_FINISH_BANNER_SPEED;
+                const coreFloat fVisibility = MIN(m_fIntroTimer, MAX(MENU_FINISH_BANNER_SPEED_REV - m_fOutroTimer, 0.0f)) * MENU_FINISH_BANNER_SPEED;
                 const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_FINISH_BANNER_ANIMATION, 1.0f)) * MENU_FINISH_BANNER_ANIMATION;
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
@@ -172,5 +172,6 @@ void cFinishMenu::ShowThankYou()
     m_TotalValue.SetText(PRINT("%u", iSumScore));
 
     // 
+    this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_FINISH_DEFAULT, 0.0f);
 }

@@ -24,7 +24,7 @@
 // ****************************************************************
 // constructor
 cVausBoss::cVausBoss()noexcept
-: m_iScoutOrder (0u)
+//: m_iScoutOrder (0u)
 {
     // load models
     this->DefineModelHigh("ship_boss_vaus_high.md3");
@@ -105,7 +105,7 @@ void cVausBoss::__MoveOwn()
 
         g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            const coreVector3& vPos = pPlayer->GetPosition();
+            const coreVector3 vPos = pPlayer->GetPosition();
             pPlayer->SetPosition(coreVector3(vPos.x, MIN(vPos.y, this->GetPosition().y - 9.5f), vPos.z));
         });
     }
@@ -190,7 +190,7 @@ void cVausBoss::__MoveOwn()
                 m_avVector[0].z = pBall->GetDirection().x;
             }
 
-            const coreFloat fDrop   = (FRAMERATE_TIME * fSpeed) * RCP(LERPB(0.0f, 1.0f, (FRAMERATE_TIME * fSpeed))) * 0.5f / fSpeed;
+            const coreFloat fDrop   = (fSpeed / FRAMERATE_MIN) * RCP(LERPB(0.0f, 1.0f, (fSpeed / FRAMERATE_MIN))) * 0.5f / fSpeed; // TODO: wtf, get rid of time value if necessary  
             const coreFloat fNewPos = m_avVector[0].x + pBall->GetDirection().x * VIRIDO_BALL_SPEED * fDrop;
 
             this->DefaultMoveLerp(m_avVector[0].xy(), coreVector2(fNewPos, -0.95f), fTime);
@@ -862,8 +862,8 @@ sobald spieler paddle hat und ihn zum ersten mal erwischt ist seiten-angriff per
 laser von allen 3 bosse nausgehend
 bei phasenwechsel seitenbosse sterben, dropen schilde zum einsammeln (markiert)
 boss bringt seinen laser zur mitte
-schieﬂt ball mit aller kraft nach unten, muss man ausweichen, ball grˆﬂer schneller
-spieler kann schild nehmen und auch ball so schieﬂen (aber nicht aktiv)
+schie√üt ball mit aller kraft nach unten, muss man ausweichen, ball gr√∂√üer schneller
+spieler kann schild nehmen und auch ball so schie√üen (aber nicht aktiv)
 laser in mitte (oder seite) blockiert unbeschadet spieler oder paddle
 
 

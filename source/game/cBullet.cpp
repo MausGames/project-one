@@ -111,59 +111,58 @@ void cBullet::Deactivate(const coreBool bAnimated)
 // 
 void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal)
 {
-    ASSERT(pObject)
-
-    coreVector2 vHit = vIntersection;
-
-    // 
-    const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * Core::System->GetTime());
+    ASSERT(pObject && pObject->GetModel()->GetNumClusters())
 
     // increase intersection precision
-    coreFloat fHitDistance = 0.0f;
-    coreUint8 iHitCount    = 1u;
-    if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
+    coreVector2 vHit = vIntersection;
     {
-        vHit = vRayPos + m_vFlyDir * fHitDistance;
-    }
-    else
-    {
-        const coreVector2 vBackupRayDir = (pObject->GetPosition().xy() - vHit).Normalized();
+        coreFloat fHitDistance = 0.0f;
+        coreUint8 iHitCount    = 1u;
 
-        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vBackupRayDir, 0.0f), &fHitDistance, &iHitCount))
+        // shoot ray into fly direction
+        const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * Core::System->GetTime());
+        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
         {
-            vHit = vHit + vBackupRayDir * fHitDistance;
-
-            const coreVector2 vRayPos2 = vRayPos + vBackupRayDir * fHitDistance;
-
-            iHitCount = 1u;
-            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos2, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
+            vHit = vRayPos + m_vFlyDir * fHitDistance;
+        }
+        else
+        {
+            // move ray further towards object
+            const coreVector2 vTowardsDir = (pObject->GetPosition().xy() - vHit).Normalized();
+            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vTowardsDir, 0.0f), &fHitDistance, &iHitCount))
             {
-                vHit = vRayPos2 + m_vFlyDir * fHitDistance;
+                // shoot ray again into fly direction
+                const coreVector2 vNewRayPos = vRayPos + vTowardsDir * fHitDistance;
+                if(Core::Manager::Object->TestCollision(pObject, coreVector3(vNewRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &(iHitCount = 1)))   // reset
+                {
+                    vHit = vNewRayPos + m_vFlyDir * fHitDistance;
+                }
+                else
+                {
+                    vHit = vHit + vTowardsDir * fHitDistance;
+                }
             }
         }
     }
-    ASSERT(pObject->GetModel()->GetNumClusters()) // repair-enemy can trigger this, if two bullets hit at the same time   
 
-
-
+    // calculate projected intersection (for error correction)
     const coreVector2 vHitDiff = vHit - this->GetPosition().xy();
     const coreFloat   fHitProj = coreVector2::Dot(vHitDiff, m_vFlyDir);
-    const coreVector2 vNewPos  = this->GetPosition().xy() + m_vFlyDir * fHitProj;   // TODO: name   
+    const coreVector2 vPeak    = this->GetPosition().xy() + m_vFlyDir * fHitProj;
 
-    // 
-    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vNewPos - m_vFlyDir * (m_fSpeed * Core::System->GetTime())) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
+    // calculate reflection normal (approximation, sharp)
+    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vPeak - m_vFlyDir * 3.0f) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
     if(coreVector2::Dot(m_vFlyDir, vNormal) >= 0.0f) return;
 
-    // 
+    // reflect bullet
     ASSERT(vNormal.IsNormalized())
     m_vFlyDir = coreVector2::Reflect(m_vFlyDir, vNormal);
 
-    // 
-    this->SetPosition(coreVector3(vNewPos - m_vFlyDir * fHitProj, 0.0f));
+    // set corrected position
+    this->SetPosition(coreVector3(vPeak - m_vFlyDir * fHitProj, 0.0f));
 
-    // 
+    // call individual reflect routine
     this->__ReflectOwn();
-
 
     // move the 3d-object
     this->coreObject3D::Move();   // for direction (and other) changes
@@ -670,7 +669,7 @@ void cRocketBullet::__MoveOwn()
     if(pEnemy)
     {
         const coreVector2 vAim    = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-        const coreVector2 vNewDir = (m_vFlyDir + vAim * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized(vAim);
+        const coreVector2 vNewDir = (m_vFlyDir + vAim * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized(vAim); // TODO: not time-portable   
 
         m_vFlyDir = vNewDir;
     }

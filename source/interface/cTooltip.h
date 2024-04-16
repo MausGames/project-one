@@ -70,7 +70,7 @@ template <typename... A> void cTooltip::ShowText(const coreFloat fWidth, const v
 {
     // show tooltip at current mouse position
     m_bDisplay = true;
-    this->SetCenter(Core::Input->GetMousePosition());
+    this->SetCenter(MapToAxis(Core::Input->GetMousePosition(), g_vHudDirection));
 
     // check and save last reference-pointer (to prevent redundant update)
     if(m_pLastRef == pRef) return;

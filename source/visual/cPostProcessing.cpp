@@ -152,16 +152,17 @@ void cPostProcessing::Recompile()
 void cPostProcessing::UpdateLayout()
 {
     // 
-    const coreVector2 vSize = coreVector2(1.0f,1.0f) * (I_TO_F(MIN(g_CurConfig.Game.iGameScale, 100u)) / 100.0f);
+    const coreVector2 vBase = coreVector2(g_CurConfig.Game.iMirrorMode ? -1.0f : 1.0f, 1.0f);
+    const coreVector2 vSize = vBase * (I_TO_F(MIN(g_CurConfig.Game.iGameScale, 100u)) / 100.0f);
 
     // 
     coreVector2 vDirection;
     switch(g_CurConfig.Game.iGameRotation)
     {
     default: vDirection = coreVector2( 0.0f, 1.0f); break;
-    case 1:  vDirection = coreVector2(-1.0f, 0.0f); break;
-    case 2:  vDirection = coreVector2( 0.0f,-1.0f); break;
-    case 3:  vDirection = coreVector2( 1.0f, 0.0f); break;
+    case 1u: vDirection = coreVector2(-1.0f, 0.0f); break;
+    case 2u: vDirection = coreVector2( 0.0f,-1.0f); break;
+    case 3u: vDirection = coreVector2( 1.0f, 0.0f); break;
     }
 
     // 
@@ -210,7 +211,7 @@ void cPostProcessing::__UpdateInterior()
             m_aInterior[i].SetPosition (this->GetPosition ());
             m_aInterior[i].SetSize     (this->GetSize     () * coreVector2(0.5f,1.0f));
             m_aInterior[i].SetDirection(this->GetDirection());
-            m_aInterior[i].SetAlignment(this->GetDirection().Rotated90() * coreVector2(1.0f,-1.0f) * (i ? 1.0f : -1.0f));
+            m_aInterior[i].SetAlignment(this->GetDirection().Rotated90() * coreVector2(1.0f,-1.0f) * (i ? 1.0f : -1.0f) * SIGN(this->GetSize().x));
             m_aInterior[i].SetTexSize  (coreVector2(0.5f,1.0f));
             m_aInterior[i].SetTexOffset(coreVector2(i ? 0.5f : 0.0f, 0.0f));
             m_aInterior[i].Move();
@@ -238,9 +239,9 @@ void cPostProcessing::__UpdateInterior()
 void cPostProcessing::__UpdateWall()
 {
     // place objects left-right or top-down depending on window aspect ratio
-    const coreVector2& vResolution = Core::System->GetResolution();
-    const coreVector2  vFlip       = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
-    const coreVector2  vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
+    const coreVector2 vResolution = Core::System->GetResolution();
+    const coreVector2 vFlip       = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
+    const coreVector2 vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
 
     // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
@@ -254,6 +255,7 @@ void cPostProcessing::__UpdateWall()
         m_aWall[i].SetDirection (vFlip * (fSide *  coreVector2(-1.0f,1.0f)));
         m_aWall[i].SetCenter    (vFlip * (fSide *  0.5f));
         m_aWall[i].SetAlignment (vFlip * (fSide * -1.0f));
+        m_aWall[i].SetStyle     (CORE_OBJECT2D_STYLE_DEFAULT | CORE_OBJECT2D_STYLE_ASPECTCENTER);
         m_aWall[i].Move();
     }
 }

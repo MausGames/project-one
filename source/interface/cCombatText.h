@@ -12,6 +12,7 @@
 
 // TODO: allow localized text with standard numbers
 // TODO: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
+// TODO: if possible, reuse the same text
 
 
 // ****************************************************************

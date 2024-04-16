@@ -81,7 +81,6 @@ static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
 #define __DEPTH_GROUP_UNDER   {m_iDepthDebug = 11u;     m_iDepthLevel = 20u;}
 #define __DEPTH_GROUP_OVER    {m_iDepthDebug = BIT(7u); m_iDepthLevel = 9u;}
 #define __DEPTH_GROUP_TOP     {m_iDepthDebug = 0u;}
-#define __DEPTH_GROUP_SPECIAL {}
 #define __DEPTH_RESET         {this->ChangeDepthLevel(0u, 20u);}
 
 
@@ -138,8 +137,9 @@ public:
     void Render();
     void Move();
 
-    // render the overlay separately
+    // render and move the overlay separately
     void RenderOverlay();
+    void MoveOverlay();
 
     // control active mission
     void LoadMissionID   (const coreInt32 iID);

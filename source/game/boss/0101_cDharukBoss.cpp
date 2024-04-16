@@ -376,7 +376,7 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 21u)
     {
-        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : FRAMERATE_VALUE, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : RCP(Core::System->GetTime()), LERP_LINEAR)
         {
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
@@ -753,12 +753,12 @@ void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& v
     // 
     if(vDirection.x + vDirection.y > 0.0f)
          ADD_BIT   (m_iPackedDir, 0u + 2u*iIndex)
-    else REMOVE_BIT(m_iPackedDir, 0u + 2u*iIndex);
+    else REMOVE_BIT(m_iPackedDir, 0u + 2u*iIndex)
 
     // 
     if(coreMath::IsNear(vDirection.y, 0.0f))
          ADD_BIT   (m_iPackedDir, 1u + 2u*iIndex)
-    else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex);
+    else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex)
 
     STATIC_ASSERT(DHARUK_BOOMERANGS*2u <= sizeof(m_iPackedDir)*8u)
 }

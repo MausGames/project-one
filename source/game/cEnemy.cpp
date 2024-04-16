@@ -84,7 +84,7 @@ void cEnemy::Move()
         // 
         if(g_pForeground->IsVisibleObject(this))
         {
-            this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            this->SetEnabled(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
             this->ChangeType(TYPE_ENEMY);   // # makes it available in cEnemyManager::ForEachEnemy
         }
         else
@@ -93,8 +93,8 @@ void cEnemy::Move()
         }
 
 
-       // this->SetTexSize  (coreVector2(1.2f,1.2f));
-       // this->SetTexOffset(coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * -0.25f));
+        this->SetTexSize  (coreVector2(1.2f,1.2f));
+        this->SetTexOffset(coreVector2(0.0f, FMOD(coreFloat(Core::System->GetTotalTime()) * -0.25f, -1.0f)));
     }
 
     // 
@@ -223,18 +223,15 @@ void cEnemy::Kill(const coreBool bAnimated)
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         // 
-        //if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
-        //{
-        //    const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
-        //    g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), vColor);
-        //}
-        //else
-        //{
-        //    g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
-        //}
-
-
-        g_pSpecialEffects->ExplosionTest(this);
+        if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
+        {
+            const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
+            g_pSpecialEffects->MacroDestructionColor(this, vColor);
+        }
+        else
+        {
+            g_pSpecialEffects->MacroDestructionDark(this);
+        }
     }
 
     if(bEnergy)
@@ -306,7 +303,7 @@ coreVector2 cEnemy::AimAtPlayer(const cPlayer* pPlayer)const
 
 // ****************************************************************
 // 
-void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
+void cEnemy::_SetParent(cEnemy* OUTPUT_2 pParent)
 {
     ASSERT(!this->IsParent())
 
@@ -329,90 +326,6 @@ void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
         pParent->m_apMember.insert(this);
         pParent->RemoveStatus(ENEMY_STATUS_CHILD);
     }
-}
-
-
-// ****************************************************************
-// destructor
-cEnemySquad::~cEnemySquad()
-{
-    // 
-    this->FreeEnemies();
-}
-
-
-// ****************************************************************
-// 
-void cEnemySquad::FreeEnemies()
-{
-    ASSERT(STATIC_ISVALID(g_pGame))
-
-    // 
-    FOR_EACH(it, m_apEnemy)
-        g_pGame->GetEnemyManager()->FreeEnemy(&(*it));
-
-    // clear memory
-    m_apEnemy.clear();
-}
-
-
-// ****************************************************************
-// 
-void cEnemySquad::ClearEnemies(const coreBool bAnimated)
-{
-    // 
-    FOR_EACH(it, m_apEnemy)
-        (*it)->Kill(bAnimated);
-}
-
-
-// ****************************************************************
-// 
-cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
-{
-    // 
-    cEnemy*   pEnemy = NULL;
-    coreFloat fLenSq = FLT_MAX;
-
-    // 
-    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
-    {
-        // 
-        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq < fLenSq)
-        {
-            // 
-            pEnemy = pCurEnemy;
-            fLenSq = fCurLenSq;
-        }
-    });
-
-    return pEnemy;
-}
-
-
-// ****************************************************************
-// 
-cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
-{
-    // 
-    cEnemy*   pEnemy = NULL;
-    coreFloat fLenSq = 0.0f;
-
-    // 
-    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
-    {
-        // 
-        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq > fLenSq)
-        {
-            // 
-            pEnemy = pCurEnemy;
-            fLenSq = fCurLenSq;
-        }
-    });
-
-    return pEnemy;
 }
 
 
@@ -666,13 +579,13 @@ cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-void cEnemyManager::AttachFunction(cEnemy* pEnemy, const coreUint8 iRepeat, const coreFloat fDelay, const coreVariant16& oData, uRepeatFunc nFunction)
+void cEnemyManager::AttachFunction(cEnemy* pEnemy, const coreUint16 iRepeat, const coreFloat fDelay, const coreVariant16& oData, uRepeatFunc nFunction)
 {
     ASSERT(pEnemy && iRepeat && nFunction)
 
     // 
-    ASSERT((fDelay >= 0.0f) && (fDelay <= (255.0f / FRAMERATE_VALUE)))
-    const coreUint8 iDelay = F_TO_UI(fDelay * FRAMERATE_VALUE);
+    ASSERT((fDelay >= 0.0f) && (fDelay <= (65535.0f / FRAMERATE_MAX)))
+    const coreUint16 iDelay = F_TO_UI(fDelay * RCP(Core::System->GetTime()));
 
     // 
     sRepeatEntry oNewEntry;
@@ -686,6 +599,97 @@ void cEnemyManager::AttachFunction(cEnemy* pEnemy, const coreUint8 iRepeat, cons
 
     // 
     m_aRepeatEntry.push_back(oNewEntry);
+}
+
+
+// ****************************************************************
+// destructor
+cEnemySquad::~cEnemySquad()
+{
+    // 
+    this->FreeEnemies();
+}
+
+
+// ****************************************************************
+// 
+void cEnemySquad::FreeEnemies()
+{
+    // 
+    FOR_EACH(it, m_apEnemy)
+        cEnemySquad::__GetDefaultEnemyManager()->FreeEnemy(&(*it));
+
+    // clear memory
+    m_apEnemy.clear();
+}
+
+
+// ****************************************************************
+// 
+void cEnemySquad::ClearEnemies(const coreBool bAnimated)
+{
+    // 
+    FOR_EACH(it, m_apEnemy)
+        (*it)->Kill(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = FLT_MAX;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
+// 
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = 0.0f;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq > fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
+// 
+cEnemyManager* cEnemySquad::__GetDefaultEnemyManager()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->GetEnemyManager();
 }
 
 
@@ -924,8 +928,8 @@ void cRepairEnemy::__MoveOwn()
     m_fAnimation.UpdateMod(0.2f, 1.0f);
 
     // 
-    const coreVector2  vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * Core::System->GetTime());
-    const coreVector4& vArea   = m_pPlayer->GetArea();
+    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * Core::System->GetTime());
+    const coreVector4 vArea   = m_pPlayer->GetArea();
 
     // 
          if((vNewPos.x < vArea.x) && (m_vDirection.x < 0.0f)) m_vDirection.x =  ABS(m_vDirection.x);
