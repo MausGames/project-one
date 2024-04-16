@@ -32,6 +32,9 @@
 // TODO 3: show target FPS in config menu (speed x update rate)
 // TODO 3: when switching resolution, and confirming by returning, the transition is broken
 // TODO 3: when switching resolution, the next mouse click is not recognized (no press even is coming from SDL, only the release event)
+// TODO 3: swapping controls should swap buttons visually
+// TODO 3: context specific controller button icons on top of J0 J1 etc.
+// TODO 3: in config menu, switchboxes flicker when discarding config
 
 
 // ****************************************************************
@@ -45,7 +48,7 @@
 #define MENU_GAME_MISSIONS            (9u)
 #define MENU_GAME_STAGES              (7u)//SEGMENTS)
 #define MENU_GAME_PLAYERS             (PLAYERS)
-#define MENU_GAME_OPTIONS             (4u)
+#define MENU_GAME_OPTIONS             (5u)
 #define MENU_SCORE_ENTRIES            (10u)
 #define MENU_REPLAY_ENTRIES           (5u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
@@ -246,6 +249,8 @@ private:
 
     coreMap<coreString, cGuiButton*> m_apLanguageButton;   // list with buttons for valid language files
 
+    cMenuNavigator m_Navigator;
+
 
 public:
     cIntroMenu()noexcept;
@@ -304,7 +309,7 @@ private:
     cGuiButton m_ConfigButton;   // config button
     cGuiButton m_ExitButton;     // exit button
 
-    cMenuInput m_MenuInput;  
+    cMenuNavigator m_Navigator;
 
 
 public:
@@ -352,13 +357,14 @@ private:
     cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];       // 
 
     cGuiSwitchBox m_Players;                           // 
+    cGuiSwitchBox m_Mode;                              // 
     cGuiSwitchBox m_Difficulty;                        // 
     cGuiSwitchBox m_aWeapon     [MENU_GAME_PLAYERS];   // 
     cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];   // 
     cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
     cGuiObject    m_aSupportIcon[MENU_GAME_PLAYERS];   // 
-    
-    cMenuInput m_MenuInput;
+
+    cMenuNavigator m_Navigator;
 
 
 public:
@@ -378,8 +384,10 @@ public:
     void SaveValues();
 
     // 
+    // TODO  
     inline const coreInt32& GetMissionID         ()const                       {return m_WorldMap.GetSelectionID();}
-    inline const coreUint8& GetSelectedPlayers   ()const                       {return m_Players   .GetCurEntry().tValue;}
+    inline       coreUint8  GetSelectedPlayers   ()const                       {return m_Players   .GetCurEntry().tValue ? 2u : 1u;}
+    inline       coreUint8  GetSelectedMode      ()const                       {return m_Mode      .GetCurEntry().tValue | m_Players.GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
@@ -399,6 +407,8 @@ private:
     cGuiLabel  m_aName [MENU_SCORE_ENTRIES];   // 
     cGuiLabel  m_aScore[MENU_SCORE_ENTRIES];   // 
     cGuiObject m_aLine [MENU_SCORE_ENTRIES];   // 
+
+    cMenuNavigator m_Navigator;
 
 
 public:
@@ -426,6 +436,8 @@ private:
 
     coreList<cReplay::sInfo> m_aInfoList;      // 
 
+    cMenuNavigator m_Navigator;
+
 
 public:
     cReplayMenu()noexcept;
@@ -448,6 +460,8 @@ private:
     cGuiObject m_Background;   // 
 
     cGuiButton m_BackButton;   // back button
+
+    cMenuNavigator m_Navigator;
 
 
 public:
@@ -526,11 +540,10 @@ private:
     coreUintW                      m_iCurMonitorIndex;
     coreMap<coreUintW, coreString> m_asCurResolution;
 
+    cMenuNavigator m_Navigator;
+
 
 public:
-    
-    
-cMenuInput m_MenuInput;  
     cConfigMenu()noexcept;
 
     DISABLE_COPY(cConfigMenu)
@@ -580,6 +593,8 @@ private:
     cGuiButton m_ConfigButton;   // config button
     cGuiButton m_ExitButton;     // exit button
 
+    cMenuNavigator m_Navigator;
+
 
 public:
     cPauseMenu()noexcept;
@@ -619,7 +634,6 @@ private:
 
     cGuiLabel m_aName [MENU_SUMMARY_ENTRIES];                       // 
     cGuiLabel m_aValue[MENU_SUMMARY_ENTRIES];                       // 
-    cGuiLabel m_aaPart[MENU_SUMMARY_ENTRIES][MENU_SUMMARY_PARTS];   // 
 
     cGuiLabel m_TotalName;                                          // 
     cGuiLabel m_TotalValue;                                         // 

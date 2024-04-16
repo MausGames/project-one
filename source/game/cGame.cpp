@@ -22,13 +22,11 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_iCurMissionIndex    (coreUintW(-1))
 , m_fTimeInOut          (0.0f)
 , m_iContinues          (GAME_CONTINUES)
-, m_fPacifistDamage     (0.0f)
-, m_bPacifist           (false)
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
 , m_Options             (oOptions)
-, m_bCoop               (oOptions.iPlayers > 1u)
+, m_iVersion            (0u)
 , m_iStatus             (0u)
 {
     ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
@@ -36,7 +34,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 #if defined(_P1_DEBUG_RANDOM_)
 
     // 
-    if(!m_bCoop && (CORE_RAND_RUNTIME & 0x01u))
+    if(!this->IsMulti() && (CORE_RAND_RUNTIME & 0x01u))
         m_aPlayer[0].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
     else
 
@@ -47,7 +45,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
 
-    if(m_bCoop)
+    if(this->IsMulti())
     {
         // configure second player
         m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
@@ -59,8 +57,8 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
         m_aPlayer[1].SetInput(&g_aGameInput[1]);
 
         // 
-        //m_aPlayer[0].SetArea(coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f)));
-        //m_aPlayer[1].SetArea(coreVector4(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA)); walls are coming at you
+        m_aPlayer[0].SetArea(m_aPlayer[0].GetArea() * coreVector4(1.0f, 1.0f, -0.045f, 1.0f));
+        m_aPlayer[1].SetArea(m_aPlayer[1].GetArea() * coreVector4(-0.045f, 1.0f, 1.0f, 1.0f));
 
         // 
         g_pPostProcessing->SetSplitScreen(true);
@@ -157,10 +155,8 @@ void cGame::Render()
         // render underlying objects
         m_EnemyManager.RenderUnder();
         m_pCurMission->RenderUnder();
-    }
 
-    __DEPTH_GROUP_SHIP   // # 2
-    {
+        // TODO: push oder GL_DEPTH_TEST ?? 
         glDepthMask(false);
         {
             // 
@@ -168,7 +164,10 @@ void cGame::Render()
                 m_aPlayer[i].RenderBefore();
         }
         glDepthMask(true);
+    }
 
+    __DEPTH_GROUP_SHIP   // # 2
+    {
         // apply deferred outline-layer
         g_pOutline->Apply();
     }
@@ -184,6 +183,15 @@ void cGame::Render()
         // render overlying objects
         m_EnemyManager.RenderOver();
         m_pCurMission->RenderOver();
+
+        // TODO: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
+        glDepthMask(false);
+        {
+            // 
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RenderMiddle();
+        }
+        glDepthMask(true);
     }
 
     __DEPTH_GROUP_TOP
@@ -223,9 +231,6 @@ void cGame::Move()
 
     // 
     m_TimeTable.Update();
-
-    // 
-    this->__HandlePacifist();
 
     // 
     cHelper::GlobalUpdate();
@@ -333,7 +338,7 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
         // 
         g_pSave->EditGlobalStats()->iMissionsDone += 1u;
 
-        for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+        for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
         {
             // 
             const coreUint32 iScoreFull = m_aPlayer[i].GetScoreTable()->GetScoreMission(iOldIndex);
@@ -418,7 +423,7 @@ void cGame::StartIntro()
     // 
     m_fTimeInOut = -GAME_INTRO_DELAY;
 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
     {
         // 
         m_aPlayer[i].Kill(false);
@@ -426,8 +431,10 @@ void cGame::StartIntro()
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);   // TODO 1: handle combination with gameplay code
 
         // 
-        const coreFloat fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
+        const coreFloat fSide = this->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
         m_aPlayer[i].SetPosition(coreVector3(fSide, -140.0f, 0.0f));
+
+        STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 }
 
@@ -448,7 +455,7 @@ void cGame::StartOutro(const coreUint8 iType)
     m_iOutroType = iType;
 
     // 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
     // 
@@ -473,7 +480,7 @@ void cGame::UseContinue()
     ASSERT(m_iContinues)
     m_iContinues -= 1u;
 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
     {
         // 
         m_aPlayer[i].StartFeeling(PLAYER_FEEL_TIME_CONTINUE, 2u);
@@ -488,22 +495,6 @@ void cGame::UseContinue()
     g_pSave->EditGlobalStats      ()->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsMission()->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsSegment()->iContinuesUsed += 1u;
-}
-
-
-// ****************************************************************
-// 
-void cGame::ActivatePacifist()
-{
-    /*
-    // 
-    ASSERT(!m_bPacifist)
-    m_bPacifist = true;
-
-    // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].AddStatus(PLAYER_STATUS_PACIFIST);
-    */
 }
 
 
@@ -645,7 +636,7 @@ coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool
         case 2u: return  50000u;
         case 3u: return  30000u;
         case 4u: return  20000u;
-        default: return  10000u - MIN(50u * (iDamageTaken - LIVES), 9999u);
+        default: return  10000u - 50u * MIN(iDamageTaken - LIVES, 199u);
         }
 
         STATIC_ASSERT(LIVES == 5u)
@@ -680,7 +671,7 @@ coreBool cGame::__HandleIntro()
             ADD_FLAG   (m_iStatus, GAME_STATUS_PLAY)
 
             // re-enable player controls
-            for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+            for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
             // 
@@ -766,7 +757,7 @@ void cGame::__HandleDefeat()
         coreBool bAllDefeated = true;
 
         // 
-        for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+        for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
         {
             cPlayer* pPlayer = &m_aPlayer[i];
 
@@ -777,7 +768,7 @@ void cGame::__HandleDefeat()
             // 
             g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
-            if(m_bCoop && bDefeated && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
+            if(this->IsMulti() && bDefeated && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
             {
                 // 
                 m_pRepairEnemy = new cRepairEnemy();
@@ -834,44 +825,6 @@ void cGame::__HandleDefeat()
             // 
             SAFE_DELETE(m_pRepairEnemy)
         }
-    }
-}
-
-
-// ****************************************************************
-// 
-void cGame::__HandlePacifist()
-{
-    if(!m_bPacifist) return;
-
-    // 
-    const coreUintW iNumEnemies = m_EnemyManager.GetNumEnemiesAlive();
-    if(iNumEnemies)
-    {
-        // 
-        this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            if(!pPlayer->IsRolling()) m_fPacifistDamage.Update(GAME_PACIFIST_DAMAGE * RCP(I_TO_F(m_bCoop ? GAME_PLAYERS : 1u)));
-        });
-
-        // 
-        if((m_fPacifistDamage >= GAME_PACIFIST_DAMAGE) && (F_TO_UI(m_fPacifistDamage) >= iNumEnemies))
-        {
-            // 
-            const coreInt32 iDamage = F_TO_UI(m_fPacifistDamage) / iNumEnemies;
-            m_fPacifistDamage -= I_TO_F(iDamage * iNumEnemies);
-
-            // 
-            m_EnemyManager.ForEachEnemy([&](cEnemy* OUTPUT pEnemy)
-            {
-                pEnemy->TakeDamage(iDamage, ELEMENT_NEUTRAL, pEnemy->GetPosition().xy(), NULL);
-            });
-        }
-    }
-    else
-    {
-        // 
-        m_fPacifistDamage = 0.0f;
     }
 }
 

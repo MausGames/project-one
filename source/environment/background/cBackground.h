@@ -210,7 +210,7 @@ public:
 
 private:
     // execute own routines
-    inline void __RenderOwnAfter()final {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void __RenderOwnAfter()final {/*glClearColor(1.0,1.0,1.0,1.0);*/ m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
 

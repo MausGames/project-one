@@ -47,8 +47,7 @@ private:
     coreUint8 m_iMsgType;                                    // 
     coreUint8 m_iInputType;                                  // 
 
-
-    cMenuInput m_MenuInput;
+    cMenuNavigator m_Navigator;                              // 
 
 
 public:
@@ -150,6 +149,9 @@ template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nC
     ASSERT(!m_nCallback)
     m_nCallback = nCallback;
     m_vCurMouse = Core::Input->GetMousePosition();
+
+    // 
+    m_Navigator.ResetFirst();
 }
 
 

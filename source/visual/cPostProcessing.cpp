@@ -40,6 +40,7 @@ cPostProcessing::cPostProcessing()noexcept
     m_Separator.DefineProgram("default_2d_program");
     m_Separator.DefineTexture(0u, "default_white.png");
     m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
+    m_Separator.SetColor4    (coreVector4(coreVector3(1.0f,1.0f,1.0f),0.0f));
 
     // 
     this->SetWallOpacity  (0.0f);
@@ -98,8 +99,8 @@ void cPostProcessing::Render()
     // invalidate all frame buffers (# not cGlow and cDistortion, because of incremental rendering and pause)
     if(!g_pMenu->IsPaused())
     {
-        g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
-        g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
+        g_pEnvironment->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+        g_pForeground ->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
     }
 }
 
@@ -288,7 +289,7 @@ void cPostProcessing::__UpdateSeparator()
         const coreFloat fValue = (m_fSplitScreenValue == 1.0f) ? 1.0f : LERPB(0.0f, 1.0f, m_fSplitScreenValue);
 
         // 
-        m_Separator.SetSize     (coreVector2(LERP(0.1f, 0.01f, fValue), 1.0f));
+        m_Separator.SetSize     (coreVector2(LERP(0.1f, 0.0055f, fValue), 1.0f));
         m_Separator.SetDirection(this->GetDirection());
         m_Separator.SetAlpha    (LERP(0.0f, 0.8f, fValue));
         m_Separator.Move();

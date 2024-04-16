@@ -14,7 +14,7 @@
 cTooltip::cTooltip()noexcept
 : m_iNumLines (0u)
 , m_bDisplay  (false)
-, m_pLastRef  (NULL)
+, m_pLastRef  (I_TO_P(-1))
 {
     const coreVector2 vAlignment = coreVector2(TOOLTIP_TARGET_OFFSET.x ? SIGN(TOOLTIP_TARGET_OFFSET.x) : 0.0f,
                                                TOOLTIP_TARGET_OFFSET.y ? SIGN(TOOLTIP_TARGET_OFFSET.y) : 0.0f);

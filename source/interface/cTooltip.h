@@ -28,7 +28,7 @@
 #define TOOLTIP_ONELINER      (FLT_MAX)                             // create tooltip without wrapping (infinite width)
 
 #define TOOLTIP_MOUSE         (Core::Input->GetMousePosition() * Core::System->GetResolution() * RCP(Core::System->GetResolution().Min()))
-#define TOOLTIP_OBJECT(x)     (coreVector2((x).GetTransform()._31, (x).GetTransform()._32) * RCP(Core::System->GetResolution().Min()))
+#define TOOLTIP_OBJECT(x)     (GetTranslation(x) * RCP(Core::System->GetResolution().Min()))
 
 
 // ****************************************************************

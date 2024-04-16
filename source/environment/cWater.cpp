@@ -136,7 +136,7 @@ void cWater::UpdateReflection()
         // flip projection left-right (also culling!, after StartDraw())
         c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
 
-        glDepthFunc(GL_ALWAYS);   // better performance than depth-clear
+        glDepthFunc(GL_ALWAYS);   // better performance than clear
         glDisable  (GL_BLEND);
         {
             // move and render the sky-plane
@@ -192,7 +192,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
         // fill depth frame buffer
         m_Depth.StartDraw();
         {
-            glDepthFunc (GL_ALWAYS);   // better performance than depth-clear
+            glDepthFunc (GL_ALWAYS);   // better performance than clear
             glDrawBuffer(GL_NONE);
             {
                 // render the outdoor-surface

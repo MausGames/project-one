@@ -307,4 +307,12 @@ constexpr FUNC_CONST coreFloat DelayTime(const coreFloat fTime, const coreFloat 
 }
 
 
+// ****************************************************************
+// 
+inline FUNC_LOCAL coreVector2 GetTranslation(const coreObject2D& oObject)
+{
+    return coreVector2(oObject.GetTransform()._31, oObject.GetTransform()._32);
+}
+
+
 #endif // _P1_GUARD_UTILITIES_H_

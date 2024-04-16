@@ -96,7 +96,7 @@ void cDemoMission::__SetupOwn()
         }
         if(STAGE_TIME_POINT(10.0f) && !iBulletShot)
         {
-            g_pGame->ActivatePacifist();
+            //g_pGame->ActivatePacifist();
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)

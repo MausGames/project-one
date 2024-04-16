@@ -258,10 +258,12 @@ void cAmemasuBoss::__MoveOwn()
 
             g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                const coreFloat fSide = g_pGame->GetCoop() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
+                const coreFloat fSide = GAME_MULTI ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
 
                 const coreFloat fHeightPlayer = m_ChangePath.CalcPositionLerp(CLAMP((fTime*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f)).y;
                 pPlayer->SetPosition(coreVector3(fSide, (-3.75f - fHeightPlayer) * FOREGROUND_AREA.y, 0.0f));
+
+                STATIC_ASSERT(GAME_PLAYERS == 2u)
             });
 
             if(PHASE_FINISHED)

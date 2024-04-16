@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cPauseMenu::cPauseMenu()noexcept
-: coreMenu (SURFACE_PAUSE_MAX, SURFACE_PAUSE_DEFAULT)
+: coreMenu    (SURFACE_PAUSE_MAX, SURFACE_PAUSE_DEFAULT)
+, m_Navigator (this)
 {
     // create menu objects
     m_ResumeButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -33,10 +34,18 @@ cPauseMenu::cPauseMenu()noexcept
     m_ExitButton.SetSize      (m_ResumeButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
+    // 
+    m_Navigator.BindObject(&m_ResumeButton, &m_ExitButton,   NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ConfigButton, &m_ResumeButton, NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_ResumeButton, NULL, NULL, MENU_TYPE_DEFAULT);
+
+    m_Navigator.AssignFirst(&m_ResumeButton);
+
     // bind menu objects
     this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ResumeButton);
     this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ConfigButton);
     this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ExitButton);
+    this->BindObject(SURFACE_PAUSE_DEFAULT, &m_Navigator);
 }
 
 
@@ -44,6 +53,9 @@ cPauseMenu::cPauseMenu()noexcept
 // move the pause menu
 void cPauseMenu::Move()
 {
+    // 
+    m_Navigator.Update();
+
     // move the menu
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);

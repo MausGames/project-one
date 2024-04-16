@@ -12,19 +12,22 @@
 
 // TODO 3: enemy bullet (and enemy?) cleanup on mission unload
 // TODO 2: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
-// TODO 3: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
 
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS         (PLAYERS)     // default number of players
-#define GAME_HELPERS         (HELPERS)     // 
-#define GAME_CONTINUES       (CONTINUES)   // 
-#define GAME_INTRO_DELAY     (0.2f)        // 
-#define GAME_INTRO_DURATION  (3.5f)        // 
-#define GAME_PACIFIST_DAMAGE (20.0f)       // 
+#define GAME_PLAYERS        (PLAYERS)     // default number of players
+#define GAME_HELPERS        (HELPERS)     // 
+#define GAME_CONTINUES      (CONTINUES)   // 
+#define GAME_INTRO_DELAY    (0.2f)        // 
+#define GAME_INTRO_DURATION (3.5f)        // 
+
+#define GAME_MULTI      (g_pGame->IsMulti())
+#define GAME_EASY       (g_pGame->GetDifficulty() == 0u)
+#define GAME_HARD       (g_pGame->GetDifficulty() == 2u)
+#define GAME_VERSION(x) (g_pGame->GetVersion() >= (x))
 
 enum eGameStatus : coreUint8
 {
@@ -36,9 +39,19 @@ enum eGameStatus : coreUint8
     GAME_STATUS_FINISHED = 0x20u    // 
 };
 
+enum eGameMode : coreUint8
+{
+    GAME_MODE_DEFAULT   = 0x00u,   // 
+    GAME_MODE_COOP      = 0x01u,   // 
+    GAME_MODE_DUEL      = 0x02u,   // 
+    GAME_MODE_PACIFIST  = 0x10u,   // 
+    GAME_MODE_MASOCHIST = 0x20u    // 
+};
+
 struct sGameOptions final
 {
     coreUint8 iPlayers;                                          // 
+    coreUint8 iMode;                                             // 
     coreUint8 iDifficulty;                                       // 
     coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_EQUIP_WEAPONS];    // 
     coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_EQUIP_SUPPORTS];   // 
@@ -135,16 +148,13 @@ private:
 
     coreUint8 m_iContinues;                 // 
 
-    coreFlow m_fPacifistDamage;             // 
-    coreBool m_bPacifist;                   // 
-
     coreUint8 m_iDepthLevel;                // 
     coreUint8 m_iDepthDebug;                // 
 
     coreUint8 m_iOutroType;                 // 
 
     sGameOptions m_Options;                 // 
-    coreBool     m_bCoop;                   // 
+    coreUint16   m_iVersion;                // 
 
     coreUint8 m_iStatus;                    // 
 
@@ -177,13 +187,11 @@ public:
     void UseContinue();
 
     // 
-    void ActivatePacifist();
-
-    // 
     void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
     void PushDepthLevel    (const coreUint8 iLevels);
     void PushDepthLevelShip();
-    
+
+    // 
     inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
     inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
@@ -192,6 +200,12 @@ public:
     RETURN_NONNULL cPlayer* FindPlayerDual(const coreUintW   iIndex);
     template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
+
+    // 
+    inline coreBool IsMulti    ()const {return (m_Options.iPlayers > 1u);}
+    inline coreBool IsCoop     ()const {return HAS_FLAG(m_Options.iMode, GAME_MODE_COOP);}
+    inline coreBool IsPacifist ()const {return HAS_FLAG(m_Options.iMode, GAME_MODE_PACIFIST);}
+    inline coreBool IsMasochist()const {return HAS_FLAG(m_Options.iMode, GAME_MODE_MASOCHIST);}
 
     // access game objects
     inline cPlayer*         GetPlayer             (const coreUintW iIndex)   {ASSERT(iIndex                   < GAME_PLAYERS) return &m_aPlayer[iIndex];}
@@ -212,11 +226,11 @@ public:
     inline const coreInt32*    GetMissionList()const {return m_piMissionList;}
     inline const coreUintW&    GetNumMissions()const {return m_iNumMissions;}
     inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
-    inline const coreBool&     GetPacifist   ()const {return m_bPacifist;}
     inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
     inline const sGameOptions& GetOptions    ()const {return m_Options;}
+    inline const coreUint8&    GetPlayers    ()const {return m_Options.iPlayers;}
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
-    inline const coreBool&     GetCoop       ()const {return m_bCoop;}
+    inline const coreUint16&   GetVersion    ()const {return m_iVersion;}
     inline const coreUint8&    GetStatus     ()const {return m_iStatus;}
 
     // 
@@ -232,7 +246,6 @@ private:
     coreBool __HandleIntro();
     coreBool __HandleOutro();
     void     __HandleDefeat();
-    void     __HandlePacifist();
     void     __HandleCollisions();
 
     // 
@@ -245,7 +258,7 @@ private:
 template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 {
     // 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
     {
         cPlayer* pPlayer = &m_aPlayer[i];
         if(pPlayer->HasStatus(PLAYER_STATUS_DEAD)) continue;
@@ -261,7 +274,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 template <typename F> void cGame::ForEachPlayerAll(F&& nFunction)
 {
     // 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetPlayers(); i < ie; ++i)
     {
         // 
         nFunction(&m_aPlayer[i], i);

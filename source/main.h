@@ -78,10 +78,11 @@
 // TODO 3: make sure enemy bullet ClearAll is called on STAGE_DELAY
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
-// TODO 3: every boss, enemy, player-bullet-interacting object needs a volume
+// TODO 3: every boss, enemy, player-bullet-interacting object needs a volume (including all enemy-bullet types)
 // TODO 1: all sounds need IsUsable checks
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
 // TODO 1: 3d sound needs to be correct based on game orientation
+// TODO 3: skip rendering (like in pause) when update frequency is >= 2x of the refresh rate
 
 
 // ****************************************************************
@@ -108,9 +109,9 @@
 // general definitions
 #define PLAYERS              (2u)
 #define HELPERS              (9u)
-#define MISSIONS             (9u + 1u + 2u)
+#define MISSIONS             (9u + 2u + 1u)
 #define BOSSES               (2u)
-#define WAVES                (10u)
+#define WAVES                (6u)
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
@@ -182,6 +183,15 @@
 #define SHADER_WAVE          "#define _P1_WAVE_       (1) \n"        // object
 #define SHADER_GREY          "#define _P1_GREY_       (1) \n"        // vignette
 #define SHADER_LINE          "#define _P1_LINE_       (1) \n"        // ink
+
+
+struct sVersion final
+{
+    const coreChar*  pcString;
+    const coreUint16 iNumber;
+};
+constexpr sVersion g_aVersion[] = {{"1.0.0", 1u}};
+
 
 // collision types
 enum eType : coreInt32
@@ -278,7 +288,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 
 #include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"
-#include "additional/cMenuInput.h"
+#include "additional/cMenuNavigator.h"
 #include "additional/cRotaCache.h"
 #include "additional/cGuiObject.h"
 #include "additional/cLodObject.h"

@@ -32,13 +32,13 @@ cSpecialEffects::cSpecialEffects()noexcept
     for(coreUintW i = 0u; i < 2u; ++i)
     {
         m_aParticleColor[i].DefineProgram("effect_particle_color_program");
-        m_aParticleColor[i].DefineTexture(0u, "effect_particle_32.png");
+        m_aParticleColor[i].DefineTexture(0u, "effect_particle.png");
         m_aParticleDark [i].DefineProgram("effect_particle_dark_program");
-        m_aParticleDark [i].DefineTexture(0u, "effect_particle_32.png");
+        m_aParticleDark [i].DefineTexture(0u, "effect_particle.png");
         m_aParticleSmoke[i].DefineProgram("effect_particle_smoke_program");
-        m_aParticleSmoke[i].DefineTexture(0u, "effect_particle_128.png");
+        m_aParticleSmoke[i].DefineTexture(0u, "effect_smoke.png");
         m_aParticleFire [i].DefineProgram("effect_particle_fire_program");
-        m_aParticleFire [i].DefineTexture(0u, "effect_particle_128.png");
+        m_aParticleFire [i].DefineTexture(0u, "effect_smoke.png");
     }
 
     // 

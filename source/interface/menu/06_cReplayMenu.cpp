@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cReplayMenu::cReplayMenu()noexcept
-: coreMenu (SURFACE_REPLAY_MAX, SURFACE_REPLAY_DEFAULT)
+: coreMenu    (SURFACE_REPLAY_MAX, SURFACE_REPLAY_DEFAULT)
+, m_Navigator (this)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -47,11 +48,16 @@ cReplayMenu::cReplayMenu()noexcept
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
 
+    // 
+    m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.AssignFirst(&m_BackButton);
+
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_REPLAY_MAX; ++i)
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
+        this->BindObject(i, &m_Navigator);
     }
 
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i) this->BindObject(SURFACE_REPLAY_DEFAULT, &m_aLine[i]);
@@ -64,6 +70,9 @@ cReplayMenu::cReplayMenu()noexcept
 // move the replay menu
 void cReplayMenu::Move()
 {
+    // 
+    m_Navigator.Update();
+
     // move the menu
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);

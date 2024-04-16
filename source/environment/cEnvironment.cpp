@@ -100,8 +100,8 @@ void cEnvironment::Render()
             glEnable(GL_BLEND);
 
             // invalidate single backgrounds
-            m_pOldBackground->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
-            m_pBackground   ->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
+            m_pOldBackground->GetResolvedTexture()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+            m_pBackground   ->GetResolvedTexture()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
         }
         else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
     }

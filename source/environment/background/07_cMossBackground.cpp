@@ -16,7 +16,7 @@ cMossBackground::cMossBackground()noexcept
 , m_fLightningDelay  (Core::Rand->Float(15.0f, 30.0f))
 , m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
 , m_fThunderDelay    (0.0f)
-, m_iThunderIndex    (Core::Rand->Int(ARRAY_SIZE(m_apThunder) - 1))
+, m_iThunderIndex    (Core::Rand->Uint(ARRAY_SIZE(m_apThunder) - 1u))
 , m_bEnableLightning (true)
 , m_bEnableHeadlight (false)
 {
@@ -319,7 +319,7 @@ void cMossBackground::__MoveOwn()
     // 
     if((fPrevDelay < 0.0f) && (m_fThunderDelay >= 0.0f))
     {
-        m_iThunderIndex = (m_iThunderIndex + Core::Rand->Int(1, ARRAY_SIZE(m_apThunder) - 1)) % ARRAY_SIZE(m_apThunder);
+        m_iThunderIndex = (m_iThunderIndex + Core::Rand->Uint(1u, ARRAY_SIZE(m_apThunder) - 1u)) % ARRAY_SIZE(m_apThunder);
         m_apThunder[m_iThunderIndex]->PlayRelative(this, 0.0f, 1.0f, false, SOUND_AMBIENT);
     }
 

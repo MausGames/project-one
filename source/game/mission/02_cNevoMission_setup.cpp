@@ -472,6 +472,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: 2 gegner pro seite, rotating arrow, start mit oben, gegen uhrzeigersinn
     // TODO 1: vertical enemies offset so players have to work together
     // TODO 1: use object_arrow.md3
+    // TODO 1: mehr masse, zumindest eine breit gefächerte gegner-welle (möglichst früh ?)
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)

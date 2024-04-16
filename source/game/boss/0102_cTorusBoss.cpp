@@ -599,7 +599,7 @@ void cTorusBoss::__MoveOwn()
 
                 this->__DisableSummon();
 
-                for(coreUintW i = 0u, ie = /*((g_pGame->GetDifficulty() > 0) ? 2u : 1u)*/1u; i < ie; ++i)
+                for(coreUintW i = 0u, ie = /*(GAME_EASY ? 1u : 2u)*/1u; i < ie; ++i)
                 {
                     const coreVector2 vDir = (i ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalized();
                     pMission->EnableBall(i, this->GetPosition().xy(), vDir);

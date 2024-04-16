@@ -195,7 +195,7 @@ void cViridoMission::__SetupOwn()
                 {
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 1.0f) * 4.0f) + fBase);
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.2f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.2f*0.5f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
                 }
             }
         });
@@ -889,7 +889,7 @@ void cViridoMission::__SetupOwn()
     {
         STAGE_BOSS(m_Torus, {60.0f, 120.0f, 180.0, 240.0f})
     });
-
+STAGE_START_HERE
     // ################################################################
     // end
     STAGE_MAIN({TAKE_MISSION})

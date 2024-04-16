@@ -22,7 +22,6 @@
 // TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
-// TODO 1: player was taking damage when moving "into" transparent back of spearbullet (maybe also viewbullet, and more), after evasive maneuver, make sure to add own collision volume
 
 
 // ****************************************************************
@@ -31,7 +30,7 @@
 #define BULLET_SET_COUNT        (16u)     // 
 #define BULLET_SPEED_FACTOR     (30.0f)   // 
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
-#define BULLET_COLLISION_FACTOR (0.9f)//(0.75f)   // (for enemy bullets) TODO 1: collision bug, spear bullets where hitting player only after they passed
+#define BULLET_COLLISION_FACTOR (0.75f)   // (for enemy bullets) 
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
@@ -524,7 +523,7 @@ public:
     ASSIGN_ID(8, "Spear")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.15f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f) * 0.9f); m_fAnimation = 0.15f; m_fFade = 0.0f;}
 
     // change default color
     inline cSpearBullet* MakeWhite  () {this->_MakeWhite  (0.8f); return this;}

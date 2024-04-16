@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cMainMenu::cMainMenu()noexcept
-: coreMenu (SURFACE_MAIN_MAX, SURFACE_MAIN_DEFAULT)
+: coreMenu    (SURFACE_MAIN_MAX, SURFACE_MAIN_DEFAULT)
+, m_Navigator (NULL)
 {
     // create menu objects
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -48,9 +49,15 @@ cMainMenu::cMainMenu()noexcept
     m_ExitButton.SetSize      (m_StartButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_MenuInput);
+    // 
+    m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ReplayButton, &m_ScoreButton,  NULL, &m_ExtraButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
 
-
+    m_Navigator.AssignFirst(&m_StartButton);
 
     // bind menu objects
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartButton);
@@ -59,19 +66,10 @@ cMainMenu::cMainMenu()noexcept
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_Navigator);
 
     // 
     this->DeactivateFirstPlay();
-
-
-
-    m_MenuInput.BindObject(&m_StartButton);
-    m_MenuInput.BindObject(&m_ScoreButton);
-    m_MenuInput.BindObject(&m_ReplayButton);
-    m_MenuInput.BindObject(&m_ExtraButton);
-    m_MenuInput.BindObject(&m_ConfigButton);
-    m_MenuInput.BindObject(&m_ExitButton);
-
 }
 
 
@@ -79,12 +77,12 @@ cMainMenu::cMainMenu()noexcept
 // move the main menu
 void cMainMenu::Move()
 {
+    // 
+    m_Navigator.Update();
+
     // move the menu
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
-
-    //m_MenuInput.Move();
-
 
     // 
     switch(this->GetCurSurface())

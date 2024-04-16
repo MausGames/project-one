@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cExtraMenu::cExtraMenu()noexcept
-: coreMenu (SURFACE_EXTRA_MAX, SURFACE_EXTRA_DEFAULT)
+: coreMenu    (SURFACE_EXTRA_MAX, SURFACE_EXTRA_DEFAULT)
+, m_Navigator (this)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -27,11 +28,16 @@ cExtraMenu::cExtraMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
+    // 
+    m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.AssignFirst(&m_BackButton);
+
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_EXTRA_MAX; ++i)
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
+        this->BindObject(i, &m_Navigator);
     }
 }
 
@@ -40,6 +46,9 @@ cExtraMenu::cExtraMenu()noexcept
 // move the extra menu
 void cExtraMenu::Move()
 {
+    // 
+    m_Navigator.Update();
+
     // move the menu
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);

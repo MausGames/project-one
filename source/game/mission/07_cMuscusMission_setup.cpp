@@ -1251,7 +1251,7 @@ void cMuscusMission::__SetupOwn()
             nTeleportFunc(pEnemy, false);
         });
 
-        const coreBool bTransform = (m_iStageSub >= 13u) && (pSquad2->GetNumEnemiesAlive() < (g_pGame->GetCoop() ? 2u : 1u));
+        const coreBool bTransform = (m_iStageSub >= 13u) && (pSquad2->GetNumEnemiesAlive() < g_pGame->GetPlayers());
 
         STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
         {

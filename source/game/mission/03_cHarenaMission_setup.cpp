@@ -1287,7 +1287,7 @@ void cHarenaMission::__SetupOwn()
                            (ABS(vDiff.y) < pBoard->GetCollisionRange().y))
                         {
                             if(bIsActive &&  pPlayer->IsNormal ()) pPlayer->TakeDamage(10u, ELEMENT_NEUTRAL, pPlayer->GetPosition().xy());
-                            if(bIsQuiet  && !pPlayer->IsRolling()) this->LaunchSpike(i, g_pGame->GetCoop() ? 3.0f : 6.0f);
+                            if(bIsQuiet  && !pPlayer->IsRolling()) this->LaunchSpike(i, 6.0f * RCP(I_TO_F(g_pGame->GetPlayers())));
                         }
                     });
                 }

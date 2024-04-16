@@ -21,9 +21,9 @@ void cIntroMission::__SetupOwn()
         {
             pPlayer->ActivateNormalShading();
             
-                 //pPlayer->SetTilt(0.5f*PI);
+                 //pPlayer->SetTilt(0.5f*PI); // TODO   
         });
-//m_Turf.Enable();
+//m_Turf.Enable(); // TODO   
 
         STAGE_FINISH_NOW
     });
@@ -102,7 +102,8 @@ void cIntroMission::__SetupOwn()
         }
         if(STAGE_TIME_POINT(10.0f) && !iBulletShot)
         {
-            g_pGame->ActivatePacifist();
+            //g_pGame->ActivatePacifist();
+            // TODO 1: remove
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)

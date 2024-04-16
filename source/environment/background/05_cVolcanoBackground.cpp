@@ -303,7 +303,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
     // 
     m_Smoke.DefineProgram("effect_particle_smoke_program"); 
     m_Smoke.DefineProgram("effect_particle_fire_program"); 
-    m_Smoke.DefineTexture(0u, "effect_particle_128.png"); 
+    m_Smoke.DefineTexture(0u, "effect_smoke.png"); 
 
     pList1 = m_apGroundObjectList[0]; 
     m_aSmokeEffect.reserve(pList1->List()->size()); 

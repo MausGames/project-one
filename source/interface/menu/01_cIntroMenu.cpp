@@ -15,6 +15,7 @@ cIntroMenu::cIntroMenu()noexcept
 : coreMenu       (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
 , m_IntroTimer   (coreTimer(3.0f, 0.5f, 1u))
 , m_iIntroStatus (0xFFu)
+, m_Navigator    (this)
 {
     // create menu objects
     m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -40,6 +41,9 @@ cIntroMenu::~cIntroMenu()
 // move the intro menu
 void cIntroMenu::Move()
 {
+    // 
+    m_Navigator.Update();
+
     // move the menu
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
@@ -137,7 +141,7 @@ void cIntroMenu::StartIntro()
     m_iIntroStatus = 1u;
 
     // 
-    const coreBool bSelectLanguage = Core::Language->GetPath()[0] ? false : true;
+    const coreBool bSelectLanguage = (Core::Language->GetPath()[0] == '\0');
     if(bSelectLanguage)
     {
         // 
@@ -166,6 +170,19 @@ void cIntroMenu::StartIntro()
             // 
             m_apLanguageButton.emplace((*it), pButton);
         }
+
+        // 
+        for(coreUintW i = 0u, ie = m_apLanguageButton.size(); i < ie; ++i)
+        {
+            cGuiButton* pUp   = m_apLanguageButton.get_valuelist().at((i + ie - 1u) % ie);
+            cGuiButton* pDown = m_apLanguageButton.get_valuelist().at((i + 1u)      % ie);
+
+            m_Navigator.BindObject(m_apLanguageButton.get_valuelist().at(i), pUp, NULL, pDown, NULL, NULL, MENU_TYPE_DEFAULT);
+        }
+        m_Navigator.AssignFirst(m_apLanguageButton.front());
+
+        // 
+        this->BindObject(SURFACE_INTRO_LANGUAGE, &m_Navigator);
     }
 
     // 

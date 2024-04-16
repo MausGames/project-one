@@ -16,6 +16,7 @@ cMsgBox::cMsgBox()noexcept
 , m_fFade      (0.0f)
 , m_iMsgType   (0u)
 , m_iInputType (0u)
+, m_Navigator  (NULL)
 {
     // 
     this->DefineTexture(0u, "menu_background_black.png");
@@ -47,9 +48,10 @@ cMsgBox::cMsgBox()noexcept
     m_No.SetSize      (m_Yes.GetSize());
     m_No.GetCaption()->SetText(ICON_TIMES);
 
-
-    m_MenuInput.BindObject(&m_Yes);
-    m_MenuInput.BindObject(&m_No);
+    // 
+    m_Navigator.BindObject(NULL,   NULL, &m_Yes, NULL, &m_No, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_Yes, NULL, NULL,   NULL, &m_No, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_No,  NULL, &m_Yes, NULL, NULL,  NULL, MENU_TYPE_DEFAULT);
 }
 
 
@@ -67,6 +69,9 @@ void cMsgBox::Render()
     m_Msg.Render();
     m_Yes.Render();
     m_No .Render();
+
+    // 
+    m_Navigator.Render();
 }
 
 
@@ -80,9 +85,9 @@ void cMsgBox::Move()
 
     if(!m_fFade) return;
 
-
-    m_MenuInput.Move();
-
+    // (before mouse-position override) 
+    m_Navigator.Update();
+    m_Navigator.Move();
 
     // 
     if(Core::Input->GetMousePosition() != MSGBOX_IGNORE_MOUSE)

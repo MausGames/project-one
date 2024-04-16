@@ -659,6 +659,7 @@ cConeBullet::cConeBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_cone.md3");
+    this->DefineVolume ("bullet_cone_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
 
@@ -759,12 +760,12 @@ cSpearBullet::cSpearBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_spear.md3");
+    this->DefineVolume ("bullet_spear_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
-    // TODO 1: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it)
 }
 
 
@@ -795,7 +796,7 @@ void cSpearBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.18f, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -954,12 +955,12 @@ cViewBullet::cViewBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_view.md3");
+    this->DefineVolume ("bullet_view_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
-    // TODO 1: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it) (does the view-bullet also has this problem ?)
 }
 
 

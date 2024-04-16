@@ -74,6 +74,9 @@ public:
     void SelectPin(const coreUintW iIndex);
 
     // 
+    inline cGuiObject* GetPin(const coreUintW iIndex) {ASSERT(iIndex < WORLDMAP_PINS) return &m_aPin[iIndex];}
+
+    // 
     inline coreBool         GetSelectionState()const {return m_aPin[m_iNewPin].IsClicked();}
     inline const coreUint8& GetSelectionIndex()const {return m_iNewPin;}
     inline const coreInt32& GetSelectionID   ()const {return m_aData[m_iNewPin].iID;}

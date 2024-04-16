@@ -533,7 +533,7 @@ void cCalorMission::__SetupOwn()
         {
             if(!bFirstHit || (pEnemy->GetID() != cWarriorEnemy::ID)) return;
 
-            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.04f * (g_pGame->GetCoop() ? 0.5f : 1.0f));
+            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.04f * RCP(I_TO_F(g_pGame->GetPlayers())));
 
             pBullet->Deactivate(true);
         });
@@ -1176,10 +1176,12 @@ void cCalorMission::__SetupOwn()
             this->EnableStar(0u, g_pGame->GetPlayer(0u));
             (*m_Star.List())[0]->SetPosition(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3);
 
-            if(g_pGame->GetCoop())
+            if(GAME_MULTI)
             {
                 this->EnableStar(1u, g_pGame->GetPlayer(1u));
                 (*m_Star.List())[1]->SetPosition(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3);
+
+                STATIC_ASSERT(GAME_PLAYERS == 2u)
             }
 
             m_Boulder.Resurrect();

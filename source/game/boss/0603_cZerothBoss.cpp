@@ -101,12 +101,10 @@ void cZerothBoss::__ResurrectOwn()
     //pMission->EnableStar(0u, this);
     
     
-    pMission->EnableStar(0u, g_pGame->GetPlayer(0u));
-
-    if(g_pGame->GetCoop())
+    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
     {
-        pMission->EnableStar(1u, g_pGame->GetPlayer(1u));
-    }
+        pMission->EnableStar(i, pPlayer);
+    });
 
     pMission->StartSwing();
 }

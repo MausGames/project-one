@@ -161,7 +161,7 @@ void cGeluMission::__SetupOwn()
         {
             const coreVector2 vPos  = pBullet->GetPosition().xy();
             const coreVector2 vDir  = pBullet->GetFlyDir();
-            const coreFloat   fPush = 0.005f * I_TO_F(pBullet->GetDamage()) * (iDefend ? -4.0f : 3.0f) * (g_pGame->GetCoop() ? 0.5f : 1.0f);
+            const coreFloat   fPush = 0.005f * I_TO_F(pBullet->GetDamage()) * (iDefend ? -4.0f : 3.0f) * RCP(I_TO_F(g_pGame->GetPlayers()));
 
                  if((vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {afOffTarget[0] += fPush; pBullet->Deactivate(true);}
             else if((vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {afOffTarget[1] += fPush; pBullet->Deactivate(true);}
@@ -217,7 +217,7 @@ void cGeluMission::__SetupOwn()
         vAreaFrom = -FOREGROUND_AREA + 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);
         vAreaTo   =  FOREGROUND_AREA - 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[1], afOffCurrent[3]);
 
-        if(g_pGame->GetCoop())
+        if(GAME_MULTI)
         {
             g_pGame->GetPlayer(0u)->SetArea(coreVector4(vAreaFrom, FOREGROUND_AREA.x * -0.1f, vAreaTo.y));
             g_pGame->GetPlayer(1u)->SetArea(coreVector4(FOREGROUND_AREA.x *  0.1f, vAreaFrom.y, vAreaTo));
@@ -228,6 +228,7 @@ void cGeluMission::__SetupOwn()
         {
             g_pGame->GetPlayer(0u)->SetArea(coreVector4(vAreaFrom, vAreaTo));
         }
+        // TODO 1: adjust to new extended hitbox area
 
         if(m_iStageSub >= 2u)
         {
@@ -898,6 +899,8 @@ void cGeluMission::__SetupOwn()
     // TODO 1: player should not be able to shoot and move between (neighbor-)blocks
     // TODO 1: player should not be able to fly "through" blocks, can happen if they move against fly direction
     // TODO 1: coop: both need to be in same direction | depends on side the block is (could be confusing on left-right movement)
+    // TODO 1: in coop, richtung ändert sich erst wenn beide in die selbe schauen, ansonsten bleibt sie unverändert (hmm, oder doch beide richtungen ?, is leichter zu kommunizieren)
+    // TODO 1: aber was ist wenn blöcke nur auf der eigenen seite reagieren, und auch anders angeordnet sind (e.g. wenn linien von oben kommen ist link-rechts vertauscht), könnte lustig sein
     // TODO 1: blocks pressing player against wall need to make damage
     // TODO 1: block should not allow player to "press into", same with Fang objects in dynamic wall wave
     // TODO 1: allow rotation already at the border of arrows
@@ -1709,7 +1712,7 @@ void cGeluMission::__SetupOwn()
             const coreBool bInsideNew = g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy() * vAlong);
             const coreBool bForward   = (coreVector2::Dot(pEnemy->GetMove(), vAlong.InvertedX() * vSide.y) < 0.0f);
 
-            if(((bInsideOld && !bInsideNew) || ((g_pGame->GetDifficulty() > 1u) && !bInsideOld && bInsideNew)) && bForward)
+            if(((bInsideOld && !bInsideNew) || (GAME_HARD && !bInsideOld && bInsideNew)) && bForward)
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
                 const coreVector2 vDir = ((i < 12u) ? pEnemy->AimAtPlayerDual((i / 8u) % 2u) : pEnemy->AimAtPlayerSide()).Normalized();
@@ -1781,7 +1784,7 @@ void cGeluMission::__SetupOwn()
             else if(i < 32u) iGroupNum = 4u;
             else             iGroupNum = 8u;
 
-            const coreFloat fPower = I_TO_F(pBullet->GetDamage()) * (g_pGame->GetCoop() ? 0.5f : 1.0f);
+            const coreFloat fPower = I_TO_F(pBullet->GetDamage()) * RCP(I_TO_F(g_pGame->GetPlayers()));
 
             coreVector2 vForceDir;
                  if(i < 16u) vForceDir   = fPower * 6.0f * coreVector2( 0.0f,-1.0f);

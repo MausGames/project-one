@@ -11,13 +11,15 @@
 #define _P1_GUARD_PLAYER_H_
 
 // TODO 3: add all weapons to player directly in class
-// TODO 3: all parts of player-rendering should be batched for coop
-// TODO 3: render wind, bubble, etc. in group for coop
+// TODO 3: all parts of player-rendering should be batched for multiplayer
+// TODO 3: render wind, bubble, etc. in group for multiplayer
 // TODO 1: check which operations have to be done outside of dead-check
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO 3: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
-// TODO 5: orange/red exhaust for second ship ?
+// TODO 5: orange/red/yellow exhaust for second ship ?
 // TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
+// TODO 4: remove dark shading resources, if not required anymore (maybe for bonus phases)
+// TODO 3: add more delay to bubble/feeling
 
 
 // ****************************************************************
@@ -27,8 +29,9 @@
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.15f)           // 
+#define PLAYER_RANGE_SIZE         (1.04f)           // 
 #define PLAYER_WIND_SIZE          (4.5f)            // 
-#define PLAYER_BUBBLE_SIZE        (6.0f)            // 
+#define PLAYER_BUBBLE_SIZE        (4.8f)            // 
 #define PLAYER_ROLL_SPEED         (1.0f)            // 
 #define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)   // (ship is vulnerable for a single frame) 
 #define PLAYER_FEEL_TIME          (3.0f)            // 
@@ -50,12 +53,11 @@
 enum ePlayerStatus : coreUint8
 {
     PLAYER_STATUS_DEAD           = 0x01u,   // completely removed from the game
-    PLAYER_STATUS_PACIFIST       = 0x02u,   // 
-    PLAYER_STATUS_SHIELDED       = 0x04u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x08u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x10u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x20u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x40u,   // 
+    PLAYER_STATUS_SHIELDED       = 0x02u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x04u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x08u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x10u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x20u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
@@ -83,7 +85,6 @@ private:
     coreVector2 m_vForce;                                    // 
     coreFloat   m_fSpeed;                                    // 
     coreFloat   m_fTilt;                                     // 
-    coreFloat   m_fTiltOld;                                  // 
 
     coreFlow  m_fRollTime;                                   // 
     coreFlow  m_fFeelTime;                                   // 
@@ -106,13 +107,17 @@ private:
     coreFlow       m_fAnimation;                             // 
     coreUint16     m_iLook;                                  // 
 
+    coreVector2 m_vOldDir;                                   // 
+    coreFlow    m_fRangeValue;                               // 
+    coreFlow    m_fArrowValue;                               // 
+
     coreObject3D m_Dot;                                      // 
     coreObject3D m_Range;                                    // 
+    coreObject3D m_Arrow;                                    // 
     coreObject3D m_Wind;                                     // 
     coreObject3D m_Bubble;                                   // 
-    coreObject3D m_Shield;                                   // 
+    coreObject3D m_aShield[2];                               // 
     coreObject3D m_Exhaust;                                  // 
-    coreObject3D m_Wind2;                                     //            
 
     coreMap<const coreObject3D*, coreUint32> m_aCollision;   // 
 
@@ -131,6 +136,7 @@ public:
     // render and move the player
     void Render      ()final;
     void RenderBefore();
+    void RenderMiddle();
     void RenderAfter ();
     void Move        ()final;
 
@@ -151,7 +157,7 @@ public:
 
     // 
     inline void ActivateNormalShading() {this->DefineProgram(m_pNormalProgram);}
-    inline void ActivateDarkShading  () {this->DefineProgram(m_pDarkProgram);}
+    inline void ActivateDarkShading  () {this->ActivateNormalShading(); this->SetBaseColor(COLOR_SHIP_GREY * 0.5f);/*this->DefineProgram(m_pDarkProgram);*/}
 
     // 
     void TurnIntoEnemy ();
@@ -162,10 +168,14 @@ public:
     inline coreBool IsRolling    ()const {return (m_iRollDir    != PLAYER_NO_ROLL);}
     inline coreBool IsFeeling    ()const {return (m_fFeelTime   >  PLAYER_NO_FEEL);}
     inline coreBool IsIgnoring   ()const {return (m_fIgnoreTime >  PLAYER_NO_IGNORE);}
-    inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
+    inline coreBool IsDarkShading()const {return true;}//(this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
     inline coreBool IsEnemyLook  ()const {return (m_apWeapon[0]->GetID() == cEnemyWeapon::ID);}
 
     // 
+    void EnableRange  ();
+    void DisableRange ();
+    void EnableArrow  ();
+    void DisableArrow ();
     void EnableWind   (const coreVector2 vDirection);
     void DisableWind  ();
     void EnableBubble ();

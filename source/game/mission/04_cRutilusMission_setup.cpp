@@ -144,7 +144,7 @@ void cRutilusMission::__SetupOwn()
 
                 for(coreUintW j = 0u; j < RUTILUS_PLATES; ++j)
                 {
-                    coreObject3D& oPlate = m_aPlateRaw[i];
+                    coreObject3D& oPlate = m_aPlateRaw[j];
                     if(!oPlate.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
                     const coreVector2 vSize = oPlate.GetCollisionRange().xy();
@@ -632,9 +632,9 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    this->SetTeleporterActive(1u);
                     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) this->EnableTeleporter(i);
                     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) g_pSpecialEffects->CreateSplashColor(m_aTeleporter[i].GetPosition(), 50.0f, 10u, RUTILUS_TELEPORTER_COLOR(i));
+                    this->SetTeleporterActive(1u);
                 }
             }
             else if(iTransitionState == 1u)
@@ -659,8 +659,8 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    this->SetTeleporterActive(0u);
                     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
+                    this->SetTeleporterActive(0u);
                 }
             }
             else if(iTransitionState == 1u)
@@ -698,8 +698,8 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    this->SetTeleporterActive(1u);
                     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
+                    this->SetTeleporterActive(1u);
                 }
             }
         }
@@ -1118,7 +1118,7 @@ void cRutilusMission::__SetupOwn()
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-1.2f,1.2f), coreVector2(1.0f,-1.0f).Normalized());
+            pPath1->AddNode(coreVector2(-1.3f,1.3f), coreVector2(1.0f,-1.0f).Normalized());
             pPath1->AddStop(coreVector2(-0.9f,0.9f), coreVector2(1.0f,-1.0f).Normalized());
             pPath1->Refine();
         });
@@ -1126,7 +1126,7 @@ void cRutilusMission::__SetupOwn()
         STAGE_ADD_PATH(pPath2)
         {
             pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
             pPath2->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
             pPath2->Refine();
         });
@@ -1566,7 +1566,7 @@ void cRutilusMission::__SetupOwn()
 
         STAGE_WAVE("VIERUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 10u})

@@ -162,7 +162,7 @@ void cFinishMenu::ShowThankYou()
         const coreUint32 iScore = pPlayer->GetScoreTable()->GetScoreTotal();
 
         // 
-        m_aTotalPart[i].SetText(g_pGame->GetCoop() ? coreData::ToChars(iScore) : "");
+        m_aTotalPart[i].SetText(g_pGame->IsMulti() ? coreData::ToChars(iScore) : "");
 
         // 
         iSumScore += iScore;

@@ -78,12 +78,13 @@ public:
         coreUint8  iNumMissions;                                                           // 
         coreUint8  iNumSegments;                                                           // 
 
+        coreUint8  iOptionMode;                                                            // 
         coreUint8  iOptionDifficulty;                                                      // 
         coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                 // 
         coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                // 
 
-        coreUint8  iConfigUpdateFreq;                                                      // 
-        coreUint8  iConfigVersion;                                                         // 
+        coreUint16 iConfigUpdateFreq;                                                      // 
+        coreUint16 iConfigVersion;                                                         // 
 
         coreUint8  iMissionStartIndex;                                                     // 
         coreInt32  aiMissionList[REPLAY_MISSIONS];                                         // 

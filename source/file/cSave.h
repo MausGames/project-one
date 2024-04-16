@@ -99,6 +99,7 @@ public:
         coreUint8 iStandard;                                       // 
         coreUint8 iTraining;                                       // 
         coreUint8 iPlayers;                                        // 
+        coreUint8 iMode;                                           // 
         coreUint8 iDifficulty;                                     // 
         coreUint8 aaiWeapon [SAVE_PLAYERS][SAVE_EQUIP_WEAPONS];    // 
         coreUint8 aaiSupport[SAVE_PLAYERS][SAVE_EQUIP_SUPPORTS];   // 
@@ -107,6 +108,7 @@ public:
     // 
     struct sProgress final
     {
+        // TODO 1: coop, duel, game modes, difficulty (27 dimensions)
         coreBool   bFirstPlay;                                      // 
         coreUint8  aiAdvance      [SAVE_MISSIONS];                  // 
         coreUint8  aiMedalMission [SAVE_MISSIONS];                  // 
@@ -126,6 +128,7 @@ public:
         coreUint64   iSaveTimestamp;                                      // 
         coreUint32   iSaveCount;                                          // 
 
+        // TODO 1: coop, duel, game modes, difficulty (27 dimensions)
         sGlobalStats oGlobalStats;                                        // 
         sLocalStats  aLocalStatsMission [SAVE_MISSIONS];                  // 
         sLocalStats  aaLocalStatsSegment[SAVE_MISSIONS][SAVE_SEGMENTS];   // 
@@ -152,7 +155,7 @@ public:
     RETURN_NONNULL sGlobalStats* EditGlobalStats      ();
     RETURN_NONNULL sLocalStats*  EditLocalStatsMission(const coreUintW iMissionIndex);
     RETURN_NONNULL sLocalStats*  EditLocalStatsMission();
-    RETURN_NONNULL sLocalStats*  EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    RETURN_NONNULL sLocalStats*  EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex); // const coreUint8 iMode (with difficulty)
     RETURN_NONNULL sLocalStats*  EditLocalStatsSegment();
     RETURN_NONNULL sOptions*     EditOptions          ();
     RETURN_NONNULL sProgress*    EditProgress         ();

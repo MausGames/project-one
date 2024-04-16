@@ -173,6 +173,9 @@ void cMenu::Render()
 // move the menu
 void cMenu::Move()
 {
+    cMenuNavigator::GlobalUpdate();
+    
+    
     // 
     if(!Core::Manager::Resource->IsLoading())   // TODO 1: hier wegen sync mit environment-change   
         m_TransitionTime.Update(1.0f);
@@ -414,6 +417,7 @@ void cMenu::Move()
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
 
                 // 
+                if(STATIC_ISVALID(g_pGame)) // only for debug
                 g_pGame->LoadNextMission();
             }
         }
@@ -597,6 +601,9 @@ const coreMap<coreString, coreString>& cMenu::GetLanguageList()
         // 
         coreLanguage::GetAvailableLanguages(&s_asLanguage);
 
+        // 
+        if(s_asLanguage.empty()) s_asLanguage.emplace("MISSING", "");
+
 #if defined(_P1_DEBUG_RANDOM_)
 
         // 
@@ -740,6 +747,7 @@ void cMenu::__StartGame()
     // 
     sGameOptions oOptions = {};
     oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers   ();
+    oOptions.iMode        = m_GameMenu.GetSelectedMode      ();
     oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
