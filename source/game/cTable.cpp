@@ -36,6 +36,7 @@ void cDataTable::Reset()
     std::memset(&m_aaCounterSegment, 0, sizeof(m_aaCounterSegment));
 
     // 
+    std::memset(&m_iMedalArcade,    0, sizeof(m_iMedalArcade));
     std::memset(&m_aiMedalMission,  0, sizeof(m_aiMedalMission));
     std::memset(&m_aaiMedalSegment, 0, sizeof(m_aaiMedalSegment));
 
@@ -115,6 +116,27 @@ RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterSegment()
 
 // ****************************************************************
 // 
+void cDataTable::GiveMedalArade(const coreUint8 iMedal)
+{
+    // 
+    ASSERT(iMedal < MEDAL_MAX)
+    m_iMedalArcade = iMedal;
+
+    if(STATIC_ISVALID(g_pGame))
+    {
+        if(g_pGame->GetPlayerIndex(m_pOwner) == 0u)
+        {
+            // 
+            g_pSave->EditGlobalStats     ()->aiMedalsEarned[iMedal] += 1u;
+            g_pSave->EditLocalStatsArcade()->aiMedalsEarned[iMedal] += 1u;
+        }
+
+        // 
+        coreUint8& iMedalArcade = g_pSave->EditProgress()->aaaiMedalArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
+        iMedalArcade = MAX(iMedalArcade, iMedal);
+    }
+}
+
 void cDataTable::GiveMedalMission(const coreUint8 iMedal, const coreUintW iMissionIndex)
 {
     // 

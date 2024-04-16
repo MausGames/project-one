@@ -345,9 +345,20 @@ void cMenu::Move()
                 }
                 else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
-                    // 
-                    if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
-                                           else m_DefeatMenu.ShowGameOver();
+                    if(g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK)
+                    {
+                        const coreUint8 iCurContinue = g_pGame->GetContinuesMax() - g_pGame->GetContinuesLeft();
+
+                        // 
+                        if(iCurContinue < g_pReplay->GetHeader().aiDataContinuesUsed[0]) m_DefeatMenu.ShowReplay();
+                                                                                    else m_DefeatMenu.ShowGameOver();
+                    }
+                    else
+                    {
+                        // 
+                        if(g_pGame->GetContinuesLeft()) m_DefeatMenu.ShowContinue();
+                                                   else m_DefeatMenu.ShowGameOver();
+                    }
 
                     // 
                     this->ChangeSurface(SURFACE_DEFEAT, 0.0f);
@@ -452,6 +463,7 @@ void cMenu::Move()
             else if(m_MainMenu.GetStatus() == 3)
             {
                 // 
+                m_ReplayMenu.ChangeSurface(SURFACE_REPLAY_OVERVIEW, 0.0f);
                 m_ReplayMenu.LoadOverview();
 
                 // switch to replay menu
@@ -561,6 +573,14 @@ void cMenu::Move()
             {
                 // return to previous menu
                 this->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u);
+            }
+            else if(m_ReplayMenu.GetStatus() == 3)
+            {
+                // 
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+
+                // 
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 2u);
             }
         }
         break;
@@ -692,6 +712,15 @@ void cMenu::Move()
                 // 
                 this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
             }
+            else if(m_SummaryMenu.GetStatus() == 6)
+            {
+                // 
+                m_ReplayMenu.ChangeSurface(SURFACE_REPLAY_SLOTS, 0.0f);
+                m_ReplayMenu.LoadOverview();
+
+                // 
+                this->ShiftSurface(this, SURFACE_REPLAY, 3.0f, 1u);
+            }
         }
         break;
 
@@ -794,9 +823,19 @@ void cMenu::Move()
                 // 
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
 
-                // 
-                this->__EndGame();
-                this->__StartGame();
+                if(g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK)
+                {
+                    // 
+                    g_pReplay->EndPlayback();
+                    g_pReplay->RecreateGame();
+                    g_pReplay->StartPlayback();
+                }
+                else
+                {
+                    // 
+                    this->__EndGame();
+                    this->__StartGame();
+                }
 
                 // 
                 g_pGame->UseRestart();
@@ -980,6 +1019,7 @@ void cMenu::Move()
 coreBool cMenu::IsPaused()const
 {
     return (this->GetCurSurface() != SURFACE_EMPTY)   &&
+           (this->GetCurSurface() != SURFACE_REPLAY)  &&
            (this->GetCurSurface() != SURFACE_SUMMARY) &&
            (this->GetCurSurface() != SURFACE_DEFEAT)  &&
            (this->GetCurSurface() != SURFACE_FINISH)  &&
@@ -1234,7 +1274,7 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const co
         const coreVector2 vBasePos = coreVector2(pButton->GetAlignment().x ? oData.vPosition.x : pButton->GetPosition().x, pButton->GetAlignment().y ? oData.vPosition.y : pButton->GetPosition().y);
         const coreFloat   fScale   = LERPH3(1.0f, 1.1f, oData.fTime);
 
-        pButton->SetPosition     (vBasePos - oData.vSize * pButton->GetAlignment() * 0.5f * (fScale - 1.0f));
+        pButton->SetPosition     (vBasePos - oData.vSize * pButton->GetAlignment() * (0.5f * (fScale - 1.0f)));
         pButton->SetSize         (oData.vSize * fScale);
         pButton->SetTexOffset    (oData.vTexOffset + (pButton->GetSize() - oData.vSize) * -0.5f);
         pButton->SetFocusModifier(oData.vSize / pButton->GetSize());
@@ -1301,7 +1341,7 @@ void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const cor
     const coreFloat fScale = LERPH3(1.0f, 1.2f, oData.fTime);
     
     pTab->SetSize     (oData.vSize * coreVector2(1.0f, fScale));
-    pTab->SetPosition (oData.vPosition - oData.vSize * pTab->GetAlignment() * 0.5f * (fScale - 1.0f) + coreVector2(0.0f, (pTab->GetSize().y - oData.vSize.y) * 0.5f));
+    pTab->SetPosition (oData.vPosition - oData.vSize * pTab->GetAlignment() * (0.5f * (fScale - 1.0f)) + coreVector2(0.0f, (pTab->GetSize().y - oData.vSize.y) * 0.5f));
     pTab->SetTexOffset(oData.vTexOffset + coreVector2(0.0f, (pTab->GetSize().y - oData.vSize.y) * -1.0f));
     pTab->Move();
 
@@ -1477,6 +1517,9 @@ void cMenu::__Reset(const coreResourceReset eInit)
 void cMenu::__StartGame()
 {
     // 
+    InitFramerate(GetCurUpdateFreq(), GetCurGameSpeed());
+
+    // 
     coreInt32 iMissionID;
     coreUint8 iTakeFrom, iTakeTo, iKind;
     m_GameMenu.RetrieveStartData(&iMissionID, &iTakeFrom, &iTakeTo, &iKind);
@@ -1504,14 +1547,17 @@ void cMenu::__StartGame()
     STATIC_NEW(g_pGame, oOptions, piMissionList, iNumMissions)
     g_pGame->LoadMissionID(iMissionID, iTakeFrom, iTakeTo);
 
-#if !defined(_CORE_EMSCRIPTEN_)
-    // 
-    //if(!g_bDemoVersion) g_pReplay->StartRecording();
-#endif
-
-    // 
     if(iKind == GAME_KIND_ALL)
     {
+#if defined(_CORE_DEBUG_)   // [RP]
+        // 
+        if(!g_bDemoVersion && !DEFINED(_CORE_SWITCH_))
+        {
+            g_pReplay->StartRecording();
+        }
+#endif
+
+        // 
         g_pSave->EditLocalStatsArcade()->iCountStart += 1u;
     }
 }
@@ -1521,19 +1567,6 @@ void cMenu::__StartGame()
 // 
 void cMenu::__EndGame()
 {
-    // 
-    if(g_pReplay->GetStatus() == REPLAY_STATUS_RECORDING)
-    {
-        g_pReplay->EndRecording();
-        g_pReplay->SaveFile(coreData::DateTimePrint("Debug Replay %Y-%m-%d %H:%M:%S"));
-        g_pReplay->Clear();
-    }
-    else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
-    {
-        g_pReplay->EndPlayback();
-        g_pReplay->Clear();
-    }
-
     // 
     if(!g_pSave->GetHeader().oProgress.bFirstPlay)
     {
@@ -1548,6 +1581,7 @@ void cMenu::__EndGame()
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_SCORE)
+            //ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_REPLAY)   // [RP]
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
         }
 
@@ -1564,8 +1598,14 @@ void cMenu::__EndGame()
     }
 
     // 
+    g_pReplay->Cancel();
+
+    // 
     ASSERT(STATIC_ISVALID(g_pGame))
     STATIC_DELETE(g_pGame)
+
+    // 
+    InitFramerate();
 }
 
 

@@ -254,7 +254,7 @@ $INPUT_KEYBOARD = キーボード
 $INPUT_JOYSTICK = ゲームパッド
 
 $INFORMATION_RESTART = ゲームをリスタートします
-$QUESTION_SAVE = 変更を保存しますか？
+$QUESTION_CONFIG_SAVE = 変更を保存しますか？
 $QUESTION_IMPORT = デモ版のセーブデータをインポートしますか？
 $QUESTION_RESTART = ゲームをリスタートしますか？
 $QUESTION_EXIT_GAME = 終了しますか？

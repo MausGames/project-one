@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.2.4 (https://www.maus-games.at)                             |//
+//| Project One v1.2.5 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -154,7 +154,7 @@
 #define EQUIP_SUPPORTS       (1u)
 #define FRAMERATE_MIN        (60.0f)
 #define FRAMERATE_MAX        (360.0f * 2.0f)
-#define SCALE_FACTOR         (CORE_GL_SUPPORT(ARB_texture_rg) ? 0.5f : 0.4f)
+#define SCALE_FACTOR         (0.5f * (CORE_GL_SUPPORT(ARB_texture_rg) ? 1.0f : 0.8f) * (g_CurConfig.Graphics.iRender ? 1.0f : 0.8f))
 #define CAMERA_POSITION      (coreVector3(0.0f,  0.0f,  1.0f) * 110.0f)
 #define CAMERA_DIRECTION     (coreVector3(0.0f,  0.0f, -1.0f))
 #define CAMERA_ORIENTATION   (coreVector3(0.0f,  1.0f,  0.0f))
@@ -216,7 +216,6 @@
 #define COLOR_PLAYER_BLUE    (COLOR_ENERGY_BLUE    * 1.1f)
 #define COLOR_PLAYER_CYAN    (COLOR_ENERGY_CYAN    * 1.0f)
 #define COLOR_PLAYER_GREEN   (COLOR_ENERGY_GREEN   * 0.77f)
-#define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))   // TODO 1: remove
 
 // shader modifiers
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_"  " (" #x ") \n"   // full_transition
@@ -258,7 +257,8 @@ constexpr sVersion g_aVersion[] =
     {"1.2.1", 2u},
     {"1.2.2", 3u},
     {"1.2.3", 4u},
-    {"1.2.4", 5u}
+    {"1.2.4", 5u},
+    {"1.2.5", 6u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 
@@ -334,9 +334,9 @@ enum eBadge : coreUint8
     BADGE_ACHIEVEMENT
 };
 
-extern void InitResolution(const coreVector2 vResolution);   // init resolution properties (1:1)
-extern void InitDirection();                                 // 
-extern void InitFramerate();                                 // init frame rate properties (lock)
+extern void InitResolution(const coreVector2 vResolution);                                       // init resolution properties (1:1)
+extern void InitDirection();                                                                     // 
+extern void InitFramerate(const coreUint16 iUpdateFreq = 0u, const coreUint8 iGameSpeed = 0u);   // init frame rate properties (lock)
 
 extern FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq);
 
@@ -363,6 +363,7 @@ extern coreBool        g_bDemoVersion;      //
 extern coreBool        g_bLeaderboards;     // 
 extern coreBool        g_bSteamDeck;        // 
 extern coreBool        g_bHandheld;         // 
+extern coreBool        g_bNoInstancing;     // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 
@@ -377,8 +378,8 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "interface/cNewIndicator.h"
 #include "additional/cMenuNavigator.h"
 #include "file/cConfig.h"
-#include "file/cReplay.h"
 #include "file/cSave.h"
+#include "file/cReplay.h"
 #include "visual/cIcon.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"

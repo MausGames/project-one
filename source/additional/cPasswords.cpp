@@ -69,6 +69,8 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
+#if !defined(_CORE_SWITCH_)
+
     // FUCHSIN pink
     case 17376649531488240964u:
         {
@@ -80,6 +82,8 @@ coreBool ApplyPassword(const coreChar* pcText)
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP)
         }
         break;
+
+#endif
 
     // GAMBOGE yellow
     case 14976658933825851731u:

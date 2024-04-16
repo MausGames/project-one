@@ -52,7 +52,10 @@ void cIntroMenu::Move()
     // 
     if(this->GetCurSurface() == SURFACE_INTRO_LANGUAGE)
     {
-        if(!g_pMenu->IsShifting())
+        // 
+        const coreBool bAllow = !g_pMenu->IsShifting() || (g_pMenu->GetShifting().GetValue(CORE_TIMER_GET_NORMAL) > 0.7f);
+
+        if(bAllow)
         {
             // 
             FOR_EACH(it, m_apLanguageButton)
@@ -93,7 +96,7 @@ void cIntroMenu::Move()
             case 7u: vColor = COLOR_MENU_GREEN;   break;
             }
 
-            cMenu::UpdateButton((*it), &m_Navigator, (*it)->IsFocused(), vColor);
+            cMenu::UpdateButton((*it), &m_Navigator, (*it)->IsFocused(), vColor, true, bAllow);
         }
     }
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)   // # old surface

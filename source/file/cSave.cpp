@@ -91,7 +91,7 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUint8 
         if(!STATIC_ISVALID(g_pGame) || (g_pGame->GetKind() == GAME_KIND_ALL) || (g_pGame->GetKind() == GAME_KIND_MISSION))
         {
             // 
-            ASSERT(iMissionIndex < REPLAY_MISSIONS)
+            ASSERT(iMissionIndex < SAVE_MISSIONS)
             return &m_Header.aaaaLocalStatsMission[iType][iMode][iDifficulty][iMissionIndex];
         }
     }
@@ -122,8 +122,8 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUint8 
         if(iSegmentIndex != MISSION_NO_SEGMENT)
         {
             // 
-            ASSERT(iMissionIndex < REPLAY_MISSIONS)
-            ASSERT(iSegmentIndex < REPLAY_SEGMENTS)
+            ASSERT(iMissionIndex < SAVE_MISSIONS)
+            ASSERT(iSegmentIndex < SAVE_SEGMENTS)
             return &m_Header.aaaaaLocalStatsSegment[iType][iMode][iDifficulty][iMissionIndex][iSegmentIndex];
         }
 
@@ -266,7 +266,7 @@ void cSave::SaveFile()
             coreUint64 iAvailable;
             coreData::SystemSpace(&iAvailable, NULL);
 
-                 if(iAvailable < sizeof(sHeader) * 10u)                                 m_eStatus = SAVE_STATUS_ERROR_SPACE;
+                 if(iAvailable < 1u * 1024u * 1024u)                                    m_eStatus = SAVE_STATUS_ERROR_SPACE;
             else if(!coreData::FolderWritable(coreData::StrDirectory(m_sPath.c_str()))) m_eStatus = SAVE_STATUS_ERROR_ACCESS;
             else                                                                        m_eStatus = SAVE_STATUS_ERROR_UNKNOWN;
 
@@ -274,6 +274,7 @@ void cSave::SaveFile()
             return CORE_OK;
         }
 
+        // 
         coreFile::FlushFilesystem();
 
         // 
@@ -321,6 +322,7 @@ void cSave::ImportDemo()
         m_Header.oOptions.iNavigation = 0u;
         ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_START)
         ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_SCORE)
+        //ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_REPLAY)   // [RP]
         ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_EXTRA)
         ADD_BIT_EX(m_Header.oProgress.aiState, STATE_DEMO_IMPORTED)
     }
@@ -332,6 +334,14 @@ void cSave::ImportDemo()
 coreBool cSave::CanImportDemo()const
 {
     return !g_bDemoVersion && !coreData::FileExists(m_sPath.c_str()) && !coreData::FileExists(PRINT("%s.backup", m_sPath.c_str())) && coreData::FileExists(m_sPathDemo.c_str());
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cSave::NextReplayNum()
+{
+    return ++m_Header.iReplayCount;
 }
 
 
@@ -370,11 +380,15 @@ coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, coreSet<sScorePack*>* OUTP
         return false;
     }
 
+    // 
     coreFile* pScoreFile = oArchive.GetFile("score");
     if(pScoreFile)
     {
+        // 
         pScoreFile->Decompress();
-        if(!cSave::__RestoreQueueData(pQueue, pScoreFile->GetData(), pScoreFile->GetSize()))
+
+        // 
+        WARN_IF(!cSave::__RestoreQueueData(pQueue, pScoreFile->GetData(), pScoreFile->GetSize()))
         {
             Core::Log->Warning("Save (%s) contains a broken score-queue!", pcPath);
         }
@@ -438,6 +452,15 @@ void cSave::__UpgradeHeader(sHeader* OUTPUT pHeader)
     }
 
     // 
+    //if(pHeader->iVersion <= 4u)   // [RP]
+    //{
+    //    if(!pHeader->oProgress.bFirstPlay)
+    //    {
+    //        ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_REPLAY)
+    //    }
+    //}
+
+    // 
     pHeader->iVersion = SAVE_FILE_VERSION;
 }
 
@@ -491,9 +514,17 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
         {
             ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_START)
             ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_SCORE)
+            //ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_REPLAY)   // [RP]
             ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_EXTRA)
         }
     }
+
+#if defined(_CORE_SWITCH_)
+
+    // 
+    REMOVE_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_GAMESPEEDUP)
+
+#endif
 
     // 
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_MIRRORMODE))   g_CurConfig.Game.iMirrorMode = 0u;

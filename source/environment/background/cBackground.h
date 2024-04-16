@@ -12,7 +12,6 @@
 
 // TODO 5: merge stone diff and norm textures (own shader ?)
 // TODO 5: added object gets shadow-shader
-// TODO 3: make grass leafs same color as other plants
 // TODO 3: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO 3: positions in separate list (when iterating through lambda)
 // TODO 3: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
@@ -36,6 +35,7 @@
 // TODO 3: vielleicht visual height + Z reinrechnen für visibility calculations (dann kann große view range reduziert werden)
 // TODO 3: background object replication bug (wo objekte zu nah zusammen sind an der replikations-linie) (bei fly offset 145 in center), fällt fast nicht auf, nur bei sting-only snow background
 // TODO 2: bei background-density interpolation, wenn infinity-jump durchgeführt wird, poppen objekte noch immer rein/raus
+// TODO 3: shadow-flickering on 45 degree pyramids on intel and amd slightly
 
 
 // ****************************************************************
@@ -113,6 +113,7 @@
 #define SNOW_CLOUD_2_NUM        (64u)
 #define SNOW_CLOUD_2_RESERVE    (76u)   // # exact
 #define SNOW_SNOW_NUM           (12u)
+#define SNOW_SNOW_NUM_LOW       (8u)
 
 #define MOSS_TREE_NUM           (1536u)
 #define MOSS_TREE_1_RESERVE     (128u)

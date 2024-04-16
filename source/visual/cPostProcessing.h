@@ -11,11 +11,7 @@
 #define _P1_GUARD_POSTPROCESSING_H_
 
 // TODO 3: don't update shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
-// TODO 3: support box mode (4 walls), for scaling
-// TODO 3: don't render wallpapers on 1:1 (and without offsets)
 // TODO 3: also clamp fullscreen distortion similar to water distortion ?
-// TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
-// TODO 3: remove overdraw when rendering border object (= on rotation, own shader with discard ?)
 // TODO 3: border might flicker-disappear when rotating, briefly passing 0.0f, and shaking screen
 // TODO 3: if overdraw can be handled, then N "shadow-border" can be used when rotating (like on Dharuk) (own shader with discard ?)
 
@@ -34,7 +30,7 @@
 #define POST_BORDERS            (3u)
 #define POST_CHROMA_FACTOR      (0.01f)
 #define POST_DEFAULT_BORDER_MIN (0.25f)
-#define POST_DEFAULT_BORDER_MAX (0.8f)
+#define POST_DEFAULT_BORDER_MAX (0.75f)
 
 
 // ****************************************************************
@@ -91,7 +87,7 @@ public:
     {
         m_Black.Render();
 
-        if(m_fFrameValue < 2.0f)
+        if((m_fFrameValue < 2.0f) && (!coreMath::IsNear(Core::System->GetResolution().AspectRatio(), 1.0f) || m_bOffsetActive))
         {
             // render wallpapers
             for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)

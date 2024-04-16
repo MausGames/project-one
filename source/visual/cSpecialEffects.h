@@ -40,6 +40,8 @@
 #define SPECIAL_DEPTH(x)         (((x).z < -1.0f) ? 1u : 0u)
 #define SPECIAL_DEEP             (-1.1f)
 
+#define SPECIAL_QUALITY(x)       (g_bNoInstancing ? MAX(((x) * 6u) / 10u, 1u) : (x))
+
 #define SPECIAL_SPLASH_TINY      (25.0f), (13u)
 #define SPECIAL_SPLASH_SMALL     (50.0f), (25u)
 #define SPECIAL_SPLASH_BIG      (100.0f), (50u)

@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.2.4";
+const coreChar* const CoreApp::Settings::Version                       = "1.2.5";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -314,6 +314,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_tree_03_norm.png",           CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_tree_03_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_water_rain.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_rain.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
+    Core::Manager::Resource->Load<coreTexture>("fallback_depth.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/fallback_depth.png", CORE_TEXTURE_LOAD_NO_COMPRESS | CORE_TEXTURE_LOAD_NO_FILTER | CORE_TEXTURE_LOAD_NEAREST);
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_01.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_01.png");
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_02.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_03.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_03.png");
@@ -453,7 +454,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_snow.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_snow.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_track.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_track.vert");
-    Core::Manager::Resource->Load<coreShader> ("effect_track.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_track.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_track.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_track.frag", CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("effect_weather_nebula.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, SPACE_NEBULA_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_nebula.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, SPACE_NEBULA_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain_cloud.vert",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, CLOUD_RAIN_NUM));
@@ -462,29 +463,29 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain_moss.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, DESERT_SAND_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, DESERT_SAND_NUM));
-    Core::Manager::Resource->Load<coreShader> ("effect_weather_snow.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, SNOW_SNOW_NUM));
-    Core::Manager::Resource->Load<coreShader> ("effect_weather_snow.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, SNOW_SNOW_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_snow.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, CORE_GL_SUPPORT(ES2_restriction) ? SNOW_SNOW_NUM_LOW : SNOW_SNOW_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_snow.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, CORE_GL_SUPPORT(ES2_restriction) ? SNOW_SNOW_NUM_LOW : SNOW_SNOW_NUM));
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.vert",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_ice.vert",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("environment_ice.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.frag", CORE_SHADER_OPTION_NO_EARLY_DEPTH);
+    Core::Manager::Resource->Load<coreShader> ("environment_ice.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.frag", CORE_SHADER_OPTION_NO_EARLY_DEPTH CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("environment_lava.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_lava.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_lava.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_lava.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("environment_outdoor.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag");
-    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_glow.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_GLOW);
-    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT);
-    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light_glow.frag",    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("environment_outdoor.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", CORE_SHADER_OPTION_VIEWDIR);
+    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_glow.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_GLOW CORE_SHADER_OPTION_VIEWDIR);
+    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT CORE_SHADER_OPTION_VIEWDIR);
+    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light_glow.frag",    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT SHADER_GLOW CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("environment_rain.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_rain.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("environment_rain.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_rain.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_rain.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_rain.frag", CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("environment_under.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_under.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_vignette.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_vignette.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_vignette_grey.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_vignette.frag", SHADER_GREY);
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("environment_water.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_water.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag", CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("full.vert",                              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full.vert");
     Core::Manager::Resource->Load<coreShader> ("full_blur_1x.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_1x.frag");
     Core::Manager::Resource->Load<coreShader> ("full_blur_2y.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2y.frag");
@@ -520,25 +521,25 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_swipe_label.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.frag", SHADER_LABEL);
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object_wave.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", SHADER_WAVE);
-    Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag");
+    Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_depth.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW SHADER_DEPTH);
     Core::Manager::Resource->Load<coreShader> ("object_ship_detail.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW SHADER_DEPTH SHADER_DETAIL);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
-    Core::Manager::Resource->Load<coreShader> ("object_ice.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ice.frag");
-    Core::Manager::Resource->Load<coreShader> ("object_meteor.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag");
-    Core::Manager::Resource->Load<coreShader> ("object_meteor_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", SHADER_BLINK);
+    Core::Manager::Resource->Load<coreShader> ("object_ice.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ice.frag", CORE_SHADER_OPTION_VIEWDIR);
+    Core::Manager::Resource->Load<coreShader> ("object_meteor.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_VIEWDIR);
+    Core::Manager::Resource->Load<coreShader> ("object_meteor_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", SHADER_BLINK CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
-    Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_depth_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW SHADER_DEPTH);
     Core::Manager::Resource->Load<coreShader> ("object_ship_detail_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW SHADER_DEPTH SHADER_DETAIL);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
-    Core::Manager::Resource->Load<coreShader> ("object_meteor_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_meteor_blink_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
+    Core::Manager::Resource->Load<coreShader> ("object_meteor_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING CORE_SHADER_OPTION_VIEWDIR);
+    Core::Manager::Resource->Load<coreShader> ("object_meteor_blink_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK CORE_SHADER_OPTION_VIEWDIR);
     Core::Manager::Resource->Load<coreShader> ("object_board.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_board.vert");
     Core::Manager::Resource->Load<coreShader> ("object_board.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_board.frag");
     Core::Manager::Resource->Load<coreShader> ("object_board_inst.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_board.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -652,7 +653,10 @@ void CoreApp::Setup()
         const coreUint8 iHinting = oConfig.GetInt ("Config", "Hinting", TTF_HINTING_LIGHT_SUBPIXEL);
         const coreBool  bKerning = oConfig.GetBool("Config", "Kerning", true);
 
-        Core::Manager::Resource->Load<coreFont>(coreData::StrFilename(it->c_str()), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), iHinting, bKerning);
+        coreString sFilename = coreData::StrFilename(it->c_str());
+        if(DEFINED(_CORE_EMSCRIPTEN_)) sFilename.replace(".woff", ".ttf");
+
+        Core::Manager::Resource->Load<coreFont>(sFilename.c_str(), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), iHinting, bKerning);
     }
 
     const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_STANDARD;

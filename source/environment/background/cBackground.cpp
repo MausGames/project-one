@@ -26,7 +26,7 @@ template <const coreChar* pcString, coreUintW iLength, coreUintW iNum> struct sS
     static const coreChar v ## __a[] = s; \
     static const sStringList<v ## __a, ARRAY_SIZE(v ## __a), n> v;
 
-__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SPACE_NEBULA_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM, CLOUD_RAIN_NUM), s_asOverlayTransform)
+__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SPACE_NEBULA_NUM, SNOW_SNOW_NUM, SNOW_SNOW_NUM_LOW, MOSS_RAIN_NUM, CLOUD_RAIN_NUM), s_asOverlayTransform)
 
 
 // ****************************************************************
@@ -125,29 +125,6 @@ void cBackground::Render()
 
     // 
     this->__UpdateOwn();
-    
-    
-            
-            /*
-            if(m_pWater)
-            {
-                m_pWater->Render1();
-                
-                
-                    glDisable(GL_BLEND);
-                            
-                            // send shadow matrix to shader-programs
-                        cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
-                        cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
-
-                        // render the outdoor-surface
-                        if(m_pOutdoor) m_pOutdoor->Render();
-                        
-                        // render all ground objects
-                        FOR_EACH(it, m_apGroundObjectList) (*it)->Render();
-                        FOR_EACH(it, m_apGroundAddList)    (*it)->Render();
-            }
-             */
 
     // fill background frame buffer
     m_FrameBuffer.StartDraw();
@@ -184,9 +161,6 @@ void cBackground::Render()
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_FrameBuffer);
-            
-            
-            //if(m_pWater) m_pWater->Render2();
         }
         glEnable(GL_BLEND);
 
@@ -212,7 +186,7 @@ void cBackground::Render()
     if(m_pOutdoor)
     {
         // invalidate shadow and light map
-        if(g_CurConfig.Graphics.iShadow) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
+        if(g_CurConfig.Graphics.iShadow && cShadow::IsSupported()) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
         m_pOutdoor->InvalidateLightMap();
     }
 }
@@ -250,7 +224,7 @@ void cBackground::Move()
             coreBool bUpdate = false;
 
             // 
-            const coreFloat             fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
+            const coreFloat             fDensity      = (*it)->List()->front()->GetCollisionModifier().x * (g_bNoInstancing ? 0.7f : 1.0f);
             const coreList<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
             const coreList<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
 

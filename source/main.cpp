@@ -18,6 +18,7 @@ coreBool        g_bDemoVersion    = false;
 coreBool        g_bLeaderboards   = false;
 coreBool        g_bSteamDeck      = false;
 coreBool        g_bHandheld       = false;
+coreBool        g_bNoInstancing   = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -69,6 +70,8 @@ void CoreApp::Init()
 
     // 
     g_bLeaderboards = !std::strcmp(Core::Platform->GetIdentifier(), "Steam");
+
+    g_bNoInstancing = CORE_GL_SUPPORT(ES2_restriction); 
 
     // 
     InitAchievements();
@@ -318,13 +321,17 @@ void CoreApp::Move()
 
     Core::Debug->MeasureStart("Move");
     {
+        const coreBool bWasPaused = g_pMenu->IsPaused();
+        
         // update input interface
         UpdateInput();
 
         // move the menu
         g_pMenu->Move();
+        
         if(!g_pMenu->IsPaused())
         {
+            if(bWasPaused) ForceFramerate(true);
             
                 g_pDistortion->Move();
             
@@ -455,7 +462,7 @@ void InitDirection()
 
 // ****************************************************************
 // init frame rate properties
-void InitFramerate()
+void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
 {
     // get current display mode
     SDL_DisplayMode oMode = {};
@@ -467,8 +474,8 @@ void InitFramerate()
     // calculate logical and physical frame time
     if(!STATIC_ISVALID(g_pGame))
     {
-        const coreDouble dUpdateFreq = coreDouble(GetCurUpdateFreq() ? GetCurUpdateFreq() : iRefreshRate);
-        const coreDouble dGameSpeed  = coreDouble(GetCurGameSpeed () ? GetCurGameSpeed () : 100u) / 100.0;
+        const coreDouble dUpdateFreq = coreDouble(iUpdateFreq ? iUpdateFreq : iRefreshRate);
+        const coreDouble dGameSpeed  = coreDouble(iGameSpeed  ? iGameSpeed  : 100u) / 100.0;
 
         const coreDouble dRawRate   = dUpdateFreq / dGameSpeed;
         const coreDouble dFixedRate = MIN(CEIL(coreDouble(FRAMERATE_MIN) / dRawRate) * dRawRate, coreDouble(FRAMERATE_MAX));   // increase in multiples, if below minimum frame rate
@@ -477,10 +484,10 @@ void InitFramerate()
         s_fLogicalTime  = coreFloat(1.0 / dFixedRate);
         s_dPhysicalTime = 1.0 / (dFixedRate * dGameSpeed);
 
-        g_fGameRate = s_fLogicalRate;
-
         s_iSkipMax   = oMode.refresh_rate ? (F_TO_UI(dFixedRate * dGameSpeed) / oMode.refresh_rate) : 0u;
         s_iSkipFrame = s_iSkipMax;   // trigger render
+
+        g_fGameRate = s_fLogicalRate;
     }
 
     // override vertical synchronization
@@ -571,7 +578,6 @@ static void ForceFramerate(const coreBool bFull)
 {
     if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
     {
-        //if(g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT)
         // 
         if(TIME) c_cast<coreFloat&>(TIME) = s_fLogicalTime;
 

@@ -1141,13 +1141,13 @@ void cCalorMission::__SetupOwn()
     // bullets in dungeon are created in order to have consistent straight line overlap everywhere (bottom to top, left to right), corners are ignored and random though
     // corners in dungeon have double-bullets, but they are important for collision handling
     // collision handling in the dungeon is extremely unstable, and can fail with slightly different parameters, should be fixed or not reused (possible issues: player collision handling, bullet collision range (player needs to touch cluster), global move, bullet test order, cGame callback being called later, ...)
+    // background needs to move slower, to improve distinction with the moving bullets (could also be during a sandstorm, rainstorm or other visual distortion to completely remove the background movement)
     // TASK: collect hidden treasure-boxes in dungeons (open up when flying over it)
     // TASK: destroy secret enemy at the back of the initial room
     // ACHIEVEMENT: create a prison with a maximum size of 4x4 bullets
     // TODO 1: hardmode: attacking enemies
     // TODO 1: hardmode: moving enemies in dungeon
     // TODO 1: hardmode: additional attacking pseudo-enemy, made of bullet?), or infinity object, even in dungeon (though similar to P1 object)
-    // TODO 1: could be during a sandstorm, rainstorm or other visual distortion to remove the background movement
     // TODO 3: late update: make sure corners in dungeon are visually consistent (depth)
     // TODO 3: maybe show fullscreen arrow/cone
     STAGE_MAIN({TAKE_ALWAYS, 2u})
@@ -1177,7 +1177,7 @@ void cCalorMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(15u)
+        STAGE_GET_START(17u)
             STAGE_GET_VEC2 (vGlobalOffset)
             STAGE_GET_VEC2 (vGlobalMove)
             STAGE_GET_VEC2 (vGlobalDir, vGlobalDir = coreVector2(0.0f,1.0f))
@@ -1189,6 +1189,8 @@ void cCalorMission::__SetupOwn()
             STAGE_GET_UINT (iCreationChest)
             STAGE_GET_UINT (iChestCount)
             STAGE_GET_UINT (iReset)
+            STAGE_GET_UINT (iHitState)
+            STAGE_GET_UINT (iHitStateOld)
             STAGE_GET_FLOAT(fSpeedFix)
         STAGE_GET_END
 
@@ -1709,7 +1711,10 @@ void cCalorMission::__SetupOwn()
                 }
             });
 
-            STAGE_COLL_PLAYER_BULLET(pPlayer, pBullet, vIntersection, bFirstHit, COLL_REF(vGlobalMove), COLL_REF(vGlobalDir), COLL_REF(fSpeedFix))
+            iHitStateOld = iHitState;
+            iHitState    = 0u;
+
+            STAGE_COLL_PLAYER_BULLET(pPlayer, pBullet, vIntersection, bFirstHit, COLL_REF(vGlobalMove), COLL_REF(vGlobalDir), COLL_REF(fSpeedFix), COLL_REF(iHitState), COLL_REF(iHitStateOld))
             {
                 const coreInt32 iDamage = pBullet->GetDamage();
 
@@ -1733,7 +1738,13 @@ void cCalorMission::__SetupOwn()
                         fSpeedFix = 1.1f;
                     }
 
-                    if(pPlayer->IsNormal()) pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vIntersection.xy());
+                    const coreUintW iIndex = g_pGame->GetPlayerIndex(pPlayer);
+
+                    ADD_BIT(iHitState, iIndex)
+                    if(!HAS_BIT(iHitStateOld, iIndex))
+                    {
+                        if(pPlayer->IsNormal()) pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vIntersection.xy());
+                    }
                 }
             });
         }

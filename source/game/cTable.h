@@ -53,6 +53,7 @@ private:
     sCounter m_aCounterMission [TABLE_MISSIONS];                   // 
     sCounter m_aaCounterSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
+    coreUint8 m_iMedalArcade;                                      // (for post-game handling) 
     coreUint8 m_aiMedalMission [TABLE_MISSIONS];                   // 
     coreUint8 m_aaiMedalSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
@@ -86,6 +87,7 @@ public:
     RETURN_NONNULL sCounter* EditCounterSegment();
 
     // 
+    void GiveMedalArade  (const coreUint8 iMedal);
     void GiveMedalMission(const coreUint8 iMedal, const coreUintW iMissionIndex);
     void GiveMedalMission(const coreUint8 iMedal);
     void GiveMedalSegment(const coreUint8 iMedal, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
@@ -110,6 +112,7 @@ public:
     inline const sCounter&  GetCounterTotal  ()const                                                             {return m_CounterTotal;}
     inline const sCounter&  GetCounterMission(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aCounterMission [iMissionIndex];}
     inline const sCounter&  GetCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaCounterSegment[iMissionIndex][iSegmentIndex];}
+    inline const coreUint8& GetMedalArcade   ()const                                                             {return m_iMedalArcade;}
     inline const coreUint8& GetMedalMission  (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiMedalMission  [iMissionIndex];}
     inline const coreUint8& GetMedalSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMedalSegment [iMissionIndex][iSegmentIndex];}
     inline const coreUint8& GetFragmentAll   (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiFragment      [iMissionIndex];}

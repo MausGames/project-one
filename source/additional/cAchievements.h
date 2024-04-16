@@ -25,7 +25,8 @@
 #define SCORE_MISSIONS          (MISSIONS - 2u)                    // (aligned to 2) 
 #define SCORE_MISSIONS_EX       (MISSIONS - 3u + CONTINUES)        // 
 #define SCORE_SEGMENTS          (SEGMENTS)                         // 
-#define SCORE_TYPE              (GAME_TYPE_MAX)                    // 
+#define SCORE_PURES             (2u)                               // 
+#define SCORE_TYPES             (GAME_TYPE_MAX)                    // 
 #define SCORE_DIFFICULTIES      (GAME_DIFFICULTY_MAX)              // 
 #define SCORE_EQUIP_WEAPONS     (EQUIP_WEAPONS)                    // 
 #define SCORE_EQUIP_SUPPORTS    (EQUIP_SUPPORTS)                   // 

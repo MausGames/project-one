@@ -217,10 +217,11 @@ extern void UpdateInput();
 
 // ****************************************************************
 // 
-inline coreUint8  GetCurGameSpeed   () {return g_CurConfig.Game.iPureMode ? SCORE_PURE_GAMESPEED    : g_CurConfig.Game.iGameSpeed;}
-inline coreUint8  GetCurBackRotation() {return g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKROTATION : g_CurConfig.Game.iBackRotation;}
-inline coreUint8  GetCurBackSpeed   () {return g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_CurConfig.Game.iBackSpeed;}
-inline coreUint16 GetCurUpdateFreq  () {return g_CurConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_CurConfig.Game.iUpdateFreq;}
+extern coreUint8  GetCurGameSpeed     ();
+extern coreUint8  GetCurBackRotation  ();
+extern coreUint8  GetCurBackSpeed     ();
+extern coreUint16 GetCurUpdateFreq    ();
+extern coreUint16 GetCurUpdateFreqReal();
 
 
 #endif // _P1_GUARD_CONFIG_H_

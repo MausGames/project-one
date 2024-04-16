@@ -246,7 +246,7 @@ void cBridgeMenu::Move()
                 g_pPostProcessing->SetValueAll   (fBlend);
                 g_pPostProcessing->SetSoundVolume(fBlend);
 
-                if(m_fReturnTimer >= 1.5f)
+                if(m_fReturnTimer >= 1.0f)
                 {
                     // 
                     m_iStatus = 3;
@@ -299,7 +299,7 @@ void cBridgeMenu::Move()
     case SURFACE_BRIDGE_RESTART:
         {
             // 
-            m_fReturnTimer.Update(1.0f);
+            m_fReturnTimer.Update(2.0f);
 
             if(m_bReturnState)
             {
@@ -443,6 +443,10 @@ void cBridgeMenu::UseRestart(const coreBool bPaused)
     g_pGame->GetCombatText()->SetVisible(false);
 
     // 
+    if((g_pGame->GetKind() == GAME_KIND_ALL) && (g_pGame->GetCurMissionIndex() > 0u))
+        g_pGame->FadeMusic(2.0f);
+
+    // 
     this->ChangeSurface(SURFACE_BRIDGE_RESTART, 0.0f);
 }
 
@@ -510,11 +514,11 @@ coreBool cBridgeMenu::HasUnlocks()
         }
     };
 
-         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)   && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))                 return true;
-    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))                 return true;
-    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_AFTER_FIRST)) return true;
-    else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))                 return true;
-    else if(nApplyUnlockFunc(UNLOCK_WEAPON_WAVE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][6];}))                 return true;
+         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)   && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))                            return true;
+    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3] && !DEFINED(_CORE_SWITCH_);})) return true;
+    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_AFTER_FIRST))            return true;
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))                            return true;
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_WAVE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][6];}))                            return true;
 
     return false;
 }

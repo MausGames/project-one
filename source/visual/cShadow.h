@@ -92,6 +92,9 @@ public:
     // enable shader-program and apply read shadow matrix
     static void EnableShadowRead(const coreUintW iHandleIndex);
 
+    // 
+    static inline coreBool IsSupported() {return CORE_GL_SUPPORT(ARB_depth_texture);}
+
     // access global bind container
     static inline cBindContainer* GetGlobalContainer() {return &s_GlobalContainer;}
 

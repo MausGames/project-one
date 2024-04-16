@@ -254,7 +254,7 @@ $INPUT_KEYBOARD = Teclado
 $INPUT_JOYSTICK = Control
 
 $INFORMATION_RESTART = El juego se reiniciará ahora.
-$QUESTION_SAVE = ¿Guardar cambios?
+$QUESTION_CONFIG_SAVE = ¿Guardar cambios?
 $QUESTION_IMPORT = ¿Importar datos de demo guardados?
 $QUESTION_RESTART = ¿Reiniciar el juego?
 $QUESTION_EXIT_GAME = ¿Salir del juego?

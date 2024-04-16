@@ -12,9 +12,8 @@
 const float c_v1TestFactor = 0.2;   // 
 
 // shader input
-varying float v_v1Mix;              // mix value between both outdoor textures
-varying vec4  v_v4ShadowCoord;      // pixel coordinates viewed from the light source
-varying vec2  v_v2Border;           // 
+varying vec4 v_v4ShadowCoord;       // pixel coordinates viewed from the light source
+varying vec3 v_v3Border;            // (z = mix value between both outdoor textures) 
 
 
 void FragmentMain()
@@ -33,13 +32,13 @@ void FragmentMain()
     // always lookup full normal map (less register pressure)
     vec4 v4FullNormal = coreTexture2D(2, v_av2TexCoord[0]);
 
-    if(v_v1Mix <= 0.0)   // # performance boost
+    if(v_v3Border.z <= 0.0)   // # performance boost
     {
         // lookup only lower outdoor textures
         v2TexNormal = v4FullNormal.zw;
         v3TexColor  = coreTexture2D(1, v_av2TexCoord[0]).rgb;
     }
-    else if(v_v1Mix >= 1.0)
+    else if(v_v3Border.z >= 1.0)
     {
         // lookup only upper outdoor textures
         v2TexNormal = v4FullNormal.xy;
@@ -52,13 +51,13 @@ void FragmentMain()
         vec3 v3FullColor2 = coreTexture2D(0, v_av2TexCoord[0]).rgb;
 
         // mix between both layers
-        v2TexNormal = mix(v4FullNormal.zw, v4FullNormal.xy, v_v1Mix);
-        v3TexColor  = mix(v3FullColor1,    v3FullColor2,    v_v1Mix);
+        v2TexNormal = mix(v4FullNormal.zw, v4FullNormal.xy, v_v3Border.z);
+        v3TexColor  = mix(v3FullColor1,    v3FullColor2,    v_v3Border.z);
     }
 
 #endif
 
-#if (_P1_SHADOW_) == 1 || defined(_P1_LIGHT_)
+#if (_P1_SHADOW_) == 1 || (defined(_P1_LIGHT_) && ((_P1_SHADOW_) >= 1))
 
     // apply shadow mapping with single depth value comparison
     float v1Light = mix(1.0, 0.5, coreTextureBaseShadow(0, v_v4ShadowCoord));
@@ -69,7 +68,7 @@ void FragmentMain()
         float v1DynLight = coreTextureBaseProj(3, v_v4ShadowCoord).r;
 
         // 
-        float v1Visibility = coreSaturate(max(v_v2Border.x, v_v2Border.y));
+        float v1Visibility = coreSaturate(max(v_v3Border.x, v_v3Border.y));
         v1Light = mix(v1Light, 0.5, mix(v1DynLight, 0.0, v1Visibility));
     }
 
@@ -95,7 +94,7 @@ void FragmentMain()
                             coreTextureBaseProj(3, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0)).r) * 0.2;
 
         // 
-        float v1Visibility = coreSaturate(max(v_v2Border.x, v_v2Border.y));
+        float v1Visibility = coreSaturate(max(v_v3Border.x, v_v3Border.y));
         v1Light = mix(v1Light, 0.5, mix(v1DynLight, 0.0, v1Visibility));
     }
 
@@ -109,7 +108,7 @@ void FragmentMain()
 #if defined(_P1_GLOW_)
 
     // increase lower outdoor intensity (for volcano background)
-    float v1Max = min(1.0 - v_v1Mix, 1.0);
+    float v1Max = min(1.0 - v_v3Border.z, 1.0);
     v1Light     = max(v1Max, v1Light);
 
     // 
@@ -148,6 +147,4 @@ void FragmentMain()
     gl_FragColor = vec4(v3TexColor * v1Diffuse + v1Specular, 1.0);
 
 #endif
-
-//gl_FragColor = vec4(vec3(0.05), gl_FragColor.a); // [A1]
 }

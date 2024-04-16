@@ -244,7 +244,8 @@ private:
     coreFlow m_fVanishDelay;                // 
     coreBool m_bDefeatDelay;                // 
 
-    coreUint8 m_iContinues;                 // 
+    coreUint8 m_iContinuesLeft;             // 
+    coreUint8 m_iContinuesMax;              // 
     coreUint8 m_iRaise;                     // 
 
     coreUint8 m_iDepthLevel;                // 
@@ -384,20 +385,21 @@ public:
     
 
     // get object properties
-    inline       coreUint8     GetNumPlayers ()const {return this->IsMulti() ? GAME_PLAYERS : 1u;}
-    inline const coreInt32*    GetMissionList()const {ASSERT(m_piMissionList) return m_piMissionList;}
-    inline const coreUintW&    GetNumMissions()const {return m_iNumMissions;}
-    inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
-    inline const coreUint8&    GetRaise      ()const {return m_iRaise;}
-    inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
-    inline const sGameOptions& GetOptions    ()const {return m_Options;}
-    inline const coreUint8&    GetKind       ()const {return m_Options.iKind;}
-    inline const coreUint8&    GetType       ()const {return m_Options.iType;}
-    inline const coreUint8&    GetMode       ()const {return m_Options.iMode;}
-    inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
-    inline const coreUint8&    GetFlags      ()const {return m_Options.iFlags;}
-    inline const coreUint16&   GetVersion    ()const {return m_iVersion;}
-    inline const coreUint16&   GetStatus     ()const {return m_iStatus;}
+    inline       coreUint8     GetNumPlayers   ()const {return this->IsMulti() ? GAME_PLAYERS : 1u;}
+    inline const coreInt32*    GetMissionList  ()const {ASSERT(m_piMissionList) return m_piMissionList;}
+    inline const coreUintW&    GetNumMissions  ()const {return m_iNumMissions;}
+    inline const coreUint8&    GetContinuesLeft()const {return m_iContinuesLeft;}
+    inline const coreUint8&    GetContinuesMax ()const {return m_iContinuesMax;}
+    inline const coreUint8&    GetRaise        ()const {return m_iRaise;}
+    inline const coreUint8&    GetOutroType    ()const {return m_iOutroType;}
+    inline const sGameOptions& GetOptions      ()const {return m_Options;}
+    inline const coreUint8&    GetKind         ()const {return m_Options.iKind;}
+    inline const coreUint8&    GetType         ()const {return m_Options.iType;}
+    inline const coreUint8&    GetMode         ()const {return m_Options.iMode;}
+    inline const coreUint8&    GetDifficulty   ()const {return m_Options.iDifficulty;}
+    inline const coreUint8&    GetFlags        ()const {return m_Options.iFlags;}
+    inline const coreUint16&   GetVersion      ()const {return m_iVersion;}
+    inline const coreUint16&   GetStatus       ()const {return m_iStatus;}
 
     // 
     static coreUint8  CalcMedal       (const coreFloat fTime, const coreFloat* pfMedalGoal);

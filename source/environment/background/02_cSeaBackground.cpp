@@ -374,7 +374,7 @@ void cSeaBackground::__MoveOwn()
         // 
         pWeed->SetDirection(vWeedDir);
     }
-    pList->MoveNormal();
+    pList->MoveNormal();   // TODO 1: only update on actual changes
 
     // 
     m_fWaveTime.Update(1.4f);

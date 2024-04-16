@@ -56,6 +56,9 @@ void cDistortion::Update()
 {
     if(!g_CurConfig.Graphics.iDistortion)
     {
+        glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
+        m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         // 
         m_bActive = false;
         return;
@@ -82,7 +85,7 @@ void cDistortion::Update()
                     if(!oWave.GetAlpha()) continue;
 
                     // 
-                    const coreFloat fScale = oWave.GetColor4().x;
+                    const coreFloat fScale = oWave.GetColor4().x * DISTORTION_SCALE_FACTOR * 2.0f;
                     //const coreFloat fSpeed = oWave.GetColor4().y;
 
                     // 
@@ -99,7 +102,7 @@ void cDistortion::Update()
                     if(!oBurst.GetAlpha()) continue;
 
                     // 
-                    const coreFloat fScale = oBurst.GetColor4().x;
+                    const coreFloat fScale = oBurst.GetColor4().x * DISTORTION_SCALE_FACTOR * 2.0f;
                     //const coreFloat fSpeed = oBurst.GetColor4().yz().LengthSq();
 
                     // 
@@ -210,7 +213,7 @@ void cDistortion::CreateEraser(const coreVector3 vPosition, const coreFloat fSca
 
     // 
     oEraser.SetPosition(g_pForeground->Project2D(vPosition) * DISTORTION_SCALE_FACTOR);
-    oEraser.SetSize    (coreVector2(0.1f,0.1f) * fScale);
+    oEraser.SetSize    (coreVector2(0.2f,0.2f) * fScale * DISTORTION_SCALE_FACTOR);
     oEraser.SetAlpha   (1.0f);
 }
 

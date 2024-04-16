@@ -639,11 +639,17 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     void VertexMain();
     void ShaderMain()
     {
-        // compatibility for Intel and macOS (also prevent compiler-generated overruns)
+        // compatibility for Intel and macOS
         v_v4VarColor   = vec4(0.0);
-        for(int i = 0; i < CORE_NUM_TEXTURES_2D; ++i) v_av2TexCoord[min(i, CORE_NUM_TEXTURES_2D - 1)] = vec2(0.0);
-        for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightPos[min(i, CORE_NUM_LIGHTS      - 1)] = vec4(0.0);
-        for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightDir[min(i, CORE_NUM_LIGHTS      - 1)] = vec4(0.0);
+        #if defined(GL_ES)
+            for(int i = 0; i < CORE_NUM_TEXTURES_2D; ++i) v_av2TexCoord[i] = vec2(0.0);
+            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightPos[i] = vec4(0.0);
+            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightDir[i] = vec4(0.0);
+        #else
+            for(int i = 0; i < CORE_NUM_TEXTURES_2D; ++i) v_av2TexCoord[min(i, CORE_NUM_TEXTURES_2D - 1)] = vec2(0.0);
+            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightPos[min(i, CORE_NUM_LIGHTS      - 1)] = vec4(0.0);
+            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightDir[min(i, CORE_NUM_LIGHTS      - 1)] = vec4(0.0);
+        #endif
         v_v3TangentPos = vec3(0.0);
         v_v3TangentCam = vec3(0.0);
 
@@ -777,7 +783,10 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     void FragmentMain();
     void ShaderMain()
     {
+    #if defined(_CORE_OPTION_VIEWDIR_)
         v_v3ViewDir = v_v3TangentCam - v_v3TangentPos;
+    #endif
+
         FragmentMain();
     }
 

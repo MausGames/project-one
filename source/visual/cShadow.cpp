@@ -86,7 +86,7 @@ void cShadow::Reconfigure()
     m_iLevel = g_CurConfig.Graphics.iShadow;
 
     // 
-    if(!CORE_GL_SUPPORT(ARB_depth_texture)) m_iLevel = 0u;
+    if(!cShadow::IsSupported()) m_iLevel = 0u;
 
     // delete old shadow map
     m_FrameBuffer.Delete();
@@ -148,7 +148,7 @@ void cShadow::GlobalExit()
 // update the shadow map class
 void cShadow::GlobalUpdate()
 {
-    if(!g_CurConfig.Graphics.iShadow) return;
+    if(!g_CurConfig.Graphics.iShadow || !cShadow::IsSupported()) return;
 
     // create orthographic projection
     constexpr coreMatrix4 mOrtho = coreMatrix4::Ortho(-SHADOW_RANGE_X,   SHADOW_RANGE_X,
@@ -194,11 +194,11 @@ void cShadow::Recompile()
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
         coreProgramPtr& pHandle  = s_apHandle[i];
-        const coreChar* pcConfig = PRINT("%s%s%s%s%s", PRINT(SHADER_SHADOW(%u), g_CurConfig.Graphics.iShadow),
-                                                       (i == SHADOW_HANDLE_OBJECT_INST   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? CORE_SHADER_OPTION_INSTANCING : "",
-                                                       (i == SHADOW_HANDLE_OBJECT_WAVE   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? SHADER_WAVE                   : "",
-                                                       (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW                   : "",
-                                                       (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT                  : "");
+        const coreChar* pcConfig = PRINT("%s%s%s%s%s%s", PRINT(SHADER_SHADOW(%u), cShadow::IsSupported() ? g_CurConfig.Graphics.iShadow : 0u), CORE_SHADER_OPTION_VIEWDIR,
+                                                         (i == SHADOW_HANDLE_OBJECT_INST   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? CORE_SHADER_OPTION_INSTANCING : "",
+                                                         (i == SHADOW_HANDLE_OBJECT_WAVE   || i == SHADOW_HANDLE_OBJECT_WAVE_INST)   ? SHADER_WAVE                   : "",
+                                                         (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW                   : "",
+                                                         (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT                  : "");
 
         // change configuration of related shaders
         for(coreUintW j = 0u, je = pHandle->GetNumShaders(); j < je; ++j)
@@ -265,7 +265,7 @@ void cShadow::RenderInstanced(const coreMatrix4& mTransform, const coreList<core
 // enable shader-program and apply read shadow matrix
 void cShadow::EnableShadowRead(const coreUintW iHandleIndex)
 {
-    if(!g_CurConfig.Graphics.iShadow) return;
+    if(!g_CurConfig.Graphics.iShadow || !cShadow::IsSupported()) return;
 
     ASSERT(iHandleIndex < ARRAY_SIZE(s_apHandle))
     cShadow::__SendTransform(s_apHandle[iHandleIndex], s_mReadShadowMatrix);

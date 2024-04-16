@@ -190,9 +190,6 @@ void cPlayer::Configure(const coreUintW iShipType)
     case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_PLAYER_YELLOW; m_vMenuColor = COLOR_MENU_YELLOW; m_vLedColor = COLOR_LED_YELLOW; m_fRangeScale = 1.0f;  break;
     case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_PLAYER_GREEN;  m_vMenuColor = COLOR_MENU_GREEN;  m_vLedColor = COLOR_LED_GREEN;  m_fRangeScale = 1.08f; break;
     }
-    
-    
-    //m_vMenuColor = COLOR_MENU_WHITE;  // [A1]
 
     // load models
     this->DefineModelHigh(sModelHigh);

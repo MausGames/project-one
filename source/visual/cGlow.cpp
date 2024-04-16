@@ -22,8 +22,9 @@ cGlow::cGlow()noexcept
 // update the glow-effect
 void cGlow::Update()
 {
-    if(!g_CurConfig.Graphics.iGlow || (!TIME && Core::System->GetCurFrame()))
+    if(!g_CurConfig.Graphics.iGlow || (!TIME && Core::System->GetCurFrame()) || g_bNoInstancing)
     {
+        m_Blur.Clear();
         // 
         m_bActive = false;
         return;

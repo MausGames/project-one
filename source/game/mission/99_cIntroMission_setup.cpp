@@ -201,6 +201,11 @@ void cIntroMission::__SetupOwn()
             }
         }
 
+        if(g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK)
+        {
+            iAnyButton = 1u;   // never show this trophy in a replay, even when genuine
+        }
+
         STAGE_FOREACH_PLAYER(pPlayer, i)
         {
             coreUint32& iInputState = aiInputState[i];

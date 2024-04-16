@@ -46,21 +46,21 @@ cGameMenu::cGameMenu()noexcept
 
     m_StartButtonArmory.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StartButtonArmory.DefineProgram("menu_border_program");
-    m_StartButtonArmory.SetPosition  (m_BackgroundArmory.GetPosition() + m_BackgroundArmory.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
+    m_StartButtonArmory.SetPosition  (m_BackgroundArmory.GetPosition() + m_BackgroundArmory.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f) + MENU_BUTTON_SHIFT);
     m_StartButtonArmory.SetSize      (coreVector2(0.3f,0.07f));
     m_StartButtonArmory.SetAlignment (coreVector2(1.0f,-1.0f));
     m_StartButtonArmory.GetCaption()->SetTextLanguage("START");
 
     m_StartButtonFirst.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StartButtonFirst.DefineProgram("menu_border_program");
-    m_StartButtonFirst.SetPosition  (m_BackgroundFirst.GetPosition() + m_BackgroundFirst.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
+    m_StartButtonFirst.SetPosition  (m_BackgroundFirst.GetPosition() + m_BackgroundFirst.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f) + MENU_BUTTON_SHIFT);
     m_StartButtonFirst.SetSize      (m_StartButtonArmory.GetSize());
     m_StartButtonFirst.SetAlignment (m_StartButtonArmory.GetAlignment());
     m_StartButtonFirst.GetCaption()->SetTextLanguage("START");
 
     m_StartButtonDemo.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StartButtonDemo.DefineProgram("menu_border_program");
-    m_StartButtonDemo.SetPosition  (m_BackgroundDemo.GetPosition() + m_BackgroundDemo.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
+    m_StartButtonDemo.SetPosition  (m_BackgroundDemo.GetPosition() + m_BackgroundDemo.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f) + MENU_BUTTON_SHIFT);
     m_StartButtonDemo.SetSize      (m_StartButtonArmory.GetSize());
     m_StartButtonDemo.SetAlignment (m_StartButtonArmory.GetAlignment());
     m_StartButtonDemo.GetCaption()->SetTextLanguage("START");
@@ -1804,9 +1804,6 @@ void cGameMenu::SaveValues()
     {
         g_pSave->EditOptions()->iNavigation = m_DemoStage.GetCurValue();
     }
-
-    // 
-    InitFramerate();
 
     // 
     SaveConfig();

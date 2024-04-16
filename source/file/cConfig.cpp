@@ -81,7 +81,7 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
 #if defined(CONFIG_FORCE)
 
     // force specific settings
-    g_OldConfig.Graphics.iReflection = 1u;
+    //g_OldConfig.Graphics.iReflection = 1u;
     g_OldConfig.Graphics.iGlow       = 1u;
     //g_OldConfig.Graphics.iDistortion = 1u;
 
@@ -699,4 +699,28 @@ void UpdateInput()
     
     
     g_MenuInput.bAny = g_MenuInput.bAccept || g_MenuInput.bCancel || g_MenuInput.bPause || Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
+}
+
+
+// ****************************************************************
+// 
+coreUint8  GetCurGameSpeed   () {return (g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigGameSpeed    : (g_CurConfig.Game.iPureMode ? SCORE_PURE_GAMESPEED    : g_CurConfig.Game.iGameSpeed);}
+coreUint8  GetCurBackRotation() {return (g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigBackRotation : (g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKROTATION : g_CurConfig.Game.iBackRotation);}
+coreUint8  GetCurBackSpeed   () {return (g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigBackSpeed    : (g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_CurConfig.Game.iBackSpeed);}
+coreUint16 GetCurUpdateFreq  () {return (g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigUpdateFreq   : (g_CurConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_CurConfig.Game.iUpdateFreq);}
+
+
+// ****************************************************************
+// 
+coreUint16 GetCurUpdateFreqReal()
+{
+    // 
+    if(GetCurUpdateFreq()) return GetCurUpdateFreq();
+
+    // get current display mode
+    SDL_DisplayMode oMode = {};
+    SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
+
+    // 
+    return (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
 }

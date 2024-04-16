@@ -31,9 +31,12 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
 
     if(sSkyTexture)
     {
-        // create depth frame buffer
-        m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-        m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        if(CORE_GL_SUPPORT(ARB_depth_texture))
+        {
+            // create depth frame buffer
+            m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+            m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        }
 
         // create sky-plane object
         m_Sky.DefineTexture(0u, sSkyTexture);
@@ -51,6 +54,9 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
     this->DefineTexture(2u, m_Refraction.GetColorTarget(0u).pTexture);
     this->DefineTexture(3u, m_Depth     .GetDepthTarget()  .pTexture);
     this->DefineProgram("environment_water_program");
+
+    // 
+    if(!m_Depth.GetIdentifier()) this->DefineTexture(3u, "fallback_depth.png");
 
     // set object properties
     this->SetSize(coreVector3(WATER_SIZE, WATER_SIZE, 1.0f));
@@ -74,38 +80,6 @@ void cWater::Render(coreFrameBuffer* pBackground)
 
     // blit current background color into own refraction buffer
     pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, &m_Refraction);
-
-    // 
-    this->__RenderOwn();
-
-    if(this->GetProgram()->Enable())
-    {
-        // update all water uniforms
-        this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
-        this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
-
-        // render the 3d-object
-        this->coreObject3D::Render();
-    }
-
-    // invalidate all frame buffer objects
-    if(m_Reflection.GetIdentifier()) m_Reflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
-    if(m_Refraction.GetIdentifier()) m_Refraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
-    if(m_Depth     .GetIdentifier()) m_Depth     .Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
-}
-
-
-
-
-void cWater::Render1()
-{
-    m_Refraction.StartDraw();
-    m_Refraction.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
-
-}
-void cWater::Render2()
-{
-    if(!this->GetProgram().IsUsable()) return;
 
     // 
     this->__RenderOwn();
@@ -183,7 +157,7 @@ void cWater::UpdateReflection()
         glDepthFunc(GL_LEQUAL);
         glEnable   (GL_BLEND);
 
-        if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive()))
+        if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive()) && !g_bNoInstancing)
         {
             // 
             cLodObject::AllowHigh(false);
@@ -276,6 +250,9 @@ void cWater::Reshape()
     this->DefineTexture(1u, m_Reflection.GetColorTarget(0u).pTexture);
     this->DefineTexture(2u, m_Refraction.GetColorTarget(0u).pTexture);
     this->DefineTexture(3u, m_Depth     .GetDepthTarget()  .pTexture);
+
+    // 
+    if(!m_Depth.GetIdentifier()) this->DefineTexture(3u, "fallback_depth.png");
 }
 
 
@@ -299,7 +276,7 @@ cIceWater::cIceWater(const coreHashString& sSkyTexture)noexcept
 
     // 
     m_Ice.DefineTexture(0u, "environment_water_norm.png");
-    m_Ice.DefineProgram("environment_ice_program");
+    m_Ice.DefineProgram(m_Depth.GetIdentifier() ? "environment_ice_program" : NULL);
 }
 
 

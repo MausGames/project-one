@@ -230,12 +230,10 @@ void cFinishMenu::ShowThankYou()
     }
 
     // 
-    g_pSave->EditGlobalStats     ()->aiMedalsEarned[MEDAL_BRONZE] += 1u;
-    g_pSave->EditLocalStatsArcade()->aiMedalsEarned[MEDAL_BRONZE] += 1u;
-
-    // 
-    coreUint8& iMedalArcade = g_pSave->EditProgress()->aaaiMedalArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
-    iMedalArcade = MAX(iMedalArcade, MEDAL_BRONZE);
+    g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetDataTable()->GiveMedalArade(MEDAL_BRONZE);
+    });
 
     // 
     g_pSave->EditLocalStatsArcade()->iScoreBest   = MAX(g_pSave->EditLocalStatsArcade()->iScoreBest,       aiScoreFull[iMaxIndex]);

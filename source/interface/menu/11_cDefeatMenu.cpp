@@ -139,7 +139,7 @@ void cDefeatMenu::Move()
                 if(m_fBurst >= 1.0f) m_eState = DEFEAT_OUTRO;
 
                 // 
-                const coreUint8 iContinues = STATIC_ISVALID(g_pGame) ? g_pGame->GetContinues() : 0u;
+                const coreUint8 iContinues = STATIC_ISVALID(g_pGame) ? g_pGame->GetContinuesLeft() : 0u;
                 if(iContinues)
                 {
                     // 
@@ -187,6 +187,31 @@ void cDefeatMenu::Move()
             {
                 // 
                 m_iStatus = 2;
+            }
+        }
+        break;
+
+    case SURFACE_DEFEAT_REPLAY:
+        {
+            // 
+            m_fIntroTimer.Update(1.0f);
+            if((m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV) && !this->GetTransition().GetStatus())
+            {
+                // 
+                m_eState = DEFEAT_OUTRO;
+                if(STATIC_ISVALID(g_pGame))
+                {
+                    g_pGame->GetInterface ()->SetVisible(false);
+                    g_pGame->GetCombatText()->SetVisible(false);
+                }
+            }
+
+            // 
+            if(m_eState == DEFEAT_OUTRO) m_fOutroTimer.Update(1.0f);
+            if(m_fOutroTimer >= MENU_DEFEAT_BANNER_SPEED_REV + MENU_DEFEAT_DELAY_OUTRO)
+            {
+                // 
+                m_iStatus = 1;
             }
         }
         break;
@@ -244,7 +269,7 @@ void cDefeatMenu::ShowContinue()
     m_fCountdown = 11.0f;
 
     // 
-    const coreUint8 iContinues = g_pGame->GetContinues();
+    const coreUint8 iContinues = g_pGame->GetContinuesLeft();
     ASSERT(iContinues)
 
     // 
@@ -274,6 +299,21 @@ void cDefeatMenu::ShowGameOver()
 
     // 
     this->ChangeSurface(SURFACE_DEFEAT_GAMEOVER, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cDefeatMenu::ShowReplay()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    // 
+    this->__ResetState();
+    m_fIntroTimer = -MENU_DEFEAT_DELAY_INTRO;
+
+    // 
+    this->ChangeSurface(SURFACE_DEFEAT_REPLAY, 0.0f);
 }
 
 

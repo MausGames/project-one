@@ -57,8 +57,6 @@ public:
 
     // render and move the water-surface
     void Render(coreFrameBuffer* pBackground);
-    void Render1();
-    void Render2();
     void Move()final;
 
     // update water reflection and depth

@@ -654,9 +654,6 @@ void cInterface::Move()
         const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), cShip::TransformColorFactor(fBase)) + ((fBase <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
         m_aBossHealthBar[1].SetColor3(vColor * 1.0f);
         m_aBossHealthBar[2].SetColor3(vColor * 0.3f);
-        
-        //m_aBossHealthBar[1].SetColor3(COLOR_MENU_WHITE * 1.0f);   // [A1]
-        //m_aBossHealthBar[2].SetColor3(COLOR_MENU_WHITE * 0.3f);   // [A1]
 
         // display health value
         m_BossHealthValue.SetText(PRINT("%.0f%%", fPercent ? FLOOR(LERP(1.0f, 100.0f, fPercent)) : 0.0f));
@@ -1374,11 +1371,6 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
 
     // show default boss banner
     this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())), pBoss->GetExtra());
-    
-    
-    
-    
-    //this->ShowBoss("???", Core::Language->GetString("BOSS_TITLE_HIDDEN"));   // [A1]
 
     if(bSilent)
     {

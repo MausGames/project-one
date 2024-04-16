@@ -45,9 +45,6 @@ cPostProcessing::cPostProcessing()noexcept
         m_aWall[i].DefineTexture(0u, "menu_background_black.png");
         m_aWall[i].DefineProgram("menu_border_direct_program");
         m_aWall[i].SetTexOffset (coreVector2(0.0f,0.071f));
-        
-         
-        //m_aWall[i].DefineTexture(0u, "default_black.png");  // [A1]
     }
     this->__UpdateWall();
 
@@ -114,13 +111,6 @@ void cPostProcessing::Render()
 
     if(bDisableBlend) glDisable(GL_BLEND);
     {
-        // 
-        if(!this->GetDirection().IsAligned())
-        {
-            for(coreUintW i = 0u; i < POST_BORDERS; ++i)
-                m_aBorder[i].Render();
-        }
-
         if(m_fFrameValue >= 1.0f)
         {
             // 
@@ -128,15 +118,37 @@ void cPostProcessing::Render()
         }
         else
         {
-            // render interiors (post-process)
-            for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
-                m_aInterior[i].Render(this->GetProgram());
+            // 
+            if(!this->GetDirection().IsAligned())
+            {
+                glEnable(GL_DEPTH_TEST);
+                {
+                    glDepthRange(0.0f, 0.5f);
+
+                    // 
+                    for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+                        m_aInterior[i].Render(this->GetProgram());
+
+                    glDepthRange(0.0f, 1.0f);
+
+                    // 
+                    for(coreUintW i = 0u; i < POST_BORDERS; ++i)
+                        m_aBorder[i].Render();
+                }
+                glDisable(GL_DEPTH_TEST);
+            }
+            else
+            {
+                // render interiors (post-process)
+                for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+                    m_aInterior[i].Render(this->GetProgram());
+            }
         }
 
         // 
         m_Black.Render();
 
-        if(m_fFrameValue < 2.0f)
+        if((m_fFrameValue < 2.0f) && (!coreMath::IsNear(Core::System->GetResolution().AspectRatio(), 1.0f) || m_bOffsetActive))
         {
             // render wallpapers
             for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)

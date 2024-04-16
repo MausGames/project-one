@@ -569,9 +569,6 @@ void cCombatText::__DrawLabel(const coreChar* pcText, const coreVector3 vPositio
         m_aLabel[i].SetCenter  (vOnScreen);
         m_aLabel[i].SetColor4  (coreVector4(vColor, 0.0f));
         m_aLabel[i].SetScale   (coreVector2(1.0f,1.0f));
-        
-        
-        //m_aLabel[i].SetColor4(coreVector4(COLOR_MENU_WHITE, 0.0f));// [A1]
 
         // 
         m_afTime[i] = 1.0f;

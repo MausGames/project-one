@@ -101,7 +101,7 @@ cMainMenu::cMainMenu()noexcept
     else if(DEFINED(_CORE_DEBUG_))
     {
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
-        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);   // [RP] bei den anderen
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     }
@@ -123,13 +123,14 @@ cMainMenu::cMainMenu()noexcept
 
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartNew);
     if(g_bLeaderboards) this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreNew);
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_Navigator);
 
     // 
     coreSet<coreObject2D*>* pObjectSet = this->GetObjectSet(SURFACE_MAIN_DEFAULT);
-    for(coreUintW i = 0u, ie = pObjectSet->size() - (g_bLeaderboards ? 5u : 4u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = pObjectSet->size() - (g_bLeaderboards ? 1u : 0u) - 5u; i < ie; ++i)
     {
         (*pObjectSet)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
     }
@@ -139,6 +140,9 @@ cMainMenu::cMainMenu()noexcept
 
     m_ScoreNew.SetPosition(m_ScoreButton.GetPosition() + m_ScoreButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
     m_ScoreNew.SetIndex   (NEW_MAIN_SCORE);
+
+    m_ReplayNew.SetPosition(m_ReplayButton.GetPosition() + m_ReplayButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
+    m_ReplayNew.SetIndex   (NEW_MAIN_REPLAY);
 
     m_ExtraNew.SetPosition(m_ExtraButton.GetPosition() + m_ExtraButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
     m_ExtraNew.SetIndex   (NEW_MAIN_EXTRA);
@@ -187,6 +191,9 @@ void cMainMenu::Move()
             {
                 // 
                 m_iStatus = 3;
+
+                // 
+                m_ReplayNew.Resolve();
             }
             else if(m_ExtraButton.IsClicked())
             {

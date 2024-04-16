@@ -61,7 +61,7 @@ cConfigMenu::cConfigMenu()noexcept
 
     m_SaveButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_SaveButton.DefineProgram("menu_border_program");
-    m_SaveButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
+    m_SaveButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f) + MENU_BUTTON_SHIFT);
     m_SaveButton.SetSize      (coreVector2(0.3f,0.07f));
     m_SaveButton.SetAlignment (coreVector2(1.0f,-1.0f));
     m_SaveButton.SetOverride  (-1);   // # used in LoadValues()
@@ -510,8 +510,15 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 2u, ie = iMaxAnisotropy; i <= ie; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);
     m_RenderQuality  .AddEntryLanguage("VALUE_LOW",              0u);
     m_RenderQuality  .AddEntryLanguage("VALUE_HIGH",             1u);
-    m_ShadowQuality  .AddEntryLanguage("VALUE_LOW",              1u);
-    m_ShadowQuality  .AddEntryLanguage("VALUE_HIGH",             2u);
+    if(cShadow::IsSupported())
+    {
+        m_ShadowQuality.AddEntryLanguage("VALUE_LOW",  1u);
+        m_ShadowQuality.AddEntryLanguage("VALUE_HIGH", 2u);
+    }
+    else
+    {
+        m_ShadowQuality.AddEntryLanguage("VALUE_OFF", 1u);
+    }
     for(coreUintW i = 0u; i <= 200u; i += 5u) m_ShakeEffects .AddEntry(PRINT("%zu%%", i), i);
     m_FlashEffects   .AddEntryLanguage("VALUE_OFF",              0u);
     m_FlashEffects   .AddEntryLanguage("VALUE_ON",               1u);
@@ -741,11 +748,12 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_3DSound);
 
             // 
-            m_GlobalVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_GlobalVolume .GetCurValue()) * 0.01f));
-            m_MusicVolume  .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MusicVolume  .GetCurValue()) * 0.01f));
-            m_EffectVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_EffectVolume .GetCurValue()) * 0.01f));
-            m_AmbientVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_AmbientVolume.GetCurValue()) * 0.01f));
-            m_MenuVolume   .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MenuVolume   .GetCurValue()) * 0.01f));
+            const auto nColorFunc = [](const coreFloat fValue) {return TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, fValue);};
+            m_GlobalVolume .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_GlobalVolume .GetCurValue()) * 0.01f));
+            m_MusicVolume  .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_MusicVolume  .GetCurValue()) * 0.01f));
+            m_EffectVolume .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_EffectVolume .GetCurValue()) * 0.01f));
+            m_AmbientVolume.GetCaption()->SetColor3(nColorFunc(I_TO_F(m_AmbientVolume.GetCurValue()) * 0.01f));
+            m_MenuVolume   .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_MenuVolume   .GetCurValue()) * 0.01f));
 
             // 
                  if(m_AudioQuality.GetCurValue() == 0u) m_AudioQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
@@ -1085,7 +1093,7 @@ void cConfigMenu::Move()
         if(m_SaveButton.GetOverride() >= 0)
         {
             // 
-            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [this](const coreInt32 iAnswer)
+            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_CONFIG_SAVE"), [this](const coreInt32 iAnswer)
             {
                 // 
                 if(iAnswer == MSGBOX_ANSWER_YES)
@@ -1399,6 +1407,16 @@ void cConfigMenu::SaveValues()
 
         // 
         g_pMenu->InvokePauseStep();
+        
+        if(STATIC_ISVALID(g_pGame))
+        {   // TODO 1: does not work fully, as resources are not loaded yet
+            // refresh frame-buffers        
+            g_pGlow->Update();
+            Timeless([]()
+            {
+                g_pDistortion->Update();
+            });
+        }
     }
 
     if(bAudio)

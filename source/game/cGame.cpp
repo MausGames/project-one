@@ -30,7 +30,8 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_fHitDelay           (0.0f)
 , m_fVanishDelay        (0.0f)
 , m_bDefeatDelay        (false)
-, m_iContinues          ((g_bDemoVersion || !g_pSave->GetHeader().oProgress.bFirstPlay) ? GAME_CONTINUES : 0u)
+, m_iContinuesLeft      (0u)
+, m_iContinuesMax       (0u)
 , m_iRaise              (0u)
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
@@ -52,6 +53,11 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
     else
 
 #endif
+
+    // 
+    const coreUint32 iContinue = (g_bDemoVersion || !g_pSave->GetHeader().oProgress.bFirstPlay) ? GAME_CONTINUES : 0u;
+    m_iContinuesLeft = iContinue;
+    m_iContinuesMax  = iContinue;
 
     // configure first player
     m_aPlayer[0].Configure  (g_bCheatP1 ? PLAYER_SHIP_P1 : PLAYER_SHIP_ATK);
@@ -901,6 +907,7 @@ void cGame::UseContinue()
 
     const coreUintW iMissionIndex = m_iCurMissionIndex;
     const coreUintW iSegmentIndex = m_pCurMission->GetCurSegmentIndex();
+    const coreUint8 iCurContinue  = m_iContinuesMax - m_iContinuesLeft;
 
     // 
     this->LoadMissionID(m_pCurMission->GetID(), iSegmentIndex, m_pCurMission->GetTakeTo());
@@ -912,13 +919,13 @@ void cGame::UseContinue()
     ADD_FLAG   (m_iStatus, GAME_STATUS_NAMELESS)
 
     // 
-    ASSERT(m_iContinues)
-    m_iContinues -= 1u;
+    ASSERT(m_iContinuesLeft)
+    m_iContinuesLeft -= 1u;
 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
-        m_aPlayer[i].GetScoreTable()->StoreRun(m_aPlayer[i].GetDataTable()->GetCounterTotal().iContinuesUsed, iMissionIndex, iSegmentIndex);
+        m_aPlayer[i].GetScoreTable()->StoreRun(iCurContinue, iMissionIndex, iSegmentIndex);
 
         // 
         m_aPlayer[i].GetDataTable ()->RevertSegment   (iMissionIndex, iSegmentIndex);
@@ -956,7 +963,12 @@ void cGame::UseRestart()
 {
     // 
     ADD_FLAG(m_iStatus, GAME_STATUS_QUICK)
-    ADD_FLAG(m_iStatus, GAME_STATUS_NAMELESS)
+
+    if(g_pReplay->GetMode() == REPLAY_MODE_DISABLED)
+    {
+        // 
+        ADD_FLAG(m_iStatus, GAME_STATUS_NAMELESS)
+    }
 }
 
 
@@ -964,6 +976,7 @@ void cGame::UseRestart()
 // 
 void cGame::DisableMissionName()
 {
+    // 
     ADD_FLAG(m_iStatus, GAME_STATUS_NAMELESS)
 }
 

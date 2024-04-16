@@ -26,7 +26,7 @@
 #define SAVE_FILE_FOLDER    ""                       // 
 #define SAVE_FILE_EXTENSION "p1sv"                   // 
 #define SAVE_FILE_MAGIC     (UINT_LITERAL("P1SV"))   // 
-#define SAVE_FILE_VERSION   (0x00000004u)            // 
+#define SAVE_FILE_VERSION   (0x00000004u)            //    // [RP]
 
 #define SAVE_NAME_LENGTH    (32u)                    // 
 #define SAVE_PLAYERS        (PLAYERS)                // 
@@ -72,6 +72,7 @@ enum eSaveNew : coreUint8   // # never change bits after release
 {
     NEW_MAIN_START        = 0u,
     NEW_MAIN_SCORE        = 3u,
+    NEW_MAIN_REPLAY       = 4u,
     NEW_MAIN_EXTRA        = 1u,
     NEW_MAIN_CONFIG       = 2u,
     NEW_CONFIG_GAME       = 10u,
@@ -230,6 +231,7 @@ public:
 
         coreUint64   iSaveTimestamp;   // 
         coreUint32   iSaveCount;       // 
+        coreUint32   iReplayCount;     // 
 
         sGlobalStats oGlobalStats;     // 
         sLocalStats  aaaLocalStatsArcade   [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES];                                 // 
@@ -296,6 +298,9 @@ public:
     // 
     void     ImportDemo();
     coreBool CanImportDemo()const;
+
+    // 
+    coreUint32 NextReplayNum();
 
     // 
     inline void ResetStatus() {m_eStatus = SAVE_STATUS_OK;}
