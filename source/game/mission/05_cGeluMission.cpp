@@ -12,33 +12,36 @@
 // ****************************************************************
 // constructor
 cGeluMission::cGeluMission()noexcept
-: m_Fang          (GELU_FANGS)
-, m_iFangActive   (0u)
-, m_Way           (GELU_WAYS)
-, m_WayArrow      (GELU_WAYS)
-, m_iWayActive    (0u)
-, m_iWayVisible   (0u)
-, m_iWayGhost     (0u)
-, m_iWayFree      (0u)
-, m_Orb           (GELU_ORBS)
-, m_afOrbTime     {}
-, m_Line          (GELU_LINES)
-, m_afLineTime    {}
-, m_iLineMode     (0u)
-, m_Coin          (GELU_COINS)
-, m_CoinWave      (GELU_COINS)
-, m_Gap           (GELU_GAPS)
-, m_afGapTime     {}
-, m_iGapActive    (0u)
-, m_Shine         (GELU_SHINES)
-, m_afShineTime   {}
-, m_iShineActive  (0u)
-, m_avOldPos      {}
-, m_iTouchState   (0u)
-, m_abCrushImmune {}
-, m_abCrushInside {}
-, m_iCrushState   (0u)
-, m_fAnimation    (0.0f)
+: m_Fang           (GELU_FANGS)
+, m_iFangActive    (0u)
+, m_Way            (GELU_WAYS)
+, m_WayArrow       (GELU_WAYS)
+, m_iWayActive     (0u)
+, m_iWayVisible    (0u)
+, m_iWayGhost      (0u)
+, m_iWayFree       (0u)
+, m_Orb            (GELU_ORBS)
+, m_afOrbTime      {}
+, m_Line           (GELU_LINES)
+, m_afLineTime     {}
+, m_iLineMode      (0u)
+, m_Coin           (GELU_COINS)
+, m_CoinWave       (GELU_COINS)
+, m_Gap            (GELU_GAPS)
+, m_afGapTime      {}
+, m_iGapActive     (0u)
+, m_Shine          (GELU_SHINES)
+, m_afShineTime    {}
+, m_iShineActive   (0u)
+, m_avOldPos       {}
+, m_iTouchState    (0u)
+, m_iTouchStateOld (0u)
+, m_avFreezeMove   {}
+, m_abCrushImmune  {}
+, m_abCrushInside  {}
+, m_iCrushState    (0u)
+, m_fAnimation     (0.0f)
+, m_bStory         (g_pSave->GetHeader().oProgress.aiAdvance[5] < 7u)
 {
     // 
     m_apBoss[0] = &m_Chol;
@@ -79,7 +82,7 @@ cGeluMission::cGeluMission()noexcept
 
             // load object resources
             coreObject3D* pWay = &m_aWayRaw[i];
-            pWay->DefineModel  (iType ? "object_arrow.md3" : "object_cube_top.md3");
+            pWay->DefineModel  (iType ? "object_arrow_short.md3" : "object_cube_top.md3");
             pWay->DefineVolume ("object_cube_volume.md3");
             pWay->DefineTexture(0u, "effect_energy.png");
             pWay->DefineProgram(iType ? "effect_energy_flat_invert_program" : "effect_energy_flat_spheric_program");
@@ -125,7 +128,7 @@ cGeluMission::cGeluMission()noexcept
         {
             // load object resources
             coreObject3D* pLine = &m_aLineRaw[i];
-            pLine->DefineModel  ("object_tube_open.md3");
+            pLine->DefineModel  ("object_tube.md3");
             pLine->DefineTexture(0u, "effect_energy.png");
             pLine->DefineProgram("effect_energy_flat_invert_program");
 
@@ -220,6 +223,14 @@ cGeluMission::cGeluMission()noexcept
     m_Surfer.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_TOP | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
 
     // 
+    m_SurferWave.DefineModel  ("object_cube_top.md3");
+    m_SurferWave.DefineTexture(0u, "effect_energy.png");
+    m_SurferWave.DefineProgram("effect_energy_flat_program");
+    m_SurferWave.SetColor3    (COLOR_ENERGY_YELLOW * 0.4f);
+    m_SurferWave.SetTexSize   (coreVector2(1.0f,1.0f) * 0.4f);
+    m_SurferWave.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     g_pGlow->BindList(&m_Way);
     g_pGlow->BindList(&m_WayArrow);
     g_pGlow->BindList(&m_Orb);
@@ -235,9 +246,6 @@ cGeluMission::cGeluMission()noexcept
 // destructor
 cGeluMission::~cGeluMission()
 {
-    // 
-    m_Surfer.Kill(false);
-
     // 
     g_pGlow->UnbindList(&m_Way);
     g_pGlow->UnbindList(&m_WayArrow);
@@ -256,6 +264,7 @@ cGeluMission::~cGeluMission()
     for(coreUintW i = 0u; i < GELU_COINS;  ++i) this->DisableCoin (i, false);
     for(coreUintW i = 0u; i < GELU_GAPS;   ++i) this->DisableGap  (i, false);
     for(coreUintW i = 0u; i < GELU_SHINES; ++i) this->DisableShine(i, false);
+    this->DisableSurfer(false);
 }
 
 
@@ -585,6 +594,36 @@ void cGeluMission::DisableShine(const coreUintW iIndex, const coreBool bAnimated
 
 // ****************************************************************
 // 
+void cGeluMission::EnableSurfer()
+{
+    WARN_IF(m_SurferWave.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableSurfer(false);
+
+    // 
+    m_Surfer.Resurrect();
+
+    // 
+    m_SurferWave.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_SurferWave);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::DisableSurfer(const coreBool bAnimated)
+{
+    if(!m_SurferWave.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Surfer.Kill(false);
+
+    // 
+    m_SurferWave.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_SurferWave);
+}
+
+
+// ****************************************************************
+// 
 void cGeluMission::__RenderOwnBottom()
 {
     DEPTH_PUSH
@@ -642,6 +681,28 @@ void cGeluMission::__RenderOwnUnder()
     // 
     m_WayArrow.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_WayArrow);
+
+    // 
+    m_SurferWave.Render();
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::__MoveOwnAlways()
+{
+    // 
+    g_pGame->ForEachPlayerAll([this](const cPlayer* pPlayer, const coreUintW i)
+    {
+        if(!pPlayer->GetInput()->vMove.IsNull())
+        {
+            m_avFreezeMove[i] = pPlayer->GetInput()->vMove;
+        }
+        else if(pPlayer->HasStatus(PLAYER_STATUS_DEAD))
+        {
+            m_avFreezeMove[i] = coreVector2(0.0f,0.0f);
+        }
+    });
 }
 
 
@@ -986,6 +1047,12 @@ void cGeluMission::__MoveOwnAfter()
     {
         m_Surfer.SetDirection(coreVector3(coreVector2::Direction((8.0f*PI) * m_fAnimation), 0.0f));
         m_Surfer.SetTexOffset(coreVector2(0.0f, 0.5f * m_fAnimation));
+
+        m_SurferWave.SetPosition (m_Surfer.GetPosition ());
+        m_SurferWave.SetSize     (m_Surfer.GetSize     () * 1.5f);
+        m_SurferWave.SetDirection(m_Surfer.GetDirection());
+        m_SurferWave.SetTexOffset(m_Surfer.GetTexOffset());
+        m_SurferWave.Move();
     }
 }
 
@@ -995,8 +1062,10 @@ void cGeluMission::__MoveOwnAfter()
 void cGeluMission::__UpdateCollisionFang()
 {
     if(!m_iFangActive) return;
-    
-    m_iTouchState = 0u;
+
+    // 
+    m_iTouchStateOld = m_iTouchState;
+    m_iTouchState    = 0u;
 
     // 
     for(coreUintW i = 0u; i < GELU_FANGS; ++i)
@@ -1201,8 +1270,9 @@ void cGeluMission::__UpdateCollisionWay()
 {
     if(!m_iWayActive) return;
 
-    
-    m_iTouchState = 0u;
+    // 
+    m_iTouchStateOld = m_iTouchState;
+    m_iTouchState    = 0u;
 
     g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
@@ -1304,6 +1374,11 @@ void cGeluMission::__UpdateCollisionWay()
             {
                 m_abCrushImmune[i] = false;
             }
+        }
+
+        if(m_iTouchState && !m_iTouchStateOld)
+        {
+            g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 25.0f, 5u, COLOR_ENERGY_MAGENTA);
         }
 
         m_abCrushInside[i] = bIntersect;

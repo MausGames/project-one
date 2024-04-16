@@ -27,12 +27,14 @@ cMuscusMission::cMuscusMission()noexcept
 , m_fSunValue      (0.0f)
 , m_fSunAnimation  (0.0f)
 , m_iDiamondIndex  (UINT8_MAX)
+, m_fDiamondSpin   (0.0f)
 , m_afStrikeTime   {}
 , m_apStrikePlayer {}
 , m_apStrikeTarget {}
 , m_iStrikeState   (0u)
 , m_fStrikeTicker  (0.0f)
 , m_fAnimation     (0.0f)
+, m_bStory         (g_pSave->GetHeader().oProgress.aiAdvance[7] < 7u)
 {
     // 
     m_apBoss[0] = &m_Geminga;
@@ -54,9 +56,10 @@ cMuscusMission::cMuscusMission()noexcept
             pGenerate->DefineProgram(iType ? "effect_energy_flat_spheric_program" : "effect_energy_flat_invert_program");
 
             // set object properties
-            pGenerate->SetColor3 (COLOR_ENERGY_GREEN * 0.7f);
-            pGenerate->SetTexSize(coreVector2(1.0f,1.0f) * 0.5f);
-            pGenerate->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            pGenerate->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.15f);
+            pGenerate->SetColor3           (COLOR_ENERGY_GREEN * 0.7f);
+            pGenerate->SetTexSize          (coreVector2(1.0f,1.0f) * 0.5f);
+            pGenerate->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
             if(iType) m_GenerateWave.BindObject(pGenerate);
@@ -362,6 +365,7 @@ void cMuscusMission::StartDiamond(const coreUintW iIndex)
 
     // 
     m_iDiamondIndex = iIndex;
+    m_fDiamondSpin  = 0.0f;
 
     // 
     ASSERT(pGenerate->IsEnabled(CORE_OBJECT_ENABLE_ALL))
@@ -386,6 +390,7 @@ void cMuscusMission::EndDiamond(const coreBool bAnimated)
 
     // 
     m_iDiamondIndex = UINT8_MAX;
+    m_fDiamondSpin  = 0.0f;
 
     // 
     pGenerate->SetColor3(COLOR_ENERGY_GREEN * 0.7f);
@@ -430,7 +435,7 @@ void cMuscusMission::StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, cons
 
     // 
     const coreVector2 vDiff = pTarget->GetPosition().xy() - pPearl->GetPosition().xy();
-    const coreFloat   fLen  = LERP(8.0f, 1.0f, STEP(0.0f, 0.6f * FOREGROUND_AREA.x, vDiff.Length()));
+    const coreFloat   fLen  = LERPB(8.0f, 1.0f, STEP(0.0f, 0.8f * FOREGROUND_AREA.x, vDiff.Length()));
 
     // 
     const coreVector2 vDirIn  = vDiff.Normalized();
@@ -731,13 +736,17 @@ void cMuscusMission::__MoveOwnAfter()
         coreObject3D* pGenerate = (*m_Generate.List())[m_iDiamondIndex];
 
         // 
-        const coreVector2 vDir = coreVector2::Direction(m_fAnimation * (4.0f*PI));
+        if(m_fDiamondSpin) m_fDiamondSpin.UpdateMin(3.0f, 2.0f);
+
+        // 
+        const coreVector2 vDir   = coreVector2::Direction(m_fAnimation * (4.0f*PI));
+        const coreFloat   fScale = STEP(1.0f, 2.0f, m_fDiamondSpin);
 
         // 
         m_Diamond.SetPosition (pGenerate->GetPosition ());
-        m_Diamond.SetSize     (pGenerate->GetSize     () * 0.5f);
+        m_Diamond.SetSize     (pGenerate->GetSize     () * LERPB(1.0f, 1.5f, fScale) * 0.5f);
         m_Diamond.SetDirection(coreVector3(vDir, 0.0f));
-        m_Diamond.SetAlpha    (pGenerate->GetAlpha    ());
+        m_Diamond.SetAlpha    (pGenerate->GetAlpha    () * LERPB(1.0f, 0.0f, fScale));
         m_Diamond.SetTexOffset(pGenerate->GetTexOffset());
         m_Diamond.Move();
     }

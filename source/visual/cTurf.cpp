@@ -15,7 +15,7 @@ cTurf::cTurf()noexcept
 : m_fFlash (0.0f)
 {
     // load object resources
-    this->DefineProgram("effect_turf_program");
+    //this->DefineProgram("effect_turf_program");
 }
 
 

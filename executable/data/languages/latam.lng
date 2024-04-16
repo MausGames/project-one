@@ -1,0 +1,468 @@
+$LANGUAGE = Español (Latinoamérica)
+$FONT = keifont.ttf
+
+$WELCOME = Un juego de Martin Mauersics
+$PROMPT = PRESIONA UN BOTÓN
+
+$START_GAME = JUGAR
+$EXIT_GAME = SALIR DEL JUEGO
+
+$LEADERBOARDS = MARCADORES
+$REPLAYS = REPETICIÓN
+$EXTRAS = EXTRAS
+$SETTINGS = CONFIGURACIÓN
+
+$TO_STEAM = IR A STEAM
+$CREDITS = CRÉDITOS
+
+$SAVE = GUARDAR
+$DISCARD = DESCARTAR
+$BACK = VOLVER
+$RESUME = CONTINUAR
+$RESTART = REINICIAR
+$NEXT = SIGUIENTE
+$AGAIN = OTRA VEZ
+$START = COMENZAR
+$ENTER = ENTRAR
+$WATCH = MIRAR
+
+$UNLOCKED = DESBLOQUEADO
+$NEW = NUEVO
+$UNKNOWN = ???
+
+$PLAYER = JUGADOR
+$MISSION = Área
+$SEGMENT = Nivel
+
+$CONFIG_VIDEO = VIDEO
+$CONFIG_AUDIO = SONIDO
+$CONFIG_INPUT = ENTRADA
+$CONFIG_GAME = JUEGO
+
+$CONFIG_VIDEO_MONITOR = Monitor
+$CONFIG_VIDEO_RESOLUTION = Resolución
+$CONFIG_VIDEO_DISPLAYMODE = Modo de pantalla
+$CONFIG_VIDEO_ANTIALIASING = Suavizado espacial
+$CONFIG_VIDEO_TEXTUREFILTER = Filtro de texturas
+$CONFIG_VIDEO_RENDERQUALITY = Calidad de renderizado
+$CONFIG_VIDEO_SHADOWQUALITY = Calidad de las sombras
+$CONFIG_VIDEO_SHAKEEFFECTS = Efectos de vibración
+$CONFIG_VIDEO_FLASHEFFECTS = Efectos de destellos
+$CONFIG_VIDEO_HITSTOPEFFECTS = Efectos de detención al golpear
+$CONFIG_VIDEO_CHROMAEFFECTS = Aberración cromática
+$CONFIG_AUDIO_GLOBALVOLUME = Volumen general
+$CONFIG_AUDIO_MUSICVOLUME = Volumen de la música
+$CONFIG_AUDIO_EFFECTVOLUME = Volumen de los efectos
+$CONFIG_AUDIO_AMBIENTVOLUME = Volumen del ambiente
+$CONFIG_AUDIO_MENUVOLUME = Volumen del menú
+$CONFIG_AUDIO_QUALITY = Calidad del sonido
+$CONFIG_AUDIO_MODE = Modo de sonido
+$CONFIG_AUDIO_3DSOUND = Sonido 3D
+$CONFIG_INPUT_TYPE = Tipo de entrada
+$CONFIG_INPUT_RUMBLE = Vibración
+$CONFIG_INPUT_FIREMODE = Modo de disparo
+$CONFIG_INPUT_CONTROLMODE = Modo de control
+$CONFIG_INPUT_MOVEUP = Mover hacia arriba
+$CONFIG_INPUT_MOVELEFT = Mover a la izquierda
+$CONFIG_INPUT_MOVEDOWN = Mover hacia abajo
+$CONFIG_INPUT_MOVERIGHT = Mover a la derecha
+$CONFIG_INPUT_ACTION1 = Disparar
+$CONFIG_INPUT_ACTION2 = Girar a la izquierda
+$CONFIG_INPUT_ACTION3 = Girar a la derecha
+$CONFIG_INPUT_ACTION4 = Disparar hacia arriba
+$CONFIG_INPUT_ACTION5 = Disparar a la izquierda
+$CONFIG_INPUT_ACTION6 = Disparar hacia abajo
+$CONFIG_INPUT_ACTION7 = Disparar a la derecha
+$CONFIG_INPUT_ACTION8 = Pausa
+$CONFIG_GAME_LANGUAGE = Idioma
+$CONFIG_GAME_GAMEDIRECTION = Dirección del juego
+$CONFIG_GAME_MIRRORMODE = Modo espejo
+$CONFIG_GAME_HUDDIRECTION = Dirección del HUD
+$CONFIG_GAME_HUDTYPE = Disposición del HUD
+$CONFIG_GAME_COMBATTEXT = Texto flotante
+$CONFIG_GAME_BACKROTATION = Rotación del fondo
+$CONFIG_GAME_BACKSPEED = Velocidad del fondo
+$CONFIG_GAME_UPDATEFREQ = Frecuencia de actualización
+$CONFIG_GAME_VERSION = Versión
+
+$CONFIG_VIDEO_MONITOR_DESC = #
+$CONFIG_VIDEO_RESOLUTION_DESC = #
+$CONFIG_VIDEO_DISPLAYMODE_DESC = #
+$CONFIG_VIDEO_ANTIALIASING_DESC = #
+$CONFIG_VIDEO_TEXTUREFILTER_DESC = #
+$CONFIG_VIDEO_RENDERQUALITY_DESC = Calidad de las texturas y frecuencia del sombreador
+$CONFIG_VIDEO_SHADOWQUALITY_DESC = Tamaño del mapeo de sombras y suavidad de las sombras
+$CONFIG_VIDEO_SHAKEEFFECTS_DESC = Efectos: moverán el juego hacia arriba y hacia abajo
+$CONFIG_VIDEO_FLASHEFFECTS_DESC = Efectos: destellos rápidos de objetos o la pantalla
+$CONFIG_VIDEO_HITSTOPEFFECTS_DESC = Efectos: congelan el tiempo al recibir daño
+$CONFIG_VIDEO_CHROMAEFFECTS_DESC = Efectos: separan y difuminan los colores
+$CONFIG_AUDIO_GLOBALVOLUME_DESC = #
+$CONFIG_AUDIO_MUSICVOLUME_DESC = #
+$CONFIG_AUDIO_EFFECTVOLUME_DESC = #
+$CONFIG_AUDIO_AMBIENTVOLUME_DESC = #
+$CONFIG_AUDIO_MENUVOLUME_DESC = #
+$CONFIG_AUDIO_QUALITY_DESC = #
+$CONFIG_AUDIO_MODE_DESC = #
+$CONFIG_AUDIO_3DSOUND_DESC = Oirás el sonido en relación con su ubicación en la pantalla
+$CONFIG_INPUT_TYPE_DESC = #
+$CONFIG_INPUT_RUMBLE_DESC = #
+$CONFIG_INPUT_FIREMODE_DESC = #
+$CONFIG_INPUT_CONTROLMODE_DESC = #
+$CONFIG_INPUT_MOVEUP_DESC = #
+$CONFIG_INPUT_MOVELEFT_DESC = #
+$CONFIG_INPUT_MOVEDOWN_DESC = #
+$CONFIG_INPUT_MOVERIGHT_DESC = #
+$CONFIG_INPUT_ACTION1_DESC = #
+$CONFIG_INPUT_ACTION2_DESC = #
+$CONFIG_INPUT_ACTION3_DESC = #
+$CONFIG_INPUT_ACTION4_DESC = #
+$CONFIG_INPUT_ACTION5_DESC = #
+$CONFIG_INPUT_ACTION6_DESC = #
+$CONFIG_INPUT_ACTION7_DESC = #
+$CONFIG_INPUT_ACTION8_DESC = #
+$CONFIG_GAME_LANGUAGE_DESC = #
+$CONFIG_GAME_GAMEDIRECTION_DESC = Rota la orientación del juego sin cambiar los controles
+$CONFIG_GAME_MIRRORMODE_DESC = #
+$CONFIG_GAME_HUDDIRECTION_DESC = Rota el texto y los controles (para el modo Tate)
+$CONFIG_GAME_HUDTYPE_DESC = #
+$CONFIG_GAME_COMBATTEXT_DESC = #
+$CONFIG_GAME_BACKROTATION_DESC = #
+$CONFIG_GAME_BACKSPEED_DESC = #
+$CONFIG_GAME_UPDATEFREQ_DESC = Actualizaciones por segundo del juego
+$CONFIG_GAME_VERSION_DESC = #
+
+$GAME_TYPE = Tipo de juego
+$GAME_DIFFICULTY = Dificultad
+$GAME_GAMESPEED = Velocidad del juego
+$GAME_STAGE = Nivel
+$GAME_SHIELD = Escudo
+$GAME_WEAPON = Arma
+
+$GAME_TYPE_SOLO = Solitario
+$GAME_TYPE_COOP = Cooperativo
+$GAME_DIFFICULTY_EASY = Fácil
+$GAME_DIFFICULTY_NORMAL = Difícil
+
+$GAME_WEAPON_NOTHING = Nada
+$GAME_WEAPON_RAY = Láser
+$GAME_WEAPON_PULSE = Pulso
+
+$EXTRA_TROPHY = TROFEOS
+$EXTRA_STATS = ESTADÍSTICAS
+$EXTRA_OTHER = OTRO
+$EXTRA_PROGRESS = Progreso
+$EXTRA_PASSWORD = Contraseña
+$EXTRA_CREDITS = Créditos
+
+$FILTER_ALL = TODO
+$FILTER_COMPLETE = COMPLETO
+$FILTER_GLOBAL = GLOBAL
+
+$STAT_TIME_PLAYED = Tiempo de juego
+$STAT_SCORE_GAINED = Puntuación obtenida
+$STAT_MISSIONS_DONE = Áreas completadas
+$STAT_BOSSES_DONE = Jefes derrotados
+$STAT_ENEMIES_DONE = Enemigos derrotados
+$STAT_SEGMENTS_DONE = Niveles completados
+$STAT_DAMAGE_GIVEN = Daño infligido
+$STAT_DAMAGE_TAKEN = Daño recibido
+$STAT_CONTINUES_USED = Total de continuaciones
+$STAT_REPAIRS_USED = Jugadores reparados
+$STAT_MOVES_MADE = Movimientos realizados
+$STAT_TURNS_MADE = Giros realizados
+$STAT_BULLETS_SHOT = Balas disparadas
+$STAT_MEDALS_EARNED_BRONZE = Medallas obtenidas (C)
+$STAT_MEDALS_EARNED_SILVER = Medallas obtenidas (B)
+$STAT_MEDALS_EARNED_GOLD = Medallas obtenidas (A)
+$STAT_MEDALS_EARNED_PLATINUM = Medallas obtenidas (S)
+$STAT_MEDALS_EARNED_DARK = Medallas obtenidas (X)
+$STAT_MEDALS_EARNED = Medallas obtenidas (todas)
+$STAT_BADGES_EARNED = Insignias obtenidas
+$STAT_HELPER_HIT = Ayudantes dañados
+$STAT_SCORE_BEST = Mejor puntuación
+$STAT_SCORE_WORST = Peor puntuación
+$STAT_SCORE_TOTAL = Puntuación total
+$STAT_TIME_BEST_SHIFTED = Mejor tiempo
+$STAT_TIME_BEST_RAW = Mejor tiempo (puro)
+$STAT_TIME_WORST_SHIFTED = Peor tiempo
+$STAT_TIME_WORST_RAW = Peor tiempo (puro)
+$STAT_TIME_TOTAL = Tiempo total
+$STAT_MAX_COMBO = Mejor combinación
+$STAT_MAX_CHAIN = Mejor encadenamiento
+$STAT_COUNT_START = Veces comenzado
+$STAT_COUNT_END = Veces completado
+
+$VALUE_OFF = Apagado
+$VALUE_ON = Encendido
+$VALUE_LOW = Bajo
+$VALUE_HIGH = Alto
+$VALUE_AUTO = Automático
+$VALUE_NO = No
+$VALUE_YES = Sí
+$MONITOR_PRIMARY = Primario
+$MONITOR_SECONDARY = Secundario
+$RESOLUTION_DESKTOP = Escritorio
+$RESOLUTION_CUSTOM = Personalizada
+$DISPLAYMODE_WINDOW = Ventana
+$DISPLAYMODE_BORDERLESS = Sin bordes
+$DISPLAYMODE_FULLSCREEN = Pantalla completa
+$AUDIOMODE_MONO = Monoaural
+$AUDIOMODE_SPEAKERS = Parlantes
+$AUDIOMODE_HEADPHONES = Auriculares
+$FIREMODE_NORMAL = Normal
+$FIREMODE_INVERT = Invertir
+$FIREMODE_TOGGLE = Alternado
+$CONTROLMODE_ORIGINAL = Original
+$CONTROLMODE_TWINSTICK = A dos palancas
+$HUDDIRECTION_RIGHT = Hacia la derecha
+$HUDDIRECTION_UPSIDE = Invertido hacia abajo
+$HUDDIRECTION_LEFT = Hacia la izquierda
+$HUDTYPE_OUTSIDE = Afuera (lejos)
+$HUDTYPE_INSIDE = Adentro
+$HUDTYPE_BORDER = Afuera (cerca)
+$VERSION_LATEST = Última
+
+$INPUT_KEYBOARD = Teclado
+$INPUT_JOYSTICK = Control
+
+$INFORMATION_RESTART = El juego se reiniciará ahora.
+$QUESTION_SAVE = ¿Guardar cambios?
+$QUESTION_RESTART = ¿Reiniciar el juego?
+$QUESTION_EXIT_GAME = ¿Salir del juego?
+$QUESTION_READY = ¿Todo listo?
+$QUESTION_ERROR_SAVE = Fallo al guardar. ¿Volver a intentar?
+$MAPPING = Nueva tecla/botón
+
+$ERROR_SAVE_01 = Error desconocido
+$ERROR_SAVE_02 = Espacio en el disco
+$ERROR_SAVE_03 = Acceso denegado
+
+$DEFEAT_GAMEOVER = TERMINÓ EL JUEGO
+$DEFEAT_CONTINUE = ¿Continuar?
+
+$TEXT_IMMUNE = INMUNE
+$TEXT_HIT = GOLPE
+$TEXT_LUCKY = ¡GOLPE DE SUERTE!
+$TEXT_GIVEUP = ¡NO TE RINDAS!
+
+$GAME_HEADER_DEMO = ELIGE EL MODO DE JUEGO
+$GAME_HEADER_GAME = ELIGE EL NIVEL
+
+$GAME_ARCADE = ARCADE
+$GAME_ARCADE_COMPLETE = MODO CLÁSICO
+
+$GAME_SCORE = Mejor puntuación
+$GAME_TIME = Mejor tiempo
+
+$ENTER_NAME = INGRESA TU NOMBRE
+$ENTER_PASSWORD = INGRESA TU CONTRASEÑA
+
+$BONUS_TIME = Bonificación de tiempo
+$BONUS_MEDAL = Bonificación de medallas
+$BONUS_SURVIVE = Bonificación de evasión
+$SUMMARY_ARCADE = RESUMEN
+$SUMMARY_MISSION_TOTAL = Total del área
+$SUMMARY_SEGMENT_SCORE = Puntuación final
+$SUMMARY_SEGMENT_TIME = Tiempo final
+$SUMMARY_PERFECT = ¡PERFECTO!
+$SUMMARY_RECORD = ¡NUEVA PUNTUACIÓN MÁS ALTA!
+$FINISH_TOTAL = Puntuación final
+
+$THANK_YOU = ¡Gracias por jugar!
+$THANK_YOU_DEMO = ¡Gracias por jugar la demo!
+$THANK_YOU_SUPPORT = ¡Gracias a todos los que me#apoyaron en este tiempo!
+
+$ENDING_NORMAL = ¿Estás seguro de estar haciendo lo correcto?
+
+$CREDITS_MUSIC = Música
+$CREDITS_SOUNDS = Sonidos
+$CREDITS_TEXTURES = Texturas
+$CREDITS_MODELS = Modelos
+$CREDITS_FONTS = Fuente
+$CREDITS_LIBRARIES = Bibliotecas de programación
+
+$CREDITS_ROLE_DESIGNER = Diseño de juego
+$CREDITS_ROLE_PROGRAMMER = Programación
+$CREDITS_ROLE_TESTER = Revisión de calidad
+$CREDITS_ROLE_ADVISER = Asesoría
+$CREDITS_ROLE_LOCA = Localización
+$CREDITS_ROLE_THANKS = Agradecimientos especiales
+
+$BADGE_01_01_01_DESC = Destruye todas las barreras marcadas
+$BADGE_01_01_02_DESC = Elimina a un enemigo con daño reflejado
+$BADGE_01_02_01_DESC = Golpea todos los triángulos
+$BADGE_01_02_02_DESC = Toca el láser diferente
+$BADGE_01_03_01_DESC = Recoge todos los cuadrados
+$BADGE_01_03_02_DESC = Salta sobre un enemigo
+$BADGE_01_04_01_DESC = Quita todos los escombros
+$BADGE_01_04_02_DESC = Golpea al objetivo
+$BADGE_01_05_01_DESC = Atrapa los artículos que caen
+$BADGE_01_05_02_DESC = Encuentra a todos enemigos escurridizos
+
+$BADGE_02_01_01_DESC = Elimina suficientes balas
+$BADGE_02_01_02_DESC = Golpea todos los objetos ocultos
+$BADGE_02_02_01_DESC = Identifica y elimina a todos los#enemigos desprotegidos
+$BADGE_02_02_02_DESC = Activa algunas placas en orden
+$BADGE_02_03_01_DESC = Recoge todos los restos
+$BADGE_02_03_02_DESC = Ataca a un enemigo por la espalda
+$BADGE_02_04_01_DESC = Sigue girando
+$BADGE_02_04_02_DESC = Ataca enemigos desde la dirección alternativa
+$BADGE_02_05_01_DESC = Destruye todas las esferas inestables
+$BADGE_02_05_02_DESC = Atraviesa el enorme ataque
+
+$BADGE_03_01_01_DESC = Destruye todas las naves extrañas
+$BADGE_03_01_02_DESC = Muéstrale piedad al último enemigo
+$BADGE_03_02_01_DESC = Golpea al enemigo dorado
+$BADGE_03_02_02_DESC = Róbate todos los huevos
+$BADGE_03_03_01_DESC = Termínalo tú mismo
+$BADGE_03_03_02_DESC = Obtén suficientes artículos al final
+$BADGE_03_04_01_DESC = Sobrevive a la primera oleada
+$BADGE_03_04_02_DESC = Elimina a todos los enemigos humeantes
+$BADGE_03_05_01_DESC = Toca todas las placas marcadas
+$BADGE_03_05_02_DESC = No dejes que se escape el enemigo grande
+
+$BADGE_04_01_01_DESC = Destruye todos los enemigos deambulantes
+$BADGE_04_01_02_DESC = Gira en la dirección equivocada
+$BADGE_04_02_01_DESC = Siempre dispárale a la luz
+$BADGE_04_02_02_DESC = Escóndete en cada rincón
+$BADGE_04_03_01_DESC = Recolecta todos los objetos veloces
+$BADGE_04_03_02_DESC = Roza las balas enemigas
+$BADGE_04_04_01_DESC = Golpea a varios enemigos a la vez
+$BADGE_04_04_02_DESC = Vuela alrededor del ayudante
+$BADGE_04_05_01_DESC = Quédate con uno de los asteroides
+$BADGE_04_05_02_DESC = Evita un enorme impacto
+
+$BADGE_05_01_01_DESC = Reactiva todos los enemigos
+$BADGE_05_01_02_DESC = Recoge todas las monedas
+$BADGE_05_02_01_DESC = Destruye algunos enemigos primero
+$BADGE_05_02_02_DESC = Dispárales a todos los muros en orden
+$BADGE_05_03_01_DESC = Golpea a ese enemigo
+$BADGE_05_03_02_DESC = Visita todos los huecos
+$BADGE_05_04_01_DESC = Entra en cada orbe
+$BADGE_05_04_02_DESC = Ataca todos los objetivos que reptan detrás
+$BADGE_05_05_01_DESC = Atraviesa el desafío bailando
+$BADGE_05_05_02_DESC = Quita todos los bloques giratorios
+
+$BADGE_06_01_01_DESC = Recoge todos los copos móviles
+$BADGE_06_01_02_DESC = Intercepta a los enemigos saltarines
+$BADGE_06_02_01_DESC = Destruye a todos los enemigos debajo de la nieve
+$BADGE_06_02_02_DESC = Atáscate
+$BADGE_06_03_01_DESC = Abre todos los cofres del tesoro escondidos
+$BADGE_06_03_02_DESC = Encuentra al enemigo secreto
+$BADGE_06_04_01_DESC = Destruye el ovni
+$BADGE_06_04_02_DESC = Alcanza la parte superior a toda velocidad
+$BADGE_06_05_01_DESC = Ataca al enemigo misterioso
+$BADGE_06_05_02_DESC = Golpea a todos los objetivos adicionales
+
+$BADGE_07_01_01_DESC = Toca al enemigo invisible
+$BADGE_07_01_02_DESC = Destruye todos los objetos escondidos
+$BADGE_07_02_01_DESC = Vuela contra todos los diamantes
+$BADGE_07_02_02_DESC = Muévete en contra de la línea giratoria
+$BADGE_07_03_01_DESC = Ataca al enemigo con tu arma
+$BADGE_07_03_02_DESC = Recoge todos los orbes escondidos
+$BADGE_07_04_01_DESC = Teletranspórtate solo a muy corta distancia
+$BADGE_07_04_02_DESC = Salta tres líneas a la vez
+$BADGE_07_05_01_DESC = Golpea a todas las naves zombi
+$BADGE_07_05_02_DESC = Mantente al alcance del ayudante
+
+$BADGE_99_01_01_DESC = Golpea a todos los enemigos adicionales
+$BADGE_99_01_02_DESC = #
+$BADGE_99_02_01_DESC = Aprende a rotar tu nave
+$BADGE_99_02_02_DESC = #
+$BADGE_99_03_01_DESC = Recoge todas las partículas
+$BADGE_99_03_02_DESC = #
+$BADGE_99_04_01_DESC = Ataca al enemigo empalado
+$BADGE_99_04_02_DESC = #
+$BADGE_99_05_01_DESC = Hazte camino entre las balas
+$BADGE_99_05_02_DESC = #
+
+$ACHIEVEMENT_STAGE_01_01_DESC = Refleja una sola bala al menos 20 veces
+$ACHIEVEMENT_STAGE_01_02_DESC = Toca todos los láseres
+$ACHIEVEMENT_STAGE_01_03_DESC = No te muevas mientras los enemigos#estén en el aire
+$ACHIEVEMENT_STAGE_01_04_DESC = Toca al enemigo grande siete veces#mientras se mueve a tu alrededor
+$ACHIEVEMENT_STAGE_01_05_DESC = Solo dispara hacia la derecha#(rotación predeterminada)
+$ACHIEVEMENT_STAGE_01_06_DESC = Vuela a través de la puerta
+
+$ACHIEVEMENT_STAGE_02_01_DESC = Ten al menos 1500 balas activas#al mismo tiempo
+$ACHIEVEMENT_STAGE_02_02_DESC = Nunca tocas una placa dos veces#mientras todo gira a tu alrededor
+$ACHIEVEMENT_STAGE_02_03_DESC = Nunca dejes de moverte ni de disparar
+$ACHIEVEMENT_STAGE_02_04_DESC = No rotes más de 20 veces
+$ACHIEVEMENT_STAGE_02_05_DESC = Encuentra al ayudante y tócalo
+$ACHIEVEMENT_STAGE_02_06_DESC = Destruye al mismo jugador dos veces#con el mismo rayo
+
+$ACHIEVEMENT_STAGE_03_01_DESC = Sigue a la cabeza de la serpiente durante#no menos de diez segundos
+$ACHIEVEMENT_STAGE_03_02_DESC = Ataca a cada enemigo una vez cuando#sean el objetivo incorrecto
+$ACHIEVEMENT_STAGE_03_03_DESC = Baila durante no menos de 30 segundos#con el enemigo final sin que te toque
+$ACHIEVEMENT_STAGE_03_04_DESC = Nunca destruyas uno de#los enemigos pequeños
+$ACHIEVEMENT_STAGE_03_05_DESC = Solo muévete por la línea del medio hasta#que todo se encuentre en silencio
+$ACHIEVEMENT_STAGE_03_06_DESC = Deja que te golpee cada tanque#exactamente una vez
+
+$ACHIEVEMENT_STAGE_04_01_DESC = Nunca dispares hacia la izquierda#(rotación predeterminada)
+$ACHIEVEMENT_STAGE_04_02_DESC = Nunca rotes tu nave manualmente
+$ACHIEVEMENT_STAGE_04_03_DESC = Destruye a todos los enemigos#mientras estás ralentizado
+$ACHIEVEMENT_STAGE_04_04_DESC = No te golpees a ti mismo
+$ACHIEVEMENT_STAGE_04_05_DESC = Mantén con vida y activos a todos los#enemigos que disparan hasta el final
+$ACHIEVEMENT_STAGE_04_06_DESC = Destruye uno de los asteroides#más grandes sin recibir daño
+
+$ACHIEVEMENT_STAGE_05_01_DESC = Golpea a todos los enemigos,#al menos, una vez
+$ACHIEVEMENT_STAGE_05_02_DESC = No falles ningún disparo
+$ACHIEVEMENT_STAGE_05_03_DESC = Destruye 30 enemigos desde#dentro de las rocas
+$ACHIEVEMENT_STAGE_05_04_DESC = Mantente sobre un orbe que ya no exista
+$ACHIEVEMENT_STAGE_05_05_DESC = Nunca toques un bloque sólido
+$ACHIEVEMENT_STAGE_05_06_DESC = Derrota al jefe sin moverte tú mismo
+
+$ACHIEVEMENT_STAGE_06_01_DESC = Destruye a todos los enemigos mientras#te persigue un fantasma
+$ACHIEVEMENT_STAGE_06_02_DESC = Limpia todo antes de terminar el nivel
+$ACHIEVEMENT_STAGE_06_03_DESC = Crea la habitación más pequeña posible
+$ACHIEVEMENT_STAGE_06_04_DESC = Solo ataca siguiendo el movimiento#de la pantalla
+$ACHIEVEMENT_STAGE_06_05_DESC = Captura enemigos con solo un jugador#en el modo cooperativo
+$ACHIEVEMENT_STAGE_06_06_DESC = Toca todos los cubos de hielo nuevos
+
+$ACHIEVEMENT_STAGE_07_01_DESC = Destruye cinco enemigos mientras#no los ilumine la luz
+$ACHIEVEMENT_STAGE_07_02_DESC = Nunca dejes que desaparezcan los campos
+$ACHIEVEMENT_STAGE_07_03_DESC = Ataca solo cuando el escudo#se encuentre activo
+$ACHIEVEMENT_STAGE_07_04_DESC = Teletranspórtate a largas distancias
+$ACHIEVEMENT_STAGE_07_05_DESC = Destruye a todos los enemigos#en el orden contrario una vez
+$ACHIEVEMENT_STAGE_07_06_DESC = Recoge tu primer orbe sin#que rebote ninguna bala
+
+$ACHIEVEMENT_STAGE_99_01_DESC = Destruye a todos los enemigos sin#presionar ningún botón
+$ACHIEVEMENT_STAGE_99_02_DESC = Destruye solo un enemigo por turno
+$ACHIEVEMENT_STAGE_99_03_DESC = Combina cuatro enemigos
+$ACHIEVEMENT_STAGE_99_04_DESC = Solo inflige daño durante#los segundos impares
+$ACHIEVEMENT_STAGE_99_05_DESC = No inflijas ni recibas daño
+$ACHIEVEMENT_STAGE_99_06_DESC = Mantén vivo al enemigo adicional
+
+$UNLOCK_01_NAME = MODO ESPEJO
+$UNLOCK_01_DESC = Invierte el juego horizontalmente
+$UNLOCK_02_NAME = SUPERVELOCIDAD
+$UNLOCK_02_DESC = Aumenta la velocidad del juego un 200 %
+$UNLOCK_03_NAME = ESCUDO DE PODER
+$UNLOCK_03_DESC = Equipa un escudo más poderoso#(si lo deseas)
+$UNLOCK_04_NAME = CAÑÓN DE PULSO
+$UNLOCK_04_DESC = Arma poderosa, aunque lenta, con un ataque de carga
+
+$BOSS_TITLE_0101 = El soñador infinito
+$BOSS_TITLE_0102 = La puerta de la creación
+$BOSS_TITLE_0103 = El último defensor
+$BOSS_TITLE_0201 = #
+$BOSS_TITLE_0202 = #
+$BOSS_TITLE_0203 = El dragón destrozado
+$BOSS_TITLE_0301 = #
+$BOSS_TITLE_0302 = El intocable
+$BOSS_TITLE_0303 = #
+$BOSS_TITLE_0401 = #
+$BOSS_TITLE_0402 = #
+$BOSS_TITLE_0403 = El centro del universo
+$BOSS_TITLE_0501 = #
+$BOSS_TITLE_0502 = #
+$BOSS_TITLE_0503 = La llama eterna
+$BOSS_TITLE_0601 = #
+$BOSS_TITLE_0602 = #
+$BOSS_TITLE_0603 = La fortaleza invencible
+$BOSS_TITLE_0701 = #
+$BOSS_TITLE_0702 = El devorador de mundos
+$BOSS_TITLE_0703 = #
+$BOSS_TITLE_0801 = El enemigo final
+$BOSS_TITLE_0802 = #
+$BOSS_TITLE_9901 = La espada del origen
+$BOSS_TITLE_HIDDEN = Tu mejor amigo

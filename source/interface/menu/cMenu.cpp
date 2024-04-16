@@ -12,6 +12,8 @@ coreVector3 cMenu::m_vHighlightColor = COLOR_MENU_WHITE;
 coreVector3 cMenu::m_vButtonColor    = COLOR_MENU_WHITE;
 coreButton* cMenu::m_apCurButton[2]  = {};
 coreButton* cMenu::m_apNewButton[2]  = {};
+coreMap<const void*, coreButton*> cMenu::m_apCurButton2 = {};
+coreMap<const void*, coreButton*> cMenu::m_apNewButton2 = {};
 cGuiButton* cMenu::m_pCurTab         = NULL;
 cGuiButton* cMenu::m_pNewTab         = NULL;
 cGuiObject* cMenu::m_pCurLine        = NULL;
@@ -114,6 +116,9 @@ cMenu::cMenu()noexcept
     m_pNewTab        = NULL;
     m_pCurLine       = NULL;
     m_pNewLine       = NULL;
+    
+    m_apCurButton2.clear();
+    m_apNewButton2.clear();
     
     s_aButtonData.clear();
 }
@@ -307,7 +312,7 @@ void cMenu::Move()
                         m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
 
                         // 
-                        m_GameMenu.ChangeSurface(/*(g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_MISSION :*/ SURFACE_GAME_SEGMENT, 0.0f);
+                        m_GameMenu.ChangeSurface(SURFACE_GAME_MAIN, 0.0f);
                         m_GameMenu.LoadValues();
 
                         // 
@@ -370,7 +375,7 @@ void cMenu::Move()
             if(m_MainMenu.GetStatus() == 1)
             {
                 // 
-                m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_FIRST : SURFACE_GAME_SEGMENT), 0.0f);
+                m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_FIRST : SURFACE_GAME_MAIN), 0.0f);
                 m_GameMenu.LoadValues();
                 m_GameMenu.ResetNavigator();
 
@@ -396,7 +401,8 @@ void cMenu::Move()
             else if(m_MainMenu.GetStatus() == 4)
             {
                 // 
-                m_ExtraMenu.ChangeSurface(SURFACE_EXTRA_STATS, 0.0f);
+                m_ExtraMenu.ChangeSurface(SURFACE_EXTRA_TROPHY, 0.0f);
+                m_ExtraMenu.LoadTrophies();
                 m_ExtraMenu.LoadMissions();
                 m_ExtraMenu.ResetNavigator();
 
@@ -783,7 +789,7 @@ void cMenu::Move()
     m_Tooltip   .Move();
     m_PauseLayer.Move();
     
-    if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)))
+    if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)) && (!STATIC_ISVALID(g_pGame) || (g_pGame->GetCurMission()->GetID() != cAterMission::ID)))
     {
         m_fVolume.UpdateMax(-0.5f, 0.0f);
     }
@@ -805,17 +811,32 @@ void cMenu::Move()
     }
     
     
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_apCurButton); ++i)
+    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_apCurButton); ++i)
+    //{
+    //    if(m_apCurButton[i] != m_apNewButton[i])
+    //    {
+    //        m_apCurButton[i] = m_apNewButton[i];
+    //        if(m_apCurButton[i] && (!m_apCurButton[i]->GetCaption() || m_apCurButton[i]->GetCaption()->GetAlpha()) && m_apCurButton[i]->GetAlpha())   // for summary buttons
+    //        {
+    //            if(TIME) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
+    //        }
+    //    }
+    //    m_apNewButton[i] = NULL;
+    //}
+    FOR_EACH(it, m_apNewButton2)
     {
-        if(m_apCurButton[i] != m_apNewButton[i])
+        const void* pKey   = (*m_apNewButton2.get_key(it));
+        coreButton* pValue = (*it);
+        
+        if(m_apCurButton2[pKey] != pValue)
         {
-            m_apCurButton[i] = m_apNewButton[i];
-            if(m_apCurButton[i])
+            m_apCurButton2[pKey] = pValue;
+            if(pValue && (!pValue->GetCaption() || pValue->GetCaption()->GetAlpha()) && pValue->GetAlpha())   // for summary buttons
             {
                 if(TIME) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
             }
         }
-        m_apNewButton[i] = NULL;
+        m_apNewButton2[pKey] = NULL;
     }
     
     if(m_pCurTab != m_pNewTab)
@@ -957,7 +978,19 @@ const coreMap<coreString, coreString>& cMenu::GetLanguageList()
         coreLanguage::GetAvailableLanguages(&asOutput);
 
         // 
-        if(asOutput.empty()) asOutput.emplace("MISSING", "");
+        if(asOutput.empty()) asOutput.emplace("NO LANGUAGE FOUND", "");
+
+        // 
+        asOutput.sort_asc();
+
+        // 
+        const coreChar* pcKey = "English";
+        if(asOutput.count(pcKey))
+        {
+            coreString sPath = std::move(asOutput.at(pcKey));
+            asOutput.erase(pcKey);
+            asOutput.emplace(asOutput.begin(), pcKey, std::move(sPath));
+        }
 
 #if defined(_P1_DEBUG_RANDOM_)
 
@@ -1035,7 +1068,7 @@ const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const co
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow, const coreBool bSound)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow, const coreBool bSound)
 {
     ASSERT(pButton)
 
@@ -1084,8 +1117,9 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, co
     
     if(bFocused)
     {
-        if(m_apNewButton[0]) m_apNewButton[1] = m_apNewButton[0];
-        m_apNewButton[0] = pButton;
+        //if(m_apNewButton[0]) m_apNewButton[1] = m_apNewButton[0];
+        //m_apNewButton[0] = pButton;
+        m_apNewButton2[pMenu] = pButton;
     }
     
     if(pButton->IsClicked())
@@ -1094,10 +1128,10 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, co
     }
 }
 
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreBool bGrow)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreBool bGrow)
 {
     // 
-    cMenu::UpdateButton(pButton, bFocused, m_vButtonColor, bGrow);
+    cMenu::UpdateButton(pButton, pMenu, bFocused, m_vButtonColor, bGrow);
 }
 
 
@@ -1204,23 +1238,28 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSo
 
 // ****************************************************************
 // 
-void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const coreVector3 vFocusColor)
+void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const coreBool bChangeColor, const coreVector3 vFocusColor, const coreBool bSound)
 {
     if(!TIME) return;   // for transitions
     if(!pLine->GetAlpha()) return;
 
     if(bInteract) pLine->Interact();
-    pLine->SetColor3(pLine->IsFocused() ? vFocusColor : coreVector3(1.0f,1.0f,1.0f));
+    if(bChangeColor) pLine->SetColor3(pLine->IsFocused() ? vFocusColor : coreVector3(1.0f,1.0f,1.0f));
     
-    if(pLine->IsFocused())
+    if(pLine->IsFocused() && bSound)
     {
         m_pNewLine = pLine;
     }
 }
 
+void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const coreBool bChangeColor)
+{
+    cMenu::UpdateLine(pLine, bInteract, bChangeColor, m_vButtonColor);
+}
+
 void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract)
 {
-    cMenu::UpdateLine(pLine, bInteract, m_vButtonColor);
+    cMenu::UpdateLine(pLine, bInteract, true, m_vButtonColor);
 }
 
 
@@ -1363,6 +1402,12 @@ void cMenu::__EndGame()
     {
         g_pReplay->EndPlayback();
         g_pReplay->Clear();
+    }
+
+    // 
+    if(!g_pSave->GetHeader().oProgress.bFirstPlay)
+    {
+        ADD_BIT(g_pSave->EditProgress()->iState, STATE_AFTER_FIRST)
     }
 
     // 

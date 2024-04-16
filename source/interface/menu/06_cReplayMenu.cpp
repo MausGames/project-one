@@ -191,8 +191,8 @@ void cReplayMenu::Move()
             }
 
             // 
-            cMenu::UpdateButton(&m_StartButton,  m_StartButton .IsFocused());
-            cMenu::UpdateButton(&m_DeleteButton, m_DeleteButton.IsFocused());
+            cMenu::UpdateButton(&m_StartButton,  &m_Navigator, m_StartButton .IsFocused());
+            cMenu::UpdateButton(&m_DeleteButton, &m_Navigator, m_DeleteButton.IsFocused());
         }
         break;
 
@@ -205,7 +205,7 @@ void cReplayMenu::Move()
     cMenu::UpdateTab(&m_DefaultTab, true, true);
 
     // 
-    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
+    cMenu::UpdateButton(&m_BackButton, &m_Navigator, m_BackButton.IsFocused());
 
     
     

@@ -12,8 +12,9 @@
 // ****************************************************************
 // constructor
 cNewIndicator::cNewIndicator()noexcept
-: m_fFade  (0.0f)
-, m_iIndex (0xFFu)
+: m_fFade   (0.0f)
+, m_bLocked (false)
+, m_iIndex  (0xFFu)
 {
     // 
     this->DefineTexture(0u, "effect_headlight_point.png");
@@ -36,14 +37,14 @@ void cNewIndicator::Render()
     if(this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         // 
-        const coreFloat fAlpha = this->GetAlpha();
+        const coreFloat fAlpha = this->GetAlpha() * BLENDH3(m_fFade);
 
         // 
         this->SetAlpha(fAlpha * 0.3f);
         this->cGuiObject::Render();
 
         // 
-        m_Text.SetAlpha(fAlpha * m_fFade);
+        m_Text.SetAlpha(fAlpha);
         m_Text.Render();
     }
 }
@@ -60,7 +61,7 @@ void cNewIndicator::Move()
     }
     else if(!this->GetAlpha() || (m_fFade < 1.0f))
     {
-        m_fFade.UpdateMax(-3.0f, 0.0f, 0u);   // # faster in transition
+        m_fFade.UpdateMax(-2.0f, 0.0f, 0u);   // # faster in transition
     }
 
     // 
@@ -88,5 +89,22 @@ void cNewIndicator::Move()
 // 
 void cNewIndicator::Resolve()
 {
-    REMOVE_BIT_EX(g_pSave->EditProgress()->aiNew, m_iIndex)
+    if(!m_bLocked) REMOVE_BIT_EX(g_pSave->EditProgress()->aiNew, m_iIndex)
+}
+
+
+// ****************************************************************
+// 
+void cNewIndicator::Acquire()
+{
+    m_fFade   = HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiNew, m_iIndex) ? 1.0f : 0.0f;
+    m_bLocked = true;
+}
+
+
+// ****************************************************************
+// 
+void cNewIndicator::Release()
+{
+    m_bLocked = false;
 }

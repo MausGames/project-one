@@ -87,6 +87,15 @@ cBackground::~cBackground()
 
 
 // ****************************************************************
+// 
+void cBackground::Exit()
+{
+    // 
+    this->__Reset(CORE_RESOURCE_RESET_EXIT);
+}
+
+
+// ****************************************************************
 // render the background
 void cBackground::Render()
 {

@@ -218,7 +218,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_TotalName.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_TotalName.SetPosition    (coreVector2(0.0f,-0.217f));
     m_TotalName.SetColor3      (COLOR_MENU_WHITE);
-    m_TotalName.SetTextLanguage("SUMMARY_TOTAL");
+    m_TotalName.SetTextLanguage("SUMMARY_MISSION_TOTAL");
 
     m_TotalValue.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.05f));
@@ -422,7 +422,7 @@ void cSummaryMenu::Render()
     if(this->GetCurSurface() == SURFACE_SUMMARY_ARCADE)
     {
         // 
-        const coreVector2 vCorner = coreVector2(0.5f,0.5f) * (g_vGameResolution / Core::Graphics->GetViewResolution().xy());
+        const coreVector2 vCorner = coreVector2(0.5f,0.5f) * (g_vGameResolution * Core::Graphics->GetViewResolution().zw());
         Core::Graphics->StartScissorTest(-vCorner, vCorner);
         {
             // 
@@ -785,7 +785,7 @@ void cSummaryMenu::Move()
             constexpr coreFloat fSpinFrom = (2.5f + 0.8f * I_TO_F(MENU_SUMMARY_ENTRIES_SEGMENT));
             constexpr coreFloat fSpinTo   = fSpinFrom + 1.5f;
             
-            const coreBool bAnyButton = Core::Input->GetAnyButton(CORE_INPUT_PRESS);
+            const coreBool bAnyButton = Core::Input->GetAnyButton(CORE_INPUT_PRESS) || m_Navigator.GetCurObject();
             if(bAnyButton && (m_fIntroTimer < fSpinTo) && m_eState < SUMMARY_SKIPPED) m_eState = SUMMARY_SKIPPED;
 
             // 
@@ -799,9 +799,12 @@ void cSummaryMenu::Move()
                 else if(m_fIntroTimer >= fSpinTo)         m_eState = SUMMARY_OUTRO;
                 else if(m_fIntroTimer <  fSpinTo)         m_eState = SUMMARY_SKIPPED;   // skip blend-in
                 
-                //if((m_iSelection == 3u) && (eOld != SUMMARY_OUTRO) && (m_eState == SUMMARY_OUTRO)) 
+                //if((eOld != SUMMARY_OUTRO) && (m_eState == SUMMARY_OUTRO)) 
                 //    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
             }
+
+            // 
+            if(m_fIntroTimer >= 1.0f) m_Navigator.SetActive(true);
 
             // 
             if(m_eState == SUMMARY_OUTRO) m_fOutroTimer.Update(1.0f);
@@ -943,9 +946,9 @@ void cSummaryMenu::Move()
             }
 
             // 
-            cMenu::UpdateButton(&m_NextButton,  m_NextButton .IsFocused());   // after SetAlpha
-            cMenu::UpdateButton(&m_AgainButton, m_AgainButton.IsFocused());
-            cMenu::UpdateButton(&m_ExitButton,  m_ExitButton .IsFocused());
+            cMenu::UpdateButton(&m_NextButton,  &m_Navigator, m_NextButton .IsFocused());   // after SetAlpha
+            cMenu::UpdateButton(&m_AgainButton, &m_Navigator, m_AgainButton.IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,  &m_Navigator, m_ExitButton .IsFocused());
             
             const coreFloat fRotation = coreFloat(Core::System->GetTotalTime());
 
@@ -1027,12 +1030,22 @@ void cSummaryMenu::Move()
     case SURFACE_SUMMARY_ENDING_NORMAL:
         {
             // 
+            const coreFloat fOldTime = m_fIntroTimer;
+
+            // 
             m_fIntroTimer.Update(1.0f);
 
             // 
-            g_pPostProcessing->SetValueAll(1.0f - STEPH3(3.0f, 5.0f, m_fIntroTimer));
+            const coreFloat fBlend = 1.0f - STEPH3(7.0f, 9.0f, m_fIntroTimer);
+            g_pPostProcessing->SetValueAll   (fBlend);
+            g_pPostProcessing->SetSoundVolume(fBlend);
+            
+            if(InBetween(3.0f, fOldTime, m_fIntroTimer))
+            {
+                g_pGame->GetInterface()->ShowStory(Core::Language->GetString("ENDING_NORMAL"));
+            }
 
-            if(m_fIntroTimer >= 5.0f)
+            if(m_fIntroTimer >= 13.0f)
             {
                 // 
                 m_iStatus = 2;
@@ -1045,6 +1058,7 @@ void cSummaryMenu::Move()
 
                 // 
                 g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+                g_pPostProcessing->SetSoundVolume(1.0f);
 
                 // 
                 cMenu::ClearScreen();
@@ -1110,9 +1124,11 @@ void cSummaryMenu::ShowArcade()
         g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW j)
         {
             // 
-            iScoreFull     += pPlayer->GetScoreTable()->GetScoreMission(i);
-            iContinuesUsed += pPlayer->GetDataTable ()->GetCounterTotal().iContinuesUsed;
+            iScoreFull += pPlayer->GetScoreTable()->GetScoreMission(i);
         });
+
+        // 
+        iContinuesUsed += g_pGame->GetPlayer(0u)->GetDataTable()->GetCounterTotal().iContinuesUsed;
 
         // 
         const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftMission(i);
@@ -1227,7 +1243,10 @@ void cSummaryMenu::ShowArcade()
 
     if(bNearComplete)
     {
-        if(!iContinuesUsed)
+        const coreUint8* piShield = g_pGame->GetOptions().aiShield;
+
+        // 
+        if(!iContinuesUsed && std::all_of(piShield, piShield + g_pGame->GetNumPlayers(), [](const coreUint8 A) {return !A;}))
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiTrophy, TROPHY_ONECOLORCLEAR)
         }
@@ -1380,7 +1399,7 @@ void cSummaryMenu::ShowSegment()
         const auto& oCounter = pPlayer->GetDataTable()->GetCounterSegment(iMissionIndex, iSegmentIndex);
 
         const coreUint32 iScore     = pPlayer->GetScoreTable()->GetScoreSegment    (iMissionIndex, iSegmentIndex);
-        const coreInt32  iShift     = coreInt32(oCounter.iShiftBadAdded) - coreInt32(oCounter.iShiftGoodAdded);
+        const coreInt32  iShift     = coreInt32(oCounter.iShiftBadAdded);   // # only bad
         //const coreUint32 iMaxSeries = pPlayer->GetScoreTable()->GetMaxSeriesSegment(iMissionIndex, iSegmentIndex);
 
         // 
@@ -1447,6 +1466,10 @@ void cSummaryMenu::ShowSegment()
     // 
     const coreBool bNoNext = (iMissionIndex >= MISSION_ATER) && bBoss;
     m_NextButton.SetOverride(bNoNext ? -1 : 0);
+
+    // 
+    m_Navigator.ResetFirst();
+    m_Navigator.SetActive(false);
 
     // 
     this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_SEGMENT_COOP : SURFACE_SUMMARY_SEGMENT_SOLO, 0.0f);

@@ -35,9 +35,12 @@ cBridgeMenu::cBridgeMenu()noexcept
     m_UnlockName.Construct  (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
     m_UnlockName.SetPosition(coreVector2(0.0f,-0.2f));
 
-    m_UnlockDesc.Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-    m_UnlockDesc.SetPosition(coreVector2(0.0f,-0.27f));
-    m_UnlockDesc.SetColor3  (COLOR_MENU_INSIDE);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aUnlockDesc); ++i)
+    {
+        m_aUnlockDesc[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+        m_aUnlockDesc[i].SetPosition(coreVector2(0.0f, -0.27f - 0.06f * I_TO_F(i)));
+        m_aUnlockDesc[i].SetColor3  (COLOR_MENU_INSIDE);
+    }
 
     m_UnlockIcon.DefineTexture(0u, "menu_unlocks.png");
     m_UnlockIcon.DefineProgram("menu_grey_program");
@@ -53,7 +56,8 @@ cBridgeMenu::cBridgeMenu()noexcept
 
     this->BindObject(SURFACE_BRIDGE_UNLOCK, &m_UnlockHeader);
     this->BindObject(SURFACE_BRIDGE_UNLOCK, &m_UnlockName);
-    this->BindObject(SURFACE_BRIDGE_UNLOCK, &m_UnlockDesc);
+    this->BindObject(SURFACE_BRIDGE_UNLOCK, &m_aUnlockDesc[0]);
+    this->BindObject(SURFACE_BRIDGE_UNLOCK, &m_aUnlockDesc[1]);
     this->BindObject(SURFACE_BRIDGE_UNLOCK, &m_UnlockBack);
     this->BindObject(SURFACE_BRIDGE_UNLOCK, &m_UnlockIcon);
 }
@@ -106,7 +110,9 @@ void cBridgeMenu::Move()
                 if(m_bFade)
                 {
                     // 
-                    g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
+                    const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                    g_pPostProcessing->SetValueAll   (fBlend);
+                    g_pPostProcessing->SetSoundVolume(fBlend);
 
                     if(g_pMenu->IsPaused())
                     {
@@ -118,28 +124,21 @@ void cBridgeMenu::Move()
 
                 if(m_fReturnTimer >= (m_bFade ? 1.5f : 0.5f))
                 {
-                    if(this->HasUnlocks())
+                    // 
+                    m_iStatus = 2;
+
+                    // 
+                    m_bReturnState = false;
+
+                    if(m_bFade)
                     {
                         // 
-                        this->ShowUnlocks();
-                    }
-                    else
-                    {
-                        // 
-                        m_iStatus = 2;
+                        g_pEnvironment->ChangeBackground(cNoBackground::ID,           ENVIRONMENT_MIX_FADE,    0.0f);
+                        g_pEnvironment->ChangeBackground(g_pEnvironment->GetLastID(), ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
+                        g_pPostProcessing->SetSoundVolume(1.0f);
 
                         // 
-                        m_bReturnState = false;
-
-                        if(m_bFade)
-                        {
-                            // 
-                            g_pEnvironment->ChangeBackground(cNoBackground::ID,           ENVIRONMENT_MIX_FADE,    0.0f);
-                            g_pEnvironment->ChangeBackground(g_pEnvironment->GetLastID(), ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
-
-                            // 
-                            cMenu::ClearScreen();
-                        }
+                        cMenu::ClearScreen();
                     }
                 }
             }
@@ -194,6 +193,8 @@ void cBridgeMenu::Move()
 
                 if(m_fUnlockTime >= 4.0f)
                 {
+                    m_iUnlockState = 2u;
+
                     // 
                     this->ApplyUnlocks();
 
@@ -224,11 +225,12 @@ void cBridgeMenu::Move()
             m_UnlockIcon.SetPosition(coreVector2(0.0f, fHeight));
             m_UnlockBack.SetPosition(coreVector2(0.0f, fHeight));
 
-            m_UnlockHeader.SetAlpha(m_UnlockHeader.GetAlpha() * fAlpha);
-            m_UnlockName  .SetAlpha(m_UnlockName  .GetAlpha() * fAlpha);
-            m_UnlockDesc  .SetAlpha(m_UnlockDesc  .GetAlpha() * fAlpha);
-            m_UnlockIcon  .SetAlpha(m_UnlockIcon  .GetAlpha() * fAlpha);
-            m_UnlockBack  .SetAlpha(m_UnlockIcon  .GetAlpha() * fAlpha);
+            m_UnlockHeader  .SetAlpha(m_UnlockHeader  .GetAlpha() * fAlpha);
+            m_UnlockName    .SetAlpha(m_UnlockName    .GetAlpha() * fAlpha);
+            m_aUnlockDesc[0].SetAlpha(m_aUnlockDesc[0].GetAlpha() * fAlpha);
+            m_aUnlockDesc[1].SetAlpha(m_aUnlockDesc[1].GetAlpha() * fAlpha);
+            m_UnlockIcon    .SetAlpha(m_UnlockIcon    .GetAlpha() * fAlpha);
+            m_UnlockBack    .SetAlpha(m_UnlockIcon    .GetAlpha() * fAlpha);
         }
         break;
 
@@ -240,7 +242,9 @@ void cBridgeMenu::Move()
             if(m_bReturnState)
             {
                 // 
-                g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
+                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                g_pPostProcessing->SetValueAll   (fBlend);
+                g_pPostProcessing->SetSoundVolume(fBlend);
 
                 if(m_fReturnTimer >= 1.5f)
                 {
@@ -252,6 +256,7 @@ void cBridgeMenu::Move()
 
                     // 
                     g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+                    g_pPostProcessing->SetSoundVolume(1.0f);
 
                     // 
                     cMenu::ClearScreen();
@@ -268,7 +273,9 @@ void cBridgeMenu::Move()
             if(m_bReturnState)
             {
                 // 
-                g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
+                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                g_pPostProcessing->SetValueAll   (fBlend);
+                g_pPostProcessing->SetSoundVolume(fBlend);
 
                 if(m_fReturnTimer >= 1.0f)
                 {
@@ -280,6 +287,7 @@ void cBridgeMenu::Move()
 
                     // 
                     g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+                    g_pPostProcessing->SetSoundVolume(1.0f);
 
                     // 
                     cMenu::ClearScreen();
@@ -296,7 +304,9 @@ void cBridgeMenu::Move()
             if(m_bReturnState)
             {
                 // 
-                g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
+                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                g_pPostProcessing->SetValueAll   (fBlend);
+                g_pPostProcessing->SetSoundVolume(fBlend);
 
                 if(g_pMenu->IsPaused())   // TODO 1: mit m_bPaused ersetzen ?
                 {
@@ -315,6 +325,7 @@ void cBridgeMenu::Move()
 
                     // 
                     g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+                    g_pPostProcessing->SetSoundVolume(1.0f);
 
                     // 
                     cMenu::ClearScreen();
@@ -442,7 +453,22 @@ void cBridgeMenu::ShowUnlocks(const coreFloat fTimeOffset)
 
     // 
     m_UnlockName.SetTextLanguage(PRINT("UNLOCK_%02zu_NAME", m_iUnlockIndex + 1u));
-    m_UnlockDesc.SetTextLanguage(PRINT("UNLOCK_%02zu_DESC", m_iUnlockIndex + 1u));
+
+    // 
+    const coreChar* pcString = Core::Language->GetString(PRINT("UNLOCK_%02zu_DESC", m_iUnlockIndex + 1u));
+    const coreChar* pcBreak  = std::strchr(pcString, '#');
+
+    // 
+    if(pcBreak)
+    {
+        m_aUnlockDesc[0].SetText(pcString, pcBreak - pcString);
+        m_aUnlockDesc[1].SetText(pcBreak + 1u);
+    }
+    else
+    {
+        m_aUnlockDesc[0].SetText(pcString);
+        m_aUnlockDesc[1].SetText("");
+    }
 
     // 
     const coreVector2 vStep      = coreVector2((1.0f/21.0f), (1.0f/21.0f));
@@ -466,6 +492,8 @@ void cBridgeMenu::ShowUnlocks(const coreFloat fTimeOffset)
 // 
 coreBool cBridgeMenu::HasUnlocks()
 {
+    if(g_bDemoVersion) return false;
+
     const auto nApplyUnlockFunc = [&](const coreUintW iIndex)
     {
         if(HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiUnlock, iIndex))
@@ -479,8 +507,9 @@ coreBool cBridgeMenu::HasUnlocks()
         }
     };
 
-         if(nApplyUnlockFunc(UNLOCK_MIRRORMORE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];})) return true;
-    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];})) return true;
+         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))             return true;
+    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))             return true;
+    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD) && HAS_BIT(g_pSave->GetHeader().oProgress.iState, STATE_AFTER_FIRST)) return true;
 
     return false;
 }
@@ -496,7 +525,7 @@ void cBridgeMenu::ApplyUnlocks()
     // 
     switch(m_iUnlockIndex)
     {
-    case UNLOCK_MIRRORMORE:
+    case UNLOCK_MIRRORMODE:
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_CONFIG)
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_CONFIG_GAME)
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_CONFIG_MIRRORMODE)
@@ -504,6 +533,10 @@ void cBridgeMenu::ApplyUnlocks()
 
     case UNLOCK_GAMESPEEDUP:
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_GAMESPEED)
+        break;
+
+    case UNLOCK_POWERSHIELD:
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_SHIELD)
         break;
 
     default:

@@ -95,7 +95,7 @@ cDharukBoss::cDharukBoss()noexcept
 
             // load object resources
             coreObject3D* pBoomerang = &m_aBoomerangRaw[i];
-            pBoomerang->DefineModel  ("object_boss_dharuk_boomerang.md3");
+            pBoomerang->DefineModel  ("ship_boss_dharuk_boomerang.md3");
             pBoomerang->DefineTexture(0u, "effect_energy.png");
             pBoomerang->DefineProgram("effect_energy_invert_program");
 
@@ -225,7 +225,7 @@ void cDharukBoss::__MoveOwn()
             const auto nEffectFunc = [](const coreVector2 vPosition, const coreVector2 vDirection)
             {
                 g_pSpecialEffects->CreateBlowColor(coreVector3(vPosition, 0.0f), coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
-                g_pSpecialEffects->PlaySound(coreVector3(vPosition, 0.0f), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(coreVector3(vPosition, 0.0f), 1.0f, 1.0f, SOUND_EFFECT_FLY);
             };
 
             constexpr coreVector2 vFrom1 = coreVector2(-1.5f, 0.7f);
@@ -330,7 +330,7 @@ void cDharukBoss::__MoveOwn()
 
             if(PHASE_TIME_POINT(0.5f))
             {
-                g_pSpecialEffects->PlaySound(coreVector3(0.0f,0.0f,0.0f), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(coreVector3(0.0f,0.0f,0.0f), 1.0f, 1.0f, SOUND_EFFECT_FLY);
             }
 
             if(PHASE_FINISHED)
@@ -368,7 +368,7 @@ void cDharukBoss::__MoveOwn()
                 m_fDuplicateValue = 5.0f;
 
                 const coreVector2 vSound = MapStepRotated90(coreVector2(fSide, 0.0f), m_aiCounter[TELEPORT_COUNT] % 4);
-                g_pSpecialEffects->PlaySound(coreVector3(vSound, 0.0f), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(coreVector3(vSound, 0.0f), 1.0f, 1.0f, SOUND_EFFECT_FLY);
             }
 
             this->DefaultMoveLerp  (coreVector2(fSide, DHARUK_OUTSIDE), coreVector2(fSide, -DHARUK_OUTSIDE), fTime);
@@ -495,7 +495,7 @@ void cDharukBoss::__MoveOwn()
                 this->__DisableBoomerang(i, true);
                 m_Summon.SetSize(m_Summon.GetSize() + coreVector3(1.3f,1.3f,1.3f) * (g_pGame->IsEasy() ? 3.0f : 1.0f));
 
-                g_pSpecialEffects->PlaySound(m_Summon.GetPosition(), 0.7f, 1.5f, SOUND_ENEMY_EXPLOSION_10);
+                g_pSpecialEffects->PlaySound(m_Summon.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
             }
         }
 

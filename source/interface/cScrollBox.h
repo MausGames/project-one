@@ -34,6 +34,8 @@ private:
     coreBool  m_bDrag;        // 
     coreFloat m_fDragValue;   // 
 
+    coreFlow m_fSpeed;        // 
+
     coreTimer m_Automatic;    // 
 
 

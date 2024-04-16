@@ -35,9 +35,20 @@ void cAterMission::__SetupOwn()
 
         g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
         g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
-        g_pEnvironment->SetTargetSpeedNow    (4.0f);
+        g_pEnvironment->SetTargetSpeedNow    (1.2f);
 
         g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        cDarkBackground* pBackground = d_cast<cDarkBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->Appear();
 
         STAGE_FINISH_NOW
     });
@@ -80,7 +91,7 @@ void cAterMission::__SetupOwn()
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
                 pEnemy->Configure(50 * 50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
-                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
 
@@ -94,8 +105,8 @@ void cAterMission::__SetupOwn()
             });
         });
 
-        if(g_pGame->IsEasy()) STAGE_BOSS(m_ProjectOne, {300.0f, 450.0f,  600.0,  750.0f, 1500.0f})
-                         else STAGE_BOSS(m_ProjectOne, {600.0f, 900.0f, 1200.0, 1500.0f, 3000.0f})
+        if(g_pGame->IsEasy()) STAGE_BOSS(m_ProjectOne, {300.0f, 450.0f, 600.0,  750.0f, 1500.0f})
+                         else STAGE_BOSS(m_ProjectOne, {450.0f, 675.0f, 900.0, 1125.0f, 2250.0f})
     },
     STAGE_PRE()
     {
@@ -143,11 +154,13 @@ void cAterMission::__SetupOwn()
                 if(m_iCredits < 1u)
                 {
                     g_pGame->StartOutro(GAME_OUTRO_ENDING_NORMAL);
+
+                    g_pGame->GetInterface()->SetVisibleSpeed(0.5f);
                 }
                 else
                 {
                     ASSERT(m_iTakeTo != TAKE_MISSION)
-                    g_pGame->StartOutro(GAME_OUTRO_SEGMENT);
+                    g_pGame->StartOutro(GAME_OUTRO_SEGMENT);   // do not fade music
                 }
 
                 g_MusicPlayer.SelectName("ending_normal.ogg");
@@ -229,7 +242,7 @@ void cAterMission::__SetupOwn()
             else
             {
                 ASSERT(m_iTakeTo != TAKE_MISSION)
-                g_pGame->StartOutro(GAME_OUTRO_SEGMENT);
+                g_pGame->StartOutro(GAME_OUTRO_SEGMENT);   // do not fade music
             }
         }
     });

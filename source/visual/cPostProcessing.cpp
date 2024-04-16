@@ -350,7 +350,7 @@ void cPostProcessing::__Reset(const coreResourceReset eInit)
 void cPostProcessing::__UpdateInterior()
 {
     // 
-    this->SetDirection(MapToAxis(m_vDirectionConfig, m_vDirectionGame));
+    this->SetDirection(MapToAxis(m_vDirectionConfig, m_vDirectionGame * this->GetSize()));
 
     if(m_bSplitScreen)
     {

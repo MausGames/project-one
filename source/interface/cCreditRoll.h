@@ -10,13 +10,7 @@
 #ifndef _P1_GUARD_CREDITROLL_H_
 #define _P1_GUARD_CREDITROLL_H_
 
-// TODO 5: rotate entries and make them rotatable
 // TODO 3: add label pool
-// TODO 1: [MF] finish credits
-// TODO 3: do not end with cloud-background
-
-
-// https://old.reddit.com/r/shmups/comments/10dd8qd/i_would_like_to_show_you_the_game_ive_been/
 
 
 // ****************************************************************
@@ -28,8 +22,7 @@
 #define CREDIT_ENTRIES_MODELS    (ARRAY_SIZE(g_apcCreditEntryModels))      // 
 #define CREDIT_ENTRIES_FONTS     (ARRAY_SIZE(g_apcCreditEntryFonts))       // 
 #define CREDIT_ENTRIES_LIBRARIES (ARRAY_SIZE(g_apcCreditEntryLibraries))   // 
-#define CREDIT_ENTRIES_THANKS    (ARRAY_SIZE(g_apcCreditEntryThanks))      // 
-#define CREDIT_HEADERS           (6u)//(7u)                                      // 
+#define CREDIT_HEADERS           (6u)                                      // 
 
 enum eCreditType : coreUint8
 {
@@ -41,13 +34,32 @@ enum eCreditType : coreUint8
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2] =
 {
-    {"Christoph Lang",   "Tester"},
-    {"David Portisch",   "Tester"},
-    {"Jochen Leopold",   "Tester"},
-    {"Lukas Meindl",     "Tester"},
-    {"Martin Mauersics", "Game Designer, Programmer"},
-    {"Stefan Karner",    "Tester"},
-    {"Tova Bele",        "Adviser, Tester"}
+    {"Benjamin Schaden",                          "$THANKS"},
+    {"Christoph Lang",                            "$TESTER"},
+    {"Claire Deiller (Loc3 Ltd.)",                "$LOCA - Français"},
+    {"Damian Hiltebrand",                         "$THANKS"},
+    {"Daniel Rubio (Pinknoise)",                  "$LOCA - Español (Latinoamérica)"},
+    {"David Portisch",                            "$TESTER"},
+    {"Eric Emanuel (Loc3 Ltd.)",                  "$LOCA - Français"},
+    {"Etel Baglietto (Pinknoise)",                "$LOCA - Español (Latinoamérica)"},
+    {"Henry Buckley (DICO Co., Ltd.)",            "$LOCA - 日本語"},
+    {"Iris Kuppen (Local Heroes Worldwide B.V.)", "$LOCA"},
+    {"Jochen Leopold",                            "$TESTER"},
+    {"Johnny Marques (Locsmiths)",                "$LOCA - Português (Brasil)"},
+    {"Lara Cecilia Garau (Pinknoise)",            "$LOCA - Español (Latinoamérica)"},
+    {"Lukas Meindl",                              "$TESTER"},
+    {"Mariano Saab (Pinknoise)",                  "$LOCA - Español (Latinoamérica)"},
+    {"Martin Mauersics",                          "$DESIGNER, $PROGRAMMER"},
+    {"Miho Miyazaki (DICO Co., Ltd.)",            "$LOCA - 日本語"},
+    {"Murilo Martins (Locsmiths)",                "$LOCA - Português (Brasil)"},
+    {"Oliver Bisztyga",                           "$THANKS"},
+    {"Rainer Petermann",                          "$THANKS"},
+    {"Ricardo Nakaoka (Locsmiths)",               "$LOCA - Português (Brasil)"},
+    {"Robert Glashüttner",                        "$THANKS"},
+    {"Stefan Karner",                             "$TESTER"},
+    {"Tova Bele",                                 "$ADVISER, $TESTER"},
+    {"Vanesa Potenzoni (Pinknoise)",              "$LOCA - Español (Latinoamérica)"},
+    {"Ziya Sarper Ekim (DICO Co., Ltd.)",         "$LOCA - 日本語"},
 };
 
 // 
@@ -55,19 +67,40 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryMusic[
 {
     "Andrew Sitkov",
     "Isao Yamaguchi",
-    "Tim Beek"
+    "Tim Beek",
+    "WOW Sound"
 };
 
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntrySounds[] =
 {
+    "0ktober",
     "Albert Fernández",
+    "Arto Koivisto",
     "Audible Dread",
+    "Audionautics",
+    "Casonika",
+    "cedarstudios",
+    "divaldo11",
+    "Eelke",
+    "frantramp",
+    "FreqMan",
     "FuseHive",
+    "Garuda1982",
     "J.BoB",
     "Joel Steudler",
+    "LadyCailin",
+    "lavik89",
+    "monosfera",
+    "Porphyr",
+    "RHumphries",
     "Rich McBride",
-    "Stormwave Audio"
+    "Sergenious",
+    "sirplus",
+    "smcameron",
+    "Stormwave Audio",
+    "themfish",
+    "xdrav"
 };
 
 // 
@@ -103,24 +136,10 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryFonts[
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryLibraries[] =
 {
-    "forsyth_too",
-    "glew",
-    "imgui",
-    "OpenAL_soft",
-    "SDL2",
-    "SDL2_image",
-    "SDL2_ttf",
-    "stb_dxt",
-    "stb_sprintf",
-    "stb_vorbis",
-    "xxhash",
-    "zstd"
-};
-
-// 
-alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryThanks[] =
-{
-    "Damian Hiltebrand"
+    "glew, imgui, OpenAL_soft",
+    "SDL2, SDL2_image, SDL2_ttf",
+    "stb_dxt, stb_sprintf, stb_vorbis",
+    "xxhash, zstd"
 };
 
 
@@ -136,6 +155,8 @@ private:
     cGuiLabel m_aName       [CREDIT_ENTRIES];                // 
     cGuiLabel m_aDescription[CREDIT_ENTRIES];                // 
 
+    cGuiLabel m_aSupportText[2];                             // 
+
     cGuiLabel m_aOtherHeader   [CREDIT_HEADERS];             // 
     cGuiLabel m_aOtherMusic    [CREDIT_ENTRIES_MUSIC];       // 
     cGuiLabel m_aOtherSounds   [CREDIT_ENTRIES_SOUNDS];      // 
@@ -143,9 +164,9 @@ private:
     cGuiLabel m_aOtherModels   [CREDIT_ENTRIES_MODELS];      // 
     cGuiLabel m_aOtherFonts    [CREDIT_ENTRIES_FONTS];       // 
     cGuiLabel m_aOtherLibraries[CREDIT_ENTRIES_LIBRARIES];   // 
-    cGuiLabel m_aOtherThanks   [CREDIT_ENTRIES_THANKS];      // 
 
     cGuiLabel m_ThankYouText;                                // 
+    cGuiLabel m_EndText;                                     // 
 
     coreFlow  m_fOffset;                                     // 
     coreFloat m_fMaxOffset;                                  // 

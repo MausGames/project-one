@@ -20,7 +20,7 @@
 // TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 // TODO 1: scoring + leaderboard also needs to be version specific
 // TODO 1: check for, and ask for import of savegame (+ whole user folder?) from demo (Steam) (save_demo.p1sv or user_demo_1000 folder, could also be general, if savegame is (also) stored globally (delete copy after import)), if no save is available on startup -> needs own menu state in intro menu (show date-time of file, maybe also some meta-data (name, time played, max mission))
-// TODO 1: [MF] mission-all stats need to be handled correctly (segment <> mission <> all <> arcade <> global, for extra menu)
+// TODO 2: iDamageGiven and iEnemiesDone only considers non-worthless enemies (also not objects)
 
 
 // ****************************************************************
@@ -28,7 +28,7 @@
 #define SAVE_FILE_FOLDER    ""                       // 
 #define SAVE_FILE_EXTENSION "p1sv"                   // 
 #define SAVE_FILE_MAGIC     (UINT_LITERAL("P1SV"))   // 
-#define SAVE_FILE_VERSION   (0x00000001u)            // 
+#define SAVE_FILE_VERSION   (0x00000002u)            // 
 
 #define SAVE_NAME_LENGTH    (32u)                    // 
 #define SAVE_PLAYERS        (PLAYERS)                // 
@@ -49,30 +49,41 @@ enum eSaveStatus : coreUint8
     SAVE_STATUS_ERROR_ACCESS  = 3u
 };
 
-enum eSaveFeat : coreUint8
+enum eSaveFeat : coreUint8   // # never change bits after release
 {
     FEAT_TWOHUNDRED = 0u
 };
 
-enum eSaveTrophy : coreUint8
+enum eSaveTrophy : coreUint8   // # never change bits after release
 {
     TROPHY_ONECOLORCLEAR = 0u
 };
 
-enum eSaveUnlock : coreUint8
+enum eSaveUnlock : coreUint8   // # never change bits after release
 {
-    UNLOCK_MIRRORMORE  = 0u,
-    UNLOCK_GAMESPEEDUP = 1u
+    UNLOCK_MIRRORMODE   = 0u,
+    UNLOCK_GAMESPEEDUP  = 1u,
+    UNLOCK_POWERSHIELD  = 2u,
+    UNLOCK_WEAPON_PULSE = 10u,   // TODO 1: look at loca-text
+    UNLOCK_WEAPON_WAVE  = 11u,
+    UNLOCK_WEAPON_TESLA = 12u,
+    UNLOCK_WEAPON_ANTI  = 13u,
 };
 
-enum eSaveNew : coreUint8
+enum eSaveNew : coreUint8   // # never change bits after release
 {
     NEW_MAIN_START        = 0u,
     NEW_MAIN_EXTRA        = 1u,
     NEW_MAIN_CONFIG       = 2u,
-    NEW_CONFIG_GAME       = 3u,
-    NEW_CONFIG_MIRRORMODE = 4u,
-    NEW_ARMORY_GAMESPEED  = 5u
+    NEW_CONFIG_GAME       = 10u,
+    NEW_CONFIG_MIRRORMODE = 11u,
+    NEW_ARMORY_GAMESPEED  = 20u,
+    NEW_ARMORY_SHIELD     = 21u
+};
+
+enum eSaveState : coreUint8   // # never change bits after release
+{
+    STATE_AFTER_FIRST = 0u
 };
 
 
@@ -177,7 +188,7 @@ public:
         coreUint8  iType;                                           // 
         coreUint8  iMode;                                           // 
         coreUint8  iDifficulty;                                     // 
-        coreUint8  iFlags;                                          // 
+        coreUint8  iFlags;                                          // (bitfield) 
         coreUint8  aiShield  [SAVE_PLAYERS];                        // 
         coreUint8  aaiWeapon [SAVE_PLAYERS][SAVE_EQUIP_WEAPONS];    // 
         coreUint8  aaiSupport[SAVE_PLAYERS][SAVE_EQUIP_SUPPORTS];   // 
@@ -186,18 +197,18 @@ public:
     // 
     struct sProgress final
     {
-        coreBool   bFirstPlay;                                 // 
-        coreUint8  aiAdvance [SAVE_MISSIONS];                  // 
+        coreBool   bFirstPlay;                                         // 
+        coreUint8  aiAdvance         [SAVE_MISSIONS];                  // 
         coreUint8  aaaiMedalArcade   [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES];                                 // 
         coreUint8  aaaaiMedalMission [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES][SAVE_MISSIONS];                  // 
         coreUint8  aaaaaiMedalSegment[SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES][SAVE_MISSIONS][SAVE_SEGMENTS];   // 
-        coreUint8  aiHelper  [SAVE_MISSIONS];                  // 
-        coreUint8  aiFragment[SAVE_MISSIONS];                  // (bitfield) 
-        coreUint8  aaiBadge  [SAVE_MISSIONS][SAVE_SEGMENTS];   // (bitfield) 
-        coreUint64 iPadding; // TODO 1: [MF] remove   + aiHelper after aaiBadge (auch in code überall)   + bump version
-        coreUint64 aiTrophy  [2];                              // (bitfield) 
-        coreUint64 aiUnlock  [2];                              // (bitfield) 
-        coreUint64 aiNew     [2];                              // (bitfield) 
+        coreUint8  aiFragment        [SAVE_MISSIONS];                  // (bitfield) 
+        coreUint8  aaiBadge          [SAVE_MISSIONS][SAVE_SEGMENTS];   // (bitfield) 
+        coreUint8  aiHelper          [SAVE_MISSIONS];                  // (bitfield) 
+        coreUint64 aiTrophy          [2];                              // (bitfield) 
+        coreUint64 aiUnlock          [2];                              // (bitfield) 
+        coreUint64 aiNew             [2];                              // (bitfield) 
+        coreUint64 iState;                                             // (bitfield) 
     };
 
     // 
@@ -268,8 +279,9 @@ public:
 
 private:
     // 
-    static coreBool __LoadHeader (sHeader* OUTPUT pHeader, const coreChar* pcPath);
-    static void     __CheckHeader(sHeader* OUTPUT pHeader);
+    static coreBool __LoadHeader   (sHeader* OUTPUT pHeader, const coreChar* pcPath);
+    static void     __UpgradeHeader(sHeader* OUTPUT pHeader);
+    static void     __CheckHeader  (sHeader* OUTPUT pHeader);
 
     // 
     static coreUint64 __GenerateChecksum(const sHeader& oHeader);

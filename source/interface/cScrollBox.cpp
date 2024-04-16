@@ -16,6 +16,7 @@ cScrollBox::cScrollBox()noexcept
 , m_fMaxOffset (0.0f)
 , m_bDrag      (false)
 , m_fDragValue (0.0f)
+, m_fSpeed     (0.0f)
 , m_Automatic  (coreTimer(1.0f, 10.0f, 0u))
 {
     // 
@@ -84,7 +85,7 @@ void cScrollBox::Move()
             m_aArrow[i].Move();
 
             // 
-            cMenu::UpdateButton(&m_aArrow[i], m_aArrow[i].IsFocused());
+            cMenu::UpdateButton(&m_aArrow[i], this, m_aArrow[i].IsFocused());
         }
 
         // 
@@ -156,22 +157,29 @@ void cScrollBox::Move()
             {
                 const coreObject2D* pObject = (*it);
 
-                if(pObject->IsFocused() && cMenuNavigator::IsValid(pObject))
+                if((pObject == cMenuNavigator::GetCurFocus()) && cMenuNavigator::IsValid(pObject))
                 {
                     this->ScrollToObject(pObject, false);
                 }
             }
         }
+        
 
+        if(coreMath::IsNear((m_fCurOffset - this->GetOffset().y), 0.0f, 0.001f)) m_fSpeed = 0.0f;
+        m_fSpeed.UpdateMin(10.0f, 1.0f);
+        
+        if(ABS(m_fCurOffset - this->GetOffset().y) > 1.0f) this->SetOffset(coreVector2(0.0f, m_fCurOffset));
+
+        
         // 
-        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 4.0f : 20.0f) * TIME))));
+        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 4.0f : 10.0f) * m_fSpeed * TIME))));
 
         // 
         m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y * RCP(m_fMaxOffset))));
         m_Cursor.Move();
 
         // 
-        cMenu::UpdateButton(&m_Cursor, m_Cursor.IsFocused(), false);
+        cMenu::UpdateButton(&m_Cursor, this, m_Cursor.IsFocused(), false);
 
         // 
         if(bMouseWheel && (fOldOffset != m_fCurOffset)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SCROLL);

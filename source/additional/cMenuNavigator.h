@@ -101,9 +101,13 @@ private:
 
     cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];        // 
 
+    coreBool m_bActive;                              // 
+
     static coreVector2 s_vMouseMove;                 // 
     static coreBool    s_bJoystick;                  // 
     static coreUint8   s_iJoystickType;              // 
+    
+    static coreObject2D* s_pCurFocus;                // 
 
 
 public:
@@ -113,7 +117,7 @@ public:
 
     // 
     void Render()final;
-    void Move()final;
+    void Move  ()final;
 
     // 
     void Update();
@@ -127,7 +131,7 @@ public:
     inline void AssignMenu (coreMenu*     pMenu)   {ASSERT(pMenu)                    m_pMenu  = pMenu;}
     inline void AssignFirst(coreObject2D* pObject) {ASSERT(m_aObject.count(pObject)) m_iFirst = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
     inline void AssignBack (coreObject2D* pObject) {ASSERT(m_aObject.count(pObject)) m_iBack  = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
-    inline void ResetFirst ()                      {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID; m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f);}
+    inline void ResetFirst ()                      {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID; m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f); FOR_EACH(it, m_aTab) it->iLastEntry = MENUNAVIGATOR_INVALID; m_bActive = true;}
 
     // 
     template <typename F> inline void UseShoulderLeft (F&& nShoulderFunc) {ASSERT(!m_nShoulderLeft)  m_nShoulderLeft  = nShoulderFunc;}   // [](void) -> void
@@ -142,6 +146,12 @@ public:
     inline void ForceCurrent   (coreObject2D* pObject) {this->OverrideCurrent(pObject); m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f);}
 
     // 
+    inline void SetActive(const coreBool bActive) {m_bActive = bActive;}
+
+    // 
+    inline coreObject2D* GetCurObject()const {return m_pCurObject;}
+
+    // 
     static void GlobalInit();
     static void GlobalUpdate();
 
@@ -150,6 +160,9 @@ public:
 
     // 
     static inline coreBool IsValid(const coreObject2D* pObject) {ASSERT(pObject) return (pObject->GetAlpha() && pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL));}
+
+    // 
+    static inline coreObject2D* GetCurFocus() {return s_pCurFocus;}
 
 
 private:

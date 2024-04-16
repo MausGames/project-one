@@ -173,7 +173,7 @@ void cIntroMission::__SetupOwn()
             {
                 pSquad2->ClearEnemies(true);
 
-                if(!iAnyButton) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                if(!iAnyButton) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
             }
 
             if(!m_bFirstPlay && g_pGame->IsTask())
@@ -185,9 +185,17 @@ void cIntroMission::__SetupOwn()
             }
         }
 
-        if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+        if(Core::Input->GetAnyButton(CORE_INPUT_HOLD))
         {
             iAnyButton = 1u;
+        }
+
+        for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+        {
+            if(!Core::Input->GetJoystickRelativeL(i).IsNull() || !Core::Input->GetJoystickRelativeR(i).IsNull())
+            {
+                iAnyButton = 1u;
+            }
         }
 
         STAGE_FOREACH_PLAYER(pPlayer, i)
@@ -263,7 +271,7 @@ void cIntroMission::__SetupOwn()
                     else
                     {
                         g_pGame->GetCombatText()->DrawProgress(iExtraState, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
-                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iExtraState, pSquad2->GetNumEnemies()), SOUND_ITEM_COLLECT);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iExtraState, pSquad2->GetNumEnemies()), SOUND_ITEM_02);
                     }
                 }
 
@@ -455,7 +463,7 @@ void cIntroMission::__SetupOwn()
                 if(aiLastPack[i] == 0xFFu) bBadge = false;
             });
 
-            if(bBadge) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+            if(bBadge) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
         }
 
         if(STAGE_BEGINNING)
@@ -706,7 +714,7 @@ void cIntroMission::__SetupOwn()
                         else
                         {
                             g_pGame->GetCombatText()->DrawCountdown(iCardCount, pSquad2->GetNumEnemies(), pBullet->GetPosition());
-                            g_pSpecialEffects->PlaySound(pBullet->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCardCount, pSquad2->GetNumEnemies()), SOUND_ITEM_COLLECT);
+                            g_pSpecialEffects->PlaySound(pBullet->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCardCount, pSquad2->GetNumEnemies()), SOUND_ITEM_01);
                         }
                     }
                 });
@@ -934,7 +942,7 @@ void cIntroMission::__SetupOwn()
 
         if(!bPostpone && STAGE_CLEARED)
         {
-            if(!HAS_BIT(iTimeState, 2u)) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+            if(!HAS_BIT(iTimeState, 2u)) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
         }
 
         if(STAGE_BEGINNING)
@@ -1019,7 +1027,7 @@ void cIntroMission::__SetupOwn()
             {
                 g_pGame->GetBulletManagerEnemy()->ResetOrder();
 
-                if(!iDamageState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                if(!iDamageState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
             }
 
             pSquad1->GetEnemy(4u)->SetCurHealthPct(0.1f);
@@ -1076,7 +1084,7 @@ void cIntroMission::__SetupOwn()
                             else
                             {
                                 g_pGame->GetCombatText()->DrawProgress(iWaveCount, 4u, pPlayer->GetPosition());
-                                g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iWaveCount, 4u), SOUND_ITEM_COLLECT);
+                                g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iWaveCount, 4u), SOUND_ITEM_01);
                             }
                         }
                     });
@@ -1271,7 +1279,7 @@ void cIntroMission::__SetupOwn()
         {
             if(STAGE_BEGINNING)
             {
-                g_pGame->StartOutro(GAME_OUTRO_BEGINNING);
+                g_pGame->StartOutro(GAME_OUTRO_BEGINNING, 1u);
                 g_pGame->FadeMusic(0.16f);
             }
         }

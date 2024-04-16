@@ -85,6 +85,7 @@ void cAterMission::TransformPlayers()
     pPlayer->EquipShield(0);
     pPlayer->SetScale   (1.5f / PLAYER_SIZE_FACTOR);
     pPlayer->SetRainbow (true);
+    pPlayer->AddStatus  (PLAYER_STATUS_KEEP_RANGE);
 
     if(g_pGame->IsMulti())
     {
@@ -95,6 +96,7 @@ void cAterMission::TransformPlayers()
         pOther->EquipShield(0);
         pOther->SetScale   (1.5f / PLAYER_SIZE_FACTOR);
         pOther->SetRainbow (true);
+        pOther->AddStatus  (PLAYER_STATUS_KEEP_RANGE);
     }
 
     // 

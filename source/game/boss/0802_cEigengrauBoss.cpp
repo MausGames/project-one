@@ -114,7 +114,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
 
     for(coreUintW i = 0u; i < BOSS_PLAYERS; ++i)
     {
-        m_aArrow[i].DefineModel  ("object_arrow.md3");
+        m_aArrow[i].DefineModel  ("object_arrow_short.md3");
         m_aArrow[i].DefineTexture(0u, "effect_energy.png");
         m_aArrow[i].DefineProgram("effect_energy_flat_invert_program");
         m_aArrow[i].SetSize      (coreVector3(1.0f,1.0f,1.0f) * 2.2f);
@@ -302,7 +302,8 @@ void cEigengrauBoss::__MoveOwn()
     {
         this->SetSize(coreVector3(1.0f,1.0f,1.0f) * LERP(150.0f, 30.0f, fCurHealthPct));
 
-        g_pSpecialEffects->CreateGust(1.0f - fCurHealthPct, 0.0f);
+        //g_pSpecialEffects->CreateGust(1.0f - STEP(0.5f, 1.0f, fCurHealthPct), 0.0f);
+        if(m_iPhase >= 10u) g_pSpecialEffects->CreateGust(1.0f, 0.0f);
 
         g_pGame->SetMusicVolume(STEP(0.01f, 0.06f, fCurHealthPct));
     }
@@ -315,7 +316,8 @@ void cEigengrauBoss::__MoveOwn()
         {
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+                pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_ALL);
+                pPlayer->RemoveStatus(PLAYER_STATUS_KEEP_RANGE);
                 m_avVector[PLAYER_POS + i].xy(pPlayer->GetPosition().xy());
             });
 
@@ -358,7 +360,7 @@ void cEigengrauBoss::__MoveOwn()
 
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                if(PHASE_TIME_POINT(0.2f)) g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                if(PHASE_TIME_POINT(0.2f) && !i) g_pSpecialEffects->PlaySound(g_pGame->IsMulti() ? LERP(g_pGame->GetPlayer(0u)->GetPosition(), g_pGame->GetPlayer(1u)->GetPosition(), 0.5f) : pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FLY);
                 
                 coreVector2 vPos, vDir;
                 m_PlayerPath.CalcPosDirLerp(BLENDS(fTime), &vPos, &vDir);                       
@@ -1045,6 +1047,16 @@ void cEigengrauBoss::__MoveOwn()
     // ################################################################
     // 
     else if(m_iPhase == 207u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 208u)
     {
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_HERMITE3)
         {

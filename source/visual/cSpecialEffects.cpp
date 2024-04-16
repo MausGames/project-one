@@ -35,6 +35,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_fShakeStrength   (0.0f)
 , m_fShakeOverride   (1.0f)
 , m_iShakeCount      (0u)
+, m_iShakeType       (0u)
 , m_fFreezeTime      (0.0f)
 , m_fSlowTime        (0.0f)
 , m_fSlowStrength    (0.0f)
@@ -118,10 +119,6 @@ cSpecialEffects::cSpecialEffects()noexcept
         ASSERT(!std::strcmp(pSoundPtr.GetHandle()->GetName(), pcName))
     };
     nLoadSoundFunc(SOUND_PLAYER_EXPLOSION,     "player_explosion.wav");
-    nLoadSoundFunc(SOUND_PLAYER_FEEL,          "player_feel.wav");
-    nLoadSoundFunc(SOUND_PLAYER_TURN,          "player_turn.wav");
-    nLoadSoundFunc(SOUND_PLAYER_INTERRUPT,     "player_interrupt.wav");
-    nLoadSoundFunc(SOUND_PLAYER_REPAIR,        "player_repair.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_01,   "enemy_explosion_01.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_02,   "enemy_explosion_02.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_03,   "enemy_explosion_03.wav");
@@ -134,7 +131,6 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_10,   "enemy_explosion_10.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_11,   "enemy_explosion_11.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_12,   "enemy_explosion_12.wav");
-    nLoadSoundFunc(SOUND_SHIP_FLY,             "ship_fly.wav");
     nLoadSoundFunc(SOUND_WEAPON_RAY,           "weapon_ray.wav");
     nLoadSoundFunc(SOUND_WEAPON_ENEMY,         "weapon_enemy.wav");
     nLoadSoundFunc(SOUND_BULLET_HIT,           "bullet_hit.wav");
@@ -151,7 +147,8 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_HELPER,               "helper.wav");
     nLoadSoundFunc(SOUND_FRAGMENT_COLLECT,     "fragment_collect.wav");
     nLoadSoundFunc(SOUND_FRAGMENT_IMPACT,      "fragment_impact.wav");
-    nLoadSoundFunc(SOUND_ITEM_COLLECT,         "item_collect.wav");
+    nLoadSoundFunc(SOUND_ITEM_01,              "item_01.wav");
+    nLoadSoundFunc(SOUND_ITEM_02,              "item_02.wav");
     nLoadSoundFunc(SOUND_SUMMARY_TEXT,         "summary_text.wav");
     nLoadSoundFunc(SOUND_SUMMARY_SCORE,        "summary_score.wav");
     nLoadSoundFunc(SOUND_SUMMARY_MEDAL,        "summary_medal.wav");
@@ -173,22 +170,20 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_MENU_SCROLL,          "menu_scroll.wav");
     nLoadSoundFunc(SOUND_MENU_SUB_IN,          "menu_sub_in.wav");
     nLoadSoundFunc(SOUND_MENU_SUB_OUT,         "menu_sub_out.wav");
-    nLoadSoundFunc(SOUND_EFFECT_BEEP,          "effect_beep.wav");   // NOT USED
-    nLoadSoundFunc(SOUND_EFFECT_CHARGE_IN,     "effect_charge_in.wav");   // NOT USED
-    nLoadSoundFunc(SOUND_EFFECT_CHARGE_OUT,    "effect_charge_out.wav");   // NOT USED
+    nLoadSoundFunc(SOUND_EFFECT_BEEP,          "effect_beep.wav");
+    nLoadSoundFunc(SOUND_EFFECT_CLICK,         "effect_click.wav");
     nLoadSoundFunc(SOUND_EFFECT_DUST,          "effect_dust.wav");
     nLoadSoundFunc(SOUND_EFFECT_ERROR,         "effect_error.wav");
-    nLoadSoundFunc(SOUND_EFFECT_FAILURE,       "effect_failure.wav");   // NOT USED
-    nLoadSoundFunc(SOUND_EFFECT_FIRE_START,    "effect_fire_start.wav");
+    nLoadSoundFunc(SOUND_EFFECT_FIRE,          "effect_fire.wav");
+    nLoadSoundFunc(SOUND_EFFECT_FLY,           "effect_fly.wav");
     nLoadSoundFunc(SOUND_EFFECT_PEARL,         "effect_pearl.wav");
-    nLoadSoundFunc(SOUND_EFFECT_SHAKE,         "effect_shake.wav");
-    nLoadSoundFunc(SOUND_EFFECT_SHAKE_2,       "effect_shake_2.wav");
-    nLoadSoundFunc(SOUND_EFFECT_SUCCESS,       "effect_success.wav");
-    nLoadSoundFunc(SOUND_EFFECT_SWIPE,         "effect_swipe.wav");
-    nLoadSoundFunc(SOUND_EFFECT_SWIPE_2,       "effect_swipe_2.wav");
-    nLoadSoundFunc(SOUND_EFFECT_SWIPE_3,       "effect_swipe_3.wav");
-    nLoadSoundFunc(SOUND_EFFECT_WOOSH,         "effect_woosh.wav");
-    nLoadSoundFunc(SOUND_EFFECT_WOOSH_2,       "effect_woosh_2.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SHAKE_01,      "effect_shake_01.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SHAKE_02,      "effect_shake_02.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SWIPE_01,      "effect_swipe_01.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SWIPE_02,      "effect_swipe_02.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SWIPE_03,      "effect_swipe_03.wav");
+    nLoadSoundFunc(SOUND_EFFECT_WOOSH_01,      "effect_woosh_01.wav");
+    nLoadSoundFunc(SOUND_EFFECT_WOOSH_02,      "effect_woosh_02.wav");
 
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
@@ -262,8 +257,8 @@ void cSpecialEffects::RenderBottom()
 {
     if(m_bActive)
     {
-        glDisable(GL_DEPTH_TEST);
-        //glDepthMask(false);
+        //glDisable(GL_DEPTH_TEST);   // cannot be used in tilt mode, particles will overlap player
+        glDepthMask(false);
         {
             const coreBool bForeground = g_pForeground->IsTarget();
 
@@ -286,8 +281,8 @@ void cSpecialEffects::RenderBottom()
                        
             if(g_bTiltMode) m_GustList.Render();
         }
-        glEnable(GL_DEPTH_TEST);
-        //glDepthMask(true);
+        //glEnable(GL_DEPTH_TEST);
+        glDepthMask(true);
     }
 }
 
@@ -444,8 +439,28 @@ void cSpecialEffects::Move()
         m_iShakeCount    = m_iShakeCount + 1u;
 
         // 
-        const coreFloat fPower = I_TO_F(g_CurConfig.Graphics.iShake) * m_fShakeOverride * 0.00008f;
-        g_pPostProcessing->SetPosition(((g_vHudDirection.InvertedX() * (m_fShakeStrength * fPower * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f))) * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
+        coreVector2 vBase;
+        if(m_iShakeType)
+        {
+            // 
+            vBase = MapToAxisInv(coreVector2::Direction(I_TO_F(m_iShakeCount) * GA), g_vHudDirection);
+        }
+        else
+        {
+            // 
+            vBase = g_vHudDirection.InvertedX() * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f);
+        }
+
+        // 
+        const coreFloat fPower = m_fShakeStrength * I_TO_F(g_CurConfig.Graphics.iShake) * m_fShakeOverride * 0.00009f;
+        g_pPostProcessing->SetPosition((vBase * fPower * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
+
+        // 
+        if(!m_fShakeStrength)
+        {
+            m_iShakeCount = 0u;
+            m_iShakeType  = 0u;
+        }
     }
 
     // 
@@ -464,9 +479,6 @@ void cSpecialEffects::MoveAlways()
         m_afRumbleTime[i].UpdateMax(-1.0f, 0.0f);
         if(!m_afRumbleTime[i]) m_afRumbleStrength[i] = 0.0f;
     }
-    
-    Core::Debug->InspectValue("m_afRumbleTime[0]", m_afRumbleTime[0]);
-    Core::Debug->InspectValue("m_afRumbleStrength[0]", m_afRumbleStrength[0]);
 }
 
 
@@ -1081,10 +1093,6 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     {
     default: ASSERT(false)
     case SOUND_PLAYER_EXPLOSION:     fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_PLAYER_FEEL:          fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_PLAYER_TURN:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_PLAYER_INTERRUPT:     fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_PLAYER_REPAIR:        fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_01:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_02:   fBaseVolume = 1.3f; fBasePitch = 0.7f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_03:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
@@ -1097,13 +1105,12 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_ENEMY_EXPLOSION_10:   fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_11:   fBaseVolume = 3.0f; fBasePitch = 0.4f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_12:   fBaseVolume = 0.6f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_SHIP_FLY:             fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_WEAPON_RAY:           fBaseVolume = 0.8f; fBasePitch = 0.4f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_WEAPON_ENEMY:         fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_BULLET_HIT:           fBaseVolume = 1.5f; fBasePitch = 0.9f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_BULLET_REFLECT:       fBaseVolume = 1.1f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_BULLET_VANISH:        fBaseVolume = 1.0f; fBasePitch = 0.8f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_SHIELD_HIT:           fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_SHIELD_HIT:           fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_SHIELD_DESTROY:       fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_MEDAL_BRONZE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MEDAL_SILVER:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
@@ -1114,7 +1121,8 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_HELPER:               fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_FRAGMENT_COLLECT:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_FRAGMENT_IMPACT:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
-    case SOUND_ITEM_COLLECT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ITEM_01:              fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ITEM_02:              fBaseVolume = 0.9f; fBasePitch = 0.9f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_SUMMARY_TEXT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_SUMMARY_SCORE:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_SUMMARY_MEDAL:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
@@ -1127,31 +1135,29 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_MENU_MSGBOX_SHOW:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MENU_MSGBOX_YES:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MENU_MSGBOX_NO:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
-    case SOUND_MENU_BUTTON_PRESS:    fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_BUTTON_PRESS:    fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MENU_SWITCH_ENABLED:  fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
-    case SOUND_MENU_SWITCH_DISABLED: fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
-    case SOUND_MENU_CHANGE_BUTTON:   fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
-    case SOUND_MENU_CHANGE_TAB:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
-    case SOUND_MENU_CHANGE_LINE:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
-    case SOUND_MENU_SCROLL:          fBaseVolume = 0.8f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_SWITCH_DISABLED: fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_CHANGE_BUTTON:   fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_CHANGE_TAB:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_CHANGE_LINE:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_SCROLL:          fBaseVolume = 0.8f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MENU_SUB_IN:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_MENU_SUB_OUT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
-    case SOUND_EFFECT_BEEP:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_CHARGE_IN:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_CHARGE_OUT:    fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_BEEP:          fBaseVolume = 2.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_CLICK:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.01f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_DUST:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_ERROR:         fBaseVolume = 1.0f; fBasePitch = 0.9f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_FAILURE:       fBaseVolume = 2.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_FIRE_START:    fBaseVolume = 1.0f; fBasePitch = 0.7f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_FIRE:          fBaseVolume = 1.0f; fBasePitch = 0.7f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_FLY:           fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_PEARL:         fBaseVolume = 1.1f; fBasePitch = 1.2f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_SHAKE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_SHAKE_2:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_SUCCESS:       fBaseVolume = 2.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_SWIPE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_SWIPE_2:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_SWIPE_3:       fBaseVolume = 1.0f; fBasePitch = 1.1f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_WOOSH:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_WOOSH_2:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SHAKE_01:      fBaseVolume = 3.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SHAKE_02:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SWIPE_01:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SWIPE_02:      fBaseVolume = 1.0f; fBasePitch = 1.1f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SWIPE_03:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_WOOSH_01:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_WOOSH_02:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_PLACEHOLDER:          return;   // #
     case SOUND_NONE:                 return;   // #
     }
@@ -1278,6 +1284,9 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 {
     // 
     m_fShakeStrength = MAX(m_fShakeStrength, fStrength);
+
+    // 
+    if(m_fShakeStrength >= SPECIAL_SHAKE_BIG) m_iShakeType = 1u;
 }
 
 
@@ -1317,6 +1326,8 @@ void cSpecialEffects::ClearAll()
     for(coreUintW i = 0u; i < SPECIAL_BLASTS;    ++i) m_aBlast        [i].SetAlpha(0.0f);
     for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i) m_aExplosionBody[i].SetAlpha(0.0f);
     m_fShakeStrength = 0.0f;
+    m_iShakeCount    = 0u;
+    m_iShakeType     = 0u;
     m_fFreezeTime    = 0.0f;
     m_fSlowTime      = 0.0f;
 
@@ -1436,7 +1447,7 @@ void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const c
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
-    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 2.5f - 0.5f, 1.0f));
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 2.5f - 0.47f, 1.0f));
 
     // 
     g_pDistortion->CreateWave        (vPosition, 2.5f * fPower, 3.0f);
@@ -1451,7 +1462,7 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
-    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 2.5f - 0.5f, 1.0f));
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 2.5f - 0.47f, 1.0f));
 
     // (# more particles than color) 
     g_pDistortion->CreateWave       (vPosition, 2.5f * fPower, 3.0f);

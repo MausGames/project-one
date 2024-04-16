@@ -1,0 +1,487 @@
+$LANGUAGE = Deutsch
+$FONT = keifont.ttf
+
+$WELCOME = Ein Spiel von Martin Mauersics
+$PROMPT = TASTE DRÜCKEN
+
+$START_GAME = SPIELEN
+$EXIT_GAME = BEENDEN
+
+$LEADERBOARDS = RANGLISTEN
+$REPLAYS = WIEDERHOLUNGEN
+$EXTRAS = EXTRAS
+$SETTINGS = OPTIONEN
+
+$TO_STEAM = ZU STEAM GEHEN
+$CREDITS = CREDITS
+
+$SAVE = SPEICHERN
+$DISCARD = VERWERFEN
+$BACK = ZURÜCK
+$RESUME = FORTSETZEN
+$RESTART = NEUSTART
+$NEXT = NÄCHSTE
+$AGAIN = NOCHMAL
+$START = START
+$DELETE = LÖSCHEN
+$ENTER = EINGEBEN
+$WATCH = ANSCHAUEN
+
+$UNLOCKED = FREIGESCHALTEN
+$NEW = NEU
+$UNKNOWN = ???
+
+$PLAYER = SPIELER
+$MISSION = Gebiet
+$BOSS = Boss
+$WAVE = Welle
+$SEGMENT = Abschnitt
+
+$CONFIG_VIDEO = VIDEO
+$CONFIG_AUDIO = AUDIO
+$CONFIG_INPUT = EINGABE
+$CONFIG_GAME = SPIEL
+
+$CONFIG_VIDEO_MONITOR = Monitor
+$CONFIG_VIDEO_RESOLUTION = Bildauflösung
+$CONFIG_VIDEO_DISPLAYMODE = Anzeigemodus
+$CONFIG_VIDEO_ANTIALIASING = Kantenglättung
+$CONFIG_VIDEO_TEXTUREFILTER = Texturfilter
+$CONFIG_VIDEO_RENDERQUALITY = Grafik Qualität
+$CONFIG_VIDEO_SHADOWQUALITY = Schatten Qualität
+$CONFIG_VIDEO_SHAKEEFFECTS = Schüttel Effekte
+$CONFIG_VIDEO_FLASHEFFECTS = Blink Effekte
+$CONFIG_VIDEO_HITSTOPEFFECTS = Einfrier Effekte
+$CONFIG_VIDEO_CHROMAEFFECTS = Chromatische Aberration
+$CONFIG_AUDIO_GLOBALVOLUME = Gesamt Lautstärke
+$CONFIG_AUDIO_MUSICVOLUME = Musik Lautstärke
+$CONFIG_AUDIO_EFFECTVOLUME = Effekt Lautstärke
+$CONFIG_AUDIO_AMBIENTVOLUME = Umgebungs Lautstärke
+$CONFIG_AUDIO_MENUVOLUME = Menu Lautstärke
+$CONFIG_AUDIO_QUALITY = Audio Qualität
+$CONFIG_AUDIO_MODE = Audio Modus
+$CONFIG_AUDIO_3DSOUND = 3D Klang
+$CONFIG_INPUT_TYPE = Eingabetyp
+$CONFIG_INPUT_RUMBLE = Vibration
+$CONFIG_INPUT_FIREMODE = Feuermodus
+$CONFIG_INPUT_CONTROLMODE = Kontrollmodus
+$CONFIG_INPUT_MOVEUP = Bewegen Rauf
+$CONFIG_INPUT_MOVELEFT = Bewegen Links
+$CONFIG_INPUT_MOVEDOWN = Bewegen Runter
+$CONFIG_INPUT_MOVERIGHT = Bewegen Rechts
+$CONFIG_INPUT_ACTION1 = Schießen
+$CONFIG_INPUT_ACTION2 = Drehen Links
+$CONFIG_INPUT_ACTION3 = Drehen Rechts
+$CONFIG_INPUT_ACTION4 = Schießen Rauf
+$CONFIG_INPUT_ACTION5 = Schießen Links
+$CONFIG_INPUT_ACTION6 = Schießen Runter
+$CONFIG_INPUT_ACTION7 = Schießen Rechts
+$CONFIG_INPUT_ACTION8 = Pause
+$CONFIG_GAME_LANGUAGE = Sprache
+$CONFIG_GAME_GAMEDIRECTION = Spiel Richtung
+$CONFIG_GAME_MIRRORMODE = Spiegelmodus
+$CONFIG_GAME_HUDDIRECTION = HUD Richtung
+$CONFIG_GAME_HUDTYPE = HUD Anordnung
+$CONFIG_GAME_COMBATTEXT = Schwebender Text
+$CONFIG_GAME_BACKROTATION = Hintergrund Rotation
+$CONFIG_GAME_BACKSPEED = Hintergrund Geschwindigkeit
+$CONFIG_GAME_UPDATEFREQ = Update Frequenz
+$CONFIG_GAME_VERSION = Version
+
+$CONFIG_VIDEO_MONITOR_DESC = #
+$CONFIG_VIDEO_RESOLUTION_DESC = #
+$CONFIG_VIDEO_DISPLAYMODE_DESC = #
+$CONFIG_VIDEO_ANTIALIASING_DESC = #
+$CONFIG_VIDEO_TEXTUREFILTER_DESC = #
+$CONFIG_VIDEO_RENDERQUALITY_DESC = Textur Qualität und Shading Frequenz
+$CONFIG_VIDEO_SHADOWQUALITY_DESC = Schatten Textur Größe und Schatten Weichheit
+$CONFIG_VIDEO_SHAKEEFFECTS_DESC = Effekte, welche das Spiel auf und ab bewegen
+$CONFIG_VIDEO_FLASHEFFECTS_DESC = Effekte, welche Objekte und den Bildschirm schnell blinken lassen
+$CONFIG_VIDEO_HITSTOPEFFECTS_DESC = Effekte, welche die Zeit einfrieren wenn man Schaden erleidet
+$CONFIG_VIDEO_CHROMAEFFECTS_DESC = Effekte, welche die Farben separieren und verwischen
+$CONFIG_AUDIO_GLOBALVOLUME_DESC = #
+$CONFIG_AUDIO_MUSICVOLUME_DESC = #
+$CONFIG_AUDIO_EFFECTVOLUME_DESC = #
+$CONFIG_AUDIO_AMBIENTVOLUME_DESC = #
+$CONFIG_AUDIO_MENUVOLUME_DESC = #
+$CONFIG_AUDIO_QUALITY_DESC = #
+$CONFIG_AUDIO_MODE_DESC = #
+$CONFIG_AUDIO_3DSOUND_DESC = Höre Geräusche basierend auf ihrer Bildschirm Position
+$CONFIG_INPUT_TYPE_DESC = #
+$CONFIG_INPUT_RUMBLE_DESC = #
+$CONFIG_INPUT_FIREMODE_DESC = #
+$CONFIG_INPUT_CONTROLMODE_DESC = #
+$CONFIG_INPUT_MOVEUP_DESC = #
+$CONFIG_INPUT_MOVELEFT_DESC = #
+$CONFIG_INPUT_MOVEDOWN_DESC = #
+$CONFIG_INPUT_MOVERIGHT_DESC = #
+$CONFIG_INPUT_ACTION1_DESC = #
+$CONFIG_INPUT_ACTION2_DESC = #
+$CONFIG_INPUT_ACTION3_DESC = #
+$CONFIG_INPUT_ACTION4_DESC = #
+$CONFIG_INPUT_ACTION5_DESC = #
+$CONFIG_INPUT_ACTION6_DESC = #
+$CONFIG_INPUT_ACTION7_DESC = #
+$CONFIG_INPUT_ACTION8_DESC = #
+$CONFIG_GAME_LANGUAGE_DESC = #
+$CONFIG_GAME_GAMEDIRECTION_DESC = Rotiere das Spiel ohne die Steuerung zu verändern
+$CONFIG_GAME_MIRRORMODE_DESC = #
+$CONFIG_GAME_HUDDIRECTION_DESC = Rotiere Text und Steuerung (für Tate Mode)
+$CONFIG_GAME_HUDTYPE_DESC = #
+$CONFIG_GAME_COMBATTEXT_DESC = #
+$CONFIG_GAME_BACKROTATION_DESC = #
+$CONFIG_GAME_BACKSPEED_DESC = #
+$CONFIG_GAME_UPDATEFREQ_DESC = Spiel Aktualisierungen pro Sekunde
+$CONFIG_GAME_VERSION_DESC = #
+
+$GAME_TYPE = Spieltyp
+$GAME_MODE = Spielmodus
+$GAME_DIFFICULTY = Schwierigkeitsgrad
+$GAME_GAMESPEED = Geschwindigkeit
+$GAME_STAGE = Abschnitt
+$GAME_SHIELD = Schild
+$GAME_WEAPON = Waffe
+
+$GAME_TYPE_SOLO = Allein
+$GAME_TYPE_COOP = Gemeinsam
+$GAME_TYPE_DUEL = Duell
+$GAME_MODE_STANDARD = Standard
+$GAME_MODE_PACIFIST = Pazifist
+$GAME_MODE_MASOCHIST = Masochist
+$GAME_DIFFICULTY_EASY = Leicht
+$GAME_DIFFICULTY_NORMAL = Schwer
+$GAME_DIFFICULTY_HARD = Prismatisch
+
+$GAME_WEAPON_NOTHING = Nichts
+$GAME_WEAPON_RAY = Laser
+$GAME_WEAPON_PULSE = Pulse
+$GAME_WEAPON_WAVE = Wave
+$GAME_WEAPON_TESLA = Tesla
+$GAME_WEAPON_ANTI = Antimatter
+
+$EXTRA_TROPHY = AUFGABEN
+$EXTRA_STATS = DATEN
+$EXTRA_OTHER = SONSTIGES
+$EXTRA_PROGRESS = Fortschritt
+$EXTRA_PASSWORD = Passwort
+$EXTRA_CREDITS = Credits
+
+$FILTER_ALL = ALLES
+$FILTER_COMPLETE = KOMPLETT
+$FILTER_GLOBAL = GLOBAL
+
+$STAT_TIME_PLAYED = Zeit Gespielt
+$STAT_SCORE_GAINED = Punkte Erhalten
+$STAT_MISSIONS_DONE = Gebiete Geschafft
+$STAT_BOSSES_DONE = Bosse Besiegt
+$STAT_SEGMENTS_DONE = Abschnitte Geschafft
+$STAT_ENEMIES_DONE = Gegner Besiegt
+$STAT_DAMAGE_GIVEN = Schaden Verursacht
+$STAT_DAMAGE_TAKEN = Schaden Erhalten
+$STAT_CONTINUES_USED = Continues Verwendet
+$STAT_REPAIRS_USED = Spieler Repariert
+$STAT_MOVES_MADE = Bewegungen Gemacht
+$STAT_TURNS_MADE = Drehungen Gemacht
+$STAT_BULLETS_SHOT = Geschosse Erzeugt
+$STAT_MEDALS_EARNED_BRONZE = Medaillen Erhalten (C)
+$STAT_MEDALS_EARNED_SILVER = Medaillen Erhalten (B)
+$STAT_MEDALS_EARNED_GOLD = Medaillen Erhalten (A)
+$STAT_MEDALS_EARNED_PLATINUM = Medaillen Erhalten (S)
+$STAT_MEDALS_EARNED_DARK = Medaillen Erhalten (X)
+$STAT_MEDALS_EARNED = Medaillen Erhalten (Alle)
+$STAT_BADGES_EARNED = Abzeichen Erhalten
+$STAT_HELPER_HIT = Helfer Getroffen
+$STAT_SCORE_BEST = Beste Punkte
+$STAT_SCORE_WORST = Schlechteste Punkte
+$STAT_SCORE_TOTAL = Gesamte Punkte
+$STAT_TIME_BEST_SHIFTED = Beste Zeit
+$STAT_TIME_BEST_RAW = Beste Zeit (Roh)
+$STAT_TIME_WORST_SHIFTED = Schlechteste Zeit
+$STAT_TIME_WORST_RAW = Schlechteste Zeit (Row)
+$STAT_TIME_TOTAL = Gesamte Zeit
+$STAT_MAX_COMBO = Beste Kombo
+$STAT_MAX_CHAIN = Beste Kette
+$STAT_COUNT_START = Geestartet
+$STAT_COUNT_END = Beendet
+
+$VALUE_OFF = Aus
+$VALUE_ON = Ein
+$VALUE_LOW = Niedrig
+$VALUE_HIGH = Hoch
+$VALUE_AUTO = Automatisch
+$VALUE_NO = Nein
+$VALUE_YES = Ja
+$MONITOR_PRIMARY = Primär
+$MONITOR_SECONDARY = Sekundär
+$RESOLUTION_DESKTOP = Desktop
+$RESOLUTION_CUSTOM = Speziell
+$DISPLAYMODE_WINDOW = Fenster
+$DISPLAYMODE_BORDERLESS = Rahmenlos
+$DISPLAYMODE_FULLSCREEN = Vollbild
+$AUDIOMODE_MONO = Mono
+$AUDIOMODE_SPEAKERS = Lautsprecher
+$AUDIOMODE_HEADPHONES = Kopfhöhrer
+$FIREMODE_NORMAL = Normal
+$FIREMODE_INVERT = Verkehrt
+$FIREMODE_TOGGLE = Umschalten
+$CONTROLMODE_ORIGINAL = Original
+$CONTROLMODE_TWINSTICK = Twin-Stick
+$HUDDIRECTION_RIGHT = Nach Rechts
+$HUDDIRECTION_UPSIDE = Kopfüber
+$HUDDIRECTION_LEFT = Nach Links
+$HUDTYPE_OUTSIDE = Außen (fern)
+$HUDTYPE_INSIDE = Innen
+$HUDTYPE_BORDER = Außen (nahe)
+$VERSION_LATEST = Aktuell
+
+$INPUT_KEYBOARD = Tastatur
+$INPUT_JOYSTICK = Gamepad
+
+$INFORMATION_REPLAY_CORRUPT = Wiederholung fehlerhaft
+$INFORMATION_RESTART = Spiel wird neu gestartet
+$QUESTION_LOAD = Lade
+$QUESTION_SAVE = Änderungen speichern ?
+$QUESTION_RESTART = Spiel neu starten ?
+$QUESTION_EXIT_GAME = Spiel verlassen ?
+$QUESTION_READY = Bist du bereit ?
+$QUESTION_ERROR_SAVE = Speichern gescheitert, nochmal ?
+$MAPPING = Neue Taste
+
+$ERROR_SAVE_01 = Unbekannter Fehler
+$ERROR_SAVE_02 = Speicherplatz
+$ERROR_SAVE_03 = Zugriff Verweigert
+
+$DEFEAT_GAMEOVER = GAME OVER
+$DEFEAT_CONTINUE = Nochmal ?
+
+$TEXT_IMMUNE = IMMUN
+$TEXT_HIT = TREFFER
+$TEXT_LUCKY = GLÜCKSTREFFER!
+$TEXT_GIVEUP = GIB NICHT AUF!
+
+$GAME_HEADER_DEMO = SPIELMODUS AUSWÄHLEN
+$GAME_HEADER_GAME = ABSCHNITT AUSWÄHLEN
+
+$GAME_ARCADE = ARCADE
+$GAME_ARCADE_COMPLETE = KLASSIK MODUS
+
+$GAME_SCORE = Beste Punkte
+$GAME_TIME = Beste Zeit
+$GAME_COMBO = Beste Kombo
+$GAME_CHAIN = Beste Kette
+
+$ENTER_NAME = NAME EINGEBEN
+$ENTER_PASSWORD = PASSWORT EINGEBEN
+
+$BONUS_TIME = Zeit Bonus
+$BONUS_MEDAL = Medaillen Bonus
+$BONUS_SURVIVE = Ausweich Bonus
+$SUMMARY_ARCADE = ZUSAMMENFASSUNG
+$SUMMARY_MISSION_TOTAL = Summe
+$SUMMARY_SEGMENT_SCORE = Punkte
+$SUMMARY_SEGMENT_TIME = Zeit
+$SUMMARY_SEGMENT_COMBO = Beste Kombo
+$SUMMARY_SEGMENT_CHAIN = Beste Kette
+$SUMMARY_BEST = BESTES
+$SUMMARY_PERFECT = PERFEKT!
+$SUMMARY_RECORD = NEUER REKORD!
+$FINISH_TOTAL = Finaler Punktestand
+
+$THANK_YOU = Vielen Dank fürs Spielen!
+$THANK_YOU_DEMO = Vielen Dank fürs Spielen der Demo!
+$THANK_YOU_SUPPORT = Danke an alle die mich auf#meinem Weg unterstützt haben!
+
+$ENDING_NORMAL = Tust du wirklich das Richtige?
+
+$CREDITS_MUSIC = Musik
+$CREDITS_SOUNDS = Geräusche
+$CREDITS_TEXTURES = Texturen
+$CREDITS_MODELS = Modelle
+$CREDITS_FONTS = Schriftarten
+$CREDITS_LIBRARIES = Programm Bibliotheken
+
+$CREDITS_ROLE_DESIGNER = Spieledesigner
+$CREDITS_ROLE_PROGRAMMER = Programmierer
+$CREDITS_ROLE_TESTER = Tester
+$CREDITS_ROLE_ADVISER = Berater
+$CREDITS_ROLE_LOCA = Lokalisierung
+$CREDITS_ROLE_THANKS = Besonderer Dank
+
+$BADGE_01_01_01_DESC = Zerstöre alle markierten Barrieren
+$BADGE_01_01_02_DESC = Erledige einen Gegner mit Reflektion
+$BADGE_01_02_01_DESC = Triff alle Dreiecke
+$BADGE_01_02_02_DESC = Berühre den anderen Strahl
+$BADGE_01_03_01_DESC = Sammle alle Vierecke
+$BADGE_01_03_02_DESC = Spring über einen Gegner
+$BADGE_01_04_01_DESC = Entferne alle Trümmer
+$BADGE_01_04_02_DESC = Triff die Zielscheibe
+$BADGE_01_05_01_DESC = Erwische die herabfallenden Gegenstände
+$BADGE_01_05_02_DESC = Finde alle unauffindbaren Gegner
+
+$BADGE_02_01_01_DESC = Räume genug Geschosse auf
+$BADGE_02_01_02_DESC = Triff alle verdeckten Objekte
+$BADGE_02_02_01_DESC = Sortiere alle ungeschützten Gegner aus
+$BADGE_02_02_02_DESC = Aktiviere einige Platten in Reihenfolge
+$BADGE_02_03_01_DESC = Sammle alle Rückstände
+$BADGE_02_03_02_DESC = Hintergehe den Gegner
+$BADGE_02_04_01_DESC = Dreh dich immer weiter
+$BADGE_02_04_02_DESC = Greife Gegner aus der falschen Richtung an
+$BADGE_02_05_01_DESC = Zerstöre alle instabilen Sphären
+$BADGE_02_05_02_DESC = Flieg durch den gewaltigen Angriff
+
+$BADGE_03_01_01_DESC = Zerstöre alle eigenartigen Schiffe
+$BADGE_03_01_02_DESC = Sei gnädig zu dem letzten Gegner
+$BADGE_03_02_01_DESC = Triff den vergoldeten Gegner
+$BADGE_03_02_02_DESC = Stehle all die Eier
+$BADGE_03_03_01_DESC = Erledige es selbst
+$BADGE_03_03_02_DESC = Sammle genug Gegenstände am Ende
+$BADGE_03_04_01_DESC = Kämpf dich durch die erste Welle
+$BADGE_03_04_02_DESC = Entferne alle rauchenden Gegner
+$BADGE_03_05_01_DESC = Berühre alle markierten Platten
+$BADGE_03_05_02_DESC = Lass den großen Gegner nicht entwischen
+
+$BADGE_04_01_01_DESC = Zerstöre alle verirrten Gegner
+$BADGE_04_01_02_DESC = Dreh dich in die falsche Richtung
+$BADGE_04_02_01_DESC = Schieß immer auf das Licht
+$BADGE_04_02_02_DESC = Versteck dich in jeder Ecke
+$BADGE_04_03_01_DESC = Sammle alle flinken Objekte
+$BADGE_04_03_02_DESC = Streif entlang der gegnerischen Geschosse
+$BADGE_04_04_01_DESC = Triff mehrere Ziele zur selben Zeit
+$BADGE_04_04_02_DESC = Flieg um den Helfer herum
+$BADGE_04_05_01_DESC = Behalte dir einen der Asteroiden
+$BADGE_04_05_02_DESC = Verhindere einen gewaltigen Einschlag
+
+$BADGE_05_01_01_DESC = Reaktiviere alle Gegner
+$BADGE_05_01_02_DESC = Sammle alle Münzen
+$BADGE_05_02_01_DESC = Zerstöre einige Gegner zuerst
+$BADGE_05_02_02_DESC = Schieße auf die Wände in Reihenfolge
+$BADGE_05_03_01_DESC = Triff diesen Gegner
+$BADGE_05_03_02_DESC = Besuche alle Zwischenräume
+$BADGE_05_04_01_DESC = Beweg dich in jede Kugel
+$BADGE_05_04_02_DESC = Greife alle verfolgenden Ziele an
+$BADGE_05_05_01_DESC = Tanz dich durch die Herausforderung
+$BADGE_05_05_02_DESC = Entferne alle drehenden Blöcke
+
+$BADGE_06_01_01_DESC = Sammle alle beweglichen Flocken
+$BADGE_06_01_02_DESC = Fang die springenden Gegner ab
+$BADGE_06_02_01_DESC = Entferne alle Gegner unter dem Schnee
+$BADGE_06_02_02_DESC = Bleib stecken
+$BADGE_06_03_01_DESC = Öffne alle versteckten Schatzkisten
+$BADGE_06_03_02_DESC = Finde den geheimen Gegner
+$BADGE_06_04_01_DESC = Zerstöre das UFO
+$BADGE_06_04_02_DESC = Erreich die Spitze bei voller Geschwindigkeit
+$BADGE_06_05_01_DESC = Greif den mysteriösen Gegner an
+$BADGE_06_05_02_DESC = Triff alle zusätzlichen Ziele
+
+$BADGE_07_01_01_DESC = Berühr einen unsichtbaren Gegner
+$BADGE_07_01_02_DESC = Zerstöre alle versteckten Objekte
+$BADGE_07_02_01_DESC = Flieg in alle Diamanten
+$BADGE_07_02_02_DESC = Beweg dich gegen die rotierende Linie
+$BADGE_07_03_01_DESC = Greif den gegner mit deiner Waffe an
+$BADGE_07_03_02_DESC = Sammle alle versteckten Kugeln
+$BADGE_07_04_01_DESC = Teleportiere dich nur über eine kurze Distanz
+$BADGE_07_04_02_DESC = Spring über 3 Linien auf einmal
+$BADGE_07_05_01_DESC = Triff alle Zombie Schiffe
+$BADGE_07_05_02_DESC = Bleib in der Nähe des Helfers
+
+$BADGE_99_01_01_DESC = Triff alle zusätzlichen Gegner
+$BADGE_99_01_02_DESC = #
+$BADGE_99_02_01_DESC = Lerne dein Schiff zu drehen
+$BADGE_99_02_02_DESC = #
+$BADGE_99_03_01_DESC = Sammle alle Partikel
+$BADGE_99_03_02_DESC = #
+$BADGE_99_04_01_DESC = Greif den aufgespießten Gegner an
+$BADGE_99_04_02_DESC = #
+$BADGE_99_05_01_DESC = Beweg dich durch alle Geschosse
+$BADGE_99_05_02_DESC = #
+
+$ACHIEVEMENT_STAGE_01_01_DESC = Reflektiere ein Geschoss mindestens 20 mal
+$ACHIEVEMENT_STAGE_01_02_DESC = Berühre jeden Strahl
+$ACHIEVEMENT_STAGE_01_03_DESC = Beweg dich nicht während Gegner#in der Luft sind
+$ACHIEVEMENT_STAGE_01_04_DESC = Berühre den großen Gegner 7 mal#während er herum rauscht
+$ACHIEVEMENT_STAGE_01_05_DESC = Schieße nur nach rechts#(Standard Rotation)
+$ACHIEVEMENT_STAGE_01_06_DESC = Flieg durchs Tor
+
+$ACHIEVEMENT_STAGE_02_01_DESC = Hab mindestens 1500 Geschosse#zur selben Zeit aktiv
+$ACHIEVEMENT_STAGE_02_02_DESC = Berühre niemals die selbe Platte zweimal#wenn sich alles dreht
+$ACHIEVEMENT_STAGE_02_03_DESC = Hör niemals auf dich zu bewegen,#hör niemals auf zu schießen
+$ACHIEVEMENT_STAGE_02_04_DESC = Dreh dich nicht mehr als 20 mal
+$ACHIEVEMENT_STAGE_02_05_DESC = Finde und berühre den Helfer
+$ACHIEVEMENT_STAGE_02_06_DESC = Zerstöre den selben Spieler zweimal#mit dem selben Strahl
+
+$ACHIEVEMENT_STAGE_03_01_DESC = Folge dem Kopf der Schlange#für mindestens 10 Sekunden
+$ACHIEVEMENT_STAGE_03_02_DESC = Greife jeden Gegner einmal als falsches Ziel an
+$ACHIEVEMENT_STAGE_03_03_DESC = Tanze mindestens 30 Sekunden mit dem#letzten Gegner ohne getroffen zu werden
+$ACHIEVEMENT_STAGE_03_04_DESC = Zerstöre keinen der kleinen Gegner
+$ACHIEVEMENT_STAGE_03_05_DESC = Beweg dich nur entlang der Mittellinie#bis alles still wird
+$ACHIEVEMENT_STAGE_03_06_DESC = Lass dich von jeder Panzer-Waffe#genau einmal treffen
+
+$ACHIEVEMENT_STAGE_04_01_DESC = Schieße niemals nach links#(Standard Rotation)
+$ACHIEVEMENT_STAGE_04_02_DESC = Dreh dein Schiff niemals manuell
+$ACHIEVEMENT_STAGE_04_03_DESC = Zerstöre alle Gegner während#du verlangsamt bist
+$ACHIEVEMENT_STAGE_04_04_DESC = Triff dich nicht selbst
+$ACHIEVEMENT_STAGE_04_05_DESC = Behalte alle schießenden Gegner#bis zum Ende
+$ACHIEVEMENT_STAGE_04_06_DESC = Zerstöre einen der großen Asteroiden#ohne Schaden zu erleiden
+
+$ACHIEVEMENT_STAGE_05_01_DESC = Triff jeden Gegner mindestens einmal
+$ACHIEVEMENT_STAGE_05_02_DESC = Verfehle niemals einen Schuss
+$ACHIEVEMENT_STAGE_05_03_DESC = Zerstöre 30 Gegner aus#dem Inneren der Felsen
+$ACHIEVEMENT_STAGE_05_04_DESC = Bleib über einer Kugel welche#nicht mehr existiert
+$ACHIEVEMENT_STAGE_05_05_DESC = Berühre niemals einen festen Block
+$ACHIEVEMENT_STAGE_05_06_DESC = Besiege den Boss ohne dich jemals#selbst zu bewegen
+
+$ACHIEVEMENT_STAGE_06_01_DESC = Zerstöre alle Gegner während du von#einem Geist heimgesucht wirst
+$ACHIEVEMENT_STAGE_06_02_DESC = Räum alles auf bevor du#den Abschnitt beendest
+$ACHIEVEMENT_STAGE_06_03_DESC = Erzeuge den kleinstmöglichen Raum
+$ACHIEVEMENT_STAGE_06_04_DESC = Greif nur entgegen der Flugrichtung an
+$ACHIEVEMENT_STAGE_06_05_DESC = Fange nur Gegner mit einem einzigen Spieler#während ihr gemeinsam spielt
+$ACHIEVEMENT_STAGE_06_06_DESC = Berühre alle frischen Eiswürfel
+
+$ACHIEVEMENT_STAGE_07_01_DESC = Zerstöre 5 Gegner während kein Licht#auf sie scheint
+$ACHIEVEMENT_STAGE_07_02_DESC = Lass keines der Felder verschwinden
+$ACHIEVEMENT_STAGE_07_03_DESC = Schlag nur zu während das Schild aktiv ist
+$ACHIEVEMENT_STAGE_07_04_DESC = Lege eine lange Gesamt-Strecke#durch Teleportation zurück
+$ACHIEVEMENT_STAGE_07_05_DESC = Zerstöre alle Gegner einmal#in verkehrter Reihenfolge
+$ACHIEVEMENT_STAGE_07_06_DESC = Sammle deine erste Kugel ohne#ein Geschoss zu reflektieren
+
+$ACHIEVEMENT_STAGE_99_01_DESC = Zerstöre alle Gegner ohne auch nur#eine Taste zu drücken
+$ACHIEVEMENT_STAGE_99_02_DESC = Zerstöre nur einen Gegner pro Drehung
+$ACHIEVEMENT_STAGE_99_03_DESC = Füge 4 Gegner zusammen
+$ACHIEVEMENT_STAGE_99_04_DESC = Richte nur Schaden während#ungerader Sekunden an
+$ACHIEVEMENT_STAGE_99_05_DESC = Verursache und erleide keinen Schaden
+$ACHIEVEMENT_STAGE_99_06_DESC = Lass den zusätzlichen Gegner am Leben
+
+$UNLOCK_01_NAME = SPIEGELMODUS
+$UNLOCK_01_DESC = Invertiere das Spiel horizontal
+$UNLOCK_02_NAME = SUPERGESCHWINDIGKEIT
+$UNLOCK_02_DESC = Erhöhe die Geschwindigkeit auf bis zu 200%
+$UNLOCK_03_NAME = KRAFTSCHILD
+$UNLOCK_03_DESC = Wähle ein stärkeres Schild (wenn du willst)
+$UNLOCK_04_NAME = PULSE CANON
+$UNLOCK_04_DESC = Wähle eine aufladbare Waffe
+
+$BOSS_TITLE_0101 = Der Endlose Träumer
+$BOSS_TITLE_0102 = Das Tor der Schöpfung
+$BOSS_TITLE_0103 = Der Letzte Verteidiger
+$BOSS_TITLE_0201 = #
+$BOSS_TITLE_0202 = #
+$BOSS_TITLE_0203 = Der Zerbrochene Drache
+$BOSS_TITLE_0301 = #
+$BOSS_TITLE_0302 = Der Unberührbare
+$BOSS_TITLE_0303 = #
+$BOSS_TITLE_0401 = #
+$BOSS_TITLE_0402 = #
+$BOSS_TITLE_0403 = Das Zentrum des Universums
+$BOSS_TITLE_0501 = #
+$BOSS_TITLE_0502 = #
+$BOSS_TITLE_0503 = Die Unvergängliche Flamme
+$BOSS_TITLE_0601 = #
+$BOSS_TITLE_0602 = #
+$BOSS_TITLE_0603 = Die Unzerstörbare Festung
+$BOSS_TITLE_0701 = #
+$BOSS_TITLE_0702 = Der Weltenfresser
+$BOSS_TITLE_0703 = #
+$BOSS_TITLE_0801 = Der Finale Gegner
+$BOSS_TITLE_0802 = #
+$BOSS_TITLE_9901 = Die Klinge des Anfangs
+$BOSS_TITLE_HIDDEN = Dein Bester Freund

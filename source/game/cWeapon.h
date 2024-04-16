@@ -53,11 +53,12 @@ public:
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // get object properties
-    inline  coreBool    GetCooldown   ()const {return m_CooldownTimer.GetStatus();}
-    inline  cPlayer*    GetOwner      ()const {return m_pOwner;}
-    virtual coreVector3 GetColorEnergy()const {return coreVector3(0.5f,0.5f,0.5f);}
-    virtual coreVector3 GetColorShip  ()const {return coreVector3(0.5f,0.5f,0.5f);}
-    virtual coreUint8   GetElement    ()const {return ELEMENT_NEUTRAL;}
+    inline  coreBool         GetCooldown   ()const {return m_CooldownTimer.GetStatus();}
+    inline  const coreUint8& GetLastStatus ()const {return m_iLastStatus;}
+    inline  cPlayer*         GetOwner      ()const {return m_pOwner;}
+    virtual coreVector3      GetColorEnergy()const {return coreVector3(0.5f,0.5f,0.5f);}
+    virtual coreVector3      GetColorShip  ()const {return coreVector3(0.5f,0.5f,0.5f);}
+    virtual coreUint8        GetElement    ()const {return ELEMENT_NEUTRAL;}
 
 
 protected:

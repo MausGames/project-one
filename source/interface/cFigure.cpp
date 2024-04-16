@@ -95,6 +95,7 @@ void cFigure::Move()
     m_Fallback.SetAlignment(this->GetAlignment());
     m_Fallback.SetColor3   (this->GetColor3   () * COLOR_MENU_WHITE);
     m_Fallback.SetAlpha    (this->GetAlpha    ());
+    m_Fallback.SetScale    (this->GetSize     ().Processed(SIGN));
     m_Fallback.Move();
 
     // 

@@ -23,8 +23,6 @@
 // time bubble hides stopping background movement
 // ACHIEVEMENT: destroy one of the big meteors
 // TODO 1: hard mode: in intro fliegt ein meteorit auf den bildschirm und crackt ihn
-// TODO 1: [MF] MAIN: juiciness (move, rota, muzzle, effects)
-// TODO 1: [MF] lebenspunkte bei time-phase begrenzen (geben keine punkte, sollte somit als soft-clamp in takedamage eingebaut werden), aber heal-status mit factor<=0.0f erst umschlagen, und auflösen mit der welle (effekt muss es anzeigen)
 // TODO 1: [MF] art der ring-rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
 
 
@@ -73,7 +71,7 @@ cMessierBoss::cMessierBoss()noexcept
     this->SetOrientation(coreVector3(1.0f,1.0f,0.0f).Normalized());
 
     // configure the boss
-    this->Configure(6600, 0u, COLOR_SHIP_MAGENTA);
+    this->Configure(6300, 0u, COLOR_SHIP_MAGENTA);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_BOTTOM);
 
     // 
@@ -103,7 +101,7 @@ cMessierBoss::cMessierBoss()noexcept
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i)
     {
-        m_aClock[i].DefineModel  (i ? "object_arrow_long.md3" : "object_arrow.md3");
+        m_aClock[i].DefineModel  (i ? "object_arrow_long.md3" : "object_arrow_short.md3");
         m_aClock[i].DefineTexture(0u, "effect_energy.png");
         m_aClock[i].DefineProgram("effect_energy_flat_invert_program");
         m_aClock[i].SetSize      (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
@@ -216,6 +214,7 @@ void cMessierBoss::__KillOwn(const coreBool bAnimated)
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         pPlayer->RemoveStatus(PLAYER_STATUS_HEALER);
+        pPlayer->RemoveStatus(PLAYER_STATUS_GYRO);
     });
 
     // 
@@ -476,9 +475,6 @@ void cMessierBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(30u)
-            //PHASE_CHANGE_TO(70u)
-            
-           // g_pEnvironment->SetTargetSpeedNow(0.0f);
         });
     }
 
@@ -746,6 +742,8 @@ void cMessierBoss::__MoveOwn()
                         pPlayer->AddStatus(PLAYER_STATUS_HEALER);
                     });
 
+                    this->SetCurHealth(1700 * 2 - this->GetCurHealth());
+
                     this->__EnableClock();
                     this->__EnableBubble(COLOR_ENERGY_PURPLE * 1.0f);
                 }
@@ -762,6 +760,12 @@ void cMessierBoss::__MoveOwn()
             {
                 pPlayer->RemoveStatus(PLAYER_STATUS_HEALER);
             });
+
+            this->SetCurHealth(3500 * 2 - this->GetCurHealth());
+
+            g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_PURPLE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
+            g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
     }
 
@@ -852,6 +856,11 @@ void cMessierBoss::__MoveOwn()
                     pSquad2->GetEnemy(i)->ChangeToNormal();
                     pSquad2->GetEnemy(i)->Resurrect();
                 }
+
+                g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+                {
+                    pPlayer->AddStatus(PLAYER_STATUS_GYRO);
+                });
             }
         });
     }
@@ -965,6 +974,11 @@ void cMessierBoss::__MoveOwn()
                 pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
             });
 
+            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                pPlayer->RemoveStatus(PLAYER_STATUS_GYRO);
+            });
+
             g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
         }
@@ -1058,7 +1072,7 @@ void cMessierBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
                 g_pSpecialEffects->SlowScreen(4.0f);
 
                 PHASE_CHANGE_INC
@@ -1072,7 +1086,7 @@ void cMessierBoss::__MoveOwn()
         for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
         {
             coreObject3D* pMeteor = (*pList->List())[i];
-            if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+            if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
             const coreVector2 vDiff = pMeteor->GetPosition().xy() - vCameraPos;
             if(vDiff.IsNull()) continue;
@@ -1172,7 +1186,7 @@ void cMessierBoss::__MoveOwn()
 
             // 
             m_aRing[i].SetPosition   (this->GetPosition());
-            m_aRing[i].SetSize       (coreVector3(1.0f,1.0f,1.0f) * LERP(10.0f, 30.0f, fTime));
+            m_aRing[i].SetSize       (coreVector3(1.0f,1.0f,1.0f) * LERP(10.0f, 35.0f, fTime));
             m_aRing[i].SetDirection  (coreVector3(vDir, 0.0f));
             m_aRing[i].SetOrientation(OriRoundDir(vOri, vDir));
             m_aRing[i].SetAlpha      (BLENDH3(MIN(1.0f - fTime, 4.0f * fTime, 1.0f)));
@@ -1194,7 +1208,7 @@ void cMessierBoss::__MoveOwn()
         for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
         {
             coreObject3D* pMeteor = (*pList->List())[i];
-            if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+            if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
             // 
             const coreVector2 vRelPos = pMeteor->GetPosition().xy() - vCameraPos;
@@ -1296,8 +1310,8 @@ void cMessierBoss::__MoveOwn()
         m_fBubbleTime.Update(-0.2f * m_fTimeFactor);
 
         // 
-        if(m_bBubbleState) m_fBubbleAlpha.UpdateMin( 1.0f, 1.0f);
-                      else m_fBubbleAlpha.UpdateMax(-1.0f, 0.0f);
+        if(m_bBubbleState) m_fBubbleAlpha.UpdateMin( 0.5f, 1.0f);
+                      else m_fBubbleAlpha.UpdateMax(-0.5f, 0.0f);
 
         // 
         if(!m_fBubbleAlpha) this->__DisableBubble(false);
@@ -1386,32 +1400,31 @@ void cMessierBoss::__MoveOwn()
 
             if(pEnemy->ReachedDeath())
             {
-                if(!g_pGame->IsEasy())
+                const coreVector2 vPos = pEnemy->GetPosition().xy();
+
+                for(coreUintW j = 3u; j--; )
                 {
-                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir2 = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 120.0f));
 
-                    for(coreUintW j = 3u; j--; )
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f * 0.8f, this, vPos, vDir2)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f * 0.8f, this, vPos, vDir2)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f * 0.8f, this, vPos, vDir2)->ChangeSize(1.7f);
+
+                    if(!g_pGame->IsEasy())
                     {
-                        const coreVector2 vDir2 = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 60.0f));
-
-                        // 
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f * 0.8f, this, vPos,  vDir2)->ChangeSize(1.7f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f * 0.8f, this, vPos,  vDir2)->ChangeSize(1.7f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f * 0.8f, this, vPos,  vDir2)->ChangeSize(1.7f);
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f * 0.8f, this, vPos, -vDir2)->ChangeSize(1.7f);
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f * 0.8f, this, vPos, -vDir2)->ChangeSize(1.7f);
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f * 0.8f, this, vPos, -vDir2)->ChangeSize(1.7f);
                     }
-
-                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
                 }
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
 
                 if(pSquad1->GetNumEnemiesAlive() == 4u)
                 {
                     if(this->_ResurrectHelper(ELEMENT_GREEN, true))
                     {
                         g_pGame->GetHelper(ELEMENT_GREEN)->SetPosition(this->GetPosition());
-                        m_avVector[HELPER_DATA].xy((pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized());
                     }
                 }
             }
@@ -1492,7 +1505,7 @@ void cMessierBoss::__MoveOwn()
     {
         const coreFloat fTime = pOrangeHelper->GetLifeTime() * 0.3f;
 
-        pOrangeHelper->SetPosition(coreVector3(LERPBR(coreVector2(1.3f,-1.0f) * FOREGROUND_AREA, this->GetPosition().xy(), fTime), 0.0f));
+        pOrangeHelper->SetPosition(coreVector3(LERPBR(coreVector2(1.3f,0.0f) * FOREGROUND_AREA, this->GetPosition().xy(), fTime), 0.0f));
 
         if(fTime >= 1.0f) this->_KillHelper(ELEMENT_ORANGE, true);
     }
@@ -1557,7 +1570,7 @@ void cMessierBoss::__MoveOwn()
     cHelper* pGreenHelper = g_pGame->GetHelper(ELEMENT_GREEN);
     if(!pGreenHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        const coreVector2 vPos = pGreenHelper->GetPosition().xy() + m_avVector[HELPER_DATA].xy() * (10.0f * TIME);
+        const coreVector2 vPos = pGreenHelper->GetPosition().xy() + coreVector2(10.0f * TIME, 0.0f);
 
         pGreenHelper->SetPosition(coreVector3(vPos, 0.0f));
 

@@ -26,6 +26,7 @@ cHarenaMission::cHarenaMission()noexcept
 , m_Flummi       (HARENA_FLUMMIS)
 , m_iInsanity    (0u)
 , m_fAnimation   (0.0f)
+, m_bStory       (g_pSave->GetHeader().oProgress.aiAdvance[3] < 7u)
 {
     // 
     m_apBoss[0] = &m_Tiger;
@@ -128,7 +129,7 @@ cHarenaMission::cHarenaMission()noexcept
     }
 
     // 
-    m_Aim.DefineModel  ("object_arrow.md3");
+    m_Aim.DefineModel  ("object_arrow_short.md3");
     m_Aim.DefineTexture(0u, "effect_energy.png");
     m_Aim.DefineProgram("effect_energy_flat_invert_program");
     m_Aim.SetColor3    (COLOR_ENERGY_BLUE * 0.8f);

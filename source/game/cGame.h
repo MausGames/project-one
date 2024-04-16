@@ -16,6 +16,7 @@
 // TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
 // TODO 4: play-sounds in special-effects klasse verschieben
+// TODO 3: repair enemy sollte auf selber höhe wie m_aPlayer[i].RenderMiddle(); oder als erstes in TOP gezeichnet werden
 
 
 // ****************************************************************
@@ -164,18 +165,20 @@ struct sFragmentData final
 
 static constexpr sFragmentData g_aFragmentData[] =
 {
-    {1u, coreVector2(  0.0f, 1024.0f -  516.0f) / 1024.0f, coreVector2( 0.01f, 0.0f),   coreVector2(452.0f,517.0f) / 1024.0f, cCloudBackground  ::Color2 * 0.9f},
-    {7u, coreVector2(378.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f,  0.01f),  coreVector2(648.0f,329.0f) / 1024.0f, cGrassBackground  ::Color2 * 0.9f},
-    {3u, coreVector2(638.0f, 1024.0f -  328.0f) / 1024.0f, coreVector2( 0.0f, -0.005f), coreVector2(388.0f,329.0f) / 1024.0f, cSeaBackground    ::Color2 * 0.9f},
-    {4u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f,  0.02f),  coreVector2(372.0f,370.0f) / 1024.0f, cDesertBackground ::Color2 * 0.9f},
+    {8u, coreVector2(760.0f, 1024.0f -  837.0f) / 1024.0f, coreVector2(-0.01f, 0.0f),   coreVector2(264.0f,369.0f) / 1024.0f, cCloudBackground  ::Color2 * 0.9f},
+    {4u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f,  0.02f),  coreVector2(372.0f,370.0f) / 1024.0f, cGrassBackground  ::Color2 * 0.9f},
+    {5u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f, -0.01f),  coreVector2(520.0f,647.0f) / 1024.0f, cSeaBackground    ::Color2 * 0.9f},
+    {1u, coreVector2(  0.0f, 1024.0f -  516.0f) / 1024.0f, coreVector2( 0.01f, 0.0f),   coreVector2(452.0f,517.0f) / 1024.0f, cDesertBackground ::Color2 * 0.9f},
     {6u, coreVector2(439.0f, 1024.0f -  783.0f) / 1024.0f, coreVector2( 0.0f,  0.0f),   coreVector2(588.0f,533.0f) / 1024.0f, cSpaceBackground  ::Color2 * 0.9f},
     {2u, coreVector2(252.0f, 1024.0f -  453.0f) / 1024.0f, coreVector2( 0.0f,  0.005f), coreVector2(524.0f,454.0f) / 1024.0f, cVolcanoBackground::Color2 * 0.9f},
-    {5u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f, -0.01f),  coreVector2(520.0f,647.0f) / 1024.0f, cSnowBackground   ::Color2 * 0.9f},
-    {8u, coreVector2(760.0f, 1024.0f -  837.0f) / 1024.0f, coreVector2(-0.01f, 0.0f),   coreVector2(264.0f,369.0f) / 1024.0f, cMossBackground   ::Color2 * 0.9f},
-    {9u, coreVector2(250.0f, 1024.0f -  773.0f) / 1024.0f, coreVector2( 0.0f,  0.0f),   coreVector2(524.0f,524.0f) / 1024.0f, cDarkBackground   ::Color2 * 0.9f},
+    {7u, coreVector2(378.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f,  0.01f),  coreVector2(648.0f,329.0f) / 1024.0f, cSnowBackground   ::Color2 * 0.9f},
+    {3u, coreVector2(638.0f, 1024.0f -  328.0f) / 1024.0f, coreVector2( 0.0f, -0.005f), coreVector2(388.0f,329.0f) / 1024.0f, cMossBackground   ::Color2 * 0.9f},
+    {9u, coreVector2(250.0f, 1024.0f -  773.0f) / 1024.0f, coreVector2( 0.0f,  0.0f),   coreVector2(524.0f,524.0f) / 1024.0f, coreVector3(0.7f,0.7f,0.7f)},
     {0u, coreVector2(0.0f,0.0f),                           coreVector2( 0.0f,  0.0f),   coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f},   // #
     {0u, coreVector2(0.0f,0.0f),                           coreVector2( 0.0f,  0.0f),   coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f}    // #
 };
+
+static constexpr coreUintW g_aiFragmentOrder[] = {7u, 3u, 6u, 0u, 4u, 5u, 1u, 2u};
 
 #define FRAGMENT_POSITION(x) (g_aFragmentData[x].vOffset + g_aFragmentData[x].vSize * 0.5f - 0.5f)
 #define FRAGMENT_DIRECTION   (coreVector2(1.0f,1.0f).Normalized())
@@ -246,6 +249,7 @@ private:
     coreUint8 m_iDepthDebug;                // 
 
     coreUint8 m_iOutroType;                 // 
+    coreUint8 m_iOutroSub;                  // 
 
     coreBool  m_bVisibleCheck;              // 
     coreUint8 m_iRepairMove;                // 
@@ -281,7 +285,7 @@ public:
 
     // 
     void StartIntro();
-    void StartOutro(const coreUint8 iType);
+    void StartOutro(const coreUint8 iType, const coreUint8 iSub = 0u);
 
     // 
     void FadeMusic(const coreFloat fSpeed);
@@ -345,6 +349,8 @@ public:
     inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
     
     inline coreUintW GetPlayerIndex(const cPlayer* pPlayer)const {ASSERT(pPlayer) return (pPlayer - &m_aPlayer[0]);}
+    
+    coreBool IsAlone()const;
 
     // access game objects
     inline cPlayer*         GetPlayer             (const coreUintW iIndex)   {ASSERT(iIndex                   < GAME_PLAYERS) return &m_aPlayer[iIndex];}
@@ -359,6 +365,7 @@ public:
     inline cExhaustManager* GetExhaustManager     ()                         {return &m_ExhaustManager;}
     inline cInterface*      GetInterface          ()                         {return &m_Interface;}
     inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
+    inline cRepairEnemy*    GetRepairEnemy        ()const                    {return m_pRepairEnemy;}
     inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}
     inline const coreUintW& GetCurMissionIndex    ()const                    {return m_iCurMissionIndex;}
     inline cTimeTable*      GetTimeTable          ()                         {return &m_TimeTable;}

@@ -430,7 +430,7 @@ public:
     ASSIGN_ID(19, "Final")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.5f,0.5f) * 0.4f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.5f,0.5f) * 0.3f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
 
     // 
     inline cFinalBullet* SetTiltProperties(const coreVector3 vPosition, const coreVector3 vDirection) {this->SetPosition(vPosition); m_vFlyDir3D = vDirection; return this;}
@@ -486,9 +486,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
+    void __ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -638,9 +637,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
+    void __ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -676,9 +674,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
+    void __ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -714,9 +711,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
+    void __ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -790,9 +786,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
+    void __ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -826,7 +821,6 @@ public:
 private:
     // execute own routines
     void __ImpactOwn      (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn     ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };
@@ -862,7 +856,6 @@ public:
 private:
     // execute own routines
     void __ImpactOwn      (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn     ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };
@@ -934,9 +927,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
+    void __ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __MoveOwn  ()final;
 };
 
 

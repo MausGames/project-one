@@ -182,6 +182,9 @@ public:
     DISABLE_COPY(cBackground)
     ENABLE_ID_EX
 
+    // 
+    void Exit();
+
     // render and move the background
     void Render();
     void Move();
@@ -358,7 +361,7 @@ public:
 
     // 
     inline void SetSandMove (const coreVector2 vMove)  {m_vSandMove = vMove;}
-    inline void SetVeilAlpha(const coreFloat   fAlpha) {m_Veil.SetAlpha(fAlpha);}
+    inline void SetVeilAlpha(const coreFloat   fAlpha) {m_Veil.SetAlpha(fAlpha * 0.8f);}
     inline void SetTrail    (const coreBool    bTrail) {m_bTrail    = bTrail;}
 
     // 
@@ -560,7 +563,7 @@ class cDarkBackground final : public cBackground
 public:
     // 
     static constexpr const coreVector3 Color  = coreVector3(0.5f,0.5f,0.5f);
-    static constexpr const coreVector3 Color2 = coreVector3(0.8f,0.8f,0.8f);
+    static constexpr const coreVector3 Color2 = coreVector3(0.4f,0.4f,0.4f);
     static constexpr const coreVector2 Icon   = coreVector2(0.0f,0.5f);
 
 
@@ -574,6 +577,7 @@ private:
 
     coreUintW m_iIndexOffset;                 // 
 
+    coreFlow m_fAppear;                       // 
     coreFlow m_fDissolve;                     // 
     coreFlow m_afFade[DARK_BLOCKS];           // 
 
@@ -597,6 +601,7 @@ public:
     ASSIGN_ID(8, "Dark")
 
     // 
+    void Appear();
     void Dissolve();
     inline coreBool IsDissolved()const {return (m_fDissolve >= 10.0f);}
 

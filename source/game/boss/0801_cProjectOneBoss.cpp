@@ -8,25 +8,21 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// - yellow:  phase 3+A, phase 1+A [54]
-// - orange:  transition 2, transition 1, phase 2 [78]
-// - red:     phase 3, phase 2 [76]
-// - magenta: phase 1+A, phase 1+A, phase 2 [78]
-// - purple:  transition, phase, phase, phase, phase [75]
-// - blue:    phase 1, phase 3, phase 1 [63]
-// - cyan:    phase 2, phase 3 [40]
-// - green:   phase 2, transition 1, phase 2 [63]
-// - white:   transition, transition, transition, transition, transition [66]
+// - yellow:  [54] phase 3+A, phase 1+A
+// - orange:  [78] transition 2, transition 1, phase 2
+// - red:     [76] phase 3, phase 2
+// - magenta: [78] phase 1+A, phase 1+A, phase 2
+// - purple:  [75] transition, phase, phase, phase, phase
+// - blue:    [63] phase 1, phase 3, phase 1
+// - cyan:    [40] phase 2, phase 3
+// - green:   [63] phase 2, transition 1, phase 2
+// - white:   [66] transition, transition, transition, transition, transition
 // - intro:   phase
 
 // boss should use absolutely all mechanics from the game (so far), a color for every mission and its mechanics, with new combinations and twists, this makes the fight extremely long (>12 min), but it is possible to scale by reducing the required number of colors the player has to beat
 // TODO 1: remove turf from base classes
 // TODO 1: hard mode: add another mechanic to each sub-stage, spieler muss in der letzten phase doch angreifen
-// TODO 1: [MF] MAIN: medal goal, juiciness (move, rota, muzzle, effects), intro, outro
 // TODO 1: how to handle death on boss ? maybe keep finished helpers disabled and skip intro !
-// TODO 1: in easy fliegen die restlichen helfer nach außen weg bevor weiß kommt
-// TODO 1: [MF] measure each phase individually on normal (add code), and add separate times for easy and normal, easy uses the 4 smallest ones?
-// TODO 1: [MF] bei platten phase, blinkender (option) pfeil zeigt nächsten flug an
 
 // yellow:
 // spikes sollten so lang aktiv sein, dass es für den spieler wichtig ist seine position dem auf-und-ab der spikes anzupassen
@@ -141,12 +137,16 @@
 // ****************************************************************
 // constructor
 cProjectOneBoss::cProjectOneBoss()noexcept
-: m_fSmoothThrust    (0.0f)
+: m_vRoadsignPos     (coreVector2(0.0f,0.0f))
+, m_fRoadsignTime    (0.0f)
+, m_fSmoothThrust    (0.0f)
 , m_vOldDir          (coreVector2(0.0f,-1.0f))
 , m_fArrowValue      (0.0f)
 , m_iHelperState     (0u)
 , m_vLevelColor      (cProjectOneBoss::Color2)
 , m_fAnimation       (0.0f)
+, m_fChromaValue     (0.0f)
+, m_fChromaSpeed     (1.0f)
 , m_fWaveValue       (1.0f)
 , m_vColorFrom       (DARK_COLOR_DEFAULT)
 , m_vColorTo         (DARK_COLOR_DEFAULT)
@@ -229,6 +229,14 @@ cProjectOneBoss::cProjectOneBoss()noexcept
         m_aFragment[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     }
 
+    m_Roadsign.DefineModel  ("object_arrow_short.md3");
+    m_Roadsign.DefineTexture(0u, "effect_energy.png");
+    m_Roadsign.DefineProgram("effect_energy_flat_invert_program");
+    m_Roadsign.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 2.2f);
+    m_Roadsign.SetColor3    (COLOR_ENERGY_CYAN);
+    m_Roadsign.SetTexSize   (coreVector2(1.0f,1.0f) * 0.4f);
+    m_Roadsign.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
     // 
     m_Range.DefineModel  ("object_penta_top.md3");
     m_Range.DefineTexture(0u, "effect_energy.png");
@@ -263,7 +271,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_Exhaust.DefineModel  ("object_tube_open.md3");
+    m_Exhaust.DefineModel  ("object_tube.md3");
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetDirection (this->GetDirection());
@@ -303,8 +311,8 @@ cProjectOneBoss::~cProjectOneBoss()
     this->Kill(false);   // TODO 1: kill(false) could be dangerous on all bosses, e.g. inner-mission is already gone
 
     // 
-    for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i)
-        this->__DisableFragment(i, false);
+    for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i) this->__DisableFragment(i, false);
+    this->__DisableRoadsign(false);
 }
 
 
@@ -367,6 +375,18 @@ void cProjectOneBoss::__ResurrectOwn()
 
     // 
     g_pGame->GetCurMission()->SetDelay(true);
+
+    // 
+    const coreUint8* piFragment = g_pSave->GetHeader().oProgress.aiFragment;
+    m_aiCounter[FRAGMENT_PHASE] = std::all_of(piFragment, piFragment + PROJECTONE_FRAGMENTS, [](const coreUint8 A) {return A;}) ? 1 : 0;
+
+    for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i)
+    {
+        constexpr coreUintW aiOrder[] = {3u, 5u, 7u, 4u, 0u, 6u, 2u, 1u};
+        STATIC_ASSERT(ARRAY_SIZE(aiOrder) == PROJECTONE_FRAGMENTS)
+
+        if(piFragment[aiOrder[i]]) ADD_BIT(m_iHelperHit, i)
+    }
 }
 
 
@@ -375,8 +395,8 @@ void cProjectOneBoss::__ResurrectOwn()
 void cProjectOneBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
-    for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i)
-        this->__DisableFragment(i, bAnimated);
+    for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i) this->__DisableFragment(i, bAnimated);
+    this->__DisableRoadsign(bAnimated);
 
     // 
     for(coreUintW i = 0u; i < PROJECTONE_SHIELDS; ++i)
@@ -424,8 +444,8 @@ void cProjectOneBoss::__RenderOwnUnder()
 
         // 
         m_Bubble .Render();
-        m_Exhaust.Render();
         m_Wind   .Render();
+        m_Exhaust.Render();
     }
 }
 
@@ -445,6 +465,10 @@ void cProjectOneBoss::__RenderOwnTop()
         // 
         m_Arrow.Render();   // # swapped
         m_Range.Render();
+
+        // 
+        m_Roadsign.Render();
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Roadsign);
     }
 
     if(std::any_of(m_aFragment, m_aFragment + PROJECTONE_FRAGMENTS, [](const coreObject3D& A) {return A.IsEnabled(CORE_OBJECT_ENABLE_RENDER);}))
@@ -474,6 +498,8 @@ void cProjectOneBoss::__MoveOwn()
     cPlayer* pOther = g_pGame->GetPlayer(1u);
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
+    coreFloat fThrustOverride = 0.0f;
+
     // ################################################################
     // 
     if(m_iPhase == 0u)
@@ -497,10 +523,10 @@ void cProjectOneBoss::__MoveOwn()
             switch(i % 4u)
             {
             default: ASSERT(false)
-            case 0u: fSide = -0.35f; break;
-            case 1u: fSide =  0.75f; break;
-            case 2u: fSide = -0.75f; break;
-            case 3u: fSide =  0.35f; break;
+            case 0u: fSide = -0.45f; break;
+            case 1u: fSide =  0.85f; break;
+            case 2u: fSide = -0.85f; break;
+            case 3u: fSide =  0.45f; break;
             }
 
             const coreVector2 vPos = coreVector2(fSide * 0.9f * LERPH3(1.0f, 0.8f, fTime), LERPH3(-1.2f, 1.3f, fTime)) * FOREGROUND_AREA;
@@ -510,6 +536,25 @@ void cProjectOneBoss::__MoveOwn()
             if((i == PROJECTONE_SHIELDS - 1u) && (fTime >= 1.0f))
                 PHASE_CHANGE_INC
         }
+
+        PHASE_CONTROL_TIMER(0u, 0.1f, LERP_LINEAR)
+        {
+            if(PHASE_BEGINNING)
+            {
+                this->SetPosition(coreVector3(0.0f,-1.5f,0.0f) * FOREGROUND_AREA3);
+
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.8f, SOUND_EFFECT_FLY);
+            }
+
+            const coreFloat   fReal = MAX(fTime * 10.0f, 0.0f);
+            const coreFloat   fPos  = MIN(this->GetPosition().y + 90.0f * fReal * TIME, 1000.0f);
+            const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 2.0f*PI, 0.6f * fReal));
+
+            this->SetPosition   (coreVector3(this->GetPosition().x, fPos, this->GetPosition().z));
+            this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
+            this->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+            fThrustOverride = (fReal < 0.2f) ? LERPB(0.0f, 0.7f, fReal / 0.2f) : LERPB(0.7f, 0.3f, fReal - 0.2f);
+        });
     }
 
     // ################################################################
@@ -533,13 +578,13 @@ void cProjectOneBoss::__MoveOwn()
 
             this->__StartFeeling();
 
-            g_pSpecialEffects->PlaySound(coreVector3(0.0f,1.3f,0.0f) * FOREGROUND_AREA3, 1.0f, 1.0f, SOUND_SHIP_FLY);
+            this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
+            this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
         }
 
         PHASE_CONTROL_TIMER(0u, 0.4f, LERP_BREAK)
         {
-            this->DefaultMoveLerp     (coreVector2(0.0f,1.3f), coreVector2(0.0f,0.0f), fTime);
-            this->DefaultOrientateLerp(0.0f*PI,                2.0f*PI,                fTime);
+            this->DefaultMoveLerp(coreVector2(0.0f,1.3f), coreVector2(0.0f,0.6f), fTime);
 
             if(PHASE_TIME_POINT(0.1f))
                 this->_StartBoss();
@@ -556,7 +601,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            //PHASE_CHANGE_TO(40u)                                       
+            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 
@@ -566,7 +611,7 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.8f)
         {
-            PHASE_CHANGE_TO((coreMath::PopCount(m_iHelperState) == (g_pGame->IsEasy() ? 4u : 8u)) ? 40u : 32u)
+            PHASE_CHANGE_TO(m_bDead ? 40u : 32u)
         });
     }
 
@@ -581,6 +626,7 @@ void cProjectOneBoss::__MoveOwn()
             m_fWaveValue = 1.1f;
 
             this->__EndFeeling();
+            this->AddStatus(ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);   // # after EndFeeling
 
             this->__DisableRange();
             this->__DisableWind ();
@@ -590,11 +636,9 @@ void cProjectOneBoss::__MoveOwn()
 
         if(PHASE_MAINTIME_POINT(6.0f))
         {
-            const coreUint8* piFragment = g_pSave->GetHeader().oProgress.aiFragment;
-
-            if(std::all_of(piFragment, piFragment + 8u, [](const coreUint8 A) {return A;}))
+            if(m_aiCounter[FRAGMENT_PHASE] == 1)
             {
-                m_aiCounter[FRAGMENT_PHASE] = 1;
+                m_aiCounter[FRAGMENT_PHASE] = 2;
 
                 this->_CreateFragment(8u);
 
@@ -613,12 +657,17 @@ void cProjectOneBoss::__MoveOwn()
 
                     g_pSpecialEffects->CreateBlowColor(pOther->GetPosition(), coreVector3(m_avVector[FINAL_PUSH].xy(), 0.0f), SPECIAL_BLOW_SMALL, COLOR_ENERGY_WHITE * 0.9f);
                 }
+
+                if(g_pGame->GetKind() == GAME_KIND_ALL)
+                {
+                    this->AddStatus(ENEMY_STATUS_INVINCIBLE);
+                }
             }
         }
 
         cItem* pItem = g_pGame->GetItemManager()->GetNumItems() ? g_pGame->GetItemManager()->GetItem(0u) : NULL;
 
-        if(m_aiCounter[FRAGMENT_PHASE])
+        if(m_aiCounter[FRAGMENT_PHASE] == 2)
         {
             PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
             {
@@ -645,16 +694,21 @@ void cProjectOneBoss::__MoveOwn()
             g_pSpecialEffects->CreateExplosion (this->GetPosition());
             g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
             g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-            g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
+            g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
             g_pSpecialEffects->SlowScreen(4.0f);
 
             g_pGame->GetItemManager()->ClearItems(true);
 
-            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            if(m_aiCounter[FRAGMENT_PHASE])
             {
-                pPlayer->ActivateNormalShading();
-                g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
-            });
+                g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+                {
+                    pPlayer->ActivateNormalShading();
+                    g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
+                });
+            }
+
+            if(pOther->HasStatus(PLAYER_STATUS_NO_INPUT_ALL)) pOther->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
         }
     }
 
@@ -682,7 +736,7 @@ void cProjectOneBoss::__MoveOwn()
 
             bFinished = false;
 
-            const coreFloat fTime = CLAMP01((m_fPhaseTime - INTERFACE_FRAGMENT_DURATION_EXT - I_TO_F(i) * 0.3f) * 0.7f);
+            const coreFloat fTime = CLAMP01((m_fPhaseTime - INTERFACE_FRAGMENT_DURATION_EXT - I_TO_F(g_aiFragmentOrder[i]) * 0.3f) * 0.7f);
 
             const coreVector2 vDir2 = FRAGMENT_DIRECTION;
             const coreVector2 vPos2 = MapToAxisInv(FRAGMENT_POSITION(i), vDir2) * FOREGROUND_AREA;
@@ -703,7 +757,7 @@ void cProjectOneBoss::__MoveOwn()
             g_pSpecialEffects->CreateExplosion (pPlayer->GetPosition());
             g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), 200.0f, 400u, true);
             g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-            g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
+            g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
             g_pSpecialEffects->SlowScreen(4.0f);
 
             pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
@@ -718,7 +772,7 @@ void cProjectOneBoss::__MoveOwn()
     // 
     else if(m_iPhase == 13u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.5f)
+        PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
             PHASE_CHANGE_INC
         });
@@ -749,15 +803,18 @@ void cProjectOneBoss::__MoveOwn()
             }
         }
 
+        const coreFloat   fSide    = g_pGame->IsMulti() ? 10.0f : 0.0f;
+        const coreVector2 vTarget1 = coreVector2(-fSide, 0.0f);
+        const coreVector2 vTarget2 = coreVector2( fSide, 0.0f);
+
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_SMOOTH)
         {
-            const coreFloat fSide = g_pGame->IsMulti() ? 10.0f : 0.0f;
 
-            this->DefaultMoveLerp(m_vLastPosition, coreVector2(-fSide / FOREGROUND_AREA.x, 0.0f), fTime);
+            this->DefaultMoveLerp(m_vLastPosition, vTarget1 / FOREGROUND_AREA, fTime);
 
             if(g_pGame->IsMulti())
             {
-                pOther->SetPosition   (coreVector3(LERP(coreVector2(60.0f,-20.0f), coreVector2(fSide, 0.0f), fTime), 0.0f));
+                pOther->SetPosition   (coreVector3(LERP(coreVector2(60.0f,-20.0f), vTarget2, fTime), 0.0f));
                 pOther->SetDirection  (this->GetDirection().InvertedX());
                 pOther->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
             }
@@ -774,14 +831,14 @@ void cProjectOneBoss::__MoveOwn()
         for(coreUintW i = 0u; i < PROJECTONE_SHIELDS; ++i)
         {
             const coreVector2 vDir = coreVector2::Direction((2.0f*PI) * I_TO_F(i) / I_TO_F(PROJECTONE_SHIELDS) - m_avVector[HELPER_DATA].z);
-            const coreVector2 vPos = this->GetPosition().xy() + vDir * fSpawn;
+            const coreVector2 vPos = vTarget1 + vDir * fSpawn;
 
             g_pGame->GetHelper(ELEMENT_YELLOW + i)->SetPosition(coreVector3(vPos, 0.0f));
         }
 
         if(g_pGame->IsMulti())
         {
-            const coreVector2 vPos = pOther->GetPosition().xy() + coreVector2(0.0f,1.0f) * fSpawn;
+            const coreVector2 vPos = vTarget2 + coreVector2(0.0f,1.0f) * fSpawn;
 
             g_pGame->GetHelper(ELEMENT_WHITE)->SetPosition(coreVector3(vPos, 0.0f));
         }
@@ -799,12 +856,16 @@ void cProjectOneBoss::__MoveOwn()
             g_pGame->GetHelper(ELEMENT_WHITE)->RemoveStatus(HELPER_STATUS_BOTTOM);
 
             g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_WHITE * 0.9f);
+            g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 200.0f, 100u, COLOR_ENERGY_WHITE * 0.9f);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_02);
 
             if(g_pGame->IsMulti())
             {
                 g_pSpecialEffects->MacroExplosionColorBig(pOther->GetPosition(), COLOR_ENERGY_WHITE * 0.9f);
+                g_pSpecialEffects->CreateSplashColor(pOther->GetPosition(), 200.0f, 100u, COLOR_ENERGY_WHITE * 0.9f);
                 g_pSpecialEffects->PlaySound(pOther->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
+                g_pSpecialEffects->PlaySound(pOther->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_02);
             }
             
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
@@ -835,7 +896,7 @@ void cProjectOneBoss::__MoveOwn()
     // 
     else if(m_iPhase == 15u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.45f)
+        PHASE_CONTROL_PAUSE(0u, 0.25f)
         {
             this->Kill(false);
         });
@@ -845,10 +906,8 @@ void cProjectOneBoss::__MoveOwn()
     // 
     else if(m_iPhase == 30u)
     {
-        PHASE_CONTROL_PAUSE(0u, 2.0f)
-        {
-            PHASE_CHANGE_INC
-        });
+        // # nothing
+        PHASE_CHANGE_INC
     }
 
     // ################################################################
@@ -859,7 +918,15 @@ void cProjectOneBoss::__MoveOwn()
         {
             m_aiCounter[SELECTED_HELPER] = -1;
             m_avVector [HELPER_DATA].z   = 1.7f*PI;
+
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FLY);
         }
+
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_SMOOTH)
+        {
+            this->DefaultMoveLerp     (m_vLastPosition, coreVector2(0.0f,0.0f), fTime);
+            this->DefaultOrientateLerp(0.0f*PI,         2.0f*PI,                fTime);
+        });
 
         for(coreUintW i = 0u; i < DARK_BLOCKS; ++i)
         {
@@ -877,7 +944,7 @@ void cProjectOneBoss::__MoveOwn()
 
         const coreFloat fTime  = MIN1(m_fPhaseTime * 0.3f);
         const coreFloat fSpeed = 0.5f + 2.5f * SIN(fTime * (1.0f*PI));
-        const coreFloat fSpawn = LERPB(FOREGROUND_AREA.x * 1.2f * SQRT2, 15.0f, fTime);
+        const coreFloat fSpawn = LERPB(FOREGROUND_AREA.x * 1.25f * SQRT2, 15.0f, fTime);
         const coreFloat fFade  = LERPH3(0.0f, 1.0f, CLAMP01(m_fPhaseTime - (1.0f / 0.3f - 1.0f)));
 
         const coreUintW iRotaCount = PROJECTONE_SHIELDS;
@@ -896,7 +963,7 @@ void cProjectOneBoss::__MoveOwn()
             if(PHASE_MAINTIME_POINT(1.0f / 0.3f - 1.0f)) pShield->Resurrect();
 
             const coreVector2 vDir = coreVector2::Direction((2.0f*PI) * I_TO_F(iRotaNum) * RCP(I_TO_F(iRotaCount)) + m_avVector[HELPER_DATA].z);
-            const coreVector2 vPos = this->GetPosition().xy() + vDir * fSpawn;
+            const coreVector2 vPos = vDir * fSpawn;
 
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
 
@@ -919,6 +986,24 @@ void cProjectOneBoss::__MoveOwn()
             for(coreUintW j = 0u; j < PROJECTONE_SHIELDS; ++j)
                 m_aShield[j].AddStatus(ENEMY_STATUS_GHOST);
         }
+        
+        if(PHASE_MAINTIME_AFTER(4.0f))
+        PHASE_CONTROL_TICKER(1u, 0u, 10.0f, LERP_LINEAR)
+        {
+            if(g_pGame->IsEasy() && ((iTick % 10u >= 4u))) return;
+
+            for(coreUintW i = 0u; i < PROJECTONE_SHIELDS; ++i)
+            {
+                if(HAS_BIT(m_iHelperState, i)) continue;
+
+                cHelper* pHelper = g_pGame->GetHelper(ELEMENT_YELLOW + i);
+
+                const coreVector2 vPos = pHelper->GetPosition().xy();
+                const coreVector2 vDir = vPos.Normalized();
+
+                this->__AddRainbowBullet(i, 1, 1.0f, vPos, vDir);
+            }
+        });
     }
 
     // ################################################################
@@ -957,7 +1042,7 @@ void cProjectOneBoss::__MoveOwn()
             if(PHASE_MAINTIME_POINT(0.0f)) pShield->Resurrect();
 
             const coreVector2 vDir = coreVector2::Direction((2.0f*PI) * I_TO_F(iRotaNum) * RCP(I_TO_F(iRotaCount)) + m_avVector[HELPER_DATA].z);
-            const coreVector2 vPos = this->GetPosition().xy() + vDir * fSpawn;
+            const coreVector2 vPos = vDir * fSpawn;
 
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
 
@@ -980,6 +1065,24 @@ void cProjectOneBoss::__MoveOwn()
             for(coreUintW j = 0u; j < PROJECTONE_SHIELDS; ++j)
                 m_aShield[j].AddStatus(ENEMY_STATUS_GHOST);
         }
+        
+        if(PHASE_MAINTIME_AFTER(3.0f))
+        PHASE_CONTROL_TICKER(1u, 0u, 10.0f, LERP_LINEAR)
+        {
+            if(g_pGame->IsEasy() && ((iTick % 10u >= 4u))) return;
+
+            for(coreUintW i = 0u; i < PROJECTONE_SHIELDS; ++i)
+            {
+                if(HAS_BIT(m_iHelperState, i)) continue;
+
+                cHelper* pHelper = g_pGame->GetHelper(ELEMENT_YELLOW + i);
+
+                const coreVector2 vPos = pHelper->GetPosition().xy();
+                const coreVector2 vDir = vPos.Normalized();
+
+                this->__AddRainbowBullet(i, 1, 1.0f, vPos, vDir);
+            }
+        });
     }
 
     // ################################################################
@@ -1052,7 +1155,7 @@ void cProjectOneBoss::__MoveOwn()
             this->__EndFeeling();
 
             g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), m_aShield[iIndex].GetColor3());
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.2f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
         }
     }
@@ -1061,9 +1164,12 @@ void cProjectOneBoss::__MoveOwn()
     // receive white helper
     else if(m_iPhase == 40u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.5f)
+        PHASE_CONTROL_TIMER(0u, 0.25f, LERP_LINEAR)
         {
-            PHASE_CHANGE_INC
+            g_pGame->SetMusicVolume(1.0f - fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
         });
     }
 
@@ -1077,6 +1183,8 @@ void cProjectOneBoss::__MoveOwn()
         {
             pHelper->AddStatus(HELPER_STATUS_TOP);
             pHelper->Resurrect(false);
+
+            g_pSpecialEffects->PlaySound(coreVector3(0.0f,1.0f,0.0f) * FOREGROUND_AREA3, 1.0f, 1.0f, SOUND_EFFECT_FLY);
         }
 
         constexpr coreFloat fDelay = 2.5f / 0.6f;
@@ -1092,7 +1200,7 @@ void cProjectOneBoss::__MoveOwn()
         {
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
 
-            PHASE_CONTROL_TICKER(0u, 0u, 60.0f, LERP_LINEAR)
+            PHASE_CONTROL_TICKER(1u, 0u, 60.0f, LERP_LINEAR)
             {
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 1u, COLOR_ENERGY_WHITE * 0.9f);
             });
@@ -1102,11 +1210,28 @@ void cProjectOneBoss::__MoveOwn()
 
         if(fTime >= fDelay)
         {
+            m_bDead = false;
+
+            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                pPlayer->GetScoreTable()->CancelCooldown();
+            });
+
             this->__RequestMission(8u);
 
             this->__SwitchHealth(8u);
             this->__SwitchColor (8u, true);
             this->__StartMission(8u);
+
+            this->__StartFeeling();
+
+            this->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+
+            this->__CreateChroma(1.0f);
+
+            g_MusicPlayer.Stop();
+            g_MusicPlayer.Play();
+            g_pGame->SetMusicVolume(1.0f);
 
             g_pGame->RepairPlayer();
 
@@ -1115,6 +1240,7 @@ void cProjectOneBoss::__MoveOwn()
 
             g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_WHITE * 0.9f);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_02);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
 
             g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -1124,8 +1250,11 @@ void cProjectOneBoss::__MoveOwn()
                 pPlayer->ApplyForce(vDiff.Normalized() * 300.0f);
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_SHOOT);
 
-                pPlayer->ActivateDarkShading();
-                g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
+                if(m_aiCounter[FRAGMENT_PHASE])
+                {
+                    pPlayer->ActivateDarkShading();
+                    g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
+                }
             });
         }
     }
@@ -1162,6 +1291,11 @@ void cProjectOneBoss::__MoveOwn()
             pOther->SetDirection(coreVector3(vOtherDir, 0.0f));
         }
     }
+    else if(m_bDead)
+    {
+        const coreFloat fNewAngle = this->GetDirection().xy().Angle() - 0.2f * TIME;
+        this->SetDirection(coreVector3(coreVector2::Direction(fNewAngle), 0.0f));
+    }
 
     // 
     for(coreUintW i = 0u; i < PROJECTONE_SHIELDS; ++i)
@@ -1190,7 +1324,7 @@ void cProjectOneBoss::__MoveOwn()
         m_fSmoothThrust = m_fSmoothThrust + SIGN(fThrust) * (30.0f * TIME * SmoothTowards(ABS(fThrust), 1.0f));
 
         // 
-        const coreFloat fFullThrust = MAX0(m_fSmoothThrust) * 0.055f;
+        const coreFloat fFullThrust = fThrustOverride ? fThrustOverride : (MAX0(m_fSmoothThrust) * 0.055f);
              if( fFullThrust && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__EnableExhaust();
         else if(!fFullThrust &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableExhaust();
 
@@ -1359,8 +1493,28 @@ void cProjectOneBoss::__MoveOwn()
     }
 
     // 
+    m_fChromaValue.UpdateMax(-m_fChromaSpeed, 0.0f);
+    g_pPostProcessing->SetChroma(BLENDBR(m_fChromaValue) * 1.5f);
+
+    // 
     for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i)
         m_aFragment[i].Move();
+
+    // 
+    if(m_Roadsign.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        m_fRoadsignTime.Update(1.1f);
+        if(m_fRoadsignTime >= 3.0f) this->__DisableRoadsign(true);
+
+        const coreFloat   fAlpha = STEPH3(0.0f, 0.1f, m_fRoadsignTime) - STEPH3(2.9f, 3.0f, m_fRoadsignTime);
+        const coreFloat   fMove  = LERPS(-1.0f, 1.0f, m_fRoadsignTime * (1.0f*PI));
+        const coreVector2 vPos   = m_vRoadsignPos + m_Roadsign.GetDirection().xy() * fMove;
+
+        m_Roadsign.SetPosition (coreVector3(vPos, 0.0f));
+        m_Roadsign.SetAlpha    (1.0f * fAlpha);
+        m_Roadsign.SetTexOffset(coreVector2(m_fAnimation * 0.2f, 0.0f));
+        m_Roadsign.Move();
+    }
 }
 
 
@@ -1639,6 +1793,7 @@ void cProjectOneBoss::__MoveYellow()
     for(coreUintW j = 0u; j < HARENA_SPIKE_DIMENSION; ++j)
     {
         coreObject3D* pBoard = pHarena->GetSpikeBoard(j);
+        if(!pBoard->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         pBoard->SetPosition(coreVector3(pBoard->GetPosition().x, fHeight, 0.0f));
 
@@ -1728,6 +1883,11 @@ void cProjectOneBoss::__MoveOrange()
         this->SetPosition(coreVector3(LERP(vTo, vFrom, fLerp), 0.0f));
         this->DefaultOrientateLerp(0.0f*PI, -2.0f*PI, fLerp);
 
+        if(PHASE_MAINTIME_POINT(1.0f))
+        {
+            this->AddStatus(ENEMY_STATUS_GHOST);
+        }
+
         const coreFloat fSpeed = (1.0f + MIN(m_fPhaseTime, 13.0f) * 0.06f) * (HAS_BIT(m_iSlowdown, 0u) ? 0.7f : 1.0f) * (g_pGame->IsEasy() ? 0.7f : 1.0f);
 
         if(PHASE_MAINTIME_POINT(2.0f))
@@ -1742,7 +1902,7 @@ void cProjectOneBoss::__MoveOrange()
                 g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
             });
 
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.5f, 1.0f, SOUND_EFFECT_SWIPE);
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.5f, 1.0f, SOUND_EFFECT_SWIPE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
 
@@ -1799,8 +1959,8 @@ void cProjectOneBoss::__MoveOrange()
 
                 pGelu->DisableWay(i, true);
 
-                g_pSpecialEffects->CreateBlowColor(pWay->GetPosition(), coreVector3(vDir, 0.0f), 50.0f, 10u, COLOR_ENERGY_MAGENTA);
-                g_pSpecialEffects->PlaySound(pWay->GetPosition(), 1.0f, 1.5f, SOUND_EFFECT_WOOSH_2);
+                g_pSpecialEffects->CreateBlowColor(pWay->GetPosition(), coreVector3(vDir, 0.0f), 75.0f, 10u, COLOR_ENERGY_MAGENTA);
+                g_pSpecialEffects->PlaySound(pWay->GetPosition(), 1.0f, 1.5f, SOUND_EFFECT_WOOSH_02);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
@@ -1871,7 +2031,7 @@ void cProjectOneBoss::__MoveOrange()
                 PHASE_CHANGE_INC
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         });
@@ -1914,7 +2074,7 @@ void cProjectOneBoss::__MoveOrange()
         if(F_TO_UI(fTimePrev * 2.0f) != F_TO_UI(fTime * 2.0f))
         {
             g_pSpecialEffects->ShakeScreen(0.3f);
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.3f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.3f, 1.5f, SOUND_EFFECT_SHAKE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
 
@@ -2012,12 +2172,18 @@ void cProjectOneBoss::__MoveOrange()
             }
 
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         });
 
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
         {
+            if(PHASE_BEGINNING)
+            {
+                this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.5f);
+                this->RemoveStatus(ENEMY_STATUS_GHOST_BULLET);
+            }
+
             const coreFloat fCurHealhtPct = this->GetCurHealthPct();
 
             vWallOffset.x = LERP(0.25f, 0.0f, STEP(0.5f, 1.0f, fCurHealhtPct)) * fTime;
@@ -2036,12 +2202,6 @@ void cProjectOneBoss::__MoveOrange()
     // 
     else if(m_iPhase == 67u)
     {
-        if(PHASE_BEGINNING2)
-        {
-            this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-            this->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
-        }
-
         pAter->SetCollEnemyBullet([COLL_THIS](const cEnemy* pEnemy, const cBullet* pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)   // on base mission
         {
             if(!bFirstHit) return;
@@ -2066,25 +2226,23 @@ void cProjectOneBoss::__MoveOrange()
 
         const auto nBounceFunc = [this](const coreVector2 vPos, const coreUintW iFlip)
         {
-            if(!g_pGame->IsEasy())
+            for(coreUintW j = 40u; j--; )
             {
-                for(coreUintW j = 40u; j--; )
-                {
-                    if((j % 10u) < 7u) continue;
+                if((j % 10u) < 7u) continue;
+                if(g_pGame->IsEasy() && (((j + 10u * iFlip) % 20u) < 10u)) continue;
 
-                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j + 5u * iFlip) * 4.5f));
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j + 5u * iFlip) * 4.5f));
 
-                    const coreFloat fSpeed = 0.5f + 0.05f * I_TO_F(j % 10u);
+                const coreFloat fSpeed = 0.5f + 0.05f * I_TO_F(j % 10u);
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, this, vPos,  vDir)->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, this, vPos, -vDir)->ChangeSize(1.4f);
-                }
-
-                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_CYAN);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, this, vPos,  vDir)->ChangeSize(1.4f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, this, vPos, -vDir)->ChangeSize(1.4f);
             }
 
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_CYAN);
+
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         };
 
@@ -2331,7 +2489,9 @@ void cProjectOneBoss::__MoveRed()
             pBackground->FlashLightning();
             pBackground->GetHeadlight()->SetAlpha(0.0f);
 
-            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            g_pSpecialEffects->MacroExplosionColorSmall(this->GetPosition(), COLOR_ENERGY_WHITE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             this->SetAlpha(1.0f);
@@ -2605,7 +2765,7 @@ void cProjectOneBoss::__MoveRed()
                 this->TakeDamage(50, ELEMENT_NEUTRAL, this->GetPosition().xy(), pMuscus->GetStrikePlayer(i), true);
                 m_fPearlFlash = 1.0f;
 
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.2f, SOUND_EFFECT_DUST);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.2f, 1.0f, SOUND_EFFECT_DUST);
             }
         }
     }
@@ -2665,7 +2825,7 @@ void cProjectOneBoss::__MoveMagenta()
         {
             PHASE_CHANGE_INC
 
-            pRutilus->EnablePlate(3u, 0.0f, 0.0f, 0.0f, 0.4f);
+            pRutilus->EnablePlate(0u, 0.0f, 0.0f, 0.0f, 0.4f);
             pRutilus->EnablePlate(1u, 0.0f, 0.0f, 0.0f, 0.4f);
         });
     }
@@ -2679,7 +2839,7 @@ void cProjectOneBoss::__MoveMagenta()
             pRutilus->EnableArea();
 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_SWIPE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_SWIPE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
 
@@ -2699,9 +2859,9 @@ void cProjectOneBoss::__MoveMagenta()
 
             for(coreUintW j = 0u; j < 5u; ++j)
             {
-                if(g_pGame->IsEasy() && ((j == 0u) || (j == 4u))) continue;
+                if(g_pGame->IsEasy() && ((j == 2u) || (j == 4u))) continue;
 
-                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F((j * 2u + 1u) % 5u) - 2.0f) * 3.0f) + fBase);
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F((j * 2u + 1u) % 5u) - 2.0f) * 3.2f) + fBase);
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, this, vPos, vDir)->ChangeSize(1.4f);
             }
@@ -2719,7 +2879,7 @@ void cProjectOneBoss::__MoveMagenta()
             pRutilus->DisableArea(true);
 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_PURPLE);
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_SWIPE_3);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_SWIPE_02);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
         }
     }
@@ -2833,6 +2993,11 @@ void cProjectOneBoss::__MoveMagenta()
                 pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
             });
 
+            for(coreUintW i = 0u; i < PROJECTONE_ENEMIES_METEOR; ++i)
+            {
+                pSquad1->GetEnemy(i)->AddStatus(ENEMY_STATUS_GHOST);
+            }
+
             this->__EndExplosion(true);
         }
     }
@@ -2887,7 +3052,7 @@ void cProjectOneBoss::__MoveMagenta()
         this->SetDirection(coreVector3(this->AimAtPlayerDual(iAimIndex).Normalized(), 0.0f));   // after, to handle screen rotation
     }
 
-    if(pRutilus->IsPlateEnabled(3u) || pRutilus->IsPlateEnabled(1u))
+    if(pRutilus->IsPlateEnabled(0u) || pRutilus->IsPlateEnabled(1u))
     {
         const coreFloat fOldPlateTime = m_fPlateTime;
         m_fPlateTime.Update(0.5f);
@@ -2896,18 +3061,18 @@ void cProjectOneBoss::__MoveMagenta()
         const coreFloat   fPlateSide   = SIN(m_fPlateTime) * 0.3f;
         const coreFloat   fPlateOffset = m_fPlateTime * -0.5f;
 
-        pRutilus->SetPlateDirection(3u, vPlateDir.InvertedX());
+        pRutilus->SetPlateDirection(0u, vPlateDir.InvertedX());
         pRutilus->SetPlateDirection(1u, vPlateDir);
 
-        pRutilus->SetPlateSide     (3u, fPlateSide * -1.0f);
+        pRutilus->SetPlateSide     (0u, fPlateSide * -1.0f);
         pRutilus->SetPlateSide     (1u, fPlateSide);
 
-        pRutilus->SetPlateOffsetNow(3u, FmodRange(MIN1(fPlateOffset + 2.0f), -1.0f, 1.0f));
+        pRutilus->SetPlateOffsetNow(0u, FmodRange(MIN1(fPlateOffset + 2.0f), -1.0f, 1.0f));
         pRutilus->SetPlateOffsetNow(1u, FmodRange(MIN1(fPlateOffset + 1.0f), -1.0f, 1.0f));
 
         if(m_iPhase >= 83u)
         {
-            if(F_TO_UI(fOldPlateTime * 0.25f + 0.5f) != F_TO_UI(m_fPlateTime * 0.25f + 0.5f)) pRutilus->DisablePlate(3u, false);
+            if(F_TO_UI(fOldPlateTime * 0.25f + 0.5f) != F_TO_UI(m_fPlateTime * 0.25f + 0.5f)) pRutilus->DisablePlate(0u, false);
             if(F_TO_UI(fOldPlateTime * 0.25f)        != F_TO_UI(m_fPlateTime * 0.25f))        pRutilus->DisablePlate(1u, false);
         }
     }
@@ -3192,8 +3357,9 @@ void cProjectOneBoss::__MovePurple()
         coreVector2 vCurDir = this->GetDirection().xy();
 
         const coreVector2 vDiff = this->AimAtPlayerDual(1u);
+        const coreFloat   fSide = coreVector2::Dot(vDiff, vCurDir.Rotated90());
 
-        if(coreVector2::Dot(vDiff, vCurDir) <= 0.0f) vCurDir = vCurDir.Rotated90() * SIGN(coreVector2::Dot(vDiff, vCurDir.Rotated90()));
+        if((coreVector2::Dot(vDiff, vCurDir) <= 0.0f) && !coreMath::IsNear(fSide, 0.0f, 1.0f)) vCurDir = vCurDir.Rotated90() * SIGN(fSide);
 
              if((vCurPos.x < -FOREGROUND_AREA.x * 1.1f) && (vCurDir.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + FOREGROUND_AREA.x * 1.1f); vCurDir.x =  ABS(vCurDir.x);}
         else if((vCurPos.x >  FOREGROUND_AREA.x * 1.1f) && (vCurDir.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - FOREGROUND_AREA.x * 1.1f); vCurDir.x = -ABS(vCurDir.x);}
@@ -3405,11 +3571,6 @@ void cProjectOneBoss::__MoveBlue()
             const coreVector2 vTo   = IsHorizontal(vFrom) ? coreVector2(0.85f * SIGN(vFrom.x), vFrom.y) : coreVector2(vFrom.x, 0.85f * SIGN(vFrom.y));
 
             this->DefaultMoveLerp(vFrom, vTo, fTime);
-
-            if(PHASE_BEGINNING)
-            {
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 0.6f, SOUND_EFFECT_SWIPE_2);
-            }
         });
 
         if(!m_aTimer[0].GetStatus())
@@ -3453,6 +3614,12 @@ void cProjectOneBoss::__MoveBlue()
                 PHASE_CHANGE_INC
 
                 m_aiCounter[EVADE_COUNT] += 1;
+
+                ASSERT(pSnow->IsActive())
+                pSnow->DrawPoint(this->GetPosition().xy(), 10.0f, SNOW_TYPE_REMOVE);
+
+                g_pSpecialEffects->MacroExplosionColorSmall(this->GetPosition(), COLOR_ENERGY_BLUE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
             }
         }
     }
@@ -3503,10 +3670,11 @@ void cProjectOneBoss::__MoveBlue()
                     ASSERT(pSnow->IsActive())
                     pSnow->DrawPoint(pBullet->GetPosition().xy(), 20.0f, SNOW_TYPE_REMOVE);
 
-                    pCalor->DisableSnow(true);
-
                     g_pSpecialEffects->MacroExplosionColorBig(pBullet->GetPosition(), COLOR_ENERGY_BLUE);
+                    g_pSpecialEffects->PlaySound(pBullet->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
                 });
+
+                pCalor->DisableSnow(true);
 
                 pCalor->EnableStar(0u, this, coreVector2(0.0f,0.0f));
                 pCalor->GetStar(0u)->SetPosition(coreVector3(-1.1f,0.0f,0.0f) * FOREGROUND_AREA3);
@@ -3514,7 +3682,7 @@ void cProjectOneBoss::__MoveBlue()
                 m_avVector[CALOR_ROTA].x = 0.5f*PI;
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
         });
@@ -3553,7 +3721,7 @@ void cProjectOneBoss::__MoveBlue()
 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(-1.1f,0.0f,0.0f) * FOREGROUND_AREA3, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(coreVector3(-1.1f,0.0f,0.0f) * FOREGROUND_AREA3, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(coreVector3(-1.1f,0.0f,0.0f) * FOREGROUND_AREA3, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         });
@@ -3755,6 +3923,7 @@ void cProjectOneBoss::__MoveCyan()
                 pNevo->EnableTile(i, 4u);
 
             this->AddStatus(ENEMY_STATUS_GHOST);
+            this->ChangeToTop();
         }
 
         coreBool bComplete1 = true;
@@ -3772,11 +3941,13 @@ void cProjectOneBoss::__MoveCyan()
             bComplete2 = false;
             iTileState = 0b0011'1100'0011'1100u;
             std::memset(aiRemember, 0, sizeof(aiRemember));
+
+            this->__EnableRoadsign(coreVector2(-0.5f,1.5f) * FOREGROUND_AREA * 0.55f, coreVector2(0.0f,-1.0f));
         }
 
         const coreUint32 iTileStateOld = iTileState;
 
-        if(PHASE_MAINTIME_AFTER(4.0f))
+        if(PHASE_MAINTIME_AFTER(0.7f / 0.25f))
         {
             PHASE_CONTROL_TIMER(4u, 0.25f, LERP_LINEAR)
             {
@@ -3814,7 +3985,16 @@ void cProjectOneBoss::__MoveCyan()
 
                 if(PHASE_BEGINNING)
                 {
-                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FLY);
+                }
+
+                if(PHASE_TIME_POINT(0.3f))
+                {
+                    const coreInt16 iNext    = m_aiCounter[RUSH_COUNT] + 1;
+                    const coreFloat fOffset2 = I_TO_F(aiLane[iNext % 4]) - 1.5f;
+                    const coreFloat fSide2   = ((iNext / 2) % 2) ? -1.0f : 1.0f;
+
+                    this->__EnableRoadsign(coreVector2(fOffset2, fSide2 * 1.5f) * FOREGROUND_AREA * 0.55f, coreVector2(0.0f, fSide2 * -1.0f));
                 }
 
                 if(PHASE_FINISHED)
@@ -3868,14 +4048,14 @@ void cProjectOneBoss::__MoveCyan()
                 {
                     pNevo->SetTileStyle(i, 1u);
 
-                    if(!HAS_BIT(iTileStateOld, i)) g_pSpecialEffects->PlaySound(pTile->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_TURN);
+                    if(!HAS_BIT(iTileStateOld, i)) g_pSpecialEffects->PlaySound(pTile->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_CLICK);
                 }
                 else
                 {
                     pNevo->SetTileStyle(i, 0u);
                     bComplete1 = false;
 
-                    if(HAS_BIT(iTileStateOld, i)) g_pSpecialEffects->PlaySound(pTile->GetPosition(), 1.0f, 0.9f, SOUND_PLAYER_TURN);
+                    if(HAS_BIT(iTileStateOld, i)) g_pSpecialEffects->PlaySound(pTile->GetPosition(), 1.0f, 0.9f, SOUND_EFFECT_CLICK);
                 }
             }
         }
@@ -3909,7 +4089,7 @@ void cProjectOneBoss::__MoveCyan()
 
             if(PHASE_BEGINNING)
             {
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FLY);
             }
 
             if(PHASE_FINISHED)
@@ -3919,10 +4099,11 @@ void cProjectOneBoss::__MoveCyan()
                 pNevo->EnableArrow(0u, this, coreVector2(0.0f,-1.0f));
 
                 this->RemoveStatus(ENEMY_STATUS_GHOST);
+                this->ChangeToNormal();
 
                 g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_CYAN);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         });
@@ -3973,6 +4154,7 @@ void cProjectOneBoss::__MoveCyan()
             pNevo->EnableArrow (0u, this, vNewDir);
 
             g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3(-vNewDir, 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_GREEN);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
         });
 
         pAter->SetCollEnemyBullet([COLL_VAL(pNevo)](const cEnemy* pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)   // on base mission
@@ -4115,7 +4297,7 @@ void cProjectOneBoss::__MoveGreen()
 
             for(coreUintW j = 100u; j--; ) g_pSpecialEffects->CreateSplashColor(this->GetPosition() + coreVector3(1.0f,0.0f,0.0f) * (2.0f * (I_TO_F(j) - 49.5f)), 10.0f, 1u, COLOR_ENERGY_PURPLE);
 
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SWIPE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SWIPE_01);
         }
 
         const coreInt32 iLostHealth = this->GetLostHealth();
@@ -4257,7 +4439,7 @@ void cProjectOneBoss::__MoveGreen()
             }
             else
             {
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FLY);
             }
         }
     }
@@ -4333,7 +4515,7 @@ void cProjectOneBoss::__MoveGreen()
                 pVirido->EnableShadow(0u, this, m_avVector[JUMP_TARGET].xy(), false);
 
                 g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH_2);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.7f, SOUND_EFFECT_WOOSH_02);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
@@ -4355,7 +4537,7 @@ void cProjectOneBoss::__MoveGreen()
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_GREEN);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 0.8f, 1.7f, SOUND_EFFECT_DUST);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         });
@@ -4397,8 +4579,8 @@ void cProjectOneBoss::__MoveGreen()
                     const coreVector2 vPos = this->GetPosition ().xy();
                     const coreVector2 vDir = this->GetDirection().xy();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 0.5f, this, vPos,  vDir)->ChangeSize(1.8f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 0.5f, this, vPos, -vDir)->ChangeSize(1.8f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 0.4f, this, vPos,  vDir)->ChangeSize(1.8f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 0.4f, this, vPos, -vDir)->ChangeSize(1.8f);
 
                     g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 1u, COLOR_ENERGY_ORANGE);
                     g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
@@ -4447,6 +4629,8 @@ void cProjectOneBoss::__MoveGreen()
 
         for(coreUintW i = 0u; i < VIRIDO_HINTS; ++i)
             pVirido->DisableHint(i, true);
+
+        pVirido->SetBarrierReflect(true);
 
         this->__EndExplosion(true);
     }
@@ -4522,7 +4706,7 @@ void cProjectOneBoss::__MoveWhite()
 
         const coreFloat fAttackSpeed = g_pGame->IsEasy() ? 0.7f : 1.0f;
 
-        const coreFloat fValue = STEP(0.0f, 60.0f, m_fFinalValue);
+        const coreFloat fValue = STEP(0.0f, DEFINED(_CORE_DEBUG_) ? 6.0f : 60.0f, m_fFinalValue);
 
         this->SetCurHealthPct(0.05f + 0.95f * (1.0f - fValue));
 
@@ -4681,8 +4865,6 @@ void cProjectOneBoss::__MoveWhite()
                 g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
                 this->_EndBoss();
-
-                this->AddStatus(ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
 
                 g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
                 {
@@ -4879,6 +5061,38 @@ void cProjectOneBoss::__DisableFragment(const coreUintW iIndex, const coreBool b
 
 // ****************************************************************
 // 
+void cProjectOneBoss::__EnableRoadsign(const coreVector2 vPosition, const coreVector2 vDirection)
+{
+    // 
+    WARN_IF(m_Roadsign.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableRoadsign(false);
+
+    // 
+    m_vRoadsignPos  = vPosition;
+    m_fRoadsignTime = 0.0f;
+
+    // 
+    m_Roadsign.SetPosition (coreVector3(vPosition,  0.0f));
+    m_Roadsign.SetDirection(coreVector3(vDirection, 0.0f));
+    m_Roadsign.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cProjectOneBoss::__DisableRoadsign(const coreBool bAnimated)
+{
+    // 
+    if(!m_Roadsign.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Roadsign.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    
+    // TODO 1: animated
+}
+
+
+// ****************************************************************
+// 
 void cProjectOneBoss::__ShowArrow()
 {
     // 
@@ -5066,16 +5280,17 @@ void cProjectOneBoss::__SwitchHealth(const coreUintW iIndex)
     switch(iIndex)
     {
     default: ASSERT(false)
-    case 0u: iHealth = 2000;                    break;   // yellow
-    case 1u: iHealth = 1800;                    break;   // orange
-    case 2u: iHealth = 2200 + 90 * 6 + 850 * 4; break;   // red
-    case 3u: iHealth = 3300;                    break;   // magenta
-    case 4u: iHealth = 4400;                    break;   // purple
-    case 5u: iHealth = 2800;                    break;   // blue
-    case 6u: iHealth = 1800;                    break;   // cyan
-    case 7u: iHealth = 3100;                    break;   // green
-    case 8u: iHealth = 10000;                   break;   // white
-    case 9u: iHealth = 600;                     break;   // intro
+    case 0u:  iHealth = 2000;                    break;   // yellow
+    case 1u:  iHealth = 1800;                    break;   // orange
+    case 2u:  iHealth = 2200 + 90 * 6 + 850 * 4; break;   // red
+    case 3u:  iHealth = 3300;                    break;   // magenta
+    case 4u:  iHealth = 4400;                    break;   // purple
+    case 5u:  iHealth = 2800;                    break;   // blue
+    case 6u:  iHealth = 1800;                    break;   // cyan
+    case 7u:  iHealth = 3100;                    break;   // green
+    case 8u:  iHealth = 10000;                   break;   // white
+    case 9u:  iHealth = 600;                     break;   // intro
+    case 10u: iHealth = 1000;                    break;   // final transition
     }
 
     // 
@@ -5273,7 +5488,7 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
     g_pPostProcessing->Reset();
 
     // 
-    g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         pPlayer->SetDirection (coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
         pPlayer->SetArea      (PLAYER_AREA_DEFAULT);
@@ -5281,7 +5496,11 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
         pPlayer->SetShootSpeed(1.0f);
         pPlayer->SetAnimSpeed (1.0f);
         pPlayer->SetInterrupt (0.0f);
-        pPlayer->RemoveStatus (PLAYER_STATUS_NO_INPUT_ALL);
+
+        if(bReturn)
+        {
+            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
+        }
     });
 
     // 
@@ -5299,8 +5518,23 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
 // 
 void cProjectOneBoss::__EndExplosion(const coreBool bClear)
 {
-    // 
-    this->__StartFeeling();
+    if(coreMath::PopCount(m_iHelperState) == (g_pGame->IsEasy() ? 4u : 6u))
+    {
+        this->__SwitchHealth(10u);
+        this->__SwitchColor (9u, false);
+
+        m_bDead = true;
+
+        this->__DisableRange  ();
+        this->__DisableArrow  ();
+        this->__DisableWind   ();
+        this->__DisableExhaust();
+    }
+    else
+    {
+        // 
+        this->__StartFeeling();
+    }
 
     // 
     g_pGame->GetCurMission()->SetDelay(true);
@@ -5345,6 +5579,19 @@ void cProjectOneBoss::__EndAnimation(const coreFloat fTime)
 // 
 cBullet* cProjectOneBoss::__AddRainbowBullet(const coreUintW iType, const coreInt32 iDamage, const coreFloat fSpeed, const coreVector2 vPos, const coreVector2 vDir)
 {
+    //switch(iType)
+    //{
+    //default: ASSERT(false)
+    //case 0u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_YELLOW);  break;
+    //case 1u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_ORANGE);  break;
+    //case 2u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_RED);     break;
+    //case 3u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_MAGENTA); break;
+    //case 4u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_PURPLE);  break;
+    //case 5u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_BLUE);    break;
+    //case 6u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_CYAN);    break;
+    //case 7u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_GREEN);   break;
+    //}
+
     switch(iType)
     {
     default: ASSERT(false)

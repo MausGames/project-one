@@ -55,7 +55,11 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsArcade(const coreUint8 i
     if(!m_bIgnore)
     {
         // 
-        return &m_Header.aaaLocalStatsArcade[iType][iMode][iDifficulty];
+        if(!STATIC_ISVALID(g_pGame) || (g_pGame->GetKind() == GAME_KIND_ALL))
+        {
+            // 
+            return &m_Header.aaaLocalStatsArcade[iType][iMode][iDifficulty];
+        }
     }
 
     // 
@@ -75,8 +79,12 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUint8 
     if(!m_bIgnore)
     {
         // 
-        ASSERT(iMissionIndex < REPLAY_MISSIONS)
-        return &m_Header.aaaaLocalStatsMission[iType][iMode][iDifficulty][iMissionIndex];
+        if(!STATIC_ISVALID(g_pGame) || (g_pGame->GetKind() == GAME_KIND_ALL) || (g_pGame->GetKind() == GAME_KIND_MISSION))
+        {
+            // 
+            ASSERT(iMissionIndex < REPLAY_MISSIONS)
+            return &m_Header.aaaaLocalStatsMission[iType][iMode][iDifficulty][iMissionIndex];
+        }
     }
 
     // 
@@ -102,9 +110,9 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUint8 
 {
     if(!m_bIgnore)
     {
-        // 
         if(iSegmentIndex != MISSION_NO_SEGMENT)
         {
+            // 
             ASSERT(iMissionIndex < REPLAY_MISSIONS)
             ASSERT(iSegmentIndex < REPLAY_SEGMENTS)
             return &m_Header.aaaaaLocalStatsSegment[iType][iMode][iDifficulty][iMissionIndex][iSegmentIndex];
@@ -179,7 +187,8 @@ coreBool cSave::LoadFile()
     }
 
     // 
-    cSave::__CheckHeader(&m_Header);
+    cSave::__UpgradeHeader(&m_Header);
+    cSave::__CheckHeader  (&m_Header);
     return true;
 }
 
@@ -260,10 +269,12 @@ void cSave::Clear()
     // 
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
-        m_Header.oOptions.aiShield  [i]    = 30u;
+        m_Header.oOptions.aiShield  [i]    = g_bDemoVersion ? SHIELD_DEFAULT : 20u;
         m_Header.oOptions.aaiWeapon [i][0] = 1u;
         m_Header.oOptions.aaiSupport[i][0] = 0u;
     }
+
+    m_Header.oOptions.aiShield[1] = 0u;
 }
 
 
@@ -295,7 +306,7 @@ coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, const coreChar* pcPath)
 
     // 
     WARN_IF((pHeader->iMagic    != SAVE_FILE_MAGIC)   ||
-            (pHeader->iVersion  != SAVE_FILE_VERSION) ||
+            (pHeader->iVersion  >  SAVE_FILE_VERSION) ||
             (pHeader->iChecksum != cSave::__GenerateChecksum(*pHeader)))
     {
         Core::Log->Warning("Save (%s) is not a valid save-file!", pcPath);
@@ -304,6 +315,42 @@ coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, const coreChar* pcPath)
 
     Core::Log->Info("Save (%s) loaded", pcPath);
     return true;
+}
+
+
+// ****************************************************************
+// 
+void cSave::__UpgradeHeader(sHeader* OUTPUT pHeader)
+{
+    // 
+    if(pHeader->iVersion <= 1u)   // TODO 1: legacy version, this is the only one which can be deleted after some time
+    {
+        struct sProgressOld final
+        {
+            coreUint8  aiPadding1[6221];
+            coreUint8  aiHelper  [SAVE_MISSIONS];
+            coreUint8  aiFragment[SAVE_MISSIONS];
+            coreUint8  aaiBadge  [SAVE_MISSIONS][SAVE_SEGMENTS];
+            coreUint64 iState;
+            coreUint64 aiTrophy  [2];
+            coreUint64 aiUnlock  [2];
+            coreUint64 aiNew     [2];
+        };
+
+        sProgressOld oProgressOld;
+        std::memcpy(&oProgressOld, &pHeader->oProgress, sizeof(sProgress)); STATIC_ASSERT(sizeof(sProgress) == sizeof(sProgressOld))
+
+        std::memcpy( pHeader->oProgress.aiHelper,    oProgressOld.aiHelper,   sizeof(sProgress::aiHelper));   STATIC_ASSERT(sizeof(sProgress::aiHelper)   == sizeof(sProgressOld::aiHelper))
+        std::memcpy( pHeader->oProgress.aiFragment,  oProgressOld.aiFragment, sizeof(sProgress::aiFragment)); STATIC_ASSERT(sizeof(sProgress::aiFragment) == sizeof(sProgressOld::aiFragment))
+        std::memcpy( pHeader->oProgress.aaiBadge,    oProgressOld.aaiBadge,   sizeof(sProgress::aaiBadge));   STATIC_ASSERT(sizeof(sProgress::aaiBadge)   == sizeof(sProgressOld::aaiBadge))
+        std::memcpy(&pHeader->oProgress.iState,     &oProgressOld.iState,     sizeof(sProgress::iState));     STATIC_ASSERT(sizeof(sProgress::iState)     == sizeof(sProgressOld::iState))
+        std::memcpy( pHeader->oProgress.aiTrophy,    oProgressOld.aiTrophy,   sizeof(sProgress::aiTrophy));   STATIC_ASSERT(sizeof(sProgress::aiTrophy)   == sizeof(sProgressOld::aiTrophy))
+        std::memcpy( pHeader->oProgress.aiUnlock,    oProgressOld.aiUnlock,   sizeof(sProgress::aiUnlock));   STATIC_ASSERT(sizeof(sProgress::aiUnlock)   == sizeof(sProgressOld::aiUnlock))
+        std::memcpy( pHeader->oProgress.aiNew,       oProgressOld.aiNew,      sizeof(sProgress::aiNew));      STATIC_ASSERT(sizeof(sProgress::aiNew)      == sizeof(sProgressOld::aiNew))
+    }
+
+    // 
+    pHeader->iVersion = SAVE_FILE_VERSION;
 }
 
 
@@ -360,8 +407,9 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     }
 
     // 
-    if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_MIRRORMORE))  g_CurConfig.Game.iMirrorMode = 0u;
+    if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_MIRRORMODE))  g_CurConfig.Game.iMirrorMode = 0u;
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_GAMESPEEDUP)) g_CurConfig.Game.iGameSpeed  = MIN(g_CurConfig.Game.iGameSpeed, 100u);
+    if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_POWERSHIELD)) for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i) pHeader->oOptions.aiShield[i] = MIN(pHeader->oOptions.aiShield[i], SHIELD_DEFAULT);
 }
 
 

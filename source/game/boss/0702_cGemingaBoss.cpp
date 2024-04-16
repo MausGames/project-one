@@ -355,7 +355,7 @@ void cGemingaBoss::__MoveOwn()
 
                 g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition(), coreVector2(0.0f,-1.0f), COLOR_ENERGY_RED);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         });
@@ -483,7 +483,7 @@ void cGemingaBoss::__MoveOwn()
 
                 g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition(), coreVector2(0.0f,1.0f), COLOR_ENERGY_RED);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
 
                 //if(m_pVacuumSound->EnableRef(this))
@@ -568,7 +568,7 @@ void cGemingaBoss::__MoveOwn()
                 m_Bottom      .RemoveStatus(ENEMY_STATUS_GHOST);
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
 
                 cStomachBackground* pBackground = d_cast<cStomachBackground*>(g_pEnvironment->GetBackground());
@@ -756,7 +756,7 @@ void cGemingaBoss::__MoveOwn()
 
                 g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                 m_aiCounter[SMASH_COUNT] += 1;
@@ -839,7 +839,7 @@ void cGemingaBoss::__MoveOwn()
             if(PHASE_TIME_POINT(0.2f))
             {
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                 for(coreUintW j = 0u; j < 18u; ++j)
@@ -866,7 +866,7 @@ void cGemingaBoss::__MoveOwn()
             if(PHASE_BEGINNING)
             {
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
@@ -955,7 +955,7 @@ void cGemingaBoss::__MoveOwn()
                 PHASE_CHANGE_TO((m_iPhase == 47u) ? 100u : 30u)
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
         });
@@ -1054,7 +1054,7 @@ void cGemingaBoss::__MoveOwn()
                     m_avVector[FOLLOW_VALUES].w = 1.0f;
 
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                    g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                 }
             }
@@ -1465,8 +1465,8 @@ void cGemingaBoss::__MoveOwn()
 
         coreVector2 vNewPos = this->GetPosition().xy() + vForce * FOREGROUND_AREA * (1.5f * TIME);
 
-             if((vNewPos.x < -FOREGROUND_AREA.x * 1.0f) && (vForce.x < 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x + FOREGROUND_AREA.x * 1.0f); vForce.x =  ABS(vForce.x); g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY); g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);}
-        else if((vNewPos.x >  FOREGROUND_AREA.x * 1.0f) && (vForce.x > 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - FOREGROUND_AREA.x * 1.0f); vForce.x = -ABS(vForce.x); g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY); g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);}
+             if((vNewPos.x < -FOREGROUND_AREA.x * 1.0f) && (vForce.x < 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x + FOREGROUND_AREA.x * 1.0f); vForce.x =  ABS(vForce.x); g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY); g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);}
+        else if((vNewPos.x >  FOREGROUND_AREA.x * 1.0f) && (vForce.x > 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - FOREGROUND_AREA.x * 1.0f); vForce.x = -ABS(vForce.x); g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY); g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);}
 
         if(!pMission->IsPearlValidAny())
         {
@@ -1478,7 +1478,7 @@ void cGemingaBoss::__MoveOwn()
                 m_Bottom.RemoveStatus(ENEMY_STATUS_DAMAGING);
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
         }
@@ -1488,7 +1488,7 @@ void cGemingaBoss::__MoveOwn()
             vForce.y = ABS(vForce.y);
 
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(coreVector3(vNewPos, 0.0f), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
         }
 
@@ -1535,7 +1535,7 @@ void cGemingaBoss::__MoveOwn()
             PHASE_CHANGE_INC
 
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         });
     }
@@ -1575,7 +1575,7 @@ void cGemingaBoss::__MoveOwn()
                 PHASE_AGAIN
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
         });
@@ -1663,7 +1663,7 @@ void cGemingaBoss::__MoveOwn()
                 PHASE_CHANGE_INC
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
         });
@@ -1720,7 +1720,7 @@ void cGemingaBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (vCenter);
                 g_pSpecialEffects->CreateSplashDark(vCenter, 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (vCenter, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                g_pSpecialEffects->PlaySound       (vCenter, 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
+                g_pSpecialEffects->PlaySound       (vCenter, 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
                 g_pSpecialEffects->SlowScreen(4.0f);
             }
         });
@@ -1936,7 +1936,7 @@ void cGemingaBoss::__MoveOwn()
             {
                 this->TakeDamage(50, ELEMENT_NEUTRAL, this->GetPosition().xy(), pMission->GetStrikePlayer(i), true);
 
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.2f, SOUND_EFFECT_DUST);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.2f, 1.0f, SOUND_EFFECT_DUST);
             }
         }
     }

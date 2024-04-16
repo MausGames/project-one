@@ -38,6 +38,7 @@ cMission::cMission()noexcept
 , m_iRecordBroken       (0u)
 , m_iTakeFrom           (0u)
 , m_iTakeTo             (TAKE_MISSION)
+, m_iOutroSub           (0u)
 , m_bDelay              (false)
 , m_bRepeat             (false)
 {
@@ -102,6 +103,7 @@ void cMission::Close()
 {
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    ASSERT(iMissionIndex < SAVE_MISSIONS)
 
     // 
     g_pSave->EditGlobalStats()->iMissionsDone += 1u;
@@ -162,6 +164,12 @@ void cMission::RenderTop   () {this->__RenderOwnTop   ();}
 
 // ****************************************************************
 // move the mission
+void cMission::MoveAlways()
+{
+    // 
+    this->__MoveOwnAlways();
+}
+
 void cMission::MoveBefore()
 {
     // 
@@ -191,7 +199,7 @@ void cMission::MoveBefore()
             // 
             if(m_anStage.empty())
             {
-                g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? GAME_OUTRO_MISSION : GAME_OUTRO_SEGMENT);
+                g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? GAME_OUTRO_MISSION : GAME_OUTRO_SEGMENT, m_iOutroSub);
 
                 if((m_iTakeTo == TAKE_MISSION) || ((m_iTakeTo == 5u) && (g_pGame->GetCurMissionIndex() != MISSION_ATER)))
                 {
@@ -300,6 +308,8 @@ void cMission::DeactivateBoss()
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    ASSERT(iMissionIndex      < SAVE_MISSIONS)
+    ASSERT(m_iCurSegmentIndex < SAVE_SEGMENTS)
 
     // 
     coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex + 1u];
@@ -393,13 +403,19 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 {
     ASSERT(iIndex < BADGES)
 
+    if(m_iCurSegmentIndex == MISSION_NO_SEGMENT) return;
+
     if(HAS_BIT(m_iBadgeGiven, iIndex)) return;
     ADD_BIT(m_iBadgeGiven, iIndex)
 
     // 
+    const coreBool bAchievement = (iBadge == BADGE_ACHIEVEMENT);
+    if(bAchievement && g_bDemoVersion) return;
+
+    // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->GetDataTable()->GiveBadge(iIndex);   // TODO 1: [MF] stats should not be changed here for achievements
+        if(!bAchievement) pPlayer->GetDataTable()->GiveBadge(iIndex);
         pPlayer->StartRolling();   // # also for achievements
     });
 
@@ -423,24 +439,34 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
         g_pSave->EditLocalStatsArcade ()->iShiftGoodAdded += iBonus;
         g_pSave->EditLocalStatsMission()->iShiftGoodAdded += iBonus;
         g_pSave->EditLocalStatsSegment()->iShiftGoodAdded += iBonus;
+
+        // 
+        g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
+
+        // 
+        g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
+        g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
     }
 
-    if(iBonus)   // TODO 1                     
     // 
-    g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
-
-    // 
-    g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
-    g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
-
-    // 
-    if(iBadge == BADGE_ACHIEVEMENT)
+    if(bAchievement)
     {
+        const coreVector3 vOverride = g_pGame->FindPlayerDual(0u)->GetPosition();   // TODO 1: cleanup
+
         // 
         const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+        ASSERT(iMissionIndex      < SAVE_MISSIONS)
+        ASSERT(m_iCurSegmentIndex < SAVE_SEGMENTS)
 
         // 
         ADD_BIT(g_pSave->EditProgress()->aaiBadge[iMissionIndex][m_iCurSegmentIndex], iIndex)
+
+        // 
+        g_pGame->GetCombatText()->DrawTrophy(vOverride);
+
+        // 
+        g_pSpecialEffects->PlaySound(vOverride, 1.0f, 1.0f, SOUND_UNLOCK);
+        g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
     }
 }
 
@@ -489,6 +515,8 @@ void cMission::__CloseSegment()
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    ASSERT(iMissionIndex      < SAVE_MISSIONS)
+    ASSERT(m_iCurSegmentIndex < SAVE_SEGMENTS)
 
     // 
     const coreFloat  fTime        = g_pGame->GetTimeTable()->GetTimeSegmentSafe();

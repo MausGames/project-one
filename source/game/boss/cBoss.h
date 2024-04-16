@@ -19,9 +19,8 @@
 // TODO 5: boss0102, separate emitters to three objects, to make them blue
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
-// TODO 1: [MF] check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
+// TODO 1: [MF] [HIGH] check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
 // TODO 4: remove counters and vectors (first remove usage)
-// TODO 1: [MF] change boss names: MESSIER -> SAROS, GEMINGA -> NAGUAL(?)    and check boss titles again
 // TODO 1: remove leviathan demo code + in-mission
 
 
@@ -52,6 +51,7 @@
 #define TORUS_WAVERS              (4u)                                         // 
 #define TORUS_BARRIERS            (8u)                                         // 
 #define TORUS_BOSS_ROTATION       (1.2f)                                       // 
+#define TORUS_RUMBLE_VOLUME       (1.5f)                                       // 
 
 #define NAUTILUS_ATTACH_DIST      (-10.0f)                                     // 
 #define NAUTILUS_INK_TIME         (10.0f)                                      // 
@@ -105,9 +105,9 @@
 #define ZEROTH_RADIUS_BULLET      (2.0f)                                       // 
 #define ZEROTH_SPEED_SLOW         (8.0f)                                       // 
 #define ZEROTH_SPEED_FAST         (16.0f)                                      // 
-#define ZEROTH_LASER_SIZE         (coreVector3(1.7f,45.0f,1.7f))               // 
+#define ZEROTH_LASER_SIZE         (coreVector3(1.65f,45.0f,1.65f))             // 
 #define ZEROTH_LASER_TEXSIZE      (coreVector2(0.5f,1.0f))                     // 
-#define ZEROTH_LASERWAVE_SIZE     (coreVector3(3.0f,22.5f,3.0f))               // 
+#define ZEROTH_LASERWAVE_SIZE     (coreVector3(2.9f,22.5f,2.9f))               // 
 #define ZEROTH_LASERWAVE_TEXSIZE  (coreVector2(0.5f,1.5f))                     // 
 
 #define GEMINGA_ENEMIES_TELEPORT  (4u)                                         // 
@@ -357,7 +357,7 @@ private:
 
     coreUint8 m_iDecalState;                           // 
 
-    coreSoundPtr m_pFireSound;                         // 
+    coreSoundPtr m_pRumbleSound;                       // 
     coreSoundPtr m_pWooshSound;                        // 
 
 
@@ -528,7 +528,8 @@ private:
     coreFlow m_fAnimation;                            // animation value
     coreFlow m_fMovement;                             // 
 
-    coreSoundPtr m_pFireSound;                        // 
+    coreSoundPtr m_pLaserSound;                       // 
+    coreSoundPtr m_pRumbleSound;                      // 
 
 
 public:
@@ -625,6 +626,8 @@ private:
     coreUint8    m_iWeaponType;                  // 
     coreUint8    m_iWeaponTypeOld;               // 
     coreFlow     m_fWeaponChange;                // 
+
+    coreUint16 m_aiBulletHit[TIGER_WEAPONS];     // 
 
     coreUint8 m_iDecalState;                     // 
 
@@ -1009,6 +1012,8 @@ private:
 
     coreFlow m_fAnimation;                      // 
 
+    coreSoundPtr m_pLaserSound;                 // 
+
 
 public:
     cZerothBoss()noexcept;
@@ -1021,7 +1026,7 @@ public:
     void ResurrectIntro();
 
     // 
-    inline void HideTail() {this->__SetLimbValue(ZEROTH_LIMB_TAIL, 1.0f);}
+    inline void HideTail() {for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i) this->__SetLimbValue(i, 1.0f);}
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_06.ogg";}
@@ -1100,7 +1105,7 @@ public:
     ~cGemingaBoss()final;
 
     DISABLE_COPY(cGemingaBoss)
-    ASSIGN_ID_EX(702, "GEMINGA", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
+    ASSIGN_ID_EX(702, "NAGUAL"/*"GEMINGA"*/, COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
 
     // 
     void ResurrectIntro();
@@ -1154,6 +1159,10 @@ private:
     cCustomEnemy m_aClone   [PROJECTONE_CLONES];      // 
     coreObject3D m_aFragment[PROJECTONE_FRAGMENTS];   // 
 
+    coreObject3D m_Roadsign;                          // 
+    coreVector2  m_vRoadsignPos;                      // 
+    coreFlow     m_fRoadsignTime;                     // 
+
     coreObject3D m_Range;                             // 
     coreObject3D m_Arrow;                             // 
     coreObject3D m_Wind;                              // 
@@ -1171,6 +1180,9 @@ private:
     coreVector3 m_vLevelColor;                        // 
 
     coreFlow m_fAnimation;                            // 
+
+    coreFlow  m_fChromaValue;                         // 
+    coreFloat m_fChromaSpeed;                         // 
 
     coreFlow    m_fWaveValue;                         // 
     coreVector3 m_vColorFrom;                         // 
@@ -1259,6 +1271,10 @@ private:
     void __DisableFragment(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void __EnableRoadsign (const coreVector2 vPosition, const coreVector2 vDirection);
+    void __DisableRoadsign(const coreBool bAnimated);
+
+    // 
     void __ShowArrow();
 
     // 
@@ -1292,6 +1308,9 @@ private:
     // 
     void __EndExplosion(const coreBool bClear);
     void __EndAnimation(const coreFloat fTime);
+
+    // 
+    inline void __CreateChroma(const coreFloat fSpeed) {m_fChromaValue = 1.0f; m_fChromaSpeed = fSpeed;}
 
     // 
     cBullet* __AddRainbowBullet(const coreUintW iType, const coreInt32 iDamage, const coreFloat fSpeed, const coreVector2 vPos, const coreVector2 vDir);

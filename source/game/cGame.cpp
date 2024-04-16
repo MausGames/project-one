@@ -34,6 +34,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (GAME_OUTRO_MISSION)
+, m_iOutroSub           (0u)
 , m_bVisibleCheck       (false)
 , m_iRepairMove         (0xFFu)
 , m_Options             (oOptions)
@@ -148,6 +149,7 @@ void cGame::Render()
 {
     if(g_bTiltMode)
     {
+        
         const auto nFlipFunc = []()
         {
             if(g_CurConfig.Game.iMirrorMode)
@@ -168,6 +170,8 @@ void cGame::Render()
         
         Core::Graphics->SetCamera(vCamPos, CAMERA_DIRECTION, vCamOri);   // do not reset at the end
             
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 51.0f, 500.0f);    // invoke transform-update
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);    // TODO 1: optimize
         nFlipFunc();
         if(g_CurConfig.Game.iMirrorMode) glCullFace(GL_FRONT);
 
@@ -508,11 +512,15 @@ void cGame::Move()
     // handle intro and outro animation
     if(!this->__HandleIntro()) return;
     if(!this->__HandleOutro()) return;
-    
+
+    // 
+    m_pCurMission->MoveAlways();
+
     if(SPECIAL_FROZEN)
     {
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-            m_aPlayer[i].MoveFrozen();
+            //m_aPlayer[i].MoveFrozen();
+            m_aPlayer[i].Move();
         
         this->__HandleDefeat();
         return;
@@ -618,6 +626,12 @@ void cGame::MoveAlways()
 // load new active mission
 void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
+    for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+    {
+        if(!m_aHelper[i].HasStatus(HELPER_STATUS_DEAD))
+            g_pSpecialEffects->CreateSplashColor(m_aHelper[i].GetPosition(), SPECIAL_SPLASH_TINY, m_aHelper[i].GetColor3());
+    }
+    
     // 
     this->__ClearAll(false);
 
@@ -755,7 +769,7 @@ void cGame::StartIntro()
 
 // ****************************************************************
 // 
-void cGame::StartOutro(const coreUint8 iType)
+void cGame::StartOutro(const coreUint8 iType, const coreUint8 iSub)
 {
     ASSERT( HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
@@ -767,6 +781,7 @@ void cGame::StartOutro(const coreUint8 iType)
     // 
     m_fTimeInOut = 0.0f;
     m_iOutroType = iType;
+    m_iOutroSub  = iSub;
 
     // 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
@@ -784,12 +799,17 @@ void cGame::StartOutro(const coreUint8 iType)
 
     // 
     g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_END(m_pCurMission->GetID()));
-    
-    if(m_iOutroType == GAME_OUTRO_BEGINNING)
+
+    // 
+    if((m_iOutroSub >= 1u) && (m_iOutroSub < 10u))
     {
         m_Tracker.Resurrect();
         m_Tracker.EnableWind();
-        m_Tracker.SetPosition(coreVector3(-0.5f,-1.5f,0.0f) * FOREGROUND_AREA3);
+        m_Tracker.SetPosition(coreVector3((m_iOutroSub == 1u) ? -0.5f : 0.8f, -1.5f, 0.0f) * FOREGROUND_AREA3);
+    }
+    else if((m_iOutroSub >= 11u) && (m_iOutroSub < 20u))
+    {
+        this->GetHelper(ELEMENT_WHITE)->Resurrect(false);
     }
 }
 
@@ -935,7 +955,7 @@ void cGame::RepairPlayer()
         pPlayer->AddStatus   (PLAYER_STATUS_REPAIRED);
 
         // 
-        g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_REPAIR);
+        g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_EXPLOSION);
         g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_BIG, 500u);
 
         // 
@@ -966,7 +986,7 @@ void cGame::RepairPlayer()
             m_aPlayer[i].SetCurHealth(1);
             m_aPlayer[i].AddStatus   (PLAYER_STATUS_REPAIRED);
 
-            m_CombatText.DrawText(Core::Language->GetString("LUCKY"), m_aPlayer[i].GetPosition(), COLOR_MENU_INSIDE);
+            m_CombatText.DrawText(Core::Language->GetString("TEXT_LUCKY"), m_aPlayer[i].GetPosition(), COLOR_MENU_INSIDE);
 
             m_bDefeatDelay = false;
         }
@@ -1071,6 +1091,19 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
     // 
     ASSERT(iIndex < GAME_PLAYERS)
     return &m_aPlayer[iIndex];
+}
+
+
+// ****************************************************************
+// 
+coreBool cGame::IsAlone()const
+{
+    STATIC_ASSERT(GAME_PLAYERS == 2u)
+
+    if(m_aPlayer[1].HasStatus(PLAYER_STATUS_DEAD)) return true;
+    if(m_aPlayer[0].HasStatus(PLAYER_STATUS_DEAD)) return true;
+
+    return false;
 }
 
 
@@ -1240,7 +1273,7 @@ coreBool cGame::__HandleIntro()
                 if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
                 {
                     g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, pPlayer->GetEnergyColor());
-                    g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                    if(!i) g_pSpecialEffects->PlaySound(this->IsMulti() ? LERP(m_aPlayer[0].GetPosition(), m_aPlayer[1].GetPosition(), 0.5f) : pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FLY);
                 }
 
                 // fly player animated into the game field
@@ -1295,16 +1328,16 @@ coreBool cGame::__HandleOutro()
                 // 
                 if(g_pForeground->IsVisiblePoint(pPlayer->GetPosition().xy()) && InBetween(i ? 0.16f : 0.0f, fOldTime, m_fTimeInOut))
                 {
-                    g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_SHIP_FLY);
+                    if(!i) g_pSpecialEffects->PlaySound(this->IsMulti() ? LERP(m_aPlayer[0].GetPosition(), m_aPlayer[1].GetPosition(), 0.5f) : pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FLY);
                 }
             }
             else
             {
-                if(m_fTimeInOut >= 5.0f) pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+                if(m_fTimeInOut >= 13.0f) pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
             }
         });
-        
-        if(!m_Tracker.HasStatus(TRACKER_STATUS_DEAD))
+
+        if((m_iOutroSub == 1u) || (m_iOutroSub == 2u))
         {
             // 
             const coreFloat   fTime = MAX(m_fTimeInOut - 2.5f, 0.0f);
@@ -1320,10 +1353,62 @@ coreBool cGame::__HandleOutro()
             // 
             if(InBetween(2.5f, fOldTime, m_fTimeInOut))
             {
-                g_pSpecialEffects->PlaySound(m_Tracker.GetPosition(), 1.0f, 0.8f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(m_Tracker.GetPosition(), 1.0f, 0.8f, SOUND_EFFECT_FLY);
             }
         }
-        
+        else if(m_iOutroSub == 11u)
+        {
+            cHelper* pHelper = this->GetHelper(ELEMENT_WHITE);
+
+            // 
+            pHelper->SetPosition(coreVector3(0.0f, LERP(-1.2f, 1.2f, STEP(2.0f, 4.0f, m_fTimeInOut)), 0.0f) * FOREGROUND_AREA3);
+        }
+        else if(m_iOutroSub == 12u)
+        {
+            cHelper* pHelper = this->GetHelper(ELEMENT_WHITE);
+
+            // 
+            pHelper->SetPosition(coreVector3(LERP(-1.2f, 1.2f, STEP(2.0f, 4.0f, m_fTimeInOut)), 0.0f, 0.0f) * FOREGROUND_AREA3);
+        }
+        else if(m_iOutroSub == 13u)
+        {
+            cHelper* pHelper = this->GetHelper(ELEMENT_WHITE);
+
+            // 
+            static const coreSpline2 s_Spline = []()
+            {
+                coreSpline2 oSpline(2u);
+
+                oSpline.AddNode(coreVector2( 1.2f, 0.8f), coreVector2(-1.0f,0.0f));
+                oSpline.AddNode(coreVector2(-1.2f,-0.8f), coreVector2(-1.0f,0.0f));
+                oSpline.Refine();
+
+                return oSpline;
+            }();
+
+            // 
+            pHelper->SetPosition(coreVector3(s_Spline.CalcPositionLerp(STEP(2.0f, 4.5f, m_fTimeInOut)), 0.0f) * FOREGROUND_AREA3);
+        }
+        else if(m_iOutroSub == 14u)
+        {
+            cHelper* pHelper = this->GetHelper(ELEMENT_WHITE);
+
+            // 
+            static const coreSpline2 s_Spline = []()
+            {
+                coreSpline2 oSpline(3u);
+
+                oSpline.AddNode(coreVector2(-0.8f, 1.3f), coreVector2(0.0f,-1.0f));
+                oSpline.AddNode(coreVector2( 0.0f,-0.8f), coreVector2(1.0f, 0.0f));
+                oSpline.AddNode(coreVector2( 0.8f, 1.3f), coreVector2(0.0f, 1.0f));
+                oSpline.Refine();
+
+                return oSpline;
+            }();
+
+            // 
+            pHelper->SetPosition(coreVector3(s_Spline.CalcPositionLerp(STEP(2.0f, 5.0f, m_fTimeInOut)), 0.0f) * FOREGROUND_AREA3);
+        }
     }
 
     return true;
@@ -1414,7 +1499,7 @@ void cGame::__HandleCollisions()
 
             if(bFirstHit)
             {
-                if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
+                if(pBullet->HasStatus(BULLET_STATUS_ACTIVE) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
                 {
                     // 
                     const coreVector2 vDiff = (vIntersection.xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * TIME)) - pShield->GetPosition().xy();
@@ -1442,7 +1527,7 @@ void cGame::__HandleCollisions()
                 {
                     if(true || pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
                     {
-                        if(pEnemy->GetLifeTime() >= 1.0f)   // TODO 1: modifiers are not applied (vielleicht egal, weil es eher wichtig für den anfang einer sub-gruppe is ?)
+                        if(pEnemy->GetLifeTime() >= 1.0f || pEnemy->HasStatus(ENEMY_STATUS_NODELAY))   // TODO 1: modifiers are not applied (vielleicht egal, weil es eher wichtig für den anfang einer sub-gruppe is ?)
 
                         // 
                         pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
@@ -1457,7 +1542,7 @@ void cGame::__HandleCollisions()
                         // 
                         g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
                         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                        g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLAYER_INTERRUPT);
+                        g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_EFFECT_DUST);
                     }
                 }
             }
@@ -1527,6 +1612,7 @@ void cGame::__HandleCollisions()
                 if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
                 {
                     // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
+                    // TODO 1: this does not work for boss body-parts (e.g. messier rings, zeroth any)
                     if(!pEnemy->ReachedDeath())
                     {
                         if(pEnemy->HasStatus(ENEMY_STATUS_DEACTIVATE))

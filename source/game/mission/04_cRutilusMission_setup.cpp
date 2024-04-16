@@ -186,7 +186,7 @@ void cRutilusMission::__SetupOwn()
 
                 pSquad2->ClearEnemies(true);
 
-                if(!iLeftShots) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                if(!iLeftShots) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
             }
 
             if(g_pGame->IsTask())
@@ -485,7 +485,7 @@ void cRutilusMission::__SetupOwn()
                     else
                     {
                         g_pGame->GetCombatText()->DrawProgress(iBonusCount, pSquad2->GetNumEnemies(), pEnemy->GetPosition());
-                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iBonusCount, pSquad2->GetNumEnemies()), SOUND_ITEM_COLLECT);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iBonusCount, pSquad2->GetNumEnemies()), SOUND_ITEM_02);
                     }
                 }
             });
@@ -508,7 +508,7 @@ void cRutilusMission::__SetupOwn()
                         else if(aiTryCount[i] >= iTotal - 3u)
                         {
                             g_pGame->GetCombatText()->DrawCountdown(aiTryCount[i], iTotal, pPlayer->GetPosition());
-                            g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(aiTryCount[i], iTotal), SOUND_ITEM_COLLECT);
+                            g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(aiTryCount[i], iTotal), SOUND_ITEM_01);
                         }
                     }
 
@@ -703,7 +703,7 @@ void cRutilusMission::__SetupOwn()
             {
                 STAGE_DELAY_START_CLEAR
 
-                if(!iDirChange) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                if(!iDirChange) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
             }
 
             iTransitionState = 0u;
@@ -737,9 +737,14 @@ void cRutilusMission::__SetupOwn()
                     iTransitionState += 1u;
 
                     nScreenSplashFunc(pHelper->GetPosition().xy());
-                    g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
 
                     this->EnableCapsule();
+
+                    STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+                    {
+                        pPlayer->AddStatus(PLAYER_STATUS_GYRO);
+                    });
                 }
             }
             else if(iTransitionState == 1u)
@@ -753,7 +758,7 @@ void cRutilusMission::__SetupOwn()
                     iTransitionState += 1u;
 
                     nScreenSplashFunc(pHelper->GetPosition().xy());
-                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
                 }
             }
         }
@@ -764,7 +769,7 @@ void cRutilusMission::__SetupOwn()
                 iTransitionState += 1u;
 
                 nScreenSplashFunc(pHelper->GetPosition().xy());
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
             }
 
             fRotationSpeed = MAX(fRotationSpeed - 0.2f * TIME, -0.6f);
@@ -776,7 +781,7 @@ void cRutilusMission::__SetupOwn()
                 iTransitionState += 1u;
 
                 nScreenSplashFunc(pHelper->GetPosition().xy());
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
 
                 fRotationSpeed = -fRotationSpeed;
             }
@@ -792,6 +797,11 @@ void cRutilusMission::__SetupOwn()
                 fRotationTo    = (fRotationValue > 1.0f*PI) ? (2.0f*PI) : (0.0f*PI);
 
                 this->DisableCapsule(true);
+
+                STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+                {
+                    pPlayer->RemoveStatus(PLAYER_STATUS_GYRO);
+                });
 
                 g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
             }
@@ -821,7 +831,7 @@ void cRutilusMission::__SetupOwn()
                 if(g_CurConfig.Game.iBackRotation)
                 {
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
                     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
                 }
 
@@ -856,7 +866,7 @@ void cRutilusMission::__SetupOwn()
         if(m_Capsule.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             constexpr coreFloat  fCapsAnimation = 0.2f;
-            constexpr coreUint32 iCapsTotal     = 6u;
+            constexpr coreUint32 iCapsTotal     = 5u;
 
             if(!g_pGame->IsTask()) fCapsDelay = 3600.0f;
 
@@ -870,6 +880,7 @@ void cRutilusMission::__SetupOwn()
             if(InBetween(fCapsAnimation, fCapsDelay, fCapsDelayOld))
             {
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
+                g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.2f, 1.0f, SOUND_EFFECT_DUST);
             }
 
             if(fCapsDelay < fCapsAnimation)
@@ -889,7 +900,7 @@ void cRutilusMission::__SetupOwn()
                         else
                         {
                             g_pGame->GetCombatText()->DrawCountdown(iCapsCount, iCapsTotal, m_Capsule.GetPosition());
-                            g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCapsCount, iCapsTotal), SOUND_PLACEHOLDER);
+                            g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCapsCount, iCapsTotal), SOUND_ITEM_02);
                         }
 
                         fCapsDelay = (iCapsCount >= iCapsTotal) ? 3600.0f : 10.0f;
@@ -902,8 +913,7 @@ void cRutilusMission::__SetupOwn()
         }
 
         fRotationValue = FmodRange(fRotationValue + fRotationSpeed * TIME * fBackSpeed, 0.0f*PI, 2.0f*PI);
-        const coreVector2 vDirection       = coreVector2::Direction(fRotationValue);
-        const coreVector2 vDirectionMirror = g_CurConfig.Game.iMirrorMode ? vDirection.InvertedX() : vDirection;
+        const coreVector2 vDirection = coreVector2::Direction(fRotationValue);
 
         g_pPostProcessing->SetDirectionGame(vDirection);
 
@@ -938,7 +948,7 @@ void cRutilusMission::__SetupOwn()
                     else
                     {
                         g_pGame->GetCombatText()->DrawProgress(iCount, 4u, vPos);
-                        g_pSpecialEffects->PlaySound(vPos, 1.0f, SPECIAL_SOUND_PROGRESS(iCount, 4u), SOUND_ITEM_COLLECT);
+                        g_pSpecialEffects->PlaySound(vPos, 1.0f, SPECIAL_SOUND_PROGRESS(iCount, 4u), SOUND_ITEM_01);
                     }
                 }
             };
@@ -1078,13 +1088,13 @@ void cRutilusMission::__SetupOwn()
 
             if((i >= 52u && i < 68u) || (i >= 72u && i < 92u) || (i >= 100u))
             {
-                pEnemy->ToAxis(vDirectionMirror);
+                pEnemy->ToAxis(vDirection);
             }
 
-            if(((i < 76u) || (i >= 100u)) && STAGE_TICK_LIFETIME_BASE(6.0f, 0.0f) && (!g_pGame->IsEasy() || ((i >= 68u && i < 76u) ? ((s_iTick % 10u) < 4u) : (s_iTick < 4u))))
+            if(((i < 76u) || (i >= 100u)) && STAGE_TICK_LIFETIME_BASE(6.0f, 0.0f) && (!g_pGame->IsEasy() || ((i >= 68u && i < 76u) ? ((s_iTick % 12u) < 4u) : (s_iTick < 4u))))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayerDual((i / 4u) % 2u).Normalized();
+                const coreVector2 vDir = pEnemy->AimAtPlayerDual((i >= 100u && i < 116u) ? 1u : (((i / 4u) + ((i >= 20u && i < 68u) ? 1u : 0u)) % 2u)).Normalized();
                 const coreVector2 vTan = vDir.Rotated90() * ((s_iTick % 2u) ? -1.0f : 1.0f);
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, (vDir + vTan * 0.02f).Normalized())->ChangeSize(1.5f);
@@ -1140,6 +1150,11 @@ void cRutilusMission::__SetupOwn()
 
         this->DisableCapsule(false);
 
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->RemoveStatus(PLAYER_STATUS_GYRO);
+        });
+
         STAGE_FINISH_NOW
     });
 
@@ -1178,6 +1193,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: effekt um verlangsamte objekte herum (schein)
     // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble (?)
     // TODO 5: badge: go in and out multiple times
+    // TODO 1: show graze indicator
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData   = 6u;
@@ -1307,12 +1323,12 @@ void cRutilusMission::__SetupOwn()
                     this->EnableArea();
 
                     g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
-                    g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_SWIPE);
+                    g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_SWIPE_01);
                     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                 }
             }
         }
-        else if(m_iStageSub == 4u)
+        else if(m_iStageSub == 6u)
         {
             if(iTransitionState == 0u)
             {
@@ -1357,7 +1373,7 @@ void cRutilusMission::__SetupOwn()
                 this->EnableSafe();
 
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
-                g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.5f, 0.7f, SOUND_EFFECT_SWIPE);
+                g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.5f, 0.7f, SOUND_EFFECT_SWIPE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                 g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,1.0f));
@@ -1414,7 +1430,7 @@ void cRutilusMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, (i < 4u) ? 2.0f : ((i == 37u) ? 0.5f : 0.0f))
 
-            const coreFloat fSpeed        = this->CalcAreaSpeed(pEnemy->GetPosition().xy(), 1.0f);
+            const coreFloat fSpeed        = this->CalcAreaSpeed(pEnemy->GetPosition().xy(), 1.0f, 1.0f);
             const coreFloat fSlowLifeTime = fLifeTime * ((i < 19u) ? 1.0f : 0.4f);
 
             if(i < 10u || (i >= 19u && i < 25u))
@@ -1484,18 +1500,18 @@ void cRutilusMission::__SetupOwn()
             if(i < 4u)
             {
             }
-            else if(i < 15u || (i >= 19u && i < 37u))
+            else if(i < 15u || (i >= 25u && i < 37u))
             {
-                if(STAGE_TICK_LIFETIME((i >= 19u && i < 25u) ? 9.0f : 12.0f, 0.0f) && g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy(), 1.2f))
+                if(STAGE_TICK_LIFETIME(12.0f, 0.0f) && g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy(), 1.2f))
                 {
                     if(F_TO_UI(I_TO_F(s_iTick - 1u) * fSpeed) != F_TO_UI(I_TO_F(s_iTick) * fSpeed))
                     {
                         coreUint32& iOwnTick = STAGE_SINK_UINT(aiOwnTick[i % iNumData]);
 
-                        if(!g_pGame->IsEasy() || ((iOwnTick % 8u) < 4u))
+                        if(!g_pGame->IsEasy() || ((iOwnTick % 10u) < 4u))
                         {
                             const coreVector2 vPos = pEnemy->GetPosition().xy();
-                            const coreVector2 vDir = ((i >= 19u && i < 25u) ? pEnemy->AimAtPlayerDual((i - 19u) % 2u) : pEnemy->AimAtPlayerSideRev()).Normalized();
+                            const coreVector2 vDir = pEnemy->AimAtPlayerDual(i % 2u).Normalized();
 
                             g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
 
@@ -1504,6 +1520,26 @@ void cRutilusMission::__SetupOwn()
                         }
 
                         iOwnTick += 1u;
+                    }
+                }
+            }
+            else if(i >= 19u && i < 25u)
+            {
+                const coreFloat fEasy = g_pGame->IsEasy() ? 0.7f : 1.0f;
+
+                if(STAGE_LIFETIME_AFTER(0.7f) && STAGE_TICK_LIFETIME(3.0f * fEasy, I_TO_F(i - 19u) / 6.0f / 0.2f) && g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy(), 1.2f))
+                {
+                    if(F_TO_UI(I_TO_F(s_iTick - 1u) * fSpeed) != F_TO_UI(I_TO_F(s_iTick) * fSpeed))
+                    {
+                        const coreVector2 vPos = pEnemy->GetPosition().xy();
+                        const coreVector2 vDir = pEnemy->AimAtPlayerDual(i % 2u).Normalized();
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(4, 4.0f * fEasy, pEnemy, vPos + vDir *  2.0f * 0.9f, vDir)->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(4, 4.0f * fEasy, pEnemy, vPos + vDir * -1.0f * 0.9f, vDir)->ChangeSize(1.4f * 0.9f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(4, 4.0f * fEasy, pEnemy, vPos + vDir * -4.0f * 0.9f, vDir)->ChangeSize(1.4f * 0.9f * 0.9f);
+
+                        g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 5u, COLOR_ENERGY_ORANGE);
+                        g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                     }
                 }
             }
@@ -1541,7 +1577,7 @@ void cRutilusMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-            if(!iFastKills) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+            if(!iFastKills) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
         }
 
         coreBool bPostpone = false;
@@ -1572,7 +1608,7 @@ void cRutilusMission::__SetupOwn()
                 coreObject3D* pTock = this->GetTock(i);
                 if(!pTock->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-                const coreFloat fSpeed  = this->CalcAreaSpeed(pTock->GetPosition().xy(), 3.0f);
+                const coreFloat fSpeed  = this->CalcAreaSpeed(pTock->GetPosition().xy(), 1.0f, 3.0f);
                 const coreBool  bActive = (fSpeed < 0.5f);
 
                 coreVector2 vCurDir = coreVector2(-1.0f,-3.0f).Normalized();
@@ -1600,7 +1636,7 @@ void cRutilusMission::__SetupOwn()
                         else
                         {
                             g_pGame->GetCombatText()->DrawProgress(iTockState, RUTILUS_TOCKS, pTock->GetPosition());
-                            g_pSpecialEffects->PlaySound(pTock->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iTockState, RUTILUS_TOCKS), SOUND_ITEM_COLLECT);
+                            g_pSpecialEffects->PlaySound(pTock->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iTockState, RUTILUS_TOCKS), SOUND_ITEM_01);
                         }
                     }
                 });
@@ -1609,6 +1645,8 @@ void cRutilusMission::__SetupOwn()
             coreBool bGraze = false;
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
+                if(!pPlayer->IsNormal()) return;
+
                 const coreVector2 vPlayerPos = pPlayer->GetPosition().xy();
 
                 g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](const cBullet* pBullet)
@@ -1620,10 +1658,10 @@ void cRutilusMission::__SetupOwn()
 
             if(bGraze)
             {
-                fGrazeValue += 20.0f * TIME;
+                fGrazeValue += 0.2f * TIME;
 
-                if(fGrazeValue >= 100.0f) STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
-                else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", fGrazeValue), pHelper->GetPosition(), COLOR_MENU_INSIDE);
+                if(fGrazeValue >= 1.0f) STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
+                else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fGrazeValue * 100.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE);
             }
         }
 
@@ -1755,7 +1793,7 @@ void cRutilusMission::__SetupOwn()
             {
                 STAGE_DELAY_START_CLEAR
 
-                if(!iSelfHits) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                if(!iSelfHits) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
             }
 
             iTransitionState = 0u;
@@ -1822,7 +1860,7 @@ void cRutilusMission::__SetupOwn()
                     STAGE_BADGE(0u, BADGE_EASY, coreVector3(0.25f,0.0f,0.0f) * FOREGROUND_AREA3);
                 }
 
-                if(iSlapState) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_EFFECT_SUCCESS);
+                if(iSlapState) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, SPECIAL_SOUND_PROGRESS(iSlapState, 3u), SOUND_ITEM_02);
 
                 iSlapState += 1u;
             }
@@ -1969,7 +2007,7 @@ void cRutilusMission::__SetupOwn()
                             else
                             {
                                 g_pGame->GetCombatText()->DrawCountdown(iAroundCount, 6u, pHelper->GetPosition());
-                                g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iAroundCount, 6u), SOUND_ITEM_COLLECT);
+                                g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iAroundCount, 6u), SOUND_ITEM_01);
                             }
                         }
                     }
@@ -2176,6 +2214,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: hard mode: indestructible meteors
     // TODO 1: hard mode: meteor bounce
     // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
+    // TODO 1: manchmal fliegt das erste orb-geschoss "anders", is das wirklich wegen der reflektion ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -2572,7 +2611,7 @@ void cRutilusMission::__SetupOwn()
                     iImpact = 1u;
 
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
-                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE);
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_01);
                     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
                 }
 
@@ -2649,7 +2688,7 @@ void cRutilusMission::__SetupOwn()
 
                     avAddMove    [i] = -pEnemy->GetDirection().xy() * 25.0f;
                     afAddRotation[i] = pParent->GetDirection().xy().Angle();
-                    afAddOffset  [i] = fLifeTimeBase;
+                    afAddOffset  [i] = fLifeTimeBeforeBase;
                 }
 
                 if(avAddMove[i])
@@ -2672,7 +2711,7 @@ void cRutilusMission::__SetupOwn()
 
                 pEnemy->DefaultRotate(afAddRotation[i]);
 
-                if(STAGE_TICK_LIFETIME_BASE(60.0f, 60.0f * afAddOffset[i]) && ((s_iTick % 7u) < 3u))
+                if(STAGE_TICK_LIFETIME_BASE(60.0f, 60.0f * afAddOffset[i]) && ((s_iTick % (g_pGame->IsEasy() ? 14u : 7u)) < 3u))
                 {
                     const coreVector2 vPos = pEnemy->GetPosition ().xy();
                     const coreVector2 vDir = pEnemy->GetDirection().xy();
@@ -2697,7 +2736,7 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        if(iActiveCount >= pSquad2->GetNumEnemies()) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+        if(iActiveCount >= pSquad2->GetNumEnemies()) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
 
         STAGE_FOREACH_ENEMY(pSquad3, pEnemy, i)
         {
@@ -2721,10 +2760,11 @@ void cRutilusMission::__SetupOwn()
                 g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
 
                 const coreVector2 vPos = pParent->GetPosition().xy();
+                const coreUintW   iNum = g_pGame->IsEasy() ? 6u : 10u;
 
-                for(coreUintW j = 10u; j--; )
+                for(coreUintW j = iNum; j--; )
                 {
-                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 18.0f));
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * (180.0f / I_TO_F(iNum))));
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.6f);
@@ -2775,7 +2815,7 @@ void cRutilusMission::__SetupOwn()
                         else
                         {
                             g_pGame->GetCombatText()->DrawCountdown(iDebrisCount, 10u, pBullet->GetPosition());
-                            g_pSpecialEffects->PlaySound(pBullet->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iDebrisCount, 10u), SOUND_ITEM_COLLECT);
+                            g_pSpecialEffects->PlaySound(pBullet->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iDebrisCount, 10u), SOUND_ITEM_01);
                         }
                     }
                 });
@@ -3388,8 +3428,8 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
-                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
+                pEnemy->Configure(50 + 50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
             });
         });
 
@@ -3399,11 +3439,11 @@ void cRutilusMission::__SetupOwn()
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 5.0f * fBaseScale);
                 pEnemy->Configure(50 * 50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
-                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
 
-        STAGE_BOSS(m_Messier, {150.0f, 225.0f, 300.0, 375.0f, 750.0f})
+        STAGE_BOSS(m_Messier, {160.0f, 240.0f, 320.0, 400.0f, 800.0f})
     },
     STAGE_PRE()
     {
@@ -3425,6 +3465,11 @@ void cRutilusMission::__SetupOwn()
     // end
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
+        if(m_bStory)
+        {
+            m_iOutroSub = 12u;
+        }
+
         STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 

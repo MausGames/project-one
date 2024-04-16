@@ -14,7 +14,7 @@
 // TODO 3: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO 3: assertion for "active boss should be alive"
 // TODO 3: STAGE_FLYPAST with dot-product or simpler per-axis
-// TODO 2: [MF] there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
+// TODO 2: [MF] [HIGH] there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO 3: wrap m_piData in function with RETURN_RESTRICT
 // TODO 3: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
 // TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory), or create 2 max-size blocks (old, cur), also in Ater mission ?
@@ -132,7 +132,7 @@
 #define RUTILUS_PLATE_SPEED         (1.0f)                                            // 
 #define RUTILUS_AREA_SIZE           (20.0f)                                           // 
 #define RUTILUS_SAFE_SIZE           (20.0f)                                           // 
-#define RUTILUS_AREA_REGISTRY       (MISSION_PLAYERS + 2u)                            // 
+#define RUTILUS_AREA_REGISTRY       (MISSION_PLAYERS + 3u)                            // 
 
 #define GELU_FANGS                  (25u)                                             // 
 #define GELU_FANGS_RAWS             (GELU_FANGS)                                      // 
@@ -161,7 +161,7 @@
 #define CALOR_CHAINS                (28u)                                             // 
 #define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
 #define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
-#define CALOR_HAILS                 (3u)                                              // 
+#define CALOR_HAILS                 (5u)                                              // 
 #define CALOR_HAILS_RAWS            (CALOR_HAILS * 2u)                                // 
 #define CALOR_CHESTS                (6u)                                              // 
 #define CALOR_CHESTS_RAWS           (CALOR_CHESTS * 2u)                               // 
@@ -345,6 +345,8 @@ protected:
     coreUint8 m_iTakeFrom;                                  // 
     coreUint8 m_iTakeTo;                                    // 
 
+    coreUint8 m_iOutroSub;                                  // 
+
     coreBool m_bDelay;                                      // 
 
     coreBool m_bRepeat;                                     // 
@@ -375,6 +377,7 @@ public:
     void RenderUnder ();
     void RenderOver  ();
     void RenderTop   ();
+    void MoveAlways  ();
     void MoveBefore  ();
     void MoveMiddle  ();
     void MoveAfter   ();
@@ -460,6 +463,7 @@ private:
     virtual void __RenderOwnUnder () {}
     virtual void __RenderOwnOver  () {}
     virtual void __RenderOwnTop   () {}
+    virtual void __MoveOwnAlways  () {}
     virtual void __MoveOwnBefore  () {}
     virtual void __MoveOwnMiddle  () {}
     virtual void __MoveOwnAfter   () {}
@@ -549,6 +553,8 @@ private:
     coreUint8 m_iBounceState;                               // 
 
     coreFlow m_fAnimation;                                  // animation value
+
+    coreBool m_bStory;                                      // 
 
 
 public:
@@ -703,13 +709,15 @@ private:
     coreBool    m_bClamp;                             // 
     coreBool    m_bOverdraw;                          // 
 
-    coreObject3D m_aDemoRange[2];                     // 
-    coreFlow     m_fDemoRangeAnim;                    // 
+    coreObject3D m_aStoryRange[2];                    // 
+    coreFlow     m_fStoryRangeAnim;                   // 
 
     coreDummyPtr m_apResCache[23];                    // 
     coreSoundPtr m_pNightmareSound;                   // 
 
     coreFlow m_fAnimation;                            // animation value
+
+    coreBool m_bStory;                                // 
 
 
 public:
@@ -853,7 +861,9 @@ private:
     std::function<void()> m_aInsanityStage[5];          // 
     coreUint8             m_iInsanity;                  // 
 
-    coreFlow m_fAnimation;                              // animation value
+    coreFlow m_fAnimation;                              // animation value#
+
+    coreBool m_bStory;                                  // 
 
 
 public:
@@ -985,6 +995,8 @@ private:
 
     coreFlow m_fAnimation;                                 // animation value
 
+    coreBool m_bStory;                                     // 
+
 
 public:
     cRutilusMission()noexcept;
@@ -1029,7 +1041,7 @@ public:
     inline coreBool IsPlateEnabled(const coreUintW iIndex)const {ASSERT(iIndex < RUTILUS_PLATES) return m_aPlateRaw[iIndex].IsEnabled(CORE_OBJECT_ENABLE_MOVE);}
 
     // 
-    coreFloat CalcAreaSpeed(const coreVector2 vPosition, const coreFloat fFactorFast)const;
+    coreFloat CalcAreaSpeed(const coreVector2 vPosition, const coreFloat fFactorSlow, const coreFloat fFactorFast)const;
 
     // 
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
@@ -1127,15 +1139,21 @@ private:
     coreUint16    m_iShineActive;                    // 
 
     cCustomEnemy m_Surfer;                           // 
+    coreObject3D m_SurferWave;                       // 
 
     coreVector2 m_avOldPos[GELU_POSITIONS];          // 
     coreUint32  m_iTouchState;                       // 
+    coreUint32  m_iTouchStateOld;                    // 
+
+    coreVector2 m_avFreezeMove[MISSION_PLAYERS];     // 
 
     coreBool  m_abCrushImmune[MISSION_PLAYERS];      // 
     coreBool  m_abCrushInside[MISSION_PLAYERS];      // 
     coreUint8 m_iCrushState;                         // 
 
     coreFlow m_fAnimation;                           // animation value
+
+    coreBool m_bStory;                               // 
 
 
 public:
@@ -1174,6 +1192,10 @@ public:
     void DisableShine(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableSurfer ();
+    void DisableSurfer(const coreBool bAnimated);
+
+    // 
     inline coreBool IsWayActive   (const coreUintW iIndex)const {ASSERT(iIndex < GELU_WAYS) return HAS_BIT(m_iWayActive,  iIndex);}
     inline coreBool IsWayActiveAny()const                       {return (m_iWayActive != 0u);}
     inline coreBool IsWayVisible  (const coreUintW iIndex)const {ASSERT(iIndex < GELU_WAYS) return HAS_BIT(m_iWayVisible, iIndex);}
@@ -1187,6 +1209,9 @@ public:
 
     // 
     inline void SetWayFree(const coreUintW iIndex, const coreBool bFree) {ASSERT(iIndex < GELU_WAYS) SET_BIT(m_iWayFree, iIndex, bFree)}
+
+    // 
+    inline coreVector2 ConsumeFreezeMove(const coreUintW iIndex) {ASSERT(iIndex < MISSION_PLAYERS) const coreVector2 A = m_avFreezeMove[iIndex]; m_avFreezeMove[iIndex] = coreVector2(0.0f,0.0f); return A;}
 
     // 
     inline void SetCrushFree  (const coreBool bCrushFree)   {SET_BIT(m_iCrushState, 0u, bCrushFree)}     // move through blocks after crush
@@ -1217,6 +1242,7 @@ private:
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
     void __RenderOwnUnder ()final;
+    void __MoveOwnAlways  ()final;
     void __MoveOwnAfter   ()final;
 
     // 
@@ -1282,7 +1308,15 @@ private:
 
     cCustomEnemy m_Boulder;                           // 
 
+    coreObject3D m_aStoryRange[2];                    // 
+    coreFlow     m_fStoryRangeAnim;                   // 
+
+    coreDummyPtr m_apResCache[19];                    // 
+    coreSoundPtr m_pNightmareSound;                   // 
+
     coreFlow m_fAnimation;                            // animation value
+
+    coreBool m_bStory;                                // 
 
 
 public:
@@ -1319,6 +1353,10 @@ public:
     // 
     void EnableStar (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vOffset);
     void DisableStar(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableRanges ();
+    void DisableRanges(const coreBool bAnimated);
 
     // 
     inline void BumpLoad(const coreFloat fValue) {ASSERT(fValue > 0.0f) m_afLoadPower[0] = MIN(m_afLoadPower[0] + fValue, I_TO_F(CALOR_LOADS)); m_afLoadPower[2] = 1.0f;}
@@ -1402,6 +1440,7 @@ private:
 
     coreObject3D m_Diamond;                                  // 
     coreUint8    m_iDiamondIndex;                            // 
+    coreFlow     m_fDiamondSpin;                             // 
 
     coreSpline2  m_aStrikeSpline [MUSCUS_PEARLS];            // 
     coreFlow     m_afStrikeTime  [MUSCUS_PEARLS];            // 
@@ -1411,6 +1450,8 @@ private:
     coreFlow     m_fStrikeTicker;                            // 
 
     coreFlow m_fAnimation;                                   // animation value
+
+    coreBool m_bStory;                                       // 
 
 
 public:
@@ -1439,6 +1480,7 @@ public:
     // 
     void StartDiamond(const coreUintW iIndex);
     void EndDiamond  (const coreBool bAnimated);
+    inline void CatchDiamond() {m_fDiamondSpin = 1.0f;}
 
     // 
     inline void ShowGenerate(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateTime[iIndex] = MAX(m_afGenerateTime[iIndex], fTime);}

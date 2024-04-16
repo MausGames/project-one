@@ -122,6 +122,8 @@ void cErrorMission::__SetupOwn()
         SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_CYAN,     0.5f)
         SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_GREEN,    0.7f)
 
+        SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_BLACK,    10.0f)
+
         STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 #if !defined(_CORE_DEBUG_)

@@ -256,6 +256,7 @@ void cEnemy::Resurrect()
 
     // add ship to the game
     this->_Resurrect();
+    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN)) this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
 
     // 
     this->__ResurrectOwn();
@@ -289,35 +290,32 @@ void cEnemy::Kill(const coreBool bAnimated)
     }
 
     // 
-    if(bAnimated)// && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) sollten am rand explodieren // this->GetType())   
+    if(bAnimated && this->GetType())   // sollten am rand explodieren
     {
         if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_SKIPEXPLOSION))
         {
-        // 
-        if(HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
-        {
-            const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
-            g_pSpecialEffects->MacroDestructionColor(this, vColor);
-        }
-        else
-        {
-            g_pSpecialEffects->MacroDestructionDark(this);
-        }
+            // 
+            if(HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
+            {
+                const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
+                g_pSpecialEffects->MacroDestructionColor(this, vColor);
+            }
+            else
+            {
+                g_pSpecialEffects->MacroDestructionDark(this);
+            }
 
-        // 
-        const coreFloat fVolume = ((g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID) && (this->GetExplosionSound() == SOUND_ENEMY_EXPLOSION_10)) ? 0.8f : 1.0f;
-        g_pSpecialEffects->PlaySound(this->GetPosition(), fVolume, this->GetExplosionPitch(), this->GetExplosionSound());
+            // 
+            const coreFloat fVolume = ((g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID) && (this->GetExplosionSound() == SOUND_ENEMY_EXPLOSION_10)) ? 0.8f : 1.0f;
+            g_pSpecialEffects->PlaySound(this->GetPosition(), fVolume, this->GetExplosionPitch(), this->GetExplosionSound());
 
-        // 
-        if(STATIC_ISVALID(g_pGame) && HAS_FLAG(m_iStatus, ENEMY_STATUS_CRASH))
-        {
-            g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 20.0f, NULL);
-            //g_pGame->GetCrashManager()->AddCrash(*this, coreVector2(0.0f,0.0f), NULL);
+            // 
+            if(STATIC_ISVALID(g_pGame) && HAS_FLAG(m_iStatus, ENEMY_STATUS_CRASH))
+            {
+                g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 20.0f, NULL);
+                //g_pGame->GetCrashManager()->AddCrash(*this, coreVector2(0.0f,0.0f), NULL);
+            }
         }
-        }
-
-        // 
-        this->TrackEnemy();
     }
 
     if(bEnergy)
@@ -379,6 +377,9 @@ void cEnemy::ApplyScore(cPlayer* pPlayer)
 
         // 
         g_pGame->GetCombatText()->DrawScore(iScore, this->GetPosition(), false);//!g_pGame->GetEnemyManager()->GetNumEnemiesAlive());   // TODO 1: bBig is not correct
+
+        // 
+        this->TrackEnemy();
     }
 }
 
@@ -1429,9 +1430,9 @@ void cRepairEnemy::__KillOwn(const coreBool bAnimated)
 // 
 void cRepairEnemy::__RenderOwnOver()
 {
-    DEPTH_PUSH
+    //DEPTH_PUSH   // # should not be used here, to prevent unexpected overflow
 
-    glDisable(GL_DEPTH_TEST);
+    glDepthFunc(GL_ALWAYS);
     {
         // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Bubble);
@@ -1439,15 +1440,15 @@ void cRepairEnemy::__RenderOwnOver()
         // 
         this->_EnableBlink(m_Bubble.GetProgram());
         m_Bubble.Render();
+
+        // 
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Ship);
     }
-    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     // 
     this->_EnableBlink(m_Ship.GetProgram());
     m_Ship.Render();
-
-    // 
-    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Ship);
 }
 
 
@@ -1468,7 +1469,7 @@ void cRepairEnemy::__MoveOwn()
     if(!bMove) this->SetPosition(coreVector3(m_pPlayer->GetPosition().xy(), 0.0f));
 
     // 
-    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * TIME * (bMove ? 1.0f : 0.0f));
+    coreVector2       vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * TIME * (bMove ? 1.0f : 0.0f));
     const coreVector2 vNewDir = coreVector2::Direction(m_fAnimation * (8.0f*PI));
     const coreVector4 vArea   = m_pPlayer->GetArea();
 
@@ -1477,6 +1478,13 @@ void cRepairEnemy::__MoveOwn()
     else if((vNewPos.x > vArea.z) && (m_vDirection.x > 0.0f)) m_vDirection.x = -ABS(m_vDirection.x);
          if((vNewPos.y < vArea.y) && (m_vDirection.y < 0.0f)) m_vDirection.y =  ABS(m_vDirection.y);
     else if((vNewPos.y > vArea.w) && (m_vDirection.y > 0.0f)) m_vDirection.y = -ABS(m_vDirection.y);
+
+    // 
+    if(!m_pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE))
+    {
+        vNewPos.x = CLAMP(vNewPos.x, vArea.x, vArea.z);
+        vNewPos.y = CLAMP(vNewPos.y, vArea.y, vArea.w);
+    }
 
     // 
     this->SetPosition (coreVector3(vNewPos, 0.0f));

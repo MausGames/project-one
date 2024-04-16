@@ -23,12 +23,11 @@
 // alle angriffe, außer die raketen, erscheinen an der einschlags-stelle, ein teppich von der anderen seite zum ziel war zu un-balanced (zu nah am einschlag war zu leicht, zu fern zu schwer), geschosse entlang des schusses waren viel zu schwer, und ein wellen-angriff direkt vom tank aus hat die mitte komplett unbrauchbar gemacht (und hat zu sehr eingeschränkt)
 // intro gegner sollten weit auseinander stehen, damit man die abstürze gut sieht, und später kommen, damit der spieler erst versucht den tank anzugreifen (und dabei die haubitze sieht, mit der aiming mechanik die bei allen waffen gleich ist)
 // abstürzende gegner sollten explodieren vor absturz, was besonders wichtig ist um die gegner über spike-plates zu kaschieren
+// ACHIEVEMENT: get hit by every tank-weapon exactly once
 // TODO 1: hard-mode: wind + minen
 // TODO 1: hard mode: wind force in environment-richtung (damit es von tiger position beeinflusst wird) (stark genug, dass man beim schießen nicht dagegen ankommt)
 // TODO 1: Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
 // TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
-// TODO 1: [MF] improve/fix beam effect + aiming + collision detection
-// TODO 1: [MF] ACHIEVEMENT: name (), description (), spin around the boss 10 times without getting hit
 // TODO 5: (mines need to be enemies to allow blinking, combo/chain)
 // TODO 5: (in die stacheln schießen erzeugt effekt (knusprig))
 // TODO 5: (make sure to disable wind on boss-death (hard if necessary))
@@ -67,6 +66,7 @@ cTigerBoss::cTigerBoss()noexcept
 , m_iWeaponType    (0u)
 , m_iWeaponTypeOld (0u)
 , m_fWeaponChange  (0.0f)
+, m_aiBulletHit    {}
 , m_iDecalState    (0u)
 , m_fAnimation     (0.0f)
 {
@@ -114,9 +114,9 @@ cTigerBoss::cTigerBoss()noexcept
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBeam); ++i)
     {
         // 
-        m_aBeam[i].DefineModel  ("object_tube_open.md3");
+        m_aBeam[i].DefineModel  ("object_tube.md3");
         m_aBeam[i].DefineTexture(0u, "effect_energy.png");
-        m_aBeam[i].DefineProgram(i ? "effect_energy_direct_program" : "effect_energy_direct_program");
+        m_aBeam[i].DefineProgram("effect_energy_direct_program");
         m_aBeam[i].SetSize      (i ? coreVector3(0.0f,0.0f,0.0f) : coreVector3(0.0f,100.0f,0.0f));
         m_aBeam[i].SetColor3    (i ? (LERP(COLOR_ENERGY_WHITE, COLOR_ENERGY_MAGENTA, 0.5f)) : (COLOR_ENERGY_MAGENTA * 1.0f));
         m_aBeam[i].SetTexSize   (i ? coreVector2(3.0f,0.2f) : coreVector2(4.0f,1.0f));
@@ -235,6 +235,11 @@ void cTigerBoss::__ResurrectOwn()
 // 
 void cTigerBoss::__KillOwn(const coreBool bAnimated)
 {
+    cHarenaMission* pMission = d_cast<cHarenaMission*>(g_pGame->GetCurMission());
+
+    // 
+    pMission->ResetCollPlayerBullet();
+
     // 
     this->__DisableBeam(bAnimated);
     for(coreUintW i = 0u; i < TIGER_AIMS;  ++i) this->__DisableAim   (i, bAnimated);
@@ -269,21 +274,21 @@ void cTigerBoss::__RenderOwnOver()
 {
     DEPTH_PUSH
 
-    glDepthFunc(GL_ALWAYS);
-    {
-        // 
-        m_Sting.Render();
-    }
-    glDepthFunc(GL_LEQUAL);
+    //glDepthFunc(GL_ALWAYS);
+    //{
+    //    // 
+    //    m_Sting.Render();
+    //}
+    //glDepthFunc(GL_LEQUAL);
 
     glDisable(GL_DEPTH_TEST);
     {
         // 
-        for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
-            m_aAim[i].Render();
+        m_AimRing.Render();
 
         // 
-        m_AimRing.Render();
+        for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
+            m_aAim[i].Render();
     }
     glEnable(GL_DEPTH_TEST);
 
@@ -637,11 +642,14 @@ void cTigerBoss::__MoveOwn()
     else if(m_iPhase == 60u)
     {
         constexpr coreUintW iHelperSpike = 35u;
-        if(pMission->GetSpikeLaunched(iHelperSpike))
+
+        const coreObject3D* pBoard = pMission->GetSpikeBoard(iHelperSpike);
+
+        if(pBoard->IsEnabled(CORE_OBJECT_ENABLE_MOVE) && pMission->GetSpikeLaunched(iHelperSpike))
         {
             if(this->_ResurrectHelper(ELEMENT_CYAN, true))
             {
-                g_pGame->GetHelper(ELEMENT_CYAN)->SetPosition(pMission->GetSpikeBoard(iHelperSpike)->GetPosition());
+                g_pGame->GetHelper(ELEMENT_CYAN)->SetPosition(pBoard->GetPosition());
             }
         }
 
@@ -731,7 +739,7 @@ void cTigerBoss::__MoveOwn()
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
                 g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
                 g_pSpecialEffects->SlowScreen(4.0f);
 
                 // load object resources
@@ -785,6 +793,8 @@ void cTigerBoss::__MoveOwn()
                 }
 
                 m_aAim[iTick].SetPosition(coreVector3(vPos * FOREGROUND_AREA * 0.5f, 0.0f));
+
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_EFFECT_BEEP);
             }
 
             if(PHASE_FINISHED)
@@ -838,22 +848,24 @@ void cTigerBoss::__MoveOwn()
                 this->__EnableAim(0u);
             }
 
+            constexpr coreFloat fLock = 0.75f - CORE_MATH_PRECISION;   // at a beep
+
             cPlayer* pTarget = this->NearestPlayerDual(m_aiCounter[BEAM_SHOT] % 2);
 
-            if(PHASE_TIME_BEFORE(0.85f))
+            if(PHASE_TIME_BEFORE(fLock))
             {
                 m_vBeamPos = pTarget->GetPosition().xy();
 
                 m_aAim[0].SetPosition(coreVector3(m_vBeamPos, 0.0f));
             }
 
-            m_AimRing.SetSize  (m_aAim[0].GetSize() * LERPBR(3.0f, 1.0f, STEP(0.0f, 0.85f, fTime)));
-            m_AimRing.SetColor3(PHASE_TIME_BEFORE(0.85f) ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_MAGENTA);
-            m_AimRing.SetAlpha (STEPH3(0.0f, 0.85f, fTime));
+            m_AimRing.SetSize  (m_aAim[0].GetSize() * LERPBR(3.0f, 1.3f, STEP(0.0f, fLock, fTime)));
+            m_AimRing.SetColor3(PHASE_TIME_BEFORE(fLock) ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_MAGENTA);
+            m_AimRing.SetAlpha (STEPH3(0.0f, fLock, fTime));
 
-            PHASE_CONTROL_TICKER(1u, 4u, 5.0f * 0.5f, LERP_LINEAR)
+            PHASE_CONTROL_TICKER(1u, 3u, 4.0f * 0.5f, LERP_LINEAR)
             {
-                //g_pSpecialEffects->PlaySound(coreVector3(m_vBeamPos, 0.0f), 1.0f, 0.7f, SOUND_EFFECT_BEEP);
+                g_pSpecialEffects->PlaySound(coreVector3(m_vBeamPos, 0.0f), 1.0f, 1.1f, SOUND_EFFECT_BEEP);
             });
 
             if(PHASE_FINISHED)
@@ -983,7 +995,8 @@ void cTigerBoss::__MoveOwn()
                     m_aiCounter[WEAPON_SHOT] += 1;
                 }
 
-                const coreVector2 vAim    = (this->NearestPlayerDual((m_aiCounter[WEAPON_SHOT] / 2) % 2)->GetPosition().xy() - g_pForeground->Project3D(this->GetPosition())).Normalized();
+                const coreVector2 vTarget = this->NearestPlayerDual(((m_aiCounter[WEAPON_SHOT] - 1) / ((m_iWeaponType == 1u) ? 4 : 2)) % 2)->GetPosition().xy();
+                const coreVector2 vAim    = (vTarget - g_pForeground->Project3D(this->GetPosition())).Normalized();
                 const coreVector2 vNewDir = SmoothAim(m_aWeapon[0].GetDirection().xy(), vAim, 5.0f);
 
                 m_aWeapon[0].SetDirection(coreVector3(vNewDir, 0.0f));
@@ -1121,7 +1134,7 @@ void cTigerBoss::__MoveOwn()
     if(m_AimRing.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         m_AimRing.SetPosition (m_aAim[0].GetPosition ());
-        m_AimRing.SetDirection(m_aAim[0].GetDirection());
+        m_AimRing.SetDirection(m_aAim[0].GetDirection().InvertedX());
         m_AimRing.Move();
     }
 
@@ -1380,6 +1393,27 @@ void cTigerBoss::__MoveOwn()
 
     // 
     pMission->PlayInsanity();
+
+    // 
+    pMission->SetCollPlayerBullet([COLL_THIS](const cPlayer* pPlayer, const cBullet* pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
+    {
+        if(!bFirstHit) return;
+        if(!pPlayer->IsNormal()) return;
+
+        switch(pBullet->GetID())
+        {
+        case cConeBullet    ::ID: m_aiBulletHit[0] += 1u; break;
+        case cTriangleBullet::ID: m_aiBulletHit[1] += 1u; break;
+        case cFlipBullet    ::ID: m_aiBulletHit[2] += 1u; break;
+        case cWaveBullet    ::ID: m_aiBulletHit[3] += 1u; break;
+        case cRocketBullet  ::ID: m_aiBulletHit[4] += 1u; break;
+        }
+
+        if(std::all_of(m_aiBulletHit, m_aiBulletHit + TIGER_WEAPONS, [](const coreUint16 A) {return (A == 1u);}))
+        {
+            g_pGame->GetCurMission()->GiveBadge(3u, BADGE_ACHIEVEMENT, pPlayer->GetPosition());
+        }
+    });
     
     
 
@@ -1510,7 +1544,7 @@ void cTigerBoss::__EnableBeam(const coreVector2 vPosition)
     const coreVector3 vImpact = coreVector3(vRealPos, g_pEnvironment->RetrieveSafeHeight(vRealPos));
 
     g_pSpecialEffects->MacroExplosionColorBig(vImpact, COLOR_ENERGY_MAGENTA);
-    g_pSpecialEffects->PlaySound(vImpact, 0.8f, 1.0f, SOUND_EFFECT_FIRE_START);
+    g_pSpecialEffects->PlaySound(vImpact, 0.8f, 1.0f, SOUND_EFFECT_FIRE);
     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
     
     
@@ -1800,7 +1834,7 @@ void cTigerBoss::__CauseBeamDamage(cPlayer* OUTPUT pTarget)
     {
         this->TakeDamage(TIGER_DAMAGE, ELEMENT_NEUTRAL, HIDDEN_POS, pTarget, true);
 
-        g_pGame->GetCombatText()->DrawText(Core::Language->GetString("HIT"), this->GetPosition(), COLOR_MENU_MAGENTA);
+        g_pGame->GetCombatText()->DrawText(Core::Language->GetString("TEXT_HIT"), this->GetPosition(), COLOR_MENU_MAGENTA);
         g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
     }
 
@@ -1809,7 +1843,7 @@ void cTigerBoss::__CauseBeamDamage(cPlayer* OUTPUT pTarget)
         if(pPlayer->IsNormal())
         {
             const coreVector2 vDiff = pPlayer->GetPosition().xy() - m_vBeamPos;
-            if(vDiff.LengthSq() < POW2(5.0f))
+            if(vDiff.LengthSq() < POW2(7.0f))
             {
                 pPlayer->TakeDamage(5, ELEMENT_MAGENTA, m_vBeamPos);
             }

@@ -166,7 +166,7 @@ void cScoreMenu::Move()
     cMenu::UpdateTab(&m_DefaultTab, true, true);
 
     // 
-    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
+    cMenu::UpdateButton(&m_BackButton, &m_Navigator, m_BackButton.IsFocused());
 }
 
 
@@ -180,7 +180,7 @@ void cScoreMenu::LoadMissions()
     m_FilterMission.ClearEntries();
 
     // 
-    m_FilterMission.AddEntryLanguage("GAME_GLOBAL", 255u);
+    m_FilterMission.AddEntryLanguage("FILTER_GLOBAL", 255u);
     for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i)
     {
         const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < MISSION_BASE) ? 1u : 0u);
@@ -209,7 +209,7 @@ void cScoreMenu::LoadSegments(const coreUintW iIndex)
     // 
     if(iIndex)
     {
-        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+        m_FilterSegment.AddEntryLanguage("FILTER_ALL", 255u);
         for(coreUintW i = 0u; i < 6u; ++i)
         {
             m_FilterSegment.AddEntry(PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iIndex - 1u, i)), i);
@@ -218,7 +218,7 @@ void cScoreMenu::LoadSegments(const coreUintW iIndex)
     }
     else
     {
-        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+        m_FilterSegment.AddEntryLanguage("FILTER_ALL", 255u);
         m_FilterSegment.SetOverride(-1);
     }
 

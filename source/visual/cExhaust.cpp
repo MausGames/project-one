@@ -26,7 +26,7 @@ cExhaustManager::cExhaustManager()noexcept
     STATIC_ASSERT(EXHAUST_BASES == 3u)
 
     // 
-    m_aPrototype[0].DefineModel  ("object_tube_open.md3");
+    m_aPrototype[0].DefineModel  ("object_tube.md3");
     m_aPrototype[0].DefineTexture(0u, "effect_energy.png");
     m_aPrototype[0].DefineProgram("effect_energy_flat_direct_program");
 

@@ -110,10 +110,10 @@ void cPauseMenu::Move()
             m_ResumeButton.SetPosition(MENU_PAUSE_RESUME_POSITION);
 
             // 
-            cMenu::UpdateButton(&m_ResumeButton,  m_ResumeButton .IsFocused());
-            cMenu::UpdateButton(&m_RestartButton, m_RestartButton.IsFocused());
-            cMenu::UpdateButton(&m_ConfigButton,  m_ConfigButton .IsFocused());
-            cMenu::UpdateButton(&m_ExitButton,    m_ExitButton   .IsFocused());
+            cMenu::UpdateButton(&m_ResumeButton,  &m_Navigator, m_ResumeButton .IsFocused());
+            cMenu::UpdateButton(&m_RestartButton, &m_Navigator, m_RestartButton.IsFocused());
+            cMenu::UpdateButton(&m_ConfigButton,  &m_Navigator, m_ConfigButton .IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,    &m_Navigator, m_ExitButton   .IsFocused());
         }
         break;
 
@@ -129,7 +129,7 @@ void cPauseMenu::Move()
             m_ResumeButton.SetPosition(coreVector2(0.0f,0.0f));
 
             // 
-            cMenu::UpdateButton(&m_ResumeButton, m_ResumeButton.IsFocused());
+            cMenu::UpdateButton(&m_ResumeButton, &m_Navigator, m_ResumeButton.IsFocused());
         }
         break;
 

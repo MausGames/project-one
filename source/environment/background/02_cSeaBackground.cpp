@@ -368,7 +368,7 @@ void cSeaBackground::__MoveOwn()
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pWeed = (*pList->List())[i];
-        if(!pWeed->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+        if(!pWeed->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
 
         // 
         pWeed->SetDirection(vWeedDir);

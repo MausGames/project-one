@@ -122,6 +122,15 @@ void cArcadeInput::Move()
 
     // 
     m_Navigator.Update();
+    
+    
+    if(g_MenuInput.bCancel)
+    {
+        // 
+        if(!m_sTextValue.empty()) {m_sTextValue.pop_back(); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);}
+        m_Text.SetText(m_sTextValue.c_str());
+    }
+    
 
     // 
     const coreChar cChar = TO_UPPER(Core::Input->GetKeyboardChar());

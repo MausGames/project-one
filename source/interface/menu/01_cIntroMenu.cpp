@@ -75,7 +75,7 @@ void cIntroMenu::Move()
         // 
         FOR_EACH(it, m_apLanguageButton)
         {
-            cMenu::UpdateButton((*it), (*it)->IsFocused());
+            cMenu::UpdateButton((*it), &m_Navigator, (*it)->IsFocused());
         }
     }
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)
@@ -165,8 +165,8 @@ void cIntroMenu::StartIntro()
             cGuiButton* pButton = new cGuiButton();
             pButton->Construct    (MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 20u, MENU_OUTLINE_SMALL);   // # always filter filename
             pButton->DefineProgram("menu_border_program");
-            pButton->SetPosition  (coreVector2(0.00f,0.09f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
-            pButton->SetSize      (coreVector2(0.34f,0.07f));
+            pButton->SetPosition  (coreVector2(0.0f,0.09f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
+            pButton->SetSize      (coreVector2(0.4f,0.07f));
             pButton->GetCaption()->SetText(asLanguageList.get_key(it)->c_str());
 
             // 

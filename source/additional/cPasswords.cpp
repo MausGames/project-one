@@ -32,7 +32,7 @@ coreBool ApplyPassword(const coreChar* pcText)
     // SAFFRON orange
     case 4606173178869511954u:
         {
-            for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i) g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 6u);
+            for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i) g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 7u);
         }
         break;
 
@@ -55,7 +55,7 @@ coreBool ApplyPassword(const coreChar* pcText)
     // INDIGO blue
     case 13535575702665342035u:
         {
-            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MIRRORMORE)
+            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MIRRORMODE)
         }
         break;
 
@@ -63,6 +63,13 @@ coreBool ApplyPassword(const coreChar* pcText)
     case 9262066068920926272u:
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP)
+        }
+        break;
+
+    // SCARLET red
+    case 4594381807352121855u:
+        {
+            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD)
         }
         break;
 

@@ -12,36 +12,38 @@
 // ****************************************************************
 // constructor
 cCalorMission::cCalorMission()noexcept
-: m_fSnowTick      (0.0f)
-, m_afSnowStuck    {}
-, m_Load           (CALOR_LOADS)
-, m_pLoadOwner     (NULL)
-, m_afLoadPower    {}
-, m_Hail           (CALOR_HAILS)
-, m_HailWave       (CALOR_HAILS)
-, m_Chest          (CALOR_HAILS)
-, m_ChestWave      (CALOR_HAILS)
-, m_afChestTime    {}
-, m_pAimOwner      (NULL)
-, m_fAimTime       (0.0f)
-, m_fAimAlpha      (0.0f)
-, m_fAimFade       (0.0f)
-, m_Star           (CALOR_STARS)
-, m_StarChain      (CALOR_STARS * CALOR_CHAINS)
-, m_apStarOwner    {}
-, m_avStarOffset   {}
-, m_afStarLength   {}
-, m_iStarSwing     (0u)
-, m_iStarAnimate   (0u)
-, m_iStarConnect   (0u)
-, m_fSwingSpeed    (1.0f)
-, m_fSwingStart    (0.0f)
-, m_afSwingValue   {}
-, m_apCatchObject  {}
-, m_avCatchPos     {}
-, m_avCatchDir     {}
-, m_fCatchTransfer (0.0f)
-, m_fAnimation     (0.0f)
+: m_fSnowTick       (0.0f)
+, m_afSnowStuck     {}
+, m_Load            (CALOR_LOADS)
+, m_pLoadOwner      (NULL)
+, m_afLoadPower     {}
+, m_Hail            (CALOR_HAILS)
+, m_HailWave        (CALOR_HAILS)
+, m_Chest           (CALOR_HAILS)
+, m_ChestWave       (CALOR_HAILS)
+, m_afChestTime     {}
+, m_pAimOwner       (NULL)
+, m_fAimTime        (0.0f)
+, m_fAimAlpha       (0.0f)
+, m_fAimFade        (0.0f)
+, m_Star            (CALOR_STARS)
+, m_StarChain       (CALOR_STARS * CALOR_CHAINS)
+, m_apStarOwner     {}
+, m_avStarOffset    {}
+, m_afStarLength    {}
+, m_iStarSwing      (0u)
+, m_iStarAnimate    (0u)
+, m_iStarConnect    (0u)
+, m_fSwingSpeed     (1.0f)
+, m_fSwingStart     (0.0f)
+, m_afSwingValue    {}
+, m_apCatchObject   {}
+, m_avCatchPos      {}
+, m_avCatchDir      {}
+, m_fCatchTransfer  (0.0f)
+, m_fStoryRangeAnim (0.0f)
+, m_fAnimation      (0.0f)
+, m_bStory          (g_pSave->GetHeader().oProgress.aiAdvance[6] < 7u)
 {
     // 
     m_apBoss[0] = &m_Zeroth;
@@ -93,8 +95,9 @@ cCalorMission::cCalorMission()noexcept
             pHail->DefineProgram("effect_energy_flat_program");
 
             // set object properties
-            pHail->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 2.2f);
+            pHail->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 2.6f : 2.2f));
             pHail->SetColor3 (COLOR_ENERGY_YELLOW * 0.7f);
+            pHail->SetAlpha  (iType ? 1.0f : 0.7f);
             pHail->SetTexSize(coreVector2(1.0f,1.0f) * 0.3f);
             pHail->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -132,7 +135,7 @@ cCalorMission::cCalorMission()noexcept
     }
 
     // 
-    m_AimArrow.DefineModel  ("object_arrow.md3");
+    m_AimArrow.DefineModel  ("object_arrow_short.md3");
     m_AimArrow.DefineTexture(0u, "effect_energy.png");
     m_AimArrow.DefineProgram("effect_energy_flat_invert_program");
     m_AimArrow.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 2.2f);
@@ -210,6 +213,18 @@ cCalorMission::cCalorMission()noexcept
     m_Boulder.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET | ENEMY_STATUS_KEEPVOLUME);
 
     // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
+    {
+        m_aStoryRange[i].DefineModel  (i ? "object_cube_top.md3" : "object_penta_top.md3");
+        m_aStoryRange[i].DefineTexture(0u, "effect_energy.png");
+        m_aStoryRange[i].DefineProgram("effect_energy_flat_invert_program");
+        m_aStoryRange[i].SetPosition  (coreVector3(0.0f, i ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA3);
+        m_aStoryRange[i].SetColor3    (i ? COLOR_PLAYER_BLUE : COLOR_PLAYER_GREEN);
+        m_aStoryRange[i].SetTexSize   (coreVector2(0.1f,0.1f));
+        m_aStoryRange[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
     g_pGlow->BindList(&m_Load);
     g_pGlow->BindList(&m_Hail);
     g_pGlow->BindList(&m_HailWave);
@@ -217,6 +232,43 @@ cCalorMission::cCalorMission()noexcept
     g_pGlow->BindList(&m_ChestWave);
     g_pGlow->BindList(&m_Star);
     g_pGlow->BindList(&m_StarChain);
+
+    if(m_bStory)
+    {
+        // 
+        constexpr const coreChar* apcName[] =
+        {
+            "default_normal.png",
+            "default_white.png",
+            "environment_block_diff.png",
+            "environment_block_norm.png",
+            "environment_clouds_blue.png",
+            "environment_clouds_high.png",
+            "environment_plant.png",
+            "environment_snow_diff.png",
+            "environment_water_norm.png",
+            "effect_snow.png",
+
+            "environment_plant_03.md3",
+            "object_sting.md3",
+            "object_cube_ice.md3",
+
+            "effect_weather_snow_program",
+            "environment_clouds_program",
+            "environment_clouds_inst_program",
+            "environment_ice_program",
+            "object_ground_program",
+            "object_ground_inst_program"
+        };
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_apResCache); ++i)
+        {
+            m_apResCache[i] = Core::Manager::Resource->Get<coreResourceDummy>(apcName[i]);
+            STATIC_ASSERT(ARRAY_SIZE(m_apResCache) == ARRAY_SIZE(apcName))
+        }
+
+        // 
+        m_pNightmareSound = Core::Manager::Resource->Get<coreSound>("effect_nightmare.wav");
+    }
 
     STATIC_ASSERT(CALOR_STARS <= sizeof(m_iStarSwing)  *8u)
     STATIC_ASSERT(CALOR_STARS <= sizeof(m_iStarAnimate)*8u)
@@ -240,13 +292,20 @@ cCalorMission::~cCalorMission()
     g_pGlow->UnbindList(&m_StarChain);
 
     // 
-    this->DisableSnow(false);
-    this->DisableLoad(false);
-    this->DisableAim (false);
-    this->DisableBull(false);
+    this->DisableSnow  (false);
+    this->DisableLoad  (false);
+    this->DisableAim   (false);
+    this->DisableBull  (false);
+    this->DisableRanges(false);
     for(coreUintW i = 0u; i < CALOR_HAILS;  ++i) this->DisableHail (i, false);
     for(coreUintW i = 0u; i < CALOR_CHESTS; ++i) this->DisableChest(i, false);
     for(coreUintW i = 0u; i < CALOR_STARS;  ++i) this->DisableStar (i, false);
+
+    if(m_bStory)
+    {
+        // 
+        if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
+    }
 }
 
 
@@ -588,6 +647,37 @@ void cCalorMission::DisableStar(const coreUintW iIndex, const coreBool bAnimated
     }
 }
 
+
+// ****************************************************************
+// 
+void cCalorMission::EnableRanges()
+{
+    // 
+    WARN_IF(m_aStoryRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableRanges(false);
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
+    {
+        m_aStoryRange[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(&m_aStoryRange[i]);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cCalorMission::DisableRanges(const coreBool bAnimated)
+{
+    // 
+    if(!m_aStoryRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
+    {
+        m_aStoryRange[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(&m_aStoryRange[i]);
+    }
+}
+
+
 // ****************************************************************
 // 
 void cCalorMission::StartSwing(const coreFloat fSpeed)
@@ -712,6 +802,10 @@ void cCalorMission::__RenderOwnUnder()
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBullWave); ++i) m_aBullWave[i].Render();
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i) m_aStoryRange[i].Render();
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_aStoryRange[i]);
 }
 
 
@@ -782,14 +876,14 @@ void cCalorMission::__MoveOwnBefore()
         g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             const coreBool bHit  = m_Snow.TestCollision(pPlayer->GetPosition().xy());
-            const coreBool bMove = !pPlayer->GetMove().IsNull();
+            const coreBool bMove = !pPlayer->GetInput()->vMove.IsNull();
 
             if(!pPlayer->IsRolling() && bHit)
             {
                 if(bMove)
                 {
                     const coreFloat fOldStuck = m_afSnowStuck[i];
-                    m_afSnowStuck[i].Update(1.0f/3.0f);
+                    m_afSnowStuck[i].Update(1.0f/2.0f);
 
                     if((fOldStuck < 1.0f) && (m_afSnowStuck[i] >= 1.0f))
                     {
@@ -1132,14 +1226,19 @@ void cCalorMission::__MoveOwnAfter()
         // 
         const coreFloat   fOffset = I_TO_F(i) * (1.0f/3.0f);
         const coreVector2 vDir    = coreVector2::Direction((2.0f*PI) * m_fAnimation);
+        //const coreVector2 vDir    = coreVector2::Direction((-6.0f*PI) * m_fAnimation);
 
         // 
         pHail->SetDirection(coreVector3(vDir, 0.0f));
         pHail->SetTexOffset(coreVector2(0.0f, FRACT(0.7f * m_fAnimation + fOffset)));
+        
+        
+       // const coreVector2 vDir2    = coreVector2::Direction((2.0f*PI) * m_fAnimation);
 
         // 
         pWave->SetPosition (pHail->GetPosition ());
         pWave->SetDirection(pHail->GetDirection() * -1.0f);
+        //pWave->SetDirection(coreVector3(vDir2, 0.0f));
         pWave->SetTexOffset(pHail->GetTexOffset());
     }
 
@@ -1361,4 +1460,20 @@ void cCalorMission::__MoveOwnAfter()
 
     // 
     m_StarChain.MoveNormal();
+
+    // 
+    if(m_aStoryRange[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
+        {
+            m_fStoryRangeAnim.Update(0.4f);
+
+            const coreVector2 vDir = coreVector2::Direction(m_fStoryRangeAnim * (-1.6f*PI));
+
+            m_aStoryRange[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * (i ? 0.03f : 0.032f) * 50.0f);              
+            m_aStoryRange[i].SetDirection(coreVector3(vDir, 0.0f));
+            m_aStoryRange[i].SetTexOffset(m_aStoryRange[i].GetTexOffset() - m_aStoryRange[i].GetDirection().xy() * (0.04f * TIME));
+            m_aStoryRange[i].Move();
+        }
+    }
 }

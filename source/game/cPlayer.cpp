@@ -47,6 +47,7 @@ cPlayer::cPlayer()noexcept
 , m_fSmoothTilt     (0.0f)
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
+, m_fGyroValue      (0.0f)
 , m_fBubbleValue    (0.0f)
 , m_fCircleValue    (0.0f)
 , m_fBoost          (0.0f)
@@ -108,6 +109,14 @@ cPlayer::cPlayer()noexcept
     m_Arrow.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
+    m_Gyro.DefineModel  ("bullet_orb.md3");
+    m_Gyro.DefineTexture(0u, "effect_energy.png");
+    m_Gyro.DefineProgram("effect_energy_flat_invert_program");
+    m_Gyro.SetAlpha     (0.0f);
+    m_Gyro.SetTexSize   (coreVector2(0.1f,0.1f));
+    m_Gyro.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     m_Wind.DefineModel  ("object_sphere.md3");
     m_Wind.DefineTexture(0u, "effect_energy.png");
     m_Wind.DefineProgram("effect_energy_flat_direct_program");
@@ -141,7 +150,7 @@ cPlayer::cPlayer()noexcept
     m_Circle.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_Exhaust.DefineModel  ("object_tube_open.md3");
+    m_Exhaust.DefineModel  ("object_tube.md3");
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetAlpha     (0.7f);
@@ -195,6 +204,7 @@ void cPlayer::Configure(const coreUintW iShipType)
     // 
     m_Range     .SetColor3(vEnergy);
     m_Arrow     .SetColor3(vEnergy * (0.9f/1.1f));
+    m_Gyro      .SetColor3(vEnergy * (0.9f/1.1f));
     m_Wind      .SetColor3(vEnergy * (1.6f/1.1f));
     m_aShield[0].SetColor3(vEnergy * (1.0f/1.1f));
     m_aShield[1].SetColor3(vEnergy * (1.0f/1.1f));
@@ -362,7 +372,10 @@ void cPlayer::RenderAfter()
             this->AddStatus(PLAYER_STATUS_TOP);
         }
         
-        
+        // 
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Gyro);
+        m_Gyro.Render();
+
         // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Arrow);
@@ -379,7 +392,7 @@ void cPlayer::RenderAfter()
 void cPlayer::Move()
 {
     // 
-    this->_UpdateAlwaysBefore();
+    if(!SPECIAL_FROZEN) this->_UpdateAlwaysBefore();
 
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
@@ -393,18 +406,16 @@ void cPlayer::Move()
             coreVector2 vNewDir = this->GetDirection().xy();
 
             // 
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))   vNewDir = -vNewDir.Rotated90();
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT))  vNewDir =  vNewDir.Rotated90();
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))  vNewDir = -vNewDir.Rotated90();
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT)) vNewDir =  vNewDir.Rotated90();
 
             
             
             // 
-            const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-            const coreVector2 vHud   = g_vHudDirection;
-            const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
-            ASSERT(vFinal.IsNormalized())
+            const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+            const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
             
-            const coreVector2 vFlip = (vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f)).Processed(SIGN);
+            const coreVector2 vFlip = coreVector2(fSide, 1.0f);//(g_vHudDirection.Processed(ABS) + g_vHudDirection.yx().Processed(ABS) * fSide).Processed(SIGN);
             
             const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
             
@@ -442,6 +453,11 @@ void cPlayer::Move()
 
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
+            // 
+                 if(HAS_BIT(m_pInput->iActionPress,   0u)) m_fBoost = 1.0f;
+            else if(HAS_BIT(m_pInput->iActionRelease, 0u)) m_fBoost = 0.0f;
+            else m_fBoost.UpdateMax(-10.0f, 0.0f);
+            
             // move the ship
             vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
 
@@ -554,7 +570,8 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            //const coreBool bToggle = !(HAS_BIT(m_pInput->iStatus, 1u) && m_apWeapon[i]->GetLastStatus());
+            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt/* && bToggle*/) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot, m_fShootSpeed);
         }
 
@@ -571,11 +588,30 @@ void cPlayer::Move()
         }
 
         // 
-        if((!coreMath::IsNear(m_vOldDir.x, this->GetDirection().x) ||
-            !coreMath::IsNear(m_vOldDir.y, this->GetDirection().y)) && !HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
+        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
         {
             m_vOldDir = this->GetDirection().xy();
-            this->ShowArrow(0u);
+        }
+        else
+        {
+            if(!coreMath::IsNear(m_vOldDir.x, this->GetDirection().x) ||
+               !coreMath::IsNear(m_vOldDir.y, this->GetDirection().y))
+            {
+                m_vOldDir = this->GetDirection().xy();
+                this->ShowArrow(0u);
+            }
+        }
+
+        // 
+        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_GYRO) && (g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)] == 1u))
+        {
+            if(!m_fGyroValue) this->EnableGyro();
+            m_fGyroValue.UpdateMin(2.0f, 1.0f);
+        }
+        else
+        {
+            m_fGyroValue.UpdateMax(-2.0f, 0.0f);
+            if(!m_fGyroValue) this->DisableGyro();
         }
 
         // 
@@ -611,12 +647,30 @@ void cPlayer::Move()
             if(m_fArrowValue <= 0.0f) this->DisableArrow();
 
             // 
-            m_Arrow.SetPosition (this->GetPosition () + vRealDir * 6.2f * PLAYER_SIZE_FACTOR_EXT);
+            m_Arrow.SetPosition (this->GetPosition() + vRealDir * 6.2f * PLAYER_SIZE_FACTOR_EXT);
             m_Arrow.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.3f * PLAYER_SIZE_FACTOR_EXT);
             m_Arrow.SetDirection(vRealDir);
             m_Arrow.SetAlpha    (BLENDH3(m_fArrowValue));
             m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
             m_Arrow.Move();
+        }
+
+        if(m_Gyro.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+            const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+
+            coreVector2 vAlong = vRealDir.xy();
+            while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();
+
+            // 
+            m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
+            m_Gyro.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 2.0f * PLAYER_SIZE_FACTOR_EXT);
+            m_Gyro.SetDirection(vRealDir.RotatedZ45());   // TODO 1: is this correct ?
+            m_Gyro.SetAlpha    (BLENDH3(m_fGyroValue));
+            m_Gyro.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
+            m_Gyro.Move();
         }
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
@@ -745,7 +799,7 @@ void cPlayer::Move()
         if(m_bGiveUp)
         {
             m_bGiveUp = false;
-            g_pGame->GetCombatText()->DrawText(Core::Language->GetString("GIVEUP"), this->GetPosition(), COLOR_MENU_INSIDE);
+            g_pGame->GetCombatText()->DrawText(Core::Language->GetString("TEXT_GIVEUP"), this->GetPosition(), COLOR_MENU_INSIDE);
         }
     }
     
@@ -757,6 +811,7 @@ void cPlayer::Move()
         
         m_Range     .SetColor3(vEnergyColor);
         m_Arrow     .SetColor3(vEnergyColor * (0.9f/1.1f));
+        m_Gyro      .SetColor3(vEnergyColor * (0.9f/1.1f));
         m_Wind      .SetColor3(vEnergyColor * (1.6f/1.1f));
         m_aShield[0].SetColor3(vEnergyColor * (1.0f/1.1f));
         m_aShield[1].SetColor3(vEnergyColor * (1.0f/1.1f));
@@ -776,7 +831,8 @@ void cPlayer::Move()
         }
     }
         
-    
+    if(!SPECIAL_FROZEN)
+    {
     m_iPreShield = m_iCurShield;
 
     // 
@@ -792,67 +848,6 @@ void cPlayer::Move()
 
     // 
     this->_UpdateAlwaysAfter();
-}
-
-
-
-void cPlayer::MoveFrozen()
-{
-    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    {
-        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
-        {
-            const coreVector2 vOldDir = this->GetDirection().xy();
-            
-            coreVector2 vNewDir = this->GetDirection().xy();
-
-            // 
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))   vNewDir = -vNewDir.Rotated90();
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT))  vNewDir =  vNewDir.Rotated90();
-
-            
-            
-            // 
-            const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-            const coreVector2 vHud   = g_vHudDirection;
-            const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
-            ASSERT(vFinal.IsNormalized())
-            
-            const coreVector2 vFlip = (vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f)).Processed(SIGN);
-            
-            const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
-            
-            // 
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
-
-            // set new direction
-            this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
-
-            // 
-            if(vNewDir != vOldDir)
-            {
-                // 
-                m_DataTable.EditCounterTotal  ()->iTurnsMade += 1u;
-                m_DataTable.EditCounterMission()->iTurnsMade += 1u;
-                m_DataTable.EditCounterSegment()->iTurnsMade += 1u;
-
-                // 
-                g_pSave->EditGlobalStats      ()->iTurnsMade += 1u;
-                g_pSave->EditLocalStatsArcade ()->iTurnsMade += 1u;
-                g_pSave->EditLocalStatsMission()->iTurnsMade += 1u;
-                g_pSave->EditLocalStatsSegment()->iTurnsMade += 1u;
-            }
-        }
-
-        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
-        {
-             if(HAS_BIT(m_pInput->iActionPress,   0u)) m_fBoost = 1.0f;
-        else if(HAS_BIT(m_pInput->iActionRelease, 0u)) m_fBoost = 0.0f;
-        else m_fBoost.UpdateMax(-10.0f, 0.0f);
-        }
     }
 }
 
@@ -922,7 +917,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
                 this->StartIgnoring(m_iCurShield ? 0u : 1u);
 
                 // 
-                if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.1f);
+                if(g_CurConfig.Graphics.iHitStop && g_pGame->IsAlone()) g_pSpecialEffects->FreezeScreen(0.1f);
                 g_pSpecialEffects->RumblePlayer(this, m_iCurShield ? SPECIAL_RUMBLE_SMALL : SPECIAL_RUMBLE_BIG, 250u);
             }
             else
@@ -932,7 +927,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
                 this->StartFeeling (PLAYER_FEEL_TIME, 0u);
 
                 // 
-                if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.2f);
+                if(g_CurConfig.Graphics.iHitStop && g_pGame->IsAlone()) g_pSpecialEffects->FreezeScreen(0.2f);
                 g_pSpecialEffects->RumblePlayer(this, SPECIAL_RUMBLE_BIG, 250u);
             }
 
@@ -1033,6 +1028,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     // 
     this->DisableRange();
     this->DisableArrow();
+    this->DisableGyro();
     this->DisableWind();
     this->DisableBubble();
     this->DisableShield();
@@ -1061,6 +1057,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fSmoothTilt   = 0.0f;
     m_fRangeValue   = 0.0f;
     m_fArrowValue   = 0.0f;
+    m_fGyroValue    = 0.0f;
     m_fBubbleValue  = 0.0f;
     m_fCircleValue  = 0.0f;
     m_fBoost        = 0.0f;
@@ -1089,6 +1086,8 @@ void cPlayer::Kill(const coreBool bAnimated)
 // 
 void cPlayer::ShowArrow(const coreUint8 iType)
 {
+    if(this->HasStatus(PLAYER_STATUS_DEAD)) return;
+
     // 
     if(m_fArrowValue <= 0.0f) this->EnableArrow();
     m_fArrowValue = 1.0f;
@@ -1099,6 +1098,8 @@ void cPlayer::ShowArrow(const coreUint8 iType)
 // 
 void cPlayer::ShowCircle()
 {
+    if(this->HasStatus(PLAYER_STATUS_DEAD)) return;
+
     // 
     if(m_fCircleValue <= 0.0f) this->EnableCircle();
     m_fCircleValue = 1.0f;
@@ -1109,6 +1110,7 @@ void cPlayer::ShowCircle()
 // 
 void cPlayer::StartRolling(const coreVector2 vDirection)
 {
+    //ASSERT(!this->HasStatus(PLAYER_STATUS_DEAD))
     //WARN_IF(this->IsRolling()) return;
 
     // 
@@ -1145,6 +1147,7 @@ void cPlayer::EndRolling()
 // 
 void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
 {
+    ASSERT(!this->HasStatus(PLAYER_STATUS_DEAD))
     WARN_IF(this->IsFeeling()) return;
 
     // 
@@ -1159,7 +1162,7 @@ void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
     else if(iType == 1u) g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
 
     // 
-    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_FEEL);
+    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_EXPLOSION);
 }
 
 
@@ -1182,6 +1185,7 @@ void cPlayer::EndFeeling()
 // 
 void cPlayer::StartIgnoring(const coreUint8 iType)
 {
+    ASSERT(!this->HasStatus(PLAYER_STATUS_DEAD))
     WARN_IF(this->IsIgnoring()) return;
 
     // 
@@ -1312,6 +1316,33 @@ void cPlayer::DisableArrow()
     // 
     m_Arrow.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     g_pGlow->UnbindObject(&m_Arrow);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EnableGyro()
+{
+    WARN_IF(m_Gyro.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableArrow();
+
+    // 
+    m_Gyro.SetAlpha(0.0f);
+
+    // 
+    m_Gyro.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Gyro);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableGyro()
+{
+    if(!m_Gyro.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Gyro.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Gyro);
 }
 
 
@@ -1550,7 +1581,7 @@ coreBool cPlayer::TestCollisionPrecise(const coreVector2 vRayPos, const coreVect
 
 // ****************************************************************
 // 
-coreVector2 cPlayer::CalcMove()
+coreVector2 cPlayer::CalcMove()const
 {
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
@@ -1570,16 +1601,51 @@ coreVector2 cPlayer::CalcMove()
 
 // ****************************************************************
 // 
-coreFloat cPlayer::CalcMoveSpeed()
+coreFloat cPlayer::CalcMoveSpeed()const
 {
-    // 
-         if(HAS_BIT(m_pInput->iActionPress,   0u)) m_fBoost = 1.0f;
-    else if(HAS_BIT(m_pInput->iActionRelease, 0u)) m_fBoost = 0.0f;
-    else m_fBoost.UpdateMax(-10.0f, 0.0f);
-
     // 
     const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_fBoost) ? 20.0f : 50.0f;
     return m_fMoveSpeed * fModifier;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::SetPosition(const coreVector3 vPosition)
+{
+    this->coreObject3D::SetPosition(vPosition);
+
+    m_Dot       .SetPosition(vPosition);
+    m_Range     .SetPosition(vPosition);
+    m_Arrow     .SetPosition(vPosition + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR_EXT);
+    m_Gyro      .SetPosition(vPosition);
+    m_Wind      .SetPosition(vPosition);
+    m_Bubble    .SetPosition(vPosition);
+    m_aShield[0].SetPosition(vPosition);
+    m_aShield[1].SetPosition(vPosition);
+    m_Exhaust   .SetPosition(vPosition - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR_EXT));
+
+    
+    // 
+    const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+    const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+    
+    coreVector2 vAlong = this->GetDirection().xy();
+    while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();
+
+    // 
+    m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
+}
+
+void cPlayer::SetDirection(const coreVector3 vDirection)
+{
+    this->coreObject3D::SetDirection(vDirection);
+
+    m_Arrow  .SetPosition(this->GetPosition() + vDirection * 6.2f * PLAYER_SIZE_FACTOR_EXT);
+    m_Exhaust.SetPosition(this->GetPosition() - vDirection * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR_EXT));
+    
+    m_Arrow  .SetDirection(vDirection);
+    m_Exhaust.SetDirection(vDirection);
 }
 
 

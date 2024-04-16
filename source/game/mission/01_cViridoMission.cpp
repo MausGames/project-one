@@ -48,6 +48,7 @@ cViridoMission::cViridoMission()noexcept
 , m_iStickyState    (0u)
 , m_iBounceState    (0u)
 , m_fAnimation      (0.0f)
+, m_bStory          (g_pSave->GetHeader().oProgress.aiAdvance[1] < 7u)
 {
     // 
     m_apBoss[0] = &m_Torus;
@@ -133,7 +134,7 @@ cViridoMission::cViridoMission()noexcept
 
             // load object resources
             coreObject3D* pLaser = &m_aLaserRaw[i];
-            pLaser->DefineModel  ("object_tube_open.md3");
+            pLaser->DefineModel  ("object_tube.md3");
             pLaser->DefineTexture(0u, "effect_energy.png");
             pLaser->DefineProgram("effect_energy_flat_program");
 
@@ -176,7 +177,7 @@ cViridoMission::cViridoMission()noexcept
         {
             // load object resources
             coreObject3D* pHint = &m_aHintRaw[i];
-            pHint->DefineModel  ("object_arrow.md3");
+            pHint->DefineModel  ("object_arrow_short.md3");
             pHint->DefineTexture(0u, "effect_energy.png");
             pHint->DefineProgram("effect_energy_flat_invert_program");
 
@@ -1072,10 +1073,15 @@ void cViridoMission::__MoveOwnAfter()
                 // 
                 const coreFloat fDot    = coreVector2::Dot(vDiff,    vRayDir   .Rotated90());
                 const coreFloat fDotOld = coreVector2::Dot(vDiffOld, vOldRayDir.Rotated90());
+                
+                coreVector2 vRealIntersection;
+                if(!RayIntersection(vNewPos, pBullet->GetFlyDir(), vRayPos, vRayDir, &vRealIntersection)) return;
+                
+                const coreVector2 vRealDiff = vRayPos - vRealIntersection;
             
                 // 
-                if((SIGN(fDot) != SIGN(fDotOld))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&
-                    (ABS(coreVector2::Dot(vDiff,    vRayDir))    < (oBarrier.GetCollisionRange().x + pBullet->GetCollisionRange().x)))   // to handle teleportation
+                if((SIGN(fDot) != SIGN(fDotOld))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&   // to handle teleportation
+                    (/*ABS(coreVector2::Dot(vDiff,    vRayDir))*/vRealDiff.LengthSq()    < POW2(oBarrier.GetCollisionRange().x + pBullet->GetCollisionRange().x)))
                 {
                     const coreVector2 vIntersection = vRayPos + vRayDir * coreVector2::Dot(vDiff, vRayDir);
 
@@ -1211,7 +1217,6 @@ void cViridoMission::__MoveOwnAfter()
                 
                 coreVector2 vOldPos = pPlayer->GetOldPos();
                 
-                // TODO 1: [MF] funktioniert noch immer nicht ganz richtig bei >=3 linien (Torus)
                 for(coreUintW j = 0u; j < VIRIDO_LASERS; ++j)
                 {
                     if(iCurLaser == j) continue;
@@ -1220,29 +1225,28 @@ void cViridoMission::__MoveOwnAfter()
                     if(!pLaser2->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
                     
                     if((m_avLaserPos[j] - pLaser2->GetPosition().xy()).LengthSq() >= POW2(20.0f)) continue;       
-    
-                    const coreVector2 vRayDir2 = pLaser2->GetDirection().xy();
-                    const coreVector2 vRayPos2 = pLaser2->GetPosition ().xy() - vRayDir2 * pLaser2->GetSize().y;
                     
-                    const coreVector2 vDiff2   = vNewPos - vRayPos2;
+                    const coreVector2 vDiff2   = vNewPos - pLaser2->GetPosition().xy();
                     const coreVector2 vDiffOld = vOldPos - m_avLaserPos[j];
                 
                     // 
-                    const coreFloat fDot    = coreVector2::Dot(vDiff2,   vRayDir2       .Rotated90());
-                    const coreFloat fDotOld = coreVector2::Dot(vDiffOld, m_avLaserDir[j].Rotated90());
+                    const coreFloat fDot    = coreVector2::Dot(vDiff2,   pLaser2->GetDirection().xy().Rotated90());
+                    const coreFloat fDotOld = coreVector2::Dot(vDiffOld, m_avLaserDir[j]             .Rotated90());
                 
                     // 
                     if((SIGN(fDot) != SIGN(fDotOld)) && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f))   // to handle teleportation
                     {
-                        
-                        const coreVector2 vDiffA = pPlayer->GetOldPos() - m_avLaserPos[j];
-                        const coreVector2 vNormA = m_avLaserDir[j].Rotated90();
-                        const coreFloat   fSideA = coreVector2::Dot(vDiffA, vNormA);
+                        const coreVector2 vRayDir2 = pLaser2->GetDirection().xy();
+                        const coreVector2 vRayPos2 = pLaser2->GetPosition ().xy() - vRayDir2 * pLaser2->GetSize().y;
                         
                         coreVector2 vDot;
                         if(RayIntersection(vRayPos, vRayDir, vRayPos2, vRayDir2, &vDot))
                         {
-                            const coreVector2 vMove = (vNorm * SIGN(fSide * 1.0f) + vNormA * SIGN(fSideA * 1.0f)).Normalized() * 0.1f;
+                            const coreVector2 vDiffA = pPlayer->GetOldPos() - m_avLaserPos[j];
+                            const coreVector2 vNormA = m_avLaserDir[j].Rotated90();
+                            const coreFloat   fSideA = coreVector2::Dot(vDiffA, vNormA);
+                        
+                            const coreVector2 vMove = (vNorm * SIGN(fSide) + vNormA * SIGN(fSideA)).Normalized() * 0.1f;
                             vNewPos = vDot + vMove;
                         
                             pPlayer->SetPosition(coreVector3(vNewPos, 0.0f));

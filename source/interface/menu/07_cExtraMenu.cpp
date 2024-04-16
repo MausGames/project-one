@@ -12,8 +12,9 @@
 // ****************************************************************
 // constructor
 cExtraMenu::cExtraMenu()noexcept
-: coreMenu (SURFACE_EXTRA_MAX, SURFACE_EXTRA_STATS)
-, m_Stats  {}
+: coreMenu    (SURFACE_EXTRA_MAX, SURFACE_EXTRA_TROPHY)
+, m_iCurIndex (0u)
+, m_Stats     {}
 {
     constexpr coreFloat fSplit  = 1.0f/300.0f;   // 0.00333...
     constexpr coreFloat fSplit2 = 1.0f/60.0f;    // 0.01666...
@@ -24,43 +25,33 @@ cExtraMenu::cExtraMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.01f));
     m_Background.SetSize      (coreVector2(0.9f,0.75f));
 
-    m_ProgressTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_ProgressTab.DefineProgram("menu_border_program");
-    m_ProgressTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.15f - fSplit + fSplit2, -0.0125f));
-    m_ProgressTab.SetSize      (coreVector2(0.23f + fSplit + fSplit2*2.0f, 0.07f));
-    m_ProgressTab.SetAlignment (coreVector2(0.0f, 1.0f));
-    m_ProgressTab.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_ProgressTab.SetTexOffset (m_ProgressTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.15f - fSplit + fSplit2, 0.0125f));
-    m_ProgressTab.GetCaption()->SetTextLanguage("EXTRA_PROGRESS");
+    m_TrophyTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_TrophyTab.DefineProgram("menu_border_program");
+    m_TrophyTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.15f - fSplit + fSplit2, -0.0125f));
+    m_TrophyTab.SetSize      (coreVector2(0.23f + fSplit + fSplit2*2.0f, 0.07f));
+    m_TrophyTab.SetAlignment (coreVector2(0.0f, 1.0f));
+    m_TrophyTab.SetTexSize   (coreVector2(1.0f,-1.0f));
+    m_TrophyTab.SetTexOffset (m_TrophyTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.15f - fSplit + fSplit2, 0.0125f));
+    m_TrophyTab.GetCaption()->SetTextLanguage("EXTRA_TROPHY");
 
     m_StatsTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StatsTab.DefineProgram("menu_border_program");
-    m_StatsTab.SetPosition  (m_ProgressTab.GetPosition() * coreVector2(0.0f,1.0f));
-    m_StatsTab.SetSize      (m_ProgressTab.GetSize());
-    m_StatsTab.SetAlignment (m_ProgressTab.GetAlignment());
-    m_StatsTab.SetTexSize   (m_ProgressTab.GetTexSize());
-    m_StatsTab.SetTexOffset (m_ProgressTab.GetTexOffset() + coreVector2(m_StatsTab.GetPosition().x - m_ProgressTab.GetPosition().x, 0.0f));
+    m_StatsTab.SetPosition  (m_TrophyTab.GetPosition() * coreVector2(0.0f,1.0f));
+    m_StatsTab.SetSize      (m_TrophyTab.GetSize());
+    m_StatsTab.SetAlignment (m_TrophyTab.GetAlignment());
+    m_StatsTab.SetTexSize   (m_TrophyTab.GetTexSize());
+    m_StatsTab.SetTexOffset (m_TrophyTab.GetTexOffset() + coreVector2(m_StatsTab.GetPosition().x - m_TrophyTab.GetPosition().x, 0.0f));
     m_StatsTab.GetCaption()->SetTextLanguage("EXTRA_STATS");
 
     m_OtherTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_OtherTab.DefineProgram("menu_border_program");
-    m_OtherTab.SetPosition  (m_ProgressTab.GetPosition() * coreVector2(-1.0f,1.0f));
-    m_OtherTab.SetSize      (m_ProgressTab.GetSize());
-    m_OtherTab.SetAlignment (m_ProgressTab.GetAlignment());
-    m_OtherTab.SetTexSize   (m_ProgressTab.GetTexSize());
-    m_OtherTab.SetTexOffset (m_ProgressTab.GetTexOffset() + coreVector2(m_OtherTab.GetPosition().x - m_ProgressTab.GetPosition().x, 0.0f));
+    m_OtherTab.SetPosition  (m_TrophyTab.GetPosition() * coreVector2(-1.0f,1.0f));
+    m_OtherTab.SetSize      (m_TrophyTab.GetSize());
+    m_OtherTab.SetAlignment (m_TrophyTab.GetAlignment());
+    m_OtherTab.SetTexSize   (m_TrophyTab.GetTexSize());
+    m_OtherTab.SetTexOffset (m_TrophyTab.GetTexOffset() + coreVector2(m_OtherTab.GetPosition().x - m_TrophyTab.GetPosition().x, 0.0f));
     m_OtherTab.GetCaption()->SetTextLanguage("EXTRA_OTHER");
-    
-    
-    m_StatsTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.235f,-0.0125f));
-    m_StatsTab.SetSize      (coreVector2(0.41f,0.07f));
-    m_StatsTab.SetTexOffset (m_StatsTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.235f,0.0125f));
 
-    m_OtherTab.SetPosition  (m_StatsTab.GetPosition() * coreVector2(-1.0f,1.0f));
-    m_OtherTab.SetSize      (m_StatsTab.GetSize());
-    m_OtherTab.SetTexOffset (m_StatsTab.GetTexOffset() + coreVector2(m_OtherTab.GetPosition().x - m_StatsTab.GetPosition().x, 0.0));
-    
-    
     m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
@@ -68,27 +59,77 @@ cExtraMenu::cExtraMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
-    m_ProgressArea.DefineTexture(0u, "menu_detail_04.png");
-    m_ProgressArea.DefineTexture(1u, "menu_background_black.png");
-    m_ProgressArea.DefineProgram("menu_inner_program");
-    m_ProgressArea.SetPosition  (m_Background.GetPosition());
-    m_ProgressArea.SetSize      (coreVector2(m_Background.GetSize().y, 0.2f));
-    m_ProgressArea.SetDirection (coreVector2(1.0f,0.0f));
+    m_SummaryName.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_SummaryName.SetPosition    (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f,-0.05f));
+    m_SummaryName.SetAlignment   (coreVector2(1.0f,0.0f));
+    m_SummaryName.SetColor3      (COLOR_MENU_WHITE);
+    m_SummaryName.SetTextLanguage("EXTRA_PROGRESS");
 
-    for(coreUintW i = 0u; i < MENU_EXTRA_FRAGMENTS; ++i)
+    m_SummaryValue.Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_SummaryValue.SetPosition (coreVector2(-1.0f,1.0f) * m_SummaryName.GetPosition() + coreVector2(-0.04f,0.0f));
+    m_SummaryValue.SetAlignment(coreVector2(-1.0f,0.0f));
+    m_SummaryValue.SetColor3   (COLOR_MENU_WHITE);
+
+    m_SummaryLine.DefineTexture(0u, "menu_detail_04.png");
+    m_SummaryLine.DefineTexture(1u, "menu_background_black.png");
+    m_SummaryLine.DefineProgram("menu_inner_program");
+    m_SummaryLine.SetPosition  (coreVector2(0.0f, m_SummaryName.GetPosition().y));
+    m_SummaryLine.SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
+    m_SummaryLine.SetTexOffset (coreVector2(-0.09f,0.0f));
+
+    m_CueTrophy.Construct   (MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_CueTrophy.SetPosition (coreVector2(-1.0f,1.0f) * m_SummaryName.GetPosition());
+    m_CueTrophy.SetAlignment(coreVector2(-1.0f,0.0f));
+    m_CueTrophy.SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    m_CueTrophy.SetText     (ICON_TROPHY);
+
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i)
     {
-        const coreVector2 vDir  = FRAGMENT_DIRECTION;
-        const coreVector2 vPos  = MapToAxisInv(FRAGMENT_POSITION(i), vDir) * 0.35f;
-        const coreVector2 vSize = g_aFragmentData[i].vSize * 0.35f * ((i == 8u) ? 1.1f : 1.0f);
+        const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f + -0.175f - 0.15f*I_TO_F(i);
 
-        m_aFragment[i].DefineTexture(0u, PRINT("menu_fragment_%02zu.png", g_aFragmentData[i].iIndex));
-        m_aFragment[i].DefineTexture(1u, "menu_background_black.png");
-        m_aFragment[i].DefineProgram("menu_fragment_program");
-        m_aFragment[i].SetPosition  (vPos + m_ProgressArea.GetPosition());
-        m_aFragment[i].SetSize      (vSize);
-        m_aFragment[i].SetDirection (vDir);
-        m_aFragment[i].SetColor3    (g_aFragmentData[i].vColor);
+        m_aTrophyName[i].Construct   (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_aTrophyName[i].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f,0.032f));
+        m_aTrophyName[i].SetAlignment(coreVector2(1.0f,0.0f));
+
+        for(coreUintW j = 0u; j < ARRAY_SIZE(m_aaTrophyDesc[0]); ++j)
+        {
+            m_aaTrophyDesc[i][j].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+            m_aaTrophyDesc[i][j].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f, -0.003f - 0.03f*I_TO_F(j)));
+            m_aaTrophyDesc[i][j].SetAlignment(coreVector2(1.0f,0.0f));
+            m_aaTrophyDesc[i][j].SetColor3   (COLOR_MENU_WHITE);
+        }
+
+        m_aTrophyCheck[i].Construct  (MENU_FONT_ICON_4, MENU_OUTLINE_SMALL);
+        m_aTrophyCheck[i].SetPosition(coreVector2(m_Background.GetPosition().x + m_Background.GetSize().x*0.5f, fHeight) + coreVector2(-0.08f,0.0f));
+        m_aTrophyCheck[i].SetText    (ICON_CHECK);
+
+        m_aTrophyTile[i].DefineProgram("menu_grey_program");
+        m_aTrophyTile[i].SetPosition  (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.08f,0.0f));
+        m_aTrophyTile[i].SetSize      (coreVector2(0.05f,0.05f) * 1.4f);
+
+        m_aTrophyBack[i].DefineProgram("menu_color_program");
+        m_aTrophyBack[i].SetPosition  (m_aTrophyTile[i].GetPosition());
+        m_aTrophyBack[i].SetSize      (m_aTrophyTile[i].GetSize() + coreVector2(0.01f,0.01f));
+        m_aTrophyBack[i].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.15f);
+        m_aTrophyBack[i].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.1f);
+
+        m_aTrophyLine[i].DefineTexture(0u, "menu_detail_04.png");
+        m_aTrophyLine[i].DefineTexture(1u, "menu_background_black.png");
+        m_aTrophyLine[i].DefineProgram("menu_inner_program");
+        m_aTrophyLine[i].SetPosition  (coreVector2(0.0f, fHeight));
+        m_aTrophyLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.15f));
+        m_aTrophyLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
+        m_aTrophyLine[i].SetFocusable (true);
     }
+
+    m_TrophyBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.0375f));
+    m_TrophyBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.625f));
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyLine [i]);
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyBack [i]);
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyTile [i]);   // wave and boss
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyCheck[i]);
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) m_TrophyBox.BindObject(&m_aTrophyName [i]);
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aaTrophyDesc[0]); ++j) m_TrophyBox.BindObject(&m_aaTrophyDesc[i][j]);
 
     for(coreUintW i = 0u; i < MENU_EXTRA_FILTERS; ++i)
     {
@@ -172,6 +213,7 @@ cExtraMenu::cExtraMenu()noexcept
         m_aOtherLine[i].SetPosition  (coreVector2(0.0f, m_aOtherName[i].GetPosition().y));
         m_aOtherLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.1f));
         m_aOtherLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
+        m_aOtherLine[i].SetFocusable (true);
     }
     m_aOtherName[0].SetTextLanguage("EXTRA_PASSWORD");
     m_aOtherName[1].SetTextLanguage("EXTRA_CREDITS");
@@ -194,25 +236,29 @@ cExtraMenu::cExtraMenu()noexcept
     m_PasswordHeader.SetTextLanguage("ENTER_PASSWORD");
 
     // 
+    m_FilterSegment   .AddEntry        ("",                       255u);   // dummy
     m_FilterType      .AddEntryLanguage("GAME_TYPE_SOLO",         GAME_TYPE_SOLO);
     m_FilterType      .AddEntryLanguage("GAME_TYPE_COOP",         GAME_TYPE_COOP);
+    m_FilterType      .AddEntryLanguage("FILTER_ALL",             255u);
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", GAME_DIFFICULTY_NORMAL);
+    m_FilterDifficulty.AddEntryLanguage("FILTER_ALL",             255u);
 
     // 
-    //m_Navigator.BindObject(&m_ProgressTab, &m_BackButton, &m_OtherTab,    &m_FilterMission, &m_StatsTab,    MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    //m_Navigator.BindObject(&m_StatsTab,    &m_BackButton, &m_ProgressTab, &m_FilterMission, &m_OtherTab,    MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    //m_Navigator.BindObject(&m_OtherTab,    &m_BackButton, &m_StatsTab,    &m_FilterMission, &m_ProgressTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    m_Navigator.BindObject(&m_StatsTab,    &m_BackButton, &m_OtherTab, &m_FilterMission, &m_OtherTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    m_Navigator.BindObject(&m_OtherTab,    &m_BackButton, &m_StatsTab, &m_FilterMission, &m_StatsTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_TrophyTab, &m_BackButton, &m_OtherTab,  &m_FilterMission, &m_StatsTab,  MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_StatsTab,  &m_BackButton, &m_TrophyTab, &m_FilterMission, &m_OtherTab,  MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_OtherTab,  &m_BackButton, &m_StatsTab,  &m_FilterMission, &m_TrophyTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
 
-    //m_Navigator.BindObject(&m_aFragment[8], &m_ProgressTab, NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_PROGRESS);
-    //m_Navigator.BindObject(&m_aFragment[8], &m_StatsTab, NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_PROGRESS);
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i)
+    {
+        m_Navigator.BindObject(&m_aTrophyLine[i], (i == 0u)                       ? s_cast<coreObject2D*>(&m_TrophyTab)  : &m_aTrophyLine[(i + MENU_EXTRA_TROPHIES - 1u) % MENU_EXTRA_TROPHIES], NULL,
+                                                  (i == MENU_EXTRA_TROPHIES - 1u) ? s_cast<coreObject2D*>(&m_BackButton) : &m_aTrophyLine[(i + 1u)                       % MENU_EXTRA_TROPHIES], NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_TROPHY);
+    }
 
     m_Navigator.BindObject(&m_FilterMission,    &m_StatsTab,       NULL,                &m_FilterSegment, NULL,                MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_EXTRA_STATS);
     m_Navigator.BindObject(&m_FilterSegment,    &m_FilterMission,  NULL,                &m_FilterType,    NULL,                MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_EXTRA_STATS);
-    m_Navigator.BindObject(&m_FilterType,       &m_FilterSegment,  &m_FilterDifficulty, &m_aStatsLine[0], &m_FilterDifficulty, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS, SURFACE_EXTRA_STATS);
-    m_Navigator.BindObject(&m_FilterDifficulty, &m_FilterSegment,  &m_FilterType,       &m_aStatsLine[0], &m_FilterType,       MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS, SURFACE_EXTRA_STATS);
+    m_Navigator.BindObject(&m_FilterType,       &m_FilterSegment,  &m_FilterDifficulty, &m_aStatsLine[0], &m_FilterDifficulty, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS,                         SURFACE_EXTRA_STATS);
+    m_Navigator.BindObject(&m_FilterDifficulty, &m_FilterSegment,  &m_FilterType,       &m_aStatsLine[0], &m_FilterType,       MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS,                         SURFACE_EXTRA_STATS);
 
     for(coreUintW i = 0u; i < MENU_EXTRA_STATS; ++i)
     {
@@ -225,10 +271,11 @@ cExtraMenu::cExtraMenu()noexcept
 
     m_Navigator.BindObject(&m_BackButton, &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, &m_FilterMission, NULL, MENU_TYPE_DEFAULT);
 
-    //m_Navigator.BindSurface(&m_ProgressTab, SURFACE_EXTRA_PROGRESS, &m_aFragment[8],                      NULL, &m_aFragment[8],  NULL);
-    m_Navigator.BindSurface(&m_StatsTab,    SURFACE_EXTRA_STATS,    &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, &m_FilterMission, NULL);
-    m_Navigator.BindSurface(&m_OtherTab,    SURFACE_EXTRA_OTHER,    &m_Credits,                           NULL, &m_Password,      NULL);
+    m_Navigator.BindSurface(&m_TrophyTab, SURFACE_EXTRA_TROPHY, &m_aTrophyLine[MENU_EXTRA_TROPHIES - 1u], NULL, &m_aTrophyLine[0], NULL);
+    m_Navigator.BindSurface(&m_StatsTab,  SURFACE_EXTRA_STATS,  &m_aStatsLine [MENU_EXTRA_STATS    - 1u], NULL, &m_FilterMission,  NULL);
+    m_Navigator.BindSurface(&m_OtherTab,  SURFACE_EXTRA_OTHER,  &m_Credits,                               NULL, &m_Password,       NULL);
 
+    m_Navigator.BindScroll(&m_TrophyBox);
     m_Navigator.BindScroll(&m_StatsBox);
 
     m_Navigator.AssignFirst(&m_FilterMission);
@@ -238,21 +285,24 @@ cExtraMenu::cExtraMenu()noexcept
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_EXTRA_PASSWORD; ++i)
     {
-        //if(i != SURFACE_EXTRA_PROGRESS) this->BindObject(i, &m_ProgressTab);
-        if(i != SURFACE_EXTRA_STATS)    this->BindObject(i, &m_StatsTab);
-        if(i != SURFACE_EXTRA_OTHER)    this->BindObject(i, &m_OtherTab);
+        if(i != SURFACE_EXTRA_TROPHY) this->BindObject(i, &m_TrophyTab);
+        if(i != SURFACE_EXTRA_STATS)  this->BindObject(i, &m_StatsTab);
+        if(i != SURFACE_EXTRA_OTHER)  this->BindObject(i, &m_OtherTab);
 
         this->BindObject(i, &m_Background);
 
-        //if(i == SURFACE_EXTRA_PROGRESS) this->BindObject(i, &m_ProgressTab);
-        if(i == SURFACE_EXTRA_STATS)    this->BindObject(i, &m_StatsTab);
-        if(i == SURFACE_EXTRA_OTHER)    this->BindObject(i, &m_OtherTab);
+        if(i == SURFACE_EXTRA_TROPHY) this->BindObject(i, &m_TrophyTab);
+        if(i == SURFACE_EXTRA_STATS)  this->BindObject(i, &m_StatsTab);
+        if(i == SURFACE_EXTRA_OTHER)  this->BindObject(i, &m_OtherTab);
 
         this->BindObject(i, &m_BackButton);
     }
 
-    this->BindObject(SURFACE_EXTRA_PROGRESS, &m_ProgressArea);
-    for(coreUintW i = 0u; i < MENU_EXTRA_FRAGMENTS; ++i) this->BindObject(SURFACE_EXTRA_PROGRESS, &m_aFragment[i]);
+    this->BindObject(SURFACE_EXTRA_TROPHY, &m_SummaryLine);
+    this->BindObject(SURFACE_EXTRA_TROPHY, &m_SummaryName);
+    this->BindObject(SURFACE_EXTRA_TROPHY, &m_SummaryValue);
+    this->BindObject(SURFACE_EXTRA_TROPHY, &m_CueTrophy);
+    this->BindObject(SURFACE_EXTRA_TROPHY, &m_TrophyBox);
 
     for(coreUintW i = 0u; i < MENU_EXTRA_FILTERS; ++i) this->BindObject(SURFACE_EXTRA_STATS, &m_aFilterLine[i]);
     this->BindObject(SURFACE_EXTRA_STATS, &m_FilterIcon);
@@ -292,14 +342,14 @@ void cExtraMenu::Move()
     m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
-         //if(m_ProgressTab.IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_PROGRESS);
-    /*else*/ if(m_StatsTab   .IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_STATS);
-    else if(m_OtherTab   .IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_OTHER);
+         if(m_TrophyTab.IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_TROPHY);
+    else if(m_StatsTab .IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_STATS);
+    else if(m_OtherTab .IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_OTHER);
 
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_EXTRA_PROGRESS:
+    case SURFACE_EXTRA_TROPHY:
         {
             if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
@@ -307,8 +357,8 @@ void cExtraMenu::Move()
                 m_iStatus = 1;
             }
 
-            const coreVector2 vTexOffset = coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * 0.1f);
-            for(coreUintW i = 0u; i < MENU_EXTRA_FRAGMENTS; ++i) m_aFragment[i].SetTexOffset(vTexOffset);
+            // 
+            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateLine(&m_aTrophyLine[i], false, false, g_pMenu->GetButtonColor(), cMenuNavigator::IsUsingJoystick());
         }
         break;
 
@@ -371,8 +421,8 @@ void cExtraMenu::Move()
             }
 
             // 
-            cMenu::UpdateButton(&m_Password, m_Password.IsFocused());
-            cMenu::UpdateButton(&m_Credits,  m_Credits .IsFocused());
+            cMenu::UpdateButton(&m_Password, &m_Navigator, m_Password.IsFocused());
+            cMenu::UpdateButton(&m_Credits,  &m_Navigator, m_Credits .IsFocused());
 
             // 
             for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true);
@@ -423,12 +473,120 @@ void cExtraMenu::Move()
     }
 
     // 
-    cMenu::UpdateTab(&m_ProgressTab, (this->GetCurSurface() == SURFACE_EXTRA_PROGRESS), m_ProgressTab.IsFocused());
-    cMenu::UpdateTab(&m_StatsTab,    (this->GetCurSurface() == SURFACE_EXTRA_STATS),    m_StatsTab   .IsFocused());
-    cMenu::UpdateTab(&m_OtherTab,    (this->GetCurSurface() >= SURFACE_EXTRA_OTHER),    m_OtherTab   .IsFocused());   // # all
+    cMenu::UpdateTab(&m_TrophyTab, (this->GetCurSurface() == SURFACE_EXTRA_TROPHY), m_TrophyTab.IsFocused());
+    cMenu::UpdateTab(&m_StatsTab,  (this->GetCurSurface() == SURFACE_EXTRA_STATS),  m_StatsTab .IsFocused());
+    cMenu::UpdateTab(&m_OtherTab,  (this->GetCurSurface() >= SURFACE_EXTRA_OTHER),  m_OtherTab .IsFocused());   // # all
 
     // 
-    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
+    cMenu::UpdateButton(&m_BackButton, &m_Navigator, m_BackButton.IsFocused());
+}
+
+
+// ****************************************************************
+// 
+void cExtraMenu::LoadTrophies()
+{
+    const auto& oProgress = g_pSave->GetHeader().oProgress;
+
+    coreUintW iMax = 0u;
+    for(coreUintW i = 0u; i < 8u; ++i)
+    {
+        if(oProgress.aiAdvance[i]) iMax = i * 6u + oProgress.aiAdvance[i];
+    }
+    
+    coreUintW iAchieved = 0u;
+
+    coreUintW iCountBoss = 0u;
+    coreUintW iCountWave = 0u;
+    for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i)
+    {
+        if(i < iMax)
+        {
+            m_aTrophyName [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aaTrophyDesc[i][0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aaTrophyDesc[i][1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aTrophyTile [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aTrophyBack [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aTrophyLine [i]   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
+            const coreUintW iMissionIndex = i / 6u;
+            const coreUintW iSegmentIndex = i % 6u;
+    
+            const coreBool bAchieved = HAS_BIT(oProgress.aaiBadge[iMissionIndex][iSegmentIndex], 3u);
+            if(bAchieved) iAchieved += 1u;
+            
+            m_aTrophyName[i].SetColor3(bAchieved ? g_aMissionData[iMissionIndex].vColor : (COLOR_MENU_WHITE * MENU_LIGHT_IDLE));
+            m_aTrophyName[i].SetText(PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iMissionIndex, iSegmentIndex)));
+    
+            m_aTrophyCheck[i].SetEnabled(bAchieved ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aTrophyCheck[i].SetColor3(bAchieved ? g_aMissionData[iMissionIndex].vColor : COLOR_MENU_WHITE);
+    
+            m_aTrophyTile[i].SetColor3(bAchieved ? g_aMissionData[iMissionIndex].vColor  : COLOR_MENU_WHITE);
+            m_aTrophyLine[i].SetColor3(bAchieved ? g_aMissionData[iMissionIndex].vColor2 : COLOR_MENU_WHITE);
+            
+            
+            const coreFloat fShift = (i == 17u) ? 0.5f : (i == 23u) ? 3.2f : (i == 41u) ? 1.0f : 2.0f;
+
+            const coreBool    bBoss      = ((i % 6u) == 5u);
+            const coreVector2 vStep      = bBoss ? coreVector2((1.0f/37.0f), (1.0f/21.0f) * (581.0f/512.0f)) : coreVector2((1.0f/41.0f), (1.0f/41.0f));
+            const coreVector2 vTexSize   = bBoss ? coreVector2(4.0f,4.0f)                                    : coreVector2(4.0f,4.0f);
+            const coreVector2 vTexOffset = bBoss ? coreVector2(I_TO_F(iCountBoss % 4u) * 9.0f + 1.0f + fShift, I_TO_F(iCountBoss / 4u) * 5.0f + 1.0f) :
+                                                   coreVector2(I_TO_F(iCountWave % 8u) * 5.0f + 1.0f,          I_TO_F(iCountWave / 8u) * 5.0f + 1.0f);
+    
+            m_aTrophyTile[i].DefineTexture(0u, bBoss ? "menu_segment_boss.png" : "menu_segment_wave.png");
+            m_aTrophyTile[i].SetTexSize   (vTexSize   * vStep);
+            m_aTrophyTile[i].SetTexOffset (vTexOffset * vStep);
+        
+            
+            if((i == iMax - 1u) && !bAchieved)
+            {
+                const coreVector2 vStep2      = coreVector2((1.0f/41.0f), (1.0f/41.0f));
+                const coreVector2 vTexOffset2 = coreVector2(I_TO_F(62u % 8u) * 5.0f + 1.0f, I_TO_F(62u / 8u) * 5.0f + 1.0f);
+
+                m_aTrophyTile[i].DefineTexture(0u, "menu_segment_wave.png");
+                m_aTrophyTile[i].SetTexSize   (vTexSize    * vStep2);
+                m_aTrophyTile[i].SetTexOffset (vTexOffset2 * vStep2);
+
+                m_aaTrophyDesc[i][0].SetTextLanguage("UNKNOWN");
+                m_aaTrophyDesc[i][1].SetText("");
+            }
+            else
+            {
+                const coreChar* pcString = Core::Language->GetString(PRINT("ACHIEVEMENT_STAGE_%02d_%02zu_DESC", g_aMissionData[i / 6u].iID, (i % 6u) + 1u));
+                const coreChar* pcBreak  = std::strchr(pcString, '#');
+
+                if(pcBreak)
+                {
+                    m_aaTrophyDesc[i][0].SetText(pcString, pcBreak - pcString);
+                    m_aaTrophyDesc[i][1].SetText(pcBreak + 1u);
+                }
+                else
+                {
+                    m_aaTrophyDesc[i][0].SetText(pcString);
+                    m_aaTrophyDesc[i][1].SetText("");
+                }
+            }
+
+            if(bBoss) iCountBoss += 1u;
+                 else iCountWave += 1u;
+        }
+        else
+        {
+            m_aTrophyName [i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aaTrophyDesc[i][0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aaTrophyDesc[i][1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aTrophyCheck[i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aTrophyTile [i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aTrophyBack [i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aTrophyLine [i]   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        }
+    }
+
+    m_SummaryValue.SetText(PRINT("%zu/%s", iAchieved, (iMax <= MENU_EXTRA_TROPHIES) ? "???" : "48"));
+    STATIC_ASSERT(MENU_EXTRA_TROPHIES == 48u)
+
+    m_TrophyBox.SetCurOffset(0.0f);
+    m_TrophyBox.SetMaxOffset(0.15f * I_TO_F(MIN(iMax, MENU_EXTRA_TROPHIES)) - m_TrophyBox.GetSize().y);
 }
 
 
@@ -440,9 +598,9 @@ void cExtraMenu::LoadMissions()
     m_FilterMission.ClearEntries();
 
     // 
-    m_FilterMission.AddEntryLanguage("GAME_GLOBAL", 255u);
-    m_FilterMission.AddEntryLanguage("GAME_ARCADE", 254u);
-    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i)
+    m_FilterMission.AddEntryLanguage("FILTER_GLOBAL",        255u);
+    m_FilterMission.AddEntryLanguage("GAME_ARCADE_COMPLETE", 254u);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(g_aMissionData); ++i)
     {
         const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < MISSION_BASE) ? 1u : 0u);
 
@@ -466,31 +624,41 @@ void cExtraMenu::LoadMissions()
 void cExtraMenu::LoadSegments(const coreUintW iMissionIndex)
 {
     // 
-    const coreUintW iOldEntry = m_FilterSegment.GetNumEntries() ? m_FilterSegment.GetCurValue() : 0u;
-    m_FilterSegment.ClearEntries();
+    m_aiCurFilter[m_iCurIndex] = m_FilterSegment.GetNumEntries() ? m_FilterSegment.GetCurValue() : 0u;
 
     // 
     if(iMissionIndex == 255u)
     {
-        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
-
         m_FilterSegment   .SetOverride(-1);
         m_FilterType      .SetOverride(-1);
         m_FilterDifficulty.SetOverride(-1);
 
+        m_FilterSegment   .GetCaption()->SetText("-");
         m_FilterType      .GetCaption()->SetText("-");
         m_FilterDifficulty.GetCaption()->SetText("-");
+
+        m_iCurIndex = 0u;
     }
     else if(iMissionIndex == 254u)
     {
-        m_FilterSegment.AddEntryLanguage("GAME_ALL", 255u);
+        m_FilterSegment.ClearEntries();
 
-        m_FilterSegment   .SetOverride(-1);
+        m_FilterSegment.AddEntryLanguage("FILTER_COMPLETE", 255u);
+        for(coreUintW i = 0u; i < ARRAY_SIZE(g_aMissionData); ++i)
+        {
+            const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < MISSION_BASE) ? 1u : 0u);
+
+            if(iAdvance) m_FilterSegment.AddEntry(g_aMissionData[i].pcName, i);
+        }
+
+        m_FilterSegment   .SetOverride(0);
         m_FilterType      .SetOverride(0);
         m_FilterDifficulty.SetOverride(0);
 
         m_FilterType      .Next(); m_FilterType      .Previous();
         m_FilterDifficulty.Next(); m_FilterDifficulty.Previous();
+
+        m_iCurIndex = 1u;
     }
     else
     {
@@ -500,7 +668,8 @@ void cExtraMenu::LoadSegments(const coreUintW iMissionIndex)
         const coreUint8 iMin     = (iMissionIndex == MISSION_ATER) ? 5u : 0u;
         const coreUint8 iMax     = (iMissionIndex == MISSION_ATER) ? 7u : 6u;
 
-        m_FilterSegment.AddEntryLanguage("MISSION", 255u);
+        m_FilterSegment.ClearEntries();
+
         for(coreUintW i = iMin, ie = MIN(iAdvance, iMax); i < ie; ++i)
         {
             m_FilterSegment.AddEntry(PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iMissionIndex, i)), i);
@@ -512,12 +681,12 @@ void cExtraMenu::LoadSegments(const coreUintW iMissionIndex)
 
         m_FilterType      .Next(); m_FilterType      .Previous();
         m_FilterDifficulty.Next(); m_FilterDifficulty.Previous();
+
+        m_iCurIndex = 2u;
     }
 
     // 
-    if(!m_FilterSegment.SelectValue(iOldEntry)) m_FilterSegment.SelectFirst();
-    
-    // TODO 1: [MF] save stage similar to "-"
+    if(m_iCurIndex && (!m_aiCurFilter.count(m_iCurIndex) || !m_FilterSegment.SelectValue(m_aiCurFilter.at(m_iCurIndex)))) m_FilterSegment.SelectFirst();
 }
 
 
@@ -551,15 +720,13 @@ void cExtraMenu::__UpdateStats()
         nSetStatFunc("STAT_TIME_PLAYED",            "%llud %lluh %llum %llus", (iTimePlayed / 86400u), (iTimePlayed / 3600u) % 24u, (iTimePlayed / 60u) % 60u, iTimePlayed % 60u);
         nSetStatFunc("STAT_SCORE_GAINED",           "%'llu",                   oStats.iScoreGained);
         nSetStatFunc("STAT_MISSIONS_DONE",          "%'u",                     oStats.iMissionsDone);
+        nSetStatFunc("STAT_SEGMENTS_DONE",          "%'u",                     oStats.iBossesDone + oStats.iWavesDone);
         nSetStatFunc("STAT_BOSSES_DONE",            "%'u",                     oStats.iBossesDone);
-        nSetStatFunc("STAT_WAVES_DONE",             "%'u",                     oStats.iWavesDone);
         nSetStatFunc("STAT_ENEMIES_DONE",           "%'u",                     oStats.iEnemiesDone);
         nSetStatFunc("STAT_DAMAGE_GIVEN",           "%'llu",                   oStats.iDamageGiven);
         nSetStatFunc("STAT_DAMAGE_TAKEN",           "%'u",                     oStats.iDamageTaken);
         nSetStatFunc("STAT_CONTINUES_USED",         "%'u",                     oStats.iContinuesUsed);
         nSetStatFunc("STAT_REPAIRS_USED",           "%'u",                     oStats.iRepairsUsed);
-        nSetStatFunc("STAT_SHIFT_GOOD_ADDED",       "%'u",                     oStats.iShiftGoodAdded);
-        nSetStatFunc("STAT_SHIFT_BAD_ADDED",        "%'u",                     oStats.iShiftBadAdded);
         nSetStatFunc("STAT_MOVES_MADE",             "%'llu",                   oStats.iMovesMade);
         nSetStatFunc("STAT_TURNS_MADE",             "%'u",                     oStats.iTurnsMade);
         nSetStatFunc("STAT_BULLETS_SHOT",           "%'llu",                   oStats.iBulletsShot);
@@ -576,12 +743,14 @@ void cExtraMenu::__UpdateStats()
     }
     else if(iMissionValue == 254u)
     {
-        const auto&     oStats      = g_pSave->GetHeader().aaaLocalStatsArcade[iTypeValue][iModeValue][iDifficultyValue];
+        const auto&     oStats      = this->__PrepareStats(iTypeValue, iModeValue, iDifficultyValue, iSegmentValue, 255u);
         const coreInt32 iBestShift  = coreInt32(oStats.iTimeBestShiftBad)  - coreInt32(oStats.iTimeBestShiftGood);
         const coreInt32 iWorstShift = coreInt32(oStats.iTimeWorstShiftBad) - coreInt32(oStats.iTimeWorstShiftGood);
         const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  10.0f);
         const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), 10.0f);
 
+        nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
+        nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
         nSetStatFunc("STAT_SCORE_BEST",             "%'u",      oStats.iScoreBest);
         nSetStatFunc("STAT_SCORE_WORST",            "%'u",      oStats.iScoreWorst);
         nSetStatFunc("STAT_SCORE_TOTAL",            "%'llu",    oStats.iScoreTotal);
@@ -590,14 +759,10 @@ void cExtraMenu::__UpdateStats()
         nSetStatFunc("STAT_TIME_WORST_SHIFTED",     "%.1f %+d", fWorstTime, iWorstShift);
         nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), 10.0f));
         nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), 10.0f));
-        nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
-        nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
         nSetStatFunc("STAT_DAMAGE_GIVEN",           "%'llu",    oStats.iDamageGiven);
         nSetStatFunc("STAT_DAMAGE_TAKEN",           "%'u",      oStats.iDamageTaken);
         nSetStatFunc("STAT_CONTINUES_USED",         "%'u",      oStats.iContinuesUsed);
         nSetStatFunc("STAT_REPAIRS_USED",           "%'u",      oStats.iRepairsUsed);
-        nSetStatFunc("STAT_SHIFT_GOOD_ADDED",       "%'u",      oStats.iShiftGoodAdded);
-        nSetStatFunc("STAT_SHIFT_BAD_ADDED",        "%'u",      oStats.iShiftBadAdded);
         nSetStatFunc("STAT_MOVES_MADE",             "%'llu",    oStats.iMovesMade);
         nSetStatFunc("STAT_TURNS_MADE",             "%'u",      oStats.iTurnsMade);
         nSetStatFunc("STAT_BULLETS_SHOT",           "%'llu",    oStats.iBulletsShot);
@@ -614,15 +779,16 @@ void cExtraMenu::__UpdateStats()
     }
     else
     {
-        const coreBool bMission = (iSegmentValue == 255u);
-        const coreBool bBoss    = MISSION_SEGMENT_IS_BOSS(iSegmentValue);
+        const coreBool bBoss = MISSION_SEGMENT_IS_BOSS(iSegmentValue);
 
-        const auto&     oStats      = bMission ? g_pSave->GetHeader().aaaaLocalStatsMission[iTypeValue][iModeValue][iDifficultyValue][iMissionValue] : g_pSave->GetHeader().aaaaaLocalStatsSegment[iTypeValue][iModeValue][iDifficultyValue][iMissionValue][iSegmentValue];
+        const auto&     oStats      = this->__PrepareStats(iTypeValue, iModeValue, iDifficultyValue, iMissionValue, iSegmentValue);
         const coreInt32 iBestShift  = coreInt32(oStats.iTimeBestShiftBad)  - coreInt32(oStats.iTimeBestShiftGood);
         const coreInt32 iWorstShift = coreInt32(oStats.iTimeWorstShiftBad) - coreInt32(oStats.iTimeWorstShiftGood);
         const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  10.0f);
         const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), 10.0f);
 
+        nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
+        nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
         nSetStatFunc("STAT_SCORE_BEST",             "%'u",      oStats.iScoreBest);
         nSetStatFunc("STAT_SCORE_WORST",            "%'u",      oStats.iScoreWorst);
         nSetStatFunc("STAT_SCORE_TOTAL",            "%'llu",    oStats.iScoreTotal);
@@ -631,19 +797,18 @@ void cExtraMenu::__UpdateStats()
         nSetStatFunc("STAT_TIME_WORST_SHIFTED",     "%.1f %+d", fWorstTime, iWorstShift);
         nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), 10.0f));
         nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), 10.0f));
-        if(!bMission)
+        if(bBoss)
         {
-            if(bBoss) nSetStatFunc("STAT_MAX_CHAIN", "%'u",    oStats.iMaxSeries);
-                 else nSetStatFunc("STAT_MAX_COMBO", "x%u.%u", 1u + oStats.iMaxSeries / 10u, oStats.iMaxSeries % 10u);
+            nSetStatFunc("STAT_MAX_CHAIN", "%'u", oStats.iMaxSeries);
         }
-        nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
-        nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
+        else
+        {
+            nSetStatFunc("STAT_MAX_COMBO", "x%u.%u", 1u + oStats.iMaxSeries / 10u, oStats.iMaxSeries % 10u);
+        }
         nSetStatFunc("STAT_DAMAGE_GIVEN",           "%'llu",    oStats.iDamageGiven);
         nSetStatFunc("STAT_DAMAGE_TAKEN",           "%'u",      oStats.iDamageTaken);
         nSetStatFunc("STAT_CONTINUES_USED",         "%'u",      oStats.iContinuesUsed);
         nSetStatFunc("STAT_REPAIRS_USED",           "%'u",      oStats.iRepairsUsed);
-        nSetStatFunc("STAT_SHIFT_GOOD_ADDED",       "%'u",      oStats.iShiftGoodAdded);
-        nSetStatFunc("STAT_SHIFT_BAD_ADDED",        "%'u",      oStats.iShiftBadAdded);
         nSetStatFunc("STAT_MOVES_MADE",             "%'llu",    oStats.iMovesMade);
         nSetStatFunc("STAT_TURNS_MADE",             "%'u",      oStats.iTurnsMade);
         nSetStatFunc("STAT_BULLETS_SHOT",           "%'llu",    oStats.iBulletsShot);
@@ -653,13 +818,13 @@ void cExtraMenu::__UpdateStats()
         nSetStatFunc("STAT_MEDALS_EARNED_PLATINUM", "%'u",      oStats.aiMedalsEarned[MEDAL_PLATINUM]);
         nSetStatFunc("STAT_MEDALS_EARNED_DARK",     "%'u",      oStats.aiMedalsEarned[MEDAL_DARK]);
         nSetStatFunc("STAT_MEDALS_EARNED",          "%'u",      oStats.aiMedalsEarned[MEDAL_BRONZE] + oStats.aiMedalsEarned[MEDAL_SILVER] + oStats.aiMedalsEarned[MEDAL_GOLD] + oStats.aiMedalsEarned[MEDAL_PLATINUM] + oStats.aiMedalsEarned[MEDAL_DARK]);
-        if(bMission || !bBoss)
-        {
-            nSetStatFunc("STAT_BADGES_EARNED", "%'u", oStats.iBadgesEarned);
-        }
-        if(bMission || bBoss)
+        if(bBoss)
         {
             nSetStatFunc("STAT_HELPER_HIT", "%'u", oStats.iHelperHit);
+        }
+        else
+        {
+            nSetStatFunc("STAT_BADGES_EARNED", "%'u", oStats.iBadgesEarned);
         }
 
         m_FilterIcon.SetColor3   (g_aMissionData[iMissionValue].vColor * 0.8f);
@@ -686,51 +851,72 @@ void cExtraMenu::__UpdateStats()
 // ****************************************************************
 // 
 const cSave::sLocalStats& cExtraMenu::__PrepareStats(const coreUint8 iTypeValue, const coreUint8 iModeValue, const coreUint8 iDifficultyValue, const coreUint8 iMissionValue, const coreUint8 iSegmentValue)
-{/*
+{
+    // 
     std::memset(&m_Stats, 0, sizeof(m_Stats));
-    
+
+    // 
     for(coreUintW i = 0u; i < SAVE_TYPES; ++i)
     {
+        if((iTypeValue != i) && (iTypeValue < SAVE_TYPES)) continue;
+
         for(coreUintW j = 0u; j < SAVE_MODES; ++j)
         {
+            if((iModeValue != j) && (iModeValue < SAVE_MODES)) continue;
+
             for(coreUintW k = 0u; k < SAVE_DIFFICULTIES; ++k)
             {
-                m_Stats.iScoreBest;
-                m_Stats.iScoreWorst;
-                m_Stats.iScoreTotal;
-                m_Stats.iTimeBest;
-                m_Stats.iTimeWorst;
-                m_Stats.iTimeTotal;
-                m_Stats.iCountStart;
-                m_Stats.iCountEnd;
-        
-                m_Stats.iMaxSeries;
-        
-                m_Stats.iTimeBestShifted;
-                m_Stats.iTimeBestShiftGood;
-                m_Stats.iTimeBestShiftBad;
-                m_Stats.iTimeWorstShifted;
-                m_Stats.iTimeWorstShiftGood;
-                m_Stats.iTimeWorstShiftBad;
+                if((iDifficultyValue != k) && (iDifficultyValue < SAVE_DIFFICULTIES)) continue;
 
-                m_Stats.iDamageGiven;
-                m_Stats.iDamageTaken;
-                m_Stats.iContinuesUsed;
-                m_Stats.iRepairsUsed;
-                m_Stats.iShiftGoodAdded;
-                m_Stats.iShiftBadAdded;
-                m_Stats.iTurnsMade;
-                m_Stats.iMovesMade;
-                m_Stats.iBulletsShot;
-                m_Stats.iBadgesEarned;
-                m_Stats.iHelperHit;
-                
+                const cSave::sLocalStats* A;
+                     if(iMissionValue >= SAVE_MISSIONS) A = &g_pSave->GetHeader().aaaLocalStatsArcade   [i][j][k];
+                else if(iSegmentValue >= SAVE_SEGMENTS) A = &g_pSave->GetHeader().aaaaLocalStatsMission [i][j][k][iMissionValue];
+                else                                    A = &g_pSave->GetHeader().aaaaaLocalStatsSegment[i][j][k][iMissionValue][iSegmentValue];
+
+                m_Stats.iScoreBest  = MAX(m_Stats.iScoreBest,       A->iScoreBest);
+                m_Stats.iScoreWorst = MIN(m_Stats.iScoreWorst - 1u, A->iScoreWorst - 1u) + 1u;
+                m_Stats.iTimeBest   = MIN(m_Stats.iTimeBest   - 1u, A->iTimeBest   - 1u) + 1u;
+                m_Stats.iTimeWorst  = MAX(m_Stats.iTimeWorst,       A->iTimeWorst);
+                m_Stats.iScoreTotal = m_Stats.iScoreTotal + A->iScoreTotal;
+                m_Stats.iTimeTotal  = m_Stats.iTimeTotal  + A->iTimeTotal;
+                m_Stats.iCountStart = m_Stats.iCountStart + A->iCountStart;
+                m_Stats.iCountEnd   = m_Stats.iCountEnd   + A->iCountEnd;
+
+                m_Stats.iMaxSeries  = MAX(m_Stats.iMaxSeries, A->iMaxSeries);
+
+                if(A->iTimeBestShifted - 1u < m_Stats.iTimeBestShifted - 1u)
+                {
+                    m_Stats.iTimeBestShifted   = A->iTimeBestShifted;
+                    m_Stats.iTimeBestShiftGood = A->iTimeBestShiftGood;
+                    m_Stats.iTimeBestShiftBad  = A->iTimeBestShiftBad;
+                }
+
+                if(A->iTimeWorstShifted > m_Stats.iTimeWorstShifted)
+                {
+                    m_Stats.iTimeWorstShifted   = A->iTimeWorstShifted;
+                    m_Stats.iTimeWorstShiftGood = A->iTimeWorstShiftGood;
+                    m_Stats.iTimeWorstShiftBad  = A->iTimeWorstShiftBad;
+                }
+
+                m_Stats.iDamageGiven    = m_Stats.iDamageGiven    + A->iDamageGiven;
+                m_Stats.iDamageTaken    = m_Stats.iDamageTaken    + A->iDamageTaken;
+                m_Stats.iContinuesUsed  = m_Stats.iContinuesUsed  + A->iContinuesUsed;
+                m_Stats.iRepairsUsed    = m_Stats.iRepairsUsed    + A->iRepairsUsed;
+                m_Stats.iShiftGoodAdded = m_Stats.iShiftGoodAdded + A->iShiftGoodAdded;
+                m_Stats.iShiftBadAdded  = m_Stats.iShiftBadAdded  + A->iShiftBadAdded;
+                m_Stats.iTurnsMade      = m_Stats.iTurnsMade      + A->iTurnsMade;
+                m_Stats.iMovesMade      = m_Stats.iMovesMade      + A->iMovesMade;
+                m_Stats.iBulletsShot    = m_Stats.iBulletsShot    + A->iBulletsShot;
+                m_Stats.iBadgesEarned   = m_Stats.iBadgesEarned   + A->iBadgesEarned;
+                m_Stats.iHelperHit      = m_Stats.iHelperHit      + A->iHelperHit;
+
                 for(coreUintW l = 0u; l < SAVE_MEDALS; ++l)
                 {
-                    m_Stats.aiMedalsEarned[l];
+                    m_Stats.aiMedalsEarned[l] = m_Stats.aiMedalsEarned[l] + A->aiMedalsEarned[l];
                 }
             }
         }
-    }*/
+    }
+
     return m_Stats;
 }

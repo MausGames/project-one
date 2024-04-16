@@ -13,8 +13,8 @@
 // TODO 2: realtime language update (also combat text, LUCKY, HIT, etc.), boss-titles, mission-titles, time-bonus
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 // TODO 4: merge wave time and boss time if possible
-// TODO 1: [MF] sterne anzeigen in score banner
 // TODO 3: add animation to combo bar, combo value, score (consider sustained fire on boss, e.g. on Eigengrau)
+// TODO 1: [MF] [HIGH] ausblende algorithmus einbauen (+ also for combat-text marker)
 
 
 // ****************************************************************
@@ -42,8 +42,8 @@
 #define INTERFACE_BANNER_TYPE_SCORE       (3u)             // 
 #define INTERFACE_BANNER_TYPE_ALERT       (4u)             // 
 
-#define INTERFACE_STORY_SPEED             (1.0f)           // 
-#define INTERFACE_STORY_DURATION          (4.0f)           // 
+#define INTERFACE_STORY_SPEED             (0.5f)           // 
+#define INTERFACE_STORY_DURATION          (9.0f)           // 
 
 #define INTERFACE_FRAGMENT_SPEED          (1.5f)           // 
 #define INTERFACE_FRAGMENT_DURATION       (5.0f)           // 
@@ -117,6 +117,7 @@ private:
     cGuiObject m_BannerShadow;                      // 
     cGuiObject m_aBannerIcon[2];                    // 
     cGuiLabel  m_aBannerText[4];                    // banner labels
+    cGuiLabel  m_BannerExtra;                       // 
     coreFloat  m_fBannerStart;                      // animation start time
     coreFloat  m_fBannerDuration;                   // 
     coreFloat  m_fBannerSpeed;                      // 
@@ -145,15 +146,16 @@ private:
     coreFlow m_fRotation;                           // 
     coreFlow m_fShake;                              // 
 
-    coreBool m_bVisible;                            // visibility status
-    coreFlow m_fAlphaAll;                           // overall alpha value (except for banner)
-    coreFlow m_fAlphaBoss;                          // boss alpha value
-    coreFlow m_fAlphaWave;                          // 
-    coreFlow m_fAlphaSegment;                       // 
-    coreFlow m_fAlphaTurf;                          // 
-    coreFlow m_fAlphaGoal;                          // 
-    coreFlow m_fAlphaBadge;                         // 
-    coreFlow m_fAlphaFragment;                      // 
+    coreBool  m_bVisible;                            // visibility status
+    coreFloat m_fVisibleSpeed;                       // 
+    coreFlow  m_fAlphaAll;                           // overall alpha value (except for banner)
+    coreFlow  m_fAlphaBoss;                          // boss alpha value
+    coreFlow  m_fAlphaWave;                          // 
+    coreFlow  m_fAlphaSegment;                       // 
+    coreFlow  m_fAlphaTurf;                          // 
+    coreFlow  m_fAlphaGoal;                          // 
+    coreFlow  m_fAlphaBadge;                         // 
+    coreFlow  m_fAlphaFragment;                      // 
 
     coreUint8 m_iFakeEnd;                           // 
     coreBool  m_bBossChange;                        // 
@@ -203,6 +205,7 @@ public:
 
     // set object properties
     inline void SetVisible      (const coreBool  bVisible)    {m_bVisible       = bVisible;}
+    inline void SetVisibleSpeed (const coreFloat fSpeed)      {m_fVisibleSpeed  = fSpeed;}
     inline void SetAlphaAll     (const coreFloat fAlpha)      {m_fAlphaAll      = fAlpha;}
     inline void SetAlphaBoss    (const coreFloat fAlpha)      {m_fAlphaBoss     = fAlpha;}
     inline void SetAlphaWave    (const coreFloat fAlpha)      {m_fAlphaWave     = fAlpha;}

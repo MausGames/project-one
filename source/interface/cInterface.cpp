@@ -50,7 +50,7 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
 
     oImmune.Construct      (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     oImmune.SetColor3      (COLOR_MENU_INSIDE);
-    oImmune.SetTextLanguage("IMMUNE");
+    oImmune.SetTextLanguage("TEXT_IMMUNE");
 
     // 
     fShieldBump = 0.0f;
@@ -64,38 +64,41 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
 // ****************************************************************
 // constructor
 cInterface::cInterface(const coreUint8 iNumViews)noexcept
-: m_iNumViews        (iNumViews)
-, m_fBossSpin        (0.0f)
-, m_fGoalBump        (0.0f)
-, m_iGoalOld         (MEDAL_NONE)
-, m_afHelperBump     {}
-, m_iHelperState     (0u)
-, m_afBadgeBump      {}
-, m_iBadgeState      (0u)
-, m_fBannerStart     (INTERFACE_INVALID_START)
-, m_fBannerDuration  (0.0f)
-, m_fBannerSpeed     (0.0f)
-, m_iBannerType      (0u)
-, m_bBannerEigengrau (false)
-, m_fStoryStart      (INTERFACE_INVALID_START)
-, m_fFragmentStart   (INTERFACE_INVALID_START)
-, m_iFragmentNew     (0u)
-, m_iFragmentState   (0u)
-, m_fAlertStart      (INTERFACE_INVALID_START)
-, m_fAnimation       (0.0f)
-, m_fRotation        (0.0f)
-, m_fShake           (0.0f)
-, m_bVisible         (false)
-, m_fAlphaAll        (0.0f)
-, m_fAlphaBoss       (0.0f)
-, m_fAlphaWave       (0.0f)
-, m_fAlphaSegment    (0.0f)
-, m_fAlphaTurf       (0.0f)
-, m_fAlphaGoal       (0.0f)
-, m_fAlphaBadge      (0.0f)
-, m_fAlphaFragment   (0.0f)
-, m_iFakeEnd         (0u)
-, m_bBossChange      (false)
+: m_aView             {}
+, m_iNumViews         (iNumViews)
+, m_fBossSpin         (0.0f)
+, m_fGoalBump         (0.0f)
+, m_iGoalOld          (MEDAL_NONE)
+, m_afHelperBump      {}
+, m_iHelperState      (0u)
+, m_afBadgeBump       {}
+, m_iBadgeState       (0u)
+, m_fBannerStart      (INTERFACE_INVALID_START)
+, m_fBannerDuration   (0.0f)
+, m_fBannerSpeed      (0.0f)
+, m_iBannerType       (0u)
+, m_bBannerEigengrau  (false)
+, m_fStoryStart       (INTERFACE_INVALID_START)
+, m_fFragmentStart    (INTERFACE_INVALID_START)
+, m_fFragmentDuration (0.0f)
+, m_iFragmentNew      (0u)
+, m_iFragmentState    (0u)
+, m_fAlertStart       (INTERFACE_INVALID_START)
+, m_fAnimation        (0.0f)
+, m_fRotation         (0.0f)
+, m_fShake            (0.0f)
+, m_bVisible          (false)
+, m_fVisibleSpeed     (2.0f)
+, m_fAlphaAll         (0.0f)
+, m_fAlphaBoss        (0.0f)
+, m_fAlphaWave        (0.0f)
+, m_fAlphaSegment     (0.0f)
+, m_fAlphaTurf        (0.0f)
+, m_fAlphaGoal        (0.0f)
+, m_fAlphaBadge       (0.0f)
+, m_fAlphaFragment    (0.0f)
+, m_iFakeEnd          (0u)
+, m_bBossChange       (false)
 {
     ASSERT((m_iNumViews > 0) && (m_iNumViews <= INTERFACE_VIEWS))
 
@@ -216,6 +219,10 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBannerText[2].DefineTexture(2u, "menu_background_black.png");
     m_aBannerText[3].DefineTexture(2u, "menu_background_black.png");
 
+    m_BannerExtra.Construct    (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_BannerExtra.DefineProgram("menu_swipe_program");
+    m_BannerExtra.DefineTexture(2u, "menu_background_black.png");
+
     m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aStoryText[0].SetColor3(COLOR_MENU_INSIDE);
     m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
@@ -296,6 +303,7 @@ void cInterface::Render()
         m_aBannerText[1].Render();
         m_aBannerText[2].Render();
         m_aBannerText[3].Render();
+        m_BannerExtra   .Render();
 
         // 
         m_Medal.Render();
@@ -845,7 +853,7 @@ void cInterface::Move()
         // 
         if(pBoss)
         {
-            const coreBool bVisible = ((pBoss->GetID() != cIntroBoss::ID) || !d_cast<cIntroMission*>(g_pGame->GetCurMission())->GetFirstPlay()) && (pBoss->GetID() != cProjectOneBoss::ID) && (pBoss->GetID() != cEigengrauBoss::ID);
+            const coreBool bVisible = ((pBoss->GetID() != cIntroBoss::ID) || !d_cast<cIntroMission*>(g_pGame->GetCurMission())->GetFirstPlay()) /*&& (pBoss->GetID() != cProjectOneBoss::ID)*/ && (pBoss->GetID() != cEigengrauBoss::ID);
             m_aHelper    [i].SetEnabled(bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             m_aHelperWave[i].SetEnabled(bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         }
@@ -949,6 +957,8 @@ void cInterface::Move()
         {
             m_aBannerText[2].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
             m_aBannerText[3].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
+            
+            m_BannerExtra.SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
         }
 
         // 
@@ -958,7 +968,7 @@ void cInterface::Move()
         m_aBannerIcon[1].SetDirection(coreVector2::Direction(fBanner * (-0.1f*PI)));
 
         // 
-        m_Medal.SetPosition(coreVector2(0.0f, LERPB(-0.07f, -0.04f, MIN1(fBanner * 0.8f))));
+        m_Medal.SetPosition(coreVector2(0.0f, LERPB(-0.07f, -0.04f, MIN1(fBanner * 0.6f))));
         m_Medal.SetSize    (coreVector2(0.135f,0.135f) * LERP(1.5f, 1.0f, MIN1(fBanner * 10.0f)));
 
         // set banner transparency
@@ -970,6 +980,7 @@ void cInterface::Move()
         m_aBannerText[1].SetAlpha(fBannerAlpha * 0.2f);
         m_aBannerText[2].SetAlpha(fBannerAlpha);   // TODO 1: MENU_INSIDE_ALPHA is falsch für BOSS und MISSION banner animation
         m_aBannerText[3].SetAlpha(fBannerAlpha);   // TODO 1: - || -
+        m_BannerExtra   .SetAlpha(fBannerAlpha);   // TODO 1: - || -  ??
         m_Medal         .SetAlpha(fBannerAlpha);
         
 
@@ -1008,6 +1019,7 @@ void cInterface::Move()
         m_aBannerText[1].Move();
         m_aBannerText[2].Move();
         m_aBannerText[3].Move();
+        m_BannerExtra   .Move();
         m_Medal         .Move();
     }
 
@@ -1075,7 +1087,7 @@ void cInterface::Move()
                 const coreVector2 vDir = FRAGMENT_DIRECTION;
                 const coreVector2 vPos = MapToAxisInv(FRAGMENT_POSITION(i), vDir) * INTERFACE_FRAGMENT_SCALE;
 
-                const coreFloat fTime2 = CLAMP01(fFragment - INTERFACE_FRAGMENT_DURATION_2 - I_TO_F(i) * 0.3f);
+                const coreFloat fTime2 = CLAMP01(fFragment - INTERFACE_FRAGMENT_DURATION_2 - I_TO_F(g_aiFragmentOrder[i]) * 0.3f);
 
                 m_aFragment[i].SetPosition(vPos + vPos.Normalized() * LERPBR(0.0f, 1.5f, fTime2) + m_aFragmentTable[0].GetPosition());
             }
@@ -1118,8 +1130,8 @@ void cInterface::Move()
 
     // smoothly toggle interface visibility (after forwarding, to allow overriding)
     if(m_bVisible)
-         m_fAlphaAll.UpdateMin( 2.0f, 1.0f);
-    else m_fAlphaAll.UpdateMax(-2.0f, 0.0f);
+         m_fAlphaAll.UpdateMin( m_fVisibleSpeed, 1.0f);
+    else m_fAlphaAll.UpdateMax(-m_fVisibleSpeed, 0.0f);
 
     // smoothly toggle boss data visibility
     if(pBoss && (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
@@ -1187,6 +1199,11 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    m_BannerExtra.SetText    ("");//("エクストラ");
+    m_BannerExtra.SetPosition(coreVector2(0.0f,-0.09f));
+    m_BannerExtra.SetCenter  (m_aBannerText[3].GetCenter());
+    m_BannerExtra.SetColor3  (m_aBannerText[3].GetColor3());
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -1271,6 +1288,11 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    m_BannerExtra.SetText    ("");//("レヴィアタン");
+    m_BannerExtra.SetPosition(coreVector2(0.0f,-0.09f));
+    m_BannerExtra.SetCenter  (m_aBannerText[3].GetCenter());
+    m_BannerExtra.SetColor3  (m_aBannerText[3].GetColor3());
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -1284,6 +1306,7 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
 {
     ASSERT(pBoss)
     
+    /*
     if(pBoss->GetID() == cProjectOneBoss::ID)
     {
         coreUint8 iFragments = 0u;
@@ -1299,6 +1322,7 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
             return;
         }
     }
+     */
 
     // show default boss banner
     this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
@@ -1322,6 +1346,7 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
         m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_BannerExtra   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
 }
 
@@ -1382,6 +1407,8 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    m_BannerExtra.SetText("");
 
     // 
     ASSERT(iMedal != MEDAL_NONE)
@@ -1403,9 +1430,9 @@ void cInterface::ShowAlert()
     this->__PrepareBanner();
 
     // set banner text
-    m_aBannerText[0].SetText("WARNING");
-    m_aBannerText[1].SetText("WARNING");
-    m_aBannerText[3].SetText("WARNING");
+    m_aBannerText[0].SetText("WARNUNG");
+    m_aBannerText[1].SetText("WARNUNG");
+    m_aBannerText[3].SetText("WARNUNG");
 
     // save animation properties
     m_fBannerStart    = g_pGame->GetTimeTable()->GetTimeEvent();
@@ -1438,6 +1465,8 @@ void cInterface::ShowAlert()
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    m_BannerExtra.SetText("");
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -1770,6 +1799,7 @@ void cInterface::__PrepareBanner()
     m_aBannerText[1].SetAlpha(0.0f);
     m_aBannerText[2].SetAlpha(0.0f);
     m_aBannerText[3].SetAlpha(0.0f);
+    m_BannerExtra   .SetAlpha(0.0f);
 
     // also hide banner bar (but has no transparency)
     m_BannerBar.SetSize(coreVector2(0.0f,0.0f));
@@ -1778,5 +1808,6 @@ void cInterface::__PrepareBanner()
     m_bBannerEigengrau = false;
     m_aBannerText[2].SetAlignment(coreVector2(0.0f,0.0f));
     m_aBannerText[3].SetAlignment(coreVector2(0.0f,0.0f));
+    m_BannerExtra   .SetAlignment(coreVector2(0.0f,0.0f));
     m_BannerShadow.SetCenter    (coreVector2(0.0f,0.02f));
 }

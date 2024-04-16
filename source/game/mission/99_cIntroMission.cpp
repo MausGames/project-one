@@ -81,6 +81,7 @@ void cIntroMission::__MoveOwnAfter()
         const coreVector2 vGame  = g_pPostProcessing->GetDirection();
         const coreVector2 vHud   = g_vHudDirection;
         const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+        ASSERT(vFinal.IsNormalized())
         
         const coreUintW iShift = PackDirection(vFinal)  / 2u;
 

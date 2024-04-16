@@ -135,7 +135,7 @@ cRayWeapon::cRayWeapon()noexcept
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aMuzzle); ++i)
     {
-        m_aMuzzle[i].DefineModel  ("object_tube_open.md3");
+        m_aMuzzle[i].DefineModel  ("object_tube.md3");
         m_aMuzzle[i].DefineTexture(0u, "effect_energy.png");
         m_aMuzzle[i].DefineProgram("effect_energy_flat_direct_program");
         m_aMuzzle[i].SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.8f, 0.0f));
@@ -160,6 +160,13 @@ void cRayWeapon::__UpdateOwn(const coreUint8 iShootStatus, const coreFloat fShoo
 {
     //if(iShootStatus) m_fVolume.UpdateMin(0.2f, 1.0f);
     //            else m_fVolume = 0.0f;
+  
+    //if(HAS_BIT(m_pOwner->GetInput()->iStatus, 1u) && (m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) >= 0.0f))
+    //{
+    //    if(m_iBurst == 1u) m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+//
+    //    m_iBurst = 0u;
+    //}
 }
 
 
@@ -244,6 +251,7 @@ void cRayWeapon::__ShootOwn()
     const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
     
     cBulletManager* pManager = m_pOwner->HasStatus(PLAYER_STATUS_TOP) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
+    
 
     // 
     if(!m_iBurst)

@@ -360,7 +360,7 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
 
     // 
     WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)   ||
-            (m_Header.iVersion  != REPLAY_FILE_VERSION) ||
+            (m_Header.iVersion  >  REPLAY_FILE_VERSION) ||
             (m_Header.iChecksum != cReplay::__GenerateChecksum(m_Header)))
     {
         Core::Log->Warning("Replay (%s) is not a valid replay-file!", pcPath);

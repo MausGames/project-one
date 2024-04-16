@@ -15,7 +15,6 @@
 // TODO 3: make lightning owner-sticky with position-offset
 // TODO 3: don't invoke special-effects out of view (though consider effect-radius)
 // TODO 1: [MF] check for all locations where deep particles would make sense (or invert everything ?)
-// TODO 4: remove effect_energy_ring_program if not required anymore (+file +define)
 // TODO 4: think about merging *Color and *Dark functions, as they are mostly identical
 // TODO 3: sinus shake
 // TODO 3: discard every X particle (create min 1) on low quality ?
@@ -25,6 +24,7 @@
 // TODO 3: update 3d-sound settings in real-time (store position)
 // TODO 3: move some global sound effects to local pointers (where it makes sense), to reduce permanent memory load
 // TODO 1: no rumble in replays (might already be possible, but still check e.g. for NULL)
+// TODO 1: in CreateBreakup*, add deterministic vertex-shift to make it more random (consider out-of-bounds access!)
 
 
 // ****************************************************************
@@ -66,17 +66,13 @@
 
 #define SPECIAL_RELATIVE            (coreVector3(0.0f,0.0f,0.0f))
 #define SPECIAL_SOUND_MEDAL(x)      (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
-#define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.3f, STEP(1.0f, I_TO_F((y) - 1u), I_TO_F(x))))
+#define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.2f, STEP(1.0f, I_TO_F((y) - 1u), I_TO_F(x))))
 
 #define SPECIAL_FROZEN (TIME < 0.001f)
 
 enum eSoundEffect : coreUint8
 {
     SOUND_PLAYER_EXPLOSION,
-    SOUND_PLAYER_FEEL,
-    SOUND_PLAYER_TURN,
-    SOUND_PLAYER_INTERRUPT,
-    SOUND_PLAYER_REPAIR,
 
     SOUND_ENEMY_EXPLOSION_01,
     SOUND_ENEMY_EXPLOSION_02,
@@ -90,8 +86,6 @@ enum eSoundEffect : coreUint8
     SOUND_ENEMY_EXPLOSION_10,
     SOUND_ENEMY_EXPLOSION_11,
     SOUND_ENEMY_EXPLOSION_12,
-
-    SOUND_SHIP_FLY,
 
     SOUND_WEAPON_RAY,
     SOUND_WEAPON_ENEMY,
@@ -116,7 +110,8 @@ enum eSoundEffect : coreUint8
     SOUND_FRAGMENT_COLLECT,
     SOUND_FRAGMENT_IMPACT,
 
-    SOUND_ITEM_COLLECT,
+    SOUND_ITEM_01,
+    SOUND_ITEM_02,
 
     SOUND_SUMMARY_TEXT,
     SOUND_SUMMARY_SCORE,
@@ -143,18 +138,20 @@ enum eSoundEffect : coreUint8
     SOUND_MENU_SUB_IN,
     SOUND_MENU_SUB_OUT,
 
+    SOUND_EFFECT_BEEP,
+    SOUND_EFFECT_CLICK,
     SOUND_EFFECT_DUST,
     SOUND_EFFECT_ERROR,
-    SOUND_EFFECT_FIRE_START,
+    SOUND_EFFECT_FIRE,
+    SOUND_EFFECT_FLY,
     SOUND_EFFECT_PEARL,
-    SOUND_EFFECT_SHAKE,
-    SOUND_EFFECT_SHAKE_2,
-    SOUND_EFFECT_SUCCESS,
-    SOUND_EFFECT_SWIPE,
-    SOUND_EFFECT_SWIPE_2,
-    SOUND_EFFECT_SWIPE_3,
-    SOUND_EFFECT_WOOSH,
-    SOUND_EFFECT_WOOSH_2,
+    SOUND_EFFECT_SHAKE_01,
+    SOUND_EFFECT_SHAKE_02,
+    SOUND_EFFECT_SWIPE_01,
+    SOUND_EFFECT_SWIPE_02,
+    SOUND_EFFECT_SWIPE_03,
+    SOUND_EFFECT_WOOSH_01,
+    SOUND_EFFECT_WOOSH_02,
 
     SOUND_PLACEHOLDER,
     SOUND_NONE,
@@ -216,6 +213,7 @@ private:
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
     coreFloat m_fShakeOverride;                             // 
     coreUint8 m_iShakeCount;                                // 
+    coreUint8 m_iShakeType;                                 // 
 
     coreFloat m_fFreezeTime;                                // 
     coreFloat m_fSlowTime;                                  // 
@@ -223,7 +221,7 @@ private:
 
     cIcon m_aIcon[SPECIAL_ICONS];                           // 
 
-    coreUint16 m_iEffectFrame;                              // 
+    coreUint32 m_iEffectFrame;                              // 
     coreUint8  m_iEffectCount;                              // 
     coreUint8  m_iBreakupCount;                             // 
 

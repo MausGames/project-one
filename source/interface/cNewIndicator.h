@@ -16,10 +16,11 @@
 class cNewIndicator final : public cGuiObject
 {
 private:
-    cGuiLabel m_Text;     // 
+    cGuiLabel m_Text;      // 
 
-    coreFlow  m_fFade;    // 
-    coreUint8 m_iIndex;   // 
+    coreFlow  m_fFade;     // 
+    coreBool  m_bLocked;   // 
+    coreUint8 m_iIndex;    // 
 
 
 public:
@@ -33,6 +34,10 @@ public:
 
     // 
     void Resolve();
+
+    // 
+    void Acquire();
+    void Release();
 
     // 
     inline void SetIndex(const coreUint8 iIndex) {m_iIndex = iIndex;}

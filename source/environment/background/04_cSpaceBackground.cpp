@@ -196,14 +196,19 @@ void cSpaceBackground::__RenderOwnAfter()
 void cSpaceBackground::__MoveOwn()
 {
     // 
-    const coreMatrix3 mRota = coreMatrix4::RotationY(TIME * -0.7f * m_fMeteorSpeed).m123();
+    const coreMatrix3 amRota[] = {coreMatrix4::RotationY(TIME * -0.7f * m_fMeteorSpeed).m123(),
+                                  coreMatrix4::RotationY(TIME * -0.6f * m_fMeteorSpeed).m123(),
+                                  coreMatrix4::RotationY(TIME * -0.5f * m_fMeteorSpeed).m123()};
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pMeteor = (*pList->List())[i];
-        if((i >= m_iCopyLower) && (i < m_iCopyUpper) && !pMeteor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+        if((i >= m_iCopyLower) && (i < m_iCopyUpper) && !pMeteor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
+
+        // 
+        const coreMatrix3& mRota = amRota[(i % m_iCopyUpper) % ARRAY_SIZE(amRota)];
 
         // 
         pMeteor->SetDirection  ((pMeteor->GetDirection  () * mRota).Normalized());

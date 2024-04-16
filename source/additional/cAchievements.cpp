@@ -44,7 +44,7 @@ void InitAchievements()
     }
 
     // 
-    for(coreUintW i = 0u; i < 6u; ++i)
+    for(coreUintW i = 0u; i < 4u; ++i)
     {
         const coreChar* pcLocal    = PRINT("challenge_%02zu", i + 1u);
         const coreChar* pcPlatform = PRINT("CHALLENGE_%02zu", i + 1u);
@@ -120,23 +120,6 @@ void CheckAchievements()
                 Core::Platform->UnlockAchievement("challenge_01");
             }
 
-            if(ALL_MEDAL_ARCADE(iMedal) {return (iMedal == MEDAL_DARK);}))
-            {
-                Core::Platform->UnlockAchievement("challenge_02");
-            }
-
-            if([]()
-            {
-                for(coreUintW i = 0u; i < MISSION_BASE; ++i)
-                {
-                    if(!ALL_MEDAL_MISSION(aiMedal) {return (aiMedal[i] == MEDAL_DARK);})) return false;
-                }
-                return true;
-            }())
-            {
-                Core::Platform->UnlockAchievement("challenge_03");
-            }
-
             if([]()
             {
                 for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
@@ -151,13 +134,18 @@ void CheckAchievements()
                 return true;
             }())
             {
-                Core::Platform->UnlockAchievement("challenge_04");
+                Core::Platform->UnlockAchievement("challenge_02");
             }
         }
         break;
 
     case 7u:
         {
+            if(ALL_MEDAL_ARCADE(iMedal) {return (iMedal == MEDAL_DARK);}))
+            {
+                Core::Platform->UnlockAchievement("challenge_03");
+            }
+
             if([]()
             {
                 for(coreUintW i = 1u; i < MISSION_BASE - 1u; ++i)
@@ -166,30 +154,12 @@ void CheckAchievements()
                     {
                         if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u)) return false;
                         if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u)) return false;
-                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 2u)) return false;
                     }
                 }
                 return true;
             }())
             {
-                Core::Platform->UnlockAchievement("challenge_05");
-            }
-
-            coreUint32 iCount = 0u;
-            if(ALL_STATS_SEGMENT(oStats)
-            {
-                for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
-                {
-                    for(coreUintW j = 0u; j < SAVE_SEGMENTS; ++j)
-                    {
-                        if(HAS_BIT(oStats[i][j].iFeat, FEAT_TWOHUNDRED))
-                            iCount += 1u;
-                    }
-                }
-                return (iCount >= 6u);
-            }))
-            {
-                Core::Platform->UnlockAchievement("challenge_06");
+                Core::Platform->UnlockAchievement("challenge_04");
             }
         }
         break;
@@ -199,3 +169,40 @@ void CheckAchievements()
         break;
     }
 }
+
+
+/*
+
+
+if([]()
+{
+    for(coreUintW i = 0u; i < MISSION_BASE; ++i)
+    {
+        if(!ALL_MEDAL_MISSION(aiMedal) {return (aiMedal[i] == MEDAL_DARK);})) return false;
+    }
+    return true;
+}())
+{
+    Core::Platform->UnlockAchievement("challenge_03");
+}
+
+
+coreUint32 iCount = 0u;
+if(ALL_STATS_SEGMENT(oStats)
+{
+    for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
+    {
+        for(coreUintW j = 0u; j < SAVE_SEGMENTS; ++j)
+        {
+            if(HAS_BIT(oStats[i][j].iFeat, FEAT_TWOHUNDRED))
+                iCount += 1u;
+        }
+    }
+    return (iCount >= 6u);
+}))
+{
+    Core::Platform->UnlockAchievement("challenge_06");
+}
+
+
+*/

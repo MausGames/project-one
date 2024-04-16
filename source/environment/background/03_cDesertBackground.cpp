@@ -410,7 +410,11 @@ void cDesertBackground::__MoveOwn()
     
     
     
-    if(m_bTrail)
+    
+    if(m_bTrail) m_fTrailBlend.UpdateMin( 0.1f, 1.0f);
+            else m_fTrailBlend.UpdateMax(-0.1f, 0.0f);
+    
+    if(m_fTrailBlend)
     {
         // 
         const coreVector2 vEnvDirection = g_pEnvironment->GetDirection();
@@ -439,12 +443,6 @@ void cDesertBackground::__MoveOwn()
                 this->__CreateTrail(1u, coreVector3(vTrailPos2, g_pEnvironment->RetrieveSafeHeight(vTrailPos2) - 0.0f));
             }
         }
-        
-        m_fTrailBlend.UpdateMin(0.1f, 1.0f);
-    }
-    else
-    {
-        m_fTrailBlend = 0.0f;
     }
 }
 

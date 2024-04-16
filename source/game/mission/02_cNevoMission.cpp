@@ -12,35 +12,36 @@
 // ****************************************************************
 // constructor
 cNevoMission::cNevoMission()noexcept
-: m_Bomb           (NEVO_BOMBS)
-, m_afBombTime     {}
-, m_iBombGone      (0u)
-, m_Blast          (NEVO_BLASTS)
-, m_BlastLine      (NEVO_BLASTS * NEVO_LINES)
-, m_afBlastTime    {}
-, m_Tile           (NEVO_TILES)
-, m_afTileTime     {}
-, m_Arrow          (NEVO_ARROWS)
-, m_apArrowOwner   {}
-, m_afArrowAlpha   {}
-, m_aiArrowDir     {}
-, m_iArrowActive   (0u)
-, m_iArrowFake     (0u)
-, m_bArrowEnabled  (true)
-, m_Block          (NEVO_BLOCKS)
-, m_BlockWave      (NEVO_BLOCKS)
-, m_apBlockOwner   {}
-, m_afBlockScale   {}
-, m_afBlockRota    {}
-, m_afScrapTime    {}
-, m_Chip           (NEVO_CHIPS)
-, m_ChipWave       (NEVO_CHIPS)
-, m_vForce         (coreVector2(0.0f,0.0f))
-, m_vImpact        (coreVector2(0.0f,0.0f))
-, m_bClamp         (false)
-, m_bOverdraw      (false)
-, m_fDemoRangeAnim (0.0f)
-, m_fAnimation     (0.0f)
+: m_Bomb            (NEVO_BOMBS)
+, m_afBombTime      {}
+, m_iBombGone       (0u)
+, m_Blast           (NEVO_BLASTS)
+, m_BlastLine       (NEVO_BLASTS * NEVO_LINES)
+, m_afBlastTime     {}
+, m_Tile            (NEVO_TILES)
+, m_afTileTime      {}
+, m_Arrow           (NEVO_ARROWS)
+, m_apArrowOwner    {}
+, m_afArrowAlpha    {}
+, m_aiArrowDir      {}
+, m_iArrowActive    (0u)
+, m_iArrowFake      (0u)
+, m_bArrowEnabled   (true)
+, m_Block           (NEVO_BLOCKS)
+, m_BlockWave       (NEVO_BLOCKS)
+, m_apBlockOwner    {}
+, m_afBlockScale    {}
+, m_afBlockRota     {}
+, m_afScrapTime     {}
+, m_Chip            (NEVO_CHIPS)
+, m_ChipWave        (NEVO_CHIPS)
+, m_vForce          (coreVector2(0.0f,0.0f))
+, m_vImpact         (coreVector2(0.0f,0.0f))
+, m_bClamp          (false)
+, m_bOverdraw       (false)
+, m_fStoryRangeAnim (0.0f)
+, m_fAnimation      (0.0f)
+, m_bStory          (g_pSave->GetHeader().oProgress.aiAdvance[2] < 7u)
 {
     // 
     m_apBoss[0] = &m_Leviathan;
@@ -77,7 +78,7 @@ cNevoMission::cNevoMission()noexcept
 
             // load object resources
             coreObject3D* pBlast = &m_aBlastRaw[i];
-            pBlast->DefineModel  (iType ? "object_tube_open.md3" : "object_sphere.md3");
+            pBlast->DefineModel  (iType ? "object_tube.md3" : "object_sphere.md3");
             pBlast->DefineTexture(0u, "effect_energy.png");
             pBlast->DefineProgram("effect_energy_flat_program");
 
@@ -121,12 +122,11 @@ cNevoMission::cNevoMission()noexcept
         {
             // load object resources
             coreObject3D* pArrow = &m_aArrowRaw[i];
-            pArrow->DefineModel  ("object_arrow.md3");
+            pArrow->DefineModel  ("object_arrow_short.md3");
             pArrow->DefineTexture(0u, "effect_energy.png");
             pArrow->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
-            pArrow->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
             pArrow->SetColor3 (COLOR_ENERGY_GREEN * 0.5f);
             pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.2f);
             pArrow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -237,15 +237,15 @@ cNevoMission::cNevoMission()noexcept
 #endif
 
     // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
     {
-        m_aDemoRange[i].DefineModel  (i ? "object_cube_top.md3" : "object_penta_top.md3");
-        m_aDemoRange[i].DefineTexture(0u, "effect_energy.png");
-        m_aDemoRange[i].DefineProgram("effect_energy_flat_invert_program");
-        m_aDemoRange[i].SetPosition  (coreVector3(0.0f, i ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA3);
-        m_aDemoRange[i].SetColor3    (i ? COLOR_PLAYER_BLUE : COLOR_PLAYER_GREEN);
-        m_aDemoRange[i].SetTexSize   (coreVector2(0.1f,0.1f));
-        m_aDemoRange[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+        m_aStoryRange[i].DefineModel  (i ? "object_cube_top.md3" : "object_penta_top.md3");
+        m_aStoryRange[i].DefineTexture(0u, "effect_energy.png");
+        m_aStoryRange[i].DefineProgram("effect_energy_flat_invert_program");
+        m_aStoryRange[i].SetPosition  (coreVector3(0.0f, i ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA3);
+        m_aStoryRange[i].SetColor3    (i ? COLOR_PLAYER_BLUE : COLOR_PLAYER_GREEN);
+        m_aStoryRange[i].SetTexSize   (coreVector2(0.1f,0.1f));
+        m_aStoryRange[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     }
 
     // 
@@ -258,7 +258,7 @@ cNevoMission::cNevoMission()noexcept
     g_pGlow->BindList(&m_Chip);
     g_pGlow->BindList(&m_ChipWave);
 
-    if(g_bDemoVersion)
+    if(m_bStory || g_bDemoVersion)
     {
         // 
         constexpr const coreChar* apcName[] =
@@ -328,7 +328,7 @@ cNevoMission::~cNevoMission()
     this->DisableContainer(false);
     this->DisableRanges   (false);
 
-    if(g_bDemoVersion)
+    if(m_bStory || g_bDemoVersion)
     {
         // 
         if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
@@ -783,12 +783,12 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 void cNevoMission::EnableRanges()
 {
     // 
-    WARN_IF(m_aDemoRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableRanges(false);
+    WARN_IF(m_aStoryRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableRanges(false);
 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
     {
-        m_aDemoRange[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-        g_pGlow->BindObject(&m_aDemoRange[i]);
+        m_aStoryRange[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(&m_aStoryRange[i]);
     }
 }
 
@@ -798,12 +798,12 @@ void cNevoMission::EnableRanges()
 void cNevoMission::DisableRanges(const coreBool bAnimated)
 {
     // 
-    if(!m_aDemoRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    if(!m_aStoryRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
     {
-        m_aDemoRange[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        g_pGlow->UnbindObject(&m_aDemoRange[i]);
+        m_aStoryRange[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(&m_aStoryRange[i]);
     }
 }
 
@@ -866,8 +866,8 @@ void cNevoMission::__RenderOwnUnder()
     //m_ChipWave.Render();
 
     // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i) m_aDemoRange[i].Render();
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_aDemoRange[i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i) m_aStoryRange[i].Render();
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_aStoryRange[i]);
 }
 
 
@@ -1075,11 +1075,11 @@ void cNevoMission::__MoveOwnAfter()
     // 
     const coreVector2 vArrowOri = coreVector2::Direction(m_fAnimation * (6.0f*PI));
 
-    // 
-    m_iArrowActive = m_bArrowEnabled ? BIT(PackDirection(g_pGame->FindPlayerDual(0u)->GetDirection().xy())) : 0u;
+    // (# badge and achievement depend on this) 
+    m_iArrowActive = 0u;
     g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
     {
-        m_iArrowActive &= BIT(PackDirection(pPlayer->GetDirection().xy()));
+        m_iArrowActive |= BIT(PackDirection(pPlayer->GetDirection().xy()));
     });
 
     // 
@@ -1107,11 +1107,14 @@ void cNevoMission::__MoveOwnAfter()
         if(!m_afArrowAlpha[i]) this->DisableArrow(i, false);
 
         // 
-        const coreFloat fActive = (HAS_BIT(m_iArrowActive, m_aiArrowDir[i]) || HAS_BIT(m_iArrowFake, i)) ? 1.0f : 0.5f;
+        const coreBool  bActive = HAS_BIT(m_iArrowActive, m_aiArrowDir[i]) || HAS_BIT(m_iArrowFake, i);
+        const coreFloat fScale  = bActive ? 1.0f : 0.9f;
+        const coreFloat fAlpha  = bActive ? 1.0f : 0.5f;
         const coreFloat fOffset = I_TO_F(i) * (1.0f/8.0f);
 
         // 
-        oArrow.SetAlpha    (m_afArrowAlpha[i] * fActive);
+        oArrow.SetSize     (coreVector3(2.0f,2.0f,2.0f) * fScale);
+        oArrow.SetAlpha    (m_afArrowAlpha[i] * fAlpha);
         oArrow.SetTexOffset(coreVector2(FRACT(0.6f * m_fAnimation + fOffset), 0.0f));
     }
 
@@ -1302,18 +1305,18 @@ void cNevoMission::__MoveOwnAfter()
 #endif
 
     // 
-    if(m_aDemoRange[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    if(m_aStoryRange[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
         {
-            m_fDemoRangeAnim.Update(0.4f);
+            m_fStoryRangeAnim.Update(0.4f);
 
-            const coreVector2 vDir = coreVector2::Direction(m_fDemoRangeAnim * (-1.6f*PI));
+            const coreVector2 vDir = coreVector2::Direction(m_fStoryRangeAnim * (-1.6f*PI));
 
-            m_aDemoRange[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * (i ? 0.03f : 0.032f) * 50.0f);              
-            m_aDemoRange[i].SetDirection(coreVector3(vDir, 0.0f));
-            m_aDemoRange[i].SetTexOffset(m_aDemoRange[i].GetTexOffset() - m_aDemoRange[i].GetDirection().xy() * (0.04f * TIME));
-            m_aDemoRange[i].Move();
+            m_aStoryRange[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * (i ? 0.03f : 0.032f) * 50.0f);              
+            m_aStoryRange[i].SetDirection(coreVector3(vDir, 0.0f));
+            m_aStoryRange[i].SetTexOffset(m_aStoryRange[i].GetTexOffset() - m_aStoryRange[i].GetDirection().xy() * (0.04f * TIME));
+            m_aStoryRange[i].Move();
         }
     }
 

@@ -19,14 +19,16 @@
 // TODO 3: last-used input type might get disconnected, without reset
 // TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized to 0, but gets set to the set with the mouse-button when navigating menu with mouse
 // TODO 3: HRTF from core-config (improves spatial acuity with headphones, makes only sense with 3D sound)
-// TODO 3: [MF] vielleicht bei toggle fire-mode single-feuer solange bei aktivierung gedrückt gehalten wird
 // TODO 3: weitere optionen: particle effects (%)
 // TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
+// TODO 3: on very first startup, lowest resampler is selected, even when high sound quality is default
 
 
 // ****************************************************************
 // configuration definitions
 #define CONFIG_FORCE   // # force specific settings (for fairness)
+
+#define CONFIG_DEFAULT_VOLUME (0.7f)
 
 #define CONFIG_GRAPHICS_RENDER       "Graphics", "Render",                               (1)
 #define CONFIG_GRAPHICS_SHADOW       "Graphics", "Shadow",                               (2)
@@ -38,10 +40,10 @@
 #define CONFIG_GRAPHICS_HIT_STOP     "Graphics", "HitStop",                              (1)
 #define CONFIG_GRAPHICS_CHROMA       "Graphics", "Chroma",                               (1)
 
-#define CONFIG_AUDIO_EFFECT_VOLUME   "Audio",    "EffectVolume",                         (1.0f)
-#define CONFIG_AUDIO_AMBIENT_VOLUME  "Audio",    "AmbientVolume",                        (1.0f)
-#define CONFIG_AUDIO_MENU_VOLUME     "Audio",    "MenuVolume",                           (1.0f)
-#define CONFIG_AUDIO_QUALITY         "Audio",    "Quality",                              (0)
+#define CONFIG_AUDIO_EFFECT_VOLUME   "Audio",    "EffectVolume",                         (CONFIG_DEFAULT_VOLUME)
+#define CONFIG_AUDIO_AMBIENT_VOLUME  "Audio",    "AmbientVolume",                        (CONFIG_DEFAULT_VOLUME)
+#define CONFIG_AUDIO_MENU_VOLUME     "Audio",    "MenuVolume",                           (CONFIG_DEFAULT_VOLUME)
+#define CONFIG_AUDIO_QUALITY         "Audio",    "Quality",                              (1)
 #define CONFIG_AUDIO_3D_SOUND        "Audio",    "3DSound",                              (1)
 
 #define CONFIG_INPUT_TYPE(p)         "Input",    PRINT("P%zu_Type",        (p)),         (p + INPUT_SETS_KEYBOARD)

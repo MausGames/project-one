@@ -257,7 +257,6 @@ void CoreApp::Render()
                     if(g_CurConfig.Game.iMirrorMode) glDisable(GL_CULL_FACE);
                 }
             }
-
         }
         Core::Debug->MeasureEnd("Post Processing");
         Core::Debug->MeasureStart("Interface");
@@ -298,10 +297,12 @@ void CoreApp::Move()
     LockFramerate();
     ForceFramerate(true);
 
+    
     static coreFlow fBorder = 0.0f;
     if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 0.3f, 1.0f);
                            else fBorder.UpdateMax(-0.3f, 0.0f);
     g_pPostProcessing->SetBorderAll(LERPH3(POST_DEFAULT_BORDER_MIN, POST_DEFAULT_BORDER_MAX, fBorder));
+    
 
     Core::Debug->MeasureStart("Move");
     {
@@ -491,6 +492,19 @@ FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq)
 
 
 // ****************************************************************
+// 
+coreVector2 CalcFinalDirection()
+{
+    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+    const coreVector2 vHud   = g_vHudDirection;
+    const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+    ASSERT(vFinal.IsNormalized())
+
+    return vFinal;
+}
+
+
+// ****************************************************************
 // lock frame rate
 static void LockFramerate()
 {
@@ -564,13 +578,8 @@ static void ForceFramerate(const coreBool bFull)
 static void UpdateListener()
 {
     // 
-    const coreFloat fSide = (g_CurConfig.Game.iMirrorMode == 1u) ? 1.0f : -1.0f;
-
-    // 
-    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-    const coreVector2 vHud   = g_vHudDirection;
-    const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
-    ASSERT(vFinal.IsNormalized())
+    const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? 1.0f : -1.0f;
+    const coreVector2 vFinal = CalcFinalDirection();
 
     // 
     Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f, 0.0f, fSide), coreVector3(vFinal, 0.0f));

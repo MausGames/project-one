@@ -21,6 +21,8 @@
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 // TODO 3: effect on player when loosing combo or chain (and on UI, and combat text)
 // TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
+// TODO 3: m_vOldDir sollte bei resurrection/repair zurückgesetzt werden
+// TODO 3: gyro aktualisiert sich nicht bei HUD rotation (auch bei game rotation ?)
 
 
 // ****************************************************************
@@ -76,11 +78,12 @@ enum ePlayerStatus : coreUint16
     PLAYER_STATUS_HEALER         = 0x0020u,   // 
     PLAYER_STATUS_TOP            = 0x0040u,   // 
     PLAYER_STATUS_KEEP_RANGE     = 0x0080u,   // TODO 1: still used ?
-    PLAYER_STATUS_REPAIRED       = 0x0100u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0200u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0400u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x0800u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x1000u,   // 
+    PLAYER_STATUS_GYRO           = 0x0100u,   // 
+    PLAYER_STATUS_REPAIRED       = 0x0200u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0400u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0800u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x1000u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x2000u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
@@ -159,6 +162,7 @@ private:
     coreFloat   m_fSmoothTilt;                                // 
     coreFlow    m_fRangeValue;                                // 
     coreFlow    m_fArrowValue;                                // 
+    coreFlow    m_fGyroValue;                                 // 
     coreFlow    m_fBubbleValue;                               // 
     coreFlow    m_fCircleValue;                               // 
     coreFlow    m_fBoost;                                     // 
@@ -167,6 +171,7 @@ private:
     coreObject3D m_Dot;                                       // 
     coreObject3D m_Range;                                     // 
     coreObject3D m_Arrow;                                     // 
+    coreObject3D m_Gyro;                                      // 
     coreObject3D m_Wind;                                      // 
     coreObject3D m_Bubble;                                    // 
     coreObject3D m_aShield[2];                                // 
@@ -198,8 +203,6 @@ public:
     void RenderMiddle();
     void RenderAfter ();
     void Move        ()final;
-    
-    void MoveFrozen();
 
     // reduce current health
     coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact);
@@ -248,6 +251,8 @@ public:
     void DisableRange  ();
     void EnableArrow   ();
     void DisableArrow  ();
+    void EnableGyro    ();
+    void DisableGyro   ();
     void EnableWind    (const coreVector2 vDirection = coreVector2(0.0f,0.0f));
     void DisableWind   ();
     void EnableBubble  ();
@@ -276,8 +281,8 @@ public:
     inline void ApplyForceTimed(const coreVector2 vForce) {m_vForce += vForce * TIME;}
 
     // 
-    coreVector2 CalcMove     ();
-    coreFloat   CalcMoveSpeed();
+    coreVector2 CalcMove     ()const;
+    coreFloat   CalcMoveSpeed()const;
 
     // 
     inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_EQUIP_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
@@ -324,29 +329,8 @@ public:
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount,     const coreBool bFirstHit) -> void
     
 
-    void SetPosition(const coreVector3 vPosition)
-    {
-        this->coreObject3D::SetPosition(vPosition);
-
-        m_Dot       .SetPosition(vPosition);
-        m_Range     .SetPosition(vPosition);
-        m_Arrow     .SetPosition(vPosition + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR_EXT);
-        m_Wind      .SetPosition(vPosition);
-        m_Bubble    .SetPosition(vPosition);
-        m_aShield[0].SetPosition(vPosition);
-        m_aShield[1].SetPosition(vPosition);
-        m_Exhaust   .SetPosition(vPosition - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR_EXT));
-    }
-    void SetDirection(const coreVector3 vDirection)
-    {
-        this->coreObject3D::SetDirection(vDirection);
-
-        m_Arrow  .SetPosition(this->GetPosition() + vDirection * 6.2f * PLAYER_SIZE_FACTOR_EXT);
-        m_Exhaust.SetPosition(this->GetPosition() - vDirection * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR_EXT));
-        
-        m_Arrow  .SetDirection(vDirection);
-        m_Exhaust.SetDirection(vDirection);
-    }
+    void SetPosition (const coreVector3 vPosition);
+    void SetDirection(const coreVector3 vDirection);
     // coreObject3D::Move in teleport
     
     inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {ASSERT(false) return false;}

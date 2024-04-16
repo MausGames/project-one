@@ -60,6 +60,7 @@ cEnvironment::cEnvironment()noexcept
 cEnvironment::~cEnvironment()
 {
     // save last background
+    ASSERT(m_iLastID)
     Core::Config->SetInt("Game", "Background", m_iLastID);
 
     // explicitly undefine to detach textures
@@ -309,6 +310,9 @@ void cEnvironment::__ClearTransition()
         // 
         m_pTempBackground = m_pOldBackground;
         m_pOldBackground  = NULL;
+
+        // 
+        m_pTempBackground->Exit();
     }
     else
     {

@@ -99,8 +99,8 @@ cCholBoss::cCholBoss()noexcept
     m_Fire.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_apFireModel[0] = Core::Manager::Resource->Get<coreModel>("object_boss_chol_fire_01.md3");
-    m_apFireModel[1] = Core::Manager::Resource->Get<coreModel>("object_boss_chol_fire_02.md3");
+    m_apFireModel[0] = Core::Manager::Resource->Get<coreModel>("ship_boss_chol_fire_01.md3");
+    m_apFireModel[1] = Core::Manager::Resource->Get<coreModel>("ship_boss_chol_fire_02.md3");
 }
 
 
@@ -141,7 +141,13 @@ void cCholBoss::__ResurrectOwn()
 
         // 
         for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
+        {
             m_aWing[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+            m_aWing[i].AddStatus  (ENEMY_STATUS_GHOST);
+        }
+
+        // 
+        this->AddStatus(ENEMY_STATUS_GHOST);
 
         // 
         this->_ResurrectBoss();
@@ -246,9 +252,6 @@ void cCholBoss::__MoveOwn()
                 PHASE_CHANGE_INC
 
                 this->_StartBoss();
-
-                this->ChangeToNormal();
-                for(coreUintW i = 0u; i < CHOL_WINGS; ++i) m_aWing[i].ChangeToNormal();
             }
         });
     }
@@ -273,6 +276,18 @@ void cCholBoss::__MoveOwn()
 
                 m_avVector[START_VALUES_POS + 4u].xyz(this->GetPosition());
                 m_avVector[START_VALUES_DIR + 4u].xyz(coreVector3(this->GetDirection().xy().Angle(), this->GetDirection().z, SQRT(1.0f - POW2(this->GetDirection().z))));
+            }
+
+            if(PHASE_TIME_POINT(0.5f))
+            {
+                for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
+                {
+                    m_aWing[i].RemoveStatus(ENEMY_STATUS_GHOST);
+                    m_aWing[i].ChangeToNormal();
+                }
+
+                this->RemoveStatus(ENEMY_STATUS_GHOST);
+                this->ChangeToNormal();
             }
 
             const coreVector3 vStartPos = m_avVector[START_VALUES_POS + 4u].xyz();
@@ -337,7 +352,7 @@ void cCholBoss::__MoveOwn()
                 if(InBetween(0.0f, m_avVector[TRANSITION_TIME].x, fOldTime) ||
                    InBetween(0.5f, m_avVector[TRANSITION_TIME].x, fOldTime))
                 {
-                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.5f, SOUND_EFFECT_WOOSH);
+                    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.5f, SOUND_EFFECT_WOOSH_01);
                 }
 
                 if(m_avVector[TRANSITION_TIME].x <= 0.0f)
@@ -436,7 +451,7 @@ void cCholBoss::__MoveOwn()
             case 3: vTarget = coreVector2( 0.0f, 1.0f);         break;
             }
 
-            if(PHASE_TIME_BEFORE(0.5f))
+            if(PHASE_TIME_BEFORE(0.5f) || PHASE_TIME_POINT(0.5f))   // with point, to prevent explosion on temporary target-position
             {
                 this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition * 3.0f, STEPBR(0.0f, 0.5f, fTime));
             }
@@ -468,7 +483,7 @@ void cCholBoss::__MoveOwn()
                     }
                 }
 
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 2.0f, 1.0f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 2.0f, 1.0f, SOUND_EFFECT_FLY);
             }
 
             if(this->ReachedHealth(this->GetMaxHealth() - 2500))
@@ -617,7 +632,7 @@ void cCholBoss::__MoveOwn()
             }
 
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            g_pSpecialEffects->PlaySound(coreVector3(0.0f,-1.0f,0.0f) * FOREGROUND_AREA3, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+            g_pSpecialEffects->PlaySound(coreVector3(0.0f,-1.0f,0.0f) * FOREGROUND_AREA3, 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
         }
     }
@@ -671,7 +686,7 @@ void cCholBoss::__MoveOwn()
             if(InBetween(0.5f, fStompTimePrev, fStompTime) && (i < 5u))
             {
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(pFang->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
+                g_pSpecialEffects->PlaySound(pFang->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                 if(i == 2u)
@@ -802,7 +817,7 @@ void cCholBoss::__MoveOwn()
         {
             if(PHASE_TIME_POINT(0.5f) || PHASE_TIME_POINT(0.75f))
             {
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.5f, SOUND_EFFECT_WOOSH);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.5f, SOUND_EFFECT_WOOSH_01);
             }
 
             this->SetPosition (coreVector3(0.0f, ParaLerp(1.5f, 0.6f, 0.7f, BLENDB(MIN1(fTime * 2.0f))), 0.0f) * FOREGROUND_AREA3);
@@ -836,7 +851,7 @@ void cCholBoss::__MoveOwn()
                     g_pSpecialEffects->CreateExplosion (this->GetPosition());
                     g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
                     g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                    g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_2);
+                    g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
                     g_pSpecialEffects->SlowScreen(4.0f);
                 }
                 else
@@ -861,7 +876,7 @@ void cCholBoss::__MoveOwn()
         {
             if(PHASE_BEGINNING)
             {
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 2.0f, 1.0f, SOUND_SHIP_FLY);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 2.0f, 1.0f, SOUND_EFFECT_FLY);
             }
 
             coreVector2 vFrom, vTo;
@@ -948,8 +963,8 @@ void cCholBoss::__MoveOwn()
 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_BIG, COLOR_ENERGY_GREEN);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_EFFECT_SHAKE);
-                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 0.7f, SOUND_EFFECT_SHAKE_2);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_01);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 0.7f, SOUND_EFFECT_SHAKE_02);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
             }
         }
@@ -1016,7 +1031,7 @@ void cCholBoss::__MoveOwn()
 
         const coreFloat   fSpeed  = LERP(1.0f, 1.3f, MIN1(m_fPhaseTime * 0.05f)) * (g_pGame->IsEasy() ? 0.5f : 0.8f);
         const coreFloat   fChange = LERPS(fSpeed, -1.0f, m_fWebReverse) * TIME;
-        const coreVector2 vMove   = coreVector2(0.0f, -fChange) * FOREGROUND_AREA * 0.5f;
+        const coreVector2 vScroll = coreVector2(0.0f, -fChange) * FOREGROUND_AREA * 0.5f;
 
         const coreFloat fWebLevelPrev = m_fWebLevel;
         m_fWebLevel += fChange;
@@ -1059,7 +1074,7 @@ void cCholBoss::__MoveOwn()
             coreObject3D* pOrb = pMission->GetOrb(i);
             if(!pOrb->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-            pOrb->SetPosition(coreVector3(pOrb->GetPosition().xy() + vMove, 0.0f));
+            pOrb->SetPosition(coreVector3(pOrb->GetPosition().xy() + vScroll, 0.0f));
         }
 
         if(m_fWebLevel >= 4.0f)
@@ -1075,6 +1090,7 @@ void cCholBoss::__MoveOwn()
                     s_avOldMove[i] = pPlayer->GetInput()->vMove;
 
                     pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+                    pMission->ConsumeFreezeMove(i);
                 });
 
                 const coreVector3 vPos = pMission->GetOrb(s_aiTarget[0])->GetPosition();
@@ -1083,7 +1099,7 @@ void cCholBoss::__MoveOwn()
                 g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
                 g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
 
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.5f, 1.0f, SOUND_EFFECT_SWIPE);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.5f, 1.0f, SOUND_EFFECT_SWIPE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
@@ -1095,13 +1111,11 @@ void cCholBoss::__MoveOwn()
                     s_aiTarget[iIndex] = iNewTarget;
             };
 
-            const sGameInput oEmptyInput = {};
-
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 if(!pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) return;
 
-                const sGameInput* pInput = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? &oEmptyInput : pPlayer->GetInput();
+                const coreVector2 vMove = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? coreVector2(0.0f,0.0f) : pMission->ConsumeFreezeMove(i);
 
                 const coreUintW iNextTarget = (s_aiTarget[i] + 1u) % GELU_ORBS;
                 const coreUintW iPrevTarget = s_aiTarget[i] ? (s_aiTarget[i] - 1u) : (GELU_ORBS - 1u);
@@ -1112,20 +1126,20 @@ void cCholBoss::__MoveOwn()
 
                 const coreVector2 vDiff1 = pTarget->GetPosition().xy() - pPlayer->GetPosition().xy();
 
-                const coreBool bTabX = (ABS(vDiff1.y) < 3.0f) && (SIGNUM(s_avOldMove[i].x) != SIGNUM(pInput->vMove.x));
-                const coreBool bTabY = (ABS(vDiff1.x) < 3.0f) && (SIGNUM(s_avOldMove[i].y) != SIGNUM(pInput->vMove.y));
+                const coreBool bTabX = (ABS(vDiff1.y) < 3.0f) && (SIGNUM(s_avOldMove[i].x) != SIGNUM(vMove.x));
+                const coreBool bTabY = (ABS(vDiff1.x) < 3.0f) && (SIGNUM(s_avOldMove[i].y) != SIGNUM(vMove.y));
 
                 coreBool bCancel = false;
 
                 if(g_pForeground->IsVisiblePoint(pNextTarget->GetPosition().xy(), 1.2f))
                 {
                     const coreVector2 vNextDiff = pNextTarget->GetPosition().xy() - pTarget->GetPosition().xy();
-                    if((coreVector2::Dot(vNextDiff, pInput->vMove) > 0.5f) && ((bTabX && IsHorizontal(vNextDiff)) || (bTabY && !IsHorizontal(vNextDiff))))
+                    if((coreVector2::Dot(vNextDiff, vMove) > 0.5f) && ((bTabX && IsHorizontal(vNextDiff)) || (bTabY && !IsHorizontal(vNextDiff))))
                     {
                         nChangeTargetFunc(i, iNextTarget);
                     }
                 }
-                else if(SIGNUM(pInput->vMove.y) > 0.0f)
+                else if(SIGNUM(vMove.y) > 0.0f)
                 {
                     bCancel = true;
                 }
@@ -1133,16 +1147,16 @@ void cCholBoss::__MoveOwn()
                 if(g_pForeground->IsVisiblePoint(pPrevTarget->GetPosition().xy(), 1.2f))
                 {
                     const coreVector2 vPrevDiff = pPrevTarget->GetPosition().xy() - pTarget->GetPosition().xy();
-                    if((coreVector2::Dot(vPrevDiff, pInput->vMove) > 0.5f) && ((bTabX && IsHorizontal(vPrevDiff)) || (bTabY && !IsHorizontal(vPrevDiff))))
+                    if((coreVector2::Dot(vPrevDiff, vMove) > 0.5f) && ((bTabX && IsHorizontal(vPrevDiff)) || (bTabY && !IsHorizontal(vPrevDiff))))
                     {
                         nChangeTargetFunc(i, iPrevTarget);
                     }
                 }
 
-                             if(bTabX) s_avOldMove[i].x = pInput->vMove.x;
-                if(!bCancel) if(bTabY) s_avOldMove[i].y = pInput->vMove.y;
+                             if(bTabX) s_avOldMove[i].x = vMove.x;
+                if(!bCancel) if(bTabY) s_avOldMove[i].y = vMove.y;
 
-                pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().xy() + vMove, 0.0f));
+                pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().xy() + vScroll, 0.0f));
 
                 const coreVector2 vDiff2 = pMission->GetOrb(s_aiTarget[i])->GetPosition().xy() - pPlayer->GetPosition().xy();
                 if(!vDiff2.IsNull())
@@ -1165,7 +1179,7 @@ void cCholBoss::__MoveOwn()
                     g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
                     g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
 
-                    g_pSpecialEffects->PlaySound(vPos, 1.5f, 1.0f, SOUND_EFFECT_SWIPE);
+                    g_pSpecialEffects->PlaySound(vPos, 1.5f, 1.0f, SOUND_EFFECT_SWIPE_01);
                 }
             });
         }
@@ -1287,6 +1301,11 @@ void cCholBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
+            if(!m_aiCounter[PLAYER_MOVE])
+            {
+                pMission->GiveBadge(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition());
+            }
+
             this->AddStatus(ENEMY_STATUS_GHOST);
 
             this->_EndBoss();
@@ -1298,11 +1317,6 @@ void cCholBoss::__MoveOwn()
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
 
             m_avVector[ENV_ROTATION].x = g_pEnvironment->GetDirection().Angle();
-
-            if(!m_aiCounter[PLAYER_MOVE])
-            {
-                pMission->GiveBadge(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f));
-            }
         }
 
         this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
@@ -1600,7 +1614,7 @@ void cCholBoss::__MoveOwn()
                             }
 
                             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
+                            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                         }
                     }
@@ -2103,8 +2117,8 @@ void cCholBoss::__EnableFire(const coreUint8 iType)
             g_pSpecialEffects->CreateBlowFire (vPos, vDir,  50.0f, 20u, COLOR_FIRE_ORANGE);
             g_pSpecialEffects->CreateBlowColor(vPos, vDir, 100.0f, 50u, COLOR_FIRE_ORANGE);
         }
-        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FIRE_START);
-        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_2);
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FIRE);
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_02);
     }
 }
 
@@ -2159,7 +2173,7 @@ void cCholBoss::__Impact(coreObject3D* OUTPUT pObject, const coreVector2 vPos, c
 
         if(bBig) g_pSpecialEffects->PlaySound(vPosTo, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
             else g_pSpecialEffects->PlaySound(vPosTo, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
-        g_pSpecialEffects->PlaySound(vPosTo, 1.0f, 1.0f, SOUND_EFFECT_SHAKE_2);
+        g_pSpecialEffects->PlaySound(vPosTo, 1.0f, 1.0f, SOUND_EFFECT_SHAKE_02);
 
         const coreUintW i = 0u;
         // 

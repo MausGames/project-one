@@ -388,7 +388,7 @@ void cScoreTable::CancelCooldown()
     if(m_iCurCombo || m_iCurChain)
     {
         m_pOwner->ShowCircle();
-        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
+        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);   // TODO 1: add sound ?
     }
 
     // 

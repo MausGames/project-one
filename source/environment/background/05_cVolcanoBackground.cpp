@@ -379,7 +379,7 @@ void cVolcanoBackground::__MoveOwn()
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pSmoke = (*pList->List())[i];
-        if(!pSmoke->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+        if(!pSmoke->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
 
         m_aSmokeEffect[i].CreateParticle(1, 6.0f, [](coreParticle* OUTPUT pParticle)
         {

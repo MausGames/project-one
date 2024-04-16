@@ -718,6 +718,9 @@ void cFinalBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vFor
 // move the final bullet
 void cFinalBullet::__MoveOwn()
 {
+    this->SetTexSize(coreVector2(0.5f,0.5f) * 0.3f);
+    
+    
     // fly around
 
     this->SetPosition(this->GetPosition() + m_vFlyDir3D * (m_fSpeed * TIME));
@@ -727,19 +730,22 @@ void cFinalBullet::__MoveOwn()
 
     // update animation
     m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
-    this->SetTexOffset(coreVector2(0.35f, 0.0f + 0.2f*m_fAnimation + 0.0f*FRACT(coreFloat(Core::System->GetTotalTime()) * 0.1f)));
+    m_fAnimation = FMOD(coreFloat(Core::System->GetTotalTime()) * 0.2f, 5.0f);
+    this->SetTexOffset(coreVector2(0.35f, -0.2f * m_fAnimation));
 
+    const coreFloat fRange = STEP(-500.0f, 0.0f, this->GetPosition().z) + CORE_MATH_PRECISION;
     
     // update fade
     m_fFade.Update(1.5f * fRelSpeed);
-    this->SetSize(coreVector3(3.7f, 3.7f, 3.7f) * 0.7f * m_fScale * MIN1(12.0f * m_fFade));
+    this->SetSize(coreVector3(3.7f, 3.7f, 3.7f) * 0.8f * m_fScale * MIN1(12.0f * m_fFade) * fRange);
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * RCP(fRange));
     
-    const coreVector2 vOri = coreVector2::Direction(m_fFade * 3.0f);
+    const coreVector2 vOri = coreVector2::Direction(m_fFade * 6.0f);
     this->SetDirection(coreVector3(vOri, 0.0f));
     
 
     const coreFloat fHeight = this->GetPosition().z;
-    this->SetAlpha(MIN1(15.0f * m_fFade) * (STEPH3(-390.0f, -310.0f, fHeight) - STEPH3(50.0f, 150.0f, fHeight)));
+    this->SetAlpha(MIN1(15.0f * m_fFade) * (STEPH3(-390.0f, -310.0f, fHeight) - STEPH3(50.0f, 150.0f, fHeight)) * 0.8f);
 }
 
 
@@ -761,13 +767,6 @@ void cOrbBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce
     // 
     if(vForce.IsNull()) g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                            10.0f, 3u, this->GetColor3());
                    else g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), coreVector3(vForce, 0.0f), 50.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// 
-void cOrbBullet::__ReflectOwn()
-{
 }
 
 
@@ -958,13 +957,6 @@ void cTriangleBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 v
 
 
 // ****************************************************************
-// 
-void cTriangleBullet::__ReflectOwn()
-{
-}
-
-
-// ****************************************************************
 // move the triangle bullet
 void cTriangleBullet::__MoveOwn()
 {
@@ -1005,13 +997,6 @@ void cFlipBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForc
 
 
 // ****************************************************************
-// 
-void cFlipBullet::__ReflectOwn()
-{
-}
-
-
-// ****************************************************************
 // move the flip bullet
 void cFlipBullet::__MoveOwn()
 {
@@ -1047,13 +1032,6 @@ void cQuadBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForc
     // 
     if(vForce.IsNull()) g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                            10.0f, 3u, this->GetColor3());
                    else g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), coreVector3(vForce, 0.0f), 50.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// 
-void cQuadBullet::__ReflectOwn()
-{
 }
 
 
@@ -1140,15 +1118,8 @@ cCardBullet::cCardBullet()noexcept
 void cCardBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    if(vForce.IsNull()) g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                            10.0f, 3u, this->GetColor3());
-                   else g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), coreVector3(vForce, 0.0f), 50.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// 
-void cCardBullet::__ReflectOwn()
-{
+    if(vForce.IsNull()) g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                            25.0f, 10u, this->GetColor3());
+                   else g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), coreVector3(vForce, 0.0f), 50.0f, 10u, this->GetColor3());
 }
 
 
@@ -1214,13 +1185,6 @@ void cDebrisBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vFo
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 25.0f, 5u, COLOR_ENERGY_YELLOW);
-}
-
-
-// ****************************************************************
-// 
-void cDebrisBullet::__ReflectOwn()
-{
 }
 
 
@@ -1302,13 +1266,6 @@ void cMineBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForc
     // 
     if(this->GetSize().x >= 3.0f) g_pSpecialEffects->MacroExplosionPhysicalColorBig  (this->GetPosition(), COLOR_FIRE_ORANGE);
                              else g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
-}
-
-
-// ****************************************************************
-// 
-void cMineBullet::__ReflectOwn()
-{
 }
 
 
@@ -1467,13 +1424,6 @@ void cGrowBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForc
                            else g_pSpecialEffects->CreateBlowColor  (coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 9u, this->GetColor3());
         }
     }
-}
-
-
-// ****************************************************************
-// 
-void cGrowBullet::__ReflectOwn()
-{
 }
 
 

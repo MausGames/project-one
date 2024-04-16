@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.3.0 (https://www.maus-games.at)                             |//
+//| Project One v1.0.0 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -63,7 +63,6 @@
 // TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
-// TODO 3: [MF] search and remove unused resources from application.cpp (+ folder)
 // TODO 5: convert bigger sound-effects (ambient) to music ?
 // TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
 // TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
@@ -91,39 +90,29 @@
 // TODO 1: should bullets create particles when shot ? especially for bosses
 // TODO 3: remove unused mechanics (#ifdef would be enough) so they don't take up code and memory
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
-// TODO 1: [MF] all music files need equal base volume
-// TODO 1: [MF] all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data (should already be done), also shorten sound front and back (make sure there is no micro-sound), also make mono if better, also rename and sort (similar sounds, parallel play)
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
 // TODO 4: MIN1, MAX0, CLAMP01, BLEND* everywhere possible
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 // TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
-// TODO 1: [MF] badges anordnen nach reihenfolge im level (index + description)
-// TODO 1: [MF] the repair-enemy needs to work in every wave and boss!
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
 // TODO 3: sphere model kann ungenau sein, vor allem bei der area-bubble bei P1 magenta phase
 // TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
-// TODO 1: in-game achievements menu, bei credits+passwort, freifliegendes menü zum scrollen, links icons (steam-icons, stage von stage-textur, rest von neuer gemergter textur (0 + 1 together)), rechts description
-// TODO 1: [MF] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
-// TODO 3: rogue like mode (grey mode), with negative effects to select
-// TODO 1: [MF] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
+// TODO 1: in-game achievements menu, bei credits+passwort, freifliegendes menü zum scrollen, links icons (steam-icons, stage von stage-textur, rest von neuer gemergter textur (0 + 1 together)), rechts description und check
+// TODO 1: [MF] [HIGH] [ULTRA] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
+// TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select
+// TODO 1: [MF] [HIGH] [ULTRA] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
+// TODO 3: health-bars für stärkere gegner (>= 30 or 50 hp), blenden sich ein bei schaden (und wieder aus nach cooldown ?)
+// TODO 1: [MF] [HIGH] [ULTRA] misc: japanes names, pulse, passwords, mehr striche bei eigengrau
 
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
 // TODO 3: player shooting wie ikaruga, RSG (single shot + vulkan)
 // TODO 5: plant movement
-// TODO 1: [MF] musik: bongos am ende von mission_03 entfernen, mission 04 laute piano-note bei ~01:08 und ~3:17, boss_08 wiederholt ständig den anfangs-jingle
-// TODO 1: [MF] last badge for: barrier, bombs, arrows, mother, spikes, tower, mole, force, time, gravity, push, fangs, orbs, ways, automove, highspeed, evade, morningstar, pearls, teleport, ghosts, generates
 // TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (maybe with separation of active-list), eine liste für shadow
-// TODO 1: [MF] possible badge: bullets + items zum einsammeln, wie damals
 // TODO 3: bei Torus, rückseite von spear bullets zerstören outline von orb bullets
 // TODO 3: improve big boss explosion: Sakurai https://www.youtube.com/watch?v=ZDopYzDX-Jg   https://youtu.be/D-4RsUI3ZNI?t=246   energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
 // TODO 1: [MF] fixup update frequency (allow less than 60?, how to communicate increases? (on low speed))
-// TODO 3: [MF] rename level to section/stage !!!! in store page and game
-// TODO 3: [MF] remap stage to area !!!! in store page and game
-// TODO 1: [MF] finish all achievement names and descriptions
-// TODO 1: [MF] finish all badge descriptions
-// TODO 1: [MF] track all sound credits
 // TODO 1: improve stage icons
 // TODO 1: [MF] praise the player ! https://www.youtube.com/watch?v=fryDyXROp8A
 
@@ -132,7 +121,7 @@
 // TODO 3: improve bloom without affecting visibility, or make configurable
 // TODO 5: (match-2 mechanic ?)
 // TODO 3: easy mode for bosses still too hard -> separate extra damage ? 20%
-// TODO 3: [MF] D4Windows anschauen, ob sie maus steuert und controller gleichzeitig verwendet
+// TODO 3: D4Windows anschauen, ob sie maus steuert und controller gleichzeitig verwendet (vielleicht wegen gyro oder accelerometer ?)
 
 // Merged List:
 // TODO 4: MAX SERIES überall entfernen (im frontend)   überall nach maxseries suchen und ausbessern, außerdem nur relevant auf segment-ebene
@@ -141,21 +130,15 @@
 // TODO 3: add more details to cloud background (transparent enemy ships far in the back ? like Ikagura and RSG)
 // TODO 3: einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
 // TODO 3: emscripten demo für v0.2.0
-// TODO 1: [MF] ACHIEVEMENTS
 // TODO 1: [MF] final fantasy ending screen (objekt in mitte (fragment, Sonic) darüber text THE END ?), "thank you for playing" beim tod von P1, in normalem playthorugh kommen credits über alle backgrounds, die grau werden und verrotten (turf brennt sich langsam ein), beim echten playthrough sind sie bunt
-// TODO 1: [MF] ENDE auf deutsch am secret ending
 // TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?)
 // TODO 3: gegner und geschosse am rand müssen gut sichtbar bleiben, wenn interface im inneren ist
-// TODO 1: [MF] P1 flies fast across summary screen after you, when you finish a mission for the first time (+ weißer helfer)
-// TODO 1: [MF] ruhige piano musik im menü (breath of the wild)
-// TODO 1: [MF] menu musik wie bei XC3
-// TODO 1: [MF] find and implement more unlocks (at least 5 in total): shield-upgrade (>30, nach 1 weiteren spiel-start nach first play), ###
+// TODO 1: [MF] [HIGH] [ULTRA] P1 flies fast across summary screen after you, when you finish a mission for the first time (+ weißer helfer)
 
 // Cleanup Task List:
 // TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet
 // TODO 4: enemy bottom/top + special bottom, menu transition, interface, menu changes (INSIDE), mission data, (pause/msgbox stretch)
 // TODO 4: Torus, Leviathan
-
 // TODO 3: sound: button-click und menu-in/menu-out überlagern sich
 // TODO 3: fix demo save
 
@@ -202,6 +185,7 @@
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
+#define SHIELD_DEFAULT       (30u)
 #define SHIELD_MAX           (255u)
 #define SHIELD_INVINCIBLE    (1000u)
 #define BADGES               (3u + 3u)
@@ -219,7 +203,7 @@
 #define LISTENER_POSITION    (coreVector3(0.0f,  0.0f,  1.0f) * 10.0f)
 #define LISTENER_VELOCITY    (coreVector3(0.0f,  0.0f,  0.0f))
 #define LIGHT_DIRECTION      (coreVector3(1.0f, -1.1f, -0.85f).Normalized())   // (0.583957136f, -0.642352879f, -0.496363580f)
-#define MUSIC_VOLUME         (0.5f)
+#define MUSIC_VOLUME         (0.4f)
 
 // color values
 #define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
@@ -280,7 +264,6 @@
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_"  " (" #x ") \n"   // full_transition
 #define SHADER_SHADOW(x)     "#define _P1_SHADOW_"      " (" #x ") \n"   // outdoor, object_ground
 #define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_"    " (" #x ") \n"   // weather
-#define SHADER_SAMPLES(x)    "#define _P1_SAMPLES_"     " (" #x ") \n"   // ink
 #define SHADER_GLOW          "#define _P1_GLOW_"        " (1) \n"        // post, outdoor, object_ship
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_"  " (1) \n"        // post
 #define SHADER_TRANSPARENT   "#define _P1_TRANSPARENT_" " (1) \n"        // post
@@ -296,14 +279,12 @@
 #define SHADER_THICK         "#define _P1_THICK_"       " (1) \n"        // outline
 #define SHADER_FLAT          "#define _P1_FLAT_"        " (1) \n"        // outline, energy
 #define SHADER_BULLET        "#define _P1_BULLET_"      " (1) \n"        // outline, energy
-#define SHADER_SPHERIC       "#define _P1_SPHERIC_"     " (1) \n"        // decal, energy
+#define SHADER_SPHERIC       "#define _P1_SPHERIC_"     " (1) \n"        // energy
 #define SHADER_INVERT        "#define _P1_INVERT_"      " (1) \n"        // energy
 #define SHADER_DIRECT        "#define _P1_DIRECT_"      " (1) \n"        // outline, energy, distortion, menu_border
-#define SHADER_RING          "#define _P1_RING_"        " (1) \n"        // energy
 #define SHADER_WAVE          "#define _P1_WAVE_"        " (1) \n"        // object
 #define SHADER_GREY          "#define _P1_GREY_"        " (1) \n"        // vignette
 #define SHADER_ROTATED       "#define _P1_ROTATED_"     " (1) \n"        // energy
-#define SHADER_LINE          "#define _P1_LINE_"        " (1) \n"        // ink    // TODO 1: used for ink, remove ?
 
 
 struct sVersion final
@@ -390,6 +371,8 @@ extern void InitDirection();                                 //
 extern void InitFramerate();                                 // init frame rate properties (lock)
 
 extern FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq);
+
+extern coreVector2 CalcFinalDirection();
 
 
 // ****************************************************************

@@ -44,7 +44,7 @@ void cHarenaMission::__SetupOwn()
 
     // ################################################################
     // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u, 2u})
     {
         cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
 
@@ -104,6 +104,7 @@ void cHarenaMission::__SetupOwn()
     // ACHIEVEMENT: follow the head of the snake group for at least 10 seconds
     // TODO 1: hardmode: bad visibility (sand storm) in einer der missionen hier, muss vielleicht sinus-förmig (oder anders) ganz verschwinden, auch geschosse wegen pressure
     // TODO 1: hardmode: enemies also shoot when getting invisible
+    // TODO 1: die 4 quick zielen nicht alle auf spieler auf easy
     m_aInsanityStage[0] = [this]()
     {
         STAGE_ADD_PATH(pPath1)
@@ -144,8 +145,6 @@ void cHarenaMission::__SetupOwn()
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
                 pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
-
-                if((i < 124u) && ((i % 11u) == 10u)) pEnemy->AddStatus(ENEMY_STATUS_CRASH);
             });
         });
 
@@ -504,14 +503,14 @@ void cHarenaMission::__SetupOwn()
             }
         }
 
-        const auto nAimFunc = [](cEnemy* OUTPUT pEnemy, const coreUintW i)
+        const auto nAimFunc = [&](cEnemy* OUTPUT pEnemy, const coreUintW i)
         {
             coreVector2 vDir;
                  if(i <  48u) vDir = pEnemy->AimAtPlayerDual((i / 8u) % 2u);
             else if(i <  60u) vDir = pEnemy->AimAtPlayerDual(i % 2u);
             else if(i <  76u) vDir = pEnemy->AimAtPlayerSide();
-            else if(i <  94u) vDir = pEnemy->AimAtPlayerDual(i % 2u);
-            else if(i < 124u) vDir = pEnemy->AimAtPlayerDual((AlongCross(pEnemy->GetPosition().xy()) >= coreVector2(0.0f,0.0f)) ? 0u : 1u);
+            else if(i <  94u) vDir = pEnemy->AimAtPlayerDual(((i - 76u) / 3u) % 2u);
+            else if(i < 124u) vDir = pEnemy->AimAtPlayerDual((pSquad1->GetNumEnemiesAlive() <= 15u) ? 1u : 0u);
             else if(i < 126u) vDir = pEnemy->AimAtPlayerSide();
             else              vDir = pEnemy->AimAtPlayerDual(((i - 126u) / 8u) % 2u);
 
@@ -708,7 +707,7 @@ void cHarenaMission::__SetupOwn()
             {
                 if((m_iStageSub == 9u) && (pSquad1->GetNumEnemiesAlive() == 1u))
                 {
-                    if(!fLastValue) iLastDual = g_pGame->GetPlayerIndex(pEnemy->NearestPlayerSide());
+                    if(!fLastValue) iLastDual = g_pGame->GetPlayerIndex(pEnemy->NearestPlayerDual(1u));
 
                     fLastValue += 0.8f * TIME;
 
@@ -752,6 +751,7 @@ void cHarenaMission::__SetupOwn()
                     if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                     {
                         pEnemy->SetOrientation(coreVector3(0.0f,0.0f,-1.0f));
+                        pEnemy->AddStatus     (ENEMY_STATUS_CRASH);
                         ADD_BIT(iFlipShow, iFlipIndex)
 
                         if(pEnemy->ReachedDeath())
@@ -763,13 +763,14 @@ void cHarenaMission::__SetupOwn()
                             else
                             {
                                 g_pGame->GetCombatText()->DrawProgress(iFlipCount, ARRAY_SIZE(aiFlip), pEnemy->GetPosition());
-                                g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlipCount, ARRAY_SIZE(aiFlip)), SOUND_ITEM_COLLECT);
+                                g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlipCount, ARRAY_SIZE(aiFlip)), SOUND_ITEM_02);
                             }
                         }
                     }
                     else if(HAS_BIT(iFlipShow, iFlipIndex))
                     {
                         pEnemy->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
+                        pEnemy->RemoveStatus  (ENEMY_STATUS_CRASH);
                         ADD_BIT(iFlipHide, iFlipIndex)
                     }
                 }
@@ -908,7 +909,7 @@ void cHarenaMission::__SetupOwn()
         const auto nAttackFunc = [&](cEnemy* pEnemy, const coreUintW i)
         {
             const coreVector2 vPos = pEnemy->GetPosition().xy();
-            const coreVector2 vDir = pEnemy->AimAtPlayerDual(i % 2u).Normalized();
+            const coreVector2 vDir = pEnemy->AimAtPlayerDual((iIteration % 2u) ? 0u : 1u).Normalized();
 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.6f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
 
@@ -949,12 +950,14 @@ void cHarenaMission::__SetupOwn()
                         REMOVE_BIT(iGold, i)
 
                         g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_YELLOW);
+                        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
                         g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
                     }
                     else if(!HAS_BIT(iBig, i))
                     {
                         nPunishFunc(pEnemy);
 
+                        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                         g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
                         g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
@@ -988,6 +991,7 @@ void cHarenaMission::__SetupOwn()
                         }
 
                         g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_BLUE);
+                        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
                         g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
                     }
                 }
@@ -1147,7 +1151,7 @@ void cHarenaMission::__SetupOwn()
                         }
                         else
                         {
-                            if(i == iSingle) avPosTo[i] = pEnemy->NearestPlayerDual(iIteration % 2u)->GetPosition().xy() / FOREGROUND_AREA;
+                            if(i == iSingle) avPosTo[i] = pEnemy->NearestPlayerDual((iIteration % 2u) ? 0u : 1u)->GetPosition().xy() / FOREGROUND_AREA;
                         }
                     }
 
@@ -1206,10 +1210,20 @@ void cHarenaMission::__SetupOwn()
             {
                 pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
-                if(g_pForeground->IsVisibleObject(pEnemy) && !m_iInsanity && !g_pGame->IsEasy())
+                if(g_pForeground->IsVisibleObject(pEnemy) && !m_iInsanity)
                 {
-                    if(iPoints >= 23u) nPunishFunc(pEnemy);
-                                  else nAttackFunc(pEnemy, i);
+                    if(g_pGame->IsEasy())
+                    {
+                        if((iPoints >= 23u) || ((iPoints < 15u) && HAS_BIT(iBig, i)))
+                        {
+                            nAttackFunc(pEnemy, i);
+                        }
+                    }
+                    else
+                    {
+                        if(iPoints >= 23u) nPunishFunc(pEnemy);
+                                      else nAttackFunc(pEnemy, i);
+                    }
                 }
             }
             else if(!HAS_BIT(iVisible, i) && HAS_BIT(iPrevVisible, i))
@@ -1263,7 +1277,7 @@ void cHarenaMission::__SetupOwn()
                         else
                         {
                             g_pGame->GetCombatText()->DrawCountdown(iEggState, HARENA_EGGS, pEgg->GetPosition());
-                            g_pSpecialEffects->PlaySound(pEgg->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iEggState, HARENA_EGGS), SOUND_ITEM_COLLECT);
+                            g_pSpecialEffects->PlaySound(pEgg->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iEggState, HARENA_EGGS), SOUND_ITEM_01);
                         }
                     }
                 });
@@ -1315,13 +1329,6 @@ void cHarenaMission::__SetupOwn()
         cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
 
         pBackground->SetVeilAlpha(1.0f);
-
-        pBackground->GetOutdoor()->LerpHeightNow(1.0f, 0.0f);
-        pBackground->SetGroundDensity(0u, 1.0f);
-        pBackground->SetGroundDensity(1u, 1.0f);
-        pBackground->SetGroundDensity(2u, 1.0f);
-        pBackground->SetGroundDensity(3u, 1.0f);
-        pBackground->SetGroundDensity(5u, 0.0f);
         pBackground->SetTrail(false);
 
         g_pEnvironment->SetTargetDirectionNow(coreVector2(1.0f,0.0f));
@@ -1507,7 +1514,7 @@ void cHarenaMission::__SetupOwn()
                                 g_pGame->GetCombatText()->DrawCountdown(iFlummiCollect, iFlummiRequire, pFlummi->GetPosition());
                             }
 
-                            g_pSpecialEffects->PlaySound(pFlummi->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlummiCollect, iFlummiRequire), SOUND_ITEM_COLLECT);   // always
+                            g_pSpecialEffects->PlaySound(pFlummi->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlummiCollect, iFlummiRequire), SOUND_ITEM_01);   // always
                         }
                     });
                 }
@@ -1553,7 +1560,7 @@ void cHarenaMission::__SetupOwn()
                 else
                 {
                     g_pGame->GetCombatText()->DrawProgress(iKillCount, ARRAY_SIZE(aiTarget), pEnemy->GetPosition());
-                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iKillCount, ARRAY_SIZE(aiTarget)), SOUND_PLACEHOLDER);
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iKillCount, ARRAY_SIZE(aiTarget)), SOUND_ITEM_02);
                 }
             }
 
@@ -1603,8 +1610,11 @@ void cHarenaMission::__SetupOwn()
                     fDanceTimestamp = g_pGame->GetTimeTable()->GetTimeEvent();
                 }
 
-                g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetDirection(), 80.0f, 20u, COLOR_ENERGY_BLUE);
-                g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+                if(!bMover)
+                {
+                    g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetDirection(), 80.0f, 20u, COLOR_ENERGY_BLUE);
+                    g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+                }
             }
 
             if(bAnyDamage || (bMover && (iMoverActive == 2u)))
@@ -1625,26 +1635,26 @@ void cHarenaMission::__SetupOwn()
                 vRotate.y += (bBig ? 0.5f : 1.0f) * TIME;
                 pEnemy->DefaultRotate(vRotate.x + vRotate.y * (2.0f*PI));
 
-                if(!bMover && !bBig && (vRotate.y >= (nIsTargetFunc(i) ? 5.0f : (g_pGame->IsEasy() ? 1.0f : 3.0f))))
+                if(!bMover && !bBig && (vRotate.y >= (nIsTargetFunc(i) ? 5.0f : (g_pGame->IsEasy() ? 1.5f : 3.0f))))
                 {
                     pEnemy->Kill(true);
 
                     if(!m_iInsanity)
                     {
                         pEnemy->ApplyScore();
+
+                        if(i == iHelperIndex)
+                        {
+                            pHelper->Resurrect(true);
+                            pHelper->SetPosition(pEnemy->GetPosition());
+
+                            vHelperMove = vMove;
+
+                            g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), 25.0f, 5u, COLOR_ENERGY_CYAN);
+                        }
                     }
 
                     iPoints += 1u;
-
-                    if(i == iHelperIndex)
-                    {
-                        pHelper->Resurrect(true);
-                        pHelper->SetPosition(pEnemy->GetPosition());
-
-                        vHelperMove = vMove;
-
-                        g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), 25.0f, 5u, COLOR_ENERGY_CYAN);
-                    }
                 }
             }
             else
@@ -1824,9 +1834,9 @@ void cHarenaMission::__SetupOwn()
 
             if(bReset) fDanceTimestamp = fCurTimestamp;
 
-            if(fDanceTimestamp - fCurTimestamp >= 30.0f)
+            if(fCurTimestamp - fDanceTimestamp >= 30.0f)
             {
-                STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                STAGE_BADGE(3u, BADGE_ACHIEVEMENT, pSquad1->GetEnemy(iBigIndex)->GetPosition())
             }
         }
 
@@ -1834,6 +1844,21 @@ void cHarenaMission::__SetupOwn()
 
         if(!m_iInsanity)
         {
+            cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+
+            if(STAGE_BEGINNING)
+            {
+                pBackground->GetOutdoor()->LerpHeight(1.0f, 0.0f);
+            }
+
+            const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
+
+            pBackground->SetGroundDensity(0u, STEP(0.5f, 1.0f, fEnvLerp));
+            pBackground->SetGroundDensity(1u, STEP(0.5f, 1.0f, fEnvLerp));
+            pBackground->SetGroundDensity(2u, STEP(0.5f, 1.0f, fEnvLerp));
+            pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, fEnvLerp));
+            pBackground->SetGroundDensity(5u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+
             if(STAGE_BEGINNING)
             {
                 g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,-1.0f), 30.0f);
@@ -1876,6 +1901,13 @@ void cHarenaMission::__SetupOwn()
         cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
 
         pBackground->SetVeilAlpha(1.0f);
+
+        pBackground->GetOutdoor()->LerpHeightNow(1.0f, 0.0f);
+        pBackground->SetGroundDensity(0u, 1.0f);
+        pBackground->SetGroundDensity(1u, 1.0f);
+        pBackground->SetGroundDensity(2u, 1.0f);
+        pBackground->SetGroundDensity(3u, 1.0f);
+        pBackground->SetGroundDensity(5u, 0.0f);
 
         g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,-1.0f));
 
@@ -1952,8 +1984,8 @@ void cHarenaMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.15f);
-                pEnemy->Configure(g_pGame->IsEasy() ? 4 : 10, 0u, COLOR_SHIP_MAGENTA);
-                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS);
+                pEnemy->Configure(g_pGame->IsEasy() ? 6 : 10, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_NODELAY);
             });
         });
 
@@ -2072,7 +2104,7 @@ void cHarenaMission::__SetupOwn()
                         else
                         {
                             g_pGame->GetCombatText()->DrawCountdown(iInitCount, 20u, pEnemy->GetPosition());
-                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iInitCount, 20u), SOUND_PLACEHOLDER);
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iInitCount, 20u), SOUND_ITEM_01);
                         }
                     }
                     else if(iState == 2u)
@@ -2084,7 +2116,7 @@ void cHarenaMission::__SetupOwn()
                         else
                         {
                             g_pGame->GetCombatText()->DrawProgress(iBreakCount, ARRAY_SIZE(aaiBreak), pEnemy->GetPosition());
-                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iBreakCount, ARRAY_SIZE(aaiBreak)), SOUND_ITEM_COLLECT);
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iBreakCount, ARRAY_SIZE(aaiBreak)), SOUND_ITEM_02);
                         }
                     }
                 }
@@ -2119,7 +2151,7 @@ void cHarenaMission::__SetupOwn()
                 {
                     pSquad2->ClearEnemies(true);
 
-                    if(!iLoopKill) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                    if(!iLoopKill) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
                 }
 
                 iBreakRef = 0u;
@@ -2627,7 +2659,7 @@ void cHarenaMission::__SetupOwn()
                 else if(STAGE_SUB( 5u)) {STAGE_RESURRECT(pSquad1, 24u, 29u) fEnemyDelay = 4.0f;}
                 else if(STAGE_SUB( 6u)) {STAGE_RESURRECT(pSquad1, 58u, 58u) fEnemyDelay = 0.0f;}
                 else if(STAGE_SUB( 7u)) {STAGE_RESURRECT(pSquad1, 30u, 37u) fEnemyDelay = 5.0f;}
-                else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1, 38u, 41u) fEnemyDelay = 2.0f; if(!iMiddleState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))}
+                else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1, 38u, 41u) fEnemyDelay = 2.0f; if(!iMiddleState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())}
                 else if(STAGE_SUB( 9u))
                 {
                     for(coreUintW i = 0u; i < HARENA_SPIKES; ++i)
@@ -2637,6 +2669,8 @@ void cHarenaMission::__SetupOwn()
 
             iSpikeCount = 0u;
             fSpikeDelay = (m_iStageSub == 1u) ? 1.0f : 0.5f;
+
+            if(g_pGame->IsEasy()) fEnemyDelay += 0.5f;
 
             std::memset(afIntroTime, 0, sizeof(coreFloat) * iNumData);
         }
@@ -2650,9 +2684,13 @@ void cHarenaMission::__SetupOwn()
 
         if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
         {
-            if(this->GetSpikeLaunched(35u))
+            constexpr coreUintW iHelperSpike = 35u;
+
+            const coreObject3D* pBoard = this->GetSpikeBoard(iHelperSpike);
+
+            if(pBoard->IsEnabled(CORE_OBJECT_ENABLE_MOVE) && this->GetSpikeLaunched(iHelperSpike))
             {
-                pHelper->SetPosition(this->GetSpikeBoard(35u)->GetPosition());
+                pHelper->SetPosition(pBoard->GetPosition());
             }
             else
             {
@@ -2857,7 +2895,7 @@ void cHarenaMission::__SetupOwn()
             for(coreUintW i = 0u; i < HARENA_SPIKES; ++i)
             {
                 const coreObject3D* pBoard = this->GetSpikeBoard(i);
-                if(!pBoard->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+                if(!pBoard->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
                 const coreBool bIsActive = this->GetSpikeLaunched(i);
                 const coreBool bIsQuiet  = this->GetSpikeQuiet   (i) && (m_iStageSub == 8u);
@@ -2881,7 +2919,7 @@ void cHarenaMission::__SetupOwn()
                             else
                             {
                                 g_pGame->GetCombatText()->DrawProgress(iGoodCount, 6u, pBoard->GetPosition());
-                                g_pSpecialEffects->PlaySound(pBoard->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iGoodCount, 6u), SOUND_ITEM_COLLECT);
+                                g_pSpecialEffects->PlaySound(pBoard->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iGoodCount, 6u), SOUND_ITEM_01);
                             }
                         }
                         else
@@ -2904,7 +2942,7 @@ void cHarenaMission::__SetupOwn()
                         {
                             pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
-                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.2f, SOUND_EFFECT_SWIPE);
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.2f, SOUND_EFFECT_SWIPE_01);
                         }
                     });
                 }
@@ -3304,6 +3342,11 @@ void cHarenaMission::__SetupOwn()
     // end
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
+        if(m_bStory)
+        {
+            m_iOutroSub = 11u;
+        }
+
         STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });
 

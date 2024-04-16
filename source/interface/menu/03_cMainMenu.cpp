@@ -204,14 +204,14 @@ void cMainMenu::Move()
             }
 
             // 
-            cMenu::UpdateButton(&m_StartButton,   m_StartButton  .IsFocused());
-            cMenu::UpdateButton(&m_ScoreButton,   m_ScoreButton  .IsFocused());
-            cMenu::UpdateButton(&m_ReplayButton,  m_ReplayButton .IsFocused());
-            cMenu::UpdateButton(&m_ExtraButton,   m_ExtraButton  .IsFocused());
-            cMenu::UpdateButton(&m_ConfigButton,  m_ConfigButton .IsFocused());
-            cMenu::UpdateButton(&m_SteamButton,   m_SteamButton  .IsFocused());
-            cMenu::UpdateButton(&m_CreditsButton, m_CreditsButton.IsFocused());
-            cMenu::UpdateButton(&m_ExitButton,    m_ExitButton   .IsFocused());
+            cMenu::UpdateButton(&m_StartButton,   &m_Navigator, m_StartButton  .IsFocused());
+            cMenu::UpdateButton(&m_ScoreButton,   &m_Navigator, m_ScoreButton  .IsFocused());
+            cMenu::UpdateButton(&m_ReplayButton,  &m_Navigator, m_ReplayButton .IsFocused());
+            cMenu::UpdateButton(&m_ExtraButton,   &m_Navigator, m_ExtraButton  .IsFocused());
+            cMenu::UpdateButton(&m_ConfigButton,  &m_Navigator, m_ConfigButton .IsFocused());
+            cMenu::UpdateButton(&m_SteamButton,   &m_Navigator, m_SteamButton  .IsFocused());
+            cMenu::UpdateButton(&m_CreditsButton, &m_Navigator, m_CreditsButton.IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,    &m_Navigator, m_ExitButton   .IsFocused());
         }
         break;
 

@@ -18,6 +18,7 @@ cCombatText::cCombatText()noexcept
 , m_iOrderNum     (0u)
 , m_iMarkerState  (0u)
 , m_fBadgeTime    (0.0f)
+, m_fTrophyTime   (0.0f)
 , m_iLastScore    (0u)
 , m_vOldDirection (coreVector2(0.0f,1.0f))
 , m_fOldSide      (1.0f)
@@ -46,7 +47,6 @@ cCombatText::cCombatText()noexcept
     // 
     m_BadgeIcon.DefineTexture(0u, "menu_badge.png");
     m_BadgeIcon.DefineProgram("default_2d_program");
-    m_BadgeIcon.SetSize      (coreVector2(1.0f,1.0f) * 0.12f);
     m_BadgeIcon.SetTexSize   (coreVector2(0.5f,1.0f));
 
     // 
@@ -58,6 +58,17 @@ cCombatText::cCombatText()noexcept
     // 
     m_BadgeLabel.Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
     m_BadgeLabel.SetColor3(COLOR_MENU_INSIDE);
+
+    // 
+    m_TrophyIcon.DefineTexture(0u, "menu_trophy.png");
+    m_TrophyIcon.DefineProgram("default_2d_program");
+    m_TrophyIcon.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.95f);
+
+    // 
+    m_TrophyBack.DefineTexture(0u, "effect_headlight_point.png");
+    m_TrophyBack.DefineProgram("menu_single_program");
+    m_TrophyBack.SetSize      (coreVector2(1.0f,1.0f) * 0.1f);
+    m_TrophyBack.SetColor4    (coreVector4(0.0f,0.0f,0.0f,0.0f));
     
     
     
@@ -78,7 +89,7 @@ cCombatText::cCombatText()noexcept
 void cCombatText::Render()
 {
     // 
-    const coreVector2 vCorner = coreVector2(0.5f,0.5f) * (g_vGameResolution / Core::Graphics->GetViewResolution().xy());
+    const coreVector2 vCorner = coreVector2(0.5f,0.5f) * (g_vGameResolution * Core::Graphics->GetViewResolution().zw());
     if(!g_bTiltMode) Core::Graphics->StartScissorTest(-vCorner, vCorner);
     {
         // render active label objects
@@ -95,6 +106,13 @@ void cCombatText::Render()
             m_BadgeBack .Render();
             m_BadgeIcon .Render();
             m_BadgeLabel.Render();
+        }
+
+        // 
+        if(m_fTrophyTime)
+        {
+            m_TrophyBack.Render();
+            m_TrophyIcon.Render();
         }
     }
     if(!g_bTiltMode) Core::Graphics->EndScissorTest();
@@ -233,12 +251,14 @@ void cCombatText::Move()
 
         // 
         const coreVector2 vPosition  = coreVector2(m_BadgeIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fBadgeTime));
+        const coreVector2 vSize      = coreVector2(1.0f,1.0f) * 0.12f * LERPB(0.5f, 1.0f, MIN1((1.0f - m_fBadgeTime) * 10.0f));
         const coreVector2 vDirection = coreVector2::Direction(LERPB(-0.5f*PI, -2.0f*PI, MIN1((1.0f - m_fBadgeTime) * 1.5f)));
         const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, m_BadgeIcon.GetSize(), m_BadgeIcon.GetCenter());
         const coreFloat   fAlpha     = BLENDH3(MIN1(m_fBadgeTime * 8.0f)) * fAlphaFull;
 
         // 
         m_BadgeIcon.SetPosition (vPosition);
+        m_BadgeIcon.SetSize     (vSize);
         m_BadgeIcon.SetDirection(vDirection);
         m_BadgeIcon.SetCenter   (vCenter);
         m_BadgeIcon.SetAlpha    (fAlpha);
@@ -255,6 +275,34 @@ void cCombatText::Move()
         m_BadgeLabel.SetCenter  (m_BadgeIcon.GetCenter  ());
         m_BadgeLabel.SetAlpha   (m_BadgeIcon.GetAlpha   ());
         m_BadgeLabel.Move();
+    }
+
+    // 
+    if(m_fTrophyTime)
+    {
+        // 
+        m_fTrophyTime.UpdateMax(-0.8f, 0.0f);
+
+        // 
+        const coreVector2 vPosition = coreVector2(m_TrophyIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fTrophyTime));
+        const coreVector2 vSize     = coreVector2(1.0f,1.0f) * 0.12f * LERPB (0.5f, 1.0f, MIN1((1.0f - m_fTrophyTime) * 10.0f));
+        const coreVector2 vDirection = coreVector2::Direction(LERPB(1.0f*PI, -2.0f*PI, MIN1((1.0f - m_fTrophyTime) * 1.5f)));
+        const coreVector2 vCenter   = cCombatText::__RestrictCenter(vPosition, m_TrophyIcon.GetSize(), m_TrophyIcon.GetCenter());
+        const coreFloat   fAlpha    = BLENDH3(MIN1(m_fTrophyTime * 8.0f)) * fAlphaFull;
+
+        // 
+        m_TrophyIcon.SetPosition (vPosition);
+        m_TrophyIcon.SetSize     (vSize);
+        m_TrophyIcon.SetDirection(vDirection);
+        m_TrophyIcon.SetCenter   (vCenter);
+        m_TrophyIcon.SetAlpha    (fAlpha);
+        m_TrophyIcon.Move();
+
+        // 
+        m_TrophyBack.SetPosition(m_TrophyIcon.GetPosition());
+        m_TrophyBack.SetCenter  (m_TrophyIcon.GetCenter  ());
+        m_TrophyBack.SetAlpha   (m_TrophyIcon.GetAlpha   ());
+        m_TrophyBack.Move();
     }
 
     // smoothly toggle combat text visibility (after forwarding, to allow overriding)
@@ -359,6 +407,27 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
 
 // ****************************************************************
 // 
+void cCombatText::DrawTrophy(const coreVector3 vPosition)
+{
+    // 
+    const coreVector2 vOnScreen = cCombatText::__TransformPosition(vPosition);
+
+    // 
+    m_TrophyIcon.SetCenter(vOnScreen);
+    m_TrophyIcon.SetAlpha (0.0f);
+
+    // 
+    m_TrophyBack.SetCenter(vOnScreen);
+    m_TrophyBack.SetAlpha (0.0f);
+
+    // 
+    ASSERT(!m_fTrophyTime)
+    m_fTrophyTime = 1.0f;
+}
+
+
+// ****************************************************************
+// 
 void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor)
 {
     ASSERT(iIndex < COMBAT_MARKERS)
@@ -391,13 +460,8 @@ void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, c
 void cCombatText::UpdateLayout()
 {
     // 
-    const coreFloat fSide = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-
-    // 
-    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-    const coreVector2 vHud   = g_vHudDirection;
-    const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
-    ASSERT(vFinal.IsNormalized())
+    const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+    const coreVector2 vFinal = CalcFinalDirection();
     
     
     const auto nTransformFunc = [&](coreObject2D* OUTPUT pObject)
@@ -434,6 +498,10 @@ void cCombatText::UpdateLayout()
     nTransformFunc(&m_BadgeLabel);
 
     // 
+    nTransformFunc(&m_TrophyIcon);
+    nTransformFunc(&m_TrophyBack);
+
+    // 
     m_vOldDirection = vFinal;
     m_fOldSide      = fSide;
 }
@@ -457,7 +525,8 @@ void cCombatText::Reset()
     }
 
     // 
-    m_fBadgeTime = 0.0f;
+    m_fBadgeTime  = 0.0f;
+    m_fTrophyTime = 0.0f;
 }
 
 
@@ -480,9 +549,11 @@ void cCombatText::__DrawLabel(const coreChar* pcText, const coreVector3 vPositio
         if(m_afTime[i]) continue;
 
         // init label object
-        m_aLabel[i].SetText  (pcText);
-        m_aLabel[i].SetCenter(vOnScreen);
-        m_aLabel[i].SetColor4(coreVector4(vColor, 0.0f));
+        m_aLabel[i].SetText    (pcText);
+        m_aLabel[i].SetPosition(coreVector2(0.0f,0.0f));
+        m_aLabel[i].SetCenter  (vOnScreen);
+        m_aLabel[i].SetColor4  (coreVector4(vColor, 0.0f));
+        m_aLabel[i].SetScale   (coreVector2(1.0f,1.0f));
         
         
         //m_aLabel[i].SetColor4(coreVector4(COLOR_MENU_WHITE, 0.0f));// [A1]
@@ -546,13 +617,8 @@ void cCombatText::__RemoveOrder(cGuiLabel* pLabel)
 coreVector2 cCombatText::__TransformPosition(const coreVector3 vPosition)
 {
     // 
-    const coreFloat fSide = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-
-    // 
-    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-    const coreVector2 vHud   = g_vHudDirection;
-    const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
-    ASSERT(vFinal.IsNormalized())
+    const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+    const coreVector2 vFinal = CalcFinalDirection();
 
     // 
     return MapToAxisInv(g_pForeground->Project2D(vPosition - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * coreVector2(fSide, 1.0f), vFinal);

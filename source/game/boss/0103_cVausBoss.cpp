@@ -40,8 +40,8 @@ cVausBoss::cVausBoss()noexcept
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCompanion); ++i)
     {
-        m_aCompanion[i].DefineModelHigh("object_boss_vaus_companion_high.md3");
-        m_aCompanion[i].DefineModelLow ("object_boss_vaus_companion_low.md3");
+        m_aCompanion[i].DefineModelHigh("ship_boss_vaus_companion_high.md3");
+        m_aCompanion[i].DefineModelLow ("ship_boss_vaus_companion_low.md3");
         m_aCompanion[i].SetSize        (coreVector3(2.2f,2.2f,2.2f));
         m_aCompanion[i].Configure      (1, 0u, COLOR_SHIP_YELLOW);
     }

@@ -16,6 +16,7 @@ cDarkBackground::cDarkBackground()noexcept
 , m_afStartHeight   {}
 , m_fFlyOffset      (0.0f)
 , m_iIndexOffset    (0u)
+, m_fAppear         (0.0f)
 , m_fDissolve       (-1.0f)
 , m_afFade          {}
 , m_vColor          (cDarkBackground::Color)
@@ -89,6 +90,14 @@ cDarkBackground::~cDarkBackground()
 
     // 
     this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cDarkBackground::Appear()
+{
+    m_fAppear = 1.3f + 1.2f;
 }
 
 
@@ -174,6 +183,28 @@ void cDarkBackground::__MoveOwn()
         // 
         const coreVector2 vCamPos = g_pEnvironment->GetCameraPos().xy() - g_pEnvironment->GetSideOffset();
         const coreFloat   fRange  = I_TO_F(DARK_BLOCKS_Y) * DARK_DETAIL * 0.5f;
+        
+        if(m_fAppear)
+        {
+            m_fAppear.UpdateMax(-0.3f, 0.0f);
+            const coreFloat fAppear2 = BLENDBR(m_fAppear / (1.3f + 1.2f)) * (1.3f + 1.2f);
+            
+            for(coreUintW i = 0u; i < DARK_BLOCKS; ++i)
+            {
+                const coreFloat fRand = 1.0f - STEP(0.65f, 1.0f, m_aBlockRaw[i].GetAlpha());// I_TO_F((i * 41u) % DARK_BLOCKS) / I_TO_F(DARK_BLOCKS);
+                const coreFloat fTime = (LERP(1.0f, 0.0f, CLAMP01((fAppear2 * 3.0f / 1.3f - fRand * 2.0f))));
+                
+                // 
+                const coreFloat fHeight = LERPB(-10.0f, m_afStartHeight[i], fTime);
+                const coreVector3 vColor2 = DARK_COLOR_DEFAULT * LERP(0.1f, 1.0f, STEP(-DARK_DETAIL * 1.5f, DARK_DETAIL * 1.5f, m_afStartHeight[i]));
+                const coreVector3 vColor = LERPB(coreVector3(0.0f,0.0f,0.0f), vColor2, fTime);
+                
+                
+                
+                this->SetBlockHeight(i, fHeight);
+                this->SetBlockColor (i, vColor);
+            }
+        }
 
         // 
         for(coreUintW i = 0u; i < DARK_BLOCKS; ++i)

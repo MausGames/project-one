@@ -113,6 +113,11 @@ public:
     inline coreBool IsOffset  ()const {return m_bOffsetActive;}
     inline coreBool IsMirrored()const {return (this->GetSize().x < 0.0f);}
 
+    // (wrapper) 
+    inline void SetSoundVolume(const coreFloat fVolume) {ASSERT((fVolume >= 0.0f) && (fVolume <= 1.0f)) Core::Audio->SetSoundVolume(fVolume);}
+    
+    inline void SetFrameAnimation(const coreFloat fFrameAnimation) {m_fFrameAnimation = fFrameAnimation;}
+
     // 
     void        SetWallOpacity  (const coreFloat   fOpacity);
     inline void SetWallOffset   (const coreUintW   iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; if(fOffset) m_bOffsetActive = true;}

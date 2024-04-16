@@ -46,6 +46,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_aiRegisterID      {}
 , m_afRegisterSpeed   {}
 , m_fAnimation        (0.0f)
+, m_bStory            (g_pSave->GetHeader().oProgress.aiAdvance[4] < 7u)
 {
     // 
     m_apBoss[0] = &m_Messier;
@@ -126,7 +127,7 @@ cRutilusMission::cRutilusMission()noexcept
 
     // 
     m_apWaveModel[0] = Core::Manager::Resource->Get<coreModel>("object_cube_top.md3");
-    m_apWaveModel[1] = Core::Manager::Resource->Get<coreModel>("object_tube_open.md3");
+    m_apWaveModel[1] = Core::Manager::Resource->Get<coreModel>("object_tube.md3");
 
     // 
     m_Tock    .DefineProgram("effect_energy_flat_invert_inst_program");
@@ -610,7 +611,7 @@ void cRutilusMission::DisableCapsule(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-coreFloat cRutilusMission::CalcAreaSpeed(const coreVector2 vPosition, const coreFloat fFactorFast)const
+coreFloat cRutilusMission::CalcAreaSpeed(const coreVector2 vPosition, const coreFloat fFactorSlow, const coreFloat fFactorFast)const
 {
     // 
     const coreVector2 vTestPos1    = m_aArea[0].GetPosition().xy();
@@ -619,7 +620,7 @@ coreFloat cRutilusMission::CalcAreaSpeed(const coreVector2 vPosition, const core
     const coreFloat   fTestToSq1   = POW2(m_aArea[1].GetSize().x) +  50.0f;
     const coreFloat   fTestFromSq2 = POW2(m_Safe    .GetSize().x) - 100.0f;
     const coreFloat   fTestToSq2   = POW2(m_Safe    .GetSize().x) +  50.0f;
-    const coreFloat   fSpeedSlow   = 0.2f;
+    const coreFloat   fSpeedSlow   = 0.2f * fFactorSlow;
     const coreFloat   fSpeedFast   = 1.0f * fFactorFast;
 
     // 
@@ -823,13 +824,19 @@ void cRutilusMission::__MoveOwnAfter()
 
                     if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
                     {
+                        const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+                        const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+
+                        const coreVector2 vFlip    = coreVector2(fSide, 1.0f);//(vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f)).Processed(SIGN);
+                        const coreVector2 vRealDir = MapToAxisInv(pPlayer->GetDirection().xy(), vFinal);
+
                         // 
                         coreUint8 iNewWarnDir = 0u;
                         coreBool  bNewWarn    = false;
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_UP))    {iNewWarnDir = 1u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f, 1.0f))) bNewWarn = true;}
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  {iNewWarnDir = 2u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2(-1.0f, 0.0f))) bNewWarn = true;}
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  {iNewWarnDir = 3u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f,-1.0f))) bNewWarn = true;}
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) {iNewWarnDir = 4u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 1.0f, 0.0f))) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_UP))    {iNewWarnDir = 1u; if(!SameDirection90(vRealDir, coreVector2( 0.0f, 1.0f) * vFlip)) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  {iNewWarnDir = 2u; if(!SameDirection90(vRealDir, coreVector2(-1.0f, 0.0f) * vFlip)) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  {iNewWarnDir = 3u; if(!SameDirection90(vRealDir, coreVector2( 0.0f,-1.0f) * vFlip)) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) {iNewWarnDir = 4u; if(!SameDirection90(vRealDir, coreVector2( 1.0f, 0.0f) * vFlip)) bNewWarn = true;}
 
                         // 
                         if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT)  ||
@@ -845,10 +852,10 @@ void cRutilusMission::__MoveOwnAfter()
                         if(iNewWarnDir) m_aiWarnDir[i] = iNewWarnDir;
                         m_abWarn[i] = bNewWarn;
 
-                        if(!SameDirection90(pPlayer->GetDirection().xy(), oPlate.GetDirection().xy()))
-                        {
-                            g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
-                        }
+                        //if(!SameDirection90(pPlayer->GetDirection().xy(), oPlate.GetDirection().xy()))
+                        //{
+                        //    g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
+                        //}
 
                         pPlayer->SetDirection(oPlate.GetDirection());
                         pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
@@ -1266,7 +1273,7 @@ void cRutilusMission::__UpdateAreaSpeed()
     coreFloat fEnvSpeed = 0.0f;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        const coreFloat fSpeed = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? 1.0f : this->CalcAreaSpeed(pPlayer->GetPosition().xy(), 1.0f);
+        const coreFloat fSpeed = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? 1.0f : this->CalcAreaSpeed(pPlayer->GetPosition().xy(), 1.0f, 1.0f);
 
         // 
         pPlayer->SetMoveSpeed (fSpeed);
@@ -1300,13 +1307,14 @@ void cRutilusMission::__UpdateAreaSpeed()
         coreFloat fBase = 0.0f;
         for(coreUintW i = 0u; i < RUTILUS_AREA_REGISTRY; ++i)
         {
+            const coreUint32 iID = coreUint32(pBullet->GetID()) | (coreUint32(pBullet->GetDamage()) << 16u);
             if(m_aiRegisterID[i] == 0u)
             {
                 // 
-                m_aiRegisterID   [i] = pBullet->GetID();
+                m_aiRegisterID   [i] = iID;
                 m_afRegisterSpeed[i] = pBullet->GetSpeed();
             }
-            if(m_aiRegisterID[i] == coreUint32(pBullet->GetID()))
+            if(m_aiRegisterID[i] == iID)
             {
                 // 
                 fBase = m_afRegisterSpeed[i];
@@ -1316,7 +1324,7 @@ void cRutilusMission::__UpdateAreaSpeed()
         ASSERT(fBase)
 
         // 
-        const coreFloat fSpeed = this->CalcAreaSpeed(pBullet->GetPosition().xy(), fFactorFast);
+        const coreFloat fSpeed = this->CalcAreaSpeed(pBullet->GetPosition().xy(), 1.0f, fFactorFast);
 
         // 
         pBullet->SetSpeed    (fSpeed * fBase);

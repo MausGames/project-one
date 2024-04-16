@@ -8,9 +8,10 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-coreVector2 cMenuNavigator::s_vMouseMove    = coreVector2(0.0f,0.0f);
-coreBool    cMenuNavigator::s_bJoystick     = false;
-coreUint8   cMenuNavigator::s_iJoystickType = SDL_CONTROLLER_TYPE_UNKNOWN;
+coreVector2   cMenuNavigator::s_vMouseMove    = coreVector2(0.0f,0.0f);
+coreBool      cMenuNavigator::s_bJoystick     = false;
+coreUint8     cMenuNavigator::s_iJoystickType = SDL_CONTROLLER_TYPE_UNKNOWN;
+coreObject2D* cMenuNavigator::s_pCurFocus     = NULL;
 
 
 // ****************************************************************
@@ -31,6 +32,7 @@ cMenuNavigator::cMenuNavigator()noexcept
 , m_nShoulderLeft  (NULL)
 , m_nShoulderRight (NULL)
 , m_bShoulder      (true)
+, m_bActive        (true)
 {
     // 
     this->DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
@@ -65,7 +67,7 @@ void cMenuNavigator::Render()
     {
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
         {
-            m_aCursor[i].SetAlpha(this->GetAlpha() * 0.6f);
+            m_aCursor[i].SetAlpha(this->GetAlpha() * 0.65f);
             m_aCursor[i].Render();
         }
     }
@@ -134,6 +136,17 @@ void cMenuNavigator::Move()
             }
         }
 
+        FOR_EACH(it, m_apScroll)
+        {
+            const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
+            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
+            {
+                const coreVector2 vPos = GetTranslationArea(*pScroll);
+                m_vCurPos.x = CLAMP(m_vCurPos.x, vPos.x - pScroll->GetSize().x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f - m_vCurSize.x * 0.5f);
+                m_vCurPos.y = CLAMP(m_vCurPos.y, vPos.y - pScroll->GetSize().y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f - m_vCurSize.y * 0.5f);
+            }
+        }
+
         const coreVector2 vOffset = coreVector2(m_vCurSize.x * -0.5f - 0.03f, 0.0f);
 
         this->SetPosition (m_vCurPos + vOffset);
@@ -150,18 +163,20 @@ void cMenuNavigator::Move()
             coreVector2 vNewTarget = (vPosition + m_vMouseOffset) / vResolution;
             FOR_EACH(it, m_apScroll)
             {
-                const coreObject2D* pScroll = (*it);
-                if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll))
+                const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
+                if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
                 {
                     const coreVector2 vPos = GetTranslationArea(*pScroll);
-                    vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x, vPos.x + pScroll->GetSize().x);
-                    vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y, vPos.y + pScroll->GetSize().y);
+                    vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f);
+                    vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f);
                 }
             }
             Core::Input->SetMousePosition(vNewTarget);   // for focus
         }
 
         m_pCurObject->SetFocused(m_pCurObject->IsFocusable());
+        
+        s_pCurFocus = m_pCurObject;
 
         m_iStore = this->__ToIndex(m_pCurObject);
     }
@@ -249,8 +264,8 @@ void cMenuNavigator::Move()
 void cMenuNavigator::Update()
 {
     if(!TIME) return;
-    
-    Core::Debug->InspectValue("left", Core::Input->GetJoystickButton(0u, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS));
+
+    if(!m_bActive) return;
 
     if(!s_bJoystick)
     {
@@ -483,10 +498,10 @@ void cMenuNavigator::Update()
 
     if(m_pMenu && !m_pMenu->GetAlpha())
     {
-        std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
+        if(!m_aiLock.empty()) std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
     }
 
-    if(!s_bJoystick) std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
+    if(!s_bJoystick && !m_aiLock.empty()) std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
 
     if(m_pCurObject && cMenuNavigator::IsValid(m_pCurObject))
     {
@@ -496,12 +511,12 @@ void cMenuNavigator::Update()
         coreVector2 vNewTarget = (vPosition + m_vMouseOffset) / vResolution;
         FOR_EACH(it, m_apScroll)
         {
-            const coreObject2D* pScroll = (*it);
-            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll))
+            const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
+            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
             {
                 const coreVector2 vPos = GetTranslationArea(*pScroll);
-                vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x, vPos.x + pScroll->GetSize().x);
-                vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y, vPos.y + pScroll->GetSize().y);
+                vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f);
+                vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f);
             }
         }
         Core::Input->SetMousePosition(vNewTarget);   // for focus and click
@@ -586,7 +601,7 @@ void cMenuNavigator::GlobalInit()
     if(Core::Input->GetJoystickNum())
     {
         s_bJoystick     = true;
-        s_iJoystickType = Core::Input->GetJoystickGamepadType(0);
+        s_iJoystickType = Core::Input->GetJoystickGamepadType(0u);
     }
 }
 
@@ -599,7 +614,7 @@ void cMenuNavigator::GlobalUpdate()
     {
         // 
         s_vMouseMove += Core::Input->GetMouseRelative().xy() * Core::System->GetResolution();
-        if(s_vMouseMove.LengthSq() > POW2(30.0f))
+        if(s_vMouseMove.LengthSq() > POW2(50.0f))
         {
             s_bJoystick = false;
         }
@@ -615,7 +630,7 @@ void cMenuNavigator::GlobalUpdate()
     // 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
-        if(!Core::Input->GetJoystickRelativeL(i).IsNull() || (Core::Input->GetCountJoystick(i, CORE_INPUT_PRESS) && (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING))))
+        if(!Core::Input->GetJoystickRelativeL(i).IsNull() || !Core::Input->GetJoystickRelativeR(i).IsNull() || (Core::Input->GetCountJoystick(i, CORE_INPUT_PRESS) && (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING))))
         {
             s_vMouseMove    = coreVector2(0.0f,0.0f);
             s_bJoystick     = true;

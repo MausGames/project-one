@@ -39,7 +39,7 @@ cHeadlight::cHeadlight()noexcept
 
     // 
     m_pFlickerSound = Core::Manager::Resource->Get<coreSound>("effect_flicker.wav");
-    m_pShatterSound = Core::Manager::Resource->Get<coreSound>("effect_shatter.wav");
+    //m_pShatterSound = Core::Manager::Resource->Get<coreSound>("effect_shatter.wav");
 }
 
 

@@ -16,10 +16,9 @@
 // TODO 2: use oldest active label instead of nothing, if all labels are busy (or dynamically allocated fallback)
 // TODO 4: use index instead of pointer for order-list ?
 // TODO 3: also invert with full mirror mode (like interface, maybe move outside ?) (even more, like summary and continue menu) (should it be a 3rd option ? Off, Light, Full)
-// TODO 1: [MF] alle stellen mit DrawProgress und vielleicht DrawCountdown (1, 2, 3, ...) brauchen sound effect
 // TODO 5: size-bump für critical (https://youtu.be/mfr7mGW6Z2U?t=17)
-// TODO 1: [MF] achievement badge star (silber drehung ohne text) (+ stern position anpassen ? default is player 1)
 // TODO 2: es könnten mehrere badge stars gleichzeitig benötigt werden
+// TODO 3: merge badge and trophy texture ?
 
 
 // ****************************************************************
@@ -64,6 +63,10 @@ private:
     cGuiLabel  m_BadgeLabel;                    // 
     coreFlow   m_fBadgeTime;                    // 
 
+    cGuiObject m_TrophyIcon;                     // 
+    cGuiObject m_TrophyBack;                     // 
+    coreFlow   m_fTrophyTime;                    // 
+
     coreUint8 m_iLastScore;                     // 
 
     coreVector2 m_vOldDirection;                // 
@@ -91,6 +94,7 @@ public:
     void DrawCountdown(const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition);
     void DrawText     (const coreChar*  pcText, const coreVector3 vPosition, const coreVector3 vColor);
     void DrawBadge    (const coreUint32 iValue, const coreVector3 vPosition);
+    void DrawTrophy   (const coreVector3 vPosition);
 
     // 
     void AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor);

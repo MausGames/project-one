@@ -122,7 +122,7 @@ void cMsgBox::Move()
         m_Yes.Interact();
 
         // 
-        cMenu::UpdateButton(&m_Yes, m_Yes.IsFocused(), COLOR_MENU_BLUE);
+        cMenu::UpdateButton(&m_Yes, this, m_Yes.IsFocused(), COLOR_MENU_BLUE);
 
         // 
         if(m_Yes.IsClicked() /*|| g_MenuInput.bAccept*/)
@@ -138,10 +138,10 @@ void cMsgBox::Move()
         m_No.Interact();
 
         // 
-        cMenu::UpdateButton(&m_No, m_No.IsFocused(), COLOR_MENU_RED);
+        cMenu::UpdateButton(&m_No, this, m_No.IsFocused(), COLOR_MENU_RED);
 
         // 
-        if(m_No.IsClicked() || g_MenuInput.bCancel)
+        if(m_No.IsClicked())// || g_MenuInput.bCancel)
             this->__ExecuteCallback(MSGBOX_ANSWER_NO, 0);
     }
 

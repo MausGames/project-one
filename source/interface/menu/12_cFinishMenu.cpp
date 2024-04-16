@@ -181,8 +181,8 @@ void cFinishMenu::Move()
             }
 
             // 
-            cMenu::UpdateButton(&m_SteamButton, m_SteamButton.IsFocused());
-            cMenu::UpdateButton(&m_ExitButton,  m_ExitButton .IsFocused());
+            cMenu::UpdateButton(&m_SteamButton, &m_Navigator, m_SteamButton.IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,  &m_Navigator, m_ExitButton .IsFocused());
         }
         break;
 
