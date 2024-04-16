@@ -242,7 +242,7 @@ void cPlayer::Move()
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES) && !m_fInterrupt)
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
                 if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 

@@ -170,52 +170,29 @@ void cProjectOneBoss::__MoveOwn()
             PHASE_CONTROL_TICKER(0u, 0u, 10.0f, LERP_LINEAR)
             {
                 const coreVector2 vPos = this->GetPosition().xy();
-                //const coreVector2 vDir = this->AimAtPlayer().Normalized();
-
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(Core::Rand->Float(-90.0f, 90.0f) + 180.0f));
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>    (5, 1.0f + 0.2f * 3.0f, this, vPos, vDir)->ChangeSize(1.2f);
-
-                //g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>   (5, 1.0f + 0.2f * 0.0f, this, vPos, vDir)->ChangeSize(1.2f);
-                //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>    (5, 1.0f + 0.2f * 1.0f, this, vPos, vDir)->ChangeSize(1.3f);
-                //g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.0f + 0.2f * 2.0f, this, vPos, vDir)->ChangeSize(1.1f);
-                //g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>    (5, 1.0f + 0.2f * 3.0f, this, vPos, vDir)->ChangeSize(1.2f);
-                //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>     (5, 1.0f + 0.2f * 4.0f, this, vPos, vDir)->ChangeSize(1.5f);
-                //g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 1.0f + 0.2f * 5.0f, this, vPos, vDir)->ChangeSize(1.2f);
-                //g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>    (5, 1.0f + 0.2f * 6.0f, this, vPos, vDir)->ChangeSize(1.2f);
-
-                /*
-                 const coreUintW   iInc = MIN(iTick / 2u, 36u);
-
-                for(coreUintW i = 36u - iInc, ie = 36u + iInc; i < ie; ++i)
-                {
-                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 5.0f + 60.0f));
-
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>   (5, 1.0f + 0.2f * 0.0f, this, vPos, vDir)->ChangeSize(1.2f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>    (5, 1.0f + 0.2f * 1.0f, this, vPos, vDir)->ChangeSize(1.3f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.0f + 0.2f * 2.0f, this, vPos, vDir)->ChangeSize(1.1f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>    (5, 1.0f + 0.2f * 3.0f, this, vPos, vDir)->ChangeSize(1.2f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>     (5, 1.0f + 0.2f * 4.0f, this, vPos, vDir)->ChangeSize(1.5f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 1.0f + 0.2f * 5.0f, this, vPos, vDir)->ChangeSize(1.2f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>    (5, 1.0f + 0.2f * 6.0f, this, vPos, vDir)->ChangeSize(1.2f);
-                }
-                */
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.6f, this, vPos, vDir)/*->MakeWhite()*/->ChangeSize(1.2f);
             });
 
             const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
+            this->SetPosition(coreVector3(vPlayerPos.x, 0.8f * FOREGROUND_AREA.y, 0.0f));
 
             g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([&](cFlipBullet* OUTPUT pBullet)
             {
-                //vPlayerPos
+                if(pBullet->GetFlyTime() >= 2.0f) return;
 
+                const coreVector2 vAim = (vPlayerPos - pBullet->GetPosition().xy()).Normalized();
+                const coreVector2 vDir = (pBullet->GetFlyDir() + vAim * (2.0f * Core::System->GetTime())).Normalized();
+
+                pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * BULLET_SPEED_FACTOR * Core::System->GetTime());   
+                pBullet->SetFlyDir(vDir);
             });
 
             g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 if(pPlayer->IsFeeling()) pPlayer->Kill(false);
             });
-
-            this->SetPosition(coreVector3(vPlayerPos.x, 0.8f * FOREGROUND_AREA.y, 0.0f));
         }
     }
 

@@ -79,7 +79,7 @@ void cReplayMenu::Move()
 
             for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i)
             {
-                if(m_aLine[i].IsClicked())
+                if(m_aLine[i].IsClicked()    || m_aName[i].IsClicked() || m_aTime[i].IsClicked())  
                 {
                     if(i < m_aInfoList.size())
                     {

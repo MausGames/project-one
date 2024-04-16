@@ -58,7 +58,7 @@ public:
     // 
     struct sHeader final
     {
-        coreUint32 iMagic;                                                           // 
+        coreUint32 iMagic;                                                              // 
         coreUint32 iVersion;                                                            // 
         coreChar   acName[REPLAY_NAME_LENTH];                                           // 
 

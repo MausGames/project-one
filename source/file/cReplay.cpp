@@ -289,6 +289,10 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
         return false;
     }
 
+
+    pHeader->Unscramble();
+
+
     // 
     std::memcpy(&m_Header, pHeader->GetData(), sizeof(sHeader));
     WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)   ||
@@ -326,6 +330,10 @@ void cReplay::SaveFile(const coreChar* pcName)
     // 
     coreFile* pHeader = new coreFile("header", r_cast<coreByte*>(pHeaderData), sizeof(sHeader));
     coreFile* pBody   = new coreFile("body",   pBodyData,                      iBodySize);
+
+
+    pHeader->Scramble();
+
 
     // 
     coreArchive oArchive;
@@ -395,7 +403,7 @@ void cReplay::__SetBodyData(const coreByte* pData, const coreUint32 iSize)
     // 
     coreByte*  pPlainData;
     coreUint32 iPlainSize;
-    coreData::DecompressDeflate(pData, iSize, &pPlainData, &iPlainSize);
+    coreData::Decompress(pData, iSize, &pPlainData, &iPlainSize);
 
     // 
     coreByte* pCursor = pPlainData;
@@ -447,7 +455,7 @@ void cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize)
     }
 
     // 
-    coreData::CompressDeflate(pPlainData, iPlainSize, ppData, piSize);
+    coreData::Compress(pPlainData, iPlainSize, ppData, piSize);
 
     // 
     SAFE_DELETE_ARRAY(pPlainData)

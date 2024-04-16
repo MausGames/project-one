@@ -564,7 +564,7 @@ public:
     inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f;}
 
     // change default color
-    inline cFlipBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
     inline cFlipBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cFlipBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cFlipBullet* MakeRed   () {ASSERT(false)            return this;}

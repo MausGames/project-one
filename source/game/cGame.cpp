@@ -699,8 +699,11 @@ void cGame::__HandleCollisions()
         }
         else
         {
+            const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
+            const coreVector2 vNormal = (vDiff.Normalized() - pBullet->GetFlyDir() * 10.0f).Normalized();
+
             // 
-            pBullet->Reflect(pEnemy, vIntersection.xy());
+            pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
         }
 
 

@@ -78,15 +78,6 @@ void cIntroMission::__SetupOwn()
             pPath1->AddNode(coreVector2( 0.4f,-1.2f), coreVector2(0.0f,-1.0f));
             pPath1->Refine();
         });
-        /*
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(1.2f,0.0f), coreVector2(1.0f, 0.0f));
-            pPath1->Refine();
-        });
-        */
 
         STAGE_ADD_PATH(pPath2)
         {
@@ -96,7 +87,7 @@ void cIntroMission::__SetupOwn()
             pPath2->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 48u)
+        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 36u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -116,8 +107,6 @@ void cIntroMission::__SetupOwn()
             else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 18u, 23u)
             else if(STAGE_SUB(5u)) STAGE_RESSURECT(pSquad1, 24u, 29u)
             else if(STAGE_SUB(6u)) STAGE_RESSURECT(pSquad1, 30u, 35u)
-            //else if(STAGE_SUB(7u)) STAGE_RESSURECT(pSquad1, 36u, 41u)
-            //else if(STAGE_SUB(8u)) STAGE_RESSURECT(pSquad1, 42u, 47u)
         }
 
         if(g_pGame->GetBulletManagerPlayer()->GetNumBullets())
@@ -138,7 +127,7 @@ void cIntroMission::__SetupOwn()
             STAGE_REPEAT(pPath->GetTotalDistance())
 
             const coreVector2 vFactor = coreVector2(((i % 12u) < 6u) ? -1.0f : 1.0f, (i < 24u) ? 1.0f : -1.0f);
-            const coreVector2 vOffset = coreVector2((i >= 24u && i < 36u) ? -0.2f : 0.0f, (i >= 36u) ? -0.2f : 0.0f);
+            const coreVector2 vOffset = coreVector2((i >= 24u) ? -0.2f : 0.0f, 0.0f);
 
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
@@ -191,29 +180,13 @@ void cIntroMission::__SetupOwn()
     // simple with attacks
     STAGE_MAIN
     {
-        //STAGE_ADD_PATH(pPath1)
-        //{
-        //    pPath1->Reserve(2u);
-        //    pPath1->AddNode(coreVector2(-0.6f, 1.2f), coreVector2(0.0f,-1.0f));
-        //    pPath1->AddNode(coreVector2( 0.4f,-1.2f), coreVector2(0.0f,-1.0f));
-        //    pPath1->Refine();
-        //});
-
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-1.2f, 0.8f), coreVector2(1.2f,-0.8f).Normalized());  
-            pPath1->AddNode(coreVector2( 1.2f,-0.8f), coreVector2(1.2f,-0.8f).Normalized());  
+            pPath1->AddNode(coreVector2(-1.2f, 0.8f), coreVector2(1.2f,-0.8f).Normalized());
+            pPath1->AddNode(coreVector2( 1.2f,-0.8f), coreVector2(1.2f,-0.8f).Normalized());
             pPath1->Refine();
         });
-
-        //STAGE_ADD_PATH(pPath2)
-        //{
-        //    pPath2->Reserve(2u);
-        //    pPath2->AddNode(coreVector2(-1.2f, 0.4f), coreVector2(1.2f,-0.4f).Normalized());  
-        //    pPath2->AddNode(coreVector2( 1.2f,-0.4f), coreVector2(1.2f,-0.4f).Normalized());  
-        //    pPath2->Refine();
-        //});
 
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 48u)
         {
@@ -237,28 +210,13 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.2f, 0.21f * I_TO_F((i < 16u) ? (i % 4u) : (i % 8u)))
 
-            //if((i < 16u) ? ((i % 16u) < 8u) : (((i-16u) % 32u) < 16u))
-            //{
-            //    STAGE_REPEAT(pPath1->GetTotalDistance())
-            //
-            //    const coreVector2 vFactor = coreVector2(((i < 16u) ? ((i % 8u) < 4u) : ((i % 16u) < 8u)) ? -1.0f : 1.0f, 1.0f);
-            //    const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-            //
-            //    pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-            //}
-            //else
-            {
-                const coreSpline2* pPath = pPath1;//(i < 16u) ? pPath1 : pPath2;
+            STAGE_REPEAT(pPath1->GetTotalDistance())
 
-                STAGE_REPEAT(pPath->GetTotalDistance())
+            const coreVector2 vFactor = coreVector2(((i < 16u) ? ((i % 8u) < 4u) : ((i % 16u) < 8u)) ? -1.0f : 1.0f, 1.0f);
+            const coreVector2 vOffset = coreVector2(0.0f,0.1f);
 
-                const coreVector2 vFactor = coreVector2(((i < 16u) ? ((i % 8u) < 4u) : ((i % 16u) < 8u)) ? -1.0f : 1.0f, 1.0f);
-                const coreVector2 vOffset = coreVector2(0.0f,0.1f);//I_TO_F(i / 8u) * -0.1f);
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
 
-                pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
-            }
-
-            //if(STAGE_LIFETIME_POINT(0.2f) || STAGE_LIFETIME_POINT(0.3f) || STAGE_LIFETIME_POINT(0.4f))
             if(STAGE_TICK_LIFETIME(5.0f, 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
@@ -272,7 +230,7 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
-    // heavy bullet pattern
+    // simple with heavy attacks
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -286,8 +244,6 @@ void cIntroMission::__SetupOwn()
         STAGE_ADD_PATH(pPath2)
         {
             pPath2->Reserve(2u);
-            //pPath2->AddNode(coreVector2( 1.4f,0.5f), coreVector2(-1.0f,0.0f));
-            //pPath2->AddStop(coreVector2(-0.4f,0.5f), coreVector2(-1.0f,0.0f));
             pPath2->AddNode(coreVector2(-0.4f,1.4f), coreVector2(0.0f,-1.0f), 0.9f/1.4f);
             pPath2->AddStop(coreVector2(-0.4f,0.5f), coreVector2(0.0f,-1.0f));
             pPath2->Refine();
@@ -337,7 +293,7 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // movement training
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -403,17 +359,13 @@ void cIntroMission::__SetupOwn()
         STAGE_WAVE
     });
 
-    // 
-    // 15 gruppen in summe                  
-    // 
-
     // ################################################################
     // 
     STAGE_MAIN
     {
         if(STAGE_TIME_POINT(3.0f))
         {
-            g_pGame->GetInterface()->ShowStory("Project One");
+            //g_pGame->GetInterface()->ShowStory("Project One");
         }
 
         STAGE_ADD_PATH(pPath1)
