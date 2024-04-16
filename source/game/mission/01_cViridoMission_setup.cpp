@@ -1808,8 +1808,8 @@ void cViridoMission::__SetupOwn()
                                     }
                                     else
                                     {
-                                        g_pGame->GetCombatText()->DrawCountdown(iLeapCount, 4u, pBig->GetPosition());
-                                        g_pSpecialEffects->PlaySound(pBig->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iLeapCount, 4u), SOUND_ITEM_02);
+                                        g_pGame->GetCombatText()->DrawCountdown(iLeapCount, 3u, pBig->GetPosition());
+                                        g_pSpecialEffects->PlaySound(pBig->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iLeapCount, 3u), SOUND_ITEM_02);
                                     }
                                 }
                             }

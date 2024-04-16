@@ -75,7 +75,7 @@ void FragmentMain()
         vec3 v3Step = v1StepSize * v3MathViewDir * vec3(-u_v4Resolution.z, u_v4Resolution.w, 1.0);
 
         // 
-        while(true)
+        for(int i = 0; i < 10; ++i)
         {
             // 
             v2ScreenCoord += v3Step.xy;
