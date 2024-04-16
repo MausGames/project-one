@@ -271,6 +271,50 @@ coreBool cSnow::TestCollision(const coreVector2 vPosition)const
     return (m_piSnowData[iY * SNOW_SIZE + iX] != 0x00u);
 }
 
+
+// ****************************************************************
+// 
+coreBool cSnow::TestCollision(const coreVector2 vPosition, const coreVector2 vDirection, coreFloat* OUTPUT pfDistance)const
+{
+    ASSERT(pfDistance)
+
+    // 
+    coreVector2 vCurrent = coreVector2(cSnow::__GetMapIndexFloat(vPosition.x), cSnow::__GetMapIndexFloat(vPosition.y));
+
+    // 
+    ASSERT(vDirection.IsNormalized())
+    const coreVector2 vStep = vDirection * ABS(RCP(IsHorizontal(vDirection) ? vDirection.x : vDirection.y));
+
+    // 
+    while((vCurrent.x >= 0.0f) && (vCurrent.x < I_TO_F(SNOW_SIZE)) &&
+          (vCurrent.y >= 0.0f) && (vCurrent.y < I_TO_F(SNOW_SIZE)))
+    {
+        // 
+        const coreUintW i = F_TO_UI(vCurrent.x);
+        const coreUintW j = F_TO_UI(vCurrent.y);
+        ASSERT((i < SNOW_SIZE) && (j < SNOW_SIZE))
+
+        // 
+        if(m_piSnowData[j * SNOW_SIZE + i] != 0x00u)
+        {
+            // 
+            const coreFloat fPosX = cSnow::__GetMapValue(i);
+            const coreFloat fPosY = cSnow::__GetMapValue(j);
+
+            // 
+            (*pfDistance) = (coreVector2(fPosX, fPosY) - vPosition).Length();
+            return true;
+        }
+
+        // 
+        vCurrent += vStep;
+    }
+
+    // 
+    return false;
+}
+
+
 // ****************************************************************
 // 
 coreBool cSnow::AnyData()const

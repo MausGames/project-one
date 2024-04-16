@@ -96,6 +96,7 @@
 
 #define CHOL_WINGS                (4u)                                         // 
 #define CHOL_SHIFT                (4.0f)                                       // 
+#define CHOL_FAKE_SCORE           (57300u)                                     // 
 
 #define ZEROTH_LIMBS              (6u)                                         // 
 #define ZEROTH_ICES               (2u)                                         // 
@@ -909,6 +910,8 @@ private:
     coreFloat m_fFlap;                        // 
 
     coreFloat m_fPush;                        // 
+
+    coreFlow m_fCountdown;                    // 
 
     coreFlow m_fAnimation;                    // 
 

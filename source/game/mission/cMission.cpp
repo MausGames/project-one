@@ -151,6 +151,9 @@ void cMission::Close()
 
     // 
     g_pSave->SaveFile();
+
+    // 
+    UploadLeaderboardsMission(iMissionIndex, iScoreFull);
 }
 
 
@@ -371,18 +374,7 @@ void cMission::DeactivateWave()
     if(m_iCurSegmentIndex == MISSION_NO_SEGMENT) return;
 
     // 
-    this->__CloseSegment();
-
-    // 
-    m_iCurWaveIndex    = MISSION_NO_WAVE;
-    m_iCurSegmentIndex = MISSION_NO_SEGMENT;
-
-    // 
-    m_iStageSub  = 0xFFu;
-    m_fStageWait = 6.0f;
-
-    // 
-    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)   // # before __CloseSegment
     {
         pPlayer->HealShield(pPlayer->GetMaxShield() / 5);
 
@@ -395,6 +387,17 @@ void cMission::DeactivateWave()
             pPlayer->GetScoreTable()->CancelCooldown();
         }
     });
+
+    // 
+    this->__CloseSegment();
+
+    // 
+    m_iCurWaveIndex    = MISSION_NO_WAVE;
+    m_iCurSegmentIndex = MISSION_NO_SEGMENT;
+
+    // 
+    m_iStageSub  = 0xFFu;
+    m_fStageWait = 6.0f;
 
     // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;
@@ -627,6 +630,9 @@ void cMission::__CloseSegment()
 
     // 
     g_pSave->SaveFile();
+
+    // 
+    UploadLeaderboardsSegment(iMissionIndex, m_iCurSegmentIndex, iScoreFull);
 }
 
 

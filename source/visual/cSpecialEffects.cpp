@@ -179,6 +179,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_EFFECT_PEARL,         "effect_pearl.wav");
     nLoadSoundFunc(SOUND_EFFECT_SHAKE_01,      "effect_shake_01.wav");
     nLoadSoundFunc(SOUND_EFFECT_SHAKE_02,      "effect_shake_02.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SUCCESS,       "effect_success.wav");
     nLoadSoundFunc(SOUND_EFFECT_SWIPE_01,      "effect_swipe_01.wav");
     nLoadSoundFunc(SOUND_EFFECT_SWIPE_02,      "effect_swipe_02.wav");
     nLoadSoundFunc(SOUND_EFFECT_SWIPE_03,      "effect_swipe_03.wav");
@@ -1153,6 +1154,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_EFFECT_PEARL:         fBaseVolume = 1.1f; fBasePitch = 1.2f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SHAKE_01:      fBaseVolume = 3.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SHAKE_02:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_SUCCESS:       fBaseVolume = 3.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SWIPE_01:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SWIPE_02:      fBaseVolume = 1.0f; fBasePitch = 1.1f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SWIPE_03:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
@@ -1266,7 +1268,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))   // # skip replay
             {
                 // create rumble effect
-                const coreFloat fFinal = CLAMP01(fStrength * I_TO_F(iRumble) * 0.1f);
+                const coreFloat fFinal = CLAMP01(fStrength * I_TO_F(iRumble) * 0.1f * (DEFINED(_CORE_SWITCH) ? 0.1f : 1.0f));
                 Core::Input->JoystickRumble(iJoystickID, fFinal, fFinal, iLengthMs);
 
                 // 

@@ -61,6 +61,8 @@ private:
 
     cMenuNavigator m_Navigator;            // 
 
+    coreFlow m_fFlashTime;                 // 
+
     coreBool m_bFinished;                  // 
 
 
@@ -76,6 +78,12 @@ public:
     // 
     void Start(const coreChar* pcTemplate, const coreUint8 iLength);
     void Clear();
+
+    // 
+    void OverrideText(const coreChar* pcText);
+
+    // 
+    inline void Flash() {m_fFlashTime = 1.0f;}
 
     // 
     inline const coreChar* GetText    ()const {return m_sTextValue.c_str();}

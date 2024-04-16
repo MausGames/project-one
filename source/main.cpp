@@ -61,6 +61,7 @@ void CoreApp::Init()
 
     // 
     InitAchievements();
+    InitLeaderboards();
 
     // load available music files
     //g_MusicPlayer.AddMusicFolder ("data/music",              "*.ogg");
@@ -676,7 +677,7 @@ static void DebugGame()
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;
-                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
+                oOptions.aaiWeapon [i][0] = cWaveWeapon::ID;
                 oOptions.aaiSupport[i][0] = 0u;
             }
 

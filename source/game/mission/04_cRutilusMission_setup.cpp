@@ -543,7 +543,7 @@ void cRutilusMission::__SetupOwn()
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
             pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+            pPlayer->RemoveStatus(PLAYER_STATUS_WEAK_BACK | PLAYER_STATUS_NO_INPUT_TURN);
         });
 
         STAGE_FINISH_NOW
@@ -770,6 +770,11 @@ void cRutilusMission::__SetupOwn()
 
                 nScreenSplashFunc(pHelper->GetPosition().xy());
                 g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
+
+                STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+                {
+                    pPlayer->AddStatus(PLAYER_STATUS_ARRANGE);
+                });
             }
 
             fRotationSpeed = MAX(fRotationSpeed - 0.2f * TIME, -0.6f);
@@ -835,6 +840,12 @@ void cRutilusMission::__SetupOwn()
                     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
                 }
 
+                STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+                {
+                    pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
+                    pPlayer->RemoveStatus(PLAYER_STATUS_ARRANGE);
+                });
+
                 STAGE_DELAY_END
             }
         }
@@ -891,7 +902,7 @@ void cRutilusMission::__SetupOwn()
                     {
                         d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->RefreshCooldown();
 
-                        pBullet->Deactivate(true);
+                        pBullet->Deactivate(true, vIntersection.xy());
 
                         if(++iCapsCount >= iCapsTotal)
                         {
@@ -1152,7 +1163,9 @@ void cRutilusMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
+            pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
             pPlayer->RemoveStatus(PLAYER_STATUS_GYRO);
+            pPlayer->RemoveStatus(PLAYER_STATUS_ARRANGE);
         });
 
         STAGE_FINISH_NOW
@@ -1660,8 +1673,8 @@ void cRutilusMission::__SetupOwn()
             {
                 fGrazeValue += 0.2f * TIME;
 
-                if(fGrazeValue >= 1.0f) STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
-                else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fGrazeValue * 100.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE, true);
+                     if(fGrazeValue >= 1.0f)  STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
+                else if(fGrazeValue >= 0.01f) g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fGrazeValue * 100.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE, true);
             }
         }
 
@@ -1820,7 +1833,7 @@ void cRutilusMission::__SetupOwn()
                 coreObject3D* pSlap = this->GetSlap(i);
                 if(!pSlap->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-                if(m_afSlapValue[i] < 0.95f) bSlapSolved = false;
+                if(m_afSlapValue[i] < 1.0f) bSlapSolved = false;
             }
 
             if(bSlapSolved && (iSlapState < 4u))
@@ -2145,7 +2158,7 @@ void cRutilusMission::__SetupOwn()
             cPlayer* pPlayer = d_cast<cPlayer*>(pBullet->GetOwner());
 
             const coreVector2 vDiff = pPlayer->GetPosition().xy() - pBullet->GetPosition().xy();
-            if(SameDirection90(vDiff.Normalized(), pBullet->GetFlyDir()))
+            if(!vDiff.IsNull() && SameDirection90(vDiff.Normalized(), pBullet->GetFlyDir()))
             {
                 coreVector3 vNewIntersection;
                 coreBool    bNewFirstHit;
@@ -2358,6 +2371,8 @@ void cRutilusMission::__SetupOwn()
         };
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_CYAN);
+
+        g_pSpecialEffects->OverrideShake(0.5f);
 
         if(STAGE_BEGINNING)
         {
@@ -3443,7 +3458,7 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_BOSS(m_Messier, {160.0f, 240.0f, 320.0, 400.0f, 800.0f})
+        STAGE_BOSS(m_Messier, {165.0f, 245.0f, 330.0, 410.0f, 820.0f})   // + 5
     },
     STAGE_PRE()
     {

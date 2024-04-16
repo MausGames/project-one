@@ -29,16 +29,16 @@ cBridgeMenu::cBridgeMenu()noexcept
     m_InputHeader.SetTextLanguage("ENTER_NAME");
 
     m_UnlockHeader.Construct      (MENU_FONT_DYNAMIC_5, MENU_OUTLINE_SMALL);
-    m_UnlockHeader.SetPosition    (coreVector2(0.0f,0.25f));
+    m_UnlockHeader.SetPosition    (coreVector2(0.0f,0.27f));
     m_UnlockHeader.SetTextLanguage("UNLOCKED");
 
     m_UnlockName.Construct  (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
-    m_UnlockName.SetPosition(coreVector2(0.0f,-0.2f));
+    m_UnlockName.SetPosition(coreVector2(0.0f,-0.18f));
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aUnlockDesc); ++i)
     {
         m_aUnlockDesc[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-        m_aUnlockDesc[i].SetPosition(coreVector2(0.0f, -0.27f - 0.06f * I_TO_F(i)));
+        m_aUnlockDesc[i].SetPosition(coreVector2(0.0f, -0.25f - 0.06f * I_TO_F(i)));
         m_aUnlockDesc[i].SetColor3  (COLOR_MENU_INSIDE);
     }
 
@@ -219,7 +219,7 @@ void cBridgeMenu::Move()
                 }
             }
 
-            const coreFloat fHeight = LERPB(-0.04f, 0.01f, STEP(1.0f, 2.0f, m_fUnlockTime));
+            const coreFloat fHeight = LERPB(-0.02f, 0.03f, STEP(1.0f, 2.0f, m_fUnlockTime));
             const coreFloat fAlpha  = STEPH3(1.0f, 2.0f, m_fUnlockTime) - STEPH3(2.0f, 3.0f, m_fUnlockTime);
 
             m_UnlockIcon.SetPosition(coreVector2(0.0f, fHeight));
@@ -511,23 +511,7 @@ coreBool cBridgeMenu::HasUnlocks()
     else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))                 return true;
     else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_AFTER_FIRST)) return true;
     else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))                 return true;
-#if defined(_CORE_DEBUG_)
-    else if(nApplyUnlockFunc(UNLOCK_WEAPON_WAVE)  && []()
-    {
-        for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
-        {
-            for(coreUintW j = 0u; j < 5u; ++j)
-            {
-                if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u))      return false;
-                if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u) && i) return false;
-            }
-        }
-        return true;
-    }())
-    {
-        return true;
-    }
-#endif
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_WAVE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][6];}))                 return true;
 
     return false;
 }

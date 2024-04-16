@@ -16,6 +16,7 @@
 #define DISTORTION_SCALE_FACTOR (SCALE_FACTOR)   // frame buffer resolution factor
 #define DISTORTION_WAVES        (8u)             // number of distortion-waves
 #define DISTORTION_BURSTS       (4u)             // number of distortion-bursts
+#define DISTORTION_ERASERS      (PLAYERS)        // 
 
 #define DISTORTION_WAVE_TINY    ( 1.2f), (3.0f)
 #define DISTORTION_WAVE_SMALL   ( 2.5f), (3.0f)
@@ -30,15 +31,18 @@
 class cDistortion final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_FrameBuffer;              // distortion frame buffer (reduced resolution)
+    coreFrameBuffer m_FrameBuffer;                // distortion frame buffer (reduced resolution)
 
-    coreObject2D m_aWave[DISTORTION_WAVES];     // 
-    coreUintW    m_iCurWave;                    // 
+    coreObject2D m_aWave[DISTORTION_WAVES];       // 
+    coreUintW    m_iCurWave;                      // 
 
-    coreObject2D m_aBurst[DISTORTION_BURSTS];   // 
-    coreUintW    m_iCurBurst;                   // 
+    coreObject2D m_aBurst[DISTORTION_BURSTS];     // 
+    coreUintW    m_iCurBurst;                     // 
 
-    coreBool m_bActive;                         // 
+    coreObject2D m_aEraser[DISTORTION_ERASERS];   // 
+    coreUintW    m_iCurEraser;                    // 
+
+    coreBool m_bActive;                           // 
 
 
 public:
@@ -50,8 +54,9 @@ public:
     void Update();
 
     // create distortion-objects
-    void CreateWave (const coreVector3 vPosition,                               const coreFloat fScale, const coreFloat fSpeed);
-    void CreateBurst(const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed);
+    void CreateWave  (const coreVector3 vPosition,                               const coreFloat fScale, const coreFloat fSpeed);
+    void CreateBurst (const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed);
+    void CreateEraser(const coreVector3 vPosition,                               const coreFloat fScale);
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}

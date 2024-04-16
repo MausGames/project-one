@@ -405,8 +405,8 @@ void cIntroBoss::__MoveOwn()
     // 
     else if(m_iPhase == 38u)
     {
-        const coreFloat fSide     = SIN(m_fPhaseTime       * (0.5f*PI)) * (0.7f + 0.3f * SIN(m_fPhaseTime       * (0.1f*PI))) * BLENDH3(MIN1(m_fPhaseTime       * 0.2f));
-        const coreFloat fSidePrev = SIN(m_fPhaseTimeBefore * (0.5f*PI)) * (0.7f + 0.3f * SIN(m_fPhaseTimeBefore * (0.1f*PI))) * BLENDH3(MIN1(m_fPhaseTimeBefore * 0.2f));
+        const coreFloat fSide     = SIN(m_fPhaseTime       * (0.5f*PI)) * (0.7f + 0.3f * SIN(MIN(m_fPhaseTime,       15.0f) * (0.1f*PI))) * BLENDH3(MIN1(m_fPhaseTime       * 0.2f));
+        const coreFloat fSidePrev = SIN(m_fPhaseTimeBefore * (0.5f*PI)) * (0.7f + 0.3f * SIN(MIN(m_fPhaseTimeBefore, 15.0f) * (0.1f*PI))) * BLENDH3(MIN1(m_fPhaseTimeBefore * 0.2f));
 
         const coreVector3 vTilt = coreVector3(TIME ? coreVector2(fSidePrev - fSide, -4.0f * TIME).Normalized() : coreVector2(0.0f,-1.0f), 0.0f);
         const coreVector3 vPos2 = coreVector3(fSide * 1.12f, -1.1f, 0.0f) + vTilt * -0.2f;
@@ -414,9 +414,9 @@ void cIntroBoss::__MoveOwn()
         this->SetPosition (vPos2 * FOREGROUND_AREA3);
         this->SetDirection(vTilt);
 
-        const coreFloat fFactor   = g_pGame->IsEasy() ? 5.0f : 10.0f;
-        const coreInt32 iTick     = F_TO_SI((fSide     + 1.0f) * fFactor);
-        const coreInt32 iTickPrev = F_TO_SI((fSidePrev + 1.0f) * fFactor);
+        const coreFloat fFactor   = g_pGame->IsEasy() ? 6.0f : 10.0f;
+        const coreInt32 iTick     = F_TO_SI((fSide     * 0.99f + 1.0f) * fFactor);
+        const coreInt32 iTickPrev = F_TO_SI((fSidePrev * 0.99f + 1.0f) * fFactor);
 
         if(iTick != iTickPrev)
         {

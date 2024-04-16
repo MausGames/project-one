@@ -734,7 +734,7 @@ void cGeluMission::__MoveOwnAfter()
 
                 if(InBetween(vDiff, -oFang.GetCollisionRange().xy(), oFang.GetCollisionRange().xy()))
                 {
-                    pBullet->Deactivate(true);
+                    pBullet->Deactivate(true);   // TODO 1: add correct impact parameter
 
                     if(m_iStageSub == 19u)   // TODO 1: HACK!!! this code-block should definitely be in the actual stage
                     {
@@ -828,7 +828,7 @@ void cGeluMission::__MoveOwnAfter()
                     const coreVector2 vDiff = pBullet->GetPosition().xy() - pWay->GetPosition().xy();
 
                     if(InBetween(vDiff, -pWay->GetCollisionRange().xy(), pWay->GetCollisionRange().xy()))
-                        pBullet->Deactivate(true);
+                        pBullet->Deactivate(true);   // TODO 1: add correct impact parameter
                 };
                 g_pGame->GetBulletManagerPlayer()->ForEachBullet                 (nBulletWayCollFunc);
                 g_pGame->GetBulletManagerEnemy ()->ForEachBulletTyped<cOrbBullet>(nBulletWayCollFunc);

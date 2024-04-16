@@ -2533,9 +2533,9 @@ void UnusedWaves()
                 pEnemyBullet->SetTexSize(coreVector2(1.0f,1.0f)      * (pEnemyBullet->GetTexSize().x + 0.01f)); // 0.12f
                 
                 if(pEnemyBullet->GetSize().x >= 15.0f)
-                    pEnemyBullet->Deactivate(true);
+                    pEnemyBullet->Deactivate(true); vIntersection.xy()?
                 
-                pPlayerBullet->Deactivate(true);
+                pPlayerBullet->Deactivate(true); vIntersection.xy()?
             }
         });
 #if 0
@@ -2579,7 +2579,7 @@ void UnusedWaves()
                     pEnemyBullet->SetSize(coreVector3(1.0f,0.35f,1.0f) * (pEnemyBullet->GetSize().x + fFactor));
                 }
 
-                pPlayerBullet->Deactivate(true);
+                pPlayerBullet->Deactivate(true); vIntersection.xy()?
             }
         });
 #endif
@@ -2752,7 +2752,7 @@ void UnusedWaves()
             {
                 g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cWaveBullet>([&](cWaveBullet* OUTPUT pBullet)
                 {
-                    if(pBullet->GetOwner() == pEnemy) pBullet->Deactivate(true);
+                    if(pBullet->GetOwner() == pEnemy) pBullet->Deactivate(true); vIntersection.xy()?
                 });
             }
         });

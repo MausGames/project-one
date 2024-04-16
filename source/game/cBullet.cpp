@@ -213,7 +213,7 @@ void cBullet::_EnableDepth()const
 // ****************************************************************
 // constructor
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
-: oBulletActive (BULLET_SET_INIT)
+: oBulletActive ()
 , iCurBullet    (0u)
 {
 }
@@ -442,7 +442,7 @@ cRayBullet::cRayBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // 
-    this->SetCollisionModifier(coreVector3(1.07f,1.0f,3.0f));
+    //this->SetCollisionModifier(coreVector3(1.07f,1.0f,3.0f));
 }
 
 
@@ -482,7 +482,7 @@ void cRayBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     
-    const coreFloat fRelSpeed = m_fSpeed / (8.0f*BULLET_SPEED_FACTOR);
+    const coreFloat fRelSpeed = m_fSpeed / (cRayBullet::ConfigSpeed()*BULLET_SPEED_FACTOR);
 
     // update animation
     //m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
@@ -496,6 +496,8 @@ void cRayBullet::__MoveOwn()
     this->SetSize (coreVector3(3.7f * fWave, 3.7f * fLen, 3.7f * fWave) * 0.52f * m_fScale);
     this->SetAlpha(MIN1(15.0f * m_fFade));
 
+    
+    this->SetCollisionModifier(coreVector3(1.07f * (1.0f/fWave),1.0f,3.0f));
     
     
     this->SetTexSize(coreVector2(0.4f, 0.2f * fLen) * 0.01f);
@@ -552,7 +554,7 @@ void cPulseBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
 
 
-    const coreFloat fRelSpeed = m_fSpeed / (6.0f*BULLET_SPEED_FACTOR);
+    const coreFloat fRelSpeed = m_fSpeed / (cPulseBullet::ConfigSpeed()*BULLET_SPEED_FACTOR);
     
     // update animation
     m_fAnimation.UpdateMod(0.1f * fRelSpeed * m_fAnimSpeed, 1.0f);
@@ -576,13 +578,10 @@ cSurgeBullet::cSurgeBullet()noexcept
 : m_fScale (1.0f)
 {
     // load object resources
-    this->DefineModel  ("bullet_wave.md3");
-    this->DefineVolume ("bullet_wave_volume.md3");
+    this->DefineModel  ("bullet_surge.md3");
+    this->DefineVolume ("bullet_surge_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // 
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,3.0f));
 }
 
 
@@ -591,7 +590,7 @@ cSurgeBullet::cSurgeBullet()noexcept
 void cSurgeBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 10.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -607,6 +606,9 @@ void cSurgeBullet::__ReflectOwn()
     m_fFade = 0.0f;
     this->SetSize (coreVector3(0.0f,0.0f,0.0f));
     this->SetAlpha(0.0f);
+
+    // 
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -617,15 +619,33 @@ void cSurgeBullet::__MoveOwn()
     // fly around
     this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+    
+    
+    //m_fScale -= 1.0f * TIME;
+    //if(m_fScale <= 0.0f) this->Deactivate(false);
+
+
+    const coreFloat fRelSpeed = m_fSpeed / (cSurgeBullet::ConfigSpeed()*BULLET_SPEED_FACTOR);
 
     // update animation
     m_fAnimation.UpdateMod(0.06f * m_fAnimSpeed, 1.0f);
-    this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
+    //this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
+    
+    this->SetTexSize(coreVector2(1.1f,0.25f) * 0.01f);
 
     // update fade
-    m_fFade.Update(1.0f);
-    this->SetSize (coreVector3(1.5f, 1.5f * MIN1(12.0f * m_fFade), 1.5f) * 2.35f * m_fScale);
-    this->SetAlpha(MIN1(15.0f * m_fFade));
+    constexpr coreFloat fFactor = 0.5f;
+    m_fFade.Update(fFactor * fRelSpeed);
+    
+    
+    const coreFloat fWave = 1.0f;//1.0f + 0.25f * SIN(m_fFade * 60.0f + 1.5f*PI);
+
+    const coreFloat fScale = BLENDB(MIN1(12.0f * m_fFade));
+    const coreFloat fLen =  (0.3f + 0.7f * fRelSpeed);
+    
+    //this->SetSize (coreVector3(1.5f, 1.5f * fScale, 1.5f) * 2.35f * m_fScale);
+    this->SetSize (coreVector3((1.5f - 0.1f * fScale) * fWave * (0.8f + 0.2f * fLen), 1.9f * fLen * fScale, (1.5f - 0.1f * fScale) * fWave * (0.8f + 0.2f * fLen)) * 2.35f * m_fScale);
+    this->SetAlpha(MIN1(15.0f / fFactor * m_fFade));
 }
 
 
@@ -733,7 +753,7 @@ void cFinalBullet::__MoveOwn()
     this->SetPosition(this->GetPosition() + m_vFlyDir3D * (m_fSpeed * TIME));
     
     
-    const coreFloat fRelSpeed = m_fSpeed / (16.0f*BULLET_SPEED_FACTOR);
+    const coreFloat fRelSpeed = m_fSpeed / (cFinalBullet::ConfigSpeed()*BULLET_SPEED_FACTOR);
 
     // update animation
     m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);

@@ -28,8 +28,8 @@ cCombatText::cCombatText()noexcept
 , m_fAlpha        (0.0f)
 {
     // create label objects
-    for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) {m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL); m_aLabel[i].PregenerateTexture("00000");}
-    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) {m_aLabel[i].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL); m_aLabel[i].PregenerateTexture("00000");}
+    for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) {m_aLabel[i].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL); m_aLabel[i].PregenerateTexture("00000");}
+    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) {m_aLabel[i].Construct(MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL); m_aLabel[i].PregenerateTexture("00000");}
 
     for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
     {
@@ -168,9 +168,12 @@ void cCombatText::Move()
             fAlpha    = LERPH3(0.0f, 1.0f, MIN1((fTime)        *  6.0f)) * fAlphaFull;
             vScale    = LERPB (0.5f, 1.0f, MIN1((1.0f - fTime) * 10.0f)) * coreVector2(1.0f,1.0f);
         }
+        
+        
+        const coreFloat fCover = (iType == COMBAT_TYPE_SCORE) ? g_pGame->GetInterface()->CalcGameCover(&oLabel, coreVector2(1.6f,1.6f), false) : 1.0f;
 
         oLabel.SetPosition(vPosition);
-        oLabel.SetAlpha   (fAlpha * (((m_aiType[i] != COMBAT_TYPE_SCORE) || (m_iLastScore == i)) ? 1.0f : 0.6f));
+        oLabel.SetAlpha   (fAlpha * (((m_aiType[i] != COMBAT_TYPE_SCORE) || (m_iLastScore == i)) ? 1.0f : 0.6f) * fCover);
         oLabel.SetScale   (vScale);
         
         

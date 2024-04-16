@@ -19,7 +19,7 @@ cTitleMenu::cTitleMenu()noexcept
     // create menu objects
     m_GameLogo.DefineTexture(0u, "game_logo.png");
     m_GameLogo.DefineProgram("default_2d_program");
-    m_GameLogo.SetPosition  (coreVector2(0.0f,0.13f));
+    m_GameLogo.SetPosition  (coreVector2(0.0f,0.14f));
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.8f);
     m_GameLogo.SetColor3    (COLOR_MENU_INSIDE);
 
@@ -38,11 +38,11 @@ cTitleMenu::cTitleMenu()noexcept
     m_Shadow.DefineTexture(0u, "effect_headlight_point.png");
     m_Shadow.DefineProgram("menu_single_program");
     m_Shadow.SetPosition  (m_GameLogo.GetPosition());
-    m_Shadow.SetSize      (m_GameLogo.GetSize() * coreVector2(1.4f,1.2f));
+    m_Shadow.SetSize      (m_GameLogo.GetSize() * coreVector2(1.35f,1.2f));
     m_Shadow.SetColor3    (coreVector3(0.0f,0.0f,0.0f));
 
     m_PromptText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
-    m_PromptText.SetTextLanguage("PROMPT");
+    m_PromptText.SetTextLanguage(DEFINED(_CORE_SWITCH_) ? "PROMPT_SWITCH" : "PROMPT");
 
     m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_BIG);
     m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.045f));
@@ -56,7 +56,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[1].SetText     (PRINT("Project One%s (%s) - v1.1.2 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", Core::Platform->GetIdentifier(), __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One%s (%s) - v1.2.0 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", Core::Platform->GetIdentifier(), __DATE__, __TIME__));
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_Shadow);
@@ -129,7 +129,7 @@ void cTitleMenu::Move()
     }
 
     // 
-    m_Shadow.SetAlpha(m_Shadow.GetAlpha() * 0.5f);
+    m_Shadow.SetAlpha(m_Shadow.GetAlpha() * 0.4f);
 }
 
 

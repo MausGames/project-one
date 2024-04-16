@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.1.2 (https://www.maus-games.at)                             |//
+//| Project One v1.2.0 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -33,27 +33,20 @@
 // TODO 3: check all shaders if alpha is required
 // TODO 4: full initializer lists everywhere (don't forget parent classes)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
-// TODO 3: check for 16-bit half float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
 // TODO 4: unify "forward" and "transform" comments in shaders
 // TODO 3: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
 // TODO 4: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
-// TODO 3: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
-// TODO 1: _CORE_SSE_ try to just remove the coreMath low-precision functions (macro replace ? will only work partially (in gameplay code))
 // TODO 3: reduce number of shader-lights with static_assert, change something like that into static config
 // TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
 // TODO 3: make sure everything with at least 4 instances uses batch-lists
 // TODO 4: replace / with RCP where possible
 // TODO 4: ENABLE_BITWISE when ?
-// TODO 3: transition shader only needs alpha for menu, but not for background -> create permutations
 // TODO 2: reshape causes some batch-list to be initialized twice
 // TODO 5: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
-// TODO 3: check for and prevent accumulation of small rounding errors: incremental matrix rotation
 // TODO 3: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
 // TODO 3: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
-// TODO 3: make sure shaders use 0.5,0.5 for pixel centers
-// TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
 // TODO 5: convert bigger sound-effects (ambient) to music ?
@@ -69,17 +62,14 @@
 // TODO 4: change arrays of structs to structs of arrays where possible (also in engine)
 // TODO 2: test maximum number of replays, provide upper limit, define communication when approaching or reaching limit
 // TODO 2: prevent shaking of center-aligned rectified animated text
-// TODO 3: add gamepad led colors (nur wenn multiplayer aktiv ist, ansonsten zurück auf default value, wegen merged input)
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 // TODO 4: check if any % (modulo) can be changed to coreMath::IsAligned
 // TODO 2: fix broken pw-database printing on MacOS (maybe put TODO into engine) (maybe related to geteuid<>getuid) (# replaced geteuid with getuid, which seems to be correct'er, just need to check if that was the issue on macos)
 // TODO 1: look if enemies with health 10 should be changed to 4
-// TODO 1: check for importing save-game from demo (if on Steam and no main save-game found)
 // TODO 1: make frequency rounding corrections: boss ticker, player weapon
 // TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
-// TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
-// TODO 1: should bullets create particles when shot ? especially for bosses
 // TODO 3: remove unused mechanics (#ifdef would be enough) so they don't take up code and memory
+// TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
@@ -89,16 +79,12 @@
 // TODO 3: sphere model kann ungenau sein (visual), vor allem bei der area-bubble bei P1 magenta phase
 // TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
 // TODO 1: [MF] [HIGH] [ULTRA] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
-// TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select
+// TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select (shoot speed, shoot damage, move speed, score multiplier, player size, player bullet size, enemy size, enemy bullet size, enemy bullet/attack speed, enemy speed, side-modifier (more damage to the right), extra/minus life, extra/minus shield, 
 // TODO 1: [MF] [HIGH] [ULTRA] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
-// TODO 3: health-bars für stärkere gegner (>= 30 or 50 hp), blenden sich ein bei schaden (und wieder aus nach cooldown ?)
 // TODO 3: GetCollisionRange().xy().Length() inefficient in some places (bullets), hab aber teils wieder auf GetCollisionRadius() geswechselt, weils richtiger is
-// TODO 3: in arcade summary: display 1CC, difficulty, number of hits, number of continues, other?
-// TODO 1: [MF] [HIGH] [ULTRA] new localization: weapons, vaus, console specific, difficulty, new achievements, import save-game, vsync description (others as well?)
 
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
-// TODO 3: player shooting wie ikaruga, RSG (single shot + vulkan)
 // TODO 5: plant movement
 // TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (maybe with separation of active-list), eine liste für shadow
 // TODO 3: bei Torus, rückseite von spear bullets zerstören outline von orb bullets
@@ -113,7 +99,6 @@
 // TODO 3: D4Windows anschauen, ob sie maus steuert und controller gleichzeitig verwendet (vielleicht wegen gyro oder accelerometer ?)
 
 // Merged List:
-// TODO 4: MAX SERIES überall entfernen (im frontend)   überall nach maxseries suchen und ausbessern, außerdem nur relevant auf segment-ebene
 // TODO 3: add more details to cloud background (transparent enemy ships far in the back ? like Ikagura and RSG)
 // TODO 3: einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
 // TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?)
@@ -276,7 +261,8 @@ struct sVersion final
     const coreChar*  pcString;
     const coreUint16 iNumber;
 };
-constexpr sVersion g_aVersion[] = {{"1.0.0", 1u}};
+constexpr sVersion g_aVersion[] = {{"1.2.0", 1u}};
+constexpr sVersion g_Version = {"1.2.0", 1u};
 
 
 // collision types
@@ -392,7 +378,6 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"
-#include "visual/cWorm.h"
 #include "visual/cIcon.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
@@ -429,7 +414,6 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "interface/cMsgBox.h"
 #include "interface/cScrollBox.h"
 #include "interface/cTooltip.h"
-#include "interface/cWorldMap.h"
 #include "interface/menu/cMenu.h"
 #include "game/cTable.h"
 #include "game/cBullet.h"

@@ -328,7 +328,7 @@ void cRutilusMission::DisablePlate(const coreUintW iIndex, const coreBool bAnima
     {
         g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+            pPlayer->RemoveStatus(PLAYER_STATUS_WEAK_BACK | PLAYER_STATUS_NO_INPUT_TURN);
         });
     }
 
@@ -808,7 +808,7 @@ void cRutilusMission::__MoveOwnAfter()
         // 
         g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+            pPlayer->RemoveStatus(PLAYER_STATUS_WEAK_BACK | PLAYER_STATUS_NO_INPUT_TURN);
 
             if(!pPlayer->IsRolling())
             {
@@ -839,6 +839,24 @@ void cRutilusMission::__MoveOwnAfter()
                         if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) {iNewWarnDir = 4u; if(!SameDirection90(vRealDir, coreVector2( 1.0f, 0.0f) * vFlip)) bNewWarn = true;}
 
                         // 
+                        if(g_CurConfig.Input.aiControlMode[i] == 3u)
+                        {
+                            const coreBool bPressA = HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT(0u, 0u));
+                            const coreBool bPressB = HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_RAPID_FIRE);
+                            const coreBool bHoldA  = HAS_BIT(pPlayer->GetInput()->iActionHold,  PLAYER_ACTION_SHOOT(0u, 0u));
+                            const coreBool bHoldB  = HAS_BIT(pPlayer->GetInput()->iActionHold,  PLAYER_ACTION_RAPID_FIRE);
+                            if(((bPressA && !bHoldB) || (bPressB && !bHoldA) || (bPressA && bPressB)) && !pPlayer->GetInput()->vMove.IsNull())
+                            {
+                                const coreUint8 iHold = PackDirection(MapToAxisInv(pPlayer->GetInput()->vMove, vFinal) * vFlip);
+
+                                     if(iHold == 0u) {iNewWarnDir = 1u; if(!SameDirection90(vRealDir, coreVector2( 0.0f, 1.0f) * vFlip)) bNewWarn = true;}
+                                else if(iHold == 2u) {iNewWarnDir = 2u; if(!SameDirection90(vRealDir, coreVector2(-1.0f, 0.0f) * vFlip)) bNewWarn = true;}
+                                else if(iHold == 4u) {iNewWarnDir = 3u; if(!SameDirection90(vRealDir, coreVector2( 0.0f,-1.0f) * vFlip)) bNewWarn = true;}
+                                else if(iHold == 6u) {iNewWarnDir = 4u; if(!SameDirection90(vRealDir, coreVector2( 1.0f, 0.0f) * vFlip)) bNewWarn = true;}
+                            }
+                        }
+
+                        // 
                         if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT)  ||
                            HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT) || (bNewWarn && (iNewWarnDir != m_aiWarnDir[i])))
                         {
@@ -852,13 +870,8 @@ void cRutilusMission::__MoveOwnAfter()
                         if(iNewWarnDir) m_aiWarnDir[i] = iNewWarnDir;
                         m_abWarn[i] = bNewWarn;
 
-                        //if(!SameDirection90(pPlayer->GetDirection().xy(), oPlate.GetDirection().xy()))
-                        //{
-                        //    g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
-                        //}
-
                         pPlayer->SetDirection(oPlate.GetDirection());
-                        pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
+                        pPlayer->AddStatus   (PLAYER_STATUS_WEAK_BACK | PLAYER_STATUS_NO_INPUT_TURN);
                         break;
                     }
                 }
@@ -1006,9 +1019,13 @@ void cRutilusMission::__MoveOwnAfter()
         fLimit = 1.0f;
         g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cRayBullet>(nGravityFunc);
 
-        fPower = m_fWavePower * 9.0f;
-        fLimit = 1.35f;
+        fPower = m_fWavePower * 7.2f;
+        fLimit = 1.3f;
         g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cPulseBullet>(nGravityFunc);
+
+        fPower = m_fWavePower * 7.2f;//6.2f;//3.2f;
+        fLimit = 1.3f;
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cSurgeBullet>(nGravityFunc);
 
         fPower = m_iWaveType ? (this->GetWavePull() ? 0.15f : 0.1f) : 0.3f;
         fLimit = 6.0f;
@@ -1063,26 +1080,35 @@ void cRutilusMission::__MoveOwnAfter()
         {
             const coreVector2 vDiff = pSlap->GetPosition().xy() - pBullet->GetPosition().xy();
 
-            if(vDiff.LengthSq() < pBullet->GetCollisionRange().xy().LengthSq() + POW2(7.0f))
+            if(vDiff.LengthSq() < pBullet->GetCollisionRange().xy().LengthSq() + POW2(7.0f))   // # wrong addition
+            {
+                bActive = true;
+            }
+        });
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cSurgeBullet>([&](const cSurgeBullet* pBullet)
+        {
+            const coreVector2 vDiff = pSlap->GetPosition().xy() - pBullet->GetPosition().xy();
+
+            if(vDiff.LengthSq() < pBullet->GetCollisionRange().xy().LengthSq() + POW2(4.0f))   // # wrong addition
             {
                 bActive = true;
             }
         });
         
-        if(bActive) m_afSlapValue[i].UpdateMin( 10.0f, 1.0f);
+        if(bActive) m_afSlapValue[i].UpdateMin( 10.0f, 1.05f);
                else m_afSlapValue[i].UpdateMax(-10.0f, 0.0f);
                
         pSlap->SetAlpha(MIN1(pSlap->GetAlpha() + 5.0f * TIME));
 
         // 
         const coreFloat   fOffset = I_TO_F(i) * (1.0f/8.0f);
-        const coreVector2 vDir    = coreVector2::Direction(LERPH3(0.0f*PI, 0.25f*PI, m_afSlapValue[i]));
+        const coreVector2 vDir    = coreVector2::Direction(LERPH3(0.0f*PI, 0.25f*PI, MIN1(m_afSlapValue[i])));
 
         // 
         pSlap->SetDirection(coreVector3(vDir, 0.0f));
         pSlap->SetTexOffset(coreVector2(0.0f, FRACT(0.2f * m_fAnimation + fOffset)));
         
-        pSlap->SetColor3(LERPH3(COLOR_ENERGY_BLUE, COLOR_ENERGY_ORANGE, m_afSlapValue[i]));
+        pSlap->SetColor3(LERPH3(COLOR_ENERGY_BLUE, COLOR_ENERGY_ORANGE, MIN1(m_afSlapValue[i])));
         
         
             pSlap->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 2.2f * pSlap->GetAlpha());

@@ -48,14 +48,19 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oChainValue.Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     oChainValue.SetColor3(COLOR_MENU_INSIDE);
 
-    oImmune.Construct      (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    oImmune.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     oImmune.SetColor3      (COLOR_MENU_INSIDE);
     oImmune.SetTextLanguage("TEXT_IMMUNE");
+
+    oSpeed.Construct(MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    oSpeed.SetColor3(COLOR_MENU_INSIDE);     
+    oSpeed.SetText  (ICON_FORWARD);
 
     // 
     fShieldBump = 0.0f;
     iShieldOld  = 0;
     fImmuneTime = 0.0f;
+    fSpeedTime  = 0.0f;
     fSpin       = 0.0f;
     fSpin2      = 0.0f;
 }
@@ -384,6 +389,7 @@ void cInterface::Render()
             m_aView[i].oComboValue .Render();
             m_aView[i].oChainValue .Render();
             m_aView[i].oImmune     .Render();
+            m_aView[i].oSpeed      .Render();
         }
 
         if(m_fAlphaBoss)
@@ -434,10 +440,10 @@ void cInterface::Render()
 // move the interface
 void cInterface::Move()
 {
-    ASSERT(STATIC_ISVALID(g_pGame))
+    const coreBool bInGame = STATIC_ISVALID(g_pGame);
 
-    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
-    const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();
+    const coreUintW iMissionIndex = bInGame ? g_pGame->GetCurMissionIndex()                  : 0u;
+    const coreUintW iSegmentIndex = bInGame ? g_pGame->GetCurMission()->GetCurSegmentIndex() : 0u;
 
     // 
     m_fAnimation.UpdateMod(6.0f*PI, 2.0f*PI);
@@ -481,11 +487,18 @@ void cInterface::Move()
         const coreVector2   avScale2 [] = {coreVector2(1.2f,1.4f), coreVector2(1.2f,1.2f), coreVector2(1.4f,2.0f), coreVector2(1.4f,2.0f)};
         const coreFloat fScoreCover = this->CalcGameCover(apObject2, avScale2, ARRAY_SIZE(apObject2), true);
         
-
-        if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+        if(!bInGame)
         {
-            if(oView.iShieldOld != pPlayer->GetCurShield()) oView.fShieldBump = 1.0f;
-            oView.iShieldOld = pPlayer->GetCurShield();
+            oView.fSpin  = I_TO_F(LIVES);
+            oView.fSpin2 = 1.0f;
+        }
+
+        if(!bInGame || pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+        {
+            const coreInt32 iCurShield = bInGame ? pPlayer->GetCurShield() : 10;
+
+            if(oView.iShieldOld != iCurShield) oView.fShieldBump = 1.0f;
+            oView.iShieldOld = iCurShield;
 
             oView.fShieldBump.UpdateMax(-3.0f, 0.0f);
             const coreFloat fBump = BLENDBR(oView.fShieldBump);
@@ -495,7 +508,7 @@ void cInterface::Move()
                        else oView.fSpin2 = 0.0f;
 
             // set shield bar size
-            const coreFloat fBase    = pPlayer->GetCurShieldPct();
+            const coreFloat fBase    = bInGame ? pPlayer->GetCurShieldPct() : 0.7f;
             const coreFloat fPercent = fBase * oView.fSpin2;
             const coreFloat fWidth   = oView.aShieldBar[0].GetSize().x - 0.01f;
             oView.aShieldBar[1].SetSize     (coreVector2(fPercent * fWidth, oView.aShieldBar[1].GetSize().y));
@@ -509,18 +522,18 @@ void cInterface::Move()
             oView.aShieldBar[2].SetTexOffset(coreVector2((oView.aShieldBar[2].GetAlignment().x < 0.0f) ? 0.0f : fPercent, 1.0f));
 
             // set shield bar color
-            const coreVector3 vColor = LERP((pPlayer->GetEnergyColor() * 2.3f) * 0.95f * 0.95f + ((fBase <= 0.2f) ? (fDanger * 0.5f) : 0.0f), coreVector3(1.0f,1.0f,1.0f), fBump);
+            const coreVector3 vColor = bInGame ? LERP((pPlayer->GetEnergyColor() * 2.08f) + ((fBase <= 0.2f) ? (fDanger * 0.5f) : 0.0f), coreVector3(1.0f,1.0f,1.0f), fBump) :( COLOR_PLAYER_BLUE * 2.08f);
             oView.aShieldBar[1].SetColor3(vColor * 1.0f);
             oView.aShieldBar[2].SetColor3(vColor * 0.3f);
 
             oView.aShieldBar[0].SetColor3(LERP(coreVector3(0.0f,0.0f,0.0f), coreVector3(1.0f,1.0f,1.0f) * 0.6f, fBump));
 
             // display shield value
-            oView.oShieldValue.SetText(PRINT("%.0f", I_TO_F(pPlayer->GetCurShield()) * oView.fSpin2));
+            oView.oShieldValue.SetText(PRINT("%.0f", I_TO_F(iCurShield) * oView.fSpin2));
         }
 
         // 
-        const coreFloat fCurHealth = I_TO_F(pPlayer->GetCurHealth());
+        const coreFloat fCurHealth = bInGame ? I_TO_F(pPlayer->GetCurHealth()) : I_TO_F(LIVES);
              if(!m_fAlphaAll)             oView.fSpin = 0.0f;
         else if(fCurHealth > oView.fSpin) oView.fSpin.UpdateMin( 8.0f, fCurHealth);
         else if(fCurHealth < oView.fSpin) oView.fSpin.UpdateMax(-8.0f, fCurHealth);
@@ -548,22 +561,24 @@ void cInterface::Move()
             oView.aLife[j].Move();
         }
 
-        const cScoreTable* pScoreTable = pPlayer->GetScoreTable();
+        const cScoreTable* pScoreTable = bInGame ? pPlayer->GetScoreTable() : NULL;
 
         // display score
-        oView.oScore.SetText(PRINT("%07u", pScoreTable->GetScoreTotal()));
+        oView.oScore.SetText(PRINT("%07u", bInGame ? pScoreTable->GetScoreTotal() : 0));
 
-        const coreUint32 iModifier  = pScoreTable->GetModifier();
-        const coreBool   bShowValue = (iModifier > (pScoreTable->HasOverride() ? 0u : 10u));
-        const coreBool   bShowBar   = bShowValue && (!pScoreTable->HasOverride() || pScoreTable->GetCurChain());
+        const coreUint32 iModifier  = bInGame ? pScoreTable->GetModifier() : 100u;
+        const coreUint32 iChain     = bInGame ? pScoreTable->GetCurChain() : 1000u;
+        const coreFloat  fCooldown  = bInGame ? pScoreTable->GetCooldown() : 1.0f;
+        const coreBool   bShowValue = !bInGame || ((iModifier > (pScoreTable->HasOverride() ? 0u : 10u)));
+        const coreBool   bShowBar   = !bInGame || (bShowValue && (!pScoreTable->HasOverride() || iChain));
 
         // 
-        oView.oCooldownBar.SetSize  (coreVector2(bShowBar ? (0.15f * MIN1(pScoreTable->GetCooldown() * 1.1f)) : 0.0f, 0.013f));
-        oView.oCooldownBar.SetColor3((pScoreTable->GetCooldown() > 0.5f) ? pPlayer->GetMenuColor() : COLOR_MENU_RED);
+        oView.oCooldownBar.SetSize  (coreVector2(bShowBar ? (0.15f * MIN1(fCooldown * 1.1f)) : 0.0f, 0.013f));
+        oView.oCooldownBar.SetColor3(bInGame ? ((fCooldown > 0.5f) ? pPlayer->GetMenuColor() : COLOR_MENU_RED) : COLOR_MENU_BLUE);
 
         // 
         oView.oComboValue.SetText(bShowValue ? PRINT("x%u.%u", iModifier / 10u, iModifier % 10u) : "");
-        oView.oChainValue.SetText((bShowValue && pScoreTable->GetCurChain()) ? PRINT("+%u", pScoreTable->GetCurChain()) : "");
+        oView.oChainValue.SetText((bShowValue && iChain) ? PRINT("+%u", iChain) : "");
 
         oView.oComboValue.SetEnabled(oView.oComboValue.GetText()[0] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         oView.oChainValue.SetEnabled(oView.oChainValue.GetText()[0] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
@@ -576,6 +591,17 @@ void cInterface::Move()
         oView.oImmune.SetPosition(MapToAxis(GetTranslationArea(oView.aLife[2]), g_vHudDirection) + coreVector2(0.0f, 0.05f * fImmuneValue));
         oView.oImmune.SetEnabled (oView.fImmuneTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
+        // 
+        const coreBool bFireSpeed = bInGame && HAS_BIT(pPlayer->GetInput()->iStatus, 2u);
+        if(bFireSpeed) oView.fSpeedTime.UpdateMin( 5.0f, 1.0f);
+                  else oView.fSpeedTime.UpdateMax(-5.0f, 0.0f);
+        const coreFloat fSpeedValue = BLENDH3(1.0f - oView.fSpeedTime);
+
+        // 
+        oView.oSpeed.SetPosition(MapToAxis(GetTranslationArea(oView.aLife[0]), g_vHudDirection) + coreVector2(fSpeedValue * 0.01f * (bFireSpeed ? -1.0f : 1.0f), 0.0f));
+        //oView.oSpeed.SetPosition(g_pForeground->Project2D(pPlayer->GetPosition()) + coreVector2(fSpeedValue * 0.01f * (bFireSpeed ? -1.0f : 1.0f), 0.0f));
+        oView.oSpeed.SetEnabled (oView.fSpeedTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
         // set player transparency
         oView.aShieldBar[0].SetAlpha(fAlphaPlayerFull * fHealthCover);
         oView.aShieldBar[1].SetAlpha(fAlphaPlayerFull * fHealthCover);
@@ -585,7 +611,8 @@ void cInterface::Move()
         oView.oCooldownBar .SetAlpha(fAlphaPlayerFull * fScoreCover);
         oView.oComboValue  .SetAlpha(fAlphaPlayerFull * fScoreCover);
         oView.oChainValue  .SetAlpha(fAlphaPlayerFull * fScoreCover);
-        oView.oImmune      .SetAlpha(fAlphaPlayerFull * (1.0f - fImmuneValue) * fHealthCover);
+        oView.oImmune      .SetAlpha(fAlphaPlayerFull * fHealthCover * (1.0f - fImmuneValue));
+        oView.oSpeed       .SetAlpha(fAlphaPlayerFull * fHealthCover * (1.0f - fSpeedValue));
 
         // move player
         oView.oShieldValue .Move();
@@ -597,10 +624,11 @@ void cInterface::Move()
         oView.oComboValue  .Move();
         oView.oChainValue  .Move();
         oView.oImmune      .Move();
+        oView.oSpeed       .Move();
     }
 
     // check for active boss
-    const cBoss* pBoss = g_pGame->GetCurMission()->GetCurBoss();
+    const cBoss* pBoss = bInGame ? g_pGame->GetCurMission()->GetCurBoss() : NULL;
     if(pBoss)
     {
         // 
@@ -633,7 +661,7 @@ void cInterface::Move()
     }
 
     coreBool bTurf = false;
-    if(g_pGame->GetCurMission()->GetID() == cAterMission::ID)
+    if(bInGame && (g_pGame->GetCurMission()->GetID() == cAterMission::ID))
     {
         const cTurf* pTurf = d_cast<cAterMission*>(g_pGame->GetCurMission())->GetTurf();
 
@@ -663,7 +691,7 @@ void cInterface::Move()
     }
 
     // display time
-    const coreFloat fTime = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
+    const coreFloat fTime = bInGame ? g_pGame->GetTimeTable()->GetTimeSegmentSafe() : 10.0f;
     if(fTime)
     {
         m_aBossTime[0].SetText(PRINT("%.0f.", FLOOR(      fTime)));
@@ -686,7 +714,7 @@ void cInterface::Move()
     }
 
     // 
-    const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftSegmentSafe();
+    const coreInt32 iShift = bInGame ? g_pGame->GetTimeTable()->GetShiftSegmentSafe() : 10;
     if(fTime)
     {
         m_aBossTime[2].SetText(PRINT(" %+d", iShift));
@@ -694,7 +722,14 @@ void cInterface::Move()
     }
     
     
-    if(((pBoss ? fAlphaBossFull : fAlphaWaveFull) || m_iFakeEnd) && !m_bBossChange)
+    if(!bInGame)
+    {
+        m_SegmentBest.SetText   ("10.0 +10");
+        m_SegmentBest.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
+        m_fAlphaSegment = 1.0f;
+    }
+    else if(((pBoss ? fAlphaBossFull : fAlphaWaveFull) || m_iFakeEnd) && !m_bBossChange)
     {
         if(iSegmentIndex != MISSION_NO_SEGMENT)
         {
@@ -793,11 +828,11 @@ void cInterface::Move()
     
     
     
-    
+    constexpr coreFloat afDummyGoal[] = {100.0f, 200.0f, 300.0f, 400.0f, 500.0f};
 
-    const coreFloat* pfMedalGoal  = g_pGame->GetCurMission()->GetMedalGoal();
-    const coreFloat  fTimeShifted = g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe();
-    if(pfMedalGoal && fTime && !m_iFakeEnd    && (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT))
+    const coreFloat* pfMedalGoal  = bInGame ? g_pGame->GetCurMission()->GetMedalGoal()              : afDummyGoal;
+    const coreFloat  fTimeShifted = bInGame ? g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe() : 0.0f;
+    if(pfMedalGoal && fTime && !m_iFakeEnd    && (!bInGame || (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT)))
     {
         const coreUint8 iNewMedal = cGame::CalcMedal(fTimeShifted, pfMedalGoal);
 
@@ -815,7 +850,7 @@ void cInterface::Move()
         m_fAlphaGoal.UpdateMax(-2.0f, 0.0f);
     }
 
-    if(fTime    && (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT))
+    if(fTime    && (!bInGame || (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT)))
     {
         m_fGoalBump.UpdateMax(-4.0f, 0.0f);
         m_GoalMedal.SetSize(coreVector2(1.0f,1.0f) * LERPBR(0.04f, 0.06f, m_fGoalBump));
@@ -923,7 +958,7 @@ void cInterface::Move()
     
     for(coreUintW i = 0u; i < INTERFACE_BADGES; ++i)
     {
-        const coreBool bState = (iSegmentIndex != MISSION_NO_SEGMENT) && g_pGame->GetPlayer(0u)->GetDataTable()->GetBadge(i, iMissionIndex, iSegmentIndex);
+        const coreBool bState = (iSegmentIndex != MISSION_NO_SEGMENT) && (!bInGame || g_pGame->GetPlayer(0u)->GetDataTable()->GetBadge(i, iMissionIndex, iSegmentIndex));
         
         if(bState && !HAS_BIT(m_iBadgeState, i))
         {
@@ -937,7 +972,7 @@ void cInterface::Move()
         const coreFloat fBump = BLENDBR(m_afBadgeBump[i]);
         
         
-        const coreBool bIntro = (g_pGame->GetCurMission()->GetID() == cIntroMission::ID);
+        const coreBool bIntro = (bInGame && (g_pGame->GetCurMission()->GetID() == cIntroMission::ID));
         const coreBool bIntroShow = !bIntro || ((i < 1u) && !d_cast<cIntroMission*>(g_pGame->GetCurMission())->GetFirstPlay());
         const coreUintW iNum = bIntro ? 1u : INTERFACE_BADGES;
         
@@ -966,7 +1001,7 @@ void cInterface::Move()
     }
 
     // check for active banner
-    const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart;
+    const coreFloat fBanner = bInGame ? (g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) : -1.0f;
     if((fBanner <= m_fBannerDuration) && (fBanner >= 0.0f))
     {
         // calculate visibility and animation value
@@ -997,7 +1032,7 @@ void cInterface::Move()
             if(m_fShake >= 1.0f)
             {
                 m_fShake = FRACT(m_fShake);
-                m_aBannerText[3].SetPosition(coreVector2::Rand(1.0f) * (g_CurConfig.Graphics.iShake ? 0.0016f : 0.0f));   // only on/off
+                m_aBannerText[3].SetPosition(coreVector2::Rand(1.0f) * 0.0016f);//(g_CurConfig.Graphics.iShake ? 0.0016f : 0.0f));   // only on/off
             }
         }
 
@@ -1053,7 +1088,7 @@ void cInterface::Move()
     }
 
     // check for active story
-    const coreFloat fStory = g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart;
+    const coreFloat fStory = bInGame ? (g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) : -1.0f;
     if((fStory <= m_fStoryDuration) && (fStory >= 0.0f))
     {
         // 
@@ -1074,7 +1109,7 @@ void cInterface::Move()
     m_aDialogText[1].Move();
 
     // 
-    const coreFloat fFragment = g_pGame->GetTimeTable()->GetTimeEvent() - m_fFragmentStart;
+    const coreFloat fFragment = bInGame ? (g_pGame->GetTimeTable()->GetTimeEvent() - m_fFragmentStart) : -1.0f;
     if((fFragment <= m_fFragmentDuration) && (fFragment >= 0.0f))
     {
         // 
@@ -1150,7 +1185,7 @@ void cInterface::Move()
     }
 
     // 
-    const coreFloat fAlert = g_pGame->GetTimeTable()->GetTimeEvent() - m_fAlertStart;
+    const coreFloat fAlert = bInGame ? (g_pGame->GetTimeTable()->GetTimeEvent() - m_fAlertStart) : -1.0f;
     if(m_pAlertSound->EnableRef(this))
     {
         m_pAlertSound->SetVolume(BLENDH3(CLAMP01((4.5f - fAlert) * 4.0f)));
@@ -1203,7 +1238,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub, cons
         m_aBannerText[2].DefineProgram("menu_swipe_label_program");
         m_aBannerText[3].DefineProgram("menu_swipe_label_program");
 
-        m_aBannerText[2].SetPosition(coreVector2(0.0f,0.07f));
+        m_aBannerText[2].SetPosition(coreVector2(0.0f,0.07f + 0.002f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,0.0f));
 
         m_aBannerText[2].SetCenter(coreVector2(0.0f, INTERFACE_BANNER_HEIGHT));
@@ -1277,7 +1312,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub, const c
         m_aBannerText[2].DefineProgram("menu_swipe_label_program");
         m_aBannerText[3].DefineProgram("menu_swipe_label_program");
 
-        m_aBannerText[2].SetPosition(coreVector2(0.0f,0.07f));
+        m_aBannerText[2].SetPosition(coreVector2(0.0f,0.07f + 0.002f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,0.0f));
 
         m_aBannerText[2].SetCenter(coreVector2(0.0f, INTERFACE_BANNER_HEIGHT));
@@ -1493,11 +1528,24 @@ void cInterface::ShowAlert()
 
 
 // ****************************************************************
+// 
+void cInterface::OverrideBanner(const coreChar* pcMain, const coreUint8 iMedal, const coreUint8 iMedalType)
+{
+    // 
+    m_aBannerText[3].SetText(pcMain);
+
+    // 
+    ASSERT(iMedal != MEDAL_NONE)
+    cMenu::ApplyMedalTexture(&m_Medal, iMedal, iMedalType, true);
+}
+
+
+// ****************************************************************
 // check for active banner
 coreBool cInterface::IsBannerActive()const
 {
     // compare with game-time offset
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration);
+    return STATIC_ISVALID(g_pGame) && ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration);
 }
 
 
@@ -1530,7 +1578,7 @@ void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2, const
 coreBool cInterface::IsStoryActive()const
 {
     // 
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= m_fStoryDuration);
+    return STATIC_ISVALID(g_pGame) && ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= m_fStoryDuration);
 }
 
 
@@ -1583,13 +1631,13 @@ void cInterface::ShowFragment(const coreUint8 iNewIndex)
 coreBool cInterface::IsFragmentActive()const
 {
     // 
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fFragmentStart) <= m_fFragmentDuration);
+    return STATIC_ISVALID(g_pGame) && ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fFragmentStart) <= m_fFragmentDuration);
 }
 
 
 // ****************************************************************
 // 
-void cInterface::UpdateLayout()
+void cInterface::UpdateLayout(const coreBool bForce)
 {   
     const coreVector2 vCenter = coreVector2(0.5f,0.5f) - (g_CurConfig.Game.iHudType ? coreVector2(1.0f,1.0f) : Core::System->GetResolution().yx().LowRatio()) * 0.005f;
     // TODO 1: option 0.5f-0.45f, handle aspect ratio (for outside) (also up-down)
@@ -1698,7 +1746,7 @@ void cInterface::UpdateLayout()
     nUpdateFunc(&m_GoalTime,  vTop, coreVector2(-1.0f,-1.0f * vFlip.y));
 
     
-    const coreBool bMulti = g_pGame->IsMulti();
+    const coreBool bMulti = (STATIC_ISVALID(g_pGame) || bForce) && g_pGame->IsMulti();
     
     // 
     for(coreUintW j = 0u; j < INTERFACE_BADGES;  ++j) nUpdateFunc(&m_aBadge     [j], bMulti ? vBottom : vCenter.InvertedY(), (bMulti ? (coreVector2( 0.0f,1.0f) * vFlip) : (coreVector2(-1.0f,1.0f) * vFlip)));     
@@ -1748,6 +1796,42 @@ void cInterface::UpdateSpacing()
 
 // ****************************************************************
 // 
+void cInterface::UpdateEnabled(const coreBool bForce)
+{
+    const coreBool bInGame = STATIC_ISVALID(g_pGame) || bForce;
+
+    // loop through all player views
+    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    {
+        sPlayerView& oView   = m_aView[i];
+        cPlayer*     pPlayer = g_pGame->GetPlayer(i);
+
+        if(!bInGame || pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+        {
+            // 
+            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.aShieldBar[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        }
+        else
+        {
+            // 
+            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.aShieldBar[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        }
+    }
+
+    // 
+    m_SegmentName.SetEnabled((bInGame && g_pGame->IsMulti()) ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+    m_SegmentBest.SetEnabled((bInGame && g_pGame->IsMulti()) ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
 void cInterface::MoveTimeless()
 {
     if(!STATIC_ISVALID(g_pGame)) return;
@@ -1763,8 +1847,9 @@ void cInterface::MoveTimeless()
 // 
 coreFloat cInterface::CalcGameCover(const coreObject2D** ppObject, const coreVector2* pvScale, const coreUintW iCount, const coreBool bStretch)
 {
-    ASSERT(STATIC_ISVALID(g_pGame))
     ASSERT(ppObject && pvScale && iCount)
+
+    if(!STATIC_ISVALID(g_pGame)) return 1.0f;
 
     const coreVector2 vResolutionInv  = coreVector2(1.0f,1.0f) / g_vGameResolution;
     const coreVector2 vResolutionHalf = g_vGameResolution * 0.5f;
@@ -1832,40 +1917,6 @@ coreFloat cInterface::CalcGameCover(const coreObject2D* pObject, const coreVecto
 
 // ****************************************************************
 // 
-void cInterface::UpdateEnabled()
-{
-    // loop through all player views
-    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
-    {
-        sPlayerView& oView   = m_aView[i];
-        cPlayer*     pPlayer = g_pGame->GetPlayer(i);
-
-        if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
-        {
-            // 
-            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            oView.aShieldBar[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_ALL);
-        }
-        else
-        {
-            // 
-            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-            oView.aShieldBar[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        }
-    }
-
-    // 
-    m_SegmentName.SetEnabled(g_pGame->IsMulti() ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
-    m_SegmentBest.SetEnabled(g_pGame->IsMulti() ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
-}
-
-
-// ****************************************************************
-// 
 void cInterface::__Update()
 {
     //m_aBannerText[2].SetText(pcSub);
@@ -1903,5 +1954,5 @@ void cInterface::__PrepareBanner()
     m_BannerExtra   .SetAlignment(coreVector2(0.0f,0.0f));
     m_aBannerLogo[0].SetAlignment(coreVector2(0.0f,0.0f));
     m_aBannerLogo[1].SetAlignment(coreVector2(0.0f,0.0f));
-    m_BannerShadow  .SetCenter   (coreVector2(0.0f,0.02f));
+    m_BannerShadow  .SetCenter   (coreVector2(0.0f, INTERFACE_BANNER_HEIGHT));
 }

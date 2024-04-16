@@ -187,6 +187,10 @@ private:
 // wave weapon class
 class cWaveWeapon final : public cWeapon
 {
+private:
+    coreUint8 m_iBurst;            // 
+
+
 public:
     cWaveWeapon()noexcept;
 
@@ -201,6 +205,7 @@ public:
 
 private:
     // execute own routines
+    void __ReleaseOwn (const coreUint8 iMode)final;
     void __ShootOwn   ()final;
     void __PrefetchOwn()final;
 };

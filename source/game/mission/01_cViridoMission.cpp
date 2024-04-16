@@ -1070,7 +1070,7 @@ void cViridoMission::__MoveOwnAfter()
                 }
                 const coreBool bAlways = (pBullet->GetFlyTime() < 0.1f) && !bBehind;
                 
-                const coreFloat fSlant = (1.0f + coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy())) * (bBehind ? 0.0f : 1.0f);      
+                const coreFloat fSlant = 0.0f;// (1.0f + coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy())) * (bBehind ? 0.0f : 1.0f);      
                 
                 const coreFloat   fRadius = pBullet->GetCollisionRange().xy().Max();       
                 const coreVector2 vNewPos = pBullet->GetPosition().xy() + pBullet->GetFlyDir() * fRadius;
@@ -1092,10 +1092,11 @@ void cViridoMission::__MoveOwnAfter()
                 if(!RayIntersection(vNewPos, pBullet->GetFlyDir(), vRayPos, vRayDir, &vRealIntersection)) return;
                 
                 const coreVector2 vRealDiff = vRayPos - vRealIntersection;
-            
+                const coreFloat fRealRange = ABS(coreVector2::Dot(pBullet->GetDirection().xy().Rotated90() * pBullet->GetCollisionRange().x, vRayDir));
+                
                 // 
                 if(((SIGN(fDot) != SIGN(fDotOld)) || (bAlways && (SIGN(fDot) > 0.0f)))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&   // to handle teleportation
-                    (/*ABS(coreVector2::Dot(vDiff,    vRayDir))*/vRealDiff.LengthSq()    < POW2(oBarrier.GetCollisionRange().x + pBullet->GetCollisionRange().x)))
+                    (/*ABS(coreVector2::Dot(vDiff,    vRayDir))*/vRealDiff.LengthSq()    < POW2(oBarrier.GetCollisionRange().x + fRealRange)))
                 {
                     const coreVector2 vIntersection = vRayPos + vRayDir * coreVector2::Dot(vDiff, vRayDir);
 
@@ -1118,7 +1119,7 @@ void cViridoMission::__MoveOwnAfter()
                             m_aiDrumCount[j] += pBullet->GetDamage();
 
                             // 
-                            pBullet->Deactivate(true);
+                            pBullet->Deactivate(true, vIntersection);
 
                             // 
                             g_pGame->PlayHitSound(coreVector3(vIntersection, 0.0f));
@@ -1145,7 +1146,7 @@ void cViridoMission::__MoveOwnAfter()
                     else
                     {
                         // 
-                        pBullet->Deactivate(true);
+                        pBullet->Deactivate(true, vIntersection);
                     }
                 }
             });

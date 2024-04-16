@@ -23,6 +23,7 @@
 #define CREDIT_ENTRIES_FONTS     (ARRAY_SIZE(g_apcCreditEntryFonts))       // 
 #define CREDIT_ENTRIES_LIBRARIES (ARRAY_SIZE(g_apcCreditEntryLibraries))   // 
 #define CREDIT_HEADERS           (6u)                                      // 
+#define CREDIT_SPEED             (0.11f)                                   // 
 
 enum eCreditType : coreUint8
 {
@@ -32,40 +33,43 @@ enum eCreditType : coreUint8
 };
 
 // 
-alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2] =
+alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][3] =
 {
-    {"Benjamin Schaden",                          "$THANKS"},
-    {"Chris Soukup",                              "$THANKS"},
-    {"Christoph Lang",                            "$TESTER"},
-    {"Claire Deiller (Loc3 Ltd.)",                "$LOCA - Français"},
-    {"Damian Hiltebrand",                         "$THANKS"},
-    {"Daniel Rubio (Pinknoise)",                  "$LOCA - Español (Latinoamérica)"},
-    {"David Portisch",                            "$TESTER"},
-    {"Eric Emanuel (Loc3 Ltd.)",                  "$LOCA - Français"},
-    {"Etel Baglietto (Pinknoise)",                "$LOCA - Español (Latinoamérica)"},
-    {"Henry Buckley (DICO Co., Ltd.)",            "$LOCA - 日本語"},
-    {"Iris Kuppen (Local Heroes Worldwide B.V.)", "$LOCA"},
-    {"Jochen Leopold",                            "$TESTER"},
-    {"Johnny Marques (Locsmiths)",                "$LOCA - Português (Brasil)"},
-    {"Lara Cecilia Garau (Pinknoise)",            "$LOCA - Español (Latinoamérica)"},
-    {"Lukas Meindl",                              "$TESTER"},
-    {"Mariano Saab (Pinknoise)",                  "$LOCA - Español (Latinoamérica)"},
-    {"Martin Filipp",                             "$THANKS"},
-    {"Martin Mauersics",                          "$DESIGNER, $PROGRAMMER"},
-    {"Michael Hartinger",                         "$THANKS"},
-    {"Michaela Orfandl",                          "$THANKS"},
-    {"Miho Miyazaki (DICO Co., Ltd.)",            "$LOCA - 日本語"},
-    {"Murilo Martins (Locsmiths)",                "$LOCA - Português (Brasil)"},
-    {"Neil Doppelmayr",                           "$THANKS"},
-    {"Nikmik aka Mirko",                          "$THANKS"},
-    {"Oliver Bisztyga",                           "$THANKS"},
-    {"Rainer Petermann",                          "$THANKS"},
-    {"Ricardo Nakaoka (Locsmiths)",               "$LOCA - Português (Brasil)"},
-    {"Robert Glashüttner",                        "$THANKS"},
-    {"Stefan Karner",                             "$TESTER"},
-    {"Tova Bele",                                 "$ADVISER, $TESTER"},
-    {"Vanesa Potenzoni (Pinknoise)",              "$LOCA - Español (Latinoamérica)"},
-    {"Ziya Sarper Ekim (DICO Co., Ltd.)",         "$LOCA - 日本語"},
+    {"Benjamin Schaden",                          "$THANKS",                         NULL},
+    {"Chris Soukup",                              "$THANKS",                         NULL},
+    {"Christoph Lang",                            "$TESTER",                         NULL},
+    {"Claire Deiller (Loc3 Ltd.)",                "$LOCA - Français",                "french.lng"},
+    {"Clément Sonntag",                           "$LOCA",                           NULL},
+    {"Damian Hiltebrand",                         "$THANKS",                         NULL},
+    {"Daniel Rubio (Pinknoise)",                  "$LOCA - Español (Latinoamérica)", "latam.lng"},
+    {"David Portisch",                            "$TESTER",                         NULL},
+    {"Eric Emanuel (Loc3 Ltd.)",                  "$LOCA - Français",                "french.lng"},
+    {"Etel Baglietto (Pinknoise)",                "$LOCA - Español (Latinoamérica)", "latam.lng"},
+    {"Henry Buckley (DICO Co., Ltd.)",            "$LOCA - 日本語",                   "japanese.lng"},
+    {"Iris Kuppen (Local Heroes Worldwide B.V.)", "$LOCA",                           NULL},
+    {"Jingwen Wu",                                "$LOCA - 简体中文",                 "schinese.lng"},
+    {"Jochen Leopold",                            "$TESTER",                         NULL},
+    {"Johnny Marques (Locsmiths)",                "$LOCA - Português (Brasil)",      "brazilian.lng"},
+    {"Lara Cecilia Garau (Pinknoise)",            "$LOCA - Español (Latinoamérica)", "latam.lng"},
+    {"Lukas Meindl",                              "$TESTER",                         NULL},
+    {"Mariano Saab (Pinknoise)",                  "$LOCA - Español (Latinoamérica)", "latam.lng"},
+    {"Martin Filipp",                             "$THANKS",                         NULL},
+    {"Martin Mauersics",                          "$DESIGNER, $PROGRAMMER",          NULL},
+    {"Michael Hartinger",                         "$THANKS",                         NULL},
+    {"Michaela Orfandl",                          "$THANKS",                         NULL},
+    {"Miho Miyazaki (DICO Co., Ltd.)",            "$LOCA - 日本語",                   "japanese.lng"},
+    {"Murilo Martins (Locsmiths)",                "$LOCA - Português (Brasil)",      "brazilian.lng"},
+    {"Neil Doppelmayr",                           "$THANKS",                         NULL},
+    {"Nikmik aka Mirko",                          "$THANKS",                         NULL},
+    {"Oliver Bisztyga",                           "$THANKS",                         NULL},
+    {"Rainer Petermann",                          "$THANKS",                         NULL},
+    {"Ricardo Nakaoka (Locsmiths)",               "$LOCA - Português (Brasil)",      "brazilian.lng"},
+    {"Robert Glashüttner",                        "$THANKS",                         NULL},
+    {"Stefan Karner",                             "$TESTER",                         NULL},
+    {"Tetsugen Ryo",                              "$LOCA - 繁體中文",                 "tchinese.lng"},
+    {"Tova Bele",                                 "$ADVISER, $TESTER",               NULL},
+    {"Vanesa Potenzoni (Pinknoise)",              "$LOCA - Español (Latinoamérica)", "latam.lng"},
+    {"Ziya Sarper Ekim (DICO Co., Ltd.)",         "$LOCA - 日本語",                   "japanese.lng"},
 };
 
 // 
@@ -157,6 +161,7 @@ private:
     coreViewBox m_ViewBox;                                   // 
 
     cGuiObject m_GameLogo;                                   // 
+    cGuiObject m_GameLogoDemo;
     cGuiObject m_GameLogoKana;                               // 
 
     cGuiLabel m_aName       [CREDIT_ENTRIES];                // 

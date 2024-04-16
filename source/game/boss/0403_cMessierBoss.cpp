@@ -207,14 +207,12 @@ void cMessierBoss::__KillOwn(const coreBool bAnimated)
     g_pPostProcessing->Reset();
 
     // 
-    g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
-    });
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
+        pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
         pPlayer->RemoveStatus(PLAYER_STATUS_HEALER);
         pPlayer->RemoveStatus(PLAYER_STATUS_GYRO);
+        pPlayer->RemoveStatus(PLAYER_STATUS_ARRANGE);
     });
 
     // 
@@ -860,6 +858,7 @@ void cMessierBoss::__MoveOwn()
                 g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
                 {
                     pPlayer->AddStatus(PLAYER_STATUS_GYRO);
+                    pPlayer->AddStatus(PLAYER_STATUS_ARRANGE);
                 });
             }
         });
@@ -969,14 +968,11 @@ void cMessierBoss::__MoveOwn()
 
             g_pEnvironment->SetTargetSpeedNow(0.0f);
 
-            g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-            {
-                pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
-            });
-
             g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
+                pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
                 pPlayer->RemoveStatus(PLAYER_STATUS_GYRO);
+                pPlayer->RemoveStatus(PLAYER_STATUS_ARRANGE);
             });
 
             g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());

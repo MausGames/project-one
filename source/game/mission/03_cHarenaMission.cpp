@@ -79,6 +79,17 @@ cHarenaMission::cHarenaMission()noexcept
     }
 
     // 
+    m_Correct.DefineModel  (Core::Manager::Object->GetLowQuad());
+    m_Correct.DefineTexture(0u, "effect_aim.png");
+    m_Correct.DefineProgram("effect_decal_program");
+    m_Correct.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 12.0f);
+    m_Correct.SetColor3    (COLOR_MENU_BLUE);
+    m_Correct.SetAlpha     (0.8f);
+    m_Correct.SetTexSize   (coreVector2(0.5f,1.0f));
+    m_Correct.SetTexOffset (coreVector2(0.5f,0.0f));
+    m_Correct.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     m_Egg    .DefineProgram("effect_energy_flat_invert_inst_program");
     m_EggWave.DefineProgram("effect_energy_flat_inst_program");
     {
@@ -157,7 +168,8 @@ cHarenaMission::~cHarenaMission()
     for(coreUintW i = 0u; i < HARENA_SPIKES;  ++i) this->DisableSpike (i, false);
     for(coreUintW i = 0u; i < HARENA_EGGS;    ++i) this->DisableEgg   (i, false);
     for(coreUintW i = 0u; i < HARENA_FLUMMIS; ++i) this->DisableFlummi(i, false);
-    this->DisableAim(false);
+    this->DisableAim    (false);
+    this->DisableCorrect(false);
 }
 
 
@@ -252,6 +264,31 @@ void cHarenaMission::DisableSpike(const coreUintW iIndex, const coreBool bAnimat
         pSpike->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         pBoard->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
+}
+
+
+// ****************************************************************
+// 
+void cHarenaMission::EnableCorrect()
+{
+    // 
+    WARN_IF(m_Correct.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableCorrect(false);
+
+    // 
+    m_Correct.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+    m_Correct.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cHarenaMission::DisableCorrect(const coreBool bAnimated)
+{
+    // 
+    if(!m_Correct.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Correct.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -515,6 +552,13 @@ void cHarenaMission::__RenderOwnTop()
 {
     DEPTH_PUSH
 
+    glDepthMask(false);
+    {
+        // 
+        m_Correct.Render();
+    }
+    glDepthMask(true);
+
     // 
     m_Aim.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Aim);
@@ -649,6 +693,14 @@ void cHarenaMission::__MoveOwnAfter()
     // 
     m_Spike     .MoveNormal();
     m_SpikeBoard.MoveNormal();
+
+    // 
+    if(m_Correct.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        // 
+        m_Correct.SetDirection(coreVector3(coreVector2::Direction((4.0f*PI) * m_fAnimation), 0.0f));
+        m_Correct.Move();
+    }
 
     // 
     for(coreUintW i = 0u; i < HARENA_EGGS; ++i)

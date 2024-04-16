@@ -66,6 +66,7 @@ cCholBoss::cCholBoss()noexcept
 , m_fTilt        (0.0f)
 , m_fFlap        (0.0f)
 , m_fPush        (0.0f)
+, m_fCountdown   (0.0f)
 , m_fAnimation   (0.0f)
 {
     // load models
@@ -778,7 +779,7 @@ void cCholBoss::__MoveOwn()
     {
         this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
 
-        PHASE_CONTROL_PAUSE(0u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE + 1.0f))
+        PHASE_CONTROL_PAUSE(0u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE - 2.0f))
         {
             PHASE_CHANGE_INC
 
@@ -1327,7 +1328,7 @@ void cCholBoss::__MoveOwn()
             //g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[ENV_ROTATION].x, 0.0f*PI, fTime)));   end rotation
         });
 
-        PHASE_CONTROL_PAUSE(1u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE + 1.0f))
+        PHASE_CONTROL_PAUSE(1u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE - 2.0f))
         {
             if(PHASE_FINISHED)
             {
@@ -1773,7 +1774,7 @@ void cCholBoss::__MoveOwn()
                 {
                     const coreFloat fTime  = CLAMP01(m_afWingTime[i] - I_TO_F(i) * 0.3f);
 
-                    const coreVector2 vNewPos = coreVector2(((i % 2u) ? 1.0f : -1.0f) * ((i < 2u) ? 1.5f : 0.5f) * 0.4f, LERPBR(-1.5f, 1.7f, fTime)) * FOREGROUND_AREA;
+                    const coreVector2 vNewPos = coreVector2(((i % 2u) ? 1.0f : -1.0f) * ((i < 2u) ? 2.0f : 1.0f) * 0.4f, LERPBR(-1.5f, 1.7f, fTime)) * FOREGROUND_AREA;
                     const coreVector2 vNewDir = coreVector2(0.0f,1.0f);
                     const coreVector2 vNewOri = coreVector2::Direction((2.0f*PI) * m_afWingTime[i]);
 
@@ -1970,6 +1971,35 @@ void cCholBoss::__MoveOwn()
         }
     });
 
+    if(m_fCountdown)
+    {
+        const coreFloat fOld = m_fCountdown;
+
+        m_fCountdown.UpdateMax(-1.0f / INTERFACE_BANNER_DURATION_SCORE, 0.0f);
+
+        const coreFloat fLerp  = STEP(0.0f, 0.5f, m_fCountdown);
+        const coreUint8 iMedal = F_TO_UI(LERP(I_TO_F(MEDAL_BRONZE), I_TO_F(MEDAL_MAX) - CORE_MATH_PRECISION, fLerp));
+        const coreChar* pcMain = PRINT("%.0f", LERPB(0.1f, I_TO_F(CHOL_FAKE_SCORE), fLerp));
+
+        g_pGame->GetInterface()->OverrideBanner(pcMain, iMedal, MEDAL_TYPE_BOSS);
+
+        const coreFloat fLerpOld  = STEP(0.0f, 0.5f, fOld);
+        const coreUint8 iMedalOld = F_TO_UI(LERP(I_TO_F(MEDAL_BRONZE), I_TO_F(MEDAL_MAX) - CORE_MATH_PRECISION, fLerpOld));
+
+        const coreFloat fTickStep = 4.0f * RCP(ROUND(RCP(20.0f * TIME)) * TIME);
+        if(F_TO_UI(fLerpOld * fTickStep) > F_TO_UI(fLerp * fTickStep)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_EFFECT_ERROR);
+
+        if(iMedalOld != iMedal)
+        {
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f - 0.05f * I_TO_F(MEDAL_PLATINUM - iMedal), SOUND_SUMMARY_MEDAL);
+        }
+
+        if(!m_fCountdown)
+        {
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f - 0.05f * I_TO_F(MEDAL_PLATINUM), SOUND_SUMMARY_MEDAL);
+        }
+    }
+
 
     
     // 
@@ -2118,7 +2148,7 @@ void cCholBoss::__EnableFire(const coreUint8 iType)
             g_pSpecialEffects->CreateBlowFire (vPos, vDir,  50.0f, 20u, COLOR_FIRE_ORANGE);
             g_pSpecialEffects->CreateBlowColor(vPos, vDir, 100.0f, 50u, COLOR_FIRE_ORANGE);
         }
-        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_FIRE);
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 0.8f, 1.0f, SOUND_EFFECT_FIRE);
         g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_SHAKE_02);
     }
 }
@@ -2224,7 +2254,7 @@ void cCholBoss::__ResurrectFake()
 void cCholBoss::__KillFake()
 {
     // 
-    g_pGame->GetInterface()->ShowScore(57300u, MEDAL_BRONZE, MEDAL_TYPE_BOSS);
+    g_pGame->GetInterface()->ShowScore(CHOL_FAKE_SCORE, MEDAL_DARK, MEDAL_TYPE_BOSS);
     g_pGame->GetInterface()->SetFakeEnd(1u);
     g_pGame->GetCurMission()->SetDelay(true);
 
@@ -2252,4 +2282,7 @@ void cCholBoss::__KillFake()
 
     // 
     this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+    // 
+    m_fCountdown = 1.0f;
 }

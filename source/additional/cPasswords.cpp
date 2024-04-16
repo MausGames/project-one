@@ -84,6 +84,13 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
+    // JADE green
+    case 2924535458287069379u:
+        {
+            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_WAVE)
+        }
+        break;
+
     // SELADON green
     case 2162088830537969827u:
         {

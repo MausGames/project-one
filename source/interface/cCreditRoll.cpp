@@ -34,6 +34,14 @@ cCreditRoll::cCreditRoll()noexcept
     m_ViewBox.BindObject(&m_GameLogo);
 
     // 
+    m_GameLogoDemo.DefineTexture(0u, "game_logo_demo.png");
+    m_GameLogoDemo.DefineProgram("default_2d_program");
+    m_GameLogoDemo.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f) * (0.7f/0.8f));
+    m_GameLogoDemo.SetSize      (coreVector2(1.0f,0.25f) * 0.3f * (0.7f/0.8f));
+    m_GameLogoDemo.SetColor3    (COLOR_MENU_INSIDE);
+    m_GameLogoDemo.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     m_GameLogoKana.DefineTexture(0u, "game_logo_kana.png");
     m_GameLogoKana.DefineProgram("default_2d_program");
     m_GameLogoKana.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f) * (0.7f/0.8f));
@@ -41,7 +49,7 @@ cCreditRoll::cCreditRoll()noexcept
     m_GameLogoKana.SetColor3    (COLOR_MENU_INSIDE);
     m_GameLogoKana.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
-    m_ViewBox.BindObject(&m_GameLogoKana);
+    m_ViewBox.BindObject(g_bDemoVersion ? &m_GameLogoDemo : &m_GameLogoKana);
 
     // 
     for(coreUintW i = 0u; i < CREDIT_ENTRIES; ++i)
@@ -59,11 +67,30 @@ cCreditRoll::cCreditRoll()noexcept
     }
 
     // 
+    const coreMap<coreString, coreString>& asLanguageList = cMenu::GetLanguageList();
+
+    // 
+    coreMapStr<coreString> asFont;
+    asFont.reserve(asLanguageList.size());
+
+    // 
+    FOR_EACH(it, asLanguageList)
+    {
+        // 
+        coreString sFont;
+        if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_STANDARD;
+
+        asFont.emplace_bs(coreData::StrFilename(it->c_str()), coreData::StrFilename(sFont.c_str()));
+    }
+
+    // 
     for(coreUintW i = 0u; i < CREDIT_ENTRIES; ++i)
     {
         const coreFloat fHeight = I_TO_F(i) * -0.15f - fWait;
 
-        m_aDescription[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+        const coreChar* pcFont = asFont.count_bs(g_aapcCreditEntry[i][2]) ? asFont.at_bs(g_aapcCreditEntry[i][2]).c_str() : NULL;
+
+        m_aDescription[i].Construct  (pcFont ? pcFont : MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
         m_aDescription[i].SetPosition(coreVector2(0.0f, fHeight));
         m_aDescription[i].SetAlpha   (MENU_INSIDE_ALPHA);
         m_aDescription[i].SetEnabled (CORE_OBJECT_ENABLE_NOTHING);
@@ -79,7 +106,7 @@ cCreditRoll::cCreditRoll()noexcept
         iOffset += 1u;
         const coreFloat fHeight = I_TO_F(iOffset) * -0.05f - fWait;
 
-        m_aSupportText[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+        m_aSupportText[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
         m_aSupportText[i].SetPosition(coreVector2(0.0f, fHeight));
         m_aSupportText[i].SetColor3  (COLOR_MENU_INSIDE);
         m_aSupportText[i].SetAlpha   (MENU_INSIDE_ALPHA);
@@ -171,7 +198,7 @@ void cCreditRoll::Move()
 
     // 
     const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || HAS_BIT(g_TotalInput.iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) || (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? 6.0f : 1.0f;
-    m_fOffset.Update(0.105f * fSpeed);
+    m_fOffset.Update(CREDIT_SPEED * fSpeed);
 
     // 
     m_bFinished = (m_fOffset >= m_fMaxOffset) && (m_eType == CREDIT_TYPE_MENU);
@@ -191,6 +218,7 @@ void cCreditRoll::Move()
         for(coreUintW i = 0u; i < iNum; ++i) nCullFunc(&pLabel[i], fRange);
     };
     nCullFunc    (&m_GameLogo,       1.3f);
+    nCullFunc    (&m_GameLogoDemo,   1.3f);
     nCullFunc    (&m_GameLogoKana,   1.3f);
     nCullListFunc(m_aName,           1.1f, CREDIT_ENTRIES);
     nCullListFunc(m_aDescription,    1.1f, CREDIT_ENTRIES);

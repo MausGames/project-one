@@ -16,30 +16,25 @@
 // TODO 3: unload fonts currently not used (e.g. from score-menu)
 // TODO 3: options menu: highlight changed options mit sternchen oder eigenem icon (damit text nicht immer erneuert werden muss)
 // TODO 3: options menu: 15 second on video change, yes, no
-// TODO 3: rumble when changing rumble-option (could be annoying)
 // TODO 5: display unattached joysticks and joystick names somehow
 // TODO 3: highlight which joystick is which input set
 // TODO 3: update texture filter and render quality in realtime (resource-manager reset ?)
 // TODO 3: double initial languages by switching to two columns (on demand?)
-// TODO 3: show target FPS in config menu (speed x update rate)
 // TODO 3: when switching resolution, the next mouse click is not recognized (no press event is coming from SDL, only the release event)
 // TODO 3: swapping controls should swap buttons visually
 // TODO 3: load replay number only on first entry, load headers async on demand, handle changes during runtime
 // TODO 3: display gamepad/device name in options description
 // TODO 4: locked config input buttons are set with dummy values before getting locked
 // TODO 2: [MF] handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
-// TODO 2: in emscripten müssen einige optionen geändert werden (disable: monitor, resolution, display mode | change/disable: anti-aliasing [on/off] | anisotropic ?)
 // TODO 3: leichtes wackeln des texts wenn sich switch-box ändert
 // TODO 3: welle, wenn button/switchbox gedrückt wird
 // TODO 3: anderes: ganzes menü wackelt/shifted wenn man tab ändert, tabs verändern höhe, buttons ändern größe bei selection
 // TODO 3: menu sound response is super-confused with gamepad-input, related to having fokus on multiple sub-menus (unnecessary button-fokus sound -> catch initial focusing), and being able to focus disabled buttons (active tab, save button)
 // TODO 3: de-couple interface-class and display in options when game is not running (for HUD type option)
-// TODO 3: bigger effect, when password is correct (maybe not text, but a fullscreen effect)
 // TODO 3: wenn zwischen borderless und windowed gewechselt wird mit Desktop resolution, wird im size-change-event das 0:0 überschrieben und der save-button bleibt aktiv
 // TODO 3: wenn im windowed mode die resolution zu groß ist, wird sie geclamped und der save-button bleibt aktiv
 // TODO 4: why do I have ChangeLanguage for switch-boxes, what does it do, should I add it to the engine instead?
 // TODO 4: switch more menus to SetHighlightColor, which is more efficient
-// TODO 3: scroll-box sometimes moves down and up when moving/wrapping across menu with navigator, this is related to line interaction
 // TODO 2: this->ChangeSurface(XXX, 0.0f) mit timeless wrappen
 // TODO 1: click-wave when clicking on active button or tab (not for switch-box), what about stage tile ?
 // TODO 4: remove unnecessary tiles, medals, and others related to the missing Ater segments (and possible second bosses everywhere else)
@@ -50,7 +45,8 @@
 // TODO 1: going into extra menu with mouse and selecting credits, then switching to gamepad accidentally selects the stats-switchbox
 // TODO 2: latam language, text in summary menu is etwas zu nah beinander
 // TODO 1: alle menü rendering orders optimieren, speziell für shader, speziell im game-menü
-// TODO 1: remove mission page in armory
+// TODO 1: (remove mission page in armory)
+// TODO 1: get rid of the additional interface object in config-menu
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
 // NOTE: every object in menu needs outline: weapons, medals, icons
@@ -79,7 +75,7 @@
 #define MENU_GAME_ARMORY_HELPERS      (8u)
 #define MENU_GAME_ARMORY_ICONS        (9u)
 #define MENU_GAME_ARMORY_ARROWS       (8u)
-#define MENU_SCORE_FILTERS            (2u)
+#define MENU_SCORE_FILTERS            (3u)
 #define MENU_SCORE_ENTRIES            (20u)
 #define MENU_REPLAY_ENTRIES           (12u)
 #define MENU_EXTRA_TROPHIES           (48u)
@@ -111,22 +107,24 @@
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
-#define MENU_FONT_DEFAULT       "keifont.ttf"
-#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (20u)
-#define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (25u)
-#define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (35u)
-#define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (46u)
-#define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (79u)
-#define MENU_FONT_STANDARD_6    MENU_FONT_DEFAULT, (58u)
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (20u)
-#define MENU_FONT_DYNAMIC_2     "dynamic_font",    (25u)
-#define MENU_FONT_DYNAMIC_3     "dynamic_font",    (35u)
-#define MENU_FONT_DYNAMIC_4     "dynamic_font",    (46u)
-#define MENU_FONT_DYNAMIC_5     "dynamic_font",    (79u)
-#define MENU_FONT_ICON_1        "fontawesome.ttf", (20u)
-#define MENU_FONT_ICON_2        "fontawesome.ttf", (24u)
-#define MENU_FONT_ICON_3        "fontawesome.ttf", (30u)
-#define MENU_FONT_ICON_4        "fontawesome.ttf", (44u)
+#define MENU_FONT_STANDARD      DEFINED(_CORE_EMSCRIPTEN_) ? "keifont.woff" : "keifont.ttf"
+#define MENU_FONT_DYNAMIC       "dynamic_font"
+#define MENU_FONT_ICON          DEFINED(_CORE_EMSCRIPTEN_) ? "fontawesome.woff" : "fontawesome.ttf"
+#define MENU_FONT_STANDARD_1    MENU_FONT_STANDARD, (20u)
+#define MENU_FONT_STANDARD_2    MENU_FONT_STANDARD, (25u)
+#define MENU_FONT_STANDARD_3    MENU_FONT_STANDARD, (35u)
+#define MENU_FONT_STANDARD_4    MENU_FONT_STANDARD, (46u)
+#define MENU_FONT_STANDARD_5    MENU_FONT_STANDARD, (79u)
+#define MENU_FONT_STANDARD_6    MENU_FONT_STANDARD, (58u)
+#define MENU_FONT_DYNAMIC_1     MENU_FONT_DYNAMIC,  (20u)
+#define MENU_FONT_DYNAMIC_2     MENU_FONT_DYNAMIC,  (25u)
+#define MENU_FONT_DYNAMIC_3     MENU_FONT_DYNAMIC,  (35u)
+#define MENU_FONT_DYNAMIC_4     MENU_FONT_DYNAMIC,  (46u)
+#define MENU_FONT_DYNAMIC_5     MENU_FONT_DYNAMIC,  (79u)
+#define MENU_FONT_ICON_1        MENU_FONT_ICON,     (20u)
+#define MENU_FONT_ICON_2        MENU_FONT_ICON,     (24u)
+#define MENU_FONT_ICON_3        MENU_FONT_ICON,     (30u)
+#define MENU_FONT_ICON_4        MENU_FONT_ICON,     (44u)
 #define MENU_OUTLINE_SMALL      (3u)
 #define MENU_OUTLINE_BIG        (4u)
 
@@ -155,6 +153,7 @@ enum eSurface : coreUint8
     SURFACE_INTRO_EMPTY = 0u,
     SURFACE_INTRO_WELCOME,
     SURFACE_INTRO_LANGUAGE,
+    SURFACE_INTRO_IMPORT,
     SURFACE_INTRO_MAX,
 
     SURFACE_TITLE_LOGO = 0u,
@@ -260,7 +259,9 @@ enum eEntry : coreUint8
     ENTRY_INPUT_ACTION5,
     ENTRY_INPUT_ACTION6,
     ENTRY_INPUT_ACTION7,
+    ENTRY_INPUT_ACTION10,
     ENTRY_INPUT_ACTION1,
+    ENTRY_INPUT_ACTION9,
     ENTRY_INPUT_ACTION2,
     ENTRY_INPUT_ACTION3,
     ENTRY_INPUT_ACTION8,
@@ -287,13 +288,16 @@ enum eEntry : coreUint8
 // ****************************************************************
 // icon codes (UTF-8)
 #define __ICON(x)     (r_cast<const coreChar*>(x))
+#define ICON_SWITCH   (__ICON(u8"\u0030"))
 #define ICON_CHECK    (__ICON(u8"\uF00C"))
 #define ICON_TIMES    (__ICON(u8"\uF00D"))
 #define ICON_LOCK     (__ICON(u8"\uF023"))
 #define ICON_PAUSE    (__ICON(u8"\uF04C"))
+#define ICON_FORWARD  (__ICON(u8"\uF04E"))
 #define ICON_ARROW_UP (__ICON(u8"\uF062"))
 #define ICON_SHARE    (__ICON(u8"\uF064"))
 #define ICON_TROPHY   (__ICON(u8"\uF091"))
+#define ICON_BOLT     (__ICON(u8"\uF0E7"))
 #define ICON_UNDO_ALT (__ICON(u8"\uF2EA"))
 #define ICON_REDO_ALT (__ICON(u8"\uF2F9"))
 #define ICON_BURN     (__ICON(u8"\uF46A"))
@@ -310,7 +314,10 @@ private:
     coreTimer m_IntroTimer;                                // intro animation 
     coreUint8 m_iIntroStatus;                              // 
 
+    coreFlow m_fDelayTimer;                                // 
+
     coreMap<coreString, cGuiButton*> m_apLanguageButton;   // list with buttons for valid language files
+    cScrollBox m_LanguageBox;                              // 
 
     cMenuNavigator m_Navigator;
 
@@ -417,6 +424,9 @@ private:
     cGuiButton m_StartButtonArmory;                               // start button   
     cGuiButton m_StartButtonFirst;                                // start button   
     cGuiButton m_StartButtonDemo;                                 // start button   
+    cGuiButton m_InputButtonArmory;                               // input button   
+    cGuiButton m_InputButtonFirst;                                // input button   
+    cGuiButton m_InputButtonDemo;                                 // input button   
     cGuiButton m_BackButtonMain;                                  // back button   
     cGuiButton m_BackButtonArmory;                                // back button   
     cGuiButton m_BackButtonFirst;                                 // back button   
@@ -471,7 +481,6 @@ private:
     cGuiLabel  m_aArmoryTitle    [2];                             // 
     cGuiLabel  m_aArmoryScore    [2];                             // 
     cGuiLabel  m_aArmoryTime     [2];                             // 
-    cGuiLabel  m_aArmoryMaxSeries[2];                             // 
     cGuiObject m_ArmoryTile;                                      // 
     cGuiObject m_ArmoryBack;                                      // 
     cGuiObject m_ArmoryIconBig;                                   // 
@@ -587,6 +596,9 @@ private:
     void __PrepareMission(const coreUintW iMissionIndex);
     void __PrepareSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
     void __PrepareArcade ();
+
+    // 
+    coreBool __SetupInput();
 };
 
 
@@ -602,15 +614,25 @@ private:
     cGuiButton m_BackButton;                        // back button
 
     cGuiObject m_aFilterLine[MENU_SCORE_FILTERS];   // 
+    cGuiObject m_FilterIcon;                        // 
 
     cGuiSwitchBox m_FilterMission;                  // 
     cGuiSwitchBox m_FilterSegment;                  // 
+    cGuiSwitchBox m_FilterDifficulty;               // 
 
     cGuiLabel  m_aRank [MENU_SCORE_ENTRIES];        // 
     cGuiLabel  m_aName [MENU_SCORE_ENTRIES];        // 
     cGuiLabel  m_aScore[MENU_SCORE_ENTRIES];        // 
     cGuiObject m_aLine [MENU_SCORE_ENTRIES];        // 
-    cScrollBox         m_ScoreBox;
+    cScrollBox m_ScoreBox;
+
+    cGuiLabel  m_PlayerRank;                        // 
+    cGuiLabel  m_PlayerName;                        // 
+    cGuiLabel  m_PlayerScore;                       // 
+    cGuiObject m_PlayerLine;                        // 
+
+    coreMap<coreUint8, coreUint8> m_aiCurFilter;
+    coreUint8 m_iCurIndex;
 
     cMenuNavigator m_Navigator;
 
@@ -625,7 +647,12 @@ public:
 
     // 
     void LoadMissions();
-    void LoadSegments(const coreUintW iIndex);
+    void LoadSegments(const coreUintW iMissionIndex);
+
+
+private:
+    // 
+    void __UpdateScores();
 };
 
 
@@ -798,6 +825,7 @@ private:
 
     cGuiButton m_SaveButton;                   // save button
     cGuiButton m_DiscardButton;                // discard button
+    cGuiButton m_InputButton;                  // input button
     cGuiButton m_BackButton;                   // back button
 
     cGuiLabel  m_aLabel   [ENTRY_MAX];         // 
@@ -897,6 +925,9 @@ private:
     void __RefreshManual();
 
     // 
+    coreBool __SetupInput();
+
+    // 
     inline cGuiButton& __RetrieveInputButton  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oMoveUp)                                         + iKeyIndex);}
     inline cFigure&    __RetrieveInputFigure  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oFigureMoveUp)                                   + iKeyIndex);}
     inline coreInt16&  __RetrieveInputCurValue(const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < INPUT_TYPES)        && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[g_CurConfig.Input.aiType[iPlayerIndex]].iMoveUp) + iKeyIndex);}
@@ -970,6 +1001,7 @@ private:
     cGuiLabel  m_aArcadeScore        [MENU_SUMMARY_ARCADES];              // 
     cGuiLabel  m_aArcadeTime         [MENU_SUMMARY_ARCADES];              // 
     cGuiObject m_aArcadeIcon         [MENU_SUMMARY_ARCADES];              // 
+    cGuiObject m_aArcadeIconBack     [MENU_SUMMARY_ARCADES];              // 
     cGuiObject m_aArcadeMedalMission [MENU_SUMMARY_ARCADES];
     cGuiObject m_aaArcadeMedalSegment[MENU_SUMMARY_ARCADES][MENU_SUMMARY_MEDALS];
     cGuiObject m_aArcadeLine         [MENU_SUMMARY_ARCADES];              // 
@@ -978,6 +1010,7 @@ private:
     cGuiLabel  m_aArcadeTotalBest[2];
     cGuiLabel  m_ArcadeTotalScore;
     cGuiLabel  m_ArcadeTotalTime;
+    cGuiLabel  m_ArcadeOptions;
     cGuiObject m_ArcadeTotalMedal;
 
     cGuiLabel  m_aHeader[2];                                        // 
@@ -1006,7 +1039,7 @@ private:
     coreUint8 m_iOtherNumMedal;
 
 
-#define MENU_SUMMARY_ENTRIES_SEGMENT (3u)
+#define MENU_SUMMARY_ENTRIES_SEGMENT (2u)
 #define MENU_SUMMARY_SIDES (2u)
 #define MENU_SUMMARY_BADGES (BADGES - 4u)
 
@@ -1025,7 +1058,7 @@ private:
     
     
     cGuiLabel m_aPerfect[2];
-    cGuiLabel m_aRecord[6];
+    cGuiLabel m_aRecord[6];   // TODO 1: one too much (from max series)
     coreFlow  m_afSignalTime[2];
     coreUint8 m_iSignalActive;
     
@@ -1284,6 +1317,7 @@ private:
 
     cGuiLabel m_NoticeSave;              // 
     coreFlow  m_fNoticeSaveTime;         // 
+    coreBool  m_bNoticeSavePrevent;      // 
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
     coreObject2D    m_MixObject;         // 
@@ -1298,6 +1332,10 @@ private:
     coreFlow m_fVolume;
     
     coreBool m_bStarted;
+    
+    
+    cInterface m_Interface;
+    coreFlow   m_fInterfaceAlpha;
 
     static coreVector3 m_vHighlightColor;       // 
     static coreVector3 m_vButtonColor;       // 
@@ -1349,6 +1387,10 @@ public:
     
     inline const coreVector3& GetHighlightColor()const {return m_vHighlightColor;}
     inline const coreVector3& GetButtonColor()const {return m_vButtonColor;}
+    
+    cInterface* GetInterface() {return &m_Interface;}
+    
+    inline void PreventSaveText() {m_bNoticeSavePrevent = true;}
     
     // 
     coreFloat GetVolume()const;

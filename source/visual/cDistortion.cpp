@@ -12,9 +12,10 @@
 // ****************************************************************
 // constructor
 cDistortion::cDistortion()noexcept
-: m_iCurWave  (0u)
-, m_iCurBurst (0u)
-, m_bActive   (false)
+: m_iCurWave   (0u)
+, m_iCurBurst  (0u)
+, m_iCurEraser (0u)
+, m_bActive    (false)
 {
     const coreTextureSpec oSpec = (CORE_GL_SUPPORT(EXT_texture_norm16) && CORE_GL_SUPPORT(ARB_texture_rg)) ? CORE_TEXTURE_SPEC_RG16 : (CORE_GL_SUPPORT(EXT_texture_type_2_10_10_10_rev) ? CORE_TEXTURE_SPEC_RGB10_A2 : CORE_TEXTURE_SPEC_RGB8);
 
@@ -36,6 +37,15 @@ cDistortion::cDistortion()noexcept
         m_aBurst[i].DefineTexture(0u, "effect_wave_norm.png");
         m_aBurst[i].DefineProgram("effect_distortion_direct_program");
         m_aBurst[i].SetAlpha     (0.0f);
+    }
+
+    // 
+    for(coreUintW i = 0u; i < DISTORTION_ERASERS; ++i)
+    {
+        m_aEraser[i].DefineTexture(0u, "effect_headlight_point.png");
+        m_aEraser[i].DefineProgram("menu_single_program");
+        m_aEraser[i].SetColor3    (coreVector3(0.5f,0.5f,1.0f));
+        m_aEraser[i].SetAlpha     (0.0f);
     }
 }
 
@@ -98,6 +108,20 @@ void cDistortion::Update()
                     oBurst.Move();
                     oBurst.Render();
                 }
+
+                // 
+                for(coreUintW i = 0u; i < DISTORTION_ERASERS; ++i)
+                {
+                    coreObject2D& oEraser = m_aEraser[i];
+                    if(!oEraser.GetAlpha()) continue;
+
+                    // 
+                    oEraser.Move();
+                    oEraser.Render();
+
+                    // 
+                    oEraser.SetAlpha(0.0f);
+                }
             }
             glEnable(GL_DEPTH_TEST);
         }
@@ -142,6 +166,21 @@ void cDistortion::CreateBurst(const coreVector3 vPosition, const coreVector2 vDi
     // 
     oBurst.SetPosition(g_pForeground->Project2D(vPosition) * DISTORTION_SCALE_FACTOR);
     oBurst.SetColor4  (coreVector4(fScale, vDirection * SQRT(fSpeed), 1.0f + fDelay));
+}
+
+
+// ****************************************************************
+// 
+void cDistortion::CreateEraser(const coreVector3 vPosition, const coreFloat fScale)
+{
+    // 
+    if(++m_iCurEraser >= DISTORTION_ERASERS) m_iCurEraser = 0u;
+    coreObject2D& oEraser = m_aEraser[m_iCurEraser];
+
+    // 
+    oEraser.SetPosition(g_pForeground->Project2D(vPosition) * DISTORTION_SCALE_FACTOR);
+    oEraser.SetSize    (coreVector2(0.1f,0.1f) * fScale);
+    oEraser.SetAlpha   (1.0f);
 }
 
 

@@ -22,8 +22,11 @@ void cIntroMission::__SetupOwn()
     {
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
-            if(m_bFirstPlay) pPlayer->SetBaseColor(i ? COLOR_SHIP_YELLOW : COLOR_SHIP_BLUE);
-            pPlayer->AddStatus(PLAYER_STATUS_INVINCIBLE);
+            if(m_bFirstPlay)
+            {
+                pPlayer->SetBaseColor(i ? COLOR_SHIP_YELLOW : COLOR_SHIP_BLUE);
+                pPlayer->AddStatus(PLAYER_STATUS_INVINCIBLE);
+            }
         });
 
         STAGE_FINISH_NOW
@@ -220,15 +223,15 @@ void cIntroMission::__SetupOwn()
                 this->EnableManual(i, 0u);
                 this->EnableManual(i, 1u);
                 this->EnableManual(i, 2u);
-                this->EnableManual(i, 3u);
+                this->EnableManual(i, 4u);
             }
             else if(!HAS_BIT(iInputState, 1u) && (fInputDelay >= 3.0f))
             {
-                this->EnableManual(i, 4u);
-                this->EnableManual(i, 7u);
-                this->EnableManual(i, 8u);
+                this->EnableManual(i, 5u);
                 this->EnableManual(i, 9u);
                 this->EnableManual(i, 10u);
+                this->EnableManual(i, 11u);
+                this->EnableManual(i, 12u);
             }
         });
 
@@ -366,12 +369,14 @@ void cIntroMission::__SetupOwn()
 
             if((!HAS_BIT(iInputState, 0u) || !HAS_BIT(iInputState, 1u)) && (fInputDelay >= 4.0f))
             {
-                this->EnableManual(i, 5u);
+                this->EnableManual(i, 3u);
                 this->EnableManual(i, 6u);
                 this->EnableManual(i, 7u);
                 this->EnableManual(i, 8u);
                 this->EnableManual(i, 9u);
                 this->EnableManual(i, 10u);
+                this->EnableManual(i, 11u);
+                this->EnableManual(i, 12u);
             }
         });
 
@@ -1246,8 +1251,8 @@ void cIntroMission::__SetupOwn()
                 if(m_bFirstPlay)
                 {
                     pPlayer->SetBaseColor(COLOR_SHIP_BLACK);
+                    pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE);
                 }
-                pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE);
             });
 
             STAGE_FINISH_NOW

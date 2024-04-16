@@ -10,7 +10,6 @@
 #ifndef _P1_GUARD_BULLET_H_
 #define _P1_GUARD_BULLET_H_
 
-// TODO 3: use prefetch with more precise numbers (also in enemy-manager) (maybe with per-class config)
 // TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO 3: add memory pool for bullets, instead of always reallocating
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
@@ -27,11 +26,10 @@
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT         (16u)     // initial size when creating a new bullet set
 #define BULLET_SET_COUNT        (20u)     // 
 #define BULLET_SPEED_FACTOR     (30.0f)   // 
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
-#define BULLET_COLLISION_FACTOR (0.65f)   // (for enemy bullets) 
+#define BULLET_COLLISION_FACTOR (0.6f)    // (for enemy bullets) 
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH     "a_v1Depth"
 #define BULLET_SHADER_ATTRIBUTE_DEPTH_NUM (CORE_SHADER_ATTRIBUTE_USER_NUM + 0u)
@@ -91,10 +89,10 @@ public:
     void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
-    inline cBullet* ChangeHeight           (const coreFloat fValue)  {this->SetPosition         (coreVector3(this->GetPosition().xy(), fValue)); return this;}   // not related to tilting
-    inline cBullet* ChangeSize             (const coreFloat fFactor) {this->SetSize             (this->GetSize   () * fFactor);                  return this;}
-    inline cBullet* ChangeTexSize          (const coreFloat fFactor) {this->SetTexSize          (this->GetTexSize() * fFactor);                  return this;}
-    inline cBullet* ChangeCollisionModifier(const coreFloat fValue)  {this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * fValue);          return this;}   // # unhandled change
+    inline cBullet* ChangeHeight           (const coreFloat   fValue)  {this->SetPosition         (coreVector3(this->GetPosition().xy(), fValue)); return this;}   // not related to tilting
+    inline cBullet* ChangeSize             (const coreFloat   fFactor) {this->SetSize             (this->GetSize   () * fFactor);                  return this;}
+    inline cBullet* ChangeTexSize          (const coreFloat   fFactor) {this->SetTexSize          (this->GetTexSize() * fFactor);                  return this;}
+    inline cBullet* ChangeCollisionModifier(const coreVector3 vValue)  {this->SetCollisionModifier(vValue);                                        return this;}   // # unhandled/absolute change
 
     // 
     inline void     AddStatus   (const coreInt32 iStatus)      {ADD_FLAG       (m_iStatus, iStatus)}
@@ -124,6 +122,7 @@ public:
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
     static inline coreUintW       ConfigOutlineStyle        () {ASSERT(false) return OUTLINE_STYLE_FULL;}
     static inline coreBool        ConfigShadow              () {ASSERT(false) return false;}
+    static inline coreUintW       ConfigReserve             () {ASSERT(false) return 0u;}
 
     // 
     static void GlobalInit() {}
@@ -216,6 +215,7 @@ public:
 
     // 
     template <typename T> void PrefetchBullet();
+    template <typename T> void ReserveBullet(const coreUintW iNumBullets);
 
     // 
     void OverrideOrder(const coreUint8* piNewOrder, const coreUintW iSize);
@@ -265,6 +265,8 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 32u;}
+    static constexpr coreFloat       ConfigSpeed               () {return 8.0f;}
 
 
 private:
@@ -310,6 +312,8 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 32u;}
+    static constexpr coreFloat       ConfigSpeed               () {return 6.0f;}
 
 
 private:
@@ -335,7 +339,7 @@ public:
     ASSIGN_ID(3, "Surge")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f; m_fFade = 0.0f; m_fScale = 1.0f;}
+    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); this->SetCollisionModifier(coreVector3(0.8f,1.0f,2.0f)); m_fAnimation = 0.2f; m_fFade = 0.0f; m_fScale = 1.0f;}
 
     // 
     inline cSurgeBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
@@ -355,6 +359,8 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 32u;}
+    static constexpr coreFloat       ConfigSpeed               () {return 6.0f;}
 
 
 private:
@@ -403,6 +409,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 32u;}
 
 
 private:
@@ -444,6 +451,8 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 32u;}
+    static constexpr coreFloat       ConfigSpeed               () {return 16.0f;}
 
 
 private:
@@ -481,6 +490,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -518,6 +528,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -556,6 +567,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -594,6 +606,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -632,6 +645,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -669,6 +683,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -706,6 +721,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -743,6 +759,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -781,6 +798,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_invert_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 8u;}
 
 
 private:
@@ -811,6 +829,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+    static constexpr coreUintW       ConfigReserve             () {return 8u;}
 
     // 
     static void GlobalInit();
@@ -846,6 +865,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+    static constexpr coreUintW       ConfigReserve             () {return 16u;}
 
     // 
     static void GlobalInit();
@@ -884,6 +904,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+    static constexpr coreUintW       ConfigReserve             () {return 16u;}
 
 
 private:
@@ -922,6 +943,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
 private:
@@ -972,6 +994,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_LIGHT_BULLET_THICK;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreUintW       ConfigReserve             () {return 256u;}
 
 
 private:
@@ -1013,8 +1036,9 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     // add bullet set to outline (will be cleared entirely)
     pOutline->GetStyle(T::ConfigOutlineStyle())->BindList(&oBulletActive);
 
-    // set bullet pool to initial size
-    aBulletPool.resize(BULLET_SET_INIT);
+    // set bullet pool to initial size       
+    oBulletActive.Reallocate(T::ConfigReserve());
+    aBulletPool  .resize    (T::ConfigReserve());
 }
 
 
@@ -1219,6 +1243,14 @@ template <typename T> void cBulletManager::PrefetchBullet()
 
         Core::Log->Info("Bullet Set (%s) created", T::Name);
     }
+}
+
+
+// ****************************************************************
+// 
+template <typename T> void cBulletManager::ReserveBullet(const coreUintW iNumBullets)
+{
+
 }
 
 

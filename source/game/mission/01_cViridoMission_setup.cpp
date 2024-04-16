@@ -594,6 +594,7 @@ void cViridoMission::__SetupOwn()
                 default: ASSERT(false)
                 case cRayBullet  ::ID: iSize = sizeof(cRayBullet);   break;
                 case cPulseBullet::ID: iSize = sizeof(cPulseBullet); break;
+                case cSurgeBullet::ID: iSize = sizeof(cSurgeBullet); break;
                 }
 
                 const coreUintW iIndex = (P_TO_UI(pBullet) / iSize) % iReflectWrap;
@@ -623,15 +624,16 @@ void cViridoMission::__SetupOwn()
         if(STAGE_BEGINNING)
         {
             pBackground->GetOutdoor()->LerpHeight(1.0f, 0.0f, 50u);
+
+            pBackground->SetGroundDensity(0u, 1.0f, true);
+            pBackground->SetGroundDensity(1u, 1.0f, true);
+            pBackground->SetGroundDensity(2u, 1.0f, true);
+            pBackground->SetDecalDensity (0u, 1.0f, true);
         }
 
         const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
 
-        pBackground->SetGroundDensity(0u, STEP(0.0f, 0.1f, fEnvLerp));
-        pBackground->SetGroundDensity(1u, STEP(0.0f, 0.1f, fEnvLerp));
-        pBackground->SetGroundDensity(2u, STEP(0.0f, 0.1f, fEnvLerp));
         pBackground->SetGroundDensity(3u, STEP(0.0f, 0.5f, 1.0f - fEnvLerp));
-        pBackground->SetDecalDensity (0u, STEP(0.0f, 0.1f, fEnvLerp));
         pBackground->SetAirDensity   (2u, STEP(0.9f, 1.0f, 1.0f - fEnvLerp));
 
         STAGE_WAVE(0u, "1-1", {35.0f, 50.0f, 70.0f, 85.0f, 170.0f})   // EINS
@@ -2914,7 +2916,7 @@ void cViridoMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Torus, {140.0f, 210.0f, 280.0, 350.0f, 700.0f})
+        STAGE_BOSS(m_Torus, {145.0f, 215.0f, 290.0, 360.0f, 720.0f})   // + 5
     },
     STAGE_PRE()
     {

@@ -15,10 +15,11 @@
 
 // ****************************************************************
 // table definitions
-#define TABLE_MISSIONS (MISSIONS)   // 
-#define TABLE_BOSSES   (BOSSES)     // 
-#define TABLE_SEGMENTS (SEGMENTS)   // 
-#define TABLE_BADGES   (BADGES)     // 
+#define TABLE_MISSIONS (MISSIONS)       // 
+#define TABLE_BOSSES   (BOSSES)         // 
+#define TABLE_SEGMENTS (SEGMENTS)       // 
+#define TABLE_BADGES   (BADGES)         // 
+#define TABLE_HELPERS  (HELPERS - 1u)   // 
 
 #define TABLE_TIME_TO_UINT(x)   (F_TO_UI  (coreDouble(x) * 1000.0))
 #define TABLE_TIME_TO_FLOAT(x)  (coreFloat(coreDouble(x) / 1000.0))
@@ -43,7 +44,6 @@ public:
         coreUint32 iTurnsMade;        // 
         coreUint64 iMovesMade;        // 
         coreUint64 iBulletsShot;      // 
-
     };
 
 
@@ -57,6 +57,7 @@ private:
 
     coreUint8 m_aiFragment[TABLE_MISSIONS];                        // (bitfield) 
     coreUint8 m_aaiBadge  [TABLE_MISSIONS][TABLE_SEGMENTS];        // (bitfield) 
+    coreUint8 m_aiHelper  [TABLE_MISSIONS];                        // (bitfield) 
 
     const cPlayer* m_pOwner;                                       // 
 
@@ -98,6 +99,10 @@ public:
     void GiveBadge(const coreUintW iBadgeIndex);
 
     // 
+    void GiveHelper(const coreUintW iHelperIndex, const coreUintW iMissionIndex);
+    void GiveHelper(const coreUintW iHelperIndex);
+
+    // 
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
@@ -108,8 +113,10 @@ public:
     inline const coreUint8& GetMedalSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMedalSegment [iMissionIndex][iSegmentIndex];}
     inline const coreUint8& GetFragmentAll   (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiFragment      [iMissionIndex];}
     inline const coreUint8& GetBadgeAll      (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiBadge        [iMissionIndex][iSegmentIndex];}
+    inline const coreUint8& GetHelperAll     (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiHelper        [iMissionIndex];}
     inline       coreBool   GetFragment      (const coreUintW iMissionIndex, const coreUintW iBossIndex)const    {ASSERT(iMissionIndex < TABLE_MISSIONS && iBossIndex    < TABLE_BOSSES)   return HAS_BIT(m_aiFragment[iMissionIndex], iBossIndex);}
-    inline       coreBool   GetBadge         (const coreUintW iBadgeIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iBadgeIndex < TABLE_BADGES && iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return HAS_BIT(m_aaiBadge[iMissionIndex][iSegmentIndex], iBadgeIndex);}
+    inline       coreBool   GetBadge         (const coreUintW iBadgeIndex,  const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iBadgeIndex < TABLE_BADGES && iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return HAS_BIT(m_aaiBadge[iMissionIndex][iSegmentIndex], iBadgeIndex);}
+    inline       coreBool   GetHelper        (const coreUintW iHelperIndex, const coreUintW iMissionIndex)const  {ASSERT(iHelperIndex < TABLE_HELPERS && iMissionIndex < TABLE_MISSIONS)   return HAS_BIT(m_aiHelper[iMissionIndex], iHelperIndex);}
 };
 
 
@@ -196,7 +203,7 @@ private:
     coreProtect<coreUint32> m_iTimeMono;                                             // 
     coreProtect<coreUint32> m_iTimeEvent;                                            // 
 
-    coreProtect<coreUint32> m_iTimeTotal;                                            // 
+    coreProtect<coreUint32> m_iTimeTotal;                                            // (including time between segments) 
     coreProtect<coreUint32> m_aiTimeMission [TABLE_MISSIONS];                        // total time per mission 
     coreProtect<coreUint32> m_aaiTimeSegment[TABLE_MISSIONS][TABLE_SEGMENTS];        // 
 

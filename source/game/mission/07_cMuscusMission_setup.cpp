@@ -156,10 +156,9 @@ void cMuscusMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(iNumData + 6u)
+        STAGE_GET_START(iNumData + 5u)
             STAGE_GET_FLOAT_ARRAY(afFade, iNumData)
             STAGE_GET_FLOAT      (fBlind)
-            STAGE_GET_FLOAT      (fBlindLoop)
             STAGE_GET_UINT       (iStepHit)
             STAGE_GET_UINT       (iStepRemove)
             STAGE_GET_UINT       (iHiddenState)
@@ -190,9 +189,9 @@ void cMuscusMission::__SetupOwn()
             const coreVector2 vDir = pPlayer->GetDirection().xy();
 
             const coreVector2 vDiff = vPosition - vPos;
-            const coreFloat   fDot  = coreVector2::Dot(vDir, vDiff.Normalized());
+            const coreFloat   fDot  = coreVector2::Dot(vDir, vDiff);
 
-            return (fDot > 0.8f) && (vDiff.LengthSq() < POW2(9.0f)) ? 1.0f : 0.0f;
+            return (fDot > 0.0f) && (vDiff.LengthSq() < POW2(12.5f)) ? 1.0f : 0.0f;
         };
 
         if(pSquad1->IsFinished())
@@ -335,12 +334,9 @@ void cMuscusMission::__SetupOwn()
         }
         else if((m_iStageSub >= 21u) && (m_iStageSub <= 24u))
         {
-            fBlindLoop -= 1.0f * TIME;
-            if(fBlindLoop <= 0.0f)
+            if(STAGE_BEGINNING2)
             {
-                fBlindLoop += 3.2f;
-
-                fBlind = 2.0f;
+                fBlind = (m_iStageSub == 24u) ? 2.5f : 2.0f;
                 pHeadlight->PlayFlicker(HEADLIGHT_TYPE_OFF);
             }
         }
@@ -436,7 +432,7 @@ void cMuscusMission::__SetupOwn()
                     pEnemy->SetDirection(coreVector3(vDir, 0.0f));
                 }
 
-                if(STAGE_LIFETIME_AFTER(0.0f)) pEnemy->DefaultMoveTarget(pEnemy->NearestPlayerDual(i % 2u)->GetPosition().xy(), 30.0f, 2.0f);
+                if(STAGE_LIFETIME_AFTER(0.0f)) pEnemy->DefaultMoveTarget(pEnemy->NearestPlayerDual(i % 2u)->GetPosition().xy(), g_pGame->IsEasy() ? 24.0f : 30.0f, (i == 27u) ? 10.0f : 2.0f);
             }
             else if(i < 29u)
             {
@@ -604,7 +600,7 @@ void cMuscusMission::__SetupOwn()
 
             if(g_pGame->IsTask())
             {
-                if(!bInverted && pEnemy->HasStatus(ENEMY_STATUS_HIDDEN))
+                if(!bInverted && pEnemy->HasStatus(ENEMY_STATUS_HIDDEN) && !pEnemy->ReachedDeath())
                 {
                     STAGE_FOREACH_PLAYER(pPlayer, j)
                     {

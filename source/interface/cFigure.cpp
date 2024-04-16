@@ -161,7 +161,14 @@ coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
 {
 #if defined(_CORE_SWITCH_)
 
-    return "input_gamepad_switch.png";
+    switch(iBase)
+    {
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:          return "input_gamepad_switch_full.png";
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:  return "input_gamepad_switch_left.png";
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: return "input_gamepad_switch_right.png";
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:  return "input_gamepad_switch_full.png";
+    default:                                               return "input_gamepad_switch_full.png";
+    }
 
 #else
 

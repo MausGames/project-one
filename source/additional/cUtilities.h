@@ -66,6 +66,76 @@
 
 // ****************************************************************
 // 
+constexpr FUNC_CONST coreUint8 GetSystemOsIndex()
+{
+#if defined(_CORE_WINDOWS_)
+    const coreUint8 A = 1u;
+#elif defined(_CORE_LINUX_)
+    const coreUint8 A = 2u;
+#elif defined(_CORE_MACOS_)
+    const coreUint8 A = 3u;
+#elif defined(_CORE_ANDROID_)
+    const coreUint8 A = 4u;
+#elif defined(_CORE_IOS_)
+    const coreUint8 A = 5u;
+#elif defined(_CORE_EMSCRIPTEN_)
+    const coreUint8 A = 6u;
+#elif defined(_CORE_SWITCH_)   // #
+    const coreUint8 A = 7u;
+#endif
+
+#if defined(_CORE_64BIT_)
+    const coreUint8 B = 0u;
+#else
+    const coreUint8 B = 1u;
+#endif
+
+    return (A) + (B << 4u);
+}
+
+
+// ****************************************************************
+// 
+inline coreUint8 GetSystemCpuIndex()
+{
+    static const coreUint8 s_iCpuIndex = []()
+    {
+        const coreChar* pcVendor = coreData::StrToLower(coreData::SystemCpuVendor());
+        const coreChar* pcBrand  = coreData::StrToLower(coreData::SystemCpuBrand());
+
+        if(std::strstr(pcBrand,  "amd"))   return 1u;
+        if(std::strstr(pcBrand,  "intel")) return 2u;
+        if(std::strstr(pcVendor, "apple")) return 3u;
+
+        return 0xFFu;
+    }();
+
+    return s_iCpuIndex;
+}
+
+
+// ****************************************************************
+// 
+inline coreUint8 GetSystemGpuIndex()
+{
+    static const coreUint8 s_iGpuIndex = []()
+    {
+        const coreChar* pcVendor = coreData::StrToLower(PRINT("%s", glGetString(GL_VENDOR)));   // to handle NULL
+
+        if(std::strstr(pcVendor, "amd"))    return 1u;
+        if(std::strstr(pcVendor, "nvidia")) return 2u;
+        if(std::strstr(pcVendor, "intel"))  return 3u;
+        if(std::strstr(pcVendor, "apple"))  return 4u;
+
+        return 0xFFu;
+    }();
+
+    return s_iGpuIndex;
+}
+
+
+// ****************************************************************
+// 
 inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, const coreFloat b)
 {
     ASSERT(a < b)

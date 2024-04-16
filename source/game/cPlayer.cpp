@@ -52,6 +52,8 @@ cPlayer::cPlayer()noexcept
 , m_fCircleValue    (0.0f)
 , m_fBoost          (0.0f)
 , m_iLastMove       (8u)
+, m_iLastHold       (8u)
+, m_iShootToggle    (0u)
 
 , m_bWasDamaged (false)
 , m_bGiveUp     (false)
@@ -380,11 +382,9 @@ void cPlayer::RenderAfter()
             this->AddStatus(PLAYER_STATUS_TOP);
         }
         
-
-        
         // 
-        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Gyro);
-        m_Gyro.Render();
+        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Gyro);
+        //m_Gyro.Render();
 
         // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
@@ -409,6 +409,38 @@ void cPlayer::Move()
         coreVector2 vNewPos = this->GetPosition().xy();
         coreVector3 vNewOri = coreVector3(0.0f,0.0f,1.0f);
 
+        // 
+        const coreUint8 iMode = g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)];
+        if(iMode == 3u)
+        {
+            const coreUint8 iLastHold = PackDirection(m_pInput->vMove);
+            if(m_iLastMove != iLastHold)
+            {
+                const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+                const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+
+                const coreVector2 vFlip = coreVector2(fSide, 1.0f);
+
+                switch(PackDirection(MapToAxisInv(m_pInput->vMove, vFinal) * vFlip))
+                {
+                default: ASSERT(false)
+                case 0u: m_iLastHold = 0u; break;
+                case 1u: m_iLastHold = (m_iLastHold == 0u) ? 2u : 0u; break;
+                case 2u: m_iLastHold = 2u; break;
+                case 3u: m_iLastHold = (m_iLastHold == 2u) ? 4u : 2u; break;
+                case 4u: m_iLastHold = 4u; break;
+                case 5u: m_iLastHold = (m_iLastHold == 4u) ? 6u : 4u; break;
+                case 6u: m_iLastHold = 6u; break;
+                case 7u: m_iLastHold = (m_iLastHold == 6u) ? 0u : 6u; break;
+                case 8u: m_iLastHold = 8u; break;
+                }
+            }
+        }
+        else
+        {
+            m_iLastHold = 8u;
+        }
+
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
             const coreVector2 vOldDir = this->GetDirection().xy();
@@ -429,33 +461,49 @@ void cPlayer::Move()
             
             const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
             
-            // 
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
-
-            //static coreUint8 iHold = 8u;
-            //const coreUint8 iLastHold = PackDirection(m_pInput->vMove);
-            if(g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)] == 3u)
+            if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !g_CurConfig.Legacy.iRotationTurn)
             {
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_pInput->vMove.IsNull())// && (iHold != iLastHold))
-                //if(!HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_pInput->vMove.IsNull())
-                {
-                    //if(iLastHold != iHold)
-                //    if(PackDirection(m_pInput->vMove) != m_iLastMove)
-                    {
-                         if(SameDirection90(coreVector2( 0.0f, 1.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
-                    else if(SameDirection90(coreVector2(-1.0f, 0.0f), m_pInput->vMove) && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
-                    else if(SameDirection90(coreVector2( 0.0f,-1.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
-                    else if(SameDirection90(coreVector2( 1.0f, 0.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
-                    //iHold = iLastHold;
-                    }
-                }
-                //if(HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))) iHold = iLastHold;
-                //if(!HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && m_pInput->vMove.IsNull()) iHold = 8u;
+                // 
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))    vNewDir = MapToAxis(coreVector2( 0.0f, 1.0f) * vFlip, vFinal);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  vNewDir = MapToAxis(coreVector2(-1.0f, 0.0f) * vFlip, vFinal);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  vNewDir = MapToAxis(coreVector2( 0.0f,-1.0f) * vFlip, vFinal);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) vNewDir = MapToAxis(coreVector2( 1.0f, 0.0f) * vFlip, vFinal);
+            }
+            else
+            {
+                // 
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
             }
             
+            
+            if(iMode == 3u)
+            {
+                const coreBool bPressA = HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT(0u, 0u));
+                const coreBool bPressB = HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
+                const coreBool bHoldA  = HAS_BIT(m_pInput->iActionHold,  PLAYER_ACTION_SHOOT(0u, 0u));
+                const coreBool bHoldB  = HAS_BIT(m_pInput->iActionHold,  PLAYER_ACTION_RAPID_FIRE);
+
+                if(((bPressA && !bHoldB) || (bPressB && !bHoldA) || (bPressA && bPressB)) && !m_pInput->vMove.IsNull())
+                {
+                    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !g_CurConfig.Legacy.iRotationTurn)
+                    {
+                             if(m_iLastHold == 0u) vNewDir = MapToAxis(coreVector2( 0.0f, 1.0f) * vFlip, vFinal);
+                        else if(m_iLastHold == 2u) vNewDir = MapToAxis(coreVector2(-1.0f, 0.0f) * vFlip, vFinal);
+                        else if(m_iLastHold == 4u) vNewDir = MapToAxis(coreVector2( 0.0f,-1.0f) * vFlip, vFinal);
+                        else if(m_iLastHold == 6u) vNewDir = MapToAxis(coreVector2( 1.0f, 0.0f) * vFlip, vFinal);
+                    }
+                    else
+                    {
+                             if((m_iLastHold == 0u) && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
+                        else if((m_iLastHold == 2u) && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
+                        else if((m_iLastHold == 4u) && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
+                        else if((m_iLastHold == 6u) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
+                    }
+                }
+            }
             
             
             // set new direction
@@ -603,9 +651,29 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
+            if(/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt/* && bToggle*/)
+            {
+                if(HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_RAPID_FIRE))
+                {
+                    m_iShootToggle = !m_iShootToggle;
+                    m_apWeapon[i]->Update(m_iShootToggle, m_fShootSpeed);
+                }
+                else
+                {
+                    m_iShootToggle = 0u;
+
+                    const coreUint8 iShoot = (m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES);
+                    m_apWeapon[i]->Update(iShoot, m_fShootSpeed);
+                }
+            }
+            else
+            {
+                m_iShootToggle = 0u;
+
+                m_apWeapon[i]->Update(0u, m_fShootSpeed);
+            }
+
             //const coreBool bToggle = !(HAS_BIT(m_pInput->iStatus, 1u) && m_apWeapon[i]->GetLastStatus());
-            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt/* && bToggle*/) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
-            m_apWeapon[i]->Update(iShoot, m_fShootSpeed);
         }
 
         // 
@@ -636,7 +704,7 @@ void cPlayer::Move()
         }
 
         // 
-        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_GYRO) && (g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)] != 0u))
+        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_GYRO) && ((iMode == 1u) || (iMode == 2u)))
         {
             if(!m_fGyroValue) this->EnableGyro();
             m_fGyroValue.UpdateMin(2.0f, 1.0f);
@@ -833,6 +901,11 @@ void cPlayer::Move()
         {
             m_bGiveUp = false;
             g_pGame->GetCombatText()->DrawText(Core::Language->GetString("TEXT_GIVEUP"), this->GetPosition(), COLOR_MENU_INSIDE);
+        }
+        
+        if(m_Range.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+        {
+            g_pDistortion->CreateEraser(this->GetPosition(), 1.0f);
         }
     }
     
@@ -1095,6 +1168,8 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fCircleValue  = 0.0f;
     m_fBoost        = 0.0f;
     m_iLastMove     = 8u;
+    m_iLastHold     = 8u;
+    m_iShootToggle  = 0u;
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -1363,7 +1438,7 @@ void cPlayer::EnableGyro()
 
     // 
     m_Gyro.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    g_pGlow->BindObject(&m_Gyro);
+    //g_pGlow->BindObject(&m_Gyro);
 }
 
 
@@ -1375,7 +1450,7 @@ void cPlayer::DisableGyro()
 
     // 
     m_Gyro.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    g_pGlow->UnbindObject(&m_Gyro);
+    //g_pGlow->UnbindObject(&m_Gyro);
 }
 
 
@@ -1637,7 +1712,7 @@ coreVector2 cPlayer::CalcMove()const
 coreFloat cPlayer::CalcMoveSpeed()const
 {
     // 
-    const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_fBoost) ? 20.0f : 50.0f;
+    const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_RAPID_FIRE) && !m_fBoost) ? 20.0f : 50.0f;
     return m_fMoveSpeed * fModifier;
 }
 

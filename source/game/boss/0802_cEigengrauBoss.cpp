@@ -1065,6 +1065,8 @@ void cEigengrauBoss::__MoveOwn()
             if(PHASE_FINISHED)
             {
                 this->Kill(false);
+
+                g_pMenu->PreventSaveText();
             }
         });
     }

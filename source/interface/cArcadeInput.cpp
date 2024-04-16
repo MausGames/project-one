@@ -14,6 +14,7 @@
 cArcadeInput::cArcadeInput()noexcept
 : m_iTextLength (0u)
 , m_iCurGlyph   (0u)
+, m_fFlashTime  (0.0f)
 , m_bFinished   (false)
 {
     // 
@@ -203,7 +204,11 @@ void cArcadeInput::Move()
     m_Text.Move();
 
     // 
-    m_Background.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));   // TODO 1: check if menu rotation is correct
+    m_fFlashTime.UpdateMax(-1.0f, 0.0f);
+
+    // 
+    m_Background.SetColor3   (coreVector3(1.0f,1.0f,1.0f) * LERPH3(1.0f, 3.0f, m_fFlashTime));
+    m_Background.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
     m_Background.Move();
 
     // 
@@ -244,6 +249,18 @@ void cArcadeInput::Clear()
 
     // 
     m_sTextValue = "";
+}
+
+
+// ****************************************************************
+// 
+void cArcadeInput::OverrideText(const coreChar* pcText)
+{
+    // 
+    m_Text.SetText(pcText);
+
+    // 
+    m_sTextValue = pcText;
 }
 
 

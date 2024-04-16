@@ -15,6 +15,7 @@ cIntroMenu::cIntroMenu()noexcept
 : coreMenu       (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
 , m_IntroTimer   (coreTimer(3.0f, 0.5f, 1u))
 , m_iIntroStatus (0xFFu)
+, m_fDelayTimer  (0.0f)
 {
     // create menu objects
     m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -75,13 +76,58 @@ void cIntroMenu::Move()
         // 
         FOR_EACH(it, m_apLanguageButton)
         {
-            cMenu::UpdateButton((*it), &m_Navigator, (*it)->IsFocused());
+            coreVector3 vColor;
+            switch(m_apLanguageButton.get_valuelist().index(it) % 8u)
+            {
+            default: ASSERT(false)
+            case 0u: vColor = COLOR_MENU_YELLOW;  break;
+            case 1u: vColor = COLOR_MENU_ORANGE;  break;
+            case 2u: vColor = COLOR_MENU_RED;     break;
+            case 3u: vColor = COLOR_MENU_MAGENTA; break;
+            case 4u: vColor = COLOR_MENU_PURPLE;  break;
+            case 5u: vColor = COLOR_MENU_BLUE;    break;
+            case 6u: vColor = COLOR_MENU_CYAN;    break;
+            case 7u: vColor = COLOR_MENU_GREEN;   break;
+            }
+
+            cMenu::UpdateButton((*it), &m_Navigator, (*it)->IsFocused(), vColor);
         }
     }
-    else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)
+    else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)   // # old surface
     {
         // 
-        if(!this->GetTransition().GetStatus()) g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f, 0u);
+        if(!this->GetTransition().GetStatus()) g_pMenu->ShiftSurface(this, g_pSave->CanImportDemo() ? SURFACE_INTRO_IMPORT : SURFACE_INTRO_WELCOME, 1.0f, 0u);
+    }
+    else if(this->GetCurSurface() == SURFACE_INTRO_IMPORT)
+    {
+        if(m_fDelayTimer)
+        {
+            // 
+            m_fDelayTimer.UpdateMax(-1.0f, 0.0f);
+            if(!m_fDelayTimer)
+            {
+                // 
+                g_pSave->ImportDemo();
+                Core::RequestRestart();
+            }
+        }
+        else
+        {
+            // 
+            if(!g_pMenu->GetMsgBox()->IsVisible()) g_pMenu->GetMsgBox()->ShowQuestion(PRINT("%s", Core::Language->GetString("QUESTION_IMPORT")), [this](const coreInt32 iAnswer)
+            {
+                if(iAnswer == MSGBOX_ANSWER_YES)
+                {
+                    // 
+                    m_fDelayTimer = 1.5f;
+                }
+                else
+                {
+                    // 
+                    g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f, 0u);
+                }
+            });
+        }
     }
     else
     {
@@ -97,11 +143,11 @@ void cIntroMenu::Move()
                 {
                     // 
                     m_iIntroStatus = 2u;
-                    //if(m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL) < 2.0f)
-                    //{
-                    //    m_IntroTimer.SetValue(2.0f);
-                    //    this->ChangeSurface(SURFACE_INTRO_EMPTY, 0.0f);
-                    //}
+                    if(m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL) < 2.0f)
+                    {
+                        m_IntroTimer.SetValue(2.0f);
+                        //this->ChangeSurface(SURFACE_INTRO_EMPTY, 0.0f);
+                    }
                 }
             }
             else if(m_iIntroStatus == 2u)
@@ -154,12 +200,15 @@ void cIntroMenu::StartIntro()
         ASSERT(asLanguageList.size() <= 10u)
 
         // 
-        const coreFloat fOffset = I_TO_F(asLanguageList.size()) * 0.5f - 0.5f;
+        m_apLanguageButton.reserve(asLanguageList.size());
+
+        // 
+        const coreFloat fOffset = I_TO_F(MIN(asLanguageList.size(), 8u)) * 0.5f - 0.5f;
         FOR_EACH(it, asLanguageList)
         {
             // 
             coreString sFont;
-            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_DEFAULT;
+            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_STANDARD;
 
             // create new language button
             cGuiButton* pButton = new cGuiButton();
@@ -170,11 +219,18 @@ void cIntroMenu::StartIntro()
             pButton->GetCaption()->SetText(asLanguageList.get_key(it)->c_str());
 
             // 
-            this->BindObject(SURFACE_INTRO_LANGUAGE, pButton);
+            m_LanguageBox.BindObject(pButton);
 
             // 
             m_apLanguageButton.emplace((*it), pButton);
         }
+
+        // 
+        m_LanguageBox.SetPosition (coreVector2(0.0f,0.0f));
+        m_LanguageBox.SetSize     (coreVector2(0.5f,0.74f));
+        m_LanguageBox.SetMaxOffset(0.09f * I_TO_F(asLanguageList.size()) + 0.02f - m_LanguageBox.GetSize().y);
+
+        m_Navigator.BindScroll(&m_LanguageBox);
 
         // 
         for(coreUintW i = 0u, ie = m_apLanguageButton.size(); i < ie; ++i)
@@ -189,11 +245,12 @@ void cIntroMenu::StartIntro()
         m_Navigator.ShowIcon   (true);
 
         // 
+        this->BindObject(SURFACE_INTRO_LANGUAGE, &m_LanguageBox);
         this->BindObject(SURFACE_INTRO_LANGUAGE, &m_Navigator);
     }
 
     // 
-    g_pMenu->ShiftSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_WELCOME, 0.75f, 0u);
+    g_pMenu->ShiftSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : (g_pSave->CanImportDemo() ? SURFACE_INTRO_IMPORT : SURFACE_INTRO_WELCOME), 0.75f, 0u);
 }
 
 

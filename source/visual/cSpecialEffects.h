@@ -16,7 +16,6 @@
 // TODO 3: don't invoke special-effects out of view (though consider effect-radius)
 // TODO 1: [MF] check for all locations where deep particles would make sense (or invert everything ?)
 // TODO 4: think about merging *Color and *Dark functions, as they are mostly identical
-// TODO 3: sinus shake
 // TODO 3: discard every X particle (create min 1) on low quality ?
 // TODO 1: separate particles for background rendering (automatic selection, based on start-position ? would be easier to expose)
 // TODO 3: extend particle system to allow custom move algorithms
@@ -147,6 +146,7 @@ enum eSoundEffect : coreUint8
     SOUND_EFFECT_PEARL,
     SOUND_EFFECT_SHAKE_01,
     SOUND_EFFECT_SHAKE_02,
+    SOUND_EFFECT_SUCCESS,
     SOUND_EFFECT_SWIPE_01,
     SOUND_EFFECT_SWIPE_02,
     SOUND_EFFECT_SWIPE_03,

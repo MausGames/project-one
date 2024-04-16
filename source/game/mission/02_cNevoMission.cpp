@@ -1384,7 +1384,7 @@ void cNevoMission::__MoveOwnAfter()
                 d_cast<cPlayer*>(pBulletPlayer->GetOwner())->GetScoreTable()->RefreshCooldown();
             }
 
-            pBulletPlayer->Deactivate(true);
+            pBulletPlayer->Deactivate(true, vIntersection.xy());
 
             g_pGame->PlayVanishSound(vIntersection);
         });

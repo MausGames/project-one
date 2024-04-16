@@ -901,7 +901,7 @@ void cLeviathanBoss::__MoveOwn()
                     }
                 }
 
-                pBullet->Deactivate(true);
+                pBullet->Deactivate(true, vIntersection.xy());
                 pBullet->AddStatus(BULLET_STATUS_GHOST);
             });
 
@@ -1083,7 +1083,7 @@ void cLeviathanBoss::__MoveOwn()
                 const coreVector2 vPos = coreVector2((I_TO_F(((iTick % 4u) * 3u) % 5u) - 2.0f) * 0.3f + ((iTick % 2u) ? 1.0f : -1.0f) * 0.03f, -1.2f) * FOREGROUND_AREA;
                 const coreVector2 vDir = coreVector2(0.0f,1.0f);
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cGrowBullet>(2, 0.5f, this, vPos, vDir)->ChangeSize(1.0f)->ChangeCollisionModifier(1.0f / 0.95f);   // start with 1.0f
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cGrowBullet>(2, 0.5f, this, vPos, vDir)->ChangeSize(1.0f)->ChangeCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * (1.0f / 0.95f));   // start with 1.0f
             });
         }
         else if(m_aiCounter[SMOOTH_STATE] == 1)

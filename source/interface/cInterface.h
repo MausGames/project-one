@@ -70,6 +70,8 @@ private:
         cGuiLabel  oChainValue;              // chain value
         cGuiLabel  oImmune;                  // 
         coreFlow   fImmuneTime;              // 
+        cGuiLabel  oSpeed;                   // 
+        coreFlow   fSpeedTime;               // 
         coreFlow   fSpin;                    // 
         coreFlow   fSpin2;                   // 
 
@@ -182,6 +184,7 @@ public:
     void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);
     void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);
     void ShowAlert  ();
+    void OverrideBanner(const coreChar* pcMain, const coreUint8 iMedal, const coreUint8 iMedalType);
     coreBool IsBannerActive()const;
 
     // 
@@ -194,9 +197,9 @@ public:
     coreBool IsFragmentActive()const;
 
     // 
-    void UpdateLayout();
+    void UpdateLayout(const coreBool bForce = false);
     void UpdateSpacing();
-    void UpdateEnabled();
+    void UpdateEnabled(const coreBool bForce = false);
     void MoveTimeless();
 
     // 

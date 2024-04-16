@@ -251,7 +251,7 @@ void cBonus1Mission::__SetupOwn()
 
                 // 
                 //pBullet->Reflect(pShelter, vIntersection.xy(), 3.0f);
-                pBullet->Deactivate(true);
+                pBullet->Deactivate(true, vIntersection.xy());
             });
         }
 

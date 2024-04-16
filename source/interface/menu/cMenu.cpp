@@ -24,9 +24,10 @@ coreMap<const void*, cMenu::sButtonData> cMenu::s_aButtonData = {};
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu           (SURFACE_MAX, SURFACE_INTRO)
-, m_iPauseFrame      (0u)
-, m_fNoticeSaveTime  (0.0f)
+: coreMenu             (SURFACE_MAX, SURFACE_INTRO)
+, m_iPauseFrame        (0u)
+, m_fNoticeSaveTime    (0.0f)
+, m_bNoticeSavePrevent (false)
 
 
 , iForceA (0xFFu)
@@ -38,6 +39,8 @@ cMenu::cMenu()noexcept
 , m_pTransitionMenu  (NULL)
 , m_fVolume  (1.0f)
 , m_bStarted (false)
+, m_Interface        (1u)
+, m_fInterfaceAlpha  (0.0f)
 //, m_vHighlightColor  (COLOR_MENU_WHITE)
 {
     // 
@@ -45,6 +48,7 @@ cMenu::cMenu()noexcept
     m_PauseLayer.DefineProgram("menu_grey_program");
     m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
+    m_PauseLayer.SetStyle     (CORE_OBJECT2D_STYLE_VIEWDIR);
 
     // 
     m_NoticeSave.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
@@ -131,6 +135,11 @@ cMenu::cMenu()noexcept
     m_apNewButton2.clear();
     
     s_aButtonData.clear();
+    
+    
+    m_Interface.ShowWave("1-1");
+    m_Interface.UpdateLayout();
+    m_Interface.UpdateEnabled();
 }
 
 
@@ -150,6 +159,13 @@ cMenu::~cMenu()
 // render the menu
 void cMenu::Render()
 {
+    if(!STATIC_ISVALID(g_pGame))
+    {
+        // 
+        m_Interface.SetAlphaAll(m_fInterfaceAlpha);
+        m_Interface.Render();
+    }
+    
     // 
     m_PauseLayer.Render();
 
@@ -248,6 +264,22 @@ void cMenu::Render()
 // move the menu
 void cMenu::Move()
 {
+    if(!STATIC_ISVALID(g_pGame))
+    {
+        const coreFloat fOldAlpha = m_fInterfaceAlpha;
+
+        // 
+        if((this->GetCurSurface() == SURFACE_CONFIG) && (m_ConfigMenu.GetCurSurface() ==  SURFACE_CONFIG_GAME))
+             m_fInterfaceAlpha.UpdateMin( 5.0f, 1.0f);
+        else m_fInterfaceAlpha.UpdateMax(-5.0f, 0.0f);
+
+        // 
+        if(fOldAlpha || m_fInterfaceAlpha)
+        {
+            m_Interface.Move();
+        }
+    }
+
     // 
     cFigure       ::GlobalUpdate();
     cMenuNavigator::GlobalUpdate();
@@ -815,7 +847,7 @@ void cMenu::Move()
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
     {
         //m_PauseLayer.SetAlpha    (0.25f);
-        m_PauseLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));   // TODO 1: check if menu rotation is correct
+        m_PauseLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
         //m_PauseLayer.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
     }
     else
@@ -830,10 +862,12 @@ void cMenu::Move()
     m_Tooltip   .Move();
     m_PauseLayer.Move();
 
-    // 
-    if(g_pSave->GetActive()) {m_fNoticeSaveTime = 1.0f; g_pSave->ResetActive();}
-    else                     {m_fNoticeSaveTime.UpdateMax(-1.0f, 0.0f);}
+    if(!STATIC_ISVALID(g_pGame)) m_bNoticeSavePrevent = false;
 
+    // 
+    if(g_pSave->GetActive()) {m_fNoticeSaveTime = m_bNoticeSavePrevent ? 0.0f : 1.0f; g_pSave->ResetActive();}
+    else                     {m_fNoticeSaveTime.UpdateMax(-1.0f, 0.0f);}
+    
     // 
     m_NoticeSave.SetPosition(coreVector2(-0.033f - 0.02f * BLENDB(1.0f - m_fNoticeSaveTime), 0.023f));
     m_NoticeSave.SetAlpha   (BLENDBR(m_fNoticeSaveTime));
@@ -1007,7 +1041,7 @@ coreFloat cMenu::GetVolume()const
 void cMenu::UpdateLanguageFont()
 {
     // 
-    const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_DEFAULT;
+    const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_STANDARD;
     Core::Manager::Resource->AssignProxy("dynamic_font", pcName);
 
     // 

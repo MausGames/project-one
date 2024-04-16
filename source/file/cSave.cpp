@@ -13,13 +13,17 @@
 // ****************************************************************
 // constructor
 cSave::cSave()noexcept
-: m_Header  {}
-, m_sPath   (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save%s." SAVE_FILE_EXTENSION, g_bDemoVersion ? "_demo" : "")))
-, m_iToken  (0u)
-, m_bIgnore (false)
-, m_eStatus (SAVE_STATUS_OK)
-, m_iActive (0u)
+: m_Header    {}
+, m_sPath     (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save."      SAVE_FILE_EXTENSION)))
+, m_sPathDemo (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save_demo." SAVE_FILE_EXTENSION)))
+, m_iToken    (0u)
+, m_bIgnore   (false)
+, m_eStatus   (SAVE_STATUS_OK)
+, m_iActive   (0u)
 {
+    // 
+    if(g_bDemoVersion) m_sPath = m_sPathDemo;
+
     // 
     this->LoadFile();
 }
@@ -171,16 +175,16 @@ RETURN_NONNULL cSave::sProgress* cSave::EditProgress()
 
 // ****************************************************************
 // 
-coreBool cSave::LoadFile()
+coreBool cSave::LoadFile(const coreChar* pcPath)
 {
     // 
-    if(!cSave::__LoadHeader(&m_Header, m_sPath.c_str()))
+    if(!cSave::__LoadHeader(&m_Header, pcPath))
     {
         // 
-        coreData::FileMove(m_sPath.c_str(), PRINT("%s.invalid_%s", m_sPath.c_str(), coreData::DateTimePrint("%Y%m%d_%H%M%S")));
+        coreData::FileMove(pcPath, PRINT("%s.invalid_%s", pcPath, coreData::DateTimePrint("%Y%m%d_%H%M%S")));
 
         // 
-        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.backup", m_sPath.c_str())))
+        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.backup", pcPath)))
         {
             // 
             this->Clear();
@@ -192,6 +196,11 @@ coreBool cSave::LoadFile()
     cSave::__UpgradeHeader(&m_Header);
     cSave::__CheckHeader  (&m_Header);
     return true;
+}
+
+coreBool cSave::LoadFile()
+{
+    return this->LoadFile(m_sPath.c_str());
 }
 
 
@@ -275,12 +284,36 @@ void cSave::Clear()
     // 
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
-        m_Header.oOptions.aiShield  [i]    = g_bDemoVersion ? SHIELD_DEFAULT : 20u;
+        m_Header.oOptions.aiShield  [i]    = i ? 0u : 10u;
         m_Header.oOptions.aaiWeapon [i][0] = 1u;
         m_Header.oOptions.aaiSupport[i][0] = 0u;
     }
+}
 
-    m_Header.oOptions.aiShield[1] = 0u;
+
+// ****************************************************************
+// 
+void cSave::ImportDemo()
+{
+    ASSERT(!g_bDemoVersion)
+
+    // 
+    if(this->LoadFile(m_sPathDemo.c_str()))
+    {
+        // 
+        m_Header.oOptions.iNavigation = 0u;
+        ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_START)
+        ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_EXTRA)
+        ADD_BIT_EX(m_Header.oProgress.aiState, STATE_DEMO_IMPORTED)
+    }
+}
+
+
+// ****************************************************************
+// 
+coreBool cSave::CanImportDemo()const
+{
+    return !g_bDemoVersion && !coreData::FileExists(m_sPath.c_str()) && coreData::FileExists(m_sPathDemo.c_str());
 }
 
 

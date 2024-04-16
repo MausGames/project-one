@@ -23,6 +23,7 @@ cMsgBox::cMsgBox()noexcept
     this->DefineProgram("menu_grey_program");
     this->SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     this->SetTexSize   (coreVector2(1.2f,1.2f));
+    this->SetStyle     (CORE_OBJECT2D_STYLE_VIEWDIR);
 
     // 
     m_Box.DefineTexture(0u, "menu_background_black.png");

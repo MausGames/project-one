@@ -24,7 +24,6 @@
 
 // ****************************************************************
 // enemy definitions
-#define ENEMY_SET_INIT    (8u)      // initial size when creating a new enemy set
 #define ENEMY_SET_COUNT   (16u)     // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
@@ -162,6 +161,7 @@ public:
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}
+    static constexpr coreUintW       ConfigReserve             () {return 2u;}
 
 
 protected:
@@ -238,6 +238,7 @@ public:
 
     // 
     template <typename T> void PrefetchEnemy();
+    template <typename T> void ReserveEnemy(const coreUintW iNumEnemies);
 
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}
@@ -316,6 +317,9 @@ public:
     // get object properties
     inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_09;}
 
+    // enemy configuration values
+    static constexpr coreUintW ConfigReserve() {return 32u;}
+
 
 private:
     // execute own routines
@@ -336,6 +340,9 @@ public:
 
     // get object properties
     inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_02;}
+
+    // enemy configuration values
+    static constexpr coreUintW ConfigReserve() {return 16u;}
 
 
 private:
@@ -368,6 +375,9 @@ public:
     // get object properties
     inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
     inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_10;}
+
+    // enemy configuration values
+    static constexpr coreUintW ConfigReserve() {return 32u;}
 
 
 private:
@@ -402,6 +412,9 @@ public:
     inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
     inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_04;}
 
+    // enemy configuration values
+    static constexpr coreUintW ConfigReserve() {return 32u;}
+
 
 private:
     // execute own routines
@@ -423,6 +436,9 @@ public:
 
     // get object properties
     inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_04;}
+
+    // enemy configuration values
+    static constexpr coreUintW ConfigReserve() {return 16u;}
 
 
 private:
@@ -455,6 +471,9 @@ public:
     // get object properties
     inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
     inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_02;}
+
+    // enemy configuration values
+    static constexpr coreUintW ConfigReserve() {return 16u;}
 
 
 private:
@@ -489,6 +508,9 @@ public:
     inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
     inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_07;}
 
+    // enemy configuration values
+    static constexpr coreUintW ConfigReserve() {return 32u;}
+
 
 private:
     // execute own routines
@@ -514,6 +536,7 @@ public:
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_blink_inst_program";}
+    static constexpr coreUintW       ConfigReserve()              {return 32u;}
 
 
 private:
@@ -640,10 +663,11 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindList(&oEnemyActive);
 
     // 
-    oMemoryPool.Configure(sizeof(T), ENEMY_SET_INIT);
+    oMemoryPool.Configure(sizeof(T), T::ConfigReserve());
 
-    // set enemy pool to initial size
-    apEnemyPool.resize(ENEMY_SET_INIT);
+    // set enemy pool to initial size        
+    oEnemyActive.Reallocate(T::ConfigReserve());
+    apEnemyPool .resize    (T::ConfigReserve());
     apEnemyPool[0] = POOLED_NEW(oMemoryPool, T);   // already request resources
 }
 
@@ -736,12 +760,34 @@ template <typename T> void cEnemyManager::PrefetchEnemy()
 
 // ****************************************************************
 // 
+template <typename T> void cEnemyManager::ReserveEnemy(const coreUintW iNumEnemies)
+{
+    // get requested enemy set
+    this->PrefetchEnemy<T>();
+    sEnemySet<T>* pSet = d_cast<sEnemySet<T>*>(m_apEnemySet[T::ID]);
+
+    if(pSet->apEnemyPool.size() < iNumEnemies)
+    {
+        const coreUintW iNumPot = coreMath::CeilPot(iNumEnemies);
+
+        // increase list and pool size by power of two
+        pSet->oEnemyActive.Reallocate(iNumPot);
+        pSet->apEnemyPool .resize    (iNumPot);
+    }
+}
+
+
+// ****************************************************************
+// 
 template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnemies)
 {
     ASSERT(m_apEnemy.empty())
 
     // 
     m_apEnemy.reserve(iNumEnemies);
+
+    // 
+    cEnemySquad::__GetDefaultEnemyManager()->ReserveEnemy<T>(iNumEnemies);
 
     // 
     for(coreUintW i = iNumEnemies; i--; )

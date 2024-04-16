@@ -1231,12 +1231,12 @@ void cCalorMission::__SetupOwn()
 
         const auto nAddBulletFunc = [&](const coreInt32 iDamage, const coreVector2 vPosition, const coreVector2 vDirection, const coreFloat fScale = 1.3f)
         {
-            return g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(iDamage, 0.0f, pDummy, vPosition, vDirection)->ChangeSize(fScale)->ChangeCollisionModifier(1.0f)->AddStatus(BULLET_STATUS_IMMORTAL);
+            return g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(iDamage, 0.0f, pDummy, vPosition, vDirection)->ChangeSize(fScale)->ChangeCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.0f)->AddStatus(BULLET_STATUS_IMMORTAL);
         };
 
         const auto nAddBulletWallFunc = [&](const coreInt32 iDamage, const coreVector2 vPosition, const coreVector2 vDirection, const coreFloat fScale = 1.3f)
         {
-            return g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(iDamage, 0.0f, pDummy, vPosition, vDirection)->ChangeSize(fScale)->ChangeCollisionModifier(1.5f)->AddStatus(BULLET_STATUS_IMMORTAL | BULLET_STATUS_GHOST);
+            return g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(iDamage, 0.0f, pDummy, vPosition, vDirection)->ChangeSize(fScale)->ChangeCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.5f)->AddStatus(BULLET_STATUS_IMMORTAL | BULLET_STATUS_GHOST);
         };
 
         if((m_iStageSub == 9u) && (iCreationDelay < 6u))
@@ -2902,7 +2902,7 @@ void cCalorMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Zeroth, {155.0f, 230.0f, 310.0, 385.0f, 770.0f})
+        STAGE_BOSS(m_Zeroth, {160.0f, 240.0f, 320.0, 400.0f, 800.0f})   // + 5
     },
     STAGE_PRE()
     {

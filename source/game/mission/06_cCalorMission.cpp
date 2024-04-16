@@ -866,10 +866,19 @@ void cCalorMission::__MoveOwnBefore()
                 return m_Snow.DrawPoint(vPosition, fSize, SNOW_TYPE_REMOVE);
             };
 
+            const coreVector2 vRayPos = pBullet->GetPosition().xy();
+            const coreVector2 vRayDir = pBullet->GetFlyDir();
+
+            coreFloat fDistance = 0.0f;
+            m_Snow.TestCollision(vRayPos, vRayDir, &fDistance);   // # before draw
+
             if(nHitFunc(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 4.0f) +
                nHitFunc(pBullet->GetPosition().xy(),                                4.0f) +
                nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 3.0f))
             {
+                const coreVector2 vHit = vRayPos + vRayDir * MIN(fDistance, 4.0f);
+                nHitFunc(vHit, 4.0f);
+
                 pBullet->Deactivate(true);
             }
         });
@@ -881,10 +890,45 @@ void cCalorMission::__MoveOwnBefore()
                 return m_Snow.DrawPoint(vPosition, fSize, SNOW_TYPE_REMOVE);
             };
 
-            if(nHitFunc(pBullet->GetPosition().xy(),                                5.0f) +
-               nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 4.0f))
+            const coreVector2 vRayPos = pBullet->GetPosition().xy();
+            const coreVector2 vRayDir = pBullet->GetFlyDir();
+
+            coreFloat fDistance = 0.0f;
+            m_Snow.TestCollision(vRayPos, vRayDir, &fDistance);   // # before draw
+
+            if(nHitFunc(pBullet->GetPosition().xy(),                                4.5f) +
+               nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 3.5f))
             {
-                nHitFunc(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 5.0f);
+                nHitFunc(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 4.5f);
+
+                const coreVector2 vHit = vRayPos + vRayDir * MIN(fDistance, 4.5f);
+                nHitFunc(vHit, 4.5f);
+
+                pBullet->Deactivate(true);
+            }
+        });
+
+        g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cSurgeBullet>([&](cSurgeBullet* OUTPUT pBullet)
+        {
+            const auto nHitFunc = [this](const coreVector2 vPosition, const coreFloat fSize)
+            {
+                return m_Snow.DrawPoint(vPosition, fSize, SNOW_TYPE_REMOVE);
+            };
+
+            const coreVector2 vRayPos = pBullet->GetPosition().xy();
+            const coreVector2 vRayDir = pBullet->GetFlyDir();
+
+            coreFloat fDistance = 0.0f;
+            m_Snow.TestCollision(vRayPos, vRayDir, &fDistance);   // # before draw
+
+            if(nHitFunc(pBullet->GetPosition().xy(),                                4.0f) +
+               nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 3.0f))
+            {
+                nHitFunc(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 4.0f);
+
+                const coreVector2 vHit = vRayPos + vRayDir * MIN(fDistance, 4.0f);
+                nHitFunc(vHit, 4.0f);
+
                 pBullet->Deactivate(true);
             }
         });

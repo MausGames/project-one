@@ -86,7 +86,7 @@ public:
         coreUint8  iOptionMode;                                                              // 
         coreUint8  iOptionDifficulty;                                                        // 
         coreUint8  iOptionFlags;                                                             // 
-        coreUint8  aaiOptionShield [REPLAY_PLAYERS];                                         // 
+        coreUint8  aiOptionShield  [REPLAY_PLAYERS];                                         // 
         coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                   // 
         coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                  // 
 
@@ -95,6 +95,10 @@ public:
         coreUint8  iConfigBackSpeed;                                                         // 
         coreUint16 iConfigUpdateFreq;                                                        // 
         coreUint16 iConfigVersion;                                                           // 
+
+        coreUint8  iSystemOs;                                                                // 
+        coreUint8  iSystemCpu;                                                               // 
+        coreUint8  iSystemGpu;                                                               // 
 
         coreUint8  iMissionStartIndex;                                                       // 
         coreInt32  aiMissionList[REPLAY_MISSIONS];                                           // 
@@ -113,6 +117,10 @@ public:
         coreUint16 aaiShiftGoodSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                    // 
         coreUint16 aiShiftBadMission  [REPLAY_MISSIONS];                                     // 
         coreUint16 aaiShiftBadSegment [REPLAY_MISSIONS][REPLAY_SEGMENTS];                    // 
+        
+        // TODO 1: medals, badges
+        // TODO 1: other stuff from score-struct
+        // TODO 1: legacy config values
 
         coreUint64 iChecksum;                                                                // 
     };

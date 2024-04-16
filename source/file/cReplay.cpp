@@ -39,7 +39,7 @@ void cReplay::CreateGame()
     oOptions.iFlags       = m_Header.iOptionFlags;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        oOptions.aiShield[i] = m_Header.aaiOptionShield[i];
+        oOptions.aiShield[i] = m_Header.aiOptionShield[i];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_WEAPONS;  ++j) oOptions.aaiWeapon [i][j] = m_Header.aaiOptionWeapon [i][j];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_SUPPORTS; ++j) oOptions.aaiSupport[i][j] = m_Header.aaiOptionSupport[i][j];
     }
@@ -76,7 +76,7 @@ void cReplay::StartRecording()
     m_Header.iOptionFlags      = g_pGame->GetOptions().iFlags;
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
-        m_Header.aaiOptionShield[i] = g_pGame->GetOptions().aiShield[i];
+        m_Header.aiOptionShield[i] = g_pGame->GetOptions().aiShield[i];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_WEAPONS;  ++j) m_Header.aaiOptionWeapon [i][j] = g_pGame->GetOptions().aaiWeapon [i][j];
         for(coreUintW j = 0u; j < REPLAY_EQUIP_SUPPORTS; ++j) m_Header.aaiOptionSupport[i][j] = g_pGame->GetOptions().aaiSupport[i][j];
     }
@@ -86,7 +86,12 @@ void cReplay::StartRecording()
     m_Header.iConfigBackRotation = g_CurConfig.Game.iBackRotation;
     m_Header.iConfigBackSpeed    = g_CurConfig.Game.iBackSpeed;
     m_Header.iConfigUpdateFreq   = g_CurConfig.Game.iUpdateFreq;   // TODO 1: should not be 0 
-    m_Header.iConfigVersion      = 1u;   // TODO 1 
+    m_Header.iConfigVersion      = g_pGame->GetVersion();
+
+    // 
+    m_Header.iSystemOs  = GetSystemOsIndex();
+    m_Header.iSystemCpu = GetSystemCpuIndex();
+    m_Header.iSystemGpu = GetSystemGpuIndex();
 
     // 
     m_Header.iMissionStartIndex = g_pGame->GetCurMissionIndex();
@@ -155,7 +160,7 @@ void cReplay::EndRecording()
 
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiShiftGoodMission[j] = pTable->GetShiftGoodMission(j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaiShiftGoodSegment[j][i] = pTable->GetShiftGoodSegment(j, i);
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiShiftBadMission[j]  = pTable->GetShiftBadMission (j);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiShiftBadMission [j] = pTable->GetShiftBadMission (j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaiShiftBadSegment [j][i] = pTable->GetShiftBadSegment (j, i);
     }
 
@@ -615,7 +620,7 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     pHeader->iConfigBackRotation = CLAMP(pHeader->iConfigBackRotation, 0u,                     1u);
     pHeader->iConfigBackSpeed    = CLAMP(pHeader->iConfigBackSpeed,    50u,                    200u);
     pHeader->iConfigUpdateFreq   = CLAMP(pHeader->iConfigUpdateFreq,   F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
-    pHeader->iConfigVersion      = CLAMP(pHeader->iConfigVersion,      1u,                     1u);   // TODO 1 
+    pHeader->iConfigVersion      = CLAMP(pHeader->iConfigVersion,      1u,                     g_Version.iNumber);
 
     // 
     pHeader->iMissionStartIndex = CLAMP(pHeader->iMissionStartIndex, 0u, REPLAY_MISSIONS-1u);

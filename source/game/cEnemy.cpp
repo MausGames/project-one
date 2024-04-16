@@ -586,7 +586,7 @@ void cEnemy::_SetParent(cEnemy* pParent)
 // ****************************************************************
 // constructor
 cEnemyManager::sEnemySetGen::sEnemySetGen()noexcept
-: oEnemyActive (ENEMY_SET_INIT)
+: oEnemyActive ()
 , iTopEnemy    (0u)
 {
 }

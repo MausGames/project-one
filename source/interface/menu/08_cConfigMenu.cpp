@@ -75,12 +75,20 @@ cConfigMenu::cConfigMenu()noexcept
     m_DiscardButton.SetOverride  (-1);
     m_DiscardButton.GetCaption()->SetTextLanguage("DISCARD");
 
+    m_InputButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_InputButton.DefineProgram("menu_border_program");
+    m_InputButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_SaveButton.GetSize().y);
+    m_InputButton.SetAlignment (coreVector2(-1.0f,-1.0f));
+    m_InputButton.GetCaption()->SetText(ICON_SWITCH);
+
     m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_BackButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_SaveButton.GetSize().y);
     m_BackButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
+
+    m_InputButton.SetPosition(m_BackButton.GetPosition() - coreVector2(m_BackButton.GetSize().x + 0.02f, 0.0f));
 
     coreSet<coreUintW> aiSkip;
     #if defined(_CORE_EMSCRIPTEN_)
@@ -107,6 +115,7 @@ cConfigMenu::cConfigMenu()noexcept
     #if !defined(_CORE_DEBUG_)
         aiSkip.insert(ENTRY_GAME_VERSION);
     #endif
+    aiSkip.insert(ENTRY_INPUT_ACTION10);
 
     coreUint8 iOffset = 0u;
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
@@ -176,21 +185,23 @@ cConfigMenu::cConfigMenu()noexcept
     m_aCueInput[0] .SetDirection(coreVector2( 0.0f,-1.0f));
     m_aCueInput[1] .SetDirection(coreVector2(-1.0f, 0.0f));
     m_aCueInput[3] .SetDirection(coreVector2( 1.0f, 0.0f));
-    m_aCueInput[9] .SetDirection(coreVector2( 1.0f, 0.0f));
-    m_aCueInput[10].SetDirection(coreVector2( 0.0f,-1.0f));
-    m_aCueInput[11].SetDirection(coreVector2(-1.0f, 0.0f));
+    m_aCueInput[11].SetDirection(coreVector2( 1.0f, 0.0f));
+    m_aCueInput[12].SetDirection(coreVector2( 0.0f,-1.0f));
+    m_aCueInput[13].SetDirection(coreVector2(-1.0f, 0.0f));
     m_aCueInput[0] .SetText     (ICON_BURN);
     m_aCueInput[1] .SetText     (ICON_BURN);
     m_aCueInput[2] .SetText     (ICON_BURN);
     m_aCueInput[3] .SetText     (ICON_BURN);
-    m_aCueInput[4] .SetText     (ICON_FIRE_ALT);
-    m_aCueInput[5] .SetText     (ICON_UNDO_ALT);
-    m_aCueInput[6] .SetText     (ICON_REDO_ALT);
-    m_aCueInput[7] .SetText     (ICON_PAUSE);
-    m_aCueInput[8] .SetText     (ICON_ARROW_UP);
-    m_aCueInput[9] .SetText     (ICON_ARROW_UP);
+    //m_aCueInput[4] .SetText     (ICON_FORWARD);
+    m_aCueInput[5] .SetText     (ICON_FIRE_ALT);
+    m_aCueInput[6] .SetText     (ICON_BOLT);
+    m_aCueInput[7] .SetText     (ICON_UNDO_ALT);
+    m_aCueInput[8] .SetText     (ICON_REDO_ALT);
+    m_aCueInput[9] .SetText     (ICON_PAUSE);
     m_aCueInput[10].SetText     (ICON_ARROW_UP);
     m_aCueInput[11].SetText     (ICON_ARROW_UP);
+    m_aCueInput[12].SetText     (ICON_ARROW_UP);
+    m_aCueInput[13].SetText     (ICON_ARROW_UP);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueRota); ++i)
     {
@@ -209,7 +220,11 @@ cConfigMenu::cConfigMenu()noexcept
     }
     m_aCueLock[0].SetPosition(m_aLabel[ENTRY_GAME_BACKROTATION].GetPosition() + coreVector2(0.472f,0.0f));
     m_aCueLock[1].SetPosition(m_aLabel[ENTRY_GAME_BACKSPEED]   .GetPosition() + coreVector2(0.472f,0.0f));
+#if defined(_CORE_SWITCH_)
+    m_aCueLock[2].SetPosition(HIDDEN_POS);
+#else
     m_aCueLock[2].SetPosition(m_aLabel[ENTRY_GAME_UPDATEFREQ]  .GetPosition() + coreVector2(0.472f,0.0f));
+#endif
     //m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_VERSION]     .GetPosition() + coreVector2(0.472f,0.0f));
     m_aCueLock[3].SetPosition(HIDDEN_POS);
 
@@ -358,6 +373,8 @@ cConfigMenu::cConfigMenu()noexcept
             __SET_INPUT_BUTTON(aAction[5],   INPUT_ACTION6,   aFigureAction[5])
             __SET_INPUT_BUTTON(aAction[6],   INPUT_ACTION7,   aFigureAction[6])
             __SET_INPUT_BUTTON(aAction[7],   INPUT_ACTION8,   aFigureAction[7])
+            __SET_INPUT_BUTTON(aAction[8],   INPUT_ACTION9,   aFigureAction[8])
+            __SET_INPUT_BUTTON(aAction[9],   INPUT_ACTION10,  aFigureAction[9])
 
             m_aInput[i].oFigureStickL.SetPosition(LERP(m_aInput[i].oMoveLeft.GetPosition(), m_aInput[i].oMoveDown.GetPosition(), 0.5f));
             m_aInput[i].oFigureStickL.SetSize    (coreVector2(0.08f,0.08f));
@@ -374,9 +391,13 @@ cConfigMenu::cConfigMenu()noexcept
             m_Navigator.BindObject(&m_aInput[i].aAction[3],   &m_aInput[i].oControlMode, &m_aInput[1u - i].aAction[3],   &m_aInput[i].aAction[4],   &m_aInput[1u - i].aAction[3],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[4],   &m_aInput[i].aAction[3],   &m_aInput[1u - i].aAction[4],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[4],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[5],   &m_aInput[i].aAction[4],   &m_aInput[1u - i].aAction[5],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[5],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-            m_Navigator.BindObject(&m_aInput[i].aAction[6],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[6],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[6],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-            m_Navigator.BindObject(&m_aInput[i].aAction[0],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[0],   &m_aInput[i].aAction[1],   &m_aInput[1u - i].aAction[0],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-            m_Navigator.BindObject(&m_aInput[i].aAction[1],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[1],   &m_aInput[i].aAction[2],   &m_aInput[1u - i].aAction[1],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+                //m_Navigator.BindObject(&m_aInput[i].aAction[6],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[6],   &m_aInput[i].aAction[9],   &m_aInput[1u - i].aAction[6],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+                //m_Navigator.BindObject(&m_aInput[i].aAction[9],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[9],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[9],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+                //m_Navigator.BindObject(&m_aInput[i].aAction[0],   &m_aInput[i].aAction[9],   &m_aInput[1u - i].aAction[0],   &m_aInput[i].aAction[8],   &m_aInput[1u - i].aAction[0],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+                m_Navigator.BindObject(&m_aInput[i].aAction[6],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[6],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[6],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+                m_Navigator.BindObject(&m_aInput[i].aAction[0],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[0],   &m_aInput[i].aAction[8],   &m_aInput[1u - i].aAction[0],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+            m_Navigator.BindObject(&m_aInput[i].aAction[8],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[8],   &m_aInput[i].aAction[1],   &m_aInput[1u - i].aAction[8],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+            m_Navigator.BindObject(&m_aInput[i].aAction[1],   &m_aInput[i].aAction[8],   &m_aInput[1u - i].aAction[1],   &m_aInput[i].aAction[2],   &m_aInput[1u - i].aAction[1],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[2],   &m_aInput[i].aAction[1],   &m_aInput[1u - i].aAction[2],   &m_aInput[i].aAction[7],   &m_aInput[1u - i].aAction[2],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[7],   &m_aInput[i].aAction[2],   &m_aInput[1u - i].aAction[7],   &m_aInput[i].oMoveUp,      &m_aInput[1u - i].aAction[7],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].oMoveUp,      &m_aInput[i].aAction[7],   &m_aInput[1u - i].oMoveUp,      &m_aInput[i].oMoveLeft,    &m_aInput[1u - i].oMoveUp,      MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
@@ -392,10 +413,8 @@ cConfigMenu::cConfigMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
     {
-        const cGuiButton& oLast = this->__RetrieveInputButton(i, INPUT_KEYS - 1u);
-
         m_aInput[i].oHeader.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-        m_aInput[i].oHeader.SetPosition(oLast.GetPosition() + coreVector2(oLast.GetSize().x * -0.5f, 0.0f));
+        m_aInput[i].oHeader.SetPosition(coreVector2(m_aInput[i].oMoveUp.GetPosition().x - m_aInput[i].oMoveUp.GetSize().x * 0.5f, m_Background.GetPosition().y - 0.325f));
         m_aInput[i].oHeader.SetColor3  (COLOR_MENU_WHITE);
     }
     
@@ -436,9 +455,9 @@ cConfigMenu::cConfigMenu()noexcept
     m_InputBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
     m_InputBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
 #if defined(_CORE_SWITCH_)
-    m_InputBox.SetMaxOffset(0.05f * 17.0f - m_InputBox.GetSize().y);
+    m_InputBox.SetMaxOffset(0.05f * 18.0f - m_InputBox.GetSize().y);
 #else
-    m_InputBox.SetMaxOffset(0.05f * 18.5f - m_InputBox.GetSize().y);
+    m_InputBox.SetMaxOffset(0.05f * 19.5f - m_InputBox.GetSize().y);
 #endif
     for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLine [i]);}
     for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLabel[i]);}
@@ -514,9 +533,7 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_TWINSTICK", 1u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_ORIGINAL",  0u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_MIXED",     2u);
-#if defined(_CORE_DEBUG_)
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oControlMode.AddEntryLanguage("CONTROLMODE_SINGLE",    3u);
-#endif
     m_GameDirection  .AddEntryLanguage("VALUE_OFF",              0u);
     m_GameDirection  .AddEntryLanguage("HUDDIRECTION_RIGHT",     1u);
     m_GameDirection  .AddEntryLanguage("HUDDIRECTION_UPSIDE",    2u);
@@ -543,8 +560,9 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindObject(&m_GameTab,  &m_SaveButton, &m_InputTab, &m_Monitor, &m_VideoTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
 
     m_Navigator.BindObject(&m_SaveButton,    &m_Version, &m_BackButton,    &m_Monitor, &m_DiscardButton, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_DiscardButton, &m_Version, &m_SaveButton,    &m_Monitor, &m_BackButton,    MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_BackButton,    &m_Version, &m_DiscardButton, &m_Monitor, &m_SaveButton,    MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_DiscardButton, &m_Version, &m_SaveButton,    &m_Monitor, &m_InputButton,    MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_InputButton,   &m_Version, &m_DiscardButton, &m_Monitor, &m_BackButton,    MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_BackButton,    &m_Version, &m_InputButton,   &m_Monitor, &m_SaveButton,    MENU_TYPE_DEFAULT);
 
     m_Navigator.BindSurface(&m_VideoTab, SURFACE_CONFIG_VIDEO, &m_ChromaEffects, NULL, &m_Monitor,         NULL);
     m_Navigator.BindSurface(&m_AudioTab, SURFACE_CONFIG_AUDIO, &m_3DSound,       NULL, &m_GlobalVolume,    NULL);
@@ -576,6 +594,10 @@ cConfigMenu::cConfigMenu()noexcept
         this->BindObject(i, &m_SaveButton);
         this->BindObject(i, &m_DiscardButton);
         this->BindObject(i, &m_BackButton);
+
+        #if defined(_CORE_SWITCH_) || defined(_CORE_DEBUG_)
+            this->BindObject(i, &m_InputButton);
+        #endif
 
         this->BindObject(i, &m_GameNew);
         this->BindObject(i, &m_Description);
@@ -614,7 +636,9 @@ cConfigMenu::cConfigMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
     this->BindObject(SURFACE_CONFIG_INPUT, &m_InputBox);
+#if !defined(_CORE_SWITCH_)
     this->BindObject(SURFACE_CONFIG_INPUT, &m_SwapInput);
+#endif
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueRota); ++i) this->BindObject(SURFACE_CONFIG_GAME, &m_aCueRota[i]);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueLock); ++i) this->BindObject(SURFACE_CONFIG_GAME, &m_aCueLock[i]);
@@ -818,11 +842,13 @@ void cConfigMenu::Move()
                             ENTRY_INPUT_ACTION5,
                             ENTRY_INPUT_ACTION6,
                             ENTRY_INPUT_ACTION7,
-                            ENTRY_INPUT_ACTION8
+                            ENTRY_INPUT_ACTION8,
+                            ENTRY_INPUT_ACTION9,
+                            ENTRY_INPUT_ACTION10
                         };
                         STATIC_ASSERT(ARRAY_SIZE(aiText) == INPUT_KEYS)
 
-                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("MAPPING"), m_aLabel[aiText[j]].GetText());
+                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString(DEFINED(_CORE_SWITCH_) ? "MAPPING_SWITCH" : "MAPPING"), m_aLabel[aiText[j]].GetText());
                         const coreUint8& iType  = oInput.oType.GetCurValue();   // # referenced in lambda
 
                         // 
@@ -870,8 +896,8 @@ void cConfigMenu::Move()
                                             // 
                                             if(k == iType)
                                             {
-                                            if((j >= 4u) && (j <= 6u) && (m >= 7u) && (m <= 10u)) continue;
-                                            if((m >= 4u) && (m <= 6u) && (j >= 7u) && (j <= 10u)) continue;
+                                            if((((j >= 4u) && (j <= 6u)) || (j == 12u)) && (((m >= 7u) && (m <= 10u)) || (m == 13u))) continue;
+                                            if((((m >= 4u) && (m <= 6u)) || (m == 12u)) && (((j >= 7u) && (j <= 10u)) || (j == 13u))) continue;
                                             }
 
                                             // replace with old key
@@ -880,8 +906,8 @@ void cConfigMenu::Move()
 
                                             if(k == iType)
                                             {
-                                            if((j >= 4u) && (j <=  6u) && (m >= 4u) && (m <=  6u)) continue;
-                                            if((m >= 7u) && (m <= 10u) && (j >= 7u) && (j <= 10u)) continue;
+                                            if((((j >= 4u) && (j <=  6u)) || (j == 12u)) && (((m >= 4u) && (m <=  6u)) || (m == 12u))) continue;
+                                            if((((m >= 7u) && (m <= 10u)) || (m == 13u)) && (((j >= 7u) && (j <= 10u)) || (j == 13u))) continue;
                                             }
                                             bReplace = true;
                                         }
@@ -932,7 +958,7 @@ void cConfigMenu::Move()
 
                                         if(iOtherCurValue == iCurValue)
                                         {
-                                            if(!((j >= 4u) && (j <= 6u) && (m >= 7u) && (m <= 10u)) && !((m >= 4u) && (m <= 6u) && (j >= 7u) && (j <= 10u))) continue;
+                                            if(!((((j >= 4u) && (j <= 6u)) || (j == 12u)) && (((m >= 7u) && (m <= 10u)) || (m == 13u))) && !((((m >= 4u) && (m <= 6u)) || (m == 12u)) && (((j >= 7u) && (j <= 10u)) || (j == 13u)))) continue;
 
                                             // replace with new key
                                             iOtherCurValue = iKey;
@@ -955,7 +981,7 @@ void cConfigMenu::Move()
                     // 
                     cMenu::UpdateButton(&oButton, &m_Navigator, oButton.IsFocused());
                     oButton.SetAlpha(oButton.GetAlpha() * (oButton.IsFocused() ? 1.0f : 0.75f));
-                    oFigure.SetColor3(oButton.IsFocused() ? oButton.GetColor3() : coreVector3(1.0f,1.0f,1.0f));
+                    oFigure.SetColor3(oButton.IsFocused() ? g_pMenu->GetButtonColor() : coreVector3(1.0f,1.0f,1.0f));
                 }
             }
         }
@@ -1026,6 +1052,11 @@ void cConfigMenu::Move()
         // 
         this->LoadValues();
     }
+    else if(m_InputButton.IsClicked())
+    {
+        // 
+        this->__SetupInput();
+    }
     else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
     {
         if(m_SaveButton.GetOverride() >= 0)
@@ -1066,6 +1097,7 @@ void cConfigMenu::Move()
     // 
     cMenu::UpdateButton(&m_SaveButton,    &m_Navigator, m_SaveButton   .IsFocused());
     cMenu::UpdateButton(&m_DiscardButton, &m_Navigator, m_DiscardButton.IsFocused());
+    cMenu::UpdateButton(&m_InputButton,   &m_Navigator, m_InputButton  .IsFocused());
     cMenu::UpdateButton(&m_BackButton,    &m_Navigator, m_BackButton   .IsFocused());
 
     
@@ -1094,6 +1126,11 @@ void cConfigMenu::Move()
         {
             //this->LoadValues();
         }
+
+    #if defined(_CORE_SWITCH_)
+        this->__LoadInputs();
+        this->__RefreshManual();
+    #endif
     }
 }
 
@@ -1471,6 +1508,11 @@ void cConfigMenu::__UpdateInterface()
 
         this->__RefreshManual();
     }
+    
+    g_pMenu->GetInterface()->UpdateLayout();
+    g_pMenu->GetInterface()->UpdateSpacing();
+    g_pMenu->GetInterface()->MoveTimeless();
+        
 
     // 
     Core::Manager::Object->RefreshSprites();
@@ -1584,12 +1626,21 @@ void cConfigMenu::__LoadInputs()
             cConfigMenu::PrintFigure(&oFigure, g_CurConfig.Input.aiType[i], iCurValue);
         }
 
+        #if defined(_CORE_SWITCH_)
+            const coreBool bHideSecond = (i && (Core::Input->GetJoystickNum() < 2u));
+        #endif
+
         // 
         const auto nLockFunc = [&](const coreBool bLock, cGuiButton* OUTPUT pButton, cFigure* OUTPUT pFigure, const coreInt16 iKey, const coreBool bHide)
         {
             pButton->SetOverride(bLock ? -1 : 0);
                  if(bHide) pFigure->SetEnabled(bLock ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
             else if(bLock) cConfigMenu::PrintFigure(pFigure, g_CurConfig.Input.aiType[i], iKey);
+
+        #if defined(_CORE_SWITCH_)
+            if(bHideSecond) pButton->SetOverride(-1);
+            if(bHideSecond || !bHide) pFigure->SetEnabled(bHideSecond ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
+        #endif
         };
 
         // 
@@ -1612,6 +1663,8 @@ void cConfigMenu::__LoadInputs()
         nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[4], &oInput.aFigureAction[4], 0u, true);
         nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[5], &oInput.aFigureAction[5], 0u, true);
         nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[6], &oInput.aFigureAction[6], 0u, true);
+        nLockFunc(!bOriginal  && !bMixed && !bSingle, &oInput.aAction[8], &oInput.aFigureAction[8], 0u, true);
+        nLockFunc(!bTwinstick && !bMixed,             &oInput.aAction[9], &oInput.aFigureAction[9], 0u, true);
 
         // 
         const coreBool bStickyL = (!bKeyboard);
@@ -1620,6 +1673,12 @@ void cConfigMenu::__LoadInputs()
         oInput.oFigureStickR.SetEnabled(bStickyR ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
         if(bStickyL) cConfigMenu::PrintFigure(&oInput.oFigureStickL, g_CurConfig.Input.aiType[i], FIGURE_KEY_LEFTSTICK);
         if(bStickyR) cConfigMenu::PrintFigure(&oInput.oFigureStickR, g_CurConfig.Input.aiType[i], FIGURE_KEY_RIGHTSTICK);
+
+        #if defined(_CORE_SWITCH_)
+            if(bHideSecond )oInput.oFigureStickL.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+            if(bHideSecond) oInput.oFigureStickR.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+            oInput.oHeader.SetColor3(COLOR_MENU_WHITE * (bHideSecond ? MENU_LIGHT_IDLE : MENU_LIGHT_ACTIVE));
+        #endif
 
         // 
         //oInput.oRumble.SetOverride((bKeyboard || !Core::Input->GetJoystickHasRumble(g_CurConfig.Input.aiType[i] - INPUT_SETS_KEYBOARD)) ? -1 : 0);
@@ -1671,4 +1730,12 @@ void cConfigMenu::__RefreshManual()
         });
         g_pMenu->InvokePauseStep();
     }
+}
+
+
+// ****************************************************************
+// 
+coreBool cConfigMenu::__SetupInput()
+{
+    return false;
 }

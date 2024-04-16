@@ -12,14 +12,12 @@
 
 // TODO 3: add more stats, e.g. for favorite weapon+support, direction
 // TODO 5: move time, shoot time, move WASD, move dir 1234, min and max
-// TODO 3: add save (and loading) indicator somewhere on screen (corner), maybe only for important saves (changes, game start+end) to reduce spam
 // TODO 5: output if loading (even backup) or saving did not work -> indicator in game, message box in menu
 // TODO 4: fix _WEAPONS and _SUPPORTS defines in save and replay
 // TODO 2: disable save stats while playing replays
 // TODO 2: disable or handle save stats while in error-mission
 // TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 // TODO 1: scoring + leaderboard also needs to be version specific
-// TODO 1: check for, and ask for import of savegame (+ whole user folder?) from demo (Steam) (save_demo.p1sv or user_demo_1000 folder, could also be general, if savegame is (also) stored globally (delete copy after import)), if no save is available on startup -> needs own menu state in intro menu (show date-time of file, maybe also some meta-data (name, time played, max mission))
 // TODO 2: iDamageGiven and iEnemiesDone only considers non-worthless enemies (also not objects)
 
 
@@ -64,7 +62,7 @@ enum eSaveUnlock : coreUint8   // # never change bits after release
     UNLOCK_MIRRORMODE   = 0u,
     UNLOCK_GAMESPEEDUP  = 1u,
     UNLOCK_POWERSHIELD  = 2u,
-    UNLOCK_WEAPON_PULSE = 10u,   // TODO 1: look at loca-text
+    UNLOCK_WEAPON_PULSE = 10u,
     UNLOCK_WEAPON_WAVE  = 11u,
     UNLOCK_WEAPON_TESLA = 12u,
     UNLOCK_WEAPON_ANTI  = 13u,
@@ -94,7 +92,8 @@ enum eSaveState : coreUint8   // # never change bits after release
     STATE_STORY_MUSCUS  = 7u,
     STATE_STORY_ATER    = 8u,
     STATE_STORY_BONUS1  = 9u,
-    STATE_STORY_BONUS2  = 10u
+    STATE_STORY_BONUS2  = 10u,
+    STATE_DEMO_IMPORTED = 11u
 };
 
 
@@ -107,7 +106,7 @@ template <typename T, typename F> coreBool AllVariants(T& tArray, F&& nFunction)
         {
             for(coreUintW k = 0u; k < SAVE_DIFFICULTIES; ++k)
             {
-                if(nFunction(tArray[i][j][k]))
+                if(nFunction(tArray[i][j][k], i, j, k))
                     return true;
             }
         }
@@ -115,13 +114,13 @@ template <typename T, typename F> coreBool AllVariants(T& tArray, F&& nFunction)
     return false;
 }
 
-#define ALL_MEDAL_ARCADE(a)  AllVariants(g_pSave->GetHeader().oProgress.aaaiMedalArcade,    [&](const coreUint8 a)
-#define ALL_MEDAL_MISSION(a) AllVariants(g_pSave->GetHeader().oProgress.aaaaiMedalMission,  [&](const coreUint8 a[SAVE_MISSIONS])
-#define ALL_MEDAL_SEGMENT(a) AllVariants(g_pSave->GetHeader().oProgress.aaaaaiMedalSegment, [&](const coreUint8 a[SAVE_MISSIONS][SAVE_SEGMENTS])
+#define ALL_MEDAL_ARCADE(a)  AllVariants(g_pSave->GetHeader().oProgress.aaaiMedalArcade,    [&](const coreUint8 a,                               const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
+#define ALL_MEDAL_MISSION(a) AllVariants(g_pSave->GetHeader().oProgress.aaaaiMedalMission,  [&](const coreUint8 a[SAVE_MISSIONS],                const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
+#define ALL_MEDAL_SEGMENT(a) AllVariants(g_pSave->GetHeader().oProgress.aaaaaiMedalSegment, [&](const coreUint8 a[SAVE_MISSIONS][SAVE_SEGMENTS], const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
 
-#define ALL_STATS_ARCADE(a)  AllVariants(g_pSave->GetHeader().aaaLocalStatsArcade,    [&](const cSave::sLocalStats&  a)
-#define ALL_STATS_MISSION(a) AllVariants(g_pSave->GetHeader().aaaaLocalStatsMission,  [&](const cSave::sLocalStats (&a)[SAVE_MISSIONS])
-#define ALL_STATS_SEGMENT(a) AllVariants(g_pSave->GetHeader().aaaaaLocalStatsSegment, [&](const cSave::sLocalStats (&a)[SAVE_MISSIONS][SAVE_SEGMENTS])
+#define ALL_STATS_ARCADE(a)  AllVariants(g_pSave->GetHeader().aaaLocalStatsArcade,    [&](const cSave::sLocalStats&  a,                                const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
+#define ALL_STATS_MISSION(a) AllVariants(g_pSave->GetHeader().aaaaLocalStatsMission,  [&](const cSave::sLocalStats (&a)[SAVE_MISSIONS],                const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
+#define ALL_STATS_SEGMENT(a) AllVariants(g_pSave->GetHeader().aaaaaLocalStatsSegment, [&](const cSave::sLocalStats (&a)[SAVE_MISSIONS][SAVE_SEGMENTS], const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
                      
 
 
@@ -246,6 +245,7 @@ public:
 private:
     sHeader    m_Header;                 // 
     coreString m_sPath;                  // 
+    coreString m_sPathDemo;              // 
 
     coreUint32 m_iToken;                 // 
     coreBool   m_bIgnore;                // 
@@ -274,9 +274,14 @@ public:
     RETURN_NONNULL sProgress*    EditProgress         ();
 
     // 
+    coreBool LoadFile(const coreChar* pcPath);
     coreBool LoadFile();
     void     SaveFile();
     void     Clear();
+
+    // 
+    void     ImportDemo();
+    coreBool CanImportDemo()const;
 
     // 
     inline void ResetStatus() {m_eStatus = SAVE_STATUS_OK;}

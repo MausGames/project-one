@@ -60,6 +60,7 @@ public:
 
     // 
     coreBool TestCollision(const coreVector2 vPosition)const;
+    coreBool TestCollision(const coreVector2 vPosition, const coreVector2 vDirection, coreFloat* OUTPUT pfDistance)const;
 
     // 
     coreBool AnyData()const;

@@ -465,9 +465,20 @@ void cExtraMenu::Move()
                     const coreBool bSuccess = ApplyPassword(pcText);
 
                     // 
-                    pArcadeInput->Clear();
-                    
-                    if(bSuccess) this->LoadMissions();
+                         if(!std::strcmp(pcText, "PASSWORD")) pArcadeInput->OverrideText("NICE-TRY");
+                    else if(!std::strcmp(pcText, "PASSWORT")) pArcadeInput->OverrideText("SO-NICHT");
+                    else
+                    {
+                        // 
+                        pArcadeInput->Clear();
+                    }
+
+                    if(bSuccess)
+                    {
+                        // 
+                        pArcadeInput->Flash();
+                        this->LoadMissions();
+                    }
 
                     // 
                     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, bSuccess ? SOUND_MENU_MSGBOX_YES : SOUND_MENU_MSGBOX_NO);
@@ -580,7 +591,12 @@ void cExtraMenu::LoadTrophies()
             }
             else
             {
-                const coreChar* pcString = Core::Language->GetString(PRINT("ACHIEVEMENT_STAGE_%02d_%02zu_DESC", g_aMissionData[i / 6u].iID, (i % 6u) + 1u));
+                constexpr coreUint8 aiSwitch[] = {0u};
+
+                const coreBool bHasSwitch = DEFINED(_CORE_SWITCH) && std::memchr(aiSwitch, i, ARRAY_SIZE(aiSwitch));
+                ASSERT(i <= 0xFFu)
+
+                const coreChar* pcString = Core::Language->GetString(PRINT("ACHIEVEMENT_STAGE_%02d_%02zu_DESC%s", g_aMissionData[i / 6u].iID, (i % 6u) + 1u, bHasSwitch ? "_SWITCH" : ""));
                 const coreChar* pcBreak  = std::strchr(pcString, '#');
 
                 if(pcBreak)

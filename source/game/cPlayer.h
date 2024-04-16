@@ -16,13 +16,11 @@
 // TODO 1: check which operations have to be done outside of dead-check
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
-// TODO 4: remove dark shading resources, if not required anymore (maybe for bonus phases)
 // TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
-// TODO 3: effect on player when loosing combo or chain (and on UI, and combat text)
 // TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
 // TODO 3: m_vOldDir sollte bei resurrection/repair zurückgesetzt werden
-// TODO 3: gyro aktualisiert sich nicht bei HUD rotation (auch bei game rotation ?)
+// TODO 3: (gyro aktualisiert sich nicht bei HUD rotation (auch bei game rotation ?))
 
 
 // ****************************************************************
@@ -55,14 +53,16 @@
 #define PLAYER_NO_FEEL   (-100.0f)   // 
 #define PLAYER_NO_IGNORE (-100.0f)   // 
 
-#define PLAYER_ACTION_SHOOT(i,j)  ((i) * WEAPON_MODES + (j))
-#define PLAYER_ACTION_TURN_LEFT   (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
-#define PLAYER_ACTION_TURN_RIGHT  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
-#define PLAYER_ACTION_ROLL        (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
-#define PLAYER_ACTION_SHOOT_UP    (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 2u)
-#define PLAYER_ACTION_SHOOT_LEFT  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 3u)
-#define PLAYER_ACTION_SHOOT_DOWN  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 4u)
-#define PLAYER_ACTION_SHOOT_RIGHT (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 5u)
+#define PLAYER_ACTION_SHOOT(i,j)   ((i) * WEAPON_MODES + (j))
+#define PLAYER_ACTION_TURN_LEFT    (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
+#define PLAYER_ACTION_TURN_RIGHT   (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
+#define PLAYER_ACTION_ROLL         (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
+#define PLAYER_ACTION_SHOOT_UP     (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 2u)
+#define PLAYER_ACTION_SHOOT_LEFT   (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 3u)
+#define PLAYER_ACTION_SHOOT_DOWN   (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 4u)
+#define PLAYER_ACTION_SHOOT_RIGHT  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 5u)
+#define PLAYER_ACTION_RAPID_FIRE   (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 7u)
+#define PLAYER_ACTION_CHANGE_SPEED (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 8u)
 
 #define PLAYER_AREA_DEFAULT (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
 
@@ -79,11 +79,13 @@ enum ePlayerStatus : coreUint16
     PLAYER_STATUS_TOP            = 0x0040u,   // 
     PLAYER_STATUS_KEEP_RANGE     = 0x0080u,   // TODO 1: still used ?
     PLAYER_STATUS_GYRO           = 0x0100u,   // 
-    PLAYER_STATUS_REPAIRED       = 0x0200u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0400u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0800u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x1000u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x2000u,   // 
+    PLAYER_STATUS_ARRANGE        = 0x0200u,   // 
+    PLAYER_STATUS_WEAK_BACK      = 0x0400u,   // 
+    PLAYER_STATUS_REPAIRED       = 0x0800u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x1000u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x2000u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x4000u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x8000u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
@@ -167,6 +169,8 @@ private:
     coreFlow    m_fCircleValue;                               // 
     coreFlow    m_fBoost;                                     // 
     coreUint8   m_iLastMove;                                  // 
+    coreUint8   m_iLastHold;                                  // 
+    coreUint8   m_iShootToggle;                               // 
 
     coreObject3D m_Dot;                                       // 
     coreObject3D m_Range;                                     // 

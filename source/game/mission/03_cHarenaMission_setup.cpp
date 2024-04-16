@@ -904,6 +904,8 @@ void cHarenaMission::__SetupOwn()
             avPosTo[5] = HIDDEN_POS;
             avPosTo[6] = HIDDEN_POS;
             avPosTo[7] = HIDDEN_POS;
+
+            this->EnableCorrect();
         }
 
         const auto nAttackFunc = [&](cEnemy* pEnemy, const coreUintW i)
@@ -967,6 +969,7 @@ void cHarenaMission::__SetupOwn()
 
                         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                         g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_ERROR);
                         g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
                         ADD_BIT(iRevengeState, i)
@@ -992,6 +995,11 @@ void cHarenaMission::__SetupOwn()
                             iSingle = i;
                         }
 
+                        if(iPoints == 3u)
+                        {
+                            this->DisableCorrect(false);
+                        }
+
                         if(m_iInsanity)
                         {
                             iBig |= iBig << 1u;
@@ -1001,6 +1009,7 @@ void cHarenaMission::__SetupOwn()
                         g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_BLUE);
                         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
                         g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+                        g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.5f, 1.0f, SOUND_EFFECT_SUCCESS);
                     }
                 }
 
@@ -1259,6 +1268,11 @@ void cHarenaMission::__SetupOwn()
                 pEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
                 pEnemy->SetBaseColor(COLOR_SHIP_GREY);
             }
+
+            if(HAS_BIT(iBig, i))
+            {
+                m_Correct.SetPosition(HAS_BIT(iVisible, i) ? coreVector3(HIDDEN_POS, 0.0f) : pEnemy->GetPosition());
+            }
         });
 
         if(g_pGame->IsTask())
@@ -1322,6 +1336,8 @@ void cHarenaMission::__SetupOwn()
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         g_pGame->KillHelpers();
+
+        this->DisableCorrect(false);
 
         for(coreUintW i = 0u; i < HARENA_EGGS; ++i)
             this->DisableEgg(i, false);

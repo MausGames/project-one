@@ -698,7 +698,7 @@ void cGemingaBoss::__MoveOwn()
             {
                 m_avVector[SMASH_POSITION].xy(bExit ? coreVector2(0.0f,0.0f) : this->NearestPlayerDual(m_aiCounter[SMASH_COUNT] % 2)->GetPosition().xy() / FOREGROUND_AREA);
 
-                if((m_aiCounter[SMASH_COUNT] >= 3) && this->_ResurrectHelper(ELEMENT_GREEN, true))
+                if(((m_aiCounter[SMASH_COUNT] >= 3) || bExit) && this->_ResurrectHelper(ELEMENT_GREEN, true))
                 {
                     g_pGame->GetHelper(ELEMENT_GREEN)->SetPosition(this->GetPosition());
                 }

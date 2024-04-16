@@ -289,7 +289,7 @@ void cGeluMission::__SetupOwn()
                 pSquad1->GetEnemy(j)->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()), false);
             }
 
-            pBullet->Deactivate(true);
+            pBullet->Deactivate(true, vIntersection.xy());
             pBullet->AddStatus(BULLET_STATUS_GHOST);
             g_pGame->PlayHitSound(vIntersection);
 
@@ -1013,7 +1013,7 @@ void cGeluMission::__SetupOwn()
                     if((fPush < 0.0f) && (afOffTarget[iIndex] < 0.0f)) afOffTarget[iIndex] = -1.0f;   // snap in
                 };
 
-                     if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true); iOutsideHit += 1u;}
+                     if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true); iOutsideHit += 1u;}   // TODO 1: add correct impact parameter
                 else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {nPushFunc(1); pBullet->Deactivate(true); iOutsideHit += 1u;}
                 else if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {nPushFunc(2); pBullet->Deactivate(true); iOutsideHit += 1u;}
                 else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {nPushFunc(3); pBullet->Deactivate(true); iOutsideHit += 1u;}
@@ -2425,7 +2425,13 @@ void cGeluMission::__SetupOwn()
                 for(coreUintW i = 0u; i < iOrbNum; ++i)
                     this->DisableOrb(i, false);
 
-                m_Surfer.Kill(true);
+                if(!m_Surfer.HasStatus(ENEMY_STATUS_DEAD))
+                {
+                    this->DisableSurfer(false);
+
+                    g_pSpecialEffects->MacroExplosionColorSmall(m_Surfer.GetPosition(), COLOR_ENERGY_YELLOW);
+                    g_pSpecialEffects->PlaySound(m_Surfer.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+                }
 
                 STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
                 {

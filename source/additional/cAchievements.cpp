@@ -8,8 +8,9 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-static coreBool  s_bInit = false;
-static coreUint8 s_iStep = 0u;
+static coreBool  s_bInitAchievements = false;
+static coreBool  s_bInitLeaderboards = false;
+static coreUint8 s_iStep             = 0u;
 
 
 // ****************************************************************
@@ -19,8 +20,8 @@ void InitAchievements()
     if(g_bDemoVersion) return;
 
     // 
-    if(s_bInit) return;
-    s_bInit = true;
+    if(s_bInitAchievements) return;
+    s_bInitAchievements = true;
 
     // 
     for(coreUintW i = 0u; i < 10u; ++i)
@@ -161,6 +162,79 @@ void CheckAchievements()
             {
                 Core::Platform->UnlockAchievement("challenge_04");
             }
+
+#if 0
+
+            if([]()
+            {
+                for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
+                {
+                    for(coreUintW j = 0u; j < 6u; ++j)
+                    {
+                        if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[i][j] >= MEDAL_PLATINUM);})) return false;
+                    }
+                }
+                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][5] >= MEDAL_PLATINUM);})) return false;
+                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][6] >= MEDAL_PLATINUM);})) return false;
+                return true;
+            }())
+            {
+                //Core::Platform->UnlockAchievement("challenge_XX");     
+            }
+            
+            if(ALL_MEDAL_ARCADE(iMedal) {return (iMedal >= MEDAL_PLATINUM);}))
+            {
+                //Core::Platform->UnlockAchievement("challenge_XX");
+            }
+            
+            coreUint32 iCount = 0u;
+            if(ALL_STATS_SEGMENT(oStats)
+            {
+                for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
+                {
+                    for(coreUintW j = 0u; j < SAVE_SEGMENTS; ++j)
+                    {
+                        if(HAS_BIT(oStats[i][j].iFeat, FEAT_TWOHUNDRED))
+                            iCount += 1u;
+                    }
+                }
+                return (iCount >= 10u);
+            }))
+            {
+                //Core::Platform->UnlockAchievement("challenge_XX");     
+            }
+            
+            if([]()
+            {
+                for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
+                {
+                    for(coreUintW j = 0u; j < 6u; ++j)
+                    {
+                        if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[i][j] && (iDifficulty == 2u));})) return false;
+                    }
+                }
+                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][5] && (iDifficulty == 2u));})) return false;
+                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][6] && (iDifficulty == 2u));})) return false;
+                return true;
+            }())
+            {
+                //Core::Platform->UnlockAchievement("challenge_XX");     
+            }
+            
+            coreUintW iAchieved = 0u;
+            for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
+            {
+                for(coreUintW j = 0u; j < 6u; ++j)
+                {
+                    const coreBool bAchieved = HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 3u);
+                    if(bAchieved) iAchieved += 1u;
+                }
+            }
+            if(iAchieved)
+            {
+                //Core::Platform->UnlockAchievement("challenge_XX");     
+            }
+#endif
         }
         break;
 
@@ -171,8 +245,71 @@ void CheckAchievements()
 }
 
 
-/*
+// ****************************************************************
+// 
+void InitLeaderboards()
+{
+    if(g_bDemoVersion) return;
 
+    // 
+    if(s_bInitLeaderboards) return;
+    s_bInitLeaderboards = true;
+
+    // ...
+}
+
+
+// ****************************************************************
+// 
+static void FillBaseScoreData(sScoreData* pData)
+{
+    ASSERT(pData)
+
+    // ...
+}
+
+
+// ****************************************************************
+// 
+void UploadLeaderboardsArcade(const coreUint32 iScore)
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+    if(g_pGame->GetOptions().iType != GAME_TYPE_SOLO) return;
+
+    // 
+    sScoreData oData = {};
+    FillBaseScoreData(&oData);
+
+    // ...
+}
+
+void UploadLeaderboardsMission(const coreUintW iMissionIndex, const coreUint32 iScore)
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+    if(g_pGame->GetOptions().iType != GAME_TYPE_SOLO) return;
+
+    ASSERT(iMissionIndex < SCORE_MISSIONS)
+
+    // currently not used
+}
+
+void UploadLeaderboardsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex, const coreUint32 iScore)
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+    if(g_pGame->GetOptions().iType != GAME_TYPE_SOLO) return;
+
+    ASSERT(iMissionIndex < SCORE_MISSIONS)
+    ASSERT(iSegmentIndex < SCORE_SEGMENTS)
+
+    // 
+    sScoreData oData = {};
+    FillBaseScoreData(&oData);
+
+    // ...
+}
+
+
+/*
 
 if([]()
 {
@@ -185,24 +322,5 @@ if([]()
 {
     Core::Platform->UnlockAchievement("challenge_03");
 }
-
-
-coreUint32 iCount = 0u;
-if(ALL_STATS_SEGMENT(oStats)
-{
-    for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
-    {
-        for(coreUintW j = 0u; j < SAVE_SEGMENTS; ++j)
-        {
-            if(HAS_BIT(oStats[i][j].iFeat, FEAT_TWOHUNDRED))
-                iCount += 1u;
-        }
-    }
-    return (iCount >= 6u);
-}))
-{
-    Core::Platform->UnlockAchievement("challenge_06");
-}
-
 
 */

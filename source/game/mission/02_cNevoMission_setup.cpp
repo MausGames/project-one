@@ -2031,7 +2031,7 @@ void cNevoMission::__SetupOwn()
                 }
             }
 
-            pBullet->Deactivate(true);
+            pBullet->Deactivate(true, vIntersection.xy());
             pBullet->AddStatus(BULLET_STATUS_GHOST);
         });
 

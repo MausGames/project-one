@@ -120,14 +120,14 @@ void cBoss::_EndBoss()
     m_bActive = false;
 
     // 
-    g_pGame->GetCurMission()->DeactivateBoss();
-
-    // 
-    g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)   // # before DeactivateBoss and __CloseSegment
     {
         pPlayer->GetScoreTable()->CancelCooldown();
         pPlayer->GetScoreTable()->ResetOverride();
     });
+
+    // 
+    g_pGame->GetCurMission()->DeactivateBoss();
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
@@ -189,7 +189,7 @@ void cBoss::_UpdateBoss()
                     {
                         bHit = true;
     
-                        pBullet->Deactivate(true);
+                        pBullet->Deactivate(true, vIntersection.xy());
     
                         d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->RefreshCooldown();
                         d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->AddChain(100);
@@ -207,9 +207,14 @@ void cBoss::_UpdateBoss()
                     g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_HELPER);
                     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
+                    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW j)
+                    {
+                        pPlayer->GetDataTable()->GiveHelper(i);
+                    });
+
                     if(this->HasAllHelpers())
                     {
-                        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+                        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW j)
                         {
                             pPlayer->ActivateDarkShading();
                             g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);

@@ -75,7 +75,7 @@ void cIntroMission::__RenderOwnTop()
 void cIntroMission::__MoveOwnAfter()
 {
     // 
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         if((pPlayer->GetInput() != &g_TotalInput) && (P_TO_UI(pPlayer->GetInput() - g_aGameInput) >= INPUT_SETS)) return;   // # skip replay
 
@@ -87,14 +87,16 @@ void cIntroMission::__MoveOwnAfter()
         cConfigMenu::PrintFigure(&m_aaManual[i][0],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveUp    : SDL_CONTROLLER_BUTTON_DPAD_UP);
         cConfigMenu::PrintFigure(&m_aaManual[i][1],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveLeft  : SDL_CONTROLLER_BUTTON_DPAD_LEFT);
         cConfigMenu::PrintFigure(&m_aaManual[i][2],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-        cConfigMenu::PrintFigure(&m_aaManual[i][3],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveRight : SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-        cConfigMenu::PrintFigure(&m_aaManual[i][4],  iType, oSet.aiAction[0]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][5],  iType, oSet.aiAction[1]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][6],  iType, oSet.aiAction[2]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][7],  iType, oSet.aiAction[3]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][8],  iType, oSet.aiAction[4]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][9],  iType, oSet.aiAction[5]);
-        cConfigMenu::PrintFigure(&m_aaManual[i][10], iType, oSet.aiAction[6]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][3],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_CONTROLLER_BUTTON_DPAD_DOWN);   // #
+        cConfigMenu::PrintFigure(&m_aaManual[i][4],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveRight : SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+        cConfigMenu::PrintFigure(&m_aaManual[i][5],  iType, oSet.aiAction[0]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][6],  iType, oSet.aiAction[0]);   // #
+        cConfigMenu::PrintFigure(&m_aaManual[i][7],  iType, oSet.aiAction[1]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][8],  iType, oSet.aiAction[2]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][9],  iType, oSet.aiAction[3]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][10], iType, oSet.aiAction[4]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][11], iType, oSet.aiAction[5]);
+        cConfigMenu::PrintFigure(&m_aaManual[i][12], iType, oSet.aiAction[6]);
 
         // 
         const coreVector2 vGame  = g_pPostProcessing->GetDirection();
@@ -115,6 +117,8 @@ void cIntroMission::__MoveOwnAfter()
             coreVector2( 0.0f, 1.0f),
             coreVector2(-1.0f, 0.0f),
             coreVector2( 0.0f,-1.0f),
+            coreVector2( 0.0f,-1.0f),
+            coreVector2( 1.0f, 0.0f),
             coreVector2( 1.0f, 0.0f),
             coreVector2( 1.0f, 0.0f),
             coreVector2(-1.0f, 0.5f),
@@ -124,6 +128,7 @@ void cIntroMission::__MoveOwnAfter()
             coreVector2( 0.0f,-1.0f),
             coreVector2( 1.0f, 0.0f),
         };
+        STATIC_ASSERT(ARRAY_SIZE(m_aaManual[0]) == ARRAY_SIZE(avOffset))
 
         // 
         const coreBool abBaseMove[] =
@@ -138,7 +143,9 @@ void cIntroMission::__MoveOwnAfter()
             abBaseMove[(0u + iShift) % 4u],
             abBaseMove[(1u + iShift) % 4u],
             abBaseMove[(2u + iShift) % 4u],
+            abBaseMove[(2u + iShift) % 4u],
             abBaseMove[(3u + iShift) % 4u],
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_LEFT)),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_RIGHT)),
@@ -147,6 +154,7 @@ void cIntroMission::__MoveOwnAfter()
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_DOWN)),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_RIGHT))
         };
+        STATIC_ASSERT(ARRAY_SIZE(m_aaManual[0]) == ARRAY_SIZE(abPress))
 
         // 
         const coreUint8 aiModeBits[] =
@@ -154,8 +162,10 @@ void cIntroMission::__MoveOwnAfter()
             0xFFu,
             0xFFu,
             0xFFu,
+            BIT(3u),
             0xFFu,
-            BIT(0u),
+            BIT(0u) | BIT(3u),
+            BIT(3u),
             BIT(0u),
             BIT(0u),
             BIT(1u) | BIT(2u),
@@ -163,6 +173,7 @@ void cIntroMission::__MoveOwnAfter()
             BIT(1u) | BIT(2u),
             BIT(1u) | BIT(2u)
         };
+        STATIC_ASSERT(ARRAY_SIZE(m_aaManual[0]) == ARRAY_SIZE(aiModeBits))
 
         // 
         for(coreUintW j = 0u; j < INTRO_MANUALS; ++j)
@@ -179,7 +190,7 @@ void cIntroMission::__MoveOwnAfter()
                 m_aaManual[i][j].SetDirection(MapToAxisInv(coreVector2(0.0f,1.0f), vGame));
                 m_aaManual[i][j].SetCenter   (MapToAxis(g_pForeground->Project2D(pPlayer->GetPosition()), vHud));
                 m_aaManual[i][j].SetAlpha    (BLENDH3(MIN1(fTime)));
-                m_aaManual[i][j].SetEnabled  ((fTime && HAS_BIT(aiModeBits[j], iMode)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                m_aaManual[i][j].SetEnabled  ((fTime && HAS_BIT(aiModeBits[j], iMode) && !pPlayer->HasStatus(PLAYER_STATUS_DEAD)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
                 m_aaManual[i][j].Move();
             }
         }

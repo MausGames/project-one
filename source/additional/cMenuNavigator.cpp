@@ -327,6 +327,8 @@ void cMenuNavigator::Update()
             if(m_bShoulder && m_nShoulderLeft  && bShoulderLeft)  m_nShoulderLeft ();
             if(m_bShoulder && m_nShoulderRight && bShoulderRight) m_nShoulderRight();
 
+            if(bShoulderLeft || bShoulderRight) m_bGrabbed = false;
+
             if(!m_aTab.empty())
             {
                 if(bShoulderLeft || bShoulderRight)

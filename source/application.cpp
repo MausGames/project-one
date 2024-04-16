@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.1.2";
+const coreChar* const CoreApp::Settings::Version                       = "1.2.0";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -26,7 +26,7 @@ const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID[3] = {"2914e
 const coreChar* const CoreApp::Settings::Platform::EpicClientID        = "";
 const coreChar* const CoreApp::Settings::Platform::EpicClientSecret    = "";
 
-//const coreUint32      CoreApp::Settings::Platform::SteamDemoAppID       = 2089690u;
+//const coreUint32      CoreApp::Settings::Platform::SteamDemoAppID       = 2089690u;       CoreApp::IsDemo();
 //const coreChar* const CoreApp::Settings::Platform::EpicDemoClientID     = "";
 //const coreChar* const CoreApp::Settings::Platform::EpicDemoClientSecret = "";
 
@@ -47,6 +47,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_surge.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_surge.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_surge_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_surge_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_view.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_view_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
@@ -307,6 +309,9 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_stadia.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_stadia.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_steamdeck.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_steamdeck.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_switch.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_switch.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_switch_full.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_switch_full.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_switch_left.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_switch_left.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_switch_right.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_switch_right.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_xbox360.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_xbox360.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_xboxone.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_xboxone.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_keyboard.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_keyboard.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
@@ -544,6 +549,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>  ("effect_rumble.wav",                      CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_rumble.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_shake_01.wav",                    CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_shake_01.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_shake_02.wav",                    CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_shake_02.wav");
+    Core::Manager::Resource->Load<coreSound>  ("effect_success.wav",                     CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_success.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_swipe_01.wav",                    CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_swipe_01.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_swipe_02.wav",                    CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_swipe_02.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_swipe_03.wav",                    CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_swipe_03.wav");
@@ -611,8 +617,9 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>  ("weapon_ray.wav",                         CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/weapon_ray.wav");
 
     coreList<coreString> asPath;
-    coreData::FolderScan("data/fonts", "*.ttf", &asPath);
-    coreData::FolderScan("data/fonts", "*.otf", &asPath);
+    coreData::FolderScan("data/fonts", "*.ttf",  &asPath);
+    coreData::FolderScan("data/fonts", "*.otf",  &asPath);
+    coreData::FolderScan("data/fonts", "*.woff", &asPath);
 
     FOR_EACH(it, asPath)   // # config for default font is ignored, because it was already loaded
     {
@@ -623,7 +630,7 @@ void CoreApp::Setup()
         Core::Manager::Resource->Load<coreFont>(coreData::StrFilename(it->c_str()), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), iHinting, bKerning);
     }
 
-    const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_DEFAULT;
+    const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_STANDARD;
     Core::Manager::Resource->AssignProxy(Core::Manager::Resource->LoadProxy("dynamic_font"), pcInit);
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

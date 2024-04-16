@@ -169,7 +169,7 @@ void cScrollBox::Move()
         if(coreMath::IsNear((m_fCurOffset - this->GetOffset().y), 0.0f, 0.001f)) m_fSpeed = 0.0f;
         m_fSpeed.UpdateMin(10.0f, 1.0f);
         
-        if(ABS(m_fCurOffset - this->GetOffset().y) > 1.0f) this->SetOffset(coreVector2(0.0f, m_fCurOffset));   // quick change      
+        if(ABS(m_fCurOffset - this->GetOffset().y) > 0.5f) this->SetOffset(coreVector2(0.0f, m_fCurOffset));   // quick change      
 
         
         // 

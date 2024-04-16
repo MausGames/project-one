@@ -38,7 +38,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_bVisibleCheck       (false)
 , m_iRepairMove         (0xFFu)
 , m_Options             (oOptions)
-, m_iVersion            (0u)
+, m_iVersion            (g_Version.iNumber)
 , m_iStatus             (0u)
 {
     ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
@@ -78,8 +78,8 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
         m_aHelper[i].Configure(ELEMENT_WHITE + i);
 
     // 
-    m_Interface .UpdateLayout();
-    m_Interface .UpdateEnabled();
+    m_Interface .UpdateLayout(true);
+    m_Interface .UpdateEnabled(true);
     m_CombatText.UpdateLayout();
 
     // 
@@ -481,8 +481,9 @@ void cGame::Render()
             m_BulletManagerEnemy.Render();
             m_BulletManagerEnemy.RenderAfter();
             
-            if(m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cRayBullet>() ||
-               m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cPulseBullet>())
+            if(m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cRayBullet>  () ||
+               m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cPulseBullet>() ||
+               m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cSurgeBullet>())
             {
                 DEPTH_PUSH
                 m_BulletManagerPlayerTop.Render();

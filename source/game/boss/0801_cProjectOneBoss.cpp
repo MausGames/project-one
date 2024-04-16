@@ -20,8 +20,9 @@
 // - intro:   phase
 
 // boss should use absolutely all mechanics from the game (so far), a color for every mission and its mechanics, with new combinations and twists, this makes the fight extremely long (>12 min), but it is possible to scale by reducing the required number of colors the player has to beat
-// TODO 1: remove turf from base classes
+// TODO 1: (remove turf from base classes)
 // TODO 1: hard mode: add another mechanic to each sub-stage, spieler muss in der letzten phase doch angreifen
+// TODO 1: hard mode: turf
 // TODO 1: how to handle death on boss ? maybe keep finished helpers disabled and skip intro !
 
 // yellow:
@@ -690,6 +691,8 @@ void cProjectOneBoss::__MoveOwn()
         else if(!this->GetCurHealth())   // instead of ReachedDeath
         {
             this->Kill(true);
+
+            g_pMenu->PreventSaveText();
 
             g_pSpecialEffects->CreateExplosion (this->GetPosition());
             g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
@@ -4123,7 +4126,7 @@ void cProjectOneBoss::__MoveCyan()
     // 
     else if(m_iPhase == 124u)
     {
-        const coreFloat fBaseSpeed  = LERP(1.6f, 1.0f, this->GetCurHealthPct()) * (g_pGame->IsEasy() ? 0.7f : 1.0f);
+        const coreFloat fBaseSpeed  = LERP(1.6f, 0.9f, this->GetCurHealthPct()) * (g_pGame->IsEasy() ? 0.65f : 0.95f);
         const coreFloat fArrowSpeed = 0.25f * fBaseSpeed;
 
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
@@ -4176,7 +4179,7 @@ void cProjectOneBoss::__MoveCyan()
 
             if(iPack != pNevo->GetArrowDir(0u))
             {
-                pBullet->Deactivate(true);
+                pBullet->Deactivate(true, vIntersection.xy());
                 pBullet->AddStatus(BULLET_STATUS_GHOST);
             }
         });
@@ -4362,7 +4365,7 @@ void cProjectOneBoss::__MoveGreen()
 
         this->SetDirection(coreVector3(coreVector2::Direction(m_avVector[LASER_ROTA].x * 3.0f - (0.5f*PI)), 0.0f));
 
-        if(iLostHealth >= 1600)
+        if(iLostHealth >= 1550)
         {
             PHASE_CHANGE_INC
 
@@ -5310,7 +5313,7 @@ void cProjectOneBoss::__SwitchHealth(const coreUintW iIndex)
     case 4u:  iHealth = 4400;                    break;   // purple
     case 5u:  iHealth = 2800;                    break;   // blue
     case 6u:  iHealth = 1800;                    break;   // cyan
-    case 7u:  iHealth = 3100;                    break;   // green
+    case 7u:  iHealth = 3000;                    break;   // green
     case 8u:  iHealth = 10000;                   break;   // white
     case 9u:  iHealth = 600;                     break;   // intro
     case 10u: iHealth = 1000;                    break;   // final transition

@@ -176,7 +176,7 @@
 #define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
 #define MUSCUS_ZOMBIES              (3u)                                              // 
 
-#define INTRO_MANUALS               (11u)                                             // 
+#define INTRO_MANUALS               (13u)                                             // 
 
 #define BONUS1_SHELTERS             (2u)                                              // 
 
@@ -861,6 +861,8 @@ private:
     coreUint64    m_iSpikeGood;                         // 
     coreUint64    m_iSpikeBad;                          // 
 
+    coreObject3D m_Correct;                             // 
+
     coreBatchList m_Egg;                                // 
     coreBatchList m_EggWave;                            // 
     coreObject3D  m_aEggRaw[HARENA_EGGS_RAWS];          // 
@@ -893,6 +895,10 @@ public:
     // 
     void EnableSpike (const coreUintW iIndex, const coreBool bDelayed);
     void DisableSpike(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableCorrect ();
+    void DisableCorrect(const coreBool bAnimated);
 
     // 
     void EnableEgg (const coreUintW iIndex);
@@ -1340,7 +1346,7 @@ public:
 
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "CALOR")
-    ASSIGN_EXTRA("カーロル")
+    ASSIGN_EXTRA("カロル")
 
     // 
     void EnableSnow ();
