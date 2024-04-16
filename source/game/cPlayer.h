@@ -57,12 +57,19 @@ private:
     cWeapon* m_apWeapon[PLAYER_WEAPONS];                        // main weapon objects (bullet factories, should never be NULL)
 
     const sGameInput* m_pInput;                                 // pointer to associated input set (should never be NULL)
+    coreVector2       m_avArea[2];
 
     coreVector2 m_vForce;                                       // 
     coreFlow    m_fFeelTime;                                    // 
     coreFlow    m_fRollTime;                                    // 
     coreUint8   m_iFeelType;                                    // 
     coreUint8   m_iRollDir;                                     // 
+
+
+    coreFlow m_fInterrupt;
+    coreFlow m_fLightningTime;   // 
+    coreBool m_bLightningSide;   // 
+
 
     cScoreTable m_ScoreTable;                                   // 
 
@@ -113,6 +120,10 @@ public:
     void EndFeeling  ();
     inline coreBool IsFeeling()const {return (m_fFeelTime > PLAYER_NO_FEEL);}
 
+
+    inline void Interrupt(const coreFloat fTime) {m_fInterrupt = fTime;}
+
+
     // 
     inline void     ActivateNormalShading()      {this->DefineProgram(m_pNormalProgram);}
     inline void     ActivateDarkShading  ()      {this->DefineProgram(m_pDarkProgram);}
@@ -132,6 +143,8 @@ public:
     // set object properties
     inline void SetInput(const sGameInput*  pInput) {m_pInput = pInput;}
     inline void SetForce(const coreVector2& vForce) {m_vForce = vForce;}
+
+    inline void SetArea(const coreVector2& vLower, const coreVector2& vUpper) {ASSERT(vLower < vUpper) m_avArea[0] = vLower; m_avArea[1] = vUpper;}
 
     // get object properties
     inline const sGameInput*  GetInput   ()const {ASSERT(m_pInput) return m_pInput;}

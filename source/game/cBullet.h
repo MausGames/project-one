@@ -82,6 +82,12 @@ public:
     inline cBullet* ChangeSize (const coreFloat fFactor) {this->SetSize (this->GetSize () * fFactor); return this;}
     inline cBullet* ChangeAlpha(const coreFloat fFactor) {this->SetAlpha(this->GetAlpha() * fFactor); return this;}
 
+
+    inline void SetDamage(const coreInt32    iDamage) {m_iDamage = iDamage;}
+    inline void SetSpeed (const coreFloat    fSpeed)  {m_fSpeed  = fSpeed;}
+    inline void SetFlyDir(const coreVector2& vFlyDir) {m_vFlyDir = vFlyDir;}
+
+
     // get object properties
     inline const coreInt32&   GetDamage ()const {return m_iDamage;}
     inline const coreFloat&   GetSpeed  ()const {return m_fSpeed;}
@@ -481,7 +487,7 @@ public:
     inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); m_fAnimation = 0.15f;}
 
     // change default color
-    inline cSpearBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cSpearBullet* MakeWhite () {this->_MakeWhite (0.8f); return this;}
     inline cSpearBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
     inline cSpearBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cSpearBullet* MakeRed   () {ASSERT(false)            return this;}

@@ -28,6 +28,9 @@ cEnemy::cEnemy()noexcept
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;
+
+
+    this->DefineTexture(1u, "menu_background_black.png");
 }
 
 
@@ -93,6 +96,10 @@ void cEnemy::Move()
 
         // move the 3d-object
         this->coreObject3D::Move();
+
+
+       // this->SetTexSize  (coreVector2(1.2f,1.2f));
+       // this->SetTexOffset(coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * -0.25f));
     }
 
     // 

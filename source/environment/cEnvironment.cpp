@@ -141,6 +141,7 @@ void cEnvironment::Move()
         {
             // delete old background
             m_MixObject.DefineTexture(0u, NULL);
+            m_MixObject.DefineTexture(1u, NULL);
             SAFE_DELETE(m_pOldBackground)
         }
         else m_pOldBackground->Move();
@@ -157,6 +158,9 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     // delete possible old background
     m_MixObject.DefineTexture(0u, NULL);
     SAFE_DELETE(m_pOldBackground)
+
+    // 
+    if(!fTransitionSpeed) SAFE_DELETE(m_pBackground)
 
     // make current to old
     m_pOldBackground = m_pBackground;
@@ -245,8 +249,8 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
         m_TransitionTime.Stop();
 
         // delete both backgrounds
-        SAFE_DELETE(m_pOldBackground)
         SAFE_DELETE(m_pBackground)
+        SAFE_DELETE(m_pOldBackground)
 
         // delete environment frame buffer
         m_FrameBuffer.Delete();

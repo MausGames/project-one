@@ -24,6 +24,7 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 , m_fPacifistDamage     (0.0f)
 , m_bPacifist           (false)
 , m_iDepthLevel         (0u)
+, m_iOutroType          (0u)
 , m_iStatus             (0u)
 , m_iDifficulty         (iDifficulty)
 , m_bCoop               (bCoop)
@@ -55,6 +56,11 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
         m_aPlayer[1].SetInput(&g_aGameInput[1]);
 
+
+        m_aPlayer[0].SetArea(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f));
+        m_aPlayer[1].SetArea(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA);
+
+
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -71,33 +77,14 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 // destructor
 cGame::~cGame()
 {
-    constexpr coreBool bAnimated = !DEFINED(_CORE_DEBUG_);   // prevent assertions when force-quitting
-
     // 
-    m_ItemManager.ClearItems(bAnimated);
-
-    // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].Kill(bAnimated);
-
-    // 
-    m_EnemyManager.ClearEnemies(bAnimated);
-
-    // 
-    m_BulletManagerPlayer.ClearBullets(bAnimated);
-    m_BulletManagerEnemy .ClearBullets(bAnimated);
-
-    // 
-    m_ChromaManager.ClearChromas(bAnimated);
-
-    // 
-    m_ShieldManager.ClearShields(bAnimated);
+    this->__ClearAll(!DEFINED(_CORE_DEBUG_));   // # prevent assertions when force-quitting
 
     // delete last mission
     SAFE_DELETE(m_pCurMission)
 
     // 
-    g_pWindscreen->ClearAdds(bAnimated);
+    g_pWindscreen->ClearAdds(true);
 
     // 
     g_pPostProcessing->SetSaturation(1.0f);
@@ -225,9 +212,6 @@ void cGame::Move()
     // move all overlay objects
     m_CombatText.Move();
     m_Interface .Move();
-
-
-    // g_pEnvironment->SetTargetSide(g_pGame->GetPlayer(0u)->GetPosition().xy() * 0.3f);
 }
 
 
@@ -251,21 +235,7 @@ void cGame::LoadMissionID(const coreInt32 iID)
     if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
 
     // 
-    m_ItemManager.ClearItems(true);
-
-    // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].Kill(true);
-
-    // 
-    m_EnemyManager.ClearEnemies(true);
-
-    // 
-    m_BulletManagerPlayer.ClearBullets(true);
-    m_BulletManagerEnemy .ClearBullets(true);
-
-    // 
-    m_ChromaManager.ClearChromas(true);
+    this->__ClearAll(false);
 
     // delete possible old mission
     SAFE_DELETE(m_pCurMission)
@@ -378,7 +348,7 @@ void cGame::StartIntro()
 
 // ****************************************************************
 // 
-void cGame::StartOutro()
+void cGame::StartOutro(const coreUint8 iType)
 {
     ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
 
@@ -388,6 +358,7 @@ void cGame::StartOutro()
 
     // 
     m_fTimeInOut = 0.0f;
+    m_iOutroType = iType;
 
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -612,9 +583,17 @@ void cGame::__HandleDefeat()
 
         if(bDefeated)
         {
-            // 
-            REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
-            ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
+            if(m_pCurMission->GetID() == cIntroMission::ID)
+            {
+                // 
+                this->StartOutro(1u);
+            }
+            else
+            {
+                // 
+                REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
+                ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
+            }
         }
     }
 }
@@ -669,27 +648,42 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
         // 
-        const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
-        pPlayer->SetForce(vDiff.Normalized() * 80.0f);
+        const coreVector2 vDir = (pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalized();
+        pPlayer->SetForce(vDir * 80.0f);
+
+
+        pPlayer->Interrupt(1.0f);
+
+
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+
+
+        m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection);
+
     });
 
     // 
-    cPlayer::TestCollision(TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;  
 
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
         //pBullet->Deactivate(true, vIntersection.xy());
+        // aber minen und raketen sollten explodieren 
+
+        
+        m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection);
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         if(!IN_FOREGROUND_AREA(vIntersection, 1.1f)) return;
@@ -716,6 +710,9 @@ void cGame::__HandleCollisions()
 
 
         //g_pGame->GetChromaManager()->AddChroma(vIntersection.xy(), -pBullet->GetDirection().xy(), CHROMA_SCALE_TINY, pEnemy->GetBaseColor());     
+
+        
+        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection);
     });
 
     // 
@@ -737,4 +734,30 @@ void cGame::__HandleCollisions()
     {
         pEnemy->ActivateModelDefault();
     });
+}
+
+
+// ****************************************************************
+// 
+void cGame::__ClearAll(const coreBool bAnimated)
+{
+    // 
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Kill(bAnimated);
+
+    // 
+    m_EnemyManager.ClearEnemies(bAnimated);
+
+    // 
+    m_BulletManagerPlayer.ClearBullets(bAnimated);
+    m_BulletManagerEnemy .ClearBullets(bAnimated);
+
+    // 
+    m_ChromaManager.ClearChromas(bAnimated);
+
+    // 
+    m_ItemManager.ClearItems(bAnimated);
+
+    // 
+    m_ShieldManager.ClearShields(bAnimated);
 }

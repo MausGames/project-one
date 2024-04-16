@@ -68,6 +68,7 @@
 // TODO: replace / with RCP where possible
 // TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO: remove game_icon.png from resource-index if not required anymore
+// TODO: scissor out center when rendering fullscreen effects (e.g. water vignetting)
 
 
 // ****************************************************************

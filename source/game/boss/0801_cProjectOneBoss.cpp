@@ -30,7 +30,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     this->SetSize(coreVector3(1.2f,1.2f,1.2f));
 
     // configure the boss
-    this->Configure(200, COLOR_SHIP_GREY);
+    this->Configure(10000, COLOR_SHIP_GREY);
 }
 
 
@@ -61,6 +61,7 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.6f)
         {
+            /*
             cEnemySquad* pSquad = g_pGame->GetCurMission()->GetEnemySquad(0u);
 
             pSquad->ForEachEnemy([](cEnemy* OUTPUT pEnemy, const coreUintW i)
@@ -76,8 +77,8 @@ void cProjectOneBoss::__MoveOwn()
             });
 
             g_pSpecialEffects->MacroExplosionDarkBig(coreVector3(0.0f, FOREGROUND_AREA.y, 0.0f));
-
-            ++m_iPhase;
+            */
+            PHASE_CHANGE_INC
         });
     }
 
@@ -87,16 +88,13 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK)
         {
-            // 
             this->DefaultMoveLerp(coreVector2(0.0f,1.2f), coreVector2(0.0f,0.8f), fTime);
 
-            // 
             //if(PHASE_TIME_POINT(0.85f))
             //    this->_StartBoss();
 
-            // 
             if(PHASE_FINISHED)// && !g_pGame->GetInterface()->IsBannerActive())
-                ++m_iPhase;
+                PHASE_CHANGE_INC
         });
     }
 
@@ -104,9 +102,9 @@ void cProjectOneBoss::__MoveOwn()
     // 
     else if(m_iPhase == 2u)
     {
-        PHASE_CONTROL_PAUSE(0u, 2.0f)
+        PHASE_CONTROL_PAUSE(0u, 0.5f)
         {
-            m_iPhase = 10u;
+            PHASE_CHANGE_TO(10u)
         });
     }
 
@@ -116,13 +114,11 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_SMOOTH)
         {
-            // 
             this->DefaultMoveLerp     (coreVector2(0.0f,0.8f), coreVector2(-0.8f,0.8f), fTime);
             this->DefaultOrientateLerp(0.0f*PI,                4.0f*PI,                 fTime);
 
-            // 
             if(PHASE_FINISHED)
-                ++m_iPhase;
+                PHASE_CHANGE_INC
         });
     }
 
@@ -132,13 +128,23 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
         {
-            // 
             this->DefaultMoveLerp(coreVector2(-0.8f,0.8f), coreVector2(0.8f,0.8f), fTime);
 
-            // 
+            PHASE_CONTROL_TICKER(1u, 0u, 10.0f, LERP_LINEAR)
+            {
+                const coreVector2 vPos = this->GetPosition ().xy();
+                const coreVector2 vDir = this->GetDirection().xy();
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.6f, this, vPos, vDir)->ChangeSize(1.4f);
+            });
+
             if(PHASE_FINISHED)
-                ++m_iPhase;
+            {
+                PHASE_CHANGE_INC
+                PHASE_RESET(1u)
+            }
         });
+
     }
 
     // ################################################################
@@ -147,13 +153,11 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_SMOOTH)
         {
-            // 
             this->DefaultMoveLerp     (coreVector2(0.8f,0.8f), coreVector2(0.0f,0.8f), fTime);
             this->DefaultOrientateLerp(0.0f*PI,                4.0f*PI,                fTime);
 
-            // 
             if(PHASE_FINISHED)
-                m_iPhase = 10;
+                PHASE_CHANGE_TO(10u)
         });
     }
 

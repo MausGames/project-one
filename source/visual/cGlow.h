@@ -22,7 +22,9 @@
 class cGlow final : public cBindContainerIn
 {
 private:
-    cBlur m_Blur;   // blur aggregation object (glow frame buffer)
+    cBlur m_Blur;         // blur aggregation object (glow frame buffer)
+
+    coreBool m_bActive;   // 
 
 
 public:
@@ -33,8 +35,14 @@ public:
     // update the glow-effect
     void Update();
 
+    // clear frame buffer
+    inline void Clear() {m_Blur.Clear();}
+
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return m_Blur.GetFrameBuffer();}
+
+    // 
+    inline const coreBool& IsActive()const {return m_bActive;}
 };
 
 

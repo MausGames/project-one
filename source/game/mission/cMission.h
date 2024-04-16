@@ -14,6 +14,7 @@
 // TODO: add visible debug-spline
 // TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO: assertion for "active boss should be alive"
+// TODO: STAGE_FLYPAST with dot-product or simpler per-axis
 
 
 // ****************************************************************
@@ -44,11 +45,21 @@
 #define STAGE_BOSS(e,p,d)               {if(STAGE_BEGINNING) (e).Resurrect((p) * FOREGROUND_AREA, (d)); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE                      {if(STAGE_BEGINNING) this->ActivateWave(); if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
 
-#define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
+#define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
 #define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 
 #define STAGE_ADD_PATH(n)               const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)          const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
+
+
+//#define STAGE_COLL_PLAYER_ENEMY(a,b,i)   this->_CollisionPlayerEnemy (__LINE__, [=](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3& i)
+//#define STAGE_COLL_PLAYER_BULLET(a,b,i)  this->_CollisionPlayerBullet(__LINE__, [=](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3& i)
+//#define STAGE_COLL_ENEMY_BULLET(a,b,i)   this->_CollisionEnemyBullet (__LINE__, [=](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& i)
+#define STAGE_COLL_PLAYER_ENEMY(a,b,v)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([=](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3& v)
+#define STAGE_COLL_PLAYER_BULLET(a,b,v)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([=](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3& v)
+#define STAGE_COLL_ENEMY_BULLET(a,b,v,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& v)
+
+
 
 #define STAGE_FOREACH_PLAYER(e,i)       g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)
 #define STAGE_FOREACH_PLAYER_ALL(e,i)   g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)
@@ -81,7 +92,8 @@
 #define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                 {if(STAGE_BRANCH(x, x)) {}}
 
-#define STAGE_TICK_TIME(c,o)            ((m_fStageTimeBefore >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime * (c) - (o))) != (F_TO_UI(m_fStageTimeBefore * (c) - (o)))))
+#define STAGE_TICK_TIME_FREE(c,o)       ((m_fStageTimeBefore >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime * (c) - (o))) != (F_TO_UI(m_fStageTimeBefore * (c) - (o)))))
+#define STAGE_TICK_TIME(c,o)            ((fLifeTimeBefore    >= 0.0f) && STAGE_TICK_TIME_FREE(c, o))
 #define STAGE_TICK_LIFETIME(c,o)        ((fLifeTimeBefore    >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime    * (c) - (o))) != (F_TO_UI(fLifeTimeBefore    * (c) - (o)))))
 
 #define STAGE_TIME_POINT(t)             (InBetween((t), m_fStageTimeBefore, m_fStageTime))
@@ -106,7 +118,7 @@
 #define STAGE_POSITION_BEFORE(e,t,v)    ((e)->GetPosition().v <  (t))
 #define STAGE_POSITION_AFTER(e,t,v)     ((e)->GetPosition().v >= (t))
 #define STAGE_POSITION_BETWEEN(e,t,u,v) (InBetweenExt((e)->GetPosition().v, (t), (u)))
-#define STAGE_FLYPAST(e,f,v)                           \
+#define STAGE_FLYPAST(e,f,v)                         \
     ((e)->GetPosition().v < (f)->GetPosition().v) ^  \
     ((e)->GetPosition().v < (f)->GetOldPos  ().v) || \
     ((e)->GetOldPos  ().v < (f)->GetPosition().v) ^  \
@@ -147,6 +159,10 @@ protected:
     static coreFloat   s_fHealthPctPoint;                      // 
     static coreVector2 s_vPositionPoint;                       // 
 
+    std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3&)> m_nCollPlayerEnemy;
+    std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3&)> m_nCollPlayerBullet;
+    std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3&)> m_nCollEnemyBullet;
+
 
 public:
     cMission()noexcept;
@@ -185,10 +201,24 @@ public:
     inline cEnemySquad*     GetEnemySquad  (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
 
 
+
+    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3& vIntersection) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection);}
+    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection);}
+    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3& vIntersection) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection);}
+
+
 protected:
     // 
     template             <typename F> coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
     template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
+
+    // 
+    //template <typename F> void _CollisionPlayerEnemy (const coreUint16 iCodeLine, F&& nHitFunc)   // TODO  
+    //{
+    //    if(!test) test = nHitFunc;
+    //}
+    //template <typename F> void _CollisionPlayerBullet(const coreUint16 iCodeLine, F&& nHitFunc);   // TODO  
+    //template <typename F> void _CollisionEnemyBullet (const coreUint16 iCodeLine, F&& nHitFunc);   // TODO  
 
 
 private:

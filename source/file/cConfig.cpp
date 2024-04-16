@@ -218,7 +218,7 @@ void UpdateInput()
             const coreUintW iJoystickID = i - INPUT_SETS_KEYBOARD;
 
             // map movement input
-            oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
+            oMap.vMove = Core::Input->GetJoystickRelativeL(iJoystickID);
 
             // restrict movement input to the 8 base directions
             if(!oMap.vMove.IsNull()) oMap.vMove = AlongStar(oMap.vMove);

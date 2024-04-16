@@ -381,6 +381,9 @@ template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnem
     {
         T* pEnemy = g_pGame->GetEnemyManager()->AllocateEnemy<T>();
         m_apEnemy.push_back(pEnemy);
+
+
+        pEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f));
     }
 }
 

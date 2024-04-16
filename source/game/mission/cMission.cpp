@@ -102,7 +102,7 @@ void cMission::MoveBefore()
             if(m_anStage.empty())
             {
                 // 
-                g_pGame->StartOutro();
+                g_pGame->StartOutro(0u);
             }
         }
     }
@@ -203,7 +203,8 @@ void cMission::DeactivateWave()
     const coreBool bAnimated = true;
     g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);
     g_pGame->GetItemManager()->LoseItems();
-    // should be moves somewhere else, lie for boss 
+    // should be moves somewhere else, like for boss 
+    // e.g. skip stage
 
 
 

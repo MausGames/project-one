@@ -14,11 +14,17 @@
 cPlayer::cPlayer()noexcept
 : m_apWeapon   {}
 , m_pInput     (&g_TotalInput)
+, m_avArea     {-FOREGROUND_AREA, FOREGROUND_AREA}
 , m_vForce     (coreVector2(0.0f,0.0f))
 , m_fFeelTime  (PLAYER_NO_FEEL)
 , m_fRollTime  (0.0f)
 , m_iFeelType  (0u)
 , m_iRollDir   (PLAYER_NO_ROLL)
+
+, m_fInterrupt (0.0f)
+, m_fLightningTime (0.0f)
+, m_bLightningSide (false)
+
 , m_fAnimation (0.0f)
 {
     // load object resources
@@ -33,6 +39,8 @@ cPlayer::cPlayer()noexcept
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
+
+    // 
     this->SetMaxHealth(PLAYER_LIVES);
 
     // load first weapons
@@ -207,9 +215,9 @@ void cPlayer::Render()
         {
             g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);
             m_Wind.Render();
-        glDepthFunc(GL_ALWAYS);
-        pTest->Render();
-        glDepthFunc(GL_LEQUAL);
+        //glDepthFunc(GL_ALWAYS);
+        //pTest->Render();
+        //glDepthFunc(GL_LEQUAL);
         }
 
         if(g_bDebugOutput)
@@ -234,6 +242,27 @@ void cPlayer::Move()
 
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+
+        m_fInterrupt.UpdateMax(-1.0f, 0.0f);
+
+        if(m_fInterrupt)
+        {
+            m_fLightningTime.Update(10.0f);
+            if(m_fLightningTime >= 1.0f)
+            {
+                m_fLightningTime -= 1.0f;
+
+                // 
+                m_bLightningSide = !m_bLightningSide;
+                coreVector2 vDir = coreVector2::Rand();
+                            vDir = coreVector2(m_bLightningSide ? ABS(vDir.x) : -ABS(vDir.x), vDir.y);
+
+                // 
+                g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL + 1.0f, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
+            }
+        }
+
+
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
             coreVector2 vNewDir = this->GetDirection().xy();
@@ -251,7 +280,7 @@ void cPlayer::Move()
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES) && !m_fInterrupt)
                 if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
@@ -288,10 +317,10 @@ void cPlayer::Move()
             }
 
             // restrict movement to the foreground area
-                 if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; m_vForce.x =  ABS(m_vForce.x);}
-            else if(vNewPos.x >  FOREGROUND_AREA.x) {vNewPos.x =  FOREGROUND_AREA.x; m_vForce.x = -ABS(m_vForce.x);}
-                 if(vNewPos.y < -FOREGROUND_AREA.y) {vNewPos.y = -FOREGROUND_AREA.y; m_vForce.y =  ABS(m_vForce.y);}
-            else if(vNewPos.y >  FOREGROUND_AREA.y) {vNewPos.y =  FOREGROUND_AREA.y; m_vForce.y = -ABS(m_vForce.y);}
+                 if(vNewPos.x < m_avArea[0].x) {vNewPos.x = m_avArea[0].x; m_vForce.x =  ABS(m_vForce.x);}
+            else if(vNewPos.x > m_avArea[1].x) {vNewPos.x = m_avArea[1].x; m_vForce.x = -ABS(m_vForce.x);}
+                 if(vNewPos.y < m_avArea[0].y) {vNewPos.y = m_avArea[0].y; m_vForce.y =  ABS(m_vForce.y);}
+            else if(vNewPos.y > m_avArea[1].y) {vNewPos.y = m_avArea[1].y; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
             const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
@@ -323,7 +352,7 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot);
         }
 
@@ -457,6 +486,12 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->DisableWind();
     this->DisableBubble();
     this->UpdateExhaust(0.0f);
+
+
+    m_fInterrupt = 0.0f;
+    m_fLightningTime = 0.0f;
+    m_bLightningSide = false;
+
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))

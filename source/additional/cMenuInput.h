@@ -58,7 +58,7 @@ public:
             if(Core::Input->GetJoystickButton(i, 1u, CORE_INPUT_PRESS))   Core::Input->SetMouseButton(CORE_INPUT_RIGHT, true);
             if(Core::Input->GetJoystickButton(i, 1u, CORE_INPUT_RELEASE)) Core::Input->SetMouseButton(CORE_INPUT_RIGHT, false);
 
-            const coreVector2& vRelative = Core::Input->GetJoystickRelative(i);
+            const coreVector2& vRelative = Core::Input->GetJoystickRelativeL(i);
 
             if(!vRelative.IsNull())
             {

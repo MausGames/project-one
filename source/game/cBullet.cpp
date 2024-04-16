@@ -24,6 +24,9 @@ cBullet::cBullet()noexcept
 , m_fFlyTime   (0.0f)
 , m_vFlyDir    (coreVector2(0.0f,0.0f))
 {
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
     // set initial status
     m_iStatus = BULLET_STATUS_READY;
 }
@@ -71,6 +74,9 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
     this->SetDirection(coreVector3(vDirection, 0.0f));
     this->SetAlpha    (1.0f);
 
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
     // enable collision
     this->ChangeType(iType);
 }
@@ -86,6 +92,9 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2& vImpact)
 
     // 
     if(bAnimated) this->__ImpactOwn(vImpact);
+
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // disable collision
     this->ChangeType(0);

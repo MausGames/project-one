@@ -15,6 +15,7 @@
 // TODO: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
 // TODO: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO: maybe spawn players in flight direction, mission start and continue ?
+// TODO: FindPlayer may find player outside of area (during resurrection)
 
 
 // ****************************************************************
@@ -96,6 +97,7 @@ private:
     coreBool m_bPacifist;                   // 
 
     coreUint8 m_iDepthLevel;                // 
+    coreUint8 m_iOutroType;                 // 
 
     coreUint8 m_iStatus;                    // 
     coreUint8 m_iDifficulty;                // 
@@ -123,7 +125,7 @@ public:
 
     // 
     void StartIntro();
-    void StartOutro();
+    void StartOutro(const coreUint8 iType);
 
     // 
     void UseContinue();
@@ -160,6 +162,7 @@ public:
     inline const coreUintW& GetNumMissions()const {return m_iNumMissions;}
     inline       coreUint8  GetContinues  ()const {return m_iContinues;}
     inline const coreBool&  GetPacifist   ()const {return m_bPacifist;}
+    inline const coreUint8& GetOutroType  ()const {return m_iOutroType;}
     inline const coreUint8& GetStatus     ()const {return m_iStatus;}
     inline const coreUint8& GetDifficulty ()const {return m_iDifficulty;}
     inline const coreBool&  GetCoop       ()const {return m_bCoop;}
@@ -172,6 +175,9 @@ private:
     void     __HandleDefeat();
     void     __HandlePacifist();
     void     __HandleCollisions();
+
+    // 
+    void __ClearAll(const coreBool bAnimated);
 };
 
 
