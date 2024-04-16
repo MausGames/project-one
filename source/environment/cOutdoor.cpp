@@ -44,7 +44,7 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 
         // 
         m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
-        m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
 
     // load outdoor geometry
@@ -667,7 +667,7 @@ void cOutdoor::__Reset(const coreResourceReset eInit)
         if(m_pNormalMap) this->LoadTextures(m_pcTop, m_pcBottom);
 
         // 
-        if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
     else
     {
@@ -689,6 +689,6 @@ void cOutdoor::__Reshape()
     {
         // 
         m_LightMap.Delete();
-        m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
 }

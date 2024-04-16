@@ -712,8 +712,7 @@ void cViridoMission::__SetupOwn()
     // TASK: markierte linie muss für 1 sekunde berührt werden (pole dancing)
     // TASK: gegner in finaler phase in bestimmter reihenfolge töten, ändert sich je nach start-gegner
     // ACHIEVEMENT: touch every laser at least once
-    // TODO 1: effect on laser when pole dancing
-    // TODO 1: hard mode: laser halten geschosse auf -> aber kollision mit gegner muss priorität haben    -> nur bei wave, nicht bei boss?
+    // HARD: lasers block bullets
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumData = 8u;
@@ -728,9 +727,9 @@ void cViridoMission::__SetupOwn()
         });
 
         STAGE_GET_START(iNumData * 3u + 7u)
-            STAGE_GET_UINT64     (iLineTouch)
             STAGE_GET_FLOAT_ARRAY(afDistance, iNumData)
             STAGE_GET_VEC2_ARRAY (avMove,     iNumData)
+            STAGE_GET_UINT64     (iLineTouch)
             STAGE_GET_FLOAT      (fGlobeTime)
             STAGE_GET_UINT       (iGlobeCount)
             STAGE_GET_UINT       (iCurLaser)

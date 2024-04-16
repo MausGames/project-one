@@ -10,7 +10,6 @@
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
 
-// TODO 3: reuse paths (beware of reserve assertion, and resize on refine) and squads over stages
 // TODO 3: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO 3: assertion for "active boss should be alive"
 // TODO 3: STAGE_FLYPAST with dot-product or simpler per-axis
@@ -20,8 +19,7 @@
 // TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory), or create 2 max-size blocks (old, cur), also in Ater mission ?
 // TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
 // TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
-// TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
-// TODO 1: check if all allocated enemy numbers are correct
+// TODO 1: check if all allocated enemy numbers are correct (warum war das kein MF?, wirklich einmal alle durchchecken)
 // TODO 2: generate objects are preventing each others outlines while being alpha 0 (especially on diagonal movement)
 // TODO 3: nevo: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
 // TODO 4: mission code sometimes accesses variables directly without wrapper-functions (mixed), bosses always need wrapper functions, should this be handled consistently ?
@@ -36,7 +34,6 @@
 // TODO 1: [MF] add 3 different pearl-collect-pitch tracks (wave, boss, p1) and reset state properly
 // TODO 3: flash-teleportation (mission, boss, p1) should be by the player doing the most damage, not the last attacker
 // TODO 4: there are multiple "Aim" objects (mission + boss)
-// TODO 2: STAGE_GET_UINT64 and STAGE_GET_UINT64_ARRAY hat falsches alignment (undefined behaviour) (+ reorder iLineTouch)
 // TODO 3: also wrap all object-iterations in g_pGame->IsTask()
 // TODO 3: display sticks in manual
 
@@ -46,6 +43,8 @@
 #define MISSION_PLAYERS    (PLAYERS)   // 
 #define MISSION_BOSSES     (BOSSES)    // default number of bosses per mission
 #define MISSION_WAVES      (WAVES)     // 
+#define MISSION_MAP_PATHS  (8u)        // 
+#define MISSION_MAP_SQUADS (8u)        // 
 #define MISSION_NO_BOSS    (0xFFu)     // no boss currently active (error-value)
 #define MISSION_NO_WAVE    (0xFFu)     // 
 #define MISSION_NO_SEGMENT (0xFFu)     // 
@@ -195,13 +194,13 @@
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if((e).HasStatus(ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE(i,n,...)                    {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(i, n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(this->_UpdateWait()) STAGE_FINISH_NOW}}
 
-#define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
+#define STAGE_CLEARED                          (std::all_of(m_aSquad.begin(), m_aSquad.end(), [](const cEnemySquad& oSquad) {return oSquad.IsFinished();}))
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, __i) {if((coreIntW(__i) >= coreIntW(f)) && (coreIntW(__i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, 0u, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect(); this->SetDelay(true);});}
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
-#define STAGE_DELAY_END                        {if(this->GetDelay()) m_apSquad.back()->GetEnemy(0u)->Kill(false); this->SetDelay(false);}
+#define STAGE_DELAY_END                        {if(this->GetDelay()) m_aSquad.back().GetEnemy(0u)->Kill(false); this->SetDelay(false);}
 
 #define STAGE_SINK_UINT(x)                     (bIsDead ? r_cast<coreUint32&> (s_aiSink) : (x))
 #define STAGE_SINK_FLOAT(x)                    (bIsDead ? r_cast<coreFloat&>  (s_aiSink) : (x))
@@ -226,14 +225,14 @@
 #define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
 #define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}} ASSERT(coreMath::IsAligned(iDataIndex, 2u))
 #define STAGE_GET_FLOAT(n,...)                 coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC2(n,...)                  coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC3(n,...)                  coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC4(n,...)                  coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_INT_ARRAY(n,c,...)           coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT_ARRAY(n,c,...)          coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}} ASSERT(coreMath::IsAligned(iDataIndex, 2u))
 #define STAGE_GET_FLOAT_ARRAY(n,c,...)         coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC2_ARRAY(n,c,...)          coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC3_ARRAY(n,c,...)          coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
@@ -321,8 +320,8 @@ protected:
     coreUintW m_iLastSegmentIndex;                          // 
 
     coreMap<coreUint16, std::function<void()>> m_anStage;   // 
-    coreMap<coreUint16, coreSpline2*>          m_apPath;    // 
-    coreMap<coreUint16, cEnemySquad*>          m_apSquad;   // 
+    coreMap<coreUint16, coreSpline2>           m_aPath;     // 
+    coreMap<coreUint16, cEnemySquad>           m_aSquad;    // 
 
     coreUint32* m_piData;                                   // 
     coreUint8   m_iDataSize;                                // 
@@ -432,7 +431,7 @@ public:
     inline const coreUintW& GetCurWaveIndex    ()const                       {return m_iCurWaveIndex;}
     inline const coreUintW& GetCurSegmentIndex ()const                       {return m_iCurSegmentIndex;}
     inline const coreUintW& GetLastSegmentIndex()const                       {return m_iLastSegmentIndex;}
-    inline cEnemySquad*     GetEnemySquad      (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
+    inline cEnemySquad*     GetEnemySquad      (const coreUintW iIndex)      {ASSERT(iIndex < m_aSquad.size()) return &(*(m_aSquad.begin() + iIndex));}   // TODO 1: besseres indexieren
     inline const coreUint8& GetStageSub        ()const                       {return m_iStageSub;}
     inline const coreFloat* GetMedalGoal       ()const                       {return m_pfMedalGoal;}
     inline const coreUint8& GetRecordBroken    ()const                       {return m_iRecordBroken;}
@@ -1792,18 +1791,20 @@ template <typename F> FORCE_INLINE void cMission::_AddStage(const coreUint16 iCo
 // 
 template <typename F> RETURN_RESTRICT coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
 {
-    if(!m_apPath.count(iCodeLine))
+    if(!m_aPath.count(iCodeLine))
     {
-        // 
-        coreSpline2* pNewPath = new coreSpline2();
-        nInitFunc(pNewPath);
-        ASSERT(pNewPath->GetNumNodes() == pNewPath->GetCapacity())
+        ASSERT(m_aPath.size() < MISSION_MAP_PATHS)
 
         // 
-        m_apPath.emplace(iCodeLine, pNewPath);
+        coreSpline2 oNewPath;
+        nInitFunc(&oNewPath);
+        ASSERT(oNewPath.GetNumNodes() == oNewPath.GetCapacity())
+
+        // 
+        m_aPath.emplace(iCodeLine, std::move(oNewPath));
     }
 
-    return m_apPath.at(iCodeLine);
+    return &m_aPath.at(iCodeLine);
 }
 
 
@@ -1811,18 +1812,20 @@ template <typename F> RETURN_RESTRICT coreSpline2* cMission::_AddPath(const core
 // 
 template <typename T, typename F> RETURN_RESTRICT cEnemySquad* cMission::_AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc)
 {
-    if(!m_apSquad.count(iCodeLine))
+    if(!m_aSquad.count(iCodeLine))
     {
-        // 
-        cEnemySquad* pNewSquad = new cEnemySquad();
-        pNewSquad->AllocateEnemies<T>(iNum);
-        nInitFunc(pNewSquad);
+        ASSERT(m_aPath.size() < MISSION_MAP_SQUADS)
 
         // 
-        m_apSquad.emplace(iCodeLine, pNewSquad);
+        cEnemySquad oNewSquad;
+        oNewSquad.AllocateEnemies<T>(iNum);
+        nInitFunc(&oNewSquad);
+
+        // 
+        m_aSquad.emplace(iCodeLine, std::move(oNewSquad));
     }
 
-    return m_apSquad.at(iCodeLine);
+    return &m_aSquad.at(iCodeLine);
 }
 
 

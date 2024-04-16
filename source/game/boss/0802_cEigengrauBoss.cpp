@@ -240,8 +240,8 @@ void cEigengrauBoss::__RenderOwnUnder()
         DEPTH_PUSH
 
         // 
+        g_pOutline->GetStyle(m_bActive ? OUTLINE_STYLE_FLAT_THICK : OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);   // # to prevent depth-precision issues
         m_Range.Render();
-        g_pOutline->GetStyle(m_bActive ? OUTLINE_STYLE_FLAT_THICK : OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
     }
 
     if(m_RangePlayer.IsEnabled(CORE_OBJECT_ENABLE_RENDER))

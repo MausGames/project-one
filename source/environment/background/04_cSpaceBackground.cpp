@@ -178,9 +178,9 @@ void cSpaceBackground::__RenderOwnAfter()
     for(coreUintW i = 0u; i < SPACE_NEBULA_NUM; ++i)
     {
         const coreVector2 vNewTexOffset = m_Nebula.GetTexOffset() + coreVector2::Rand(0.0f,1.0f, 0.0f,1.0f, &oRand);
-        const coreFloat   fNewScale     = 1.0f - 0.15f * I_TO_F(i);
+        const coreFloat   fNewScale     = 0.3f - 0.045f * I_TO_F(i);
 
-        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale * 0.3f));
+        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
     glDisable(GL_DEPTH_TEST);
@@ -219,7 +219,7 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     const coreVector2 vEnvMove    = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
-    const coreVector2 vSize       = coreVector2(1.0f,1.0f) * SQRT2 * m_fCoverScale;
+    const coreVector2 vSize       = coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR * m_fCoverScale;
     const coreVector2 vTexOffset  = m_Cover .GetTexOffset() + (coreVector2(0.0f,0.0f) + vEnvMove) * (0.05f * TIME);
     const coreVector2 vTexOffset2 = m_Cover2.GetTexOffset() + (coreVector2(0.0f,0.0f) + vEnvMove) * (0.28f * TIME);
 

@@ -201,7 +201,6 @@ cMossBackground::cMossBackground()noexcept
     m_Rain.DefineTexture(0u, "effect_rain.png");
     m_Rain.DefineProgram("effect_weather_rain_moss_program");
     m_Rain.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Rain.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Rain.SetAlpha     (0.55f);
 
     // 
@@ -308,6 +307,7 @@ void cMossBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f, -m_vRainMove.Length()) + vEnvMove) * (1.0f * TIME);
 
     // 
+    m_Rain.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
     m_Rain.SetDirection(MapToAxisInv(-m_vRainMove.InvertedX().Normalized(), g_pEnvironment->GetDirection()));
     m_Rain.SetTexSize  (vTexSize);
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));

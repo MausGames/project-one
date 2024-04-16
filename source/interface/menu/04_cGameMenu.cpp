@@ -910,7 +910,7 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc[i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;    ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc2[i][j]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;         ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryName     [i]);
-#if !defined(_CORE_SWITCH_) && 0   // [SW]
+#if 0
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryRaise); ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryRaise    [i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryRaiseText);
 #endif
@@ -941,7 +941,7 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_FIRSTS;            ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstLine   [i]);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFirstCueLock); ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstCueLock[i]);
     for(coreUintW i = 0u; i < MENU_GAME_FIRSTS;            ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstName   [i]);
-#if !defined(_CORE_SWITCH_) && 0   // [SW]
+#if 0
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFirstRaise); ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstRaise[i]);
     this->BindObject(SURFACE_GAME_FIRST, &m_FirstRaiseText);
 #endif
@@ -963,7 +963,7 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoCueLock); ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoCueLock[i]);
     this->BindObject(SURFACE_GAME_DEMO, &m_DemoStageIcon);
     for(coreUintW i = 0u; i < MENU_GAME_DEMOS;          ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoName [i]);
-#if !defined(_CORE_SWITCH_) && 0   // [SW]
+#if 0
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRaise); ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoRaise[i]);
     this->BindObject(SURFACE_GAME_DEMO, &m_DemoRaiseText);
 #endif

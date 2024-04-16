@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.2.2 (https://www.maus-games.at)                             |//
+//| Project One v1.2.3 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -33,7 +33,6 @@
 // TODO 3: check all shaders if alpha is required
 // TODO 4: full initializer lists everywhere (don't forget parent classes)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
-// TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
 // TODO 4: unify "forward" and "transform" comments in shaders
 // TODO 3: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
 // TODO 4: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
@@ -100,7 +99,6 @@
 // TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet
 // TODO 4: enemy bottom/top + special bottom, menu transition, interface, menu changes (INSIDE), mission data, (pause/msgbox stretch)
 // TODO 4: Torus, Leviathan
-// TODO 3: sound: button-click und menu-in/menu-out überlagern sich
 
 
 // ****************************************************************
@@ -258,9 +256,8 @@ constexpr sVersion g_aVersion[] =
 {
     {"1.2.0", 1u},
     {"1.2.1", 2u},
-#if !defined(_CORE_SWITCH_)   // [SW]
-    {"1.2.2", 3u}
-#endif
+    {"1.2.2", 3u},
+    {"1.2.3", 4u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 
@@ -364,6 +361,7 @@ extern coreFloat       g_fShiftMode;        //
 extern coreBool        g_bDemoVersion;      // 
 extern coreBool        g_bLeaderboards;     // 
 extern coreBool        g_bSteamDeck;        // 
+extern coreBool        g_bHandheld;         // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 

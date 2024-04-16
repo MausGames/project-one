@@ -36,6 +36,8 @@
 #define SCORE_PURE_UPDATEFREQ   (60u)                              // 
 #define SCORE_PURE_SHIELD       (0u)                               // 
 
+STATIC_ASSERT(SCORE_PURE_UPDATEFREQ >= F_TO_UI(FRAMERATE_MIN))
+
 struct sScoreData final
 {
     coreUint16 iMagic;

@@ -11,14 +11,13 @@
 #define _P1_GUARD_WATER_H_
 
 // TODO 5: reduce reflection-framebuffer without reflection enabled
-// TODO 5: alpha mapping water (no distortion) for very bad hardware (maybe just remove dependent texture-lookups)
-// TODO 3: water-surface clipping for refraction
+// TODO 3: water-surface clipping for refraction (what did I mean here?)
 // TODO 5: flying should create strong/fast water ripples
 // TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)
 // TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
 // TODO 3: do not load default water shader and texture if not required (maybe create water-interface, NormalWater, Clean, Fresh)
-// TODO 3: glBindTexture has to reset internal texture-cache (or implement method to change in texture)
-// TODO 3: stencil or early depth to not evaluate land areas
+// TODO 2: glBindTexture has to reset internal texture-cache (or implement method to change in texture)
+// TODO 3: rain resolution is not affected by environment-scale-factor (check dynamically, textures might shift)
 
 
 // ****************************************************************
@@ -58,6 +57,8 @@ public:
 
     // render and move the water-surface
     void Render(coreFrameBuffer* pBackground);
+    void Render1();
+    void Render2();
     void Move()final;
 
     // update water reflection and depth

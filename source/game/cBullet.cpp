@@ -197,9 +197,9 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersecti
 void cBullet::_EnableDepth(const coreProgramPtr& pProgram)const
 {
     if(!pProgram.IsUsable()) return;
+    if(!pProgram->Enable())  return;
 
     // 
-    pProgram->Enable();
     pProgram->SendUniform("u_v1Depth", m_fDepth);
 }
 

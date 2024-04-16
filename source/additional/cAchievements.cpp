@@ -280,7 +280,7 @@ static coreUint16 GetUpdateFreqReal()
     SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
     // 
-    return (oMode.refresh_rate > 0) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
+    return (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
 }
 
 

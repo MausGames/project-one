@@ -35,7 +35,7 @@ enum eGameStatus : coreUint16
     GAME_STATUS_PLAY     = 0x0004u,   // 
     GAME_STATUS_LOADING  = 0x0008u,   // 
     GAME_STATUS_DEFEATED = 0x0010u,   // 
-    GAME_STATUS_CONTINUE = 0x0020u,   // 
+    GAME_STATUS_CONTINUE = 0x0020u,   // TODO 1: still needed?    
     GAME_STATUS_QUICK    = 0x0040u,   // 
     GAME_STATUS_NAMELESS = 0x0080u,   // 
     GAME_STATUS_FINISHED = 0x0100u    // 
@@ -320,7 +320,7 @@ public:
     coreVector3 CalculateCamShift()const;
 
     // 
-#if defined(_CORE_SWITCH_) || 1   // [SW]
+#if 1
     inline coreUint32 RaiseValue(const coreUint32 iValue)const {return iValue;}
 #else
     inline coreUint32 RaiseValue(const coreUint32 iValue)const {return (iValue * (100u + m_iRaise)) / (100u + GAME_RAISE_DEFAULT);}

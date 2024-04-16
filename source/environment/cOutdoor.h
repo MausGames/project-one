@@ -11,7 +11,6 @@
 #define _P1_GUARD_OUTDOOR_H_
 
 // TODO 5: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
-// TODO 5: increase normal map sharpness, if quality improves (raise depth-value in generator until it throws an assertion)
 // TODO 4: move m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING); into constructor/factoryfunc
 // TODO 3: texture-coordinates are just stretched across XY, but they should be denser on Z changes
 // TODO 3: implement a way to invalidate the token when the normal-map lambda is finished

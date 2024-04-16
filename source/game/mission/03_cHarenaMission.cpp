@@ -450,12 +450,8 @@ void cHarenaMission::ChangeInsanity(const coreUint8 iInsanity)
     m_iInsanity = iInsanity;
 
     // 
-    FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
-    FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
-
-    // 
-    m_apPath .clear();
-    m_apSquad.clear();
+    m_aPath .clear();
+    m_aSquad.clear();
 
     // 
     if(m_piData) std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);

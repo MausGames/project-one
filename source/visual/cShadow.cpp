@@ -94,7 +94,7 @@ void cShadow::Reconfigure()
     if(m_iLevel)
     {
         const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
-        const coreVector2     vRes  = g_vGameResolution * ((m_iLevel == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH);
+        const coreVector2     vRes  = g_vGameResolution * ((m_iLevel == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH) * ENVIRONMENT_SCALE_FACTOR;
 
         // create shadow map frame buffer
         m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
@@ -173,7 +173,7 @@ void cShadow::GlobalUpdate()
     const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalized();
 
     // clamp camera movement (to reduce flickering)
-    const coreFloat   fClampFactor = g_vGameResolution.x * ((g_CurConfig.Graphics.iShadow == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH) * 0.007274395f;
+    const coreFloat   fClampFactor = g_vGameResolution.x * ((g_CurConfig.Graphics.iShadow == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH) * ENVIRONMENT_SCALE_FACTOR * 0.007274395f;
     const coreVector2 vClampPos    = (g_pEnvironment->GetCameraPos().xy() * fClampFactor).Processed(FLOOR) * RCP(fClampFactor);
 
     // assemble camera matrix (viewed from light source)

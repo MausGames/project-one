@@ -10,23 +10,21 @@
 #ifndef _P1_GUARD_ENVIRONMENT_H_
 #define _P1_GUARD_ENVIRONMENT_H_
 
-// TODO 3: render depth-quads or use scissor test (tested: works bad, no gain) or stencil test on unused background areas (for transition!)
-// TODO 3: separate culling between normal rendering and shadow, to improve efficiency (though this would update instancing buffer again ?)
+// TODO 5: separate culling between normal rendering and shadow, to improve efficiency (though this would update instancing buffer again ?)
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
-// TODO 3: remove unused mix types, or init them on demand
-// TODO 4: check if m_afStrength != 0.0f is required and remove otherwise
 // TODO 3: da is ein 1-frame delay für TargetNow funktionen
 
 
 // ****************************************************************
 // environment definitions
-#define ENVIRONMENT_MIX_FADE    (0u)   // 
-#define ENVIRONMENT_MIX_WIPE    (1u)   // 
-#define ENVIRONMENT_MIX_CURTAIN (2u)   // 
-#define ENVIRONMENT_MIX_CIRCLE  (3u)   // 
-#define ENVIRONMENT_MIXES       (4u)   // 
+#define ENVIRONMENT_MIX_FADE          (0u)     // 
+#define ENVIRONMENT_MIX_WIPE          (1u)     // 
+#define ENVIRONMENT_MIX_CURTAIN       (2u)     // 
+#define ENVIRONMENT_MIX_CIRCLE        (3u)     // 
+#define ENVIRONMENT_MIXES             (4u)     // 
 
 #define ENVIRONMENT_TRANSITION_FACTOR (0.9f)   // 
+#define ENVIRONMENT_SCALE_FACTOR      (!g_CurConfig.Graphics.iRender ? 0.7f : (g_bHandheld ? 0.8f : 1.0f))   // 
 
 #define ENVIRONMENT_DEFAULT_DIRECTION (coreVector2(0.0f,1.0f))
 #define ENVIRONMENT_DEFAULT_SIDE      (coreVector2(0.0f,0.0f))

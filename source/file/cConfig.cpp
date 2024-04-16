@@ -32,7 +32,11 @@ static void UpgradeConfig()
     {
         if(__UPGRADE(0))
         {
-            Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME, CONFIG_DEFAULT_VOLUME);
+            Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME, CONFIG_DEFAULT_VOLUME);   // # always
+            
+            
+        //Core::Config->SetInt (CORE_CONFIG_AUDIO_RESAMPLERINDEX,      g_OldConfig.Audio.iQuality ? 4 : 2);
+        //Core::Audio->Reconfigure();
 
             for(coreUintW i = 0u; i < INPUT_SETS; ++i)
             {
@@ -45,8 +49,23 @@ static void UpgradeConfig()
 
         if(__UPGRADE(1))
         {
-            Core::Config->SetInt(CONFIG_GAME_GAME_DIRECTION, Core::Config->GetInt("Game", "GameRotation", 0));
-            Core::Config->SetInt(CONFIG_GAME_HUD_DIRECTION,  Core::Config->GetInt("Game", "HudRotation",  0));
+            // # nothing
+        }
+
+        if(__UPGRADE(2))
+        {
+            if(GetSystemGpuIndex() == 3u)
+            {
+                Core::Config->SetInt (CORE_CONFIG_GRAPHICS_ANTIALIASING,      MIN(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING),      2));
+                Core::Config->SetInt (CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, MIN(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY), 4));
+                Core::Config->SetInt (CONFIG_GRAPHICS_RENDER,                 0);
+                Core::Config->SetInt (CONFIG_GRAPHICS_SHADOW,                 1);
+
+                Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,           0);
+                Core::Config->SetBool(CORE_CONFIG_GRAPHICS_TEXTURETRILINEAR,  false);
+
+                Core::Reset();
+            }
         }
     }
     #undef __UPGRADE

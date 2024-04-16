@@ -917,17 +917,12 @@ void cGame::UseContinue()
 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
-#if !defined(_CORE_SWITCH_)   // [SW]
         // 
         m_aPlayer[i].GetScoreTable()->StoreRun(m_aPlayer[i].GetDataTable()->GetCounterTotal().iContinuesUsed, iMissionIndex, iSegmentIndex);
-#endif
+
         // 
         m_aPlayer[i].GetDataTable ()->RevertSegment   (iMissionIndex, iSegmentIndex);
-#if defined(_CORE_SWITCH_)   // [SW]
-        m_aPlayer[i].GetScoreTable()->RevertSegment(iMissionIndex, iSegmentIndex);
-#else
         m_aPlayer[i].GetScoreTable()->RevertSegmentNew(iMissionIndex, iSegmentIndex);
-#endif
 
         // 
         m_aPlayer[i].GetDataTable()->EditCounterTotal  ()                            ->iContinuesUsed += 1u;
@@ -936,11 +931,7 @@ void cGame::UseContinue()
     }
 
     // 
-#if defined(_CORE_SWITCH_)   // [SW]
-    m_TimeTable.RevertSegment(iMissionIndex, iSegmentIndex);
-#else
     m_TimeTable.RevertSegmentNew(iMissionIndex, iSegmentIndex);
-#endif
 
     // 
     g_pSave->EditGlobalStats      ()                            ->iContinuesUsed += 1u;
@@ -1256,7 +1247,7 @@ coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool
 // 
 coreUint8 cGame::CalcRaiseSpeed(const coreUint8 iValue)
 {
-#if defined(_CORE_SWITCH_) || 1   // [SW]
+#if 1
     return 0u;
 #else
     return (iValue < 100u) ? (iValue - 50u) : 50u;
@@ -1268,7 +1259,7 @@ coreUint8 cGame::CalcRaiseSpeed(const coreUint8 iValue)
 // 
 coreUint8 cGame::CalcRaiseShield(const coreUint8 iValue)
 {
-#if defined(_CORE_SWITCH_) || 1   // [SW]
+#if 1
     return 0u;
 #else
     return iValue ? ((iValue >= 40u) ? 0u : (40u - iValue)) : 50u;

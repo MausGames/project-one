@@ -92,20 +92,22 @@ void cEnvironment::Render()
             // render old background
             m_pOldBackground->Render();
 
-            // set transition uniforms
-            m_MixObject.GetProgram()->Enable();
-            m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
-            m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  m_vTransitionDir);
-
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_BLEND);
+            if(m_MixObject.GetProgram()->Enable())
             {
-                // mix both backgrounds together
-                m_FrameBuffer.StartDraw();
-                m_MixObject.Render();
+                // set transition uniforms
+                m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
+                m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  m_vTransitionDir);
+
+                glDisable(GL_DEPTH_TEST);
+                glDisable(GL_BLEND);
+                {
+                    // mix both backgrounds together
+                    m_FrameBuffer.StartDraw();
+                    m_MixObject.Render();
+                }
+                glEnable(GL_DEPTH_TEST);
+                glEnable(GL_BLEND);
             }
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_BLEND);
 
             // invalidate single backgrounds
             m_pOldBackground->GetResolvedTexture()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);

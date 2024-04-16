@@ -65,14 +65,12 @@ cCloudBackground::cCloudBackground()noexcept
     m_Rain.DefineTexture(0u, "effect_rain.png");
     m_Rain.DefineProgram("effect_weather_rain_cloud_program");
     m_Rain.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Rain.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Rain.SetAlpha     (0.55f);
 
     // 
     m_Cover.DefineTexture(0u, "environment_clouds_grey.png");
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover.SetColor3    (LERP(COLOR_MENU_PURPLE, coreVector3(1.0f,1.0f,1.0f), 0.45f) * 0.5f);
     m_Cover.SetTexSize   (coreVector2(1.0f,1.0f) * SQRT2 * 1.2f);
 }
@@ -168,6 +166,7 @@ void cCloudBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f, -m_vRainMove.Length()) + vEnvMove) * (1.0f * TIME);
 
     // 
+    m_Rain.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
     m_Rain.SetDirection(MapToAxisInv(-m_vRainMove.InvertedX().Normalized(), g_pEnvironment->GetDirection()));
     m_Rain.SetTexSize  (vTexSize);
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
@@ -177,6 +176,7 @@ void cCloudBackground::__MoveOwn()
     m_fOffset.Update(-0.08f * g_pEnvironment->GetSpeed());
 
     // 
+    m_Cover.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
     m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Cover.SetTexOffset(coreVector2(0.005f * g_pEnvironment->GetSideOffset(), FRACT(m_fOffset)));
     m_Cover.Move();

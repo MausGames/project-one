@@ -87,11 +87,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
     {
-#if defined(_CORE_SWITCH_)    // [SW]
-        const coreFloat fHeight = 0.3f - 0.07f*I_TO_F(i);
-#else
         const coreFloat fHeight = 0.26f - 0.06f*I_TO_F(i);
-#endif
 
         m_aArcadeName[i].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
         m_aArcadeName[i].SetPosition (coreVector2(-0.45f, fHeight));
@@ -526,11 +522,6 @@ void cSummaryMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= fSpinFrom + 0.1f * I_TO_F(m_iOtherNumMission) + 0.05f * I_TO_F(m_iOtherNumMedal) + 1.45f + 1.0f) && (m_eState != SUMMARY_OUTRO) && g_MenuInput.bAny)
             {
-#if defined(_CORE_SWITCH_)    // [SW]
-
-                m_eState = SUMMARY_OUTRO;
-                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_YES);
-#else
                 if(!this->GetTransition().GetStatus())
                 {
                     if(this->GetCurSurface() == SURFACE_SUMMARY_ARCADE_1)
@@ -552,7 +543,6 @@ void cSummaryMenu::Move()
                         }
                     }
                 }
-#endif
             }
             
             
@@ -1376,7 +1366,7 @@ void cSummaryMenu::ShowArcade()
     constexpr const coreChar* apcNameType      [] = {"GAME_TYPE_SOLO",       "GAME_TYPE_COOP",         ""};
     constexpr const coreChar* apcNameDifficulty[] = {"GAME_DIFFICULTY_EASY", "GAME_DIFFICULTY_NORMAL", "GAME_DIFFICULTY_HARD"};
 
-#if defined(_CORE_SWITCH_) || 1   // [SW]
+#if 1
     const coreChar* pcOption = PRINT("%s / %s%s", Core::Language->GetString(apcNameType[g_pGame->GetType()]), Core::Language->GetString(apcNameDifficulty[g_pGame->GetDifficulty()]), bOneColorClear ? " / 1CC" : "");
 #else
     const coreUint8 iRaise   = g_pGame->GetRaise();

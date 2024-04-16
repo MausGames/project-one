@@ -334,7 +334,7 @@ void cPlayer::RenderBefore()
         m_aShield[1].Render();
         m_Wind      .Render();
         
-        if(!m_fTilt) m_Exhaust   .Render();
+        if(!m_fTilt) m_Exhaust.Render();
     }
 }
 
@@ -345,14 +345,13 @@ void cPlayer::RenderMiddle()
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         glDepthMask(false);
-        // 
-        m_aShield[0].Render();
-        
-        
-        if(m_fTilt) m_Exhaust   .Render();
+        {
+            // 
+            m_aShield[0].Render();
+            if(m_fTilt) m_Exhaust.Render();
+        }
         glDepthMask(true);
-        
-        
+
         // 
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
             m_apWeapon[i]->RenderAfter();
@@ -926,7 +925,7 @@ void cPlayer::Move()
     if(m_bRainbow)
     {
         coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vLedColor;
-        cProjectOneBoss::CalcColorLerp(FMOD(g_pGame->GetTimeTable()->GetTimeEvent() / 20.0f * 24.0f, 8.0f), &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vLedColor);
+        cProjectOneBoss::CalcColorLerp(FMOD(g_pGame->GetTimeTable()->GetTimeTotal() / 20.0f * 24.0f, 8.0f), &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vLedColor);
         
         m_Range     .SetColor3(vEnergyColor);
         m_Arrow     .SetColor3(vEnergyColor * (0.9f/1.1f));
@@ -1269,21 +1268,23 @@ void cPlayer::EndRolling()
 void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
 {
     ASSERT(!this->HasStatus(PLAYER_STATUS_DEAD))
-    WARN_IF(this->IsFeeling()) return;
+
+    if(!this->IsFeeling())
+    {
+        // 
+        this->EnableBubble();
+
+        // 
+             if(iType == 0u) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
+        else if(iType == 1u) g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+
+        // 
+        if(iType < 2u) g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_EXPLOSION);
+    }
 
     // 
-    m_fFeelTime = fTime;
+    m_fFeelTime = MAX(m_fFeelTime, fTime);
     m_iFeelType = iType;
-
-    // 
-    this->EnableBubble();
-
-    // 
-         if(iType == 0u) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
-    else if(iType == 1u) g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
-
-    // 
-    if(iType < 2u) g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_EXPLOSION);
 }
 
 

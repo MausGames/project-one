@@ -19,7 +19,7 @@
 // TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 // TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
-// TODO 3: m_vOldDir sollte bei resurrection/repair zurückgesetzt werden
+// TODO 3: m_vOldDir (direction) sollte bei resurrection/repair zurückgesetzt werden
 // TODO 3: (gyro aktualisiert sich nicht bei HUD rotation (auch bei game rotation ?))
 
 
@@ -40,7 +40,7 @@
 #define PLAYER_FEEL_TIME           (3.0f)               // 
 #define PLAYER_FEEL_TIME_CONTINUE  (5.0f)               // 
 #define PLAYER_FEEL_TIME_REPAIR    (5.0f)               // 
-#define PLAYER_FEEL_TIME_COOP      (0.1f)               // 
+#define PLAYER_FEEL_TIME_COOP      (0.15f)              // 
 #define PLAYER_FEEL_TIME_SHIELD    (10.0f)              // 
 #define PLAYER_IGNORE_TIME         (1.1f)               // 
 #define PLAYER_INTERRUPT           (0.3f)               // 

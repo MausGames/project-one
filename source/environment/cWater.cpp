@@ -15,7 +15,7 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
 : m_fAnimation (0.0f)
 , m_fFlyOffset (0.0f)
 {
-    const coreVector2 vWaterResolution = g_vGameResolution * WATER_SCALE_FACTOR;
+    const coreVector2 vWaterResolution = g_vGameResolution * WATER_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;
 
     if(sSkyTexture)
     {
@@ -27,18 +27,17 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
 
     // create refraction frame buffer
     m_Refraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
-    m_Refraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_Refraction.Create(g_vGameResolution * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     if(sSkyTexture)
     {
         // create depth frame buffer
         m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-        m_Depth.Create(DEFINED(_CORE_GLES_) ? g_vGameResolution : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
+        m_Depth.Create(DEFINED(_CORE_GLES_) ? (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR) : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
 
         // create sky-plane object
         m_Sky.DefineTexture(0u, sSkyTexture);
-        m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2);
-        m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
+        m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE, WATER_SKY_SIZE));
 
         // 
         m_apSkyProgram[0] = Core::Manager::Resource->Get<coreProgram>("default_2d_program");
@@ -79,13 +78,47 @@ void cWater::Render(coreFrameBuffer* pBackground)
     // 
     this->__RenderOwn();
 
-    // update all water uniforms
-    this->GetProgram()->Enable();
-    this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
-    this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
+    if(this->GetProgram()->Enable())
+    {
+        // update all water uniforms
+        this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
+        this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
 
-    // render the 3d-object
-    this->coreObject3D::Render();
+        // render the 3d-object
+        this->coreObject3D::Render();
+    }
+
+    // invalidate all frame buffer objects
+    if(m_Reflection.GetIdentifier()) m_Reflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
+    if(m_Refraction.GetIdentifier()) m_Refraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+    if(m_Depth     .GetIdentifier()) m_Depth     .Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
+}
+
+
+
+
+void cWater::Render1()
+{
+    m_Refraction.StartDraw();
+    m_Refraction.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+
+}
+void cWater::Render2()
+{
+    if(!this->GetProgram().IsUsable()) return;
+
+    // 
+    this->__RenderOwn();
+
+    if(this->GetProgram()->Enable())
+    {
+        // update all water uniforms
+        this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
+        this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
+
+        // render the 3d-object
+        this->coreObject3D::Render();
+    }
 
     // invalidate all frame buffer objects
     if(m_Reflection.GetIdentifier()) m_Reflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
@@ -141,6 +174,7 @@ void cWater::UpdateReflection()
         glDisable  (GL_BLEND);
         {
             // move and render the sky-plane
+            m_Sky.SetSize     (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
             m_Sky.SetDirection(vOldCamOri.xy());
             m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * (0.008f * WATER_SKY_SIZE), m_fFlyOffset * (-0.05f * WATER_SKY_SIZE)));
             m_Sky.Move();
@@ -218,7 +252,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apO
 
 void cWater::Reshape()
 {
-    const coreVector2 vWaterResolution = g_vGameResolution * WATER_SCALE_FACTOR;
+    const coreVector2 vWaterResolution = g_vGameResolution * WATER_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;
 
     if(m_Reflection.GetColorTarget(0u).IsValid())
     {
@@ -229,13 +263,13 @@ void cWater::Reshape()
 
     // 
     m_Refraction.Delete();
-    m_Refraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_Refraction.Create(g_vGameResolution * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     if(m_Depth.GetDepthTarget().IsValid())
     {
         // create depth frame buffer
         m_Depth.Delete();
-        m_Depth.Create(DEFINED(_CORE_GLES_) ? g_vGameResolution : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
+        m_Depth.Create(DEFINED(_CORE_GLES_) ? (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR) : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
     }
 
     // 
@@ -274,9 +308,9 @@ cIceWater::cIceWater(const coreHashString& sSkyTexture)noexcept
 void cIceWater::__RenderOwn()
 {
     if(!m_Ice.GetProgram().IsUsable()) return;
+    if(!m_Ice.GetProgram()->Enable())  return;
 
     // 
-    m_Ice.GetProgram()->Enable();
     m_Ice.GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
 
     // 
@@ -312,7 +346,7 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // 
-    m_WaveInjection.SetSize      (m_WaveMap.GetResolution() / g_vGameResolution);
+    m_WaveInjection.SetSize      (coreVector2(1.0f,1.0f) * RAIN_SCALE_FACTOR);
     m_WaveInjection.DefineTexture(0u, "environment_water_rain.png");
     m_WaveInjection.DefineProgram("default_2d_program");
     m_WaveInjection.Move();
@@ -367,8 +401,6 @@ void cRainWater::Reshape()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // 
-    m_WaveInjection.SetSize      (m_WaveMap.GetResolution() / g_vGameResolution);
-    m_WaveInjection.DefineTexture(0u, "environment_water_rain.png");
     m_WaveInjection.DefineProgram("default_2d_program");
     m_WaveInjection.Move();
 
@@ -412,8 +444,7 @@ void cRainWater::__UpdateOwn()
                 {
                     // 
                     m_WaveInjection.Render();
-                    //m_WaveInjection.Undefine();
-                    m_WaveInjection.DefineProgram(NULL);   //    keep at least texture to make reshape faster
+                    m_WaveInjection.DefineProgram(NULL);   // # keep texture to make reshape faster
                 }
                 glEnable(GL_BLEND);
             }
@@ -471,9 +502,9 @@ cLava::cLava()noexcept
 void cLava::Render()
 {
     if(!this->GetProgram().IsUsable()) return;
+    if(!this->GetProgram()->Enable())  return;
 
     // update all lava uniforms
-    this->GetProgram()->Enable();
     this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
     this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
 

@@ -10,11 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-#if defined(_CORE_SWITCH_)   // [SW]
-const coreChar* const CoreApp::Settings::Version                       = "1.2.1";
-#else
-const coreChar* const CoreApp::Settings::Version                       = "1.2.2";
-#endif
+const coreChar* const CoreApp::Settings::Version                       = "1.2.3";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -270,8 +266,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_block_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_block_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_blood_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_blood_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
-    Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_clouds_grey.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_grey.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png", CORE_TEXTURE_LOAD_NEAREST);
+    Core::Manager::Resource->Load<coreTexture>("environment_clouds_grey.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_grey.png", CORE_TEXTURE_LOAD_NEAREST);
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_high.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_high.png");

@@ -438,9 +438,8 @@ cGrassBackground::cGrassBackground()noexcept
     m_Cover.DefineTexture(0u, "environment_clouds_grey.png");
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
-    m_Cover.SetTexSize   (coreVector2(1.0f,1.0f) * SQRT2 * 1.2f);
     m_Cover.SetAlpha     (0.0f);
+    m_Cover.SetTexSize   (coreVector2(1.0f,1.0f) * SQRT2 * 1.2f);
     m_Cover.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
@@ -562,6 +561,7 @@ void cGrassBackground::__MoveOwn()
     m_fOffset.Update(-0.08f * g_pEnvironment->GetSpeed());
 
     // 
+    m_Cover.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
     m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Cover.SetColor3   (coreVector3(1.0f,1.0f,1.0f) * LERP(0.9f, 0.5f, m_Cover.GetAlpha()));
     m_Cover.SetTexOffset(coreVector2(0.005f * g_pEnvironment->GetSideOffset(), FRACT(m_fOffset)));

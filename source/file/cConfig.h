@@ -38,6 +38,7 @@
 #define CONFIG_GRAPHICS_FLASH        "Graphics", "Flash",                                (1)
 #define CONFIG_GRAPHICS_HIT_STOP     "Graphics", "HitStop",                              (1)
 #define CONFIG_GRAPHICS_CHROMA       "Graphics", "Chroma",                               (1)
+#define CONFIG_GRAPHICS_DYNAMICRES   "Graphics", "DynamicRes",                           (70)
 
 #define CONFIG_AUDIO_EFFECT_VOLUME   "Audio",    "EffectVolume",                         (CONFIG_DEFAULT_VOLUME)
 #define CONFIG_AUDIO_AMBIENT_VOLUME  "Audio",    "AmbientVolume",                        (CONFIG_DEFAULT_VOLUME)

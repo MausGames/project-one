@@ -453,7 +453,7 @@ void cSpecialEffects::Move()
         }
 
         // 
-        const coreFloat fPower = m_fShakeStrength * m_fShakeOverride * I_TO_F(g_CurConfig.Graphics.iShake) * 0.00008f;
+        const coreFloat fPower = m_fShakeStrength * m_fShakeOverride * I_TO_F(g_CurConfig.Graphics.iShake) * 0.00007f;
         g_pPostProcessing->SetPosition((vBase * fPower * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
 
         // 

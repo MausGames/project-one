@@ -243,17 +243,19 @@ void cMenu::Render()
 
         if(m_MixObject.GetProgram().IsUsable())
         {
-            // set transition uniforms
-            m_MixObject.GetProgram()->Enable();
-            m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
-            m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  g_vHudDirection.InvertedX().Rotated90());
-
-            glBlendFunc(FOREGROUND_BLEND_ALPHA);
+            if(m_MixObject.GetProgram()->Enable())
             {
-                // 
-                m_MixObject.Render();
+                // set transition uniforms
+                m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
+                m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  g_vHudDirection.InvertedX().Rotated90());
+
+                glBlendFunc(FOREGROUND_BLEND_ALPHA);
+                {
+                    // 
+                    m_MixObject.Render();
+                }
+                glBlendFunc(FOREGROUND_BLEND_DEFAULT);
             }
-            glBlendFunc(FOREGROUND_BLEND_DEFAULT);
         }
     }
     else this->coreMenu::Render();

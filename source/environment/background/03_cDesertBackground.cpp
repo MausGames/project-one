@@ -284,14 +284,12 @@ cDesertBackground::cDesertBackground()noexcept
     m_Sand.DefineTexture(0u, "effect_sand.png");
     m_Sand.DefineProgram("effect_weather_sand_program");
     m_Sand.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Sand.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Sand.SetColor3    (coreVector3(200.0f/255.0f, 186.0f/255.0f, 156.0f/255.0f) * 0.95f);
     m_Sand.SetAlpha     (0.9f);
 
     // 
     m_Veil.DefineProgram("menu_color_program");
     m_Veil.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Veil.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Veil.SetColor3    (m_Sand.GetColor3() * 0.6f);
     m_Veil.SetAlpha     (0.0f);
     m_Veil.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -389,6 +387,7 @@ void cDesertBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (m_vSandMove.InvertedX() + vEnvMove) * (0.4f * TIME);
 
     // 
+    m_Sand.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
     m_Sand.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Sand.SetTexSize  (vTexSize);
     m_Sand.SetTexOffset(vTexOffset.Processed(FRACT));
@@ -398,6 +397,7 @@ void cDesertBackground::__MoveOwn()
     m_fSandWave.UpdateMod(SQRT(MAX(ABS(g_pEnvironment->GetSpeed()), 1.0f)), 16.0f);
 
     // 
+    m_Veil.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
     m_Veil.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Veil.SetEnabled  (m_Veil.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Veil.Move();

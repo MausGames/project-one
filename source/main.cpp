@@ -17,6 +17,7 @@ coreFloat       g_fShiftMode      = 0.0f;
 coreBool        g_bDemoVersion    = false;
 coreBool        g_bLeaderboards   = false;
 coreBool        g_bSteamDeck      = false;
+coreBool        g_bHandheld       = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -484,7 +485,7 @@ void InitFramerate()
     SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
     // 
-    const coreUint32 iRefreshRate = (oMode.refresh_rate > 0) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
+    const coreUint32 iRefreshRate = (oMode.refresh_rate > F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
 
     // calculate logical and physical frame time
     if(!STATIC_ISVALID(g_pGame))
@@ -590,6 +591,7 @@ static void ForceFramerate(const coreBool bFull)
 {
     if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
     {
+        //if(g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT)
         // 
         if(TIME) c_cast<coreFloat&>(TIME) = s_fLogicalTime;
 

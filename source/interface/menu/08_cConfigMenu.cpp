@@ -111,7 +111,6 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_AUDIO_QUALITY);
         aiSkip.insert(ENTRY_INPUT_TYPE);
         aiSkip.insert(ENTRY_GAME_UPDATEFREQ);
-        aiSkip.insert(ENTRY_GAME_PUREMODE);
     #endif
     #if !defined(_CORE_DEBUG_)
         aiSkip.insert(ENTRY_GAME_VERSION);
@@ -227,11 +226,10 @@ cConfigMenu::cConfigMenu()noexcept
     m_aCueLock[1].SetPosition(m_aLabel[ENTRY_GAME_BACKSPEED]   .GetPosition() + coreVector2(0.472f,0.0f));
 #if defined(_CORE_SWITCH_)
     m_aCueLock[2].SetPosition(HIDDEN_POS);
-    m_aCueLock[3].SetPosition(HIDDEN_POS);
 #else
     m_aCueLock[2].SetPosition(m_aLabel[ENTRY_GAME_UPDATEFREQ]  .GetPosition() + coreVector2(0.472f,0.0f));
-    m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_PUREMODE]  .GetPosition() + coreVector2(0.472f,0.0f));
 #endif
+    m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_PUREMODE]  .GetPosition() + coreVector2(0.472f,0.0f));
     //m_aCueLock[4].SetPosition(m_aLabel[ENTRY_GAME_VERSION]     .GetPosition() + coreVector2(0.472f,0.0f));
     m_aCueLock[4].SetPosition(HIDDEN_POS);
 
@@ -1312,7 +1310,8 @@ void cConfigMenu::SaveValues()
     const coreBool bReset   = (m_AntiAliasing .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
     const coreBool bReshape = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
                               (m_Monitor      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
-                              (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
+                              (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))          ||
+                              (m_RenderQuality.GetCurValue() != g_CurConfig.Graphics.iRender);
     const coreBool bManager = (m_TextureFilter.GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY)) ||
                               (m_RenderQuality.GetCurValue() != g_CurConfig.Graphics.iRender);
     const coreBool bAudio   = (m_AudioQuality .GetCurValue() != g_CurConfig.Audio.iQuality)                                   ||
@@ -1651,7 +1650,7 @@ void cConfigMenu::__LoadFrequencies(const coreUintW iMonitorIndex)
     SDL_GetCurrentDisplayMode(iMonitorIndex, &oMode);
 
     // 
-    const coreUint32 iRefreshRate = (oMode.refresh_rate > 0) ? oMode.refresh_rate : 60u;
+    const coreUint32 iRefreshRate = (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
 
     // 
     m_UpdateFreq.AddEntry(PRINT("%s (%u Hz)", Core::Language->GetString("VALUE_AUTO"), iRefreshRate), 0u);

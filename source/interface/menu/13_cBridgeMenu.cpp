@@ -401,6 +401,9 @@ void cBridgeMenu::UseContinue()
     this->__ResetState();
 
     // 
+    g_pGame->GetCombatText()->SetVisible(false);
+
+    // 
     this->ChangeSurface(SURFACE_BRIDGE_CONTINUE, 0.0f);
 }
 

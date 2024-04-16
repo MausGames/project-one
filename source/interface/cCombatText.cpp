@@ -240,7 +240,7 @@ void cCombatText::Move()
         const coreFloat fCover = HAS_BIT(m_iMarkerCover, i) ? g_pGame->GetInterface()->CalcGameCover(&oMarker, coreVector2(1.6f,1.6f), false) : 1.0f;
 
         // 
-        oMarker.SetAlpha(m_afMarkerAlpha[i] * fCover);
+        oMarker.SetAlpha(m_afMarkerAlpha[i] * fAlphaFull * fCover);
         oMarker.SetScale(coreVector2(1.0f,1.0f) * LERPBR(1.2f, 1.0f, m_afMarkerAlpha[i]));
         oMarker.Move();
 

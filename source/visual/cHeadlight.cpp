@@ -21,14 +21,14 @@ cHeadlight::cHeadlight()noexcept
 
     // 
     m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
-    m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // load object resources
     this->DefineTexture(0u, m_FrameBuffer.GetColorTarget(0u).pTexture);
     this->DefineProgram("effect_headlight_program");
 
     // set object properties
-    this->SetSize(coreVector2(1.0f,1.0f));
+    this->SetSize(coreVector2(1.0f,1.0f) * ENVIRONMENT_SCALE_FACTOR);
     this->Move();
 
     // 
@@ -180,8 +180,8 @@ void cHeadlight::DrawSpot(const coreVector3 vPosition, const coreVector2 vSize, 
 {
     // 
     sSpotCommand oCommand;
-    oCommand.vPosition  = (g_pForeground->Project2D(vPosition) + g_pForeground->Project2D(coreVector3(vOffset, 0.0f))) * HEADLIGHT_SCALE_FACTOR;   // separate
-    oCommand.vSize      = (g_pForeground->Project2D(coreVector3(vSize, 0.0f)))                                         * HEADLIGHT_SCALE_FACTOR;
+    oCommand.vPosition  = (g_pForeground->Project2D(vPosition) + g_pForeground->Project2D(coreVector3(vOffset, 0.0f))) * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;   // separate
+    oCommand.vSize      = (g_pForeground->Project2D(coreVector3(vSize, 0.0f)))                                         * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;
     oCommand.vDirection = vOffset.Normalized().InvertedX();
 
     // 
@@ -195,8 +195,8 @@ void cHeadlight::DrawPoint(const coreVector3 vPosition, const coreVector2 vSize)
 {
     // 
     sPointCommand oCommand;
-    oCommand.vPosition = g_pForeground->Project2D(vPosition)                * HEADLIGHT_SCALE_FACTOR;
-    oCommand.vSize     = g_pForeground->Project2D(coreVector3(vSize, 0.0f)) * HEADLIGHT_SCALE_FACTOR;
+    oCommand.vPosition = g_pForeground->Project2D(vPosition)                * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;
+    oCommand.vSize     = g_pForeground->Project2D(coreVector3(vSize, 0.0f)) * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;
 
     // 
     m_aPointCommand.push_back(oCommand);
@@ -258,6 +258,6 @@ void cHeadlight::ResetFlicker()
 // reset with the resource manager
 void cHeadlight::__Reset(const coreResourceReset eInit)
 {
-    if(eInit) {m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL); this->Move();}
+    if(eInit) {m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL); this->SetSize(coreVector2(1.0f,1.0f) * ENVIRONMENT_SCALE_FACTOR); this->Move();}
          else {m_FrameBuffer.Delete();}
 }

@@ -266,7 +266,6 @@ cSnowBackground::cSnowBackground()noexcept
     m_Snow.DefineTexture(0u, "effect_snow.png");
     m_Snow.DefineProgram("effect_weather_snow_program");
     m_Snow.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Snow.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Snow.SetAlpha     (0.9f);
 
     // 
@@ -356,6 +355,7 @@ void cSnowBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (m_vSnowMove.InvertedX() + vEnvMove) * (0.9f * TIME);
 
     // 
+    m_Snow.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
     m_Snow.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Snow.SetTexSize  (vTexSize);
     m_Snow.SetTexOffset(vTexOffset.Processed(FRACT));

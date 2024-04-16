@@ -856,6 +856,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 5: coop: ein gegner muss innerhalb des zeitlimits von beiden erwischt werden
     // TODO 5: idea: gegner die eng zusammen gehen
     // TODO 5: badge: ride the wave
+    // TODO 1: eggs are layed when hitting an enemy, and stay in final phase? (will the last egg be hidden?)
     m_aInsanityStage[1] = [this]()
     {
         constexpr coreUintW iNumEnemies = 8u;
@@ -1630,7 +1631,7 @@ void cHarenaMission::__SetupOwn()
 
                 if(bBig)
                 {
-                    fDanceTimestamp = g_pGame->GetTimeTable()->GetTimeEvent();
+                    fDanceTimestamp = g_pGame->GetTimeTable()->GetTimeTotal();
                 }
 
                 if(!bMover)
@@ -1847,7 +1848,7 @@ void cHarenaMission::__SetupOwn()
 
         if(fDanceTimestamp)
         {
-            const coreFloat fCurTimestamp = g_pGame->GetTimeTable()->GetTimeEvent();
+            const coreFloat fCurTimestamp = g_pGame->GetTimeTable()->GetTimeTotal();
 
             coreBool bReset = !HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY);
             STAGE_FOREACH_PLAYER(pPlayer, j)

@@ -874,10 +874,10 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     // ordered dithering function (modified)
     float coreDither(const in ivec2 i2PixelCoord)
     {
-        const mat4 c_m4Matrix = mat4( 0.0,  8.0,  2.0, 10.0,
-                                     12.0,  4.0, 14.0,  6.0,
-                                      3.0, 11.0,  1.0,  9.0,
-                                     15.0,  7.0, 13.0,  5.0) / 15.0 - 0.5;
+        mat4 c_m4Matrix = mat4( 0.0,  8.0,  2.0, 10.0,
+                               12.0,  4.0, 14.0,  6.0,
+                                3.0, 11.0,  1.0,  9.0,
+                               15.0,  7.0, 13.0,  5.0) / 15.0 - 0.5;
 
         ivec2 i2Index = coreIntMod(i2PixelCoord, 4);
         #if defined(GL_ES)

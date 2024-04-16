@@ -11,22 +11,18 @@
 #define _P1_GUARD_BACKGROUND_H_
 
 // TODO 5: merge stone diff and norm textures (own shader ?)
-// TODO 3: added object gets shadow-shader
-// TODO 3: no blitting on disabled anti-aliasing (low-optimizations on other components)
-// TODO 3: optimize density to never try to draw on 0.0f
-// TODO 3: object-sets with 0% visibility and no active object should be skipped entirely
+// TODO 5: added object gets shadow-shader
 // TODO 3: make grass leafs same color as other plants
-// TODO 3: check if alL _RESERVES are correct
 // TODO 3: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO 3: positions in separate list (when iterating through lambda)
 // TODO 3: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
 // TODO 3: expose pool-allocator for additional objects (AddList), also WindScreen
-// TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
-// TODO 3: calls to pList->MoveNormal(); may be redundant, or can be replaced with normal move if not changing enabled
+// TODO 2: configurable view-range ? per list ? auto per height ?
+// TODO 3: calls to pList->MoveNormal(); (sub-classes) are required to invoke buffer-updates, can they be reduced ?
 // TODO 3: stomach should not create all vertices
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO 5: grass+blood and sand+snow (norm) textures are duplicated (especially normal maps), proxies are not possible, because files are loaded directly
-// TODO 3: improve snow texture to little flakes (broken quads) 
+// TODO 5: change snow texture to little flakes (broken quads)
 // TODO 3: in Add functions change sListKey to a combination of resource identifiers
 // TODO 3: adding temporary objects should cache resources
 // TODO 3: remove draw-call for volcano smoke base-objects

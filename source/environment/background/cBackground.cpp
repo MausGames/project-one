@@ -41,12 +41,12 @@ cBackground::cBackground(const coreBool bEmpty)noexcept
         // create background frame buffer
         m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
         m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-        m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+        m_FrameBuffer.Create(g_vGameResolution * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
     }
 
     // create resolved texture
     m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
-    m_ResolvedTexture.Create(bEmpty ? coreVector2(4.0f,4.0f) : g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_ResolvedTexture.Create(bEmpty ? coreVector2(4.0f,4.0f) : (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR), CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 
 
@@ -125,6 +125,29 @@ void cBackground::Render()
 
     // 
     this->__UpdateOwn();
+    
+    
+            
+            /*
+            if(m_pWater)
+            {
+                m_pWater->Render1();
+                
+                
+                    glDisable(GL_BLEND);
+                            
+                            // send shadow matrix to shader-programs
+                        cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
+                        cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
+
+                        // render the outdoor-surface
+                        if(m_pOutdoor) m_pOutdoor->Render();
+                        
+                        // render all ground objects
+                        FOR_EACH(it, m_apGroundObjectList) (*it)->Render();
+                        FOR_EACH(it, m_apGroundAddList)    (*it)->Render();
+            }
+             */
 
     // fill background frame buffer
     m_FrameBuffer.StartDraw();
@@ -161,6 +184,9 @@ void cBackground::Render()
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_FrameBuffer);
+            
+            
+            //if(m_pWater) m_pWater->Render2();
         }
         glEnable(GL_BLEND);
 
@@ -227,6 +253,8 @@ void cBackground::Move()
             const coreFloat             fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
             const coreList<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
             const coreList<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
+
+            if((fDensity <= 0.0f) && !(*it)->GetCurEnabled()) continue;
 
             FOR_EACH(et, *(*it)->List())
             {
@@ -626,8 +654,8 @@ void cBackground::__Reset(const coreResourceReset eInit)
     if(eInit)
     {
         // 
-        if(m_FrameBuffer.GetColorTarget(0u).IsValid()) m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
-        m_ResolvedTexture.Create(m_bEmpty ? coreVector2(4.0f,4.0f) : g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        if(m_FrameBuffer.GetColorTarget(0u).IsValid()) m_FrameBuffer.Create(g_vGameResolution * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+        m_ResolvedTexture.Create(m_bEmpty ? coreVector2(4.0f,4.0f) : (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // 
         this->__InitOwn();
@@ -659,12 +687,12 @@ void cBackground::__Reshape()
     {
         // 
         m_FrameBuffer.Delete();
-        m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+        m_FrameBuffer.Create(g_vGameResolution * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
     }
 
     // 
     m_ResolvedTexture.Delete();
-    m_ResolvedTexture.Create(m_bEmpty ? coreVector2(4.0f,4.0f) : g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_ResolvedTexture.Create(m_bEmpty ? coreVector2(4.0f,4.0f) : (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 
     if(m_pWater) m_pWater->Reshape();

@@ -42,6 +42,9 @@ cMission::cMission()noexcept
 , m_bDelay              (false)
 , m_bRepeat             (false)
 {
+    // 
+    m_aPath .reserve(MISSION_MAP_PATHS);
+    m_aSquad.reserve(MISSION_MAP_SQUADS);
 }
 
 
@@ -50,13 +53,9 @@ cMission::cMission()noexcept
 cMission::~cMission()
 {
     // 
-    FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
-    FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
-
-    // 
     m_anStage.clear();
-    m_apPath .clear();
-    m_apSquad.clear();
+    m_aPath  .clear();
+    m_aSquad .clear();
 
     // 
     ALIGNED_DELETE(m_piData)
@@ -245,12 +244,8 @@ void cMission::SkipStage()
     m_anStage.pop_back();
 
     // 
-    FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
-    FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
-
-    // 
-    m_apPath .clear();
-    m_apSquad.clear();
+    m_aPath .clear();
+    m_aSquad.clear();
 
     // 
     if(m_piData) std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
