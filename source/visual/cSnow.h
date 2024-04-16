@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_SNOW_H_
 #define _P1_GUARD_SNOW_H_
 
+// TODO 3: implement smooth snow creation (new enum), which automatically increases snow from 0 to 255, with correct frame-time (tick-loop adding 00...010...01... ?, or in draw-functions)
+
 
 // ****************************************************************
 // 
@@ -25,9 +27,9 @@ enum eSnowType : coreUint8
 
 // ****************************************************************
 // 
-class cSnow final : public coreFullscreen, public coreResourceRelation
+class cSnow : public coreFullscreen, public coreResourceRelation
 {
-private:
+protected:
     coreTexturePtr m_pSnowMap;     // 
     coreUint8*     m_piSnowData;   // 
 
@@ -38,13 +40,13 @@ private:
 
 public:
     cSnow()noexcept;
-    ~cSnow()final;
+    virtual ~cSnow()override;
 
     DISABLE_COPY(cSnow)
 
     // 
-    void Render()final;
-    void Move  ()final;
+    virtual void Render()override;
+    virtual void Move  ()override;
 
     // 
     void Enable ();
@@ -68,9 +70,9 @@ private:
     void __Reset(const coreResourceReset eInit)final;
 
     // 
-    static coreFloat __GetMapFloat(const coreFloat fValue);
-    static coreUintW __GetMapIndex(const coreFloat fValue);
-    static coreFloat __GetMapValue(const coreUintW iIndex);
+    static coreFloat __GetMapIndexFloat(const coreFloat fValue);
+    static coreUintW __GetMapIndex     (const coreFloat fValue);
+    static coreFloat __GetMapValue     (const coreUintW iIndex);
 
     // 
     static coreVector2 __SnapPosition(const coreVector2 vPosition);

@@ -198,7 +198,7 @@ coreUintW cSnow::DrawRay(const coreVector2 vPosition, const coreVector2 vDirecti
     coreUintW iHit = 0u;
 
     // 
-    coreVector2 vCurrent = coreVector2(cSnow::__GetMapFloat(vPosition.x), cSnow::__GetMapFloat(vPosition.y));
+    coreVector2 vCurrent = coreVector2(cSnow::__GetMapIndexFloat(vPosition.x), cSnow::__GetMapIndexFloat(vPosition.y));
 
     // 
     ASSERT(vDirection.IsNormalized())
@@ -283,7 +283,7 @@ void cSnow::__Reset(const coreResourceReset eInit)
 
 // ****************************************************************
 // 
-coreFloat cSnow::__GetMapFloat(const coreFloat fValue)
+coreFloat cSnow::__GetMapIndexFloat(const coreFloat fValue)
 {
     STATIC_ASSERT(FOREGROUND_AREA.x == FOREGROUND_AREA.y)
     return CLAMP((fValue + (FOREGROUND_AREA.x * 1.1f)) / (FOREGROUND_AREA.x * 2.2f), 0.0f, 1.0f - CORE_MATH_PRECISION) * I_TO_F(SNOW_SIZE);
@@ -291,8 +291,7 @@ coreFloat cSnow::__GetMapFloat(const coreFloat fValue)
 
 coreUintW cSnow::__GetMapIndex(const coreFloat fValue)
 {
-    STATIC_ASSERT(FOREGROUND_AREA.x == FOREGROUND_AREA.y)
-    return F_TO_UI(cSnow::__GetMapFloat(fValue));
+    return F_TO_UI(cSnow::__GetMapIndexFloat(fValue));
 }
 
 coreFloat cSnow::__GetMapValue(const coreUintW iIndex)

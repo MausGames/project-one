@@ -92,6 +92,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 , m_bVisible        (false)
 , m_fAlphaAll       (0.0f)
 , m_fAlphaBoss      (0.0f)
+, m_fAlphaTurf      (0.0f)
+, m_fAlphaValid     (0.0f)
+, m_fAlertStart     (0.0f)
 {
     ASSERT((m_iNumViews > 0) && (m_iNumViews <= INTERFACE_VIEWS))
 
@@ -159,6 +162,30 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aWaveTime[2].SetAlignment(coreVector2(1.0f,-1.0f));
     m_aWaveTime[2].SetColor3   (COLOR_MENU_INSIDE * 0.75f);
 
+    m_aTurfBar[0].DefineTexture(0u, "menu_detail_02.png");
+    m_aTurfBar[0].DefineProgram("default_2d_program");
+    m_aTurfBar[0].SetPosition  (coreVector2(0.0f,0.005f));
+    m_aTurfBar[0].SetSize      (coreVector2(7.0f,0.5f) * 0.07f);
+    m_aTurfBar[0].SetAlignment (coreVector2(0.0f,1.0f));
+    m_aTurfBar[0].SetColor3    (coreVector3(0.0f,0.0f,0.0f));
+
+    m_aTurfBar[1].DefineTexture(0u, "menu_detail_02.png");
+    m_aTurfBar[1].DefineProgram("default_2d_program");
+    m_aTurfBar[1].SetPosition  (m_aTurfBar[0].GetPosition() + coreVector2(0.00f,0.01f) * 0.5f);
+    m_aTurfBar[1].SetSize      (m_aTurfBar[0].GetSize()     - coreVector2(0.01f,0.01f));
+    m_aTurfBar[1].SetAlignment (m_aTurfBar[0].GetAlignment());
+
+    m_aTurfBar[2].DefineTexture(0u, "menu_detail_02.png");
+    m_aTurfBar[2].DefineProgram("default_2d_program");
+    m_aTurfBar[2].SetPosition  (m_aTurfBar[1].GetPosition());
+    m_aTurfBar[2].SetSize      (m_aTurfBar[1].GetSize());
+    m_aTurfBar[2].SetAlignment (m_aTurfBar[1].GetAlignment());
+
+    m_TurfValue.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_TurfValue.SetPosition (m_aTurfBar[0].GetPosition() + coreVector2(0.0f,0.011f));
+    m_TurfValue.SetAlignment(m_aTurfBar[0].GetAlignment());
+    m_TurfValue.SetColor3   (COLOR_MENU_INSIDE);
+
     m_GoalMedal.DefineTexture(0u, "menu_medal.png");
     m_GoalMedal.DefineProgram("default_2d_program");
     m_GoalMedal.SetAlignment (coreVector2(-1.0f,-1.0f));
@@ -197,6 +224,11 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aStoryText[1].SetColor3(COLOR_MENU_INSIDE);
 
+    m_aDialogText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aDialogText[0].SetColor3(COLOR_MENU_INSIDE);
+    m_aDialogText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aDialogText[1].SetColor3(COLOR_MENU_INSIDE);
+
     m_Medal.DefineTexture(0u, "menu_medal.png");
     m_Medal.DefineProgram("default_2d_program");
     m_Medal.SetTexSize   (coreVector2(0.25f,0.25f));
@@ -206,6 +238,19 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
         m_aBossTime[1].SetText("0");
         m_aWaveTime[0].SetText("0.");
         m_aWaveTime[1].SetText("0");
+        
+    m_pAlertSound = Core::Manager::Resource->Get<coreSound>("effect_alert.wav");
+}
+
+
+// ****************************************************************
+// destructor
+cInterface::~cInterface()
+{
+    if(m_pAlertSound->EnableRef(this))
+    {
+        m_pAlertSound->Stop();
+    }
 }
 
 
@@ -213,6 +258,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 // render the interface
 void cInterface::Render()
 {
+    m_fAlphaTurf = 0.0f;
 //#define _P1_SCREENSHOT_
 
     if(this->IsBannerActive())
@@ -251,12 +297,21 @@ void cInterface::Render()
             m_aBossHealthBar[1].Render();
             m_aBossHealthBar[2].Render();
         }
+
+        if(m_fAlphaTurf)
+        {
+            // 
+            m_aTurfBar[0].Render();
+            m_aTurfBar[1].Render();
+            m_aTurfBar[2].Render();
+        }
+
 #if !defined(_P1_SCREENSHOT_)
         // 
         m_GoalMedal.Render();
 
         // 
-        for(coreUintW j = 0u; j < INTERFACE_BADGES; ++j) m_aBadge[j].Render();
+        //for(coreUintW j = 0u; j < INTERFACE_BADGES; ++j) m_aBadge[j].Render();
 #endif
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
@@ -276,8 +331,15 @@ void cInterface::Render()
             m_aBossTime[1]   .Render();
             m_aBossTime[2]   .Render();
         }
+
+        if(m_fAlphaTurf)
+        {
+            // 
+            m_TurfValue.Render();
+        }
+
 #if !defined(_P1_SCREENSHOT_)
-            m_WaveName    .Render();   // TODO 1: nur in coop weg
+            //m_WaveName    .Render();   // TODO 1: nur in coop weg
 #endif
         if(m_fAlphaBoss != 1.0f)
         {
@@ -300,6 +362,10 @@ void cInterface::Render()
         m_aStoryText[0].Render();
         m_aStoryText[1].Render();
     }
+
+    // 
+    m_aDialogText[0].Render();
+    m_aDialogText[1].Render();
 }
 
 
@@ -313,8 +379,9 @@ void cInterface::Move()
 
     // 
     const coreFloat fAlphaPlayerFull = BLENDH3(m_fAlphaAll) * MENU_INSIDE_ALPHA;
-    const coreFloat fAlphaBossFull   = BLENDH3(m_fAlphaAll) * MENU_INSIDE_ALPHA * BLENDH3(m_fAlphaBoss);
-    const coreFloat fAlphaWaveFull   = BLENDH3(m_fAlphaAll) * MENU_INSIDE_ALPHA * BLENDH3(1.0f - m_fAlphaBoss);
+    const coreFloat fAlphaBossFull   = fAlphaPlayerFull * BLENDH3(m_fAlphaBoss);
+    const coreFloat fAlphaWaveFull   = fAlphaPlayerFull * BLENDH3(1.0f - m_fAlphaBoss);
+    const coreFloat fAlphaTurfFull   = fAlphaPlayerFull * BLENDH3(m_fAlphaTurf);
 
     // loop through all player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
@@ -405,6 +472,8 @@ void cInterface::Move()
         oView.oComboValue  .SetPosition(coreVector2(oView.oComboValue  .GetPosition().x, oView.oScoreTotal.GetPosition().y -0.045f));
         oView.oChainValue  .SetPosition(coreVector2(oView.oChainValue  .GetPosition().x, oView.oScoreTotal.GetPosition().y -0.135f));
         
+        m_WaveName  .SetPosition(coreVector2(m_WaveName  .GetPosition().x, oView.oScoreTotal.GetPosition().y));
+        
 
         // set player transparency
         oView.aShieldBar[0].SetAlpha(fAlphaPlayerFull);
@@ -473,6 +542,36 @@ void cInterface::Move()
         m_BossHealthValue.SetText(PRINT("%.0f%%", fPercent ? FLOOR(LERP(1.0f, 100.0f, fPercent)) : 0.0f));
     }
 
+    coreBool bTurf = false;
+    if(g_pGame->GetCurMission()->GetID() == cAterMission::ID)
+    {
+        const cTurf* pTurf = d_cast<cAterMission*>(g_pGame->GetCurMission())->GetTurf();
+
+        bTurf = pTurf->IsActive();
+        if(bTurf)
+        {
+        // 
+        const coreFloat fPercent = pTurf->CalcPercent();
+        const coreFloat fWidth   = m_aTurfBar[0].GetSize().x - 0.01f;
+        m_aTurfBar[1].SetPosition(coreVector2(fWidth * (fPercent-1.0f) * 0.5f, m_aTurfBar[1].GetPosition().y));
+        m_aTurfBar[1].SetSize    (coreVector2(fWidth *  fPercent,              m_aTurfBar[1].GetSize    ().y));
+        m_aTurfBar[1].SetTexSize (coreVector2(fPercent, 1.0f));
+
+        const coreFloat fRev = 1.0f - fPercent;
+        m_aTurfBar[2].SetPosition(coreVector2(fWidth * fPercent * 0.5f, m_aTurfBar[2].GetPosition().y));
+        m_aTurfBar[2].SetSize    (coreVector2(fWidth * fRev,            m_aTurfBar[2].GetSize    ().y));
+        m_aTurfBar[2].SetTexSize (coreVector2(fRev, 1.0f));
+        m_aTurfBar[2].SetTexOffset (coreVector2(fPercent, 1.0f));
+
+        const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f);// + ((fPercent <= 0.4f) ? (fDanger * 0.5f) : 0.0f);
+        m_aTurfBar[1].SetColor3(vColor * 1.0f);
+        m_aTurfBar[2].SetColor3(vColor * 0.3f);
+
+        // 
+        m_TurfValue.SetText(PRINT("%.0f%%", fPercent ? FLOOR(LERP(1.0f, 100.0f, fPercent)) : 0.0f));
+        }
+    }
+
     // display time
     const coreFloat fTime = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
     if(fTime)
@@ -492,8 +591,11 @@ void cInterface::Move()
     }
     else
     {
+        if(g_pGame->GetCurMission()->GetMedalGoal())   
+        {   
         m_aBossTime[2].SetText("");
         m_aWaveTime[2].SetText("");
+        }   
     }
 
     // adjust time position (# only required if alignment is centered)
@@ -524,6 +626,24 @@ void cInterface::Move()
     m_aBossTime[0]     .Move();
     m_aBossTime[1]     .Move();
     m_aBossTime[2]     .Move();
+    
+    
+
+    const coreFloat* pfMedalGoal  = g_pGame->GetCurMission()->GetMedalGoal();
+    const coreFloat  fTimeShifted = g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe();
+    if(pfMedalGoal && fTimeShifted)
+    {
+        cMenu::ApplyMedalTexture(&m_GoalMedal, cGame::CalcMedal(fTimeShifted, pfMedalGoal), MEDAL_TYPE_WAVE);
+        m_GoalTime.SetText(PRINT("%03.0f", CEIL(cGame::CalcMedalTime(fTimeShifted, pfMedalGoal))));
+
+        m_fAlphaValid = 1.0f;
+    }
+    else
+    {
+        m_fAlphaValid.UpdateMax(-2.0f, 0.0f);
+    }
+    
+    
 
     // set wave transparency
     m_WaveName    .SetAlpha(fAlphaPlayerFull);
@@ -536,33 +656,28 @@ void cInterface::Move()
     m_aWaveTime[0].Move();
     m_aWaveTime[1].Move();
     m_aWaveTime[2].Move();
-    
-    
-    const coreFloat* pfMedalGoal  = g_pGame->GetCurMission()->GetMedalGoal();
-    const coreFloat  fTimeShifted = g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe();
-    if(pfMedalGoal && fTimeShifted)
-    {
-        cMenu::ApplyMedalTexture(&m_GoalMedal, cGame::CalcMedal(fTimeShifted, pfMedalGoal), MEDAL_TYPE_WAVE);
-        m_GoalTime.SetText(PRINT("%03.0f", CEIL(cGame::CalcMedalTime(fTimeShifted, pfMedalGoal))));
 
-        m_GoalMedal.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-        m_GoalTime .SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    }
-    else
-    {
-        m_GoalMedal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        m_GoalTime .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    }
+    // 
+    m_aTurfBar[0].SetAlpha(fAlphaTurfFull);
+    m_aTurfBar[1].SetAlpha(fAlphaTurfFull);
+    m_aTurfBar[2].SetAlpha(fAlphaTurfFull);
+    m_TurfValue  .SetAlpha(fAlphaTurfFull);
+
+    // 
+    m_aTurfBar[0].Move();
+    m_aTurfBar[1].Move();
+    m_aTurfBar[2].Move();
+    m_TurfValue  .Move();
     
     
     m_GoalTime .SetPosition(coreVector2(-0.06f, m_aWaveTime[0].GetPosition().y));
     m_GoalMedal.SetSize(coreVector2(1.0f,1.0f) * 0.04f);
-    m_GoalMedal.SetPosition(coreVector2(-0.12f,  m_aWaveTime[0].GetPosition().y + (m_GoalMedal.GetSize().y - m_GoalTime.GetSize().y) * 0.5f));
+    m_GoalMedal.SetPosition(coreVector2(-0.12f,  m_aWaveTime[0].GetPosition().y + (m_GoalMedal.GetSize().y - m_aWaveTime[0].GetSize().y) * 0.5f)); // m_GoalTime
     
     
     // 
-    m_GoalMedal.SetAlpha(fAlphaWaveFull);    
-    m_GoalTime .SetAlpha(fAlphaWaveFull);    
+    m_GoalMedal.SetAlpha(fAlphaWaveFull * m_fAlphaValid);    
+    m_GoalTime .SetAlpha(fAlphaWaveFull * m_fAlphaValid);    
 
     // 
     m_GoalMedal.Move();
@@ -648,6 +763,10 @@ void cInterface::Move()
         m_aStoryText[1].Move();
     }
 
+    // 
+    m_aDialogText[0].Move();
+    m_aDialogText[1].Move();
+
     // smoothly toggle interface visibility (after forwarding, to allow overriding)
     if(m_bVisible)
          m_fAlphaAll.UpdateMin( 2.0f, 1.0f);
@@ -657,6 +776,22 @@ void cInterface::Move()
     if(pBoss && (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
          m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);
     else m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);
+    
+    // 
+    if(bTurf)
+         m_fAlphaTurf.UpdateMin( 2.0f, 1.0f);
+    else m_fAlphaTurf.UpdateMax(-2.0f, 0.0f);
+    
+    
+    //if(m_iBannerType == INTERFACE_BANNER_TYPE_ALERT)
+    {
+        const coreFloat fAlert = g_pGame->GetTimeTable()->GetTimeEvent() - m_fAlertStart;
+        if(m_pAlertSound->EnableRef(this))
+        {
+            m_pAlertSound->SetVolume(BLENDH3(CLAMP01((6.0f - fAlert) * 4.0f)));
+            if(fAlert > 6.0f) m_pAlertSound->Stop();
+        }
+    }
 }
 
 
@@ -717,6 +852,8 @@ void cInterface::ShowMission(const cMission* pMission)
 // show boss banner
 void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 {
+    const coreBool bEigengrau = (pcSub[0] == '\0');
+
     // 
     this->__PrepareBanner();
 
@@ -726,7 +863,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 
     // save animation properties
     m_fBannerStart    = g_pGame->GetTimeTable()->GetTimeEvent();
-    m_fBannerDuration = INTERFACE_BANNER_DURATION_BOSS;
+    m_fBannerDuration = bEigengrau ? 5.0f : INTERFACE_BANNER_DURATION_BOSS;
     m_fBannerSpeed    = INTERFACE_BANNER_SPEED_MISSION;   
     m_iBannerType     = INTERFACE_BANNER_TYPE_BOSS;
 
@@ -735,14 +872,25 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_3,  MENU_OUTLINE_SMALL);
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
 
-        m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.06f));
-        m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
+        if(bEigengrau)
+        {
+            m_aBannerText[2].SetPosition(coreVector2(0.0f,0.0f));
+            m_aBannerText[3].SetPosition(coreVector2(0.0f,0.0f));
 
-        m_aBannerText[2].SetCenter(coreVector2(0.0f,0.02f));
-        m_aBannerText[3].SetCenter(m_aBannerText[2].GetCenter());
+            m_aBannerText[2].SetCenter(coreVector2(0.0f,0.0f));
+            m_aBannerText[3].SetCenter(coreVector2(0.0f,0.0f));
+        }
+        else
+        {
+            m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.06f));
+            m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
+
+            m_aBannerText[2].SetCenter(coreVector2(0.0f,0.02f));
+            m_aBannerText[3].SetCenter(m_aBannerText[2].GetCenter());
+        }
 
         m_aBannerText[2].SetColor3(COLOR_MENU_INSIDE);
-        m_aBannerText[3].SetColor3(g_pEnvironment->GetBackground()->GetColor());
+        m_aBannerText[3].SetColor3(bEigengrau ? COLOR_MENU_INSIDE : g_pEnvironment->GetBackground()->GetColor());
     }
 
     // 
@@ -830,7 +978,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
     }
 
     // 
-    m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_ALL);//CORE_OBJECT_ENABLE_ALL);CORE_OBJECT_ENABLE_NOTHING
     m_BannerShadow  .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -893,6 +1041,9 @@ void cInterface::ShowAlert()
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    
+    m_pAlertSound->PlayRelative(this, 1.0f, 1.0f, true, SOUND_EFFECT);
+    m_fAlertStart = g_pGame->GetTimeTable()->GetTimeEvent();
 }
 
 
@@ -950,7 +1101,7 @@ void cInterface::ChangeBannerText(const coreChar* pcMain, const coreChar* pcSub)
 // 
 void cInterface::UpdateLayout()
 {
-    const coreVector2 vCenter = coreVector2(0.5f,0.5f) - (g_CurConfig.Game.iHudType ? coreVector2(1.0f,1.0f) : (Core::System->GetResolution().yx() * RCP(Core::System->GetResolution().Max()))) * 0.005f;
+    const coreVector2 vCenter = coreVector2(0.5f,0.5f) - (g_CurConfig.Game.iHudType ? coreVector2(1.0f,1.0f) : Core::System->GetResolution().yx().MinRatio()) * 0.005f;
     // TODO 1: option 0.5f-0.45f, handle aspect ratio (for outside) (also up-down)
 
     // 
@@ -1001,6 +1152,12 @@ void cInterface::UpdateLayout()
     nUpdateFunc(&m_aWaveTime[0], vTop);
     nUpdateFunc(&m_aWaveTime[1], vTop);
     nUpdateFunc(&m_aWaveTime[2], vTop);
+
+    // 
+    nUpdateFunc(&m_aTurfBar[0], vBottom);
+    nUpdateFunc(&m_aTurfBar[1], vBottom);
+    nUpdateFunc(&m_aTurfBar[2], vBottom);
+    nUpdateFunc(&m_TurfValue,   vBottom);
 
     // 
     nUpdateFunc(&m_GoalMedal, vTop);

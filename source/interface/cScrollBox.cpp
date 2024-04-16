@@ -92,6 +92,10 @@ void cScrollBox::Move()
     coreFloat fWheel = Core::Input->GetMouseWheel();
 
     // 
+    const coreBool  bMouseWheel = (fWheel != 0.0f);
+    const coreFloat fOldOffset  = this->GetOffset().y;
+
+    // 
     const coreInputType eType  = m_Automatic.GetStatus() ? CORE_INPUT_HOLD : CORE_INPUT_PRESS;
     const coreBool      bLeft  = m_aArrow[0].IsClicked(CORE_INPUT_LEFT, eType);
     const coreBool      bRight = m_aArrow[1].IsClicked(CORE_INPUT_LEFT, eType);
@@ -147,4 +151,7 @@ void cScrollBox::Move()
 
     // 
     this->coreViewBox::Move();
+
+    // 
+    if(bMouseWheel && (fOldOffset != this->GetOffset().y)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SCROLL);
 }

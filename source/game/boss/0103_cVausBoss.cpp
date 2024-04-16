@@ -35,7 +35,7 @@ cVausBoss::cVausBoss()noexcept
     this->SetSize(coreVector3(2.5f,2.5f,2.5f));
 
     // configure the boss
-    this->Configure(10000, COLOR_SHIP_YELLOW);
+    this->Configure(10000, 0u, COLOR_SHIP_YELLOW);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCompanion); ++i)
@@ -43,7 +43,7 @@ cVausBoss::cVausBoss()noexcept
         m_aCompanion[i].DefineModelHigh("object_boss_vaus_companion_high.md3");
         m_aCompanion[i].DefineModelLow ("object_boss_vaus_companion_low.md3");
         m_aCompanion[i].SetSize        (coreVector3(2.2f,2.2f,2.2f));
-        m_aCompanion[i].Configure      (1, COLOR_SHIP_YELLOW);
+        m_aCompanion[i].Configure      (1, 0u, COLOR_SHIP_YELLOW);
     }
 }
 
@@ -75,9 +75,6 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
     // 
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         pMission->DisablePaddle(i, bAnimated);
-
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 
@@ -88,7 +85,11 @@ void cVausBoss::__MoveOwn()
     // 
     this->_UpdateBoss();
 
-    if(this->GetCurHealthPct() < 0.9f) this->Kill(true);                
+    if(this->GetCurHealthPct() < 0.9f)
+    {
+        this->Kill(true);                
+        this->_EndBoss();
+    }
 
 
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());

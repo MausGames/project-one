@@ -15,10 +15,12 @@
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 // TODO 3: effect on UI when recovering life or shield (and on player, and combat text)
 // TODO 1: aktuelles level anzeigen mit wave 01-03, 03-BOSS (e.g. oben rechts im single-player)
+// TODO 1: show best time and best score in-game (mission, segment), and when a new record was made! (score also in mission summary)
 // TODO 1: health icons should be different, when the player has color (+ transformed to enemy)
 // TODO 4: merge wave time and boss time if possible
 // TODO 1: wave-name FÜNF is getting shifted down
 // TODO 1: add option to display outside interface near line, to handle ultrawide screens
+// TODO 3: UI is not correctly updated when changing window size (manually) during pause
 
 
 // ****************************************************************
@@ -27,6 +29,7 @@
 #define INTERFACE_LIVES                   (LIVES)                           // 
 #define INTERFACE_BADGES                  (BADGES)                          // 
 #define INTERFACE_BOSS_DELAY              (1.5f)                            // 
+#define INTERFACE_DIALOGS                 (2u)
 
 #define INTERFACE_BANNER_SPEED            (4.0f)                            // fade-in and fade-out speed
 //#define INTERFACE_BANNER_SPEED_REV        (1.0f / INTERFACE_BANNER_SPEED)   // 
@@ -35,7 +38,7 @@
 #define INTERFACE_BANNER_DURATION_MISSION (3.7f)                            // 
 #define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
 #define INTERFACE_BANNER_DURATION_SCORE   (5.0f)                            // 
-#define INTERFACE_BANNER_DURATION_ALERT   (3.0f)                            // 
+#define INTERFACE_BANNER_DURATION_ALERT   (3.5f)                            // 
 
 #define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
 #define INTERFACE_BANNER_TYPE_BOSS        (1u)                              // boss banner type
@@ -82,6 +85,9 @@ private:
     cGuiLabel m_WaveName;                    // wave name
     cGuiLabel m_aWaveTime[3];                // wave time (0 = seconds, 1 = deci-seconds, 2 = shift)
 
+    cGuiObject m_aTurfBar[3];                // 
+    cGuiLabel  m_TurfValue;                  // 
+
     cGuiObject m_GoalMedal;                  // 
     cGuiLabel  m_GoalTime;                   // 
 
@@ -98,6 +104,8 @@ private:
     cGuiLabel m_aStoryText[2];               // 
     coreFloat m_fStoryStart;                 // 
 
+    cGuiLabel m_aDialogText[INTERFACE_DIALOGS];              // 
+
     cGuiObject m_Medal;                      // 
 
     coreFlow m_fAnimation;                   // 
@@ -105,10 +113,17 @@ private:
     coreBool m_bVisible;                     // visibility status
     coreFlow m_fAlphaAll;                    // overall alpha value (except for banner)
     coreFlow m_fAlphaBoss;                   // boss alpha value
+    coreFlow m_fAlphaTurf;                   // 
+    
+    coreFlow m_fAlphaValid;
+    
+    coreSoundPtr m_pAlertSound;
+    coreFloat m_fAlertStart;
 
 
 public:
     explicit cInterface(const coreUint8 iNumViews)noexcept;
+    ~cInterface();
 
     DISABLE_COPY(cInterface)
 
@@ -132,6 +147,9 @@ public:
     coreBool IsStoryActive()const;
 
     // 
+    inline cGuiLabel* GetDialogText(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_DIALOGS) return &m_aDialogText[iIndex];}
+
+    // 
     void ChangeBannerText(const coreChar* pcMain, const coreChar* pcSub);
 
     // 
@@ -139,7 +157,7 @@ public:
     void UpdateEnabled();
 
     // 
-    inline void Reset() {m_fBannerStart = -FLT_MAX; m_fStoryStart = -FLT_MAX;}
+    inline void Reset() {m_fBannerStart = -FLT_MAX; m_fStoryStart = -FLT_MAX; m_fAlertStart = -FLT_MAX;}
 
     // set object properties
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}

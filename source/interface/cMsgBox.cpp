@@ -59,7 +59,7 @@ void cMsgBox::Render()
     if(!m_fFade) return;
 
     // 
-    this->cGuiObject::Render();
+    this->coreFullscreen::Render();
 
     // 
     m_Box.Render();
@@ -96,10 +96,10 @@ void cMsgBox::Move()
         g_MenuInput.bCancel = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
 
     // 
-    this->SetSize     (Core::System->GetResolution() * RCP(Core::System->GetResolution().Min()));
+    this->SetSize     (coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
     this->SetAlpha    (m_fFade * 0.5f);
     this->SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
-    this->cGuiObject::Move();
+    this->coreFullscreen::Move();
 
     // 
     m_Box.SetAlpha(m_fFade);
@@ -190,4 +190,7 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
 
     // execute callback
     nLocal(a, b);
+
+    // 
+    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, (a == MSGBOX_ANSWER_NO) ? SOUND_MENU_MSGBOX_NO : SOUND_MENU_MSGBOX_YES);
 }

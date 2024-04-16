@@ -72,7 +72,7 @@
 // TODO 4: check all lambdas if OUTPUT can be replaced with const (maybe check everything for it, engine + p1)
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
-// TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types)
+// TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types, blender decimate tool factor ~0.1)
 // TODO 1: all sounds need IsUsable checks
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
 // TODO 3: skip rendering (like in pause) when update frequency is >= 2x of the refresh rate
@@ -88,7 +88,7 @@
 // TODO 4: if font awesome will be used in the end, remove all unused icons in font-file
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 // TODO 4: check if any % (modulo) can be changed to coreMath::IsAligned
-// TODO 2: fix broken pw-database printing on MacOS (maybe put TODO into engine)
+// TODO 2: fix broken pw-database printing on MacOS (maybe put TODO into engine) (maybe related to geteuid<>getuid)
 // TODO 1: look if enemies with health 10 should be changed to 4
 // TODO 1: check for importing save-game from demo (if on Steam and no main save-game found)
 // TODO 1: make frequency rounding corrections: boss ticker, player weapon
@@ -96,20 +96,20 @@
 // TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
 // TODO 1: should bullets create particles when shot ? especially for bosses
 // TODO 3: remove unused mechanics (#ifdef would be enough) so they don't take up code and memory
+// TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
+// TODO 1: all music files need equal base volume, also remove meta data
+// TODO 1: all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data, also shorten sound front and back (make sure there is no micro-sound), also make mono if better
 
 
 // ****************************************************************
 // engine headers
 #include "Core.h"
 
-#if defined(_CORE_GCC_) || defined(_CORE_CLANG_)
+#if defined(_CORE_MSVC_)
+    #pragma warning(disable : 4189)   // local variable is initialized but not referenced
+#elif defined(_CORE_GCC_) || defined(_CORE_CLANG_)
     #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #endif
-
-#if defined(_CORE_MSVC_)
-#pragma warning(disable : 4189) // 'fBulletSpeed': local variable is initialized but not referenced
-#endif
-
 
 #define _P1_DEBUG_INPUT_ (1)
 //#define _P1_DEBUG_RANDOM_ (1)
@@ -127,9 +127,8 @@
 #endif
 
 #if defined(_CORE_DEBUG_)
-#define _P1_VERSION_1_1_0_
+    #define _P1_VERSION_1_1_0_
 #endif
-#define _P1_DEMO_ // kapsle komplette missions-files
 
 
 // ****************************************************************
@@ -138,7 +137,7 @@
 #define HELPERS              (9u)
 #define MISSIONS             (9u + 2u + 1u)
 #define BOSSES               (2u)
-#define WAVES                (6u)
+#define WAVES                (5u)
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
@@ -157,6 +156,7 @@
 #define LISTENER_POSITION    (coreVector3(0.0f,  0.0f,  1.0f) * 10.0f)
 #define LISTENER_VELOCITY    (coreVector3(0.0f,  0.0f,  0.0f))
 #define LIGHT_DIRECTION      (coreVector3(1.0f, -1.1f, -0.85f).Normalized())   // (0.583957136f, -0.642352879f, -0.496363580f)
+#define MUSIC_VOLUME         (0.5f)
 
 // color values
 #define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
@@ -191,30 +191,33 @@
 #define COLOR_SHIP_CYAN      (coreVector3(0.000f, 0.800f, 0.800f))
 #define COLOR_SHIP_GREEN     (coreVector3(0.308f, 0.720f, 0.308f))
 #define COLOR_SHIP_GREY      (coreVector3(0.500f, 0.500f, 0.500f))
+#define COLOR_SHIP_BLACK     (COLOR_SHIP_GREY * 0.6f)
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))   // TODO 1: remove
 
 // shader modifiers
-#define SHADER_TRANSITION(x) "#define _P1_TRANSITION_" " (" #x ") \n"   // full_transition
-#define SHADER_SHADOW(x)     "#define _P1_SHADOW_"     " (" #x ") \n"   // outdoor, object_ground
-#define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_"   " (" #x ") \n"   // weather
-#define SHADER_SAMPLES(x)    "#define _P1_SAMPLES_"    " (" #x ") \n"   // ink
-#define SHADER_GLOW          "#define _P1_GLOW_"       " (1) \n"        // post, outdoor, object_ship
-#define SHADER_DISTORTION    "#define _P1_DISTORTION_" " (1) \n"        // post
-#define SHADER_DEBUG         "#define _P1_DEBUG_"      " (1) \n"        // post
-#define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"   " (1) \n"        // distortion
-#define SHADER_SINGLE        "#define _P1_SINGLE_"     " (1) \n"        // decal, weather
-#define SHADER_LIGHT         "#define _P1_LIGHT_"      " (1) \n"        // outdoor, decal, outline
-#define SHADER_DARKNESS      "#define _P1_DARKNESS_"   " (1) \n"        // object_ship
-#define SHADER_BLINK         "#define _P1_BLINK_"      " (1) \n"        // energy, object_ship, object_meteor
-#define SHADER_FLAT          "#define _P1_FLAT_"       " (1) \n"        // outline, energy
-#define SHADER_BULLET        "#define _P1_BULLET_"     " (1) \n"        // outline, energy
-#define SHADER_SPHERIC       "#define _P1_SPHERIC_"    " (1) \n"        // decal, energy
-#define SHADER_INVERT        "#define _P1_INVERT_"     " (1) \n"        // energy
-#define SHADER_DIRECT        "#define _P1_DIRECT_"     " (1) \n"        // outline, energy, distortion, menu_border
-#define SHADER_RING          "#define _P1_RING_"       " (1) \n"        // energy
-#define SHADER_WAVE          "#define _P1_WAVE_"       " (1) \n"        // object
-#define SHADER_GREY          "#define _P1_GREY_"       " (1) \n"        // vignette
-#define SHADER_LINE          "#define _P1_LINE_"       " (1) \n"        // ink
+#define SHADER_TRANSITION(x) "#define _P1_TRANSITION_"  " (" #x ") \n"   // full_transition
+#define SHADER_SHADOW(x)     "#define _P1_SHADOW_"      " (" #x ") \n"   // outdoor, object_ground
+#define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_"    " (" #x ") \n"   // weather
+#define SHADER_SAMPLES(x)    "#define _P1_SAMPLES_"     " (" #x ") \n"   // ink
+#define SHADER_GLOW          "#define _P1_GLOW_"        " (1) \n"        // post, outdoor, object_ship
+#define SHADER_DISTORTION    "#define _P1_DISTORTION_"  " (1) \n"        // post
+#define SHADER_TRANSPARENT   "#define _P1_TRANSPARENT_" " (1) \n"        // post
+#define SHADER_DEBUG         "#define _P1_DEBUG_"       " (1) \n"        // post
+#define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"    " (1) \n"        // distortion
+#define SHADER_SINGLE        "#define _P1_SINGLE_"      " (1) \n"        // decal, weather
+#define SHADER_LIGHT         "#define _P1_LIGHT_"       " (1) \n"        // outdoor, decal, outline
+#define SHADER_DARKNESS      "#define _P1_DARKNESS_"    " (1) \n"        // object_ship
+#define SHADER_BLINK         "#define _P1_BLINK_"       " (1) \n"        // energy, object_ship, object_meteor
+#define SHADER_THICK         "#define _P1_THICK_"       " (1) \n"        // outline
+#define SHADER_FLAT          "#define _P1_FLAT_"        " (1) \n"        // outline, energy
+#define SHADER_BULLET        "#define _P1_BULLET_"      " (1) \n"        // outline, energy
+#define SHADER_SPHERIC       "#define _P1_SPHERIC_"     " (1) \n"        // decal, energy
+#define SHADER_INVERT        "#define _P1_INVERT_"      " (1) \n"        // energy
+#define SHADER_DIRECT        "#define _P1_DIRECT_"      " (1) \n"        // outline, energy, distortion, menu_border
+#define SHADER_RING          "#define _P1_RING_"        " (1) \n"        // energy
+#define SHADER_WAVE          "#define _P1_WAVE_"        " (1) \n"        // object
+#define SHADER_GREY          "#define _P1_GREY_"        " (1) \n"        // vignette
+#define SHADER_LINE          "#define _P1_LINE_"        " (1) \n"        // ink
 
 
 struct sVersion final
@@ -238,10 +241,7 @@ enum eType : coreInt32
 
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,
-    TYPE_VIRIDO_BARRIER,   // # move collisions into stages where possible and remove types
-    TYPE_VIRIDO_LASER,     // #
-    TYPE_NEVO_BOMB,        // #
-    TYPE_NEVO_BLOCK,       // #
+    TYPE_NEVO_BLOCK,
     TYPE_NEVO_CONTAINER,
     TYPE_RUTILUS_TELEPORTER,
 
@@ -253,7 +253,8 @@ enum eType : coreInt32
 enum eSound : coreUint8
 {
     SOUND_EFFECT = 1u,
-    SOUND_AMBIENT
+    SOUND_AMBIENT,
+    SOUND_MENU
 };
 
 // attack elements
@@ -316,6 +317,9 @@ class cMission;
 // game headers
 extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 resolution
 extern coreVector2     g_vHudDirection;     // 
+extern coreBool        g_bTiltMode;         // 
+extern coreBool        g_bShiftMode;        // 
+extern coreBool        g_bDemoVersion;      // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 

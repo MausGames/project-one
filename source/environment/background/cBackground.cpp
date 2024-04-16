@@ -26,7 +26,7 @@ template <const coreChar* pcString, coreUintW iLength, coreUintW iNum> struct sS
     extern const coreChar v ## __a[] = s; \
     static const sStringList<v ## __a, ARRAY_SIZE(v ## __a), n> v;
 
-__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SPACE_NEBULA_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
+__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SPACE_NEBULA_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM, CLOUD_RAIN_NUM), s_asOverlayTransform)
 
 
 // ****************************************************************
@@ -53,6 +53,9 @@ cBackground::~cBackground()
     // 
     m_aaiBaseHeight.clear();
     m_aaiBaseNormal.clear();
+
+    // 
+    m_apWaterRefList.clear();
 
     // remove all persistent objects
     const auto nRemoveObjectsFunc = [](coreList<coreBatchList*>* OUTPUT papList)
@@ -91,7 +94,7 @@ void cBackground::Render()
     {
         // update water reflection and depth map
         m_pWater->UpdateReflection();
-        m_pWater->UpdateDepth(m_pOutdoor, m_apGroundObjectList);
+        m_pWater->UpdateDepth(m_pOutdoor, m_apWaterRefList);
     }
 
     if(m_pOutdoor)
@@ -144,7 +147,6 @@ void cBackground::Render()
         // call individual render routine (before air)
         this->__RenderOwnBefore();
 
-        //glBlendFunc        (FOREGROUND_BLEND_SUM);
         glDisable(GL_DEPTH_TEST);
         {
             // render all air objects
@@ -152,7 +154,6 @@ void cBackground::Render()
             FOR_EACH(it, m_apAirAddList)    (*it)->Render();
         }
         glEnable(GL_DEPTH_TEST);
-        //glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
 
         // call individual render routine (after air)
         this->__RenderOwnAfter();
@@ -195,6 +196,9 @@ void cBackground::Move()
     {
         // cache current camera position (to improve performance)
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
+        
+        coreUint32 A = 0u;
+        coreUint32 B = 0u;
 
         FOR_EACH(it, *papList)
         {
@@ -212,13 +216,17 @@ void cBackground::Move()
                 coreObject3D* pObject = (*et);
 
                 // determine visibility and compare with current status
-                const coreVector2 vScreenPos = ((pObject->GetPosition().xy() - vCameraPos) * coreVector2(1.0f,0.6f)) * mRota;
+                const coreVector2 vScreenPos = (pObject->GetPosition().xy() - vCameraPos) * mRota;
+                const coreVector2 vScreenPos2 = pObject->GetPosition().xy() - vCameraPos;
+                const coreVector2 vScreenPos3 = coreVector2(vScreenPos2.x, FMOD(ABS(vScreenPos2.y) + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) - I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL) * mRota;
+                //const coreVector2 vScreenPos = ((pObject->GetPosition().xy() - vCameraPos) * coreVector2(1.0f,0.6f)) * mRota;    // vielleicht visual height + Z reinrechnen    hab auch artefakte in space
                 const coreBool    bIsVisible = ((ABS(vScreenPos.x) + ABS(vScreenPos.y)) < fRange);
-                if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+                const coreBool    bIsVisible2 = ((ABS(vScreenPos3.x) + ABS(vScreenPos3.y)) < fRange);
+                if(bIsVisible2 != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
                     // 
-                    const coreFloat fFract = FRACT(FMOD(pObject->GetPosition().y + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL));
-                    pObject->SetEnabled(bIsVisible ? ((fFract < fDensity) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE) : CORE_OBJECT_ENABLE_NOTHING);
+                    const coreFloat fFract = FRACT(FMOD(pObject->GetPosition().y + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) * EU);
+                    pObject->SetEnabled(bIsVisible2 ? ((fFract < fDensity) ? (bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING) : CORE_OBJECT_ENABLE_MOVE) : CORE_OBJECT_ENABLE_NOTHING);
 
                     // recalculate properties when becoming visible
                     if(pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL))
@@ -245,14 +253,24 @@ void cBackground::Move()
                     // 
                     bUpdate = true;
                 }
+                
+                if(bIsVisible)  A += 1u;
+                if(bIsVisible2) B += 1u;
             }
 
             // move only when necessary (also to reduce instancing updates)
             if(bUpdate) (*it)->MoveNormal();
         }
+        
+        if(papList == &m_apGroundObjectList)
+        {
+            Core::Debug->InspectValue("visible",  A);
+            Core::Debug->InspectValue("visible2", B);
+            Core::Debug->InspectValue("cam", vCameraPos);
+        }
     };
     const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotated45()).m12();
-    nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE,         mRota);
+    nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE + 30.0f, mRota);
     nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE -  9.0f, mRota);
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
 
@@ -378,14 +396,19 @@ void cBackground::ClearAdds()
 {                                                                                           \
     ASSERT((iIndex < (x).size()) && (fDensity >= 0.0f) && (fDensity <= 1.0f))               \
                                                                                             \
+    coreSet<coreObject3D*>* pContent = (x)[iIndex]->List();                                 \
+                                                                                            \
     /*  */                                                                                  \
-    coreObject3D* pBase = (x)[iIndex]->List()->front();                                     \
+    coreObject3D* pBase = pContent->front();                                                \
     pBase->SetCollisionModifier(coreVector3(fDensity, pBase->GetCollisionModifier().yz())); \
+                                                                                            \
+    /*  */                                                                                  \
+    if(bForce) FOR_EACH(et, *pContent) (*et)->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);       \
 } 
 
-void cBackground::SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity) {__SET_DENSITY(m_apGroundObjectList)}
-void cBackground::SetDecalDensity (const coreUintW iIndex, const coreFloat fDensity) {__SET_DENSITY(m_apDecalObjectList)}
-void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDensity) {__SET_DENSITY(m_apAirObjectList)}
+void cBackground::SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce) {__SET_DENSITY(m_apGroundObjectList)}
+void cBackground::SetDecalDensity (const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce) {__SET_DENSITY(m_apDecalObjectList)}
+void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce) {__SET_DENSITY(m_apAirObjectList)}
 
 #undef __SET_DENSITY
 
@@ -465,8 +488,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
     }
 
     // reduce memory consumption
-    //ASSERT(pObjectList->List()->size() <= iReserve)
-    //ASSERT(pObjectList->List()->size() >= iReserve * 2u / 5u)
+    ASSERT(pObjectList->List()->size() <= iReserve)
     pObjectList->ShrinkToFit();
 }
 
@@ -490,18 +512,20 @@ void cBackground::_SortBackToFront(coreBatchList* OUTPUT pObjectList)
 // 
 void cBackground::_BindSorted(coreBatchList* OUTPUT pObjectList, coreObject3D* pObject)
 {
+    // 
     pObjectList->BindObject(pObject);
-    
-    
+
+    // 
     coreSet<coreObject3D*>* pContent = pObjectList->List();
     if(pContent->size() >= 2u)
     {
         coreUintW iIndex = pContent->size() - 1u;
-        
+
+        // 
         while(iIndex && ((*pContent)[iIndex - 1u]->GetPosition().y > (*pContent)[iIndex]->GetPosition().y))
         {
             std::swap((*pContent)[iIndex - 1u], (*pContent)[iIndex]);
-            iIndex -= 1;
+            iIndex -= 1u;
         }
     }
 }
@@ -578,14 +602,20 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick3(const coreBatchList* pO
 // reset with the resource manager
 void cBackground::__Reset(const coreResourceReset eInit)
 {
-    if(eInit)
+    if(HAS_FLAG(eInit, CORE_RESOURCE_RESET_INIT))
     {
         // 
         m_FrameBuffer    .Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
         m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-        // 
-        this->__InitOwn();
+        if(HAS_FLAG(eInit, CORE_RESOURCE_RESET_RESHAPE))
+        {
+        }
+        else
+        {
+            // 
+            this->__InitOwn();
+        }
     }
     else
     {

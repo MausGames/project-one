@@ -29,14 +29,14 @@
 // spieler kann bei schwing-phase einfach stehen bleiben und alle rand-geschosse werden sauber zerstört, aber der zusätzliche boss-angriff bringt ihn dazu sich zu bewegen (geschwindigkeit der rand-geschosse sollte nicht weiter erhöht werden, weil es sonst zu schwer wird in kombination mit boss-angriff)
 // TODO 1: decent smoke on ice cubes ?
 // TODO 1: stone outside of boss should also be ice cube ?
-// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: ice-cube damage in coop will be halved, but should not
 // TODO 1: in coop: vor-letzter eiswürfel fängt spieler 1, letzter fängt spieler 2, bei bremsung vor ende von herumzieh phase reißt spieler 2 ab und verliert morgenstern
 // TODO 1: leichtes zucken vom boss(?) wenn er vom stern ge-grabt wird (wenn das ok is und nur ein zufall weil spieler-speed auf 0 gesetzt wird, dann mit effekt kaschieren)
 // TODO 1: in reflection algorithm: remove loop and create constant formula
 // TODO 1: soll morgen-stern "eingezogen" werden, bis er wieder benötigt wird ?
 // TODO 1: soll auch vorher (im boss) ein ice-cube kommen ?
-// TODO 1: in finaler phase, flip-bullets sollten unter gegner sein (auch im level), aber cone-bullets drüber, kann man das im bullet-manager aufteilen ? oder eigener bullet-manager für boss
+// TODO 1: in finaler phase, flip-bullets und partikel sollten unter gegner sein (auch im level), aber cone-bullets drüber, kann man das im bullet-manager aufteilen ? oder eigener bullet-manager für boss (nur für cone) [[das ganze is aber ziemlich orsch, normale gegner können (derzeit) nicht TOP gemacht werden]]
 // TODO 1: spear-bullets sind bisschen langweilig, vielleicht pattern verbessern (schräg ? spread ?)
 // TODO 1: view-bullet spread attack könnte ur-plötzlich kommen, vielleicht irgendwie ankündigen ?
 // TODO 1: laser wird plötzlich erzeugt, was ist wenn spieler direkt in schuss-bahn/drehrichtung steht, sollte gegen durchschnittlicher spieler-position erzeugt werden (zusätzliche kurze phase mit drehung), oder eher richtung ändern (is deterministischer)
@@ -44,6 +44,9 @@
 // TODO 1: soll jetzt name und health-bar kaputt sein ? (oder allgemein UI, wenn dann mit sinnvollem block-shift effect) (health % sind kaputt (wert remapping), und/oder bar zeigt nix an)
 // TODO 1: "eis laser erzeugt stacheln am rand (zum unterschied mit moving-wall-stacheln, sind sie nur am getroffenen bereich)" will ich das ? soll es wo anders vorkommen ?
 // TODO 1: ... am ende wenn er stirbt reißt die kette, er fliegt aus bild, und am anderen ende (mittig) wieder rein, und knallt dann gegen wand und zerschellt (kann irgendwie rausfliegen, aber fliegt konsistent wieder rein) (oder mehrfach bounce hin und her!)
+// TODO 1: grüner angriff wird erst schneller/stärker mit dne ersten 1-3 treffern
+// TODO 1: check if morning star is properly handled when player dies (in all sub-situations)
+// TODO 1: sollte sich vielleicht in der ersten phase leicht drehen, is eigentlich voll zach für die erste phase
 
 
 // ****************************************************************
@@ -80,7 +83,7 @@ cZerothBoss::cZerothBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.0f);
 
     // configure the boss
-    this->Configure(19000, COLOR_SHIP_BLUE);
+    this->Configure(19000, 0u, COLOR_SHIP_BLUE);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
@@ -97,7 +100,7 @@ cZerothBoss::cZerothBoss()noexcept
         m_aLimb[i].DefineModelLow (sModelLow);
         m_aLimb[i].DefineVolume   (sVolume);
         m_aLimb[i].SetSize        (this->GetSize());
-        m_aLimb[i].Configure      (1, COLOR_SHIP_BLUE);
+        m_aLimb[i].Configure      (1, 0u, COLOR_SHIP_BLUE);
         m_aLimb[i].SetParent      (this);
     }
 
@@ -106,8 +109,8 @@ cZerothBoss::cZerothBoss()noexcept
     m_Body.DefineModelLow ("ship_boss_zeroth_body_low.md3");
     m_Body.DefineVolume   ("ship_boss_zeroth_body_volume.md3");
     m_Body.SetSize        (this->GetSize());
-    m_Body.Configure      (1, COLOR_SHIP_BLUE);
-    m_Body.AddStatus      (ENEMY_STATUS_INVINCIBLE);
+    m_Body.Configure      (1, 0u, COLOR_SHIP_BLUE);
+    m_Body.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
     m_Body.SetParent      (this);
 
     // 
@@ -135,8 +138,8 @@ cZerothBoss::cZerothBoss()noexcept
         m_aIce[i].DefineProgram  ("object_ice_program");
         m_aIce[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
         m_aIce[i].SetTexSize     (coreVector2(0.25f,0.25f));
-        m_aIce[i].Configure      (50, coreVector3(1.0f,1.0f,1.0f));
-        m_aIce[i].AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS);
+        m_aIce[i].Configure      (50, 0u, coreVector3(1.0f,1.0f,1.0f));
+        m_aIce[i].AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
     }
 
     STATIC_ASSERT(offsetof(cZerothBoss, m_aLimb) < offsetof(cZerothBoss, m_Body))   // initialization order for collision detection
@@ -195,6 +198,9 @@ void cZerothBoss::__ResurrectOwn()
         // 
         constexpr coreUint8 aiNewOrder[] = {cConeBullet::ID};
         g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
+
+        // 
+        this->_ResurrectBoss();
     }
 }
 
@@ -212,7 +218,7 @@ void cZerothBoss::__KillOwn(const coreBool bAnimated)
             pMission->DisableStar(i, bAnimated);
 
         // 
-        pMission->GetSnow()->Disable(1.0f);
+        pMission->GetSnow()->Disable(bAnimated ? 1.0f : 0.0f);
 
         // 
         this->__DisableLaser(bAnimated);
@@ -229,9 +235,10 @@ void cZerothBoss::__KillOwn(const coreBool bAnimated)
 
         // 
         g_pGame->GetBulletManagerEnemy()->ResetOrder();
-
-        this->_EndBoss(bAnimated);
     }
+
+    // 
+    m_iPhase = 0u;
 }
 
 
@@ -245,12 +252,14 @@ void cZerothBoss::__RenderOwnUnder()
     m_Laser.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Laser);
 
-    glDisable(GL_DEPTH_TEST);
+    DEPTH_PUSH
+
+    glDepthMask(false);
     {
         // 
         m_LaserWave.Render();
     }
-    glEnable(GL_DEPTH_TEST);
+    glDepthMask(true);
 }
 
 
@@ -286,11 +295,22 @@ void cZerothBoss::__MoveOwn()
     {
         g_pSpecialEffects->MacroDestructionDark(&m_Body);
         this->Kill(false);
+        this->_EndBoss();
     }
 
     // ################################################################
     // 
     if(m_iPhase == 0u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 0.5f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 1u)
     {
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_BREAK)
         {
@@ -325,7 +345,7 @@ void cZerothBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 1u)
+    else if(m_iPhase == 2u)
     {
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
@@ -337,9 +357,11 @@ void cZerothBoss::__MoveOwn()
     // 
     else if(m_iPhase == 10u)
     {
-        if(m_aiCounter[EVADE_COUNT] < 3)
+        if(PHASE_MAINTIME_BEFORE(0.5f) || PHASE_MAINTIME_POINT(0.5f))
         {
             this->__SetLimbValue(ZEROTH_LIMB_TAIL, 1.0f - BLENDB(MIN1(m_fPhaseTime * 2.0f)));
+
+            if(PHASE_MAINTIME_BEFORE(0.5f)) m_aLimb[ZEROTH_LIMB_TAIL].AddStatus(ENEMY_STATUS_GHOST);
         }
 
         for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i)
@@ -395,14 +417,14 @@ void cZerothBoss::__MoveOwn()
 
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
         {
-            if(m_aiCounter[EVADE_COUNT] < 3)
+            if((m_aiCounter[EVADE_COUNT] >= 1) && (m_aiCounter[EVADE_COUNT] < 3))
             {
                 coreFloat fNewAngle;
                 switch(m_aiCounter[EVADE_COUNT])
                 {
-                default: fNewAngle =  (3.0f/3.0f)*PI; break;
-                case 1:  fNewAngle =  (1.0f/3.0f)*PI; break;
-                case 2:  fNewAngle = (-1.0f/3.0f)*PI; break;
+                default: ASSERT(false)
+                case 1: fNewAngle =  (1.0f/3.0f)*PI; break;
+                case 2: fNewAngle = (-1.0f/3.0f)*PI; break;
                 }
 
                 this->DefaultRotateLerp(AnglePos(m_vLastDirection.xy().Angle()), fNewAngle, fTime);
@@ -678,6 +700,8 @@ void cZerothBoss::__MoveOwn()
                 {
                     PHASE_CHANGE_TO(70u)
 
+                    m_aiCounter[SLAP_COUNT] = 0;   // also prevent shooting
+
                     g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
                     const coreUintW iIndex = m_aIce[i].LastAttacker() - g_pGame->GetPlayer(0u);
@@ -813,7 +837,7 @@ void cZerothBoss::__MoveOwn()
 
         g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([](cFlipBullet* OUTPUT pBullet)
         {
-            if(pBullet->GetFlyTime() > 5.0f) pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
+            if(pBullet->GetFlyTime() >= 5.0f) pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
         });
     }
 
@@ -1261,6 +1285,11 @@ void cZerothBoss::__MoveOwn()
             pMission->GetStar(i)->SetPosition(this->GetPosition());
         }
     }
+
+    const coreFloat   fEnvSpeed = g_pEnvironment->GetSpeed();
+    const coreVector2 vEnvDir   = g_pEnvironment->GetDirection() * SIGN(fEnvSpeed);
+
+    g_pSpecialEffects->CreateGust(STEP(ZEROTH_SPEED_SLOW, ZEROTH_SPEED_FAST, ABS(fEnvSpeed)), vEnvDir.Angle());
 }
 
 

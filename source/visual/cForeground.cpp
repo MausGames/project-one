@@ -76,10 +76,29 @@ coreBool cForeground::IsVisiblePoint(const coreVector2 vPosition, const coreFloa
 coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
 {
     ASSERT(pObject)
+    
+    if(g_bTiltMode)
+    {
+        // 
+        if(pObject->GetPosition().z >= CAMERA_POSITION.z)                                return false;
+        if(pObject->GetPosition().z <= CAMERA_POSITION.z - Core::Graphics->GetFarClip()) return false;
+
+        if(pObject->GetPosition().z >= 10.0f)                                return true;
+
+        // 
+        const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition() - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f));
+        const coreFloat   fRadius       = pObject->GetVisualRadius();
+
+        const coreVector2 vRatio = Core::System->GetResolution().MaxRatio();
+
+        // 
+        return ((ABS(vProjectedPos.x) < (FOREGROUND_AREA.x * 1.1f + fRadius) * vRatio.x) &&
+                (ABS(vProjectedPos.y) < (FOREGROUND_AREA.y * 1.1f + fRadius) * vRatio.y));
+    }
 
     // 
-    if(pObject->GetPosition().z >= CAMERA_POSITION.z - Core::Graphics->GetNearClip())
-        return false;
+    if(pObject->GetPosition().z >= CAMERA_POSITION.z)                                return false;
+    if(pObject->GetPosition().z <= CAMERA_POSITION.z - Core::Graphics->GetFarClip()) return false;
 
     // 
     const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());

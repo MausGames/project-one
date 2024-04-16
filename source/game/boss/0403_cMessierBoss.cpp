@@ -23,11 +23,10 @@
 // time bubble hides stopping background movement
 // TODO 1: intro: meteoriten kommen zusammen, kurze drehung und wartezeit, dann bumm, und messier bricht raus schon mit schild
 // TODO 3: reversed bullets should disappear into boss with slight fade (oder mit partikel-effekt kaschieren ? bei creation und destruction)
-// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: mehr von Ikrauga endboss inspirieren lassen https://youtu.be/AVFdOhf5-P0?t=1247
 // TODO 1: spieler sollte bei start von plate-phase weggestoßen werden (oder ähnliches, damit er nicht den ersten bullet-angriff in die fresse bekommt, spieler is zu dem zeitpunkt nah dran)
 // TODO 1: improve bullet-directions for time-slowdown phase (sometimes they cluster, maybe first identify the reason/origin)
-// TODO 1: am ende von slowdown könnten noch einige bullets verlangsamt sein (die in der mitte vom Area)
 // TODO 1: boss hat am ende noch einmal geschossen (TODO in cBoss.h)
 // TODO 1: add ~0.3s delay between time-bullet-stages
 // TODO 1: vielleicht geschosse in slowdown phase, erst werfen und verlangsamen sobald sie die bubble berühren, statt gleichzeitig
@@ -43,6 +42,8 @@
 // TODO 1: (vielleicht) in platten phase eine zweite sub-phase mit wave-bullets einbauen (vielleicht auch rotierenden platten, am ende kommt eine ausgleich-platte) (würd eigentlich gut kommen mit den anderen "bullet-sub-phasen" der anderen phasen)
 // TODO 1: musik invertieren und verlangsamen ?
 // TODO 1: flip-bullets vielleicht mit 0.5f*GA oder 1.5f rotieren (statt 1.0f)
+// TODO 1: am anfang fliegt boss mit wenn alle kleine meteoriten weg sind, rastet ein bei nächster phase zusammen mit pause (kann aber länger sein, life-milestones bleiben ja gleich)
+// TODO 1: art der rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
 
 
 // ****************************************************************
@@ -71,15 +72,26 @@ cMessierBoss::cMessierBoss()noexcept
 , m_fRotation   (0.0f)
 {
     // load models
-    this->DefineModelHigh("ship_boss_messier_high.md3");
-    this->DefineModelLow ("ship_boss_messier_low.md3");
+    this->DefineModelHigh("ship_boss_messier_core_high.md3");
+    this->DefineModelLow ("ship_boss_messier_core_low.md3");
 
     // set object properties
-    this->SetSize       (coreVector3(1.0f,1.0f,1.0f) * 10.0f);
+    this->SetSize       (coreVector3(1.0f,1.0f,1.0f) * 9.0f);
     this->SetOrientation(coreVector3(1.0f,1.0f,0.0f).Normalized());
 
     // configure the boss
-    this->Configure(6600, COLOR_SHIP_MAGENTA);
+    this->Configure(6600, 0u, COLOR_SHIP_MAGENTA);
+
+    // 
+    for(coreUintW i = 0u; i < MESSIER_SHELLS; ++i)
+    {
+        m_aShell[i].DefineModelHigh(i ? "ship_boss_messier_inside_high.md3" : "ship_boss_messier_outside_high.md3");
+        m_aShell[i].DefineModelLow (i ? "ship_boss_messier_inside_low.md3"  : "ship_boss_messier_outside_low.md3");
+        m_aShell[i].SetSize        (this->GetSize() * 1.2f * (i ? 1.0f : 1.1f));
+        m_aShell[i].Configure      (1, 0u, COLOR_SHIP_MAGENTA);
+        m_aShell[i].AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
+        m_aShell[i].SetParent      (this);
+    }
 
     // 
     for(coreUintW i = 0u; i < MESSIER_RINGS; ++i)
@@ -103,6 +115,9 @@ void cMessierBoss::__ResurrectOwn()
     // 
     constexpr coreUint8 aiNewOrder[] = {cFlipBullet::ID};
     g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
+
+    // 
+    this->_ResurrectBoss();
 }
 
 
@@ -113,11 +128,18 @@ void cMessierBoss::__KillOwn(const coreBool bAnimated)
     cRutilusMission* pMission = d_cast<cRutilusMission*>(g_pGame->GetCurMission());
 
     // 
-    pMission->DisablePlate(0u, bAnimated);
-    pMission->DisablePlate(1u, bAnimated);
+    for(coreUintW i = 0u; i < RUTILUS_PLATES; ++i)
+        pMission->DisablePlate(i, bAnimated);
+
+    // 
+    pMission->DisableArea(bAnimated);
 
     // 
     pMission->DisableWave(bAnimated);
+
+    // 
+    pMission->GetEnemySquad(0u)->ClearEnemies(bAnimated);
+    pMission->GetEnemySquad(1u)->ClearEnemies(bAnimated);
 
     // 
     this->__DisableRings(bAnimated);
@@ -133,9 +155,6 @@ void cMessierBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     g_pGame->GetBulletManagerEnemy()->ResetOrder();
-
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 
@@ -166,7 +185,11 @@ void cMessierBoss::__MoveOwn()
     // 
     this->_UpdateBoss();
 
-    if(this->ReachedDeath()) this->Kill(true);   
+    if(this->ReachedDeath())
+    {
+        this->Kill(true);   
+        this->_EndBoss();
+    }
 
     // 
     const cEnemySquad* pSquad1 = g_pGame->GetCurMission()->GetEnemySquad(0u);
@@ -214,7 +237,7 @@ void cMessierBoss::__MoveOwn()
 
                 for(coreUintW i = 0u; i < MESSIER_ENEMIES_BIG; ++i)
                 {
-                    const coreVector2 vPos = coreVector2(FmodRange(I_TO_F(i) * -1.0f, MESSIER_METEOR_RANGE * -3.0f, MESSIER_METEOR_RANGE * -1.0f), (I_TO_F(i) - 3.5f) * 0.25f * MESSIER_METEOR_RANGE);
+                    const coreVector2 vPos = coreVector2(FmodRange(I_TO_F(i) * -1.0f, MESSIER_METEOR_RANGE * -3.0f, MESSIER_METEOR_RANGE * -1.0f), (I_TO_F(i) - 3.5f) * (2.0f / I_TO_F(MESSIER_ENEMIES_BIG)) * MESSIER_METEOR_RANGE);
 
                     pSquad2->GetEnemy(i)->Resurrect();
                     pSquad2->GetEnemy(i)->SetPosition(coreVector3(vPos * FOREGROUND_AREA, 0.0f));
@@ -637,6 +660,16 @@ void cMessierBoss::__MoveOwn()
     }
 
     // 
+    m_aShell[0].SetPosition   (this->GetPosition   ());
+    m_aShell[0].SetDirection  (this->GetDirection  ());   
+    m_aShell[0].SetOrientation(this->GetOrientation());   
+
+    // 
+    m_aShell[1].SetPosition   (this->GetPosition   ());
+    m_aShell[1].SetDirection  (this->GetDirection  ().InvertedX());   
+    m_aShell[1].SetOrientation(this->GetOrientation().InvertedX());   
+
+    // 
     if(m_aRing[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         // 
@@ -798,61 +831,6 @@ void cMessierBoss::__MoveOwn()
 
         pEnemy->SetDirection(coreVector3(coreVector2::Direction((-m_fAnimation + I_TO_F(i))), 0.0f));
     });
-
-    const coreObject3D* pArea1 = pMission->GetArea(0u);
-    const coreObject3D* pArea2 = pMission->GetArea(1u);
-
-    const coreVector2 vTestPos1    = pArea1->GetPosition().xy();
-    const coreFloat   fTestFromSq1 = POW2(pArea2->GetSize().x) - 100.0f;   // inner sphere
-    const coreFloat   fTestToSq1   = POW2(pArea2->GetSize().x) +  50.0f;
-    const coreFloat   fSpeedSlow   = 0.2f;
-    const coreFloat   fSpeedFast   = 1.0f;
-
-    const auto nCalcSpeedFunc = [&](const coreVector2 vPosition)
-    {
-        const coreVector2 vDiff1 = vPosition - vTestPos1;
-
-        return LERP(fSpeedSlow, fSpeedFast, STEPH3(fTestFromSq1, fTestToSq1, vDiff1.LengthSq()));
-    };
-
-    if(pArea1->IsEnabled(CORE_OBJECT_ENABLE_ALL))
-    {
-        const coreUintW iRegisterSize = GAME_PLAYERS + 1u;
-
-        static coreUint32 aiRegisterID   [iRegisterSize];
-        static coreFloat  afRegisterSpeed[iRegisterSize];
-
-        STAGE_FOREACH_PLAYER(pPlayer, i)
-        {
-            const coreFloat fSpeed = nCalcSpeedFunc(pPlayer->GetPosition().xy());
-
-            pPlayer->SetMoveSpeed (fSpeed);
-            pPlayer->SetShootSpeed(fSpeed * 0.5f + 0.5f);
-        });
-
-        const auto nBulletSlowFunc = [&](cBullet* OUTPUT pBullet)
-        {
-            coreFloat fBase = 0.0f;
-            for(coreUintW i = 0u; i < iRegisterSize; ++i)
-            {
-                if(aiRegisterID[i] == 0u)
-                {
-                    aiRegisterID   [i] = pBullet->GetID();
-                    afRegisterSpeed[i] = pBullet->GetSpeed();
-                }
-                if(aiRegisterID[i] == coreUint32(pBullet->GetID()))
-                {
-                    fBase = afRegisterSpeed[i];
-                    break;
-                }
-            }
-            ASSERT(fBase)
-
-            pBullet->SetSpeed(fBase * nCalcSpeedFunc(pBullet->GetPosition().xy()));
-        };
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletSlowFunc);
-        g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletSlowFunc);
-    }
 }
 
 

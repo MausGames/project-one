@@ -30,11 +30,14 @@
 #define CONFIG_GRAPHICS_DISTORTION  "Graphics", "Distortion",                           (1)
 #define CONFIG_GRAPHICS_SHAKE       "Graphics", "Shake",                                (100)
 #define CONFIG_GRAPHICS_FLASH       "Graphics", "Flash",                                (1)
+#define CONFIG_GRAPHICS_HIT_STOP    "Graphics", "HitStop",                              (1)
 
 #define CONFIG_AUDIO_EFFECT_VOLUME  "Audio",    "EffectVolume",                         (1.0f)
 #define CONFIG_AUDIO_AMBIENT_VOLUME "Audio",    "AmbientVolume",                        (1.0f)
 #define CONFIG_AUDIO_3D_SOUND       "Audio",    "3DSound",                              (1)
-// HRTF from core-config
+// TODO 1: HRTF from core-config  (might improve headphone sound quality)
+// TODO 1: turn effect
+// TODO 1: shooting effect
 
 #define CONFIG_INPUT_TYPE(p)        "Input",    PRINT("P%zu_Type",      (p)),           (p)
 #define CONFIG_INPUT_RUMBLE(p)      "Input",    PRINT("P%zu_Rumble",    (p)),           (0)
@@ -105,6 +108,7 @@ struct sConfig final
         coreUint8 iDistortion;   // fullscreen distortion level
         coreUint8 iShake;        // 
         coreUint8 iFlash;        // 
+        coreUint8 iHitStop;      // 
     }
     Graphics;
 

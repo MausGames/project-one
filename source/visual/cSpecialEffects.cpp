@@ -19,12 +19,19 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)
 , m_iCurLightning    (0u)
+, m_afGustTime       {}
+, m_afGustSide       {}
+, m_fGustAngle       (0.0f)
+, m_fGustSpawn       (0.0f)
+, m_GustList         (SPECIAL_GUSTS)
+, m_iCurGust         (0u)
 , m_iCurBlast        (0u)
-, m_eSoundGuard      (SOUND_FFFF)
+, m_iSoundGuard      (0u)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
 , m_iShakeCount      (0u)
 , m_fFreezeTime      (0.0f)
+, m_iEffectFrame     (0u)
 , m_iEffectCount     (0u)
 , m_iBreakupCount    (0u)
 , m_bActive          (false)
@@ -53,6 +60,15 @@ cSpecialEffects::cSpecialEffects()noexcept
     m_LightningList.DefineProgram("effect_lightning_inst_program");
 
     // 
+    for(coreUintW i = 0u; i < SPECIAL_GUSTS; ++i)
+    {
+        m_aGust[i].DefineModel  (Core::Manager::Object->GetLowQuad());
+        m_aGust[i].DefineTexture(0u, "effect_headlight_point.png");
+        m_aGust[i].DefineProgram("effect_gust_program");
+    }
+    m_GustList.DefineProgram("effect_gust_inst_program");
+
+    // 
     for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
     {
         m_aBlast[i].DefineTexture(0u, "effect_energy.png");
@@ -66,20 +82,67 @@ cSpecialEffects::cSpecialEffects()noexcept
     // 
     const auto nLoadSoundFunc = [this](const eSoundEffect eSoundIndex, const coreChar* pcName)
     {
-        coreSoundPtr& pSoundPtr = m_apSound[eSoundIndex & 0xFFu];
+        ASSERT(eSoundIndex < SOUND_MAX)
+        coreSoundPtr& pSoundPtr = m_apSound[eSoundIndex];
 
         if(!pSoundPtr) pSoundPtr = Core::Manager::Resource->Get<coreSound>(pcName);
         ASSERT(!std::strcmp(pSoundPtr.GetHandle()->GetName(), pcName))
     };
-    nLoadSoundFunc(SOUND_EXPLOSION_ENERGY_SMALL,   "effect_explosion_energy.wav");
-    nLoadSoundFunc(SOUND_EXPLOSION_ENERGY_BIG,     "effect_explosion_energy.wav");
-    nLoadSoundFunc(SOUND_EXPLOSION_PHYSICAL_SMALL, "effect_explosion_physical.wav");
-    nLoadSoundFunc(SOUND_EXPLOSION_PHYSICAL_BIG,   "effect_explosion_physical.wav");
-    nLoadSoundFunc(SOUND_RUSH_SHORT,               "effect_rush.wav");
-    nLoadSoundFunc(SOUND_RUSH_LONG,                "effect_rush.wav");
+    nLoadSoundFunc(SOUND_PLAYER_EXPLOSION,     "player_explosion.wav");
+    nLoadSoundFunc(SOUND_PLAYER_FEEL,          "player_feel.wav");
+    nLoadSoundFunc(SOUND_PLAYER_TURN,          "player_turn.wav");
+    nLoadSoundFunc(SOUND_PLAYER_INTERRUPT,     "player_interrupt.wav");
+    nLoadSoundFunc(SOUND_PLAYER_REPAIR,        "player_repair.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_01,   "enemy_explosion_01.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_02,   "enemy_explosion_02.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_03,   "enemy_explosion_03.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_04,   "enemy_explosion_04.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_05,   "enemy_explosion_05.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_06,   "enemy_explosion_06.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_07,   "enemy_explosion_07.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_08,   "enemy_explosion_08.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_09,   "enemy_explosion_09.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_10,   "enemy_explosion_10.wav");
+    nLoadSoundFunc(SOUND_WEAPON_RAY,           "weapon_ray.wav");
+    nLoadSoundFunc(SOUND_WEAPON_ENEMY,         "weapon_enemy.wav");
+    nLoadSoundFunc(SOUND_BULLET_HIT,           "bullet_hit.wav");
+    nLoadSoundFunc(SOUND_BULLET_REFLECT,       "bullet_reflect.wav");
+    nLoadSoundFunc(SOUND_SHIELD_HIT,           "shield_hit.wav");
+    nLoadSoundFunc(SOUND_SHIELD_DESTROY,       "shield_destroy.wav");
+    nLoadSoundFunc(SOUND_MEDAL_BRONZE,         "medal_bronze.wav");
+    nLoadSoundFunc(SOUND_MEDAL_SILVER,         "medal_silver.wav");
+    nLoadSoundFunc(SOUND_MEDAL_GOLD,           "medal_gold.wav");
+    nLoadSoundFunc(SOUND_MEDAL_PLATINUM,       "medal_platinum.wav");
+    nLoadSoundFunc(SOUND_MEDAL_DARK,           "medal_dark.wav");
+    nLoadSoundFunc(SOUND_BADGE,                "badge.wav");
+    nLoadSoundFunc(SOUND_FRAGMENT_HELPER,      "fragment_helper.wav");
+    nLoadSoundFunc(SOUND_FRAGMENT_APPEAR,      "fragment_appear.wav");
+    nLoadSoundFunc(SOUND_FRAGMENT_COLLECT,     "fragment_collect.wav");
+    nLoadSoundFunc(SOUND_SUMMARY_TEXT,         "summary_text.wav");
+    nLoadSoundFunc(SOUND_SUMMARY_SCORE,        "summary_score.wav");
+    nLoadSoundFunc(SOUND_SUMMARY_MEDAL,        "summary_medal.wav");
+    nLoadSoundFunc(SOUND_CONTINUE_TICK,        "continue_tick.wav");
+    nLoadSoundFunc(SOUND_CONTINUE_ACCEPT,      "continue_accept.wav");
+    nLoadSoundFunc(SOUND_MENU_START,           "menu_start.wav");
+    nLoadSoundFunc(SOUND_MENU_MSGBOX_SHOW,     "menu_msgbox_show.wav");
+    nLoadSoundFunc(SOUND_MENU_MSGBOX_YES,      "menu_msgbox_yes.wav");
+    nLoadSoundFunc(SOUND_MENU_MSGBOX_NO,       "menu_msgbox_no.wav");
+    nLoadSoundFunc(SOUND_MENU_BUTTON_PRESS,    "menu_button_press.wav");
+    nLoadSoundFunc(SOUND_MENU_SWITCH_ENABLED,  "menu_switch_enabled.wav");
+    nLoadSoundFunc(SOUND_MENU_SWITCH_DISABLED, "menu_switch_disabled.wav");
+    nLoadSoundFunc(SOUND_MENU_CHANGE_BUTTON,   "menu_change_button.wav");
+    nLoadSoundFunc(SOUND_MENU_CHANGE_TAB,      "menu_change_tab.wav");
+    nLoadSoundFunc(SOUND_MENU_CHANGE_LINE,     "menu_change_line.wav");
+    nLoadSoundFunc(SOUND_MENU_SCROLL,          "menu_scroll.wav");
+    nLoadSoundFunc(SOUND_MENU_SUB_IN,          "menu_sub_in.wav");
+    nLoadSoundFunc(SOUND_MENU_SUB_OUT,         "menu_sub_out.wav");
+    nLoadSoundFunc(SOUND_EFFECT_SHAKE,         "effect_shake.wav");
 
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
+
+    // 
+    m_ShakeTimer.SetTimeID(0);
 }
 
 
@@ -110,6 +173,9 @@ void cSpecialEffects::Render()
             }
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
                        else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
+
+            // 
+            m_GustList.Render();
 
             // render all blast objects
             const auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
@@ -170,7 +236,8 @@ void cSpecialEffects::Move()
                 m_aParticleDark [0].GetNumActiveParticles() || m_aParticleDark [1].GetNumActiveParticles() ||
                 m_aParticleSmoke[0].GetNumActiveParticles() || m_aParticleSmoke[1].GetNumActiveParticles() ||
                 m_aParticleFire [0].GetNumActiveParticles() || m_aParticleFire [1].GetNumActiveParticles() ||
-                m_LightningList.List()->size()              ||
+                !m_LightningList.List()->empty()            ||
+                !m_GustList     .List()->empty()            ||
                 std::any_of(m_aBlast, m_aBlast + SPECIAL_BLASTS, [](const coreObject3D& oBlast) {return oBlast.GetAlpha() ? true : false;});
     if(m_bActive)
     {
@@ -201,6 +268,33 @@ void cSpecialEffects::Move()
             else DYN_REMOVE(it, *m_LightningList.List())
         }
         m_LightningList.MoveNormal();
+        
+        const coreVector2 vGustDir = coreVector2::Direction(m_fGustAngle);
+
+        // 
+        FOR_EACH_DYN(it, *m_GustList.List())
+        {
+            coreObject3D* pGust = (*it);
+
+            const coreUintW iIndex = pGust - m_aGust;
+            coreFlow& fTime = m_afGustTime[iIndex];
+            
+            fTime.Update(2.5f);
+            
+            const coreVector2 vPos   = MapToAxis(coreVector2(m_afGustSide[iIndex], LERPS(1.2f, -1.2f, fTime) * FOREGROUND_AREA.y), vGustDir);
+            const coreFloat   fScale = 7.0f * (1.0f + 5.0f * SIN(fTime * (1.0f*PI)));
+            
+            pGust->SetPosition (coreVector3(vPos, 0.0f));
+            pGust->SetSize     (coreVector3(1.0f, fScale, 1.0f));
+            pGust->SetDirection(coreVector3(vGustDir, 0.0f));
+            pGust->SetAlpha    (1.0f);
+
+            // 
+            if(fTime < 1.0f)
+                 DYN_KEEP  (it)
+            else DYN_REMOVE(it, *m_GustList.List())
+        }
+        m_GustList.MoveNormal();
 
         // loop through all blast objects
         for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
@@ -220,9 +314,6 @@ void cSpecialEffects::Move()
         }
     }
 
-    // reset sound-guard
-    m_eSoundGuard = SOUND_FFFF;
-
     // 
     if(m_fShakeStrength && m_ShakeTimer.Update(1.0f))
     {
@@ -234,6 +325,13 @@ void cSpecialEffects::Move()
         const coreFloat fPower = I_TO_F(g_CurConfig.Graphics.iShake) * 0.0001f;
         g_pPostProcessing->SetPosition(((g_vHudDirection.InvertedX() * (m_fShakeStrength * fPower * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f))) * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
     }
+}
+
+void cSpecialEffects::MoveAlways()
+{
+    // reset sound-guard
+    m_iSoundGuard = 0u;
+    STATIC_ASSERT(SOUND_MAX <= sizeof(m_iSoundGuard)*8u)
 }
 
 
@@ -466,7 +564,8 @@ void cSpecialEffects::CreateBreakupColor(const coreObject3D* pObject, const core
     // 
     const coreModel*   pModel           = pObject->GetModel().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
-    ASSERT(pModel->GetNumClusters())
+    //ASSERT(pModel->GetNumClusters())
+    if(!pModel->GetNumClusters()) return;
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
@@ -474,14 +573,21 @@ void cSpecialEffects::CreateBreakupColor(const coreObject3D* pObject, const core
     const coreVector4 vRotation = pObject->GetRotation();
     const coreVector2 vCenter   = vRotation.QuatApply(pModel->GetWeightedCenter() * vSize).xy();
     const coreVector2 vSide     = this->__GetBreakupSide();
+    
+    const coreUintW iNum = MIN(500u / iStep, pModel->GetNumVertices());
+    const coreFloat fStep = I_TO_F(pModel->GetNumVertices()) / I_TO_F(iNum);
+    coreFloat fCurrent = 0.0f;
+    
+    ASSERT(fStep >= 1.0f)
 
     // 
-    coreUintW i = 0u;
-    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
+    //coreUintW i = 0u;
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(/*pModel->GetNumVertices() / iStep*/iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[i] * vSize);
+        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[/*i*/F_TO_UI(fCurrent)] * vSize);
         const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
-        i += iStep;
+        //i += iStep;
+        fCurrent += fStep;
 
         pParticle->SetPositionRel(vPosition + vVertex,        vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f,                       1.0f);
@@ -500,7 +606,8 @@ void cSpecialEffects::CreateBreakupDark(const coreObject3D* pObject, const coreF
     // 
     const coreModel*   pModel           = pObject->GetModel().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
-    ASSERT(pModel->GetNumClusters())
+    //ASSERT(pModel->GetNumClusters())
+    if(!pModel->GetNumClusters()) return;
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
@@ -508,14 +615,21 @@ void cSpecialEffects::CreateBreakupDark(const coreObject3D* pObject, const coreF
     const coreVector4 vRotation = pObject->GetRotation();
     const coreVector2 vCenter   = vRotation.QuatApply(pModel->GetWeightedCenter() * vSize).xy();
     const coreVector2 vSide     = this->__GetBreakupSide();
+    
+    const coreUintW iNum = MIN(500u / iStep, pModel->GetNumVertices());
+    const coreFloat fStep = I_TO_F(pModel->GetNumVertices()) / I_TO_F(iNum);
+    coreFloat fCurrent = 0.0f;
+    
+    ASSERT(fStep >= 1.0f)
 
     // 
-    coreUintW i = 0u;
-    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
+    //coreUintW i = 0u;
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(/*pModel->GetNumVertices() / iStep*/iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[i] * vSize);
+        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[/*i*/F_TO_UI(fCurrent)] * vSize);
         const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
-        i += iStep;
+        //i += iStep;
+        fCurrent += fStep;
 
         pParticle->SetPositionRel(vPosition + vVertex,              vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f,                             1.0f);
@@ -602,6 +716,41 @@ void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2 vD
     m_apLightningOwner[m_iCurLightning] = pOwner;
 }
 
+// ****************************************************************
+// 
+void cSpecialEffects::CreateGust(const coreFloat fFrequency, const coreFloat fAngle)
+{
+    // 
+    m_fGustSpawn.Update(10.0f * fFrequency);
+    if(m_fGustSpawn >= 1.0f)
+    {
+        ASSERT(m_fGustSpawn < 2.0f)
+        m_fGustSpawn -= 1.0f;
+
+        // 
+        if(++m_iCurGust >= SPECIAL_GUSTS) m_iCurGust = 0u;
+        coreObject3D& oGust = m_aGust[m_iCurGust];
+
+        m_afGustTime[m_iCurGust] = 0.0f;
+
+        // 
+        const coreVector2 vPos = coreVector2(Core::Rand->Float(-1.0f, 1.0f), 100.0f) * FOREGROUND_AREA;
+
+        m_afGustSide[m_iCurGust] = vPos.x;
+
+        // 
+        oGust.SetPosition(coreVector3(vPos, 0.0f));
+        oGust.SetAlpha   (0.0f);
+
+        // 
+        WARN_IF(m_GustList.List()->count(&oGust)) {}
+           else m_GustList.BindObject(&oGust);
+    }
+
+    // 
+    m_fGustAngle = fAngle;
+}
+
 
 // ****************************************************************
 // 
@@ -662,32 +811,90 @@ void cSpecialEffects::CreateBlastTetra(const coreVector3 vPosition, const coreVe
 
 // ****************************************************************
 // 
-void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex)
+void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
 
     // 
-    if(m_eSoundGuard == eSoundIndex) return; // TODO 1: what about different position? maybe left<>right locking, or moving the sound, or deferring execution     
-    m_eSoundGuard = eSoundIndex;
+    if(HAS_BIT(m_iSoundGuard, eSoundIndex)) return; // TODO 1: what about different position? maybe left<>right locking, or moving the sound, or deferring execution     
+    ADD_BIT(m_iSoundGuard, eSoundIndex)
+
+    // 
+    if(!m_apSound[eSoundIndex].IsUsable()) return;
+    coreSound* pSound = m_apSound[eSoundIndex].GetResource();
 
     // 
     coreFloat fBaseVolume, fBasePitch, fBasePitchRnd;
+    coreBool  bRelative;
+    coreUint8 iType;
     switch(eSoundIndex)
     {
     default: ASSERT(false)
-    case SOUND_EXPLOSION_ENERGY_SMALL:   fBaseVolume = 1.0f; fBasePitch = 1.5f; fBasePitchRnd = 0.1f; break;
-    case SOUND_EXPLOSION_ENERGY_BIG:     fBaseVolume = 3.0f; fBasePitch = 0.8f; fBasePitchRnd = 0.1f; break;
-    case SOUND_EXPLOSION_PHYSICAL_SMALL: fBaseVolume = 1.0f; fBasePitch = 0.9f; fBasePitchRnd = 0.1f; break;
-    case SOUND_EXPLOSION_PHYSICAL_BIG:   fBaseVolume = 1.0f; fBasePitch = 0.6f; fBasePitchRnd = 0.1f; break;
-    case SOUND_RUSH_SHORT:               fBaseVolume = 1.5f; fBasePitch = 1.5f; fBasePitchRnd = 0.1f; break;
-    case SOUND_RUSH_LONG:                fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f; break;
+    case SOUND_PLAYER_EXPLOSION:     fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_PLAYER_FEEL:          fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_PLAYER_TURN:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_PLAYER_INTERRUPT:     fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_PLAYER_REPAIR:        fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_01:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_02:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_03:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_04:   fBaseVolume = 1.4f; fBasePitch = 1.2f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_05:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_06:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_07:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_08:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_09:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_10:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_WEAPON_RAY:           fBaseVolume = 0.8f; fBasePitch = 0.5f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_WEAPON_ENEMY:         fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_BULLET_HIT:           fBaseVolume = 1.5f; fBasePitch = 0.9f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_BULLET_REFLECT:       fBaseVolume = 1.2f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_SHIELD_HIT:           fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_SHIELD_DESTROY:       fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_MEDAL_BRONZE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_MEDAL_SILVER:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_MEDAL_GOLD:           fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_MEDAL_PLATINUM:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_MEDAL_DARK:           fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_BADGE:                fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_FRAGMENT_HELPER:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_FRAGMENT_APPEAR:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_FRAGMENT_COLLECT:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_SUMMARY_TEXT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_SUMMARY_SCORE:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_SUMMARY_MEDAL:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_CONTINUE_TICK:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_CONTINUE_ACCEPT:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_MENU_START:           fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_MSGBOX_SHOW:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_MSGBOX_YES:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_MSGBOX_NO:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_BUTTON_PRESS:    fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_SWITCH_ENABLED:  fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_SWITCH_DISABLED: fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_CHANGE_BUTTON:   fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_CHANGE_TAB:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_CHANGE_LINE:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_SCROLL:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_SUB_IN:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_MENU_SUB_OUT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
+    case SOUND_EFFECT_SHAKE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_PLACEHOLDER:          return;   // #
     }
 
     // 
-    fBasePitch *= (1.0f + Core::Rand->Float(-fBasePitchRnd, fBasePitchRnd));
+    if(!g_CurConfig.Audio.i3DSound) bRelative = true;
 
     // 
-    m_apSound[eSoundIndex & 0xFFu]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, false, SOUND_EFFECT, vPosition);
+    fBaseVolume *= (1.0f + Core::Rand->Float(-0.3f,          0.0f));
+    fBasePitch  *= (1.0f + Core::Rand->Float(-fBasePitchRnd, fBasePitchRnd));
+
+    // 
+    if(pSound->EnableRef(this)) pSound->Stop();
+
+    // 
+    if(bRelative) pSound->PlayRelative(this, fVolume * fBaseVolume, fPitch * fBasePitch, false, iType);
+             else pSound->PlayPosition(this, fVolume * fBaseVolume, fPitch * fBasePitch, false, iType, vPosition);
 }
 
 
@@ -726,7 +933,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
 void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 {
     // 
-    m_fShakeStrength = fStrength;
+    m_fShakeStrength = MAX(m_fShakeStrength, fStrength);
 
     // 
     if(fStrength) this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
@@ -737,7 +944,7 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 // 
 void cSpecialEffects::FreezeScreen(const coreFloat fTime)
 {
-    m_fFreezeTime = fTime;
+    m_fFreezeTime = MAX(m_fFreezeTime, fTime);
 }
 
 
@@ -766,7 +973,6 @@ void cSpecialEffects::MacroExplosionColorSmall(const coreVector3 vPosition, cons
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL, vColor);
     this         ->CreateBlastSphere(vPosition, SPECIAL_BLAST_SMALL,  LERP(coreVector3(1.0f,1.0f,1.0f), vColor, 0.75f));
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
@@ -776,7 +982,6 @@ void cSpecialEffects::MacroExplosionColorBig(const coreVector3 vPosition, const 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG, vColor);
     this         ->CreateBlastSphere(vPosition, SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), vColor, 0.75f));
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
@@ -786,7 +991,6 @@ void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3 vPosition)
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_SMALL);
     this         ->CreateBlastSphere(vPosition, SPECIAL_BLAST_SMALL, COLOR_ENERGY_WHITE);
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
@@ -796,7 +1000,6 @@ void cSpecialEffects::MacroExplosionDarkBig(const coreVector3 vPosition)
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_BIG);
     this         ->CreateBlastSphere(vPosition, SPECIAL_BLAST_BIG, COLOR_ENERGY_WHITE);
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
@@ -806,7 +1009,6 @@ void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3 vPositi
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL,    vColor);
     this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, vColor);
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
@@ -816,7 +1018,6 @@ void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3 vPosition
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG,    vColor);
     this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, vColor);
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
@@ -826,7 +1027,6 @@ void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3 vPositio
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_SMALL);
     this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, COLOR_FIRE_WHITE);
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
@@ -836,7 +1036,6 @@ void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3 vPosition)
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_BIG);
     this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, COLOR_FIRE_WHITE);
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
@@ -845,7 +1044,6 @@ void cSpecialEffects::MacroEruptionColorSmall(const coreVector3 vPosition, const
     // 
     g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
     this         ->CreateBlowColor(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_SMALL, vColor);
-    this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
 }
 
 void cSpecialEffects::MacroEruptionColorBig(const coreVector3 vPosition, const coreVector2 vDirection, const coreVector3 vColor)
@@ -853,7 +1051,6 @@ void cSpecialEffects::MacroEruptionColorBig(const coreVector3 vPosition, const c
     // 
     g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_BIG);
     this         ->CreateBlowColor(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG, vColor);
-    this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
 }
 
 void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3 vPosition, const coreVector2 vDirection)
@@ -861,7 +1058,6 @@ void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3 vPosition, const 
     // 
     g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
     this         ->CreateBlowDark(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_SMALL);
-    this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
 }
 
 void cSpecialEffects::MacroEruptionDarkBig(const coreVector3 vPosition, const coreVector2 vDirection)
@@ -869,7 +1065,6 @@ void cSpecialEffects::MacroEruptionDarkBig(const coreVector3 vPosition, const co
     // 
     g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_BIG);
     this         ->CreateBlowDark(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG);
-    this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
 }
 
 
@@ -885,9 +1080,8 @@ void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const c
 
     // 
     g_pDistortion->CreateWave        (vPosition, 2.5f  * fPower, 3.0f);
-    this         ->CreateBreakupColor(pObject,   52.0f * fPower, F_TO_UI(32.0f * RCP(fPower)), vColor);
+    this         ->CreateBreakupColor(pObject,   52.0f     , F_TO_UI(32.0f * RCP(fPower)), vColor);           
     this         ->CreateSplashFire  (vPosition, 5.0f  * fPower, F_TO_UI(7.0f  *    (fPower)), vColor);
-    this         ->PlaySound         (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen       (SPECIAL_SHAKE_TINY * fPower);
 }
 
@@ -901,9 +1095,8 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 
     // (# more particles than color) 
     g_pDistortion->CreateWave       (vPosition, 2.5f  * fPower, 3.0f);
-    this         ->CreateBreakupDark(pObject,   52.0f * fPower, F_TO_UI(30.0f * RCP(fPower)));
+    this         ->CreateBreakupDark(pObject,   52.0f     , F_TO_UI(30.0f * RCP(fPower)));            
     this         ->CreateSplashFire (vPosition, 5.0f  * fPower, F_TO_UI(14.0f *    (fPower)), COLOR_FIRE_WHITE);
-    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_TINY * fPower);
 }
 
@@ -913,9 +1106,12 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 coreFloat cSpecialEffects::__GetEffectBase()
 {
     // 
-    return Core::Rand->Float(-PI, PI);
-    //m_iEffectCount = (m_iEffectCount + 13u) % 32u;
-    //return (0.0625f*PI) * I_TO_F(m_iEffectCount);
+    //if(m_iEffectFrame != Core::System->GetCurFrame())
+    {
+        m_iEffectFrame = Core::System->GetCurFrame();
+        m_iEffectCount = (m_iEffectCount + 1u) % 144u;  // loop at (110.00621124003 * PI)
+    }
+    return GA * I_TO_F(m_iEffectCount);
 }
 
 

@@ -140,7 +140,7 @@ void cReplayMenu::Move()
                     if(i < m_aInfoList.size())
                     {
                         // 
-                        g_pMenu->ShiftSurface(this, SURFACE_REPLAY_DETAILS, 3.0f, false, false);
+                        g_pMenu->ShiftSurface(this, SURFACE_REPLAY_DETAILS, 3.0f, 1u, false, false);
 
                         // 
                         this->LoadDetails(i);
@@ -185,7 +185,7 @@ void cReplayMenu::Move()
             else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
-                g_pMenu->ShiftSurface(this, SURFACE_REPLAY_OVERVIEW, 3.0f, false, false);
+                g_pMenu->ShiftSurface(this, SURFACE_REPLAY_OVERVIEW, 3.0f, 2u, false, false);
             }
 
             // 
@@ -200,7 +200,7 @@ void cReplayMenu::Move()
     }
 
     // 
-    cMenu::UpdateButton(&m_DefaultTab, true);
+    cMenu::UpdateTab(&m_DefaultTab, true, true);
 
     // 
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());

@@ -23,6 +23,7 @@
 // TODO 1: PLAYER_SHIELD_INTRO always for intro
 // TODO 3: all player bullets get destroyed with death
 // TODO 1: make sure player receives final combo or chain at the end of segment
+// TODO 1: check what variables and states need to be reset on player kill
 
 
 // ****************************************************************
@@ -90,9 +91,9 @@ private:
     // 
     struct sRayData final
     {
-        coreUint32  iFrame;   // 
-        coreVector2 vPos;     // 
-        coreVector2 vDir;     // 
+        coreUint32  iFrame;       // 
+        coreVector2 vPosition;    // 
+        coreVector2 vDirection;   // 
     };
 
 
@@ -134,8 +135,11 @@ private:
     coreUint16     m_iLook;                                   // 
 
     coreVector2 m_vOldDir;                                    // 
+    coreVector2 m_vSmoothOri;                                 // 
+    coreFloat   m_fSmoothTilt;                                // 
     coreFlow    m_fRangeValue;                                // 
     coreFlow    m_fArrowValue;                                // 
+    coreFlow    m_fCircleValue;                               // 
 
     coreObject3D m_Dot;                                       // 
     coreObject3D m_Range;                                     // 
@@ -143,13 +147,13 @@ private:
     coreObject3D m_Wind;                                      // 
     coreObject3D m_Bubble;                                    // 
     coreObject3D m_aShield[2];                                // 
+    coreObject3D m_Circle;                                    // 
     coreObject3D m_Exhaust;                                   // 
 
     coreMap<const coreObject3D*, coreUint32> m_aiCollision;   // 
     coreMap<const coreObject3D*, sRayData>   m_aRayData;      // 
     
-    
-            coreVector2 vTest;
+    coreFlow m_fHitDelay;
 
 
 public:
@@ -183,6 +187,7 @@ public:
 
     // 
     void ShowArrow();
+    void ShowCircle();
 
     // 
     void StartRolling (const coreVector2 vDirection);
@@ -206,6 +211,7 @@ public:
     inline coreBool IsFeeling    ()const {return (m_fFeelTime   >  PLAYER_NO_FEEL);}
     inline coreBool IsIgnoring   ()const {return (m_fIgnoreTime >  PLAYER_NO_IGNORE);}
     inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
+    inline coreBool IsProjectOne ()const {return (GET_BITVALUE(m_iLook, 4u, 0u) == 2u);}
     inline coreBool IsEnemyLook  ()const {return (m_apWeapon[0]->GetID() == cEnemyWeapon::ID);}
 
     // 
@@ -219,6 +225,8 @@ public:
     void DisableBubble();
     void EnableShield ();
     void DisableShield();
+    void EnableCircle ();
+    void DisableCircle();
     void UpdateExhaust(const coreFloat fStrength);
 
     // 
@@ -292,12 +300,14 @@ public:
     {
         this->coreObject3D::SetDirection(vDirection);
 
+        m_Arrow  .SetPosition(this->GetPosition() + vDirection * 6.2f * PLAYER_SIZE_FACTOR);
+        m_Exhaust.SetPosition(this->GetPosition() - vDirection * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR));
+        
         m_Arrow  .SetDirection(vDirection);
         m_Exhaust.SetDirection(vDirection);
     }
     // coreObject3D::Move in teleport
 
-    
 
 private:
     // 
@@ -305,9 +315,11 @@ private:
 
     // 
     coreBool __NewCollision(const coreObject3D* pObject);
+    sRayData __NewRayData  (const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef);
     void     __UpdateCollisions();
-    
-    coreVector4 __NewRayData(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef);
+
+    // 
+    coreBool __CheckPlayerTest(const ePlayerTest eTest)const;
 };
 
 
@@ -319,7 +331,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        if(pPlayer->__CheckPlayerTest(eTest))
         {
             // 
             coreVector3 vNewIntersection;
@@ -332,13 +344,16 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     });
 }
 
+
+// ****************************************************************
+// 
 template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback)
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        if(pPlayer->__CheckPlayerTest(eTest))
         {
             // 
             coreVector3 vNewIntersection;
@@ -351,28 +366,29 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     });
 }
 
+
+// ****************************************************************
+// 
 template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, F&& nCallback)
 {
     // 
-    //Core::Manager::Object->TestCollision(TYPE_PLAYER, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), [&](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount, const coreBool bFirstHit)
     const coreList<coreObject3D*>& oPlayerList = Core::Manager::Object->GetObjectList(TYPE_PLAYER);
     FOR_EACH(it, oPlayerList)
     {
-        cPlayer* pPlayer = d_cast<cPlayer*>(*it);
-
         // 
-        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        cPlayer* pPlayer = d_cast<cPlayer*>(*it);
+        if(pPlayer->__CheckPlayerTest(eTest))
         {
             // 
-            coreFloat fNewHitDistance = 0.0f;
-            coreUint8 iNewHitCount    = 1u;
+            coreFloat fNewHitDistance;
+            coreUint8 iNewHitCount;
             coreBool  bNewFirstHit;
             if(pPlayer->TestCollisionPrecise(vRayPos, vRayDir, pRef, &fNewHitDistance, &iNewHitCount, &bNewFirstHit))
             {
                 nCallback(pPlayer, &fNewHitDistance, iNewHitCount, bNewFirstHit);
             }
         }
-    }//);
+    }
 }
 
 

@@ -29,11 +29,18 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        }
     });
 
     // ################################################################
-    // 
+    // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cGrassBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
@@ -45,34 +52,43 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
-        //g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
-        //g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
-        //g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
-        //g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
-        //g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
+        cGrassBackground* pBackground = d_cast<cGrassBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
+        pBackground->SetGroundDensity(0u, 0.0f);
+        pBackground->SetGroundDensity(1u, 0.0f);
+        pBackground->SetGroundDensity(3u, 1.0f);
+        pBackground->SetDecalDensity (0u, 0.0f);
+        pBackground->SetAirDensity   (0u, 0.0f);
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // 
+    // show mission name
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(STAGE_BEGINNING)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
         {
-            g_pGame->GetInterface()->ShowMission(this);
+            STAGE_FINISH_NOW
         }
+        else
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->GetInterface()->ShowMission(this);
+            }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+            STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        }
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_PLAY
     });
@@ -107,7 +123,10 @@ void cViridoMission::__SetupOwn()
     // TODO 1: vielleicht shield texture offset abhängig vom owner machen (selber owner hat selben offset, mit pointer wert, aber was wenn owner tot ?)
     // TODO 1: vielleicht rauf-runter-rauf-runter statt sinus-welle
     // TODO 1: transparent back-side of shield rectangle should not cause collision
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: zweite runtum-welle sollte andere schilde haben (in+gegen flugrichtung ?)
+    // TODO 1: sollte mit gegner starten die man von unten zerstören kann (aber schilde zur seite haben)
+    // TODO 1: badge: kill one enemy with a reflection
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fWidth = 0.38f;
@@ -140,7 +159,8 @@ void cViridoMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(10, COLOR_SHIP_CYAN);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->Configure(10, 0u, COLOR_SHIP_CYAN);
             });
         });
 
@@ -155,131 +175,166 @@ void cViridoMission::__SetupOwn()
             if(STAGE_SUB(1u))
             {
                 STAGE_RESURRECT(pSquad1, 0u, 1u)
-                this->EnableBarrier( 0u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier( 1u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier( 2u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier( 3u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
+                this->EnableBarrier( 0u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 1u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f,-1.0f), 1.0f);
             }
             else if(STAGE_SUB(2u))
             {
                 STAGE_RESURRECT(pSquad1, 2u, 7u)
-                this->EnableBarrier( 4u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier( 5u, pSquad1->GetEnemy( 3u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier( 6u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier( 7u, pSquad1->GetEnemy( 5u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier( 8u, pSquad1->GetEnemy( 6u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier( 9u, pSquad1->GetEnemy( 7u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
+                this->EnableBarrier( 4u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 5u, pSquad1->GetEnemy( 3u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 6u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 7u, pSquad1->GetEnemy( 5u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 8u, pSquad1->GetEnemy( 6u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 9u, pSquad1->GetEnemy( 7u), coreVector2( 0.0f, 1.0f), 1.0f);
             }
             else if(STAGE_SUB(3u))
             {
                 STAGE_RESURRECT(pSquad1, 8u, 13u)
-                this->EnableBarrier(10u, pSquad1->GetEnemy( 8u), coreVector2( 1.0f, 0.0f).Rotated90(), 0, 1.0f);
-                this->EnableBarrier(11u, pSquad1->GetEnemy( 8u), coreVector2(-1.0f, 0.0f).Rotated90(), 0, 1.0f);
-                this->EnableBarrier(12u, pSquad1->GetEnemy( 9u), coreVector2( 1.0f, 0.0f),             0, 1.0f);
-                this->EnableBarrier(13u, pSquad1->GetEnemy( 9u), coreVector2(-1.0f, 0.0f),             0, 1.0f);
-                this->EnableBarrier(14u, pSquad1->GetEnemy(10u), coreVector2( 1.0f, 0.0f).Rotated90(), 0, 1.0f);
-                this->EnableBarrier(15u, pSquad1->GetEnemy(10u), coreVector2(-1.0f, 0.0f).Rotated90(), 0, 1.0f);
-                this->EnableBarrier(16u, pSquad1->GetEnemy(11u), coreVector2( 1.0f, 0.0f).Rotated90(), 0, 1.0f);
-                this->EnableBarrier(17u, pSquad1->GetEnemy(11u), coreVector2(-1.0f, 0.0f).Rotated90(), 0, 1.0f);
-                this->EnableBarrier(18u, pSquad1->GetEnemy(12u), coreVector2( 1.0f, 0.0f),             0, 1.0f);
-                this->EnableBarrier(19u, pSquad1->GetEnemy(12u), coreVector2(-1.0f, 0.0f),             0, 1.0f);
-                this->EnableBarrier(20u, pSquad1->GetEnemy(13u), coreVector2( 1.0f, 0.0f).Rotated90(), 0, 1.0f);
-                this->EnableBarrier(21u, pSquad1->GetEnemy(13u), coreVector2(-1.0f, 0.0f).Rotated90(), 0, 1.0f);
+                this->EnableBarrier(10u, pSquad1->GetEnemy( 8u), coreVector2( 1.0f, 0.0f).Rotated90(), 1.0f);
+                this->EnableBarrier(11u, pSquad1->GetEnemy( 8u), coreVector2(-1.0f, 0.0f).Rotated90(), 1.0f);
+                this->EnableBarrier(12u, pSquad1->GetEnemy( 9u), coreVector2( 1.0f, 0.0f),             1.0f);
+                this->EnableBarrier(13u, pSquad1->GetEnemy( 9u), coreVector2(-1.0f, 0.0f),             1.0f);
+                this->EnableBarrier(14u, pSquad1->GetEnemy(10u), coreVector2( 1.0f, 0.0f).Rotated90(), 1.0f);
+                this->EnableBarrier(15u, pSquad1->GetEnemy(10u), coreVector2(-1.0f, 0.0f).Rotated90(), 1.0f);
+                this->EnableBarrier(16u, pSquad1->GetEnemy(11u), coreVector2( 1.0f, 0.0f).Rotated90(), 1.0f);
+                this->EnableBarrier(17u, pSquad1->GetEnemy(11u), coreVector2(-1.0f, 0.0f).Rotated90(), 1.0f);
+                this->EnableBarrier(18u, pSquad1->GetEnemy(12u), coreVector2( 1.0f, 0.0f),             1.0f);
+                this->EnableBarrier(19u, pSquad1->GetEnemy(12u), coreVector2(-1.0f, 0.0f),             1.0f);
+                this->EnableBarrier(20u, pSquad1->GetEnemy(13u), coreVector2( 1.0f, 0.0f).Rotated90(), 1.0f);
+                this->EnableBarrier(21u, pSquad1->GetEnemy(13u), coreVector2(-1.0f, 0.0f).Rotated90(), 1.0f);
             }
             else if(STAGE_SUB(4u))
             {
                 STAGE_RESURRECT(pSquad1, 14u, 17u)
-                this->EnableBarrier( 0u, pSquad1->GetEnemy(14u), coreVector2( 0.0f, 1.0f), 0, 3.0f);
-                this->EnableBarrier( 1u, pSquad1->GetEnemy(15u), coreVector2( 1.0f, 0.0f), 0, 3.0f);
-                this->EnableBarrier( 2u, pSquad1->GetEnemy(16u), coreVector2( 0.0f,-1.0f), 0, 3.0f);
-                this->EnableBarrier( 3u, pSquad1->GetEnemy(17u), coreVector2(-1.0f, 0.0f), 0, 3.0f);
+                this->EnableBarrier( 0u, pSquad1->GetEnemy(14u), coreVector2( 0.0f, 1.0f), 3.0f);
+                this->EnableBarrier( 1u, pSquad1->GetEnemy(15u), coreVector2( 1.0f, 0.0f), 3.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy(16u), coreVector2( 0.0f,-1.0f), 3.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy(17u), coreVector2(-1.0f, 0.0f), 3.0f);
             }
             else if(STAGE_SUB(5u))
             {
                 STAGE_RESURRECT(pSquad1, 18u, 23u)
-                this->EnableBarrier( 4u, pSquad1->GetEnemy(18u), coreVector2( 1.0f, 0.0f),             6, 1.0f);
-                this->EnableBarrier( 5u, pSquad1->GetEnemy(18u), coreVector2(-1.0f, 0.0f),             6, 1.0f);
-                this->EnableBarrier( 6u, pSquad1->GetEnemy(19u), coreVector2( 1.0f, 0.0f).Rotated90(), 6, 1.0f);
-                this->EnableBarrier( 7u, pSquad1->GetEnemy(19u), coreVector2(-1.0f, 0.0f).Rotated90(), 6, 1.0f);
-                this->EnableBarrier( 8u, pSquad1->GetEnemy(20u), coreVector2( 1.0f, 0.0f),             6, 1.0f);
-                this->EnableBarrier( 9u, pSquad1->GetEnemy(20u), coreVector2(-1.0f, 0.0f),             6, 1.0f);
-                this->EnableBarrier(10u, pSquad1->GetEnemy(21u), coreVector2( 1.0f, 0.0f).Rotated90(), 6, 1.0f);
-                this->EnableBarrier(11u, pSquad1->GetEnemy(21u), coreVector2(-1.0f, 0.0f).Rotated90(), 6, 1.0f);
-                this->EnableBarrier(12u, pSquad1->GetEnemy(22u), coreVector2( 1.0f, 0.0f),             6, 1.0f);
-                this->EnableBarrier(13u, pSquad1->GetEnemy(22u), coreVector2(-1.0f, 0.0f),             6, 1.0f);
-                this->EnableBarrier(14u, pSquad1->GetEnemy(23u), coreVector2( 1.0f, 0.0f).Rotated90(), 6, 1.0f);
-                this->EnableBarrier(15u, pSquad1->GetEnemy(23u), coreVector2(-1.0f, 0.0f).Rotated90(), 6, 1.0f);
+                this->EnableBarrier( 4u, pSquad1->GetEnemy(18u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 5u, pSquad1->GetEnemy(18u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 6u, pSquad1->GetEnemy(19u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 7u, pSquad1->GetEnemy(19u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 8u, pSquad1->GetEnemy(20u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 9u, pSquad1->GetEnemy(20u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(10u, pSquad1->GetEnemy(21u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(11u, pSquad1->GetEnemy(21u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(12u, pSquad1->GetEnemy(22u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(13u, pSquad1->GetEnemy(22u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(14u, pSquad1->GetEnemy(23u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(15u, pSquad1->GetEnemy(23u), coreVector2( 0.0f, 1.0f), 1.0f);
             }
             else if(STAGE_SUB(6u))
             {
                 STAGE_RESURRECT(pSquad1, 24u, 28u)
-                this->EnableBarrier( 0u, pSquad1->GetEnemy(24u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier( 1u, pSquad1->GetEnemy(24u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier( 2u, pSquad1->GetEnemy(25u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier( 3u, pSquad1->GetEnemy(26u), coreVector2(-1.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(16u, pSquad1->GetEnemy(26u), coreVector2( 1.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(17u, pSquad1->GetEnemy(27u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(18u, pSquad1->GetEnemy(28u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(19u, pSquad1->GetEnemy(28u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
+                this->EnableBarrier( 0u, pSquad1->GetEnemy(24u), coreVector2( 0.0f,-1.0f),              1.0f);
+                this->EnableBarrier( 1u, pSquad1->GetEnemy(24u), coreVector2(-1.0f, 0.0f),              1.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy(25u), coreVector2( 0.0f,-1.0f),              1.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy(26u), coreVector2(-1.0f,-1.0f).Normalized(), 1.0f);
+                this->EnableBarrier(16u, pSquad1->GetEnemy(26u), coreVector2( 1.0f,-1.0f).Normalized(), 1.0f);
+                this->EnableBarrier(17u, pSquad1->GetEnemy(27u), coreVector2( 0.0f,-1.0f),              1.0f);
+                this->EnableBarrier(18u, pSquad1->GetEnemy(28u), coreVector2( 0.0f,-1.0f),              1.0f);
+                this->EnableBarrier(19u, pSquad1->GetEnemy(28u), coreVector2( 1.0f, 0.0f),              1.0f);
             }
             else if(STAGE_SUB(7u))
             {
                 STAGE_RESURRECT(pSquad1, 29u, 32u)
-                this->EnableBarrier( 6u, pSquad1->GetEnemy(29u), coreVector2( 0.0f, 1.0f), 0, 3.0f);
-                this->EnableBarrier( 7u, pSquad1->GetEnemy(30u), coreVector2( 0.0f, 1.0f), 0, 3.0f);
-                this->EnableBarrier( 8u, pSquad1->GetEnemy(31u), coreVector2( 0.0f, 1.0f), 0, 3.0f);
-                this->EnableBarrier( 9u, pSquad1->GetEnemy(32u), coreVector2( 0.0f, 1.0f), 0, 3.0f);
+                this->EnableBarrier( 6u, pSquad1->GetEnemy(29u), coreVector2( 0.0f, 1.0f), 3.0f);
+                this->EnableBarrier( 7u, pSquad1->GetEnemy(30u), coreVector2( 0.0f, 1.0f), 3.0f);
+                this->EnableBarrier( 8u, pSquad1->GetEnemy(31u), coreVector2( 0.0f, 1.0f), 3.0f);
+                this->EnableBarrier( 9u, pSquad1->GetEnemy(32u), coreVector2( 0.0f, 1.0f), 3.0f);
             }
             else if(STAGE_SUB(8u))
             {
                 STAGE_RESURRECT(pSquad1, 33u, 36u)
-                this->EnableBarrier( 0u, pSquad1->GetEnemy(33u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
-                this->EnableBarrier( 1u, pSquad1->GetEnemy(34u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
-                this->EnableBarrier( 2u, pSquad1->GetEnemy(35u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
-                this->EnableBarrier( 3u, pSquad1->GetEnemy(36u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
+                this->EnableBarrier( 0u, pSquad1->GetEnemy(33u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 1u, pSquad1->GetEnemy(34u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy(35u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy(36u), coreVector2( 0.0f, 1.0f), 1.0f);
             }
             else if(STAGE_SUB(9u))
             {
                 STAGE_RESURRECT(pSquad1, 37u, 40u)
-                this->EnableBarrier( 6u, pSquad1->GetEnemy(37u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
-                this->EnableBarrier( 7u, pSquad1->GetEnemy(38u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
-                this->EnableBarrier( 8u, pSquad1->GetEnemy(39u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
-                this->EnableBarrier( 9u, pSquad1->GetEnemy(40u), coreVector2( 0.0f,-1.0f), INT8_MAX, 1.0f);
+                this->EnableBarrier( 6u, pSquad1->GetEnemy(37u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 7u, pSquad1->GetEnemy(38u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 8u, pSquad1->GetEnemy(39u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 9u, pSquad1->GetEnemy(40u), coreVector2( 0.0f, 1.0f), 1.0f);
             }
             else if(STAGE_SUB(10u))
             {
                 STAGE_RESURRECT(pSquad1, 41u, 52u)
-                this->EnableBarrier( 0u, pSquad1->GetEnemy(41u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier( 1u, pSquad1->GetEnemy(41u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier( 2u, pSquad1->GetEnemy(43u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier( 3u, pSquad1->GetEnemy(43u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier( 4u, pSquad1->GetEnemy(44u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier( 5u, pSquad1->GetEnemy(44u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(10u, pSquad1->GetEnemy(44u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(11u, pSquad1->GetEnemy(45u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(12u, pSquad1->GetEnemy(46u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(13u, pSquad1->GetEnemy(47u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(14u, pSquad1->GetEnemy(49u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(15u, pSquad1->GetEnemy(49u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(16u, pSquad1->GetEnemy(50u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(17u, pSquad1->GetEnemy(50u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(18u, pSquad1->GetEnemy(50u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier(19u, pSquad1->GetEnemy(51u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                this->EnableBarrier(20u, pSquad1->GetEnemy(51u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                this->EnableBarrier(21u, pSquad1->GetEnemy(52u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(22u, pSquad1->GetEnemy(52u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                this->EnableBarrier(23u, pSquad1->GetEnemy(52u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
+                this->EnableBarrier( 0u, pSquad1->GetEnemy(41u), coreVector2(-1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 1u, pSquad1->GetEnemy(41u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy(43u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy(43u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 4u, pSquad1->GetEnemy(44u), coreVector2(-1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 5u, pSquad1->GetEnemy(44u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(10u, pSquad1->GetEnemy(44u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(11u, pSquad1->GetEnemy(45u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(12u, pSquad1->GetEnemy(46u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(13u, pSquad1->GetEnemy(47u), coreVector2(-1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(14u, pSquad1->GetEnemy(49u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(15u, pSquad1->GetEnemy(49u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(16u, pSquad1->GetEnemy(50u), coreVector2(-1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(17u, pSquad1->GetEnemy(50u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(18u, pSquad1->GetEnemy(50u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(19u, pSquad1->GetEnemy(51u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(20u, pSquad1->GetEnemy(51u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(21u, pSquad1->GetEnemy(52u), coreVector2(-1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(22u, pSquad1->GetEnemy(52u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(23u, pSquad1->GetEnemy(52u), coreVector2( 0.0f, 1.0f), 1.0f);
 
-                //this->EnableBarrier(24u, pSquad1->GetEnemy(42u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                //this->EnableBarrier(25u, pSquad1->GetEnemy(42u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                //this->EnableBarrier(26u, pSquad1->GetEnemy(43u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                //this->EnableBarrier(27u, pSquad1->GetEnemy(45u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                //this->EnableBarrier(28u, pSquad1->GetEnemy(46u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                //this->EnableBarrier(29u, pSquad1->GetEnemy(47u), coreVector2( 0.0f,-1.0f), 0, 1.0f);
-                //this->EnableBarrier(30u, pSquad1->GetEnemy(47u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
-                //this->EnableBarrier(31u, pSquad1->GetEnemy(48u), coreVector2(-1.0f, 0.0f), 0, 1.0f);
-                //this->EnableBarrier(32u, pSquad1->GetEnemy(48u), coreVector2( 1.0f, 0.0f), 0, 1.0f);
-                //this->EnableBarrier(33u, pSquad1->GetEnemy(49u), coreVector2( 0.0f, 1.0f), 0, 1.0f);
+                //this->EnableBarrier(24u, pSquad1->GetEnemy(42u), coreVector2(-1.0f, 0.0f), 1.0f);
+                //this->EnableBarrier(25u, pSquad1->GetEnemy(42u), coreVector2( 1.0f, 0.0f), 1.0f);
+                //this->EnableBarrier(26u, pSquad1->GetEnemy(43u), coreVector2( 0.0f, 1.0f), 1.0f);
+                //this->EnableBarrier(27u, pSquad1->GetEnemy(45u), coreVector2( 0.0f, 1.0f), 1.0f);
+                //this->EnableBarrier(28u, pSquad1->GetEnemy(46u), coreVector2(-1.0f, 0.0f), 1.0f);
+                //this->EnableBarrier(29u, pSquad1->GetEnemy(47u), coreVector2( 0.0f,-1.0f), 1.0f);
+                //this->EnableBarrier(30u, pSquad1->GetEnemy(47u), coreVector2( 0.0f, 1.0f), 1.0f);
+                //this->EnableBarrier(31u, pSquad1->GetEnemy(48u), coreVector2(-1.0f, 0.0f), 1.0f);
+                //this->EnableBarrier(32u, pSquad1->GetEnemy(48u), coreVector2( 1.0f, 0.0f), 1.0f);
+                //this->EnableBarrier(33u, pSquad1->GetEnemy(49u), coreVector2( 0.0f, 1.0f), 1.0f);
+            }
+        }
+
+        if(m_iStageSub == 5u)
+        {
+            constexpr coreVector2 avBase[] =
+            {
+                coreVector2( 1.0f, 0.0f),
+                coreVector2(-1.0f, 0.0f),
+                coreVector2( 1.0f, 0.0f).Rotated90(),
+                coreVector2(-1.0f, 0.0f).Rotated90()
+            };
+
+            for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
+            {
+                coreObject3D& oBarrier = m_aBarrierRaw[i];
+                if(!m_apBarrierOwner[i]) continue;
+
+                const coreFloat   fTime = d_cast<const cEnemy*>(m_apBarrierOwner[i])->GetLifeTime();
+                const coreVector2 vRota = coreVector2::Direction(fTime * (0.6f*PI));
+                const coreVector2 vDir  = MapToAxis(avBase[i % 4u], vRota);
+
+                oBarrier.SetDirection(coreVector3(vDir, 0.0f));
+            }
+        }
+        else if((m_iStageSub == 8u) || (m_iStageSub == 9u))
+        {
+            for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
+            {
+                coreObject3D& oBarrier = m_aBarrierRaw[i];
+                if(!m_apBarrierOwner[i]) continue;
+
+                const coreVector2 vDir = -m_apBarrierOwner[i]->GetPosition().xy().Normalized();
+
+                oBarrier.SetDirection(coreVector3(vDir, 0.0f));
             }
         }
 
@@ -395,19 +450,54 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("EINS", {60.0f, 80.0f, 100.0f, 120.0f})
+        cGrassBackground* pBackground = d_cast<cGrassBackground*>(g_pEnvironment->GetBackground());
+
+        if(STAGE_BEGINNING) pBackground->GetOutdoor()->LerpHeight(1.0f, 0.0f);
+
+        const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
+
+        pBackground->SetGroundDensity(0u, STEP(0.5f, 1.0f, fEnvLerp));
+        pBackground->SetGroundDensity(1u, STEP(0.5f, 1.0f, fEnvLerp));
+        pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetDecalDensity (0u, STEP(0.5f, 1.0f, fEnvLerp));
+        pBackground->SetAirDensity   (0u, STEP(0.5f, 1.0f, fEnvLerp));
+
+        STAGE_WAVE(0u, "EINS", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
             this->DisableBarrier(i, false);
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        cGrassBackground* pBackground = d_cast<cGrassBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetOutdoor()->LerpHeightNow(1.0f, 0.0f);
+        pBackground->SetGroundDensity(0u, 1.0f);
+        pBackground->SetGroundDensity(1u, 1.0f);
+        pBackground->SetGroundDensity(3u, 0.0f);
+        pBackground->SetDecalDensity (0u, 1.0f);
+        pBackground->SetAirDensity   (0u, 1.0f);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -422,10 +512,17 @@ void cViridoMission::__SetupOwn()
     // bullets have a 3-delay pattern, but on the side and when enemies die the pattern might break
     // fast line shows the player that there is no harm, in preparation for the multi-line wave
     // enemies in 3 need to be positioned to easily kill them (to reduce pressure, which is reserved for later)
-    // TODO 1: purple helper visible at border of one laser
-    // TODO 1: fix laser collision
-    // TODO 1: invert rotation of cross, or of 5-eck ? (eher 5-eck)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // gegner ohne linie dürfen sich nicht zu schnell bewegen, weil es den spieler überfordert, vor allem mit der task
+    // die beiden drehenden gruppen sollten sich nicht in die selbe richtung drehen
+    // die mehrfach-linien sollen ein schönes muster nach unten schießen, dem man ausweichen muss während man gegen die wand gedrückt wird
+    // TASK: 4 kugerl die auf linie liegen und nach kurzer zeit verschwinden müssen abgeschossen werden
+    // TASK: gegner in finaler phase in bestimmter reihenfolge töten, ändert sich je nach start-gegner
+    // TASK: markierte linie muss für 1 sekunde berührt werden (pole dancing)
+    // COOP: nothing
+    // TODO 1: fix laser collision (on intersecting lasers)
+    // TODO 1: effect on laser when pole dancing
+    // TODO 1: HARD: laser halten geschosse auf
+    // TODO 1: MAIN: regular score, sound
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumData = 8u;
@@ -434,23 +531,30 @@ void cViridoMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(30, COLOR_SHIP_PURPLE);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_PURPLE);
             });
         });
 
-        STAGE_GET_START(iNumData * 3u + 1u)
+        STAGE_GET_START(iNumData * 3u + 5u)
             STAGE_GET_FLOAT_ARRAY(afDistance, iNumData)
             STAGE_GET_VEC2_ARRAY (avMove,     iNumData)
+            STAGE_GET_FLOAT      (fGlobeTime)
+            STAGE_GET_UINT       (iGlobeCount)
             STAGE_GET_UINT       (iCurLaser)
+            STAGE_GET_UINT       (iOrderCur)
+            STAGE_GET_UINT       (iOrderType)
         STAGE_GET_END
 
         ASSERT(pSquad1->GetNumEnemiesAlive() <= iNumData)
 
-        for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
+        if(m_iStageSub < 9u)
         {
-            if(m_apLaserOwner[i] && m_apLaserOwner[i]->HasStatus(ENEMY_STATUS_DEAD))
-                this->DisableLaser(i, true);
+            for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
+            {
+                if(m_apLaserOwner[i] && m_apLaserOwner[i]->HasStatus(ENEMY_STATUS_DEAD))
+                    this->DisableLaser(i, true);
+            }
         }
 
         if(STAGE_CLEARED)
@@ -459,6 +563,12 @@ void cViridoMission::__SetupOwn()
             {
                 this->EnableLaser(iCurLaser, pSquad1->GetEnemy(iIndex));
                 if(++iCurLaser >= VIRIDO_LASERS) iCurLaser = 0u;
+            };
+
+            const auto nEnableGlobeFunc = [&](const coreFloat fTime)
+            {
+                m_Globe.Resurrect();
+                fGlobeTime = fTime;
             };
 
             if(STAGE_SUB(1u))
@@ -475,6 +585,8 @@ void cViridoMission::__SetupOwn()
                 nEnableLaserFunc( 4u);
                 nEnableLaserFunc( 5u);
                 nEnableLaserFunc( 6u);
+
+                nEnableGlobeFunc(10.0f);
             }
             else if(STAGE_SUB(3u))
             {
@@ -483,6 +595,8 @@ void cViridoMission::__SetupOwn()
                 nEnableLaserFunc( 8u);
                 nEnableLaserFunc( 9u);
                 nEnableLaserFunc(10u);
+
+                this->StartPoleDance(2u);
             }
             else if(STAGE_SUB(4u))
             {
@@ -491,6 +605,8 @@ void cViridoMission::__SetupOwn()
                 nEnableLaserFunc(12u);
                 nEnableLaserFunc(13u);
                 nEnableLaserFunc(14u);
+
+                nEnableGlobeFunc(10.0f);
             }
             else if(STAGE_SUB(5u))
             {
@@ -508,6 +624,8 @@ void cViridoMission::__SetupOwn()
                 nEnableLaserFunc(21u);
                 nEnableLaserFunc(22u);
                 nEnableLaserFunc(23u);
+
+                nEnableGlobeFunc(5.0f);
             }
             else if(STAGE_SUB(7u))
             {
@@ -527,6 +645,8 @@ void cViridoMission::__SetupOwn()
                 nEnableLaserFunc(32u);
                 nEnableLaserFunc(33u);
                 nEnableLaserFunc(34u);
+
+                nEnableGlobeFunc(5.0f);
             }
             else if(STAGE_SUB(9u))
             {
@@ -535,6 +655,13 @@ void cViridoMission::__SetupOwn()
             }
 
             std::memset(afDistance, 0, sizeof(coreFloat) * iNumData);
+        }
+
+        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
+
+        if((m_iStageSub == 7u) && STAGE_BEGINNING2)
+        {
+            pHelper->Resurrect();
         }
 
         constexpr coreUintW iSharedIndex = 35u;
@@ -570,14 +697,14 @@ void cViridoMission::__SetupOwn()
 
             case 15u: vBasePos = coreVector2( 0.0f, 0.0f); vBaseDir = coreVector2( 0.0f, 1.0f);              fDelay = 0.0f;        fShift =    0.0f; fSide =  1.0f; break;
 
-            case 16u: vBasePos = coreVector2( 0.0f,-0.8f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.0f * 0.9f; fShift =  -70.0f; fSide =  1.0f; break;
-            case 17u: vBasePos = coreVector2( 0.0f,-0.7f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.1f * 0.9f; fShift =  -70.0f; fSide = -1.0f; break;
-            case 18u: vBasePos = coreVector2( 0.0f,-0.6f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.2f * 0.9f; fShift =  -70.0f; fSide =  1.0f; break;
-            case 19u: vBasePos = coreVector2( 0.0f,-0.5f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.3f * 0.9f; fShift =  -70.0f; fSide = -1.0f; break;
-            case 20u: vBasePos = coreVector2( 0.0f,-0.4f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.4f * 0.9f; fShift =  -70.0f; fSide =  1.0f; break;
-            case 21u: vBasePos = coreVector2( 0.0f,-0.3f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.5f * 0.9f; fShift =  -70.0f; fSide = -1.0f; break;
-            case 22u: vBasePos = coreVector2( 0.0f,-0.2f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.6f * 0.9f; fShift =  -70.0f; fSide =  1.0f; break;
-            case 23u: vBasePos = coreVector2( 0.0f,-0.1f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.7f * 0.9f; fShift =  -70.0f; fSide = -1.0f; break;
+            case 16u: vBasePos = coreVector2( 0.0f,-0.8f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.0f * 0.9f; fShift =    0.0f; fSide =  1.0f; break;
+            case 17u: vBasePos = coreVector2( 0.0f,-0.7f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.1f * 0.9f; fShift =    0.0f; fSide = -1.0f; break;
+            case 18u: vBasePos = coreVector2( 0.0f,-0.6f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.2f * 0.9f; fShift =    0.0f; fSide =  1.0f; break;
+            case 19u: vBasePos = coreVector2( 0.0f,-0.5f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.3f * 0.9f; fShift =    0.0f; fSide = -1.0f; break;
+            case 20u: vBasePos = coreVector2( 0.0f,-0.4f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.4f * 0.9f; fShift =    0.0f; fSide =  1.0f; break;
+            case 21u: vBasePos = coreVector2( 0.0f,-0.3f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.5f * 0.9f; fShift =    0.0f; fSide = -1.0f; break;
+            case 22u: vBasePos = coreVector2( 0.0f,-0.2f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.6f * 0.9f; fShift =    0.0f; fSide =  1.0f; break;
+            case 23u: vBasePos = coreVector2( 0.0f,-0.1f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.7f * 0.9f; fShift =    0.0f; fSide = -1.0f; break;
 
             case 24u: vBasePos = coreVector2( 0.0f, 0.1f); vBaseDir = coreVector2( 1.0f, 0.0f);              fDelay = 0.0f;        fShift =    0.0f; fSide =  1.0f; break;
             case 25u: vBasePos = coreVector2( 0.0f, 0.0f); vBaseDir = coreVector2(-1.0f, 0.0f);              fDelay = 0.0f;        fShift =  -20.0f; fSide = -1.0f; break;
@@ -591,7 +718,7 @@ void cViridoMission::__SetupOwn()
             case 32u:
             case 33u:
             case 34u:
-                vBasePos = coreVector2(0.0f,0.0f); vBaseDir = coreVector2::Direction(I_TO_F(i) * (0.4f*PI)); fDelay = 0.0f; fShift = 0.0f; fSide = 1.0f;
+                vBasePos = coreVector2(0.0f,0.0f); vBaseDir = coreVector2::Direction(I_TO_F(i) * (0.4f*PI)); fDelay = 0.0f; fShift = 0.0f; fSide = -1.0f;
                 break;
 
             case 35u:
@@ -614,22 +741,22 @@ void cViridoMission::__SetupOwn()
             coreVector2 vLerpPos;
                  if(i <  7u) vLerpPos = LERPB(vBasePos - vTan * 2.0f, vBasePos,          MIN1(fTime * 1.2f)) * (FOREGROUND_AREA);
             else if(i < 11u) vLerpPos = LERP (-vTan,                  vTan,             FRACT(fTime * 0.6f)) * (FOREGROUND_AREA * 1.2f);
-            else if(i < 15u) vLerpPos = LERP (-vTan,                  vTan, 0.5f - 0.5f * COS(fTime * 2.1f)) * (FOREGROUND_AREA * 1.2f);
+            else if(i < 15u) vLerpPos = LERP (-vTan,                  vTan, 0.5f - 0.5f * COS(fTime * 2.5f)) * (FOREGROUND_AREA * 1.2f);
             else if(i < 16u) vLerpPos = LERP (-vTan,                  vTan,             FRACT(fTime * 2.0f)) * (FOREGROUND_AREA * 1.2f);
-            else if(i < 24u) vLerpPos = LERP (-vTan,                  vTan,             FRACT(fTime * 0.6f)) * (FOREGROUND_AREA * 1.2f);
-            else if(i < 30u) vLerpPos = LERPB(vBasePos - vTan * 2.0f, vBasePos,          MIN1(fTime * 1.2f)) * (FOREGROUND_AREA)        * coreMatrix3::Rotation(fTime * 2.0f).m12();
-            else if(i < 35u) vLerpPos = LERPB(-vTan * 1.4f,          -vTan * 0.5f,       MIN1(fTime * 1.2f)) * (FOREGROUND_AREA * 1.2f) * coreMatrix3::Rotation(fTime * 1.1f).m12();
+            else if(i < 24u) vLerpPos = LERP (-vTan,                  vTan,             FRACT(fTime * 1.2f)) * (FOREGROUND_AREA * 1.2f);
+            else if(i < 30u) vLerpPos = LERPB(vBasePos - vTan * 2.0f, vBasePos,          MIN1(fTime * 1.2f)) * (FOREGROUND_AREA)        * coreMatrix3::Rotation(fTime *  2.0f).m12();
+            else if(i < 35u) vLerpPos = LERPB(-vTan * 1.4f,          -vTan * 0.5f,       MIN1(fTime * 1.2f)) * (FOREGROUND_AREA * 1.2f) * coreMatrix3::Rotation(fTime * -1.1f).m12();
             else if(i < 43u) vLerpPos = LERP (-vTan,                  vTan,             FRACT(fTime * 0.8f)) * (FOREGROUND_AREA * 1.2f);
             else ASSERT(false)
 
             coreVector2 vLerpDir;
                  if(i <  7u) vLerpDir = vBaseDir;
             else if(i < 11u) vLerpDir = vBaseDir;
-            else if(i < 15u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime * 1.65f).m12();
+            else if(i < 15u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime *  2.0f).m12();
             else if(i < 16u) vLerpDir = vBaseDir;
             else if(i < 24u) vLerpDir = vBaseDir;
-            else if(i < 30u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime * 2.0f).m12();
-            else if(i < 35u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime * 1.1f).m12();
+            else if(i < 30u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime *  2.0f).m12();
+            else if(i < 35u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime * -1.1f).m12();
             else if(i < 43u) vLerpDir = vBaseDir;
             else ASSERT(false)
 
@@ -685,6 +812,9 @@ void cViridoMission::__SetupOwn()
                         {
                             avMove[j] = coreVector2::Direction((I_TO_F(j) - 3.5f) * (-0.12f*PI));
                         }
+
+                        iOrderType = i;
+                        ASSERT(iOrderType)
                     }
                 }
                 else
@@ -692,7 +822,7 @@ void cViridoMission::__SetupOwn()
                     ASSERT((i - iSharedIndex) < iNumData)
 
                     coreVector2& vMove    = avMove[i - iSharedIndex];
-                    coreVector2  vNewPos2 = pEnemy->GetPosition().xy() + vMove * (30.0f * TIME);
+                    coreVector2  vNewPos2 = pEnemy->GetPosition().xy() + vMove * (20.0f * TIME);
 
                          if((vNewPos2.x < -FOREGROUND_AREA.x * 1.1f) && (vMove.x < 0.0f)) {vNewPos2.x -= 2.0f * (vNewPos2.x + FOREGROUND_AREA.x * 1.1f); vMove.x =  ABS(vMove.x);}
                     else if((vNewPos2.x >  FOREGROUND_AREA.x * 1.1f) && (vMove.x > 0.0f)) {vNewPos2.x -= 2.0f * (vNewPos2.x - FOREGROUND_AREA.x * 1.1f); vMove.x = -ABS(vMove.x);}
@@ -701,27 +831,108 @@ void cViridoMission::__SetupOwn()
 
                     pEnemy->SetPosition (coreVector3(vNewPos2, 0.0f));
                     pEnemy->SetDirection(coreVector3(vMove,    0.0f));
+
+                    if(iOrderType)
+                    {
+                        const coreUint32 iOrderIndex = (iOrderType + (i - ((i > iOrderType) ? 1u : 0u)) * 3u) % (iNumData - 1u);
+
+                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, coreData::ToChars(iOrderIndex + 1u), pEnemy->GetPosition(), COLOR_MENU_INSIDE * ((iOrderIndex == iOrderCur) ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
+
+                        if(pEnemy->ReachedDeath())
+                        {
+                            if(iOrderIndex == iOrderCur)
+                            {
+                                if(++iOrderCur == iNumData - 1u) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                            }
+                            else
+                            {
+                                iOrderType = 0u;
+                            }
+                        }
+                    }
                 }
             }
 
-            if(STAGE_TICK_TIME(12.0f, 0.0f) && ((s_iTick % 12u) < 3u))
+            if(!g_pGame->IsEasy() && STAGE_TICK_TIME2(12.0f, 0.0f) && ((s_iTick % 12u) >= 9u))
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.9f, pEnemy, vPos,  vDir)->ChangeSize(1.1f)->SetFlyTime(-0.5f);   // preserve patterns in rotation waves
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.9f, pEnemy, vPos, -vDir)->ChangeSize(1.1f)->SetFlyTime(-0.5f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.9f, pEnemy, vPos,  vDir)->ChangeSize(1.2f)->SetFlyTime(-0.5f);   // preserve patterns in rotation waves
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.9f, pEnemy, vPos, -vDir)->ChangeSize(1.2f)->SetFlyTime(-0.5f);
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_CYAN);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_PLACEHOLDER);
+            }
+
+            if((i == 6u) || (i == 14u) || (i == 19u) || (i == 30u))
+            {
+                if(!m_Globe.HasStatus(ENEMY_STATUS_DEAD))
+                {
+                    fGlobeTime -= 1.0f * TIME;
+                    if(fGlobeTime <= 0.0f)
+                    {
+                        m_Globe.Kill(false);
+                        g_pSpecialEffects->CreateSplashColor(m_Globe.GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_PURPLE);
+                        g_pSpecialEffects->PlaySound(m_Globe.GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
+                    }
+
+                    coreFloat fGlobeDist;
+                    switch(i)
+                    {
+                    default: ASSERT(false)
+                    case  6u: fGlobeDist =   0.0f; break;
+                    case 14u: fGlobeDist =   0.0f; break;
+                    case 19u: fGlobeDist =  30.0f; break;
+                    case 30u: fGlobeDist = -30.0f; break;
+                    }
+
+                    m_Globe.SetPosition(coreVector3(vLerpPos + vLerpDir * fGlobeDist, 0.0f));
+                    m_Globe.SetSize    (coreVector3(1.0f,1.0f,1.0f) * 3.0f * BLENDH3(MIN1(fGlobeTime)));
+
+                    if(pEnemy->ReachedDeath() || m_Globe.WasDamaged())
+                    {
+                        m_Globe.Kill(false);
+                        g_pSpecialEffects->MacroExplosionColorSmall(m_Globe.GetPosition(), COLOR_ENERGY_PURPLE);
+                    }
+
+                    if(m_Globe.WasDamaged())
+                    {
+                        if(++iGlobeCount == 4u) STAGE_BADGE(1u, BADGE_NORMAL, m_Globe.GetPosition())
+                        else g_pGame->GetCombatText()->DrawProgress(iGlobeCount, 4u, m_Globe.GetPosition());
+
+                        g_pSpecialEffects->PlaySound(m_Globe.GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
+                    }
+                }
+            }
+
+            if((i == 25u) || (i == 28u))
+            {
+                pHelper->SetPosition(coreVector3(vLerpPos, 0.0f));
+                if(pEnemy->ReachedDeath())
+                {
+                    pHelper->Kill(true);
+                }
             }
         });
 
-        STAGE_WAVE("ZWEI", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(m_iPoleIndex != UINT8_MAX)
+        {
+            if(m_iPoleCount >= 30u)
+            {
+                STAGE_BADGE(0u, BADGE_EASY, (*m_Laser.List())[m_iPoleIndex]->GetPosition())
+                this->EndPoleDance(true);
+            }
+        }
+
+        STAGE_WAVE(1u, "ZWEI", {40.0f, 60.0f, 80.0f, 100.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
             this->DisableLaser(i, false);
@@ -730,14 +941,9 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -759,11 +965,14 @@ void cViridoMission::__SetupOwn()
     // TODO 1: hard mode: multiple jumps
     // TODO 1: badge: jump over big enemy
     // TODO 1: helper gets stomped out of side on big enemy
-    // TODO 1: player sollte auch ein _TOP attribute bekommen, und einen eigenen shadow (wie die gegner)
+    // TODO 1: player sollte auch ein _TOP attribute bekommen, und einen eigenen shadow (wie die gegner, aber mit spieler-farbe oder schwarz)
     // TODO 1: 2x2 blöcke sollten mehr in die mitte um am rand platz zu geben, schachmuster sollte mehr verteilt sein um in der mitte mehr platz zu geben
     // TODO 1: easy: only middle 2 bullets
     // TODO 1: position-reduction also for player ?
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: badge: a stray jumper for one landing
+    // TODO 1: badge: numbers appear once in the shadows, order of killing
+    // TODO 1: maybe add shift in first 2 groups
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData  = 12u;
@@ -776,12 +985,12 @@ void cViridoMission::__SetupOwn()
                 if(i == iBigIndex)
                 {
                     pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.8f);
-                    pEnemy->Configure(120, COLOR_SHIP_ORANGE);
+                    pEnemy->Configure(120, 0u, COLOR_SHIP_ORANGE);
                 }
                 else
                 {
                     pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                    pEnemy->Configure(10, COLOR_SHIP_ORANGE);
+                    pEnemy->Configure(10, 0u, COLOR_SHIP_ORANGE);
                 }
             });
         });
@@ -1062,10 +1271,10 @@ void cViridoMission::__SetupOwn()
                             {
                                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f));
 
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos,  vDir)            ->ChangeSize(1.4f);
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos,  vDir.Rotated90())->ChangeSize(1.4f);
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos, -vDir)            ->ChangeSize(1.4f);
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos, -vDir.Rotated90())->ChangeSize(1.4f);
+                                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos,  vDir)            ->ChangeSize(1.4f);
+                                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos,  vDir.Rotated90())->ChangeSize(1.4f);
+                                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos, -vDir)            ->ChangeSize(1.4f);
+                                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos, -vDir.Rotated90())->ChangeSize(1.4f);
                             }
 
                             fPlayerJump = 1.0f;
@@ -1078,9 +1287,9 @@ void cViridoMission::__SetupOwn()
                                 const coreVector2 vDir = pEnemy->AimAtPlayerDual(i % 2u).Normalized();
                                 const coreVector2 vTan = vDir.Rotated90() * 3.0f;
 
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos + vTan, vDir)->ChangeSize(1.4f);
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos,        vDir)->ChangeSize(1.4f);
-                                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos - vTan, vDir)->ChangeSize(1.4f);
+                                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos + vTan, vDir)->ChangeSize(1.4f);
+                                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos,        vDir)->ChangeSize(1.4f);
+                                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos - vTan, vDir)->ChangeSize(1.4f);
                             }
                             else
                             {
@@ -1089,9 +1298,9 @@ void cViridoMission::__SetupOwn()
                                     const coreVector2 vDir = StepRotated90(j);
                                     const coreVector2 vTan = vDir.Rotated90() * 3.0f;
 
-                                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos + vTan, vDir)->ChangeSize(1.4f);
-                                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos,        vDir)->ChangeSize(1.4f);
-                                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.7f, pEnemy, vPos - vTan, vDir)->ChangeSize(1.4f);
+                                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos + vTan, vDir)->ChangeSize(1.4f);
+                                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos,        vDir)->ChangeSize(1.4f);
+                                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 0.7f, pEnemy, vPos - vTan, vDir)->ChangeSize(1.4f);
                                 }
                             }
                         }
@@ -1135,14 +1344,14 @@ void cViridoMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE("DREI", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(2u, "DREI", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < VIRIDO_SHADOWS; ++i)
             this->DisableShadow(i, false);
@@ -1153,6 +1362,13 @@ void cViridoMission::__SetupOwn()
         });
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1172,7 +1388,9 @@ void cViridoMission::__SetupOwn()
     // TODO 1: hard-mode: every enemy bounces once (what about bouncy enemy?), oder 1 infinity move (and bouncy enemy just moves N times infinitely)
     // TODO 1: letzte 3 gruppen (player-aim) bisschen variabler von positionierung machen (e.g. (infinity) side-movement ?)
     // TODO 1: wenn nicht problematisch, geschosse könnten auch in fixe richtung fliegen (oder an fixen punkt), außer bei den letzten wellen (wo der spieler anvisiert wird)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: badge, sammle/schieße N items ab während big-enemy charge
+    // TODO 1: geschoss-wellen sollten nicht durchgehend sein, nur die von den letzten paar gruppen (die gezielten)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData     = 16u;
@@ -1207,8 +1425,8 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * ((i == iBounceIndex) ? 2.5f : 1.5f));
-                pEnemy->Configure((i == iBounceIndex) ? 50 : 10, COLOR_SHIP_YELLOW);
-                pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
+                pEnemy->Configure((i == iBounceIndex) ? 50 : 10, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_IMMORTAL);
             });
         });
 
@@ -1280,12 +1498,12 @@ void cViridoMission::__SetupOwn()
 
                 pEnemy->SetPosition(pEnemy->GetPosition() + pEnemy->GetDirection() * ((20.0f + fSpeed) * TIME));
 
-                if(STAGE_TICK_TIME(30.0f, 0.0f))
+                if(STAGE_TICK_TIME(30.0f, 0.0f))   // TODO 1: STAGE_TICK_TIME2 instead ?
                 {
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = pEnemy->AimAtPlayerDual(i % 2u).Normalized();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (i >= 16u && i < 32u) ? 0.0f : 0.5f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, (i >= 16u && i < 32u) ? 0.0f : 0.5f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
                 }
             }
             else
@@ -1385,33 +1603,28 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("VIER", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(3u, "VIER", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
         STAGE_FINISH_PLAY
     });
 
     // ################################################################
     // enemies move and shoot with player
-    // schießen auf cooldown der waffe
+    // falls auf schießen reagiert werden soll, dann auf cooldown der waffe
     // gegner müssen immer gegen schussrichtung schießen um leichte kills zu vermeiden (speziell wenn ihre richtung fix ist, oder eine ihrer pos-achsen) (außer im finale)
     // gegner in 3, wenn sie von ner schräge kommen sieht man alle 4 selbst wenn man am rand oder der ecke fliegt, müssen aber weit genug vom rand spawnen um kollisionen zu vermeiden wenn spieler in ecke ist
     // gegner in 3, wenn sie schräg kommen werden sie auch nicht unabsichtlich beim spawnen schon abgeschossen, das selbe für die finale gruppe (+ die finale gruppe sollte so spawnen, dass sich keine zwei gegner überlagern, schaut orsch aus)
@@ -1424,12 +1637,13 @@ void cViridoMission::__SetupOwn()
     // kreis gruppe sollte nicht zu schnell rotieren, weil sie sonst zu leicht ist (fliegen einfach in den strahl ohne viel gegenwehr)
     // prison gruppe ist so aufgebaut, dass für jede spieler-richtung 3 gegner aus verschiedenen richtungen in die mitte schießen (T form), für die rand-gegner kann man die 2 gegner ein linie nicht zerstören ohne von 1 angegriffen wird, für die mittel-gegner gibt es eine reihenfolge (das ist aber ok)
     // gegner (außer in fast infinity gruppe) sollten sich nicht mit -1.0f bewegen, weil sonst die navigation relativ zu den gegnern zu schwer ist, vor allem bei wall gruppe
-    // TODO 1: flying directly between two enemies can cause infinity push between two enemies (especially in sub-phase 4) (vielleicht player-ghost status ?)
-    // TODO 1: vielleicht direktionale bullets, damit sie ähnlicher zu spieler-angriff sind
-    // TODO 1: vor wall-gruppe könnte sich spieler oben beim spawn-punkt befinden
-    // TODO 1: crosshair gruppe könnte hin und zurück fliegen, man kann nur angreifen wenn weiter weg
-    // TODO 1: enemies need an arrow like the player (but permanent)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // hunter dürfen nicht zu langsam sein, weil sonst keine löcher zwischen ihren angriffen entstehen
+    // TASK: crosshair gegner müssen in bestimmter reihenfolge getötet werden
+    // TASK: 3 geheime gegner, die sich nur an bestimmter position zeigen
+    // TASK: collect all moving energy beans
+    // TODO 1: gegner von rechts rammen spieler
+    // TODO 1: HARD: 1:1 invert-mimic für beide spieler, mit den schnellen laser-bullets (gelbe geschosse?), oder steuerung komplett invertiert
+    // TODO 1: MAIN: regular score, sound
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 58u)
@@ -1437,12 +1651,26 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(30, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_RED);
+                pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
             });
         });
 
-        STAGE_GET_START(4u)
+        STAGE_ADD_SQUAD(pSquad2, cWarriorEnemy, 3u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
+            });
+        });
+
+        STAGE_GET_START(7u)
             STAGE_GET_VEC2 (vBaseRefPos)
+            STAGE_GET_UINT (iCrossState)
+            STAGE_GET_UINT (iBeanState)
+            STAGE_GET_UINT (iHiddenState)
             STAGE_GET_UINT (iPlayerTarget, iPlayerTarget = 1u)
             STAGE_GET_FLOAT(vPlayerLerp)
         STAGE_GET_END
@@ -1451,19 +1679,22 @@ void cViridoMission::__SetupOwn()
         const cPlayer* pPlayer2 = g_pGame->GetPlayer(1u);
         STATIC_ASSERT(GAME_PLAYERS == 2u)
 
-        const coreBool bCleared = STAGE_CLEARED;
+        coreBool bEffect = false;
 
-             if(pPlayer1->HasStatus(PLAYER_STATUS_DEAD)) iPlayerTarget = 1u;
-        else if(pPlayer2->HasStatus(PLAYER_STATUS_DEAD)) iPlayerTarget = 0u;
-        else if(bCleared)                                iPlayerTarget = 1u - iPlayerTarget;
+        const coreBool bCleared = pSquad1->IsFinished();
+
+             if(pPlayer1->HasStatus(PLAYER_STATUS_DEAD)) {iPlayerTarget = 1u;}
+        else if(pPlayer2->HasStatus(PLAYER_STATUS_DEAD)) {iPlayerTarget = 0u;}
+        else if(bCleared)                                {iPlayerTarget = 1u - iPlayerTarget; bEffect = true;}
 
              if(bCleared)      vPlayerLerp = I_TO_F(iPlayerTarget);
-        else if(iPlayerTarget) vPlayerLerp = MIN(vPlayerLerp + 1.0f*TIME, 1.0f);
-        else                   vPlayerLerp = MAX(vPlayerLerp - 1.0f*TIME, 0.0f);
+        else if(iPlayerTarget) vPlayerLerp = MIN1(vPlayerLerp + 1.0f*TIME);
+        else                   vPlayerLerp = MAX0(vPlayerLerp - 1.0f*TIME);
 
-        const coreVector2 vBasePos   = LERPS(pPlayer1->GetPosition ().xy(), pPlayer2->GetPosition ().xy(), vPlayerLerp) / FOREGROUND_AREA;
-        const coreVector2 vBaseDir   = LERPS(pPlayer1->GetDirection().xy(), pPlayer2->GetDirection().xy(), vPlayerLerp).Normalized();
-        const coreBool    bBaseShoot = pPlayer1->GetWeapon(0u)->GetCooldown() || pPlayer2->GetWeapon(0u)->GetCooldown();
+        const coreVector2 vBasePos = LERPS(pPlayer1->GetPosition ().xy(), pPlayer2->GetPosition ().xy(), vPlayerLerp) / FOREGROUND_AREA;
+        const coreVector2 vBaseDir = LERPS(pPlayer1->GetDirection().xy(), pPlayer2->GetDirection().xy(), vPlayerLerp).Normalized();
+
+        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_ORANGE);
 
         if(bCleared)
         {
@@ -1476,17 +1707,70 @@ void cViridoMission::__SetupOwn()
             else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 42u, 45u)
             else if(STAGE_SUB(8u)) STAGE_RESURRECT(pSquad1, 46u, 57u)
 
+            pSquad2->ClearEnemies(true);
+                 if(m_iStageSub == 1u) STAGE_RESURRECT(pSquad2, 0u, 0u)
+            else if(m_iStageSub == 4u) STAGE_RESURRECT(pSquad2, 1u, 1u)
+            else if(m_iStageSub == 7u) STAGE_RESURRECT(pSquad2, 2u, 2u)
+
             const coreVector2 vPos = vBasePos;
             const coreVector2 vDir = -vPos.Normalized();
 
             vBaseRefPos = (vPos + vDir * g_pForeground->RayIntersection(vPos, vDir, 1.4f)) / FOREGROUND_AREA;
+
+            if(STAGE_CLEARED)
+            {
+                pHelper->Kill(true);
+            }
+
+            if(m_iStageSub == 6u)
+            {
+                for(coreUintW i = 0u; i < VIRIDO_BEANS; ++i)
+                    this->EnableBean(i);
+            }
+        }
+
+        if(STAGE_BEGINNING)
+        {
+            pHelper->Resurrect();
+        }
+
+        pHelper->SetPosition(coreVector3((vBasePos + coreVector2(1.0f,-1.0f) * LERPB(1.5f, 0.1f, MIN1(m_fStageTime * 0.5f))) * FOREGROUND_AREA, 0.0f));
+
+        if(bEffect)
+        {
+            g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(),                  25.0f, 5u, COLOR_ENERGY_ORANGE);
+            g_pSpecialEffects->CreateSplashColor(coreVector3(pHelper->GetOldPos(), 0.0f), 25.0f, 5u, COLOR_ENERGY_ORANGE);
+        }
+
+        for(coreUintW i = 0u; i < VIRIDO_BEANS; ++i)
+        {
+            coreObject3D& oBean = m_aBeanRaw[i];
+            if(!oBean.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            const coreFloat fTime   = 1.3f + I_TO_F(i) * 0.5f + (i ? 2.0f : 1.0f) - m_fStageSubTime * 1.2f;
+            const coreFloat fOffset = i ? (vBasePos.x * ((i % 2u) ? -1.0f : 0.5f) + LERP(-0.48f, 0.48f, (I_TO_F((i * 3u) % VIRIDO_BEANS) / I_TO_F(VIRIDO_BEANS - 1u)))) : vBasePos.x;
+            const coreFloat fHeight = LERP(-1.3f, 1.3f, STEPBR(-1.3f, 1.3f, fTime));
+
+            if(fTime < -1.3f) this->DisableBean(i, false);
+
+            oBean.SetPosition(coreVector3(fOffset, fHeight, 0.0f) * FOREGROUND_AREA3);
+
+            cPlayer::TestCollision(PLAYER_TEST_ALL, &oBean, [&](cPlayer* OUTPUT pPlayer, const coreObject3D* pBean, const coreVector3 vIntersection, const coreBool bFirstHit)
+            {
+                pPlayer->GetScoreTable()->RefreshCooldown();
+
+                this->DisableBean(i, true);
+
+                if(++iBeanState >= VIRIDO_BEANS) STAGE_BADGE(2u, BADGE_HARD, pBean->GetPosition())
+                else g_pGame->GetCombatText()->DrawText(coreData::ToChars(VIRIDO_BEANS - iBeanState), pBean->GetPosition());
+            });
         }
 
         const coreVector2 vRota = coreVector2::Direction(m_fStageSubTime * 0.5f);
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
+            STAGE_LIFETIME(pEnemy, 1.0f, (i >= 36u && i < 42u) ? 9.2f : 0.0f)
 
             coreVector2 vNewPos    = vBasePos;
             coreVector2 vNewRefPos = vBaseRefPos;
@@ -1533,14 +1817,14 @@ void cViridoMission::__SetupOwn()
             case 27u: vNewPos = vNewPos * -0.5f - vRota.Rotated135() * 0.8f; vNewRefPos = -coreVector2(0.0f,1.0f).Rotated135() * (1.4f * SQRT2); break;
 
             // fast infinity
-            case 28u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f - 0.6f; vNewPos.y =  0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
-            case 29u: vNewPos.x = (vNewPos.x + 1.8f) *  3.0f - 0.6f; vNewPos.y =  0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
-            case 30u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f - 0.6f; vNewPos.y = -0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
-            case 31u: vNewPos.x = (vNewPos.x + 1.8f) *  2.0f - 0.6f; vNewPos.y = -0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
-            case 32u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f + 0.6f; vNewPos.y =  0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
-            case 33u: vNewPos.x = (vNewPos.x + 1.8f) *  3.0f + 0.6f; vNewPos.y =  0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
-            case 34u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f + 0.6f; vNewPos.y = -0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
-            case 35u: vNewPos.x = (vNewPos.x + 1.8f) *  2.0f + 0.6f; vNewPos.y = -0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
+            case 28u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f - 0.6f; vNewPos.y =  0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
+            case 29u: vNewPos.x = (vNewPos.x + 1.8f) *  2.0f - 0.6f; vNewPos.y =  0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
+            case 30u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f - 0.6f; vNewPos.y = -0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
+            case 31u: vNewPos.x = (vNewPos.x + 1.8f) *  3.0f - 0.6f; vNewPos.y = -0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
+            case 32u: vNewPos.x = (vNewPos.x + 1.8f) * -2.0f + 0.6f; vNewPos.y =  0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
+            case 33u: vNewPos.x = (vNewPos.x + 1.8f) *  2.0f + 0.6f; vNewPos.y =  0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y =  1.4f; break;
+            case 34u: vNewPos.x = (vNewPos.x + 1.8f) * -3.0f + 0.6f; vNewPos.y = -0.96f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
+            case 35u: vNewPos.x = (vNewPos.x + 1.8f) *  3.0f + 0.6f; vNewPos.y = -0.72f; vNewRefPos.x = vNewPos.x; vNewRefPos.y = -1.4f; break;
 
             // wall
             case 36u: vNewPos = vNewPos * -0.85f + coreVector2(1.0f,0.0f) *  1.0f; vNewRefPos = coreVector2(0.0f,1.0f) * 1.4f; break;
@@ -1571,34 +1855,97 @@ void cViridoMission::__SetupOwn()
             case 57u: vNewPos = vNewPos * 0.5f - coreVector2( 0.24f,0.6f).Rotated90(); vNewRefPos = coreVector2(-1.0f, 1.0f) * 1.4f; vNewDir = -vNewDir;             break;
             }
 
-            vNewPos = LERPB(vNewRefPos, vNewPos, MIN(fLifeTime * 0.7f, 1.0f));
+            vNewPos = LERPB(vNewRefPos, vNewPos, MIN1(fLifeTime * 0.7f));
 
                  if(i >= 28u && i < 36u) vNewPos.x = FmodRange(vNewPos.x, -1.2f, 1.2f);
-            else if(i >= 36u && i < 42u) vNewPos.y = LERP(1.2f, -1.2f, FRACT(MAX(fLifeTime * 0.5f,                           0.0f)));
-            else if(i >= 42u && i < 46u) vNewPos.x = LERP(1.2f, -1.2f, FRACT(MAX(fLifeTime * 0.6f - I_TO_F(i - 42u) * 0.25f, 0.0f)));
+            else if(i >= 36u && i < 42u) vNewPos.y = LERP(1.25f, -1.25f, FRACT(MAX(fLifeTime * 0.5f,                           0.0f)));
+            else if(i >= 42u && i < 46u) vNewPos.x = LERP(1.25f, -1.25f, FRACT(MAX(fLifeTime * 0.6f - I_TO_F(i - 42u) * 0.25f, 0.0f)));
 
             pEnemy->SetPosition (coreVector3(vNewPos * FOREGROUND_AREA, 0.0f));
             pEnemy->SetDirection(coreVector3(vNewDir * -1.0f,           0.0f));
 
-            if(bBaseShoot && !pEnemy->ReachedDeath() && STAGE_LIFETIME_AFTER(0.5f) && STAGE_TICK_LIFETIME(8.0f, 0.0f))
+            if(!pEnemy->ReachedDeath() && STAGE_LIFETIME_AFTER(0.5f) && STAGE_TICK_LIFETIME(8.0f, 0.0f) && (!g_pGame->IsEasy() || (((s_iTick % 8u) >= 4u) && (i != 47u && i != 50u && i != 53u && i != 56u))))
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy();
 
-                if(g_pForeground->IsVisiblePoint(vPos, 1.15f)) g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.15f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
+                if(g_pForeground->IsVisiblePoint(vPos, 1.15f))
+                {
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.15f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
+
+                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_PLACEHOLDER);
+                }
+            }
+
+            constexpr coreUintW aiCrossOrder[] = {14u, 12u, 18u, 13u, 15u, 16u, 19u, 17u};
+
+            if((i >= 12u && i < 20u) && (iCrossState < ARRAY_SIZE(aiCrossOrder)))
+            {
+                if(i == aiCrossOrder[iCrossState]) g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+
+                if(pEnemy->ReachedDeath())
+                {
+                    if(i == aiCrossOrder[iCrossState])
+                    {
+                        if(++iCrossState >= ARRAY_SIZE(aiCrossOrder)) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                    }
+                    else
+                    {
+                        iCrossState = 0xFFu;
+                    }
+                }
             }
         });
 
-        STAGE_WAVE("FÜNF", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
+
+            coreVector2 vNewPos    = vBasePos;
+            coreVector2 vNewRefPos = vBaseRefPos;
+
+            switch(i)
+            {
+            default: ASSERT(false)
+            case 0u: vNewPos = vNewPos * coreVector2(-1.0f,1.0f) + coreVector2( 1.0f, 1.0f) * 1.9f; vNewRefPos = coreVector2( 1.0f, 1.0f) * 3.0f; break;
+            case 1u: vNewPos = vNewPos * coreVector2(-1.0f,1.0f) + coreVector2(-1.0f,-1.0f) * 1.9f; vNewRefPos = coreVector2(-1.0f,-1.0f) * 3.0f; break;
+            case 2u: vNewPos = vNewPos * coreVector2( 1.0f,1.0f) + coreVector2(-1.0f, 0.0f) * 1.9f; vNewRefPos = coreVector2(-1.0f, 0.0f) * 3.0f; break;
+            }
+
+            vNewPos = LERPB(vNewRefPos, vNewPos, MIN1(fLifeTime * 0.7f));
+
+            const coreVector2 vNewDir = coreVector2::Direction(fLifeTime * (4.0f*PI));
+
+            pEnemy->SetPosition (coreVector3(vNewPos * FOREGROUND_AREA, 0.0f));
+            pEnemy->SetDirection(coreVector3(vNewDir,                   0.0f));
+
+            if(pEnemy->ReachedDeath())
+            {
+                if(++iHiddenState >= 3u) STAGE_BADGE(1u, BADGE_NORMAL, pEnemy->GetPosition())
+                else g_pGame->GetCombatText()->DrawProgress(iHiddenState, 3u, pEnemy->GetPosition());
+            }
+        });
+
+        STAGE_WAVE(4u, "FÜNF", {55.0f, 85.0f, 110.0f, 140.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
+
+        for(coreUintW i = 0u; i < VIRIDO_BEANS; ++i)
+            this->DisableBean(i, false);
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1610,14 +1957,14 @@ void cViridoMission::__SetupOwn()
     // TODO 1: player gets bigger and smaller when hitting a certain enemy, should not affect collision or gameplay, but movement speed? or gets bigger over time, and gets smaller again by spinning and shooting around
     // TODO 1: shrinking enemies have different attack (single dense wave)
     // TODO 1: multiple enemies are attached to each other and will grow independently
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 90u)                       
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(50, COLOR_SHIP_RED);
+                pEnemy->Configure(50, 0u, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
 
                 pEnemy->Resurrect();
@@ -1710,21 +2057,28 @@ void cViridoMission::__SetupOwn()
             //pPlayer->SetScale(3.0f);
         });
 
-        STAGE_WAVE("SECHS", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "SECHS", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Torus, {60.0f, 120.0f, 180.0, 240.0f})
     });

@@ -17,17 +17,22 @@ void cHarenaMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        }
     });
 
     // ################################################################
-    // 
+    // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cDesertBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
         g_pEnvironment->SetTargetSpeedNow(6.0f);
-
-        //g_pEnvironment->SetTargetDirection(coreVector2(1.0f,-1.0f).Normalized());   // kommt gut mit den säulen          
 
         g_pGame->StartIntro();
 
@@ -35,27 +40,44 @@ void cHarenaMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance (split)
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
+        cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetOutdoor()->LerpHeightNow(-0.5f, -30.0f);
+        pBackground->SetGroundDensity(0u, 0.0f);
+        pBackground->SetGroundDensity(1u, 0.0f);
+        pBackground->SetGroundDensity(2u, 0.0f);
+        pBackground->SetGroundDensity(3u, 0.0f);
+        pBackground->SetGroundDensity(5u, 1.0f);
+        pBackground->SetTrail(true);
+
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // 
+    // show mission name
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(STAGE_BEGINNING)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
         {
-            g_pGame->GetInterface()->ShowMission(this);
+            STAGE_FINISH_NOW
         }
+        else
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->GetInterface()->ShowMission(this);
+            }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+            STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        }
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_PLAY
     });
@@ -80,7 +102,9 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: change pattern of stutter wave ?
     // TODO 1: adjust aim function nAimFunc, it was not updated after production-phase
     // TODO 1: check the order of the sub-wave, I'm still not happy, especially lines in 2 and 3 are too similar (there were some changes, now 2 is similar to the boss waves)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: badge: manchmal sind die gegner anders wenn sie sichtbar werden, 1/N abschießen
+    // TODO 1: hardmode: bad visibility (sand storm) in einer der missionen hier, muss vielleicht sinus-förmig (oder anders) ganz verschwinden, auch geschosse wegen pressure
     m_aInsanityStage[0] = [this]()
     {
         STAGE_ADD_PATH(pPath1)
@@ -119,7 +143,7 @@ void cHarenaMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
@@ -541,7 +565,7 @@ void cHarenaMission::__SetupOwn()
                 {
                     if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                     {
-                        pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
+                        pEnemy->SetBaseColor(COLOR_SHIP_GREEN);
                         pEnemy->SetAlpha    (1.0f);
                         pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
@@ -609,7 +633,7 @@ void cHarenaMission::__SetupOwn()
             this->CrashEnemy(pEnemy);
         });
 
-        if(!m_iInsanity) STAGE_WAVE("DREIZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!m_iInsanity) STAGE_WAVE(0u, "DREIZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     };
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -620,9 +644,16 @@ void cHarenaMission::__SetupOwn()
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -646,8 +677,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: add extra score for hits
     // TODO 1: check if bullet-collision really affects the whole shooting area, to never cause any frame-delay when getting visible
     // TODO 1: finale phase ist vielleicht etwas zu schnell (oder steigt zu schnell an)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
-    // TODO 1: big can change, like in tiger boss, just (iBig << 1u), maybe not on the first 1-2 hits
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: big can change, like in tiger boss, just (iBig << 1u), maybe not on the first 1-2 hits, maybe only for hard
     // TODO 1: coop: jeder muss einem anderen gegner folgen (4+4 bei 8er gruppe), oder ein gegner muss innerhalb des zeitlimits von beiden erwischt werden!
     m_aInsanityStage[1] = [this]()
     {
@@ -657,7 +688,7 @@ void cHarenaMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(1000, COLOR_SHIP_GREY);
+                pEnemy->Configure(1000, 0u, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
                 pEnemy->Resurrect();
@@ -940,7 +971,14 @@ void cHarenaMission::__SetupOwn()
 
         m_iStageSub = MAX(m_iStageSub, iPoints + 1u);
 
-        if(!m_iInsanity) STAGE_WAVE("VIERZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!m_iInsanity)
+        {
+            cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+
+            pBackground->SetVeilAlpha(STEPH3(0.0f, 30.0f, m_fStageTime));
+
+            STAGE_WAVE(1u, "VIERZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        }
     };
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
@@ -951,20 +989,34 @@ void cHarenaMission::__SetupOwn()
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
     // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        if(STAGE_BEGINNING)
-        {
+        cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
 
-        }
+        pBackground->SetVeilAlpha(1.0f);
 
+        pBackground->GetOutdoor()->LerpHeightNow(1.0f, 0.0f);
+        pBackground->SetGroundDensity(0u, 1.0f);
+        pBackground->SetGroundDensity(1u, 1.0f);
+        pBackground->SetGroundDensity(2u, 1.0f);
+        pBackground->SetGroundDensity(3u, 1.0f);
+        pBackground->SetGroundDensity(5u, 0.0f);
+        pBackground->SetTrail(false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -990,16 +1042,19 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: player can kill a lot of sub-groups by staying at the bottom (targeting, moving), maybe change position of those enemies (further to the border, but the should still be visible coming from above)
     // TODO 1: helper comes out of last "moving" enemy and flies straight out
     // TODO 1: bottom resizing should also be interpolated
-    // TODO 1: add better indicator for fly start-direction (arrow, can be same color as attack, big on big enemy)
+    // TODO 1: add better indicator for fly start-direction (arrow inside enemy, can be same color as attack, big on big enemy)
     // TODO 1: somehow add assertion for iNumData
     // TODO 1: vielleicht bekommen angreifende gegner den energy-shader, oder den damaging-effekt eher so aussehen lassen (eigener shader wie outline)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: shadow needs to be adjusted by size (e.g. for final enemy)
     // TODO 1: I think the shadow can be under every enemy (blend-in)
     // TODO 1: die anvisierenden gegner könnten sich vom spieler weg-drehen, is weniger nervig
     // TODO 1: eine der star bewegenden gruppen könnte sich eher gegen flugrichtung weg-werfen
     // TODO 1: bewegende in der luft sind schwer von damaging gegnern zu unterscheiden (besonders die einzelnen später), vielleicht geschwindigkeit reduzieren
     // TODO 1: coop: abwechselnd gegner treffen
+    // TODO 1: keine kollision mit spieler im turm, nur bullets
+    // TODO 1: in der oben-unten aufgeteilten phase kann ich gleich alle in der mittel-linie spawnen lassen, spieler würd eh sonst ganz unten stehn
+    // TODO 1: helper is the first bullet of final enemy
     m_aInsanityStage[2] = [this]()
     {
         constexpr coreUintW iNumEnemies = 61u;
@@ -1018,7 +1073,7 @@ void cHarenaMission::__SetupOwn()
                 const coreBool bBig     = (i == iBigIndex);
 
                 pEnemy->SetAlpha (0.0f);
-                pEnemy->Configure((bEnabler || bMover) ? 1 : 400, COLOR_SHIP_GREY);
+                pEnemy->Configure((bEnabler || bMover) ? 1 : 400, 0u, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
                 if(bEnabler || bMover || bBig) pEnemy->RemoveStatus(ENEMY_STATUS_IMMORTAL);
@@ -1103,6 +1158,8 @@ void cHarenaMission::__SetupOwn()
                 if(bMover)   iMoverActive = 2u;
 
                 this->DisableFloor(i % HARENA_FLOORS, false);
+
+                g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetDirection(), 50.0f, 5u, COLOR_ENERGY_WHITE);
             }
 
             if(bAnyDamage || (bMover && (iMoverActive == 2u)))
@@ -1248,14 +1305,14 @@ void cHarenaMission::__SetupOwn()
 
             if(pEnemy->HasStatus(ENEMY_STATUS_GHOST) && !afHeight[i])
             {
-                pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
+                pEnemy->SetBaseColor(COLOR_SHIP_RED);
                 pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
             }
 
             constexpr coreFloat fAlpha = 1.0f;
 
-            //const coreFloat fVisibility = CLAMP(1.0f - STEPH3(49.0f, 54.0f, afHeight[i]), pEnemy->GetAlpha() / fAlpha, 1.0f);
-            const coreFloat fVisibility = CLAMP(1.0f - STEPH3(9.0f, 14.0f, afHeight[i]), pEnemy->GetAlpha() / fAlpha, 1.0f);
+            const coreFloat fVisibility = CLAMP(1.0f - STEPH3(49.0f, 54.0f, afHeight[i]), pEnemy->GetAlpha() / fAlpha, 1.0f);
+            //const coreFloat fVisibility = CLAMP(1.0f - STEPH3(9.0f, 14.0f, afHeight[i]), pEnemy->GetAlpha() / fAlpha, 1.0f);
             const coreBool  bGhost      = pEnemy->HasStatus(ENEMY_STATUS_GHOST);
 
             pEnemy->SetSize (coreVector3(1.0f,1.0f,1.0f) * fVisibility * (bGhost ? 1.0f : 1.3f) * (bBig ? 1.5f : 1.0f));
@@ -1283,7 +1340,14 @@ void cHarenaMission::__SetupOwn()
 
         m_iStageSub = MAX(m_iStageSub, iPoints + 1u);
 
-        if(!m_iInsanity) STAGE_WAVE("FÜNFZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!m_iInsanity)
+        {
+            cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+
+            pBackground->SetVeilAlpha(1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
+
+            STAGE_WAVE(2u, "FÜNFZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        }
     };
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
@@ -1294,12 +1358,19 @@ void cHarenaMission::__SetupOwn()
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < HARENA_FLOORS; ++i)
             this->DisableFloor(i, false);
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1331,7 +1402,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: leicht: letzter angriff kommt von seite, statt von oben-unten (is das wirklich leichter ?)
     // TODO 1: hard: every killed enemy makes an attack (target single ?)
     // TODO 1: sonne hat mir von oben eine gegeben, vielleicht langsamer spawnen (rotation + ausbreitung)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     m_aInsanityStage[3] = [this]()
     {
         constexpr coreUintW iNumEnemies = 150u;
@@ -1358,7 +1429,7 @@ void cHarenaMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(50 + 20, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(50 + 20, 0u, COLOR_SHIP_ORANGE);
             });
         });
 
@@ -1366,7 +1437,7 @@ void cHarenaMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(10, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(10, 0u, COLOR_SHIP_MAGENTA);
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -1437,7 +1508,11 @@ void cHarenaMission::__SetupOwn()
 
         if(pSquad1->IsFinished())
         {
-            if(m_iInsanity)
+            if(m_iInsanity == HARENA_INSANITY_P1)
+            {
+                     if(STAGE_SUB(14u)) {}
+            }
+            else if(m_iInsanity)
             {
                      if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 15u, 15u)
                 else if(STAGE_SUB(13u)) {}   // may not be used
@@ -1570,6 +1645,23 @@ void cHarenaMission::__SetupOwn()
 
                 aiVector[iIndex] = vDir.PackFloat2x16();
             }
+        }
+
+        if(!m_avChildData.empty())
+        {
+            FOR_EACH(it, m_avChildData)
+            {
+                const sChildData& oData = (*it);
+
+                cEnemy*         pChild = nTakeChildFunc(oData.iType);
+                const coreUintW iIndex = pSquad2->GetIndex(pChild);
+
+                pChild->SetPosition(coreVector3(oData.vPosition, 0.0f));
+
+                aiVector[iIndex] = oData.vMove.PackFloat2x16();
+            }
+
+            m_avChildData.clear();
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1711,6 +1803,17 @@ void cHarenaMission::__SetupOwn()
                 const coreVector2 vNewPos = vCenter + coreVector2::Direction(vRaw.x) * vRaw.y;
                 pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
             }
+            else if(iType == 2u)   // bounce bullet
+            {
+                coreVector2 vNewPos = pEnemy->GetPosition().xy() + vRaw * (50.0f * TIME);
+
+                     if((vNewPos.x < -FOREGROUND_AREA.x * 1.1f) && (vRaw.x < 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x + FOREGROUND_AREA.x * 1.1f); vRaw.x =  ABS(vRaw.x);}
+                else if((vNewPos.x >  FOREGROUND_AREA.x * 1.1f) && (vRaw.x > 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - FOREGROUND_AREA.x * 1.1f); vRaw.x = -ABS(vRaw.x);}
+                     if((vNewPos.y < -FOREGROUND_AREA.y * 1.1f) && (vRaw.y < 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y + FOREGROUND_AREA.y * 1.1f); vRaw.y =  ABS(vRaw.y);}
+                else if((vNewPos.y >  FOREGROUND_AREA.y * 1.1f) && (vRaw.y > 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y - FOREGROUND_AREA.y * 1.1f); vRaw.y = -ABS(vRaw.y);}
+
+                pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
+            }
             else if(iType >= 4u)   // shield
             {
                 const coreVector2 vCenter = pSquad1->GetEnemy(iType >> 2u)->GetPosition().xy();
@@ -1724,8 +1827,7 @@ void cHarenaMission::__SetupOwn()
 
             aiVector[i] = vRaw.PackFloat2x16();
 
-            const coreVector2 vNewDir = coreVector2::Direction(fLifeTime * 5.0f);
-            pEnemy->SetDirection(coreVector3(vNewDir, 0.0f));
+            pEnemy->DefaultRotate(fLifeTime * 5.0f);
 
             if((iType == 0u) || (iType == 1u))
             {
@@ -1741,7 +1843,7 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        if(!m_iInsanity) STAGE_WAVE("SECHSZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!m_iInsanity) STAGE_WAVE(3u, "SECHSZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     };
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
@@ -1752,20 +1854,15 @@ void cHarenaMission::__SetupOwn()
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -1778,7 +1875,7 @@ void cHarenaMission::__SetupOwn()
     // gegner spawnen in stacheln, dadurch wird mögliche kollision mit spieler vermieden
     // gegner spawning muss schönes muster und delay haben
     // erste zwei stacheln müssen langsam und in der mitte spawnen, damit spieler genau sieht was passiert
-    // spieler muss genau sehn wo bald stacheln kommen und wo gefahr ist (einfärben der platten und stacheln)
+    // spieler muss genau sehen wo bald stacheln kommen und wo gefahr ist (einfärben der platten und stacheln)
     // TODO 1: change plate rendering
     // TODO 1: die symmetrische bewegung der stacheln in phase 3 ist schwer für die augen (2.0 -> 2.0) (jetzt etwas weniger, nachdem ich farben aktualisiert hab)
     // TODO 1: maybe do a semi-transparent wave with the spike model when turning red
@@ -1786,17 +1883,19 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: add a bit of delay when damage can be taken
     // TODO 1: all enemies have to rotate in the same direction (intro-spin is negative value which gets removed to 0)
     // TODO 1: dünklere kreise sollten auf der platte sein, wo die stacheln raus kommen
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: hard mode: infinity movement (only X or Y always, even with possible pattern issues, though maybe some have nixe transitions) (also enemies ?)
+    // TODO 1: vielleicht platten in semi-random pattern spawnen lassen (achtung bei bossen, hab da eh property)
+    // TODO 1: platten farbe sollte bei jeder platte leicht anders sein (zm. die graue), fixed pattern
     m_aInsanityStage[4] = [this]()
     {
         constexpr coreUintW iNumEnemies = 58u;
 
-        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, iNumEnemies)
+        STAGE_ADD_SQUAD(pSquad1, cFreezerEnemy, iNumEnemies)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(10, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(10, 0u, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
@@ -2031,7 +2130,7 @@ void cHarenaMission::__SetupOwn()
                 if(!pBoard->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
                 const coreBool bIsActive = this->GetSpikeLaunched(i);
-                const coreBool bIsQuiet  = (m_iStageSub == 7u) && !m_afSpikeMax[i];
+                const coreBool bIsQuiet  = this->GetSpikeQuiet   (i) && (m_iStageSub == 7u);
 
                 if(bIsActive || bIsQuiet)
                 {
@@ -2158,7 +2257,15 @@ void cHarenaMission::__SetupOwn()
             this->CrashEnemy(pEnemy);
         });
 
-        if(!m_iInsanity) STAGE_WAVE("SIEBZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!m_iInsanity)
+        {
+            cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+
+            pBackground->SetGroundDensity(0u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
+            pBackground->SetGroundDensity(1u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
+
+            STAGE_WAVE(4u, "SIEBZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        }
     };
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
@@ -2169,12 +2276,19 @@ void cHarenaMission::__SetupOwn()
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < HARENA_SPIKES; ++i)
             this->DisableSpike(i, false);
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -2186,7 +2300,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: show 3142 group at start, matrix of enemies
     // TODO 1: simon says, linear up and down, to make distinction easy, and to prevent accidental hits (order forward, backward, mirrored, to stay fair but variable)
     // TODO 1: static assertion, keine der chief-order darf enemy-count übersteigen
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         UNUSED STAGE_ADD_PATH(pPath1)          
@@ -2212,8 +2326,8 @@ void cHarenaMission::__SetupOwn()
                 //if(i == 8u) pEnemy->SetSize(coreVector3(1.3f,1.3f,1.3f));
 
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                //pEnemy->Configure((i == 8u) ? 200 : 50, COLOR_SHIP_GREY);
-                pEnemy->Configure(4, COLOR_SHIP_GREY);
+                //pEnemy->Configure((i == 8u) ? 200 : 50, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -2294,7 +2408,7 @@ void cHarenaMission::__SetupOwn()
 
             if(!pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
             {
-                if(STAGE_TICK_TIME((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))
+                if(STAGE_TICK_TIME((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))   // TODO 1: STAGE_TICK_TIME2 instead ?
                 {
                     const coreVector2 vPos  = pEnemy->GetPosition ().xy();
                     const coreFloat   fBase = pEnemy->GetDirection().xy().Angle();
@@ -2314,39 +2428,42 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ACHTZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "ACHTZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // boss
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        if(STAGE_BEGINNING)
-        {
-            //g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
-            //g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
-            g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
-            g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
-            g_pEnvironment->GetBackground()->SetGroundDensity(3u, 0.0f);
-            g_pEnvironment->SetTargetSpeed(6.0f, 1.0f);
-        }
+        cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
 
+        pBackground->SetGroundDensity(0u, 0.0f);
+        pBackground->SetGroundDensity(1u, 0.0f);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // boss
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
         STAGE_BOSS(m_Tiger, {60.0f, 120.0f, 180.0, 240.0f})
-
-             if(m_iInsanity == 1u) m_aInsanityStage[0]();
-        else if(m_iInsanity == 2u) m_aInsanityStage[1]();
-        else if(m_iInsanity == 3u) m_aInsanityStage[2]();
-        else if(m_iInsanity == 4u) m_aInsanityStage[3]();
-        else if(m_iInsanity == 5u) m_aInsanityStage[4]();
     });
 
     // ################################################################

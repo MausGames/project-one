@@ -17,11 +17,18 @@ void cGeluMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        }
     });
 
     // ################################################################
-    // 
+    // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cVolcanoBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
@@ -33,27 +40,34 @@ void cGeluMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // 
+    // show mission name
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(STAGE_BEGINNING)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
         {
-            g_pGame->GetInterface()->ShowMission(this);
+            STAGE_FINISH_NOW
         }
+        else
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->GetInterface()->ShowMission(this);
+            }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+            STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        }
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_PLAY
     });
@@ -75,7 +89,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: pEnemy->AimAtPlayerDual((i < 16u || (i >= 80u && i < 96u)) ? ((i / 4u) % 2u) : ((i < 32u || (i >= 40u && i < 72u)) ? ((i / 8u) % 2u) : (i % 2u))).Normalized();
     // TODO 1: what about SetAngle, especially for dungeon ?
     // TODO 1: SQRT2 not necessary ? (both cases) (oh wait, 0.7071 on corner)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fDungeonFactor  = 0.095f;
@@ -141,7 +155,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.45f);
-                pEnemy->Configure((i < 32u) ? 50 : ((i >= 40u && i < 72u) ? 120 : ((i < 96u) ? 200 : 1000)), COLOR_SHIP_ORANGE);
+                pEnemy->Configure((i < 32u) ? 50 : ((i >= 40u && i < 72u) ? 120 : ((i < 96u) ? 200 : 1000)), 0u, COLOR_SHIP_RED);
 
                 d_cast<cCinderEnemy*>(pEnemy)->SetAngle(I_TO_F(i));
 
@@ -355,21 +369,28 @@ void cGeluMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = pEnemy->AimAtPlayerDual((s_iTick / 20u + m_iStageSub) % 2u).Normalized();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
                 }
             }
         });
 
-        STAGE_WAVE("FÜNFUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "FÜNFUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -395,8 +416,9 @@ void cGeluMission::__SetupOwn()
     // TODO 1: handle assert in SetArea (both single and coop)
     // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
     // TODO 1: boss schießt die 4 flügel in den boden und zieht ihn nach oben mit seinen spitzen, spieler muss ihn nach unten schießen, beim rausziehen der flügel werden die spitzen rausgeschossen, X0X0, in zwei wellen
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: hard mode: attacking the border creates attacks (stings fly away, and respawn a second later ?)
+    // TODO 1: helfer sollte sichtbar sein, bisschen nach unten schieben
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fOffMin = 0.0f;
@@ -426,12 +448,12 @@ void cGeluMission::__SetupOwn()
             pPath3->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 80u)
+        STAGE_ADD_SQUAD(pSquad1, cFreezerEnemy, 80u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(4, COLOR_SHIP_BLUE);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_GREEN);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
@@ -884,14 +906,14 @@ void cGeluMission::__SetupOwn()
             if((fLifeTime >= 0.0f) && pEnemy->HasStatus(ENEMY_STATUS_GHOST)) pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
         });
 
-        STAGE_WAVE("SECHSUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(1u, "SECHSUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-        g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(false);
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < POST_WALLS; ++i)
             g_pPostProcessing->SetWallOffset(i, 0.0f);
@@ -906,13 +928,19 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        if(STAGE_BEGINNING)
-        {
+        cVolcanoBackground* pBackground = d_cast<cVolcanoBackground*>(g_pEnvironment->GetBackground());
 
-        }
+        pBackground->SetGroundDensity(1u, 0.0f);
 
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -934,7 +962,8 @@ void cGeluMission::__SetupOwn()
     // TODO 1: blöcke müssen besser explodieren, e.g. schrumpfen während explosion
     // TODO 1: blöcke müssen besser aussehen (form und farbe) (create better fang model with low-detail version)
     // TODO 1: in tunnel 2. teil, gegner können eh nur zerstört werden wenn man sich in die blauen wellen wagt
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: helder erscheint LERPB kurz bevor er zerquetscht wird bei transition
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = GELU_FANG_STEP;
@@ -986,7 +1015,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -1334,11 +1363,11 @@ void cGeluMission::__SetupOwn()
             if(HAS_BIT(iShakeState, i))
             {
                 oFang.SetPosition(oFang.GetPosition() + coreVector3(Core::Rand->Float(-0.5f, 0.5f), 0.0f, 0.0f));   // TODO 1: remove random
-                oFang.SetColor3  (COLOR_SHIP_ORANGE);
+                oFang.SetColor3  (COLOR_SHIP_RED * 0.6f);
             }
             else
             {
-                oFang.SetColor3((m_iStageSub == 19u) ? COLOR_SHIP_BLUE : coreVector3(0.5f,0.5f,0.5f));
+                oFang.SetColor3((m_iStageSub == 19u) ? (COLOR_SHIP_YELLOW * 0.6f) : coreVector3(0.5f,0.5f,0.5f));
             }
         }
 
@@ -1360,8 +1389,8 @@ void cGeluMission::__SetupOwn()
                     {
                         const coreVector2 vOffset = (vDir.Rotated90() * (I_TO_F(i % 6u) - 2.5f) - vDir * I_TO_F(i / 6u)) * 3.1f;
 
-                                               g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pSquad1->GetEnemy(0u), (vPos + vOffset),         vDir)        ->ChangeSize(1.6f);
-                        if(m_iStageSub == 16u) g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pSquad1->GetEnemy(0u), (vPos + vOffset) * -1.0f, vDir * -1.0f)->ChangeSize(1.6f);
+                                               g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5u, 1.0f, pSquad1->GetEnemy(0u), (vPos + vOffset),         vDir)        ->ChangeSize(1.5f);
+                        if(m_iStageSub == 16u) g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5u, 1.0f, pSquad1->GetEnemy(0u), (vPos + vOffset) * -1.0f, vDir * -1.0f)->ChangeSize(1.5f);
                     }
                 }
             }
@@ -1378,7 +1407,7 @@ void cGeluMission::__SetupOwn()
                     {
                         const coreVector2 vOffset = (vDir.Rotated90() * (I_TO_F(i % 3u) - 1.0f + fShift) - vDir * I_TO_F(i / 3u)) * 3.1f;
 
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.3f, pSquad1->GetEnemy(0u), vPos + vOffset, vDir)->ChangeSize(1.6f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5u, 1.3f, pSquad1->GetEnemy(0u), vPos + vOffset, vDir)->ChangeSize(1.5f);
                     }
                 }
             }
@@ -1446,14 +1475,23 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("SIEBENUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        cVolcanoBackground* pBackground = d_cast<cVolcanoBackground*>(g_pEnvironment->GetBackground());
+
+        if(STAGE_BEGINNING) pBackground->GetOutdoor()->LerpHeight(0.5f, -11.0f);
+
+        const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
+
+        pBackground->SetGroundDensity(2u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+
+        STAGE_WAVE(2u, "SIEBENUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < GELU_FANGS; ++i)
             this->DisableFang(i, false);
@@ -1464,6 +1502,27 @@ void cGeluMission::__SetupOwn()
         });
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 3u, 4u})
+    {
+        cVolcanoBackground* pBackground = d_cast<cVolcanoBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetOutdoor()->LerpHeightNow(0.5f, -11.0f);
+        pBackground->SetGroundDensity(1u, 0.0f);
+        pBackground->SetGroundDensity(2u, 0.0f);
+        pBackground->SetGroundDensity(3u, 0.0f);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1496,7 +1555,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: irgendetwas mit dem linien-wechsel machen, wenn man gleich danach versuchen muss nem angriff auszuweichen, vielleicht wechsel in zwei schritten, alle linien kommen zurück und blinkende verschwinden dann (1s)
     // TODO 1: sollen linien am ende mergen ? 2x2 > 2x1, dann könnten auch 4 verbindungen am ende bleiben, vielleicht sollten gegner die den übergang verursachen immer vom mittel 2x2 angegriffen werden, wodurch man immer ausweichen kann
     // TODO 1: gegner am ende halten irgendwie nix aus (vielleicht verdoppeln und dicht hintereinander)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -1524,7 +1583,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(4, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -1769,8 +1828,9 @@ void cGeluMission::__SetupOwn()
                 const coreUint8   y      = (aiTarget[i] / 4u);
                 const sGameInput* pInput = pPlayer->GetInput();
 
-                const coreVector2 vDiff1 = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(vDiff1.LengthSq() < POW2(3.0f))
+                // TODO 1: prevent diagonal movement, but still allow back and forth movement
+                //const coreVector2 vDiff1 = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();
+                //if(vDiff1.LengthSq() < POW2(3.0f))
                 {
                     if(SIGNUM(avOldMove[i].x) != SIGNUM(pInput->vMove.x))
                     {
@@ -1928,14 +1988,14 @@ void cGeluMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE("ACHTUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(3u, "ACHTUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < GELU_ORBS; ++i)
             this->DisableOrb(i, false);
@@ -1952,14 +2012,9 @@ void cGeluMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -1994,7 +2049,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: sollte nicht über lava sein wegen kontrast der blöcke
     // TWIST: (boss?) line of blocks fom left and right at the same time, but with different direction, can crush player
     // TWIST: lines from the bottom
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreFloat fStep      = GELU_WAY_STEP;
@@ -2032,12 +2087,12 @@ void cGeluMission::__SetupOwn()
             pPath4->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 49u)
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 49u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(10, COLOR_SHIP_BLUE);
+                pEnemy->Configure(10, 0u, COLOR_SHIP_BLUE);
             });
         });
 
@@ -2294,14 +2349,24 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("NEUNUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        cVolcanoBackground* pBackground = d_cast<cVolcanoBackground*>(g_pEnvironment->GetBackground());
+
+        if(STAGE_BEGINNING) pBackground->GetOutdoor()->LerpHeight(-0.5f, -26.0f);
+
+        const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
+
+        pBackground->SetGroundDensity(0u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(2u, STEP(0.5f, 1.0f, fEnvLerp));
+        pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, fEnvLerp));
+
+        STAGE_WAVE(4u, "NEUNUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < GELU_WAYS; ++i)
             this->DisableWay(i, false);
@@ -2312,6 +2377,13 @@ void cGeluMission::__SetupOwn()
         });
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -2337,7 +2409,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: SCHAU ob man eine andere mechanik von der liste rein-mergen kann ####################################################
     // TODO 1: fixe position, wie minenfeld, ferne gegner greifen an
     // TODO 1: add bouncy ball, which enemies evade
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)
@@ -2345,7 +2417,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
 
                 d_cast<cStarEnemy*>(pEnemy)->SetAngle(I_TO_F(i) * 2.0f/5.0f * PI);
             });
@@ -2465,21 +2537,43 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("DREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "DREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        cVolcanoBackground* pBackground = d_cast<cVolcanoBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetOutdoor()->LerpHeightNow(-0.5f, -26.0f);
+        pBackground->SetGroundDensity(0u, 0.0f);
+        pBackground->SetGroundDensity(1u, 0.0f);
+        pBackground->SetGroundDensity(2u, 1.0f);
+        pBackground->SetGroundDensity(3u, 1.0f);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         if(STAGE_BEGINNING)
         {

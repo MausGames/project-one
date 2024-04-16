@@ -70,7 +70,7 @@ public:
 
     // 
     void Update();
-    void UpdateDefault();
+    void UpdateDefault(const coreUint8 iType);
 
     // 
     void DrawSpot (const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vDirection);

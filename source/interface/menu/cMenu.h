@@ -39,7 +39,11 @@
 // TODO 3: display gamepad/device name in options description
 // TODO 4: locked config input buttons are set with dummy values before getting locked
 // TODO 2: handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
-// TODO 2: in emscripten müssen einige optionen geändert werden (disable: monitor, resolution, display mode | change: anti-aliasing [on/off])
+// TODO 2: in emscripten müssen einige optionen geändert werden (disable: monitor, resolution, display mode | change/disable: anti-aliasing [on/off] | anisotropic ?)
+// TODO 3: leichtes wackeln des texts wenn sich switch-box ändert
+// TODO 3: welle, wenn button/switchbox gedrückt wird
+// TODO 3: anderes: ganzes menü wackelt/shifted wenn man tab ändert, tabs verändern höhe, buttons ändern größe bei selection
+// TODO 3: GetWinFocusLost to force pause should only take effect when pause is actually allowed, save and apply state
 
 
 // ****************************************************************
@@ -52,7 +56,7 @@
 #define MENU_INSIDE_ALPHA             (0.95f)    // 
 
 #define MENU_GAME_MISSIONS            (9u)
-#define MENU_GAME_STAGES              (7u)//SEGMENTS)
+#define MENU_GAME_STAGES              (6u)
 #define MENU_GAME_PLAYERS             (PLAYERS)
 #define MENU_GAME_OPTIONS             (3u)
 #define MENU_GAME_EQUIPS              (2u)
@@ -62,7 +66,7 @@
 #define MENU_EXTRA_STATS              (20u)
 #define MENU_EXTRA_OTHERS             (3u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
-#define MENU_SUMMARY_MEDALS           (SEGMENTS)
+#define MENU_SUMMARY_MEDALS           (6u)
 #define MENU_SUMMARY_ENTRIES          (2u)
 #define MENU_SUMMARY_PARTS            (PLAYERS)
 #define MENU_SUMMARY_BANNER_SPEED     (4.0f)
@@ -88,6 +92,7 @@
 #define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (35u)
 #define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (46u)
 #define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (79u)
+#define MENU_FONT_STANDARD_6    MENU_FONT_DEFAULT, (58u)
 #define MENU_FONT_DYNAMIC_1     "dynamic_font",    (20u)
 #define MENU_FONT_DYNAMIC_2     "dynamic_font",    (25u)
 #define MENU_FONT_DYNAMIC_3     "dynamic_font",    (35u)
@@ -161,9 +166,13 @@ enum eSurface : coreUint8
     SURFACE_PAUSE_DEFAULT = 0u,
     SURFACE_PAUSE_MAX,
 
-    SURFACE_SUMMARY_SOLO = 0u,
-    SURFACE_SUMMARY_COOP,
-    SURFACE_SUMMARY_BEGIN,
+    SURFACE_SUMMARY_MISSION_SOLO = 0u,
+    SURFACE_SUMMARY_MISSION_COOP,
+    SURFACE_SUMMARY_SEGMENT_SOLO,
+    SURFACE_SUMMARY_SEGMENT_COOP,
+    SURFACE_SUMMARY_BEGINNING,
+    SURFACE_SUMMARY_ENDING_NORMAL,
+    SURFACE_SUMMARY_ENDING_SECRET,
     SURFACE_SUMMARY_TITLE,
     SURFACE_SUMMARY_MAX,
 
@@ -175,10 +184,12 @@ enum eSurface : coreUint8
     SURFACE_FINISH_MAX,
 
     SURFACE_BRIDGE_ENTER = 0u,
-    SURFACE_BRIDGE_RETURN1,
-    SURFACE_BRIDGE_RETURN2,
+    SURFACE_BRIDGE_RETURN_1,
+    SURFACE_BRIDGE_RETURN_2,
     SURFACE_BRIDGE_INPUT,
     SURFACE_BRIDGE_UNLOCK,
+    SURFACE_BRIDGE_CONTINUE,
+    SURFACE_BRIDGE_RESTART,
     SURFACE_BRIDGE_MAX
 };
 
@@ -196,6 +207,7 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_SHADOWQUALITY,
     ENTRY_VIDEO_SHAKEEFFECTS,
     ENTRY_VIDEO_FLASHEFFECTS,
+    ENTRY_VIDEO_HITSTOPEFFECTS,
     ENTRY_VIDEO,
 
     ENTRY_AUDIO_GLOBALVOLUME = ENTRY_VIDEO,
@@ -430,7 +442,7 @@ public:
     void SaveValues();
 
     // 
-    void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo);//const;
+    void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo, coreUint8* OUTPUT piKind);//const;
 
     // 
     inline const coreUint8& GetSelectedType      ()const                       {return m_Type      .GetCurValue();}
@@ -632,6 +644,7 @@ private:
     cGuiSwitchBox m_ShadowQuality;
     cGuiSwitchBox m_ShakeEffects;
     cGuiSwitchBox m_FlashEffects;
+    cGuiSwitchBox m_HitStopEffects;
     cGuiSwitchBox m_GlobalVolume;
     cGuiSwitchBox m_MusicVolume;
     cGuiSwitchBox m_EffectVolume;
@@ -704,9 +717,10 @@ private:
 class cPauseMenu final : public coreMenu
 {
 private:
-    cGuiButton m_ResumeButton;   // resume button
-    cGuiButton m_ConfigButton;   // config button
-    cGuiButton m_ExitButton;     // exit button
+    cGuiButton m_ResumeButton;    // resume button
+    cGuiButton m_RestartButton;   // restart button
+    cGuiButton m_ConfigButton;    // config button
+    cGuiButton m_ExitButton;      // exit button
 
     cMenuNavigator m_Navigator;
 
@@ -718,6 +732,10 @@ public:
 
     // move the pause menu
     void Move()final;
+
+    // 
+    void ActivateFirstPlay();
+    void DeactivateFirstPlay();
 };
 
 
@@ -763,6 +781,8 @@ private:
     coreFlow m_fIntroTimer;                                         // 
     coreFlow m_fOutroTimer;                                         // 
 
+    coreFloat m_fFinalSpinOld;                                      // 
+
     eSummaryState m_eState;                                         // 
 
 
@@ -778,7 +798,9 @@ public:
     // 
     void ShowMission();
     void ShowSegment();
-    void ShowBegin();
+    void ShowBeginning();
+    void ShowEndingNormal();
+    void ShowEndingSecret();
 
     // 
     void SetHighlightColor(const coreVector3 vColor);
@@ -788,6 +810,9 @@ private:
     // 
     void __SetMedalMission(const coreUint8 iMedal);
     void __SetMedalSegment(const coreUintW iIndex, const coreUint8 iMedal);
+
+    // 
+    void __ResetState();
 };
 
 
@@ -835,6 +860,11 @@ public:
     // 
     void ShowContinue();
     void ShowGameOver();
+
+
+private:
+    // 
+    void __ResetState();
 };
 
 
@@ -881,7 +911,12 @@ public:
 
     // 
     void SetHighlightColor(const coreVector3 vColor);
-    // this menu is handling score and replay saving
+    // TODO 1: this menu is handling score and replay saving
+
+
+private:
+    // 
+    void __ResetState();
 };
 
 
@@ -902,6 +937,7 @@ private:
 
     coreUint8 m_iTarget;              // 
     coreBool  m_bPaused;              // 
+    coreBool  m_bFade;                // 
 
 
 public:
@@ -913,9 +949,11 @@ public:
     void Move()final;
 
     // 
-    void EnterGame();
-    void ReturnMenu(const coreUint8 iTarget, const coreBool bPaused);
-    void ShowUnlock();
+    void EnterGame  (const coreBool bFade);
+    void ReturnMenu (const coreUint8 iTarget, const coreBool bPaused, const coreBool bFade);
+    void ShowUnlock ();
+    void UseContinue();
+    void UseRestart (const coreBool bPaused);
 
     // 
     coreBool RequiresUnlock()const;
@@ -923,6 +961,11 @@ public:
     // 
     inline coreUint8 GetTarget()const {return m_iTarget;}
     inline coreBool  GetPaused()const {return m_bPaused;}
+
+
+private:
+    // 
+    void __ResetState();
 };
 
 
@@ -950,8 +993,8 @@ private:
     cArcadeInput m_ArcadeInput;          // 
     cCreditRoll  m_CreditRoll;           // 
 
-    cGuiObject m_PauseLayer;             // 
-    coreUint32 m_iPauseFrame;            // 
+    coreFullscreen m_PauseLayer;         // 
+    coreUint32     m_iPauseFrame;        // 
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
     coreObject2D    m_MixObject;         // 
@@ -964,6 +1007,11 @@ private:
     coreMenu* m_pTransitionMenu;         // 
 
     static coreVector3 m_vHighlightColor;       // 
+    
+    static cGuiButton* m_pCurButton;
+    static cGuiButton* m_pNewButton;
+    static cGuiButton* m_pCurTab;
+    static cGuiButton* m_pNewTab;
 
 
 public:
@@ -988,7 +1036,7 @@ public:
     inline void InvokePauseStep() {m_iPauseFrame = Core::System->GetCurFrame();}
 
     // 
-    void ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreBool bUpdateFrom = false, const coreBool bUpdateTo = false);
+    void ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreUint8 iSound, const coreBool bUpdateFrom = false, const coreBool bUpdateTo = false);
     inline coreBool IsShifting()const {return m_TransitionTime.GetStatus();}
 
     // 
@@ -999,10 +1047,16 @@ public:
     // 
     static void UpdateLanguageFont();
     static const coreMap<coreString, coreString>& GetLanguageList();
+    
+    static void ChangeTab(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface);
+    
+    static void ClearScreen();
 
     // menu helper routines
     static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor);
     static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused);
+    static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor);
+    static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused);
     static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox);
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
     static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);

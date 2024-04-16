@@ -38,7 +38,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[1].SetText     (PRINT("Project One - v0.1.0 third edition - %s %.5s", __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One%s - v0.1.0 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", __DATE__, __TIME__));
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_GameLogo);
@@ -90,6 +90,9 @@ void cTitleMenu::Move()
             {
                 // 
                 m_fPromptExpand = 0.0f;
+
+                // 
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_START);
             }
 
             // 
@@ -115,6 +118,7 @@ void cTitleMenu::ActivateFirstPlay()
 
     // 
     m_PromptText.SetPosition(coreVector2(0.0f,0.0f));
+    m_fPromptAnimation = -4.0f;
 }
 
 
@@ -127,4 +131,5 @@ void cTitleMenu::DeactivateFirstPlay()
 
     // 
     m_PromptText.SetPosition(coreVector2(0.0f,-0.1f));
+    m_fPromptAnimation = -1.0f;
 }

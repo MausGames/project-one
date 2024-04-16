@@ -14,6 +14,7 @@
 cMossBackground::cMossBackground()noexcept
 : m_vRainMove        (coreVector2(-0.5f,-1.2f))
 , m_fLightningDelay  (Core::Rand->Float(15.0f, 30.0f))
+, m_fLightningFlash  (0.0f)
 , m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
 , m_fThunderDelay    (0.0f)
 , m_iThunderIndex    (Core::Rand->Uint(ARRAY_SIZE(m_apThunder) - 1u))
@@ -31,47 +32,41 @@ cMossBackground::cMossBackground()noexcept
     m_pOutdoor = new cOutdoor("moss", "blood", OUTDOOR_ALGORITHM_MOSS, 4.5f, false);
 
     // 
-    pList1 = new coreBatchList(MOSS_TREE_RESERVE);
+    pList1 = new coreBatchList(MOSS_TREE_1_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
 
-    pList2 = new coreBatchList(MOSS_TREE_RESERVE);
+    pList2 = new coreBatchList(MOSS_TREE_2_RESERVE);
     pList2->DefineProgram("object_ground_inst_program");
 
-    pList3 = new coreBatchList(MOSS_TREE_RESERVE);
+    pList3 = new coreBatchList(MOSS_TREE_3_RESERVE);
     pList3->DefineProgram("object_ground_inst_program");
     {
         // load object resources
         coreObject3D oBase;
         oBase.DefineProgram("object_ground_program");
 
-       // coreUint32 iNum = 0u;
-
         for(coreUintW i = 0u; i < MOSS_TREE_NUM; ++i)
         {
             // calculate position and height
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, MOSS_TREE_NUM);
             const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
-            //const coreFloat fHeight = WATER_HEIGHT + (ABS(SIN(vPosition.y*0.075f*PI) * 0.25f - ((vPosition.x+0.5f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 13.0f);
 
             // test for valid values
-            if((fHeight > -20.0f) && (fHeight < -18.0f)    )// && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            if((fHeight > -20.0f) && (fHeight < -18.0f))
             {
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(10.0f)) &&
                    !cBackground::_CheckIntersectionQuick(pList2, vPosition, POW2(10.0f)) &&
                    !cBackground::_CheckIntersectionQuick(pList3, vPosition, POW2(15.0f)))
                 {
-                    //iNum++;
-                    
                     // determine object type
-                    //const coreUint8 iType = Core::Rand->Bool() ? 0u : (((iNum < 3u) || Core::Rand->Bool(0.75f)) ? 1u : 2u);
                     const coreUint8 iType = Core::Rand->Bool() ? 0u : (Core::Rand->Bool(0.75f) ? 1u : 2u);
-//if(iType == 2u) iNum = 0u;
-                    const coreVector3 vNormal = (m_pOutdoor->RetrieveBackNormal(vPosition) * coreVector3(1.0f,1.0f,2.0f)).Normalized();
 
+                    // 
+                    const coreVector3 vNormal = (m_pOutdoor->RetrieveBackNormal(vPosition) * coreVector3(1.0f,1.0f,2.0f)).Normalized();
 
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
-                    pObject->DefineModel((iType == 0u) ? "environment_tree_01.md3" : ((iType == 1u) ? "environment_tree_02.md3" : "environment_tree_03.md3"));
+                    pObject->DefineModel  (    (iType == 0u) ? "environment_tree_01.md3"      : ((iType == 1u) ? "environment_tree_02.md3"      : "environment_tree_03.md3"));
                     pObject->DefineTexture(0u, (iType == 0u) ? "environment_tree_01_diff.png" : ((iType == 1u) ? "environment_tree_02_diff.png" : "environment_tree_03_diff.png"));
                     pObject->DefineTexture(1u, (iType == 0u) ? "environment_tree_01_norm.png" : ((iType == 1u) ? "environment_tree_02_norm.png" : "environment_tree_03_norm.png"));
 
@@ -79,9 +74,7 @@ cMossBackground::cMossBackground()noexcept
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f) - vNormal * 5.0f);
                     pObject->SetSize       (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(3.5f, 4.2f) * 1.3f);
                     pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
-                    if(iType != 2u) pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
-                    
-                    //if(iType == 2u) pObject->SetOrientation(OriRoundDir(coreVector2::Rand(), pObject->GetDirection().xy()));
+                    pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
 
                     // add object to the list
                          if(iType == 0u) cBackground::_BindSorted(pList1, pObject);
@@ -94,19 +87,19 @@ cMossBackground::cMossBackground()noexcept
         // 
         this->_StoreHeight(pList1, 0.0f);
         this->_StoreHeight(pList2, 0.0f);
-        this->_StoreHeight(pList3, 1.0f);   
+        this->_StoreHeight(pList3, 1.0f);
 
-        // post-process list and add it to the ground
-        cBackground::_FillInfinite(pList1, MOSS_TREE_RESERVE);
+        // post-process list and add to the ground
+        cBackground::_FillInfinite(pList1, MOSS_TREE_1_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
-        cBackground::_FillInfinite(pList2, MOSS_TREE_RESERVE);
+        cBackground::_FillInfinite(pList2, MOSS_TREE_2_RESERVE);
         m_apGroundObjectList.push_back(pList2);
 
-        cBackground::_FillInfinite(pList3, MOSS_TREE_RESERVE);
+        cBackground::_FillInfinite(pList3, MOSS_TREE_3_RESERVE);
         m_apGroundObjectList.push_back(pList3);
 
-        // bind stone list to shadow map
+        // 
         m_pOutdoor->GetShadowMap()->BindList(pList1);
         m_pOutdoor->GetShadowMap()->BindList(pList2);
         m_pOutdoor->GetShadowMap()->BindList(pList3);
@@ -140,7 +133,6 @@ cMossBackground::cMossBackground()noexcept
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
                     pObject->SetSize       (coreVector3(1.0f,1.0f,2.0f) * (Core::Rand->Bool() ? 3.0f : 5.0f) * 1.2f * 1.3f);
-                    pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
                     pObject->SetDirection  (coreVector3(AlongCrossNormal(coreVector2::Rand()), 0.0f));
                     pObject->SetOrientation(coreVector3(0.0f, 0.0f, Core::Rand->Bool() ? 1.0f : -1.0f));
                     pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
@@ -154,12 +146,15 @@ cMossBackground::cMossBackground()noexcept
         // 
         this->_StoreHeight(pList1, 5.0f);
 
-        // post-process list and add it to the ground
+        // post-process list and add to the ground
         cBackground::_FillInfinite(pList1, MOSS_GRAVE_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
-        // bind stone list to shadow map
+        // 
         m_pOutdoor->GetShadowMap()->BindList(pList1);
+
+        // 
+        m_apWaterRefList.push_back(pList1);
     }
 
     // allocate cloud list
@@ -185,14 +180,15 @@ cMossBackground::cMossBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * (0.5f + 0.2f * fHeight/60.0f), 0.85f));
+            pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (0.5f + 0.2f * fHeight/60.0f));
+            pObject->SetAlpha    (0.85f);
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
             pList1->BindObject(pObject);
         }
 
-        // post-process list and add it to the air
+        // post-process list and add to the air
         cBackground::_FillInfinite   (pList1, MOSS_CLOUD_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
@@ -202,7 +198,7 @@ cMossBackground::cMossBackground()noexcept
 
     // 
     m_Rain.DefineTexture(0u, "effect_rain.png");
-    m_Rain.DefineProgram("effect_weather_rain_program");
+    m_Rain.DefineProgram("effect_weather_rain_moss_program");
     m_Rain.SetPosition  (coreVector2(0.0f,0.0f));
     m_Rain.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Rain.SetAlpha     (0.6f);
@@ -282,11 +278,11 @@ void cMossBackground::__RenderOwnAfter()
 
     glDisable(GL_DEPTH_TEST);
     {
-        // 
+        // (# render first) 
         m_Rain.Render();
 
         // 
-        if(g_CurConfig.Graphics.iFlash) m_Lightning.Render();
+        m_Lightning.Render();
 
         // 
         if(m_bEnableHeadlight) m_Headlight.Render();
@@ -299,21 +295,15 @@ void cMossBackground::__RenderOwnAfter()
 // move the moss background
 void cMossBackground::__MoveOwn()
 {
-    static coreVector2 TEST = coreVector2(0.1f,0.1f);   // TIME = 0 on start, normalize assert
-    
     // 
-    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
+    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * MAX0(g_pEnvironment->GetSpeed()));
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 6.0f;
-    //const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (m_vRainMove.InvertedX() + vEnvMove) * (1.0f * TIME);
-    const coreVector2 vTexOffset = TEST + (m_vRainMove.InvertedX() + vEnvMove) * (1.0f * TIME);
-    TEST = vTexOffset;//.Processed(FRACT);
+    const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f, -m_vRainMove.Length()) + vEnvMove) * (1.0f * TIME);
 
     // 
-    //m_Rain.SetDirection(g_pEnvironment->GetDirection().InvertedX());
-    m_Rain.SetDirection(MapToAxis(-vTexOffset.Normalized(), g_pEnvironment->GetDirection().InvertedX()));
+    m_Rain.SetDirection(MapToAxisInv(-m_vRainMove.InvertedX().Normalized(), g_pEnvironment->GetDirection()));
     m_Rain.SetTexSize  (vTexSize);
-    //m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
-    m_Rain.SetTexOffset(coreVector2(0.0f,1.0f) * -vTexOffset.Length());
+    m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Rain.Move();
 
     if(m_bEnableLightning)
@@ -343,8 +333,13 @@ void cMossBackground::__MoveOwn()
     m_fThunderDelay  .Update(1.0f);
 
     // 
-    m_Lightning.SetAlpha  (m_LightningTicker.GetValue(CORE_TIMER_GET_REVERSED) * 0.7f);
-    m_Lightning.SetEnabled(m_LightningTicker.GetStatus() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_fLightningFlash.UpdateMax(-1.0f, 0.0f);
+    const coreFloat fValue = MAX(MIN1(m_fLightningFlash), m_LightningTicker.GetStatus() ? m_LightningTicker.GetValue(CORE_TIMER_GET_REVERSED) : 0.0f);
+
+    // 
+    m_Lightning.SetColor3 (g_CurConfig.Graphics.iFlash ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_BLACK);
+    m_Lightning.SetAlpha  (BLENDH3(fValue) * 0.7f);
+    m_Lightning.SetEnabled(fValue ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Lightning.Move();
 
     // 
@@ -358,12 +353,16 @@ void cMossBackground::__MoveOwn()
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_apThunder); ++i)
     {
         if(m_apThunder[i]->EnableRef(this))
+        {
             m_apThunder[i]->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+        }
     }
 
     // adjust volume of the base sound-effect
     if(m_pBaseSound->EnableRef(this))
+    {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    }
 }
 
 
@@ -372,5 +371,5 @@ void cMossBackground::__MoveOwn()
 void cMossBackground::__UpdateOwn()
 {
     // 
-    if(m_bEnableHeadlight) m_Headlight.UpdateDefault();
+    if(m_bEnableHeadlight) m_Headlight.UpdateDefault(0u);
 }

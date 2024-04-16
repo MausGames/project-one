@@ -17,11 +17,18 @@ void cMuscusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        }
     });
 
     // ################################################################
-    // 
+    // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
@@ -33,7 +40,7 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance (split)
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
         cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
@@ -46,20 +53,27 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // show mission name
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(STAGE_BEGINNING)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
         {
-            g_pGame->GetInterface()->ShowMission(this);
+            STAGE_FINISH_NOW
         }
+        else
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->GetInterface()->ShowMission(this);
+            }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+            STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        }
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_PLAY
     });
@@ -92,8 +106,9 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: die beiden 4er wellen entfernen, wenn die fürn orsch sind
     // TODO 1: erster gegner in 6x6 gruppe stirbt zu schnell, wenn spieler grad richtig schießt
     // TODO 1: mehr zwischen-subwave flickern hinzufügen, bei anderen wellen nach 10
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: vielleicht wurm-gegner hören nach kurzer zeit oder sobald sie sichtbar sind zu schießen auf
+    // TODO 1: bei raster-gruppe bleibt der spieler einfach ganz unten und schaut nach oben
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumData = 36u;
@@ -106,12 +121,12 @@ void cMuscusMission::__SetupOwn()
             pPath1->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 65u)
+        STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 65u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure((i == 23u || i == 27u) ? 120 : 10, COLOR_SHIP_YELLOW);
-                pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+                pEnemy->Configure((i == 23u || i == 27u) ? 120 : 10, 0u, COLOR_SHIP_GREEN);
+                pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
 
@@ -321,11 +336,11 @@ void cMuscusMission::__SetupOwn()
                 pEnemy->SetPosition (coreVector3(vPos * FOREGROUND_AREA, 0.0f));
                 pEnemy->SetDirection(coreVector3(vDir,                   0.0f));
 
-                     if((iStepRemove == 0u) && (iIndex != 16u)) bDisappear = true;
-                else if((iStepRemove == 1u) && (iIndex != 25u)) bDisappear = true;
-                else if((iStepRemove == 2u) && (iIndex !=  8u)) bDisappear = true;
-                else if((iStepRemove == 3u) && (iIndex != 28u)) bDisappear = true;
-                else                                            bDisappear = true;
+                     if(iStepRemove == 0u) bDisappear = (iIndex != 16u);
+                else if(iStepRemove == 1u) bDisappear = (iIndex != 25u);
+                else if(iStepRemove == 2u) bDisappear = (iIndex !=  8u);
+                else if(iStepRemove == 3u) bDisappear = (iIndex != 28u);
+                else                       bDisappear = true;
 
                 if(iStepRemove == 4u)
                 {
@@ -385,7 +400,7 @@ void cMuscusMission::__SetupOwn()
             if(HAS_BIT(iLight, i % iNumData)) fFade = MIN(fFade + 4.0f * TIME, 1.0f);
                                          else fFade = MAX(fFade - 4.0f * TIME, 0.0f);
 
-            pEnemy->SetSize (coreVector3(1.0f,1.0f,1.0f) * ((i == 23u || i == 27u) ? 2.0f : 1.3f) * LERPS(2.0f, 1.0f, fFade));
+            pEnemy->SetSize (coreVector3(1.0f,1.0f,1.0f) * ((i == 23u || i == 27u) ? 2.3f : 1.5f) * LERPS(2.0f, 1.0f, fFade));
             pEnemy->SetAlpha(LERPS(0.0f, 1.0f, fFade));
 
             if(fFade)
@@ -426,18 +441,25 @@ void cMuscusMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE("SIEBENUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!bPostpone) STAGE_WAVE(0u, "SIEBENUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         d_cast<cMossBackground*>(g_pEnvironment->GetBackground())->GetHeadlight()->ResetFlicker();
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -465,7 +487,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: gegner in 12 12 12 pattern anders (siehe notizen) (achtung, die gegner sind im code 01237654)
     // TODO 1: TOP, bei 12 12 12 pattern, gegner eigentlich ganz oben mit abstand platzieren, nicht folgen lassen
     // TODO 1: die ersten 4 gruppen sind noch etwas fishy, vor allem die rauf-runter gruppe, adden die value ? diese 4 gruppen sollten die mechanik introducen
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep        = 0.275f;
@@ -491,12 +513,12 @@ void cMuscusMission::__SetupOwn()
             pPath2->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cCinderEnemy, 76u)
+        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 76u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(10 + 10, COLOR_SHIP_YELLOW);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
+                pEnemy->Configure(10 + 10, 0u, COLOR_SHIP_BLUE);
             });
         });
 
@@ -518,7 +540,7 @@ void cMuscusMission::__SetupOwn()
         {
             for(coreUintW i = iCreateStart; i < MUSCUS_GENERATES; ++i)
             {
-                coreObject3D* pGenerate = (*m_Generate.List())[i];
+                const coreObject3D* pGenerate = this->GetGenerate(i);
 
                 if(!pGenerate->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
@@ -553,13 +575,22 @@ void cMuscusMission::__SetupOwn()
             else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 60u, 67u)
             else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 68u, 75u)
             else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 8u,  23u)
-            else if(STAGE_SUB(10u)) STAGE_DELAY_START_CLEAR
+            else if(STAGE_SUB(10u))
+            {
+                this->TestGenerate(false);
+                STAGE_DELAY_START_CLEAR
+            }
 
             if((m_iStageSub == 1u) || (m_iStageSub == 2u) || (m_iStageSub == 5u) || (m_iStageSub == 6u) || (m_iStageSub == 7u) || (m_iStageSub == 8u) || (m_iStageSub == 9u))
             {
                 iSpawnCount  = 0u;
                 fSpawnOffset = (1.0f - fSpawn) / (fSpeed * fFreqFast);
             }
+        }
+
+        if(STAGE_BEGINNING)
+        {
+            this->TestGenerate(true);
         }
 
         fSpawn += TIME * (fSpeed * RCP(pPath1->GetTotalDistance() * 0.5f)) * ((m_iStageSub >= 7u) ? fFreqFast : fFreqSlow);
@@ -772,6 +803,13 @@ void cMuscusMission::__SetupOwn()
 
                 g_pSpecialEffects->MacroExplosionColorBig(coreVector3(0.0f,0.0f,0.0f), COLOR_ENERGY_GREEN);
 
+                cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
+
+                pBackground->GetHeadlight()->ResetFlicker();
+                pBackground->SetEnableLightning(true);
+                pBackground->SetEnableHeadlight(false);
+                pBackground->FlashLightning();
+
                 STAGE_DELAY_END
             }
         }
@@ -844,7 +882,7 @@ void cMuscusMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < MUSCUS_GENERATES; ++i)
         {
-            coreObject3D* pGenerate = (*m_Generate.List())[i];
+            coreObject3D* pGenerate = this->GetGenerate(i);
             if(!pGenerate->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
             afGenerateTime[i] += 1.0f * TIME;
@@ -898,31 +936,16 @@ void cMuscusMission::__SetupOwn()
 
                 iRotaIndex += 1u;
             }
-
-            if(m_iStageSub < 10u)
-            {
-                cPlayer::TestCollision(PLAYER_TEST_NORMAL, pGenerate, [&](cPlayer* OUTPUT pPlayer, const coreObject3D* pGenerate, const coreVector3 vIntersection, const coreBool bFirstHit)
-                {
-                    if(!bFirstHit) return;
-
-                    pPlayer->TakeDamage(5, ELEMENT_GREEN, vIntersection.xy());
-
-                    this->BangGenerate(i);
-
-                    g_pSpecialEffects->CreateSplashColor(pGenerate->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_GREEN);
-                    g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                });
-            }
         }
 
-        STAGE_WAVE("ACHTUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(1u, "ACHTUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-        g_pGame->GetHelper(ELEMENT_GREEN)->Kill(false);
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < MUSCUS_GENERATES; ++i)
             this->DisableGenerate(i, false);
@@ -932,17 +955,21 @@ void cMuscusMission::__SetupOwn()
 
     // ################################################################
     // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        if(STAGE_BEGINNING)
-        {
-            cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
+        cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
 
-            pBackground->GetHeadlight()->ResetFlicker();
-            pBackground->SetEnableLightning(true);
-            pBackground->SetEnableHeadlight(false);
-        }
+        pBackground->GetHeadlight()->ResetFlicker();
+        pBackground->SetEnableLightning(true);
+        pBackground->SetEnableHeadlight(false);
 
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -971,13 +998,15 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: shoot-counter sollte irgendwie resettet werden, damit die wurst-angriffe nicht unterbrochen beginnen (sollten sie am ende unterbrochen werden, isses wurst) (STAGE_TICK_EXTERN ?)
     // TODO 1: striking pearls need a different appearance (color would be good, white?)
     // TODO 1: striking pearls sollten sich strecken (direction anpassen + Y size größer + leichte XY size kleiner)
+    // TODO 1: striking attack sollte weiter weggehn wenn sie näher bei target sind, vielleicht beschleunigt das mehr
     // TODO 1: pearls in the final phase might be hidden by the bullets at the beginning, making comprehension harder
     // TODO 1: vielleicht sollten die 3 linien näher in die mitte, dort ist es schwierig die kugerl einzusammeln
     // TODO 1: größere explosion am ende, allgemein größerer impact effect der pearls (direktional ?) + screenshake
     // TODO 1: auch größerer effekt beim einsammeln der pearls (e.g. wave effect)
     // TODO 1: die 3 linien fühlen sich noch nicht so perfekt an, sollten aber nicht zu schwer sein (ruhe vor dem sturm)
     // TODO 1: attack pattern in end-wave changes after collecting half the pearls
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: make sure pearl animation-order is correct on all sub-stages
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1009,7 +1038,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(1000, COLOR_SHIP_RED);
+                pEnemy->Configure(1000, 0u, COLOR_SHIP_YELLOW);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();
@@ -1209,7 +1238,7 @@ void cMuscusMission::__SetupOwn()
                 if(vDiff.LengthSq() < POW2(4.5f))
                 {
                     this->StrikeAttack(j, pPlayer, pSquad1->GetEnemy(0u));
-                    g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_YELLOW);
+                    g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_WHITE);
 
                     if(m_iStageSub == 6u)
                     {
@@ -1377,19 +1406,26 @@ void cMuscusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("NEUNUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(2u, "NEUNUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
             this->DisablePearl(i, false);
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1429,8 +1465,9 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: first (few?) enemies should fly further into center, to show teleportation better
     // TODO 1: gegner anordnung vor zweiter trail/highspeed gruppe sollte so geändert werden, dass man besser in die nächste gruppe startet
     // TODO 1: verwandlung ist sehr kurz, könnte ok sein, muss dann aber bei boss mehrmals verwendet werden
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: schräge gegner-bewegungen im finale ?
+    // TODO 1: helper kommt einmal aus old-position vom spieler nach teleport
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData = 14u;
@@ -1451,12 +1488,12 @@ void cMuscusMission::__SetupOwn()
             pPath2->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 104u)
+        STAGE_ADD_SQUAD(pSquad1, cCinderEnemy, 104u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(4, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_PURPLE);
             });
 
             const auto nInitFunc = [&](const coreUintW iIndex, const coreVector2 vPos)
@@ -1504,11 +1541,11 @@ void cMuscusMission::__SetupOwn()
             nInitFunc(47u, coreVector2( 0.0f,-0.7f));
         });
 
-        STAGE_ADD_SQUAD(pSquad2, cWarriorEnemy, 9u)
+        STAGE_ADD_SQUAD(pSquad2, cMinerEnemy, 9u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -1747,14 +1784,14 @@ void cMuscusMission::__SetupOwn()
 
         if(STAGE_CLEARED) nReturnFunc();
 
-        STAGE_WAVE("VIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(3u, "VIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -1765,14 +1802,9 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -1800,7 +1832,8 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: bei "quads with different speed" vielleicht die löcher bei letzter stufe etwas breiter machen
     // TODO 1: nochmal alle timings anschauen und anpassen (zeit zwischen mini-stages, länge der mini-stages, länge der steigerungen pro mini-stage)
     // TODO 1: fix rotating and crashing enemies having unintended symmetric direction
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: bei dem gegner den man in bullet-phase für badge abschießen kann sind blitze und partikel, und seine farbe blinkt (für paar s)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumEnemies = 40u;
@@ -1843,7 +1876,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, COLOR_SHIP_CYAN);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
             });
         });
@@ -1997,7 +2030,7 @@ void cMuscusMission::__SetupOwn()
             else if(iStageMini >= 11u)
             {
                 const coreFloat   fDelay  = I_TO_F((i * 7u) % 40u);
-                const coreVector2 vTarget = vLegionTarget + coreVector2::Direction(GA * fDelay - fLegionRota) * LERPB(0.0f, 1.0f, (fDelay + 1.0f) / 40.0f) * 15.0f;
+                const coreVector2 vTarget = vLegionTarget + coreVector2::Direction(GA * fDelay - fLegionRota) * BLENDB((fDelay + 1.0f) / 40.0f) * 15.0f;
 
                 if(iStageMini == 11u)
                 {
@@ -2243,16 +2276,23 @@ void cMuscusMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE("EINUNDVIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(4u, "EINUNDVIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -2267,7 +2307,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: weakpoint rolls around border with high speed, flies like ZeroRanger fast enemies across screen, are like a wall with enemy at center
     // TODO 1: weakpoint dies faster, whole wave needs to be faster
     // TODO 1: actually damage and blink other enemy
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2294,7 +2334,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(1, COLOR_SHIP_RED);
+                pEnemy->Configure(1, 0u, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -2303,7 +2343,7 @@ void cMuscusMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(50, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(50, 0u, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -2422,28 +2462,35 @@ void cMuscusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ZWEIUNDVIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "ZWEIUNDVIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         UNUSED STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, GEMINGA_ENEMIES_TELEPORT)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(4, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_PURPLE);
                 pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -2453,7 +2500,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, COLOR_SHIP_CYAN);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS);
             });
         });

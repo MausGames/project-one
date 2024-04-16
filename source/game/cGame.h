@@ -15,7 +15,7 @@
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
 // TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (but needs separation between sub-ghost states, maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
-// TODO 3: temporarily changing to no-background (on mission start) unloads all resources, even though we were just on that background (caching old background ?)
+// TODO 3: temporarily changing to no-background (on mission start) unloads all resources, even though we were just on that background (caching old background ? tripple buffering ?)
 
 
 // ****************************************************************
@@ -33,7 +33,26 @@ enum eGameStatus : coreUint8
     GAME_STATUS_PLAY     = 0x04u,   // 
     GAME_STATUS_LOADING  = 0x08u,   // 
     GAME_STATUS_DEFEATED = 0x10u,   // 
-    GAME_STATUS_FINISHED = 0x20u    // 
+    GAME_STATUS_CONTINUE = 0x20u,   // 
+    GAME_STATUS_QUICK    = 0x40u,   // 
+    GAME_STATUS_FINISHED = 0x80u    // 
+};
+
+enum eGameOutro : coreUint8
+{
+    GAME_OUTRO_MISSION = 0u,    // 
+    GAME_OUTRO_SEGMENT,         // 
+    GAME_OUTRO_BEGINNING,       // 
+    GAME_OUTRO_ENDING_NORMAL,   // 
+    GAME_OUTRO_ENDING_SECRET    // 
+};
+
+enum eGameKind : coreUint8
+{
+    GAME_KIND_ALL = 0u,   // 
+    GAME_KIND_MISSION,    // 
+    GAME_KIND_SEGMENT,    // 
+    GAME_KIND_MAX         // 
 };
 
 enum eGameType : coreUint8
@@ -62,6 +81,7 @@ enum eGameDifficulty : coreUint8
 
 struct sGameOptions final
 {
+    coreUint8 iKind;                                             // 
     coreUint8 iType;                                             // 
     coreUint8 iMode;                                             // 
     coreUint8 iDifficulty;                                       // 
@@ -72,7 +92,7 @@ struct sGameOptions final
 
 // ****************************************************************
 // 
-static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
+static constexpr coreInt32 GAME_MISSION_LIST_MAIN[] =
 {
     cIntroMission  ::ID,
     cViridoMission ::ID,
@@ -88,14 +108,12 @@ static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
     cErrorMission  ::ID
 };
 
-static constexpr coreInt32 __GAME_MISSION_LIST_DEMO[] =
+static constexpr coreInt32 GAME_MISSION_LIST_DEMO[] =
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    cDemoMission::ID
+    cIntroMission ::ID,
+    cViridoMission::ID,
+    cNevoMission  ::ID
 };
-
-#define GAME_MISSION_LIST_MAIN (__GAME_MISSION_LIST_MAIN), ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
-#define GAME_MISSION_LIST_DEMO (__GAME_MISSION_LIST_DEMO), ARRAY_SIZE(__GAME_MISSION_LIST_DEMO)
 
 struct sMissionData final
 {
@@ -118,7 +136,6 @@ static constexpr sMissionData g_aMissionData[] =
     {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color},   // #
     {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color}    // #
 };
-// TODO 1: handle game end based on mission-list
 
 
 // ****************************************************************
@@ -127,10 +144,10 @@ static constexpr sMissionData g_aMissionData[] =
 #define DEPTH_PUSH_DOUBLE    {g_pGame->PushDepthLevel(2u);}
 #define DEPTH_PUSH_SHIP      {g_pGame->PushDepthLevelShip();}
 
-#define __DEPTH_GROUP_SHIP   {this->ChangeDepthLevel(9u, 11u);}                // 2 levels, static
-#define __DEPTH_GROUP_BOTTOM {m_iDepthDebug = 11u;     m_iDepthLevel = 20u;}   // 9 levels, dynamic, 2 in game
+#define __DEPTH_GROUP_SHIP   {this->ChangeDepthLevel(8u, 10u);}                // 2 levels, static
+#define __DEPTH_GROUP_BOTTOM {m_iDepthDebug = 10u;     m_iDepthLevel = 20u;}   // 10 levels, dynamic, 2 in game
 #define __DEPTH_GROUP_UNDER  {}                                                // shared with DEPTH_GROUP_BOTTOM
-#define __DEPTH_GROUP_OVER   {m_iDepthDebug = BIT(7u); m_iDepthLevel = 9u;}    // 9 levels, dynamic, 3 in game (can use DEPTH_PUSH_SHIP)
+#define __DEPTH_GROUP_OVER   {m_iDepthDebug = BIT(7u); m_iDepthLevel = 8u;}    // 8 levels, dynamic, 3 in game (can use DEPTH_PUSH_SHIP)
 #define __DEPTH_GROUP_TOP    {m_iDepthDebug = 0u;}                             // shared with DEPTH_GROUP_OVER
 #define __DEPTH_RESET        {this->ChangeDepthLevel(0u, 20u);}
 
@@ -149,6 +166,8 @@ private:
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
     cCrashManager  m_CrashManager;          // 
+    
+    cBulletManager m_BulletManagerPlayerTop;
 
     cInterface  m_Interface;                // interface overlay
     cCombatText m_CombatText;               // combat text overlay
@@ -163,6 +182,11 @@ private:
 
     cTimeTable m_TimeTable;                 // 
     coreFlow   m_fTimeInOut;                // 
+
+    coreFlow  m_fMusicFade;                 // 
+    coreFloat m_fMusicSpeed;                // 
+    
+    coreFlow m_fHitDelay;
 
     coreUint8 m_iContinues;                 // 
 
@@ -193,18 +217,24 @@ public:
     void RenderOverlay();
     void MoveOverlay();
 
+    // 
+    void MoveAlways();
+
     // control active mission
     void LoadMissionID   (const coreInt32 iID,    const coreUint8 iTakeFrom = 0u, const coreUint8 iTakeTo = TAKE_MISSION);
     void LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom = 0u, const coreUint8 iTakeTo = TAKE_MISSION);
     void LoadNextMission();
-    void RestartMission();
 
     // 
     void StartIntro();
     void StartOutro(const coreUint8 iType);
 
     // 
+    void FadeMusic(const coreFloat fSpeed);
+
+    // 
     void UseContinue();
+    void UseRestart();
 
     // 
     void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
@@ -217,6 +247,7 @@ public:
 
     // 
     inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
+    inline void KillHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) m_aHelper[i].Kill(false);}
     inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
@@ -249,6 +280,9 @@ public:
     inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}
     inline const coreUintW& GetCurMissionIndex    ()const                    {return m_iCurMissionIndex;}
     inline cTimeTable*      GetTimeTable          ()                         {return &m_TimeTable;}
+    
+    inline cBulletManager*  GetBulletManagerPlayerTop()                         {return &m_BulletManagerPlayerTop;}
+    
 
     // get object properties
     inline       coreUint8     GetNumPlayers ()const {return this->IsMulti() ? GAME_PLAYERS : 1u;}
@@ -257,6 +291,7 @@ public:
     inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
     inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
     inline const sGameOptions& GetOptions    ()const {return m_Options;}
+    inline const coreUint8&    GetKind       ()const {return m_Options.iKind;}
     inline const coreUint8&    GetType       ()const {return m_Options.iType;}
     inline const coreUint8&    GetMode       ()const {return m_Options.iMode;}
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}

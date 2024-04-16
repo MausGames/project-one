@@ -140,7 +140,8 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
     case OUTDOOR_ALGORITHM_SEA:      nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.150f *PI) - 1.0f;                            return r;}; break;
     case OUTDOOR_ALGORITHM_VOLCANO:  nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.075f *PI) + 3.0f;                            return r;}; break;
     case OUTDOOR_ALGORITHM_UNUSED_2: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.0375f*PI) - 1.0f;                            return r;}; break;
-    case OUTDOOR_ALGORITHM_STOMACH:  nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f + SIN(y*0.087f*PI) * 10.0f) + 7.0f;                                                            return r;}; break;
+    case OUTDOOR_ALGORITHM_UNUSED_3: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f + SIN(y*0.087f*PI) * 10.0f) + 7.0f;                                                            return r;}; break;
+    case OUTDOOR_ALGORITHM_STOMACH:  nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = 0.0f;                                                                                                                                                      return r;}; break;
     }
 
     // create vertices
@@ -282,9 +283,9 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
 
     // create vertex buffer
     coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), s_aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
-    pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT_NUM, 1u, GL_FLOAT,    false, 0u);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,    4u, iNormFormat, false, 1u*sizeof(coreFloat));
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,   4u, iNormFormat, false, 1u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
+    pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT_NUM, 1u, GL_FLOAT,    1u*sizeof(coreFloat),  false, 0u, 0u);
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,    4u, iNormFormat, 1u*sizeof(coreUint32), false, 0u, 1u*sizeof(coreFloat));
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,   4u, iNormFormat, 1u*sizeof(coreUint32), false, 0u, 1u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
 
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), s_aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
@@ -297,7 +298,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
 
         // 
         pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreVector2), s_avPosition, CORE_DATABUFFER_STORAGE_STATIC);
-        pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM, 2u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM, 2u, GL_FLOAT, sizeof(coreVector2), false, 0u, 0u);
     }
 
     Core::Log->Info("Outdoor-Geometry (%u, %.1f) loaded", iAlgorithm, fGrade);
@@ -531,7 +532,7 @@ void cOutdoor::LerpHeight(const coreFloat fMul, const coreFloat fAdd, const core
 // 
 void cOutdoor::LerpHeightNow(const coreFloat fMul, const coreFloat fAdd)
 {
-    ASSERT(!this->IsLerping())
+    //ASSERT(!this->IsLerping())
 
     // 
     m_afLerpMul  [0] = m_afLerpMul  [1] = fMul;

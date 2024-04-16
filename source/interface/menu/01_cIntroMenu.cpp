@@ -81,7 +81,7 @@ void cIntroMenu::Move()
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        if(!this->GetTransition().GetStatus()) g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f);
+        if(!this->GetTransition().GetStatus()) g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f, 0u);
     }
     else
     {
@@ -125,7 +125,7 @@ void cIntroMenu::Move()
             if(fTime2 >= 1.0f)
             {
                 // 
-                g_pMenu->ShiftSurface(this, SURFACE_INTRO_EMPTY, 0.75f);
+                g_pMenu->ShiftSurface(this, SURFACE_INTRO_EMPTY, 0.75f, 0u);
             }
         }
     }
@@ -187,7 +187,7 @@ void cIntroMenu::StartIntro()
     }
 
     // 
-    g_pMenu->ShiftSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_WELCOME, 0.75f);
+    g_pMenu->ShiftSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_WELCOME, 0.75f, 0u);
 }
 
 

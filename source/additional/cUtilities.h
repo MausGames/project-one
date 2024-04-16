@@ -270,7 +270,7 @@ constexpr FUNC_CONST coreVector2 MapStepRotatedInv90X(const coreVector2 vDirecti
 // 
 constexpr FUNC_CONST coreBool IsHorizontal(const coreVector2 v)
 {
-    ASSERT(!v.IsNull())
+    //ASSERT(!v.IsNull())
     if(std::is_constant_evaluated())
     {
         return ((v.x > v.y) && (v.x > -v.y)) ||
@@ -360,6 +360,14 @@ constexpr FUNC_CONST coreVector3 OriRoundDir(const coreVector2 vOrientation, con
 constexpr FUNC_CONST coreFloat DelayTime(const coreFloat fTime, const coreFloat fOffset, const coreFloat fLength)
 {
     return MIN(fTime, fOffset) + MAX(fTime - fOffset - fLength, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+constexpr FUNC_CONST coreFloat MaxAspectRatio(const coreVector2 vVector)
+{
+    return (vVector.Max() * RCP(vVector.Min()));
 }
 
 

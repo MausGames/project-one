@@ -17,11 +17,18 @@ void cRutilusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        }
     });
 
     // ################################################################
-    // 
+    // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cSpaceBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
@@ -33,31 +40,35 @@ void cRutilusMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance (split)
+    // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
-
-        //pBackground->SetGroundDensity(0u, 0.0f);
-        //pBackground->SetCoverColor(COLOR_MENU_BLUE);
+        g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
 
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // 
+    // show mission name
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(STAGE_BEGINNING)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
         {
-            g_pGame->GetInterface()->ShowMission(this);
+            STAGE_FINISH_NOW
         }
+        else
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->GetInterface()->ShowMission(this);
+            }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+            STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        }
     });
 
     // ################################################################
-    // change background appearance (split)
+    // wait for play
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_PLAY
@@ -84,7 +95,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: maybe replace left-right enemy waves (coming from top and bottom) with something else, though spawning still from left and right did not feel that interesting)
     // TODO 1: maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
     // TODO 1: boss: spieler wird herumgedreht (mit gravitation und geschosse drehen sich auch), und beim verwenden der platte wird er in richtung forciert (eigentlich orsch)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: effect (+ sound) when getting forced and unforced (also for boss) (not permanent, but when entering/exiting)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -117,7 +128,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -169,6 +180,8 @@ void cRutilusMission::__SetupOwn()
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
+
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f * STAGE_STEP(1u, 32u));
         }
 
         const coreBool bRotated = g_pGame->IsHard();
@@ -386,17 +399,22 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE("NEUNZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        if(!bPostpone) STAGE_WAVE(0u, "NEUNZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < RUTILUS_PLATES; ++i)
             this->DisablePlate(i, false);
+
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+        });
 
         STAGE_FINISH_NOW
     });
@@ -405,11 +423,15 @@ void cRutilusMission::__SetupOwn()
     // change background appearance
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-        if(STAGE_BEGINNING)
-        {
-            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetGroundDensity(0u, 0.2f);
-        }
+        g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f);
 
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
         STAGE_FINISH_PLAY
     });
 
@@ -432,7 +454,8 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: badge: shoot at helper
     // TODO 1: whole border gets particle effect on helper impact (delayed)
     // TODO 1: player bullets should not get deleted for final phase (in bullet-class, currently not fixed), and hit should be recognized (in game-class, handled with visibility-check bool)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: gegner die sich in den ecken verstecken bewegen sich langsa min mitte, oder sobald der erste tot ist
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -467,12 +490,12 @@ void cRutilusMission::__SetupOwn()
             pPath4->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 116u)
+        STAGE_ADD_SQUAD(pSquad1, cFreezerEnemy, 116u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);   // due to tight spawning
             });
         });
@@ -515,9 +538,11 @@ void cRutilusMission::__SetupOwn()
             fTransitionTime  = 0.0f;
 
             g_pGame->SetVisibleCheck(m_iStageSub != 21u);
+
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.5f * STAGE_STEP(1u, 22u));
         }
 
-        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_GREEN);
+        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
 
         if(STAGE_BEGINNING)
         {
@@ -538,7 +563,7 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_GREEN);
+                    g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_MAGENTA);
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
                 }
             }
@@ -550,7 +575,7 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
+                    g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_MAGENTA);
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 }
             }
@@ -561,7 +586,7 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_MAGENTA);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
             }
 
@@ -573,7 +598,7 @@ void cRutilusMission::__SetupOwn()
             {
                 iTransitionState += 1u;
 
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_MAGENTA);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
 
                 fRotationSpeed = -fRotationSpeed;
@@ -589,7 +614,7 @@ void cRutilusMission::__SetupOwn()
                 fRotationFrom  = (fRotationValue);
                 fRotationTo    = (fRotationValue > 1.0f*PI) ? (2.0f*PI) : (0.0f*PI);
 
-                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_MAGENTA);
             }
 
             const coreFloat fTime = MAX(1.0f - fTransitionTime, 0.0f);
@@ -710,18 +735,18 @@ void cRutilusMission::__SetupOwn()
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
                 const coreVector2 vDir = pEnemy->AimAtPlayerSide().Normalized();
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
             }
         });
 
-        STAGE_WAVE("ZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(1u, "ZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-        g_pGame->GetHelper(ELEMENT_GREEN)->Kill(false);
+        g_pGame->KillHelpers();
 
         g_pGame->SetVisibleCheck(true);
 
@@ -732,23 +757,17 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // change background appearance
-    STAGE_MAIN({TAKE_MISSION, 1u})
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(LERP(COLOR_MENU_BLUE, COLOR_MENU_MAGENTA, m_fStageTime));
+        g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.5f);
 
-        //STAGE_FINISH_AFTER(1.0f)
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        if(STAGE_BEGINNING)
-        {
-            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -773,12 +792,11 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
     // TODO 1: wenn in bubble, musik wird langsamer
     // TODO 1: vielleicht sollten gegner geschosse langsamer sein als derzeit, wenn sie in die "normale" bubble kommen am ende
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: musik langsamer und verzerrt wiedergeben, wenn man selbst verlangsamt ist ? coop ? (vielleicht mittel von beiden spielern)
+    // TODO 1: slowdown/safe field follows player
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        constexpr coreUintW iRegisterSize = GAME_PLAYERS + 1u;
-
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
@@ -792,7 +810,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_PURPLE);
 
                 if(i < 4u)
                 {
@@ -829,13 +847,11 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(2u * iRegisterSize + 4u)
-            STAGE_GET_UINT_ARRAY (aiRegisterID,    iRegisterSize)
-            STAGE_GET_FLOAT_ARRAY(afRegisterSpeed, iRegisterSize)
-            STAGE_GET_UINT       (iTransitionState)
-            STAGE_GET_FLOAT      (fTransitionTime)
-            STAGE_GET_FLOAT      (fAreaMove)
-            STAGE_GET_FLOAT      (fAreaLerp)
+        STAGE_GET_START(4u)
+            STAGE_GET_UINT (iTransitionState)
+            STAGE_GET_FLOAT(fTransitionTime)
+            STAGE_GET_FLOAT(fAreaMove)
+            STAGE_GET_FLOAT(fAreaLerp)
         STAGE_GET_END
 
         if(STAGE_CLEARED)
@@ -867,6 +883,8 @@ void cRutilusMission::__SetupOwn()
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
+
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.75f * STAGE_STEP(1u, 24u));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
@@ -968,62 +986,11 @@ void cRutilusMission::__SetupOwn()
         m_aArea[0].SetPosition(m_Safe.IsEnabled(CORE_OBJECT_ENABLE_ALL) ? coreVector3(0.0f,0.0f,0.0f) : pHelper->GetPosition());
         m_Safe    .SetPosition(m_Safe.IsEnabled(CORE_OBJECT_ENABLE_ALL) ? pHelper->GetPosition()      : coreVector3(HIDDEN_POS, 0.0f));
 
-        const coreVector2 vTestPos1    = m_aArea[0].GetPosition().xy();
-        const coreVector2 vTestPos2    = m_Safe    .GetPosition().xy();
-        const coreFloat   fTestFromSq1 = POW2(m_aArea[1].GetSize().x) - 100.0f;   // inner sphere
-        const coreFloat   fTestToSq1   = POW2(m_aArea[1].GetSize().x) +  50.0f;
-        const coreFloat   fTestFromSq2 = POW2(m_Safe    .GetSize().x) - 100.0f;
-        const coreFloat   fTestToSq2   = POW2(m_Safe    .GetSize().x) +  50.0f;
-        const coreFloat   fSpeedSlow   = 0.2f;
-        const coreFloat   fSpeedFast   = 1.0f;
-
-        const auto nCalcSpeedFunc = [&](const coreVector2 vPosition)
-        {
-            const coreVector2 vDiff1 = vPosition - vTestPos1;
-            const coreVector2 vDiff2 = vPosition - vTestPos2;
-
-            return LERP(fSpeedSlow, fSpeedFast, STEPH3(fTestFromSq1, fTestToSq1, vDiff1.LengthSq()) - STEPH3(fTestFromSq2, fTestToSq2, vDiff2.LengthSq()) + 1.0f);
-        };
-
-        if(m_aArea[0].IsEnabled(CORE_OBJECT_ENABLE_ALL))
-        {
-            STAGE_FOREACH_PLAYER(pPlayer, i)
-            {
-                const coreFloat fSpeed = nCalcSpeedFunc(pPlayer->GetPosition().xy());
-
-                pPlayer->SetMoveSpeed (fSpeed);
-                pPlayer->SetShootSpeed(fSpeed * 0.5f + 0.5f);
-            });
-
-            const auto nBulletSlowFunc = [&](cBullet* OUTPUT pBullet)
-            {
-                coreFloat fBase = 0.0f;
-                for(coreUintW i = 0u; i < iRegisterSize; ++i)
-                {
-                    if(aiRegisterID[i] == 0u)
-                    {
-                        aiRegisterID   [i] = pBullet->GetID();
-                        afRegisterSpeed[i] = pBullet->GetSpeed();
-                    }
-                    if(aiRegisterID[i] == coreUint32(pBullet->GetID()))
-                    {
-                        fBase = afRegisterSpeed[i];
-                        break;
-                    }
-                }
-                ASSERT(fBase)
-
-                pBullet->SetSpeed(fBase * nCalcSpeedFunc(pBullet->GetPosition().xy()));
-            };
-            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletSlowFunc);
-            g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletSlowFunc);
-        }
-
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
             STAGE_LIFETIME(pEnemy, 1.0f, (i < 4u) ? 2.0f : 0.0f)
 
-            const coreFloat fSpeed        = nCalcSpeedFunc(pEnemy->GetPosition().xy());
+            const coreFloat fSpeed        = this->CalcAreaSpeed(pEnemy->GetPosition().xy());
             const coreFloat fSlowLifeTime = fLifeTime * ((i < 19u) ? 1.0f : 0.4f);
 
             if(i < 10u || (i >= 19u && i < 29u))
@@ -1122,14 +1089,14 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("EINUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(2u, "EINUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        g_pGame->GetHelper(ELEMENT_PURPLE)->Kill(false);
+        g_pGame->KillHelpers();
 
         this->DisableArea(false);
         this->DisableSafe(false);
@@ -1141,6 +1108,22 @@ void cRutilusMission::__SetupOwn()
         });
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.75f);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1164,7 +1147,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: vielleicht die 3 unteren bei der 4x3 gruppe weggeben, vielleicht zu 3x4 machen, naaa diese gruppe muss sich aber von den linien-gruppen unterscheiden, so wie die eck-gruppe
     // TODO 1: vielleicht anderer helper outro, der nicht so subtil ist
     // TODO 1: die ganzen geraden gruppen könnten leichten shift in flug-richtung haben (zick-zack, oder 4+4)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumTargets = 16u;
@@ -1193,11 +1176,11 @@ void cRutilusMission::__SetupOwn()
             pPath3->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 112u)
+        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 112u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_ORANGE);
             });
         });
 
@@ -1224,6 +1207,8 @@ void cRutilusMission::__SetupOwn()
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
+
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 1.0f * STAGE_STEP(1u, 11u));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_RED);
@@ -1269,7 +1254,8 @@ void cRutilusMission::__SetupOwn()
                 {
                     iTransitionState += 1u;
 
-                    this->SetWavePull(true);
+                    this->SetWavePull (true);
+                    this->SetWavePower(1.5f);
                     g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
                 }
             }
@@ -1395,14 +1381,14 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ZWEIUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(3u, "ZWEIUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
-        g_pGame->GetHelper(ELEMENT_RED)->Kill(false);
+        g_pGame->KillHelpers();
 
         this->DisableWave(false);
 
@@ -1411,35 +1397,17 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        if(STAGE_BEGINNING)
-        {
-            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetGroundDensity(0u, 1.0f);
-        }
+        g_pEnvironment->GetBackground()->SetGroundDensity(0u, 1.0f);
 
-        STAGE_FINISH_PLAY
-    });
-
-    // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_MISSION, 3u})
-    {
-        //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(LERP(COLOR_MENU_MAGENTA, COLOR_MENU_RED, m_fStageTime));
-
-        //STAGE_FINISH_AFTER(1.0f)
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        if(STAGE_BEGINNING)
-        {
-            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_RED);
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -1462,7 +1430,8 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: kleine meteoriten (vielleicht auch mittlere) kommen mir zu klein vor (wurden schon vergrößert)
     // TODO 1: bei der links-rechts-links-... gruppe konnte ich ganz unten durchschlüpfen
     // TODO 1: badge: 1 ganz spezieller gegner in nem meteor, verschwindet aber nach 1 bounce
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: besser highlighten welcher gegner im meteor ist, vielleicht ganzen meteor einfärben
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -1474,8 +1443,8 @@ void cRutilusMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(1, COLOR_SHIP_PURPLE);
-                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING);
+                pEnemy->Configure(1, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
             });
         });
 
@@ -1484,7 +1453,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(50, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(50, 0u, COLOR_SHIP_BLUE);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
         });
@@ -1494,7 +1463,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad3, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(1, COLOR_SHIP_CYAN);
+                pEnemy->Configure(1, 0u, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
         });
@@ -1842,7 +1811,8 @@ void cRutilusMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition ().xy();
                     const coreVector2 vDir = pEnemy->GetDirection().xy();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, pEnemy, vPos - vDir * 1.5f, vDir)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, pEnemy, vPos + vDir * 1.5f, vDir)->ChangeSize(1.7f);
                 }
             }
             else
@@ -1886,16 +1856,23 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("DREIUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(4u, "DREIUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1926,7 +1903,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: !!!! gegner sollten sich nicht bewegen, sie spawnen aus portalen (unsichtbar, bis erswter teleportation)
     // TODO 1: !!!! wenn portale als hindernisse wahrgenommen werden, sollten sie auch als solche funktionieren
     // TODO 1: links und rechts teleporter, meteoriten kommen raus in unendlichkeit, sind manchmal so arranged (seitlich und von oben-schräg), dass man durch teleporter durch muss
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1942,7 +1919,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(30, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_YELLOW);
 
                 if(i < 14u)
                 {
@@ -2388,7 +2365,7 @@ void cRutilusMission::__SetupOwn()
 
             //if(STAGE_TICK_LIFETIME(1.2f, 0.0f))
             //if(STAGE_TICK_TIME(1.2f, 0.0f))
-            if(STAGE_TICK_TIME(10.0f, 0.0f))
+            if(STAGE_TICK_TIME(10.0f, 0.0f))   // TODO 1: STAGE_TICK_TIME2 instead ?
             //if(false && STAGE_TICK_LIFETIME(10.0f, 0.0f))
             {
                 const coreUintW   iCount = 1u;//(i < 6u || (i >= 14 && i < 22u)) ? 1u : 5u;
@@ -2404,15 +2381,14 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("VIERUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "VIERUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(false);
-        g_pGame->GetHelper(ELEMENT_BLUE)  ->Kill(false);
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
             this->DisableTeleporter(i, false);
@@ -2421,24 +2397,25 @@ void cRutilusMission::__SetupOwn()
     });
 
     // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         constexpr coreFloat fBaseScale = 1.5f;
-
-        if(STAGE_BEGINNING)
-        {
-            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
-            //g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
-        }
 
         UNUSED STAGE_ADD_SQUAD(pSquad1, cMeteorEnemy, MESSIER_ENEMIES_SMALL)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(10, COLOR_SHIP_PURPLE);
-                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS);
+                pEnemy->Configure(10, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
 
@@ -2447,8 +2424,8 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 5.0f * fBaseScale);
-                pEnemy->Configure(50 * 100, COLOR_SHIP_PURPLE);
-                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_TOP);
+                pEnemy->Configure(50 * 100, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_TOP | ENEMY_STATUS_SECRET);
             });
         });
 

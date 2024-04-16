@@ -147,13 +147,8 @@ void cFinishMenu::ShowThankYou()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
+    this->__ResetState();
     m_fIntroTimer = -MENU_FINISH_DELAY_INTRO;
-    m_fOutroTimer = 0.0f;
-    m_eState      = FINISH_INTRO;
-
-    // 
-    m_Background.SetSize(coreVector2(0.0f,0.0f));
-    m_Background.Move();
 
     // 
     coreUint32 iSumScore = 0u;
@@ -172,7 +167,6 @@ void cFinishMenu::ShowThankYou()
     m_TotalValue.SetText(coreData::ToChars(iSumScore));
 
     // 
-    this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_FINISH_DEFAULT, 0.0f);
 }
 
@@ -183,4 +177,22 @@ void cFinishMenu::SetHighlightColor(const coreVector3 vColor)
 {
     // 
     m_TotalName.SetColor3(vColor);
+}
+
+
+// ****************************************************************
+// 
+void cFinishMenu::__ResetState()
+{
+    // 
+    m_fIntroTimer = 0.0f;
+    m_fOutroTimer = 0.0f;
+    m_eState      = FINISH_INTRO;
+
+    // 
+    m_Background.SetSize(coreVector2(0.0f,0.0f));
+    m_Background.Move();
+
+    // 
+    this->SetAlpha(0.0f);
 }

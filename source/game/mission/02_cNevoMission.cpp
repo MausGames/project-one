@@ -13,6 +13,7 @@
 // constructor
 cNevoMission::cNevoMission()noexcept
 : m_Bomb         (NEVO_BOMBS)
+, m_afBombTime   {}
 , m_iBombGone    (0u)
 , m_Blast        (NEVO_BLASTS)
 , m_BlastLine    (NEVO_BLASTS * NEVO_LINES)
@@ -129,6 +130,8 @@ cNevoMission::cNevoMission()noexcept
         }
     }
 
+#if defined(_P1_UNUSED_)
+
     // 
     m_Block    .DefineProgram("effect_energy_flat_spheric_inst_program");
     m_BlockWave.DefineProgram("effect_energy_flat_spheric_inst_program");
@@ -164,6 +167,8 @@ cNevoMission::cNevoMission()noexcept
     m_Container.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
     m_Container.SetColor3      (COLOR_SHIP_GREY);
     m_Container.SetEnabled     (CORE_OBJECT_ENABLE_NOTHING);
+
+#endif
 
     // 
     cShadow::GetGlobalContainer()->BindList(&m_Bomb);
@@ -206,7 +211,9 @@ void cNevoMission::EnableBomb(const coreUintW iIndex, const coreBool bGrow)
 
     // 
     WARN_IF(oBomb.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-    oBomb.ChangeType(TYPE_NEVO_BOMB);
+
+    // 
+    m_afBombTime[iIndex] = 0.0f;
 
     // 
     oBomb.SetSize   (coreVector3(1.0f,1.0f,1.0f) * (bGrow ? 0.0f : NEVO_BOMB_SIZE));
@@ -223,7 +230,6 @@ void cNevoMission::DisableBomb(const coreUintW iIndex, const coreBool bAnimated)
 
     // 
     if(!oBomb.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-    oBomb.ChangeType(0);
 
     // 
     ADD_BIT(m_iBombGone, iIndex)
@@ -373,6 +379,8 @@ void cNevoMission::DisableArrow(const coreUintW iIndex, const coreBool bAnimated
 // 
 void cNevoMission::EnableBlock(const coreUintW iIndex, const cShip* pOwner, const coreFloat fScale)
 {
+#if defined(_P1_UNUSED_)
+
     ASSERT(iIndex < NEVO_BLOCKS)
     coreObject3D* pBlock = (*m_Block    .List())[iIndex];
     coreObject3D* pWave  = (*m_BlockWave.List())[iIndex];
@@ -394,6 +402,8 @@ void cNevoMission::EnableBlock(const coreUintW iIndex, const cShip* pOwner, cons
     pBlock->SetEnabled(CORE_OBJECT_ENABLE_ALL);
     pWave ->SetTexSize(pBlock->GetTexSize());
     pWave ->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
+#endif
 }
 
 
@@ -401,6 +411,8 @@ void cNevoMission::EnableBlock(const coreUintW iIndex, const cShip* pOwner, cons
 // 
 void cNevoMission::DisableBlock(const coreUintW iIndex, const coreBool bAnimated)
 {
+#if defined(_P1_UNUSED_)
+
     ASSERT(iIndex < NEVO_BLOCKS)
     coreObject3D* pBlock = (*m_Block    .List())[iIndex];
     coreObject3D* pWave  = (*m_BlockWave.List())[iIndex];
@@ -418,6 +430,8 @@ void cNevoMission::DisableBlock(const coreUintW iIndex, const coreBool bAnimated
         pBlock->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         pWave ->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
+
+#endif
 }
 
 
@@ -425,6 +439,8 @@ void cNevoMission::DisableBlock(const coreUintW iIndex, const coreBool bAnimated
 // 
 void cNevoMission::EnableContainer(const coreVector2 vPosition)
 {
+#if defined(_P1_UNUSED_)
+
     // 
     WARN_IF(m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     m_Container.ChangeType(TYPE_NEVO_CONTAINER);
@@ -437,6 +453,8 @@ void cNevoMission::EnableContainer(const coreVector2 vPosition)
     m_Container.SetPosition(coreVector3(vPosition, 0.0f));
     m_Container.SetEnabled (CORE_OBJECT_ENABLE_ALL);
     cShadow::GetGlobalContainer()->BindObject(&m_Container);
+
+#endif
 }
 
 
@@ -444,6 +462,8 @@ void cNevoMission::EnableContainer(const coreVector2 vPosition)
 // 
 void cNevoMission::DisableContainer(const coreBool bAnimated)
 {
+#if defined(_P1_UNUSED_)
+
     // 
     if(!m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     m_Container.ChangeType(0);
@@ -454,6 +474,8 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(m_Container.GetPosition());
+
+#endif
 }
 
 
@@ -525,9 +547,7 @@ void cNevoMission::__RenderOwnOver()
     if(m_Bomb.GetCurEnabled()) cLodObject::RenderHighList(&m_Bomb);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Bomb);
 
-    // 
-    m_Arrow.Render();
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Arrow);
+#if defined(_P1_UNUSED_)
 
     // 
     m_Block.Render();
@@ -540,6 +560,20 @@ void cNevoMission::__RenderOwnOver()
     // 
     cLodObject::RenderHighObject(&m_Container);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Container);
+
+#endif
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::__RenderOwnTop()
+{
+    DEPTH_PUSH
+
+    // 
+    m_Arrow.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Arrow);
 }
 
 
@@ -558,6 +592,14 @@ void cNevoMission::__MoveOwnAfter()
     {
         coreObject3D& oBomb = m_aBombRaw[i];
         if(!oBomb.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const coreFloat fPrevTime = m_afBombTime[i];
+        m_afBombTime[i] += 1.0f * TIME;
+
+        // 
+        if(InBetween(2.0f, fPrevTime, m_afBombTime[i]))
+            this->EnableBlast(i);
 
         // 
         oBomb.SetSize  (coreVector3(1.0f,1.0f,1.0f) * MIN(oBomb.GetSize().x + 20.0f * TIME, NEVO_BOMB_SIZE));
@@ -584,9 +626,6 @@ void cNevoMission::__MoveOwnAfter()
         if(fTime >= 1.0f) this->DisableBomb (i, true);
         if(fTime >= 2.0f) this->DisableBlast(i, false);
         STATIC_ASSERT(NEVO_BOMBS == NEVO_BLASTS)
-        
-        
-        const coreFloat fOffset2 = I_TO_F(i) * (1.0f/8.0f);
 
         // 
         const coreBool  bWarn   = (fTime < 1.0f);
@@ -594,31 +633,30 @@ void cNevoMission::__MoveOwnAfter()
         const coreFloat fBlend  = CLAMP((fTime - 1.0f) * 20.0f, 0.0f, 1.0f);
         const coreFloat fSize   = bWarn ? (2.0f)                  : (LERP(1.0f, 4.0f, fLerp) * fBlend);
         const coreFloat fAlpha  = bWarn ? (0.6f * (1.0f - fTime)) : (LERP(0.0f, 1.0f, fLerp) * fBlend);
-        const coreFloat fOffset = FRACT(2.4f * m_fAnimation * (bWarn ? 0.35f : -1.0f));
+        const coreFloat fTex    = FRACT(2.4f * m_fAnimation * (bWarn ? 0.35f : -1.0f));
+        const coreFloat fOffset = I_TO_F(i) * (1.0f/8.0f);
 
         // 
         pBlast->SetPosition (coreVector3(vBasePos, 0.0f));
         pBlast->SetSize     (coreVector3(2.0f,2.0f,2.0f) * fSize);
         pBlast->SetAlpha    (bWarn ? 0.0f : fAlpha);
-        pBlast->SetTexOffset(coreVector2(0.0f, FRACT(-2.5f * m_fAnimation + fOffset2)));
+        pBlast->SetTexOffset(coreVector2(0.0f, FRACT(-2.5f * m_fAnimation + fOffset)));
 
         for(coreUintW j = 0u; j < NEVO_LINES; ++j)
         {
             coreObject3D* pLine = (*m_BlastLine.List())[i*NEVO_LINES + j];
-            
-            
-        const coreFloat fOffset3 = fOffset2 + I_TO_F(j) * (1.0f/32.0f);
 
             // 
-            const coreVector2 vDir = MapStepRotated90(vBaseDir, j);
-            const coreVector2 vPos = vBasePos + vDir * pLine->GetSize().y;
+            const coreVector2 vDir     = MapStepRotated90(vBaseDir, j);
+            const coreVector2 vPos     = vBasePos + vDir * pLine->GetSize().y;
+            const coreFloat   fOffset2 = I_TO_F(j) * (1.0f/32.0f) + fOffset;
 
             // 
             pLine->SetPosition (coreVector3(vPos, 0.0f));
             pLine->SetDirection(coreVector3(vDir, 0.0f));
             pLine->SetSize     (coreVector3(fSize, pLine->GetSize().y, fSize));
             pLine->SetAlpha    (fAlpha);
-            pLine->SetTexOffset(coreVector2(1.0f,1.0f) * (fOffset + fOffset3));
+            pLine->SetTexOffset(coreVector2(1.0f,1.0f) * (fTex + fOffset2));
         }
     }
 
@@ -707,6 +745,8 @@ void cNevoMission::__MoveOwnAfter()
     // 
     m_Arrow.MoveNormal();
 
+#if defined(_P1_UNUSED_)
+
     // 
     for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i)
     {
@@ -753,16 +793,16 @@ void cNevoMission::__MoveOwnAfter()
     m_BlockWave.MoveNormal();
 
     // 
-    //cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pBlock, const coreVector3 vIntersection, const coreBool bFirstHit)
-    //{
-    //    if(!bFirstHit) return;
-//
-    //    // 
-    //    pPlayer->TakeDamage(10, ELEMENT_ORANGE, vIntersection.xy());
-//
-    //    // 
-    //    g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_ORANGE);
-    //});
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pBlock, const coreVector3 vIntersection, const coreBool bFirstHit)
+    {
+        if(!bFirstHit) return;
+
+        // 
+        pPlayer->TakeDamage(10, ELEMENT_ORANGE, vIntersection.xy());
+
+        // 
+        g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_ORANGE);
+    });
 
     if(m_Container.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
@@ -813,6 +853,63 @@ void cNevoMission::__MoveOwnAfter()
 
             // 
             pBullet->Reflect(pContainer, vIntersection.xy());
+        });
+    }
+
+#endif
+
+    // 
+    if(g_pGame->GetBulletManagerEnemy()->GetNumBulletsTypedEst<cGrowBullet>())
+    {
+        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cGrowBullet>([](cGrowBullet* OUTPUT pBullet)
+        {
+            const coreFloat fNewSize = MIN(pBullet->GetSize().x + (7.0f * TIME), 15.0f);
+
+            pBullet->SetSize(coreVector3(1.0f,1.0f,1.0f) * fNewSize);
+        });
+
+        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cGrowBullet>([](cGrowBullet* OUTPUT pBullet1)
+        {
+            if(coreMath::IsNear(pBullet1->GetSpeed(), 0.1f)) return;
+
+            if(((pBullet1->GetPosition().x <  -FOREGROUND_AREA.x * 1.0f) && (pBullet1->GetFlyDir().x < 0.0f)) ||
+               ((pBullet1->GetPosition().x >=  FOREGROUND_AREA.y * 1.0f) && (pBullet1->GetFlyDir().x > 0.0f)) ||
+               ((pBullet1->GetPosition().y <  -FOREGROUND_AREA.y * 1.0f) && (pBullet1->GetFlyDir().y < 0.0f)) ||
+               ((pBullet1->GetPosition().y >=  FOREGROUND_AREA.y * 1.0f) && (pBullet1->GetFlyDir().y > 0.0f)))
+            {
+                pBullet1->SetSpeed(0.1f);
+                return;
+            }
+
+            g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cGrowBullet>([&](const cGrowBullet* pBullet2)
+            {
+                if(pBullet1 == pBullet2) return;
+
+                const coreVector3 vDiff        = pBullet2->GetPosition()        - pBullet1->GetPosition();
+                const coreFloat   fTotalRadius = pBullet2->GetCollisionRadius() + pBullet1->GetCollisionRadius();
+
+                if(vDiff.LengthSq() > POW2(fTotalRadius)) return;
+
+                 if(((pBullet2->GetPosition().x <  -FOREGROUND_AREA.x * 1.0f) && (pBullet1->GetFlyDir().x < 0.0f)) ||   // 2 1
+                    ((pBullet2->GetPosition().x >=  FOREGROUND_AREA.y * 1.0f) && (pBullet1->GetFlyDir().x > 0.0f)) ||
+                    ((pBullet2->GetPosition().y <  -FOREGROUND_AREA.y * 1.0f) && (pBullet1->GetFlyDir().y < 0.0f)) ||
+                    ((pBullet2->GetPosition().y >=  FOREGROUND_AREA.y * 1.0f) && (pBullet1->GetFlyDir().y > 0.0f)))
+                {
+                    pBullet1->SetSpeed(0.1f);
+                    return;
+                }
+            });
+        });
+
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
+        {
+            if(pBulletEnemy->GetID() != cGrowBullet::ID) return;
+
+            if(!bFirstHit || !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+            pBulletEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * (pBulletEnemy->GetSize().x * POW(0.9f, I_TO_F(pBulletPlayer->GetDamage()))));
+
+            pBulletPlayer->Deactivate(true);
         });
     }
 }

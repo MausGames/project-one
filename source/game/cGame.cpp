@@ -14,6 +14,9 @@
 cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
+
+, m_BulletManagerPlayerTop (TYPE_BULLET_PLAYER)
+
 , m_Interface           ((oOptions.iType != GAME_TYPE_SOLO) ? GAME_PLAYERS : 1u)
 , m_pRepairEnemy        (NULL)
 , m_piMissionList       (piMissionList)
@@ -21,10 +24,13 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_pCurMission         (NULL)
 , m_iCurMissionIndex    (coreUintW(-1))
 , m_fTimeInOut          (0.0f)
+, m_fMusicFade          (0.0f)
+, m_fMusicSpeed         (0.0f)
+, m_fHitDelay           (0.0f)
 , m_iContinues          (GAME_CONTINUES)
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
-, m_iOutroType          (0u)
+, m_iOutroType          (GAME_OUTRO_MISSION)
 , m_bVisibleCheck       (false)
 , m_Options             (oOptions)
 , m_iVersion            (0u)
@@ -116,6 +122,8 @@ cGame::~cGame()
 
     // 
     g_pSave->SaveFile();
+    
+    g_MusicPlayer.Control()->Stop();
 }
 
 
@@ -123,107 +131,249 @@ cGame::~cGame()
 // render the game
 void cGame::Render()
 {
-    __DEPTH_GROUP_BOTTOM
+    if(g_bTiltMode)
     {
-        // 
-        m_EnemyManager.RenderBottom();
-        m_pCurMission->RenderBottom();
+        if(g_bShiftMode) Core::Graphics->SetCamera(CAMERA_POSITION + m_aPlayer[0].GetPosition() * 0.5f, CAMERA_DIRECTION, CAMERA_ORIENTATION);
 
-        // 
-        m_CrashManager.Render();
+        __DEPTH_GROUP_BOTTOM
+        {
+            // 
+            m_EnemyManager.RenderBottom();
+            m_pCurMission->RenderBottom();
+
+            // 
+            m_CrashManager.Render();
         
-        g_pSpecialEffects->RenderBottom();
-    }
-
-    __DEPTH_GROUP_SHIP   // # 1
-    {
-        // render all players
-        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-            m_aPlayer[i].Render();
-
-        // 
-        for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
-            m_aHelper[i].Render();
-
-        // render all enemies
-        m_EnemyManager.Render();
-    }
-
-    __DEPTH_GROUP_UNDER
-    {
-        DEPTH_PUSH_DOUBLE
-
-        // render low-priority bullet manager
-        m_BulletManagerPlayer.Render();
-
-        // 
-        m_ShieldManager.Render();
-
-        // render underlying objects
-        m_EnemyManager.RenderUnder();
-        m_pCurMission->RenderUnder();
-
-        // TODO 1: push oder GL_DEPTH_TEST ?? 
-        glDepthMask(false);
-        {
-            // 
-            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-                m_aPlayer[i].RenderBefore();
+            //g_pSpecialEffects->RenderBottom();
         }
-        glDepthMask(true);
-    }
 
-    __DEPTH_GROUP_SHIP   // # 2
-    {
-        // apply deferred outline-layer
-        g_pOutline->Apply();
-    }
-
-    __DEPTH_GROUP_OVER
-    {
-        DEPTH_PUSH
-
-        // 
-        m_ItemManager.Render();
-
-        // render overlying objects
-        m_EnemyManager.RenderOver();
-        m_pCurMission->RenderOver();
-
-        // TODO 1: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
-        glDepthMask(false);
+        __DEPTH_GROUP_SHIP   // # 1
         {
-            // 
+            // render all players
             for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-                m_aPlayer[i].RenderMiddle();
+                m_aPlayer[i].Render();
+
+            // 
+            for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+                m_aHelper[i].Render();
+
+            // render all enemies
+            m_EnemyManager.Render();
         }
-        glDepthMask(true);
-    }
 
-    __DEPTH_GROUP_TOP
-    {
-        DEPTH_PUSH_DOUBLE
+        __DEPTH_GROUP_UNDER
+        {
+            
+            
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for bullets flying towards screen
 
-        // render special-effects
-        g_pSpecialEffects->Render();
-
-        // render high-priority bullet manager
+            m_EnemyManager.RenderUnder();
+            m_pCurMission->RenderUnder();
+            
+            DEPTH_PUSH_DOUBLE
+            
+            g_pSpecialEffects->RenderBottom();
+            
         m_BulletManagerEnemy.Render();
 
-        // render top objects
-        m_EnemyManager.RenderTop();
-        m_pCurMission->RenderTop();
+            // render low-priority bullet manager
+            m_BulletManagerPlayer.Render();
+            m_BulletManagerPlayer.RenderAfter();
 
-        glDisable(GL_DEPTH_TEST);
+            // 
+            m_ShieldManager.Render();
+
+            // render underlying objects
+            //if(!g_bTiltMode) m_EnemyManager.RenderUnder();
+            //if(!g_bTiltMode) m_pCurMission->RenderUnder();
+
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+
+            DEPTH_PUSH
+
+            glDepthMask(false);
+            {
+                // 
+                for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                    m_aPlayer[i].RenderBefore();
+            }
+            glDepthMask(true);
+        }
+
+        __DEPTH_GROUP_SHIP   // # 2
+        {
+            // apply deferred outline-layer
+            g_pOutline->Apply();
+
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for bullets flying towards screen
+            
+            m_BulletManagerPlayerTop.Render();
+            m_BulletManagerPlayerTop.RenderAfter();
+
+        m_BulletManagerEnemy.RenderAfter();
+            
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+        }
+
+        __DEPTH_GROUP_OVER
+        {
+            DEPTH_PUSH
+
+            // 
+            m_ItemManager.Render();
+
+            // render overlying objects
+            m_EnemyManager.RenderOver();
+            m_pCurMission->RenderOver();
+
+            // TODO 1: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
+            glDepthMask(false);
+            {
+                // 
+                for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                    m_aPlayer[i].RenderMiddle();
+            }
+            glDepthMask(true);
+        }
+
+        __DEPTH_GROUP_TOP
+        {
+            DEPTH_PUSH_DOUBLE
+            
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for ENEMIES and special effects near screen
+
+            // render special-effects
+            g_pSpecialEffects->Render();
+
+            // render high-priority bullet manager
+            //if(!g_bTiltMode) m_BulletManagerEnemy.Render();
+            //if(!g_bTiltMode) m_BulletManagerEnemy.RenderAfter();
+
+            // render top objects
+            m_EnemyManager.RenderTop();
+            m_pCurMission->RenderTop();
+            
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+
+            glDisable(GL_DEPTH_TEST);
+            {
+                // 
+                for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                    m_aPlayer[i].RenderAfter();
+            }
+            glEnable(GL_DEPTH_TEST);
+        }
+
+        __DEPTH_RESET
+    }
+    else
+    {
+        //Core::Graphics->SetCamera(CAMERA_POSITION + m_aPlayer[0].GetPosition() * 0.03f, CAMERA_DIRECTION, CAMERA_ORIENTATION);   // wand-interaktionen der bosse gehn nicht
+        __DEPTH_GROUP_BOTTOM
         {
             // 
-            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-                m_aPlayer[i].RenderAfter();
-        }
-        glEnable(GL_DEPTH_TEST);
-    }
+            m_EnemyManager.RenderBottom();
+            m_pCurMission->RenderBottom();
 
-    __DEPTH_RESET
+            // 
+            m_CrashManager.Render();
+
+            g_pSpecialEffects->RenderBottom();
+        }
+
+        __DEPTH_GROUP_SHIP   // # 1
+        {
+            // render all players
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].Render();
+
+            // 
+            for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+                m_aHelper[i].Render();
+
+            // render all enemies
+            m_EnemyManager.Render();
+        }
+
+        __DEPTH_GROUP_UNDER
+        {
+            DEPTH_PUSH_DOUBLE
+
+            // render low-priority bullet manager
+            m_BulletManagerPlayer.Render();
+            m_BulletManagerPlayer.RenderAfter();
+
+            // 
+            m_ShieldManager.Render();
+
+            // render underlying objects
+            m_pCurMission->RenderUnder();   
+            m_EnemyManager.RenderUnder();   
+
+            DEPTH_PUSH
+
+            glDepthMask(false);
+            {
+                // 
+                for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                    m_aPlayer[i].RenderBefore();
+            }
+            glDepthMask(true);
+        }
+
+        __DEPTH_GROUP_SHIP   // # 2
+        {
+            // apply deferred outline-layer
+            g_pOutline->Apply();
+        }
+
+        __DEPTH_GROUP_OVER
+        {
+            DEPTH_PUSH
+
+            // 
+            m_ItemManager.Render();
+
+            // render overlying objects
+            m_EnemyManager.RenderOver();
+            m_pCurMission->RenderOver();
+
+            // TODO 1: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
+            glDepthMask(false);
+            {
+                // 
+                for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                    m_aPlayer[i].RenderMiddle();
+            }
+            glDepthMask(true);
+        }
+
+        __DEPTH_GROUP_TOP
+        {
+            DEPTH_PUSH_DOUBLE
+
+            // render special-effects
+            g_pSpecialEffects->Render();
+
+            // render high-priority bullet manager
+            m_BulletManagerEnemy.Render();
+            m_BulletManagerEnemy.RenderAfter();
+
+            // render top objects
+            m_EnemyManager.RenderTop();
+            m_pCurMission->RenderTop();
+
+            glDisable(GL_DEPTH_TEST);
+            {
+                // 
+                for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                    m_aPlayer[i].RenderAfter();
+            }
+            glEnable(GL_DEPTH_TEST);
+        }
+
+        __DEPTH_RESET
+    }
 }
 
 
@@ -263,6 +413,8 @@ void cGame::Move()
     // move the bullet managers
     m_BulletManagerPlayer.Move();
     m_BulletManagerEnemy .Move();
+    
+    m_BulletManagerPlayerTop.Move();
 
     // 
     m_EnemyManager.MoveAfter();
@@ -280,6 +432,11 @@ void cGame::Move()
 
     // 
     this->__HandleDefeat();
+    
+    
+    m_fHitDelay.UpdateMax(-20.0f, 0.0f);
+    
+    //if(HAS_FLAG(m_iStatus, GAME_STATUS_PLAY)) g_pEnvironment->SetTargetSide(m_aPlayer[0].GetPosition().xy() * 0.03f, 10.0f);
 }
 
 
@@ -300,6 +457,21 @@ void cGame::MoveOverlay()
     // move interface and combat text
     m_Interface .Move();
     m_CombatText.Move();
+}
+
+
+// ****************************************************************
+// 
+void cGame::MoveAlways()
+{
+    // 
+    if(m_fMusicFade)
+    {
+        m_fMusicFade.UpdateMax(-m_fMusicSpeed, 0.0f);
+        if(!m_fMusicFade) g_MusicPlayer.Control()->Stop();
+    }
+
+    g_MusicPlayer.Control()->SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * (g_pMenu->IsPaused() ? 0.3f : 1.0f) * MUSIC_VOLUME);
 }
 
 
@@ -414,11 +586,12 @@ void cGame::LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom, 
 // 
 void cGame::LoadNextMission()
 {
-    // 
-    this->LoadMissionIndex(m_iCurMissionIndex + 1u);
-
-    // 
-    if(m_pCurMission->GetID() == cNoMission::ID)
+    if((m_Options.iKind == GAME_KIND_ALL) && (m_iCurMissionIndex + 1u < m_iNumMissions))
+    {
+        // 
+        this->LoadMissionIndex(m_iCurMissionIndex + 1u);
+    }
+    else
     {
         ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
 
@@ -426,14 +599,6 @@ void cGame::LoadNextMission()
         REMOVE_FLAG(m_iStatus, GAME_STATUS_OUTRO)
         ADD_FLAG   (m_iStatus, GAME_STATUS_FINISHED)
     }
-}
-
-
-// ****************************************************************
-// restart currently active mission
-void cGame::RestartMission()
-{
-    this->LoadMissionID(m_pCurMission->GetID());
 }
 
 
@@ -486,10 +651,26 @@ void cGame::StartOutro(const coreUint8 iType)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
     // 
-    m_Interface.SetVisible(false);
+    m_Interface .SetVisible(false);
+    m_CombatText.SetVisible(false);
 
     // 
     g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_END(m_pCurMission->GetID()));
+
+    // 
+    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION, 1.0f);
+    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE,      1.0f);
+    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED,     1.0f);
+}
+
+
+// ****************************************************************
+// 
+void cGame::FadeMusic(const coreFloat fSpeed)
+{
+    // 
+    m_fMusicFade  = 1.0f;
+    m_fMusicSpeed = fSpeed;
 }
 
 
@@ -499,9 +680,16 @@ void cGame::UseContinue()
 {
     ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
 
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();
+
     // 
-    REMOVE_FLAG(m_iStatus, GAME_STATUS_DEFEATED)
-    this->StartIntro();
+    this->LoadMissionID(m_pCurMission->GetID(), iSegmentIndex, m_pCurMission->GetTakeTo());
+
+    // 
+    REMOVE_FLAG(m_iStatus, GAME_STATUS_DEFEATED)   // # already removed
+    ADD_FLAG   (m_iStatus, GAME_STATUS_CONTINUE)
+    ADD_FLAG   (m_iStatus, GAME_STATUS_QUICK)
 
     // 
     ASSERT(m_iContinues)
@@ -510,18 +698,31 @@ void cGame::UseContinue()
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
-        m_aPlayer[i].StartFeeling(PLAYER_FEEL_TIME_CONTINUE, 2u);
+        m_aPlayer[i].GetDataTable ()->RevertSegment(iMissionIndex, iSegmentIndex);
+        m_aPlayer[i].GetScoreTable()->RevertSegment(iMissionIndex, iSegmentIndex);
 
         // 
-        m_aPlayer[i].GetDataTable()->EditCounterTotal  ()->iContinuesUsed += 1u;
-        m_aPlayer[i].GetDataTable()->EditCounterMission()->iContinuesUsed += 1u;
-        m_aPlayer[i].GetDataTable()->EditCounterSegment()->iContinuesUsed += 1u;
+        m_aPlayer[i].GetDataTable()->EditCounterTotal  ()                            ->iContinuesUsed += 1u;
+        m_aPlayer[i].GetDataTable()->EditCounterMission(iMissionIndex)               ->iContinuesUsed += 1u;
+        m_aPlayer[i].GetDataTable()->EditCounterSegment(iMissionIndex, iSegmentIndex)->iContinuesUsed += 1u;
     }
 
     // 
-    g_pSave->EditGlobalStats      ()->iContinuesUsed += 1u;
-    g_pSave->EditLocalStatsMission()->iContinuesUsed += 1u;
-    g_pSave->EditLocalStatsSegment()->iContinuesUsed += 1u;
+    m_TimeTable.RevertSegment(iMissionIndex, iSegmentIndex);
+
+    // 
+    g_pSave->EditGlobalStats      ()                            ->iContinuesUsed += 1u;
+    g_pSave->EditLocalStatsMission(iMissionIndex)               ->iContinuesUsed += 1u;
+    g_pSave->EditLocalStatsSegment(iMissionIndex, iSegmentIndex)->iContinuesUsed += 1u;
+}
+
+
+// ****************************************************************
+// 
+void cGame::UseRestart()
+{
+    // 
+    ADD_FLAG(m_iStatus, GAME_STATUS_QUICK)
 }
 
 
@@ -629,7 +830,7 @@ coreFloat cGame::CalcMedalTime(const coreFloat fTime, const coreFloat* pfMedalGo
 coreUint32 cGame::CalcBonusTime(const coreFloat fTime)
 {
     // 
-    return F_TO_UI(LERP(20000.0f, 100.0f, MIN(fTime * (1.0f/60.0f), 1.0f)));
+    return F_TO_UI(LERP(20000.0f, 100.0f, MIN(fTime * (1.0f/180.0f), 1.0f)));
 }
 
 
@@ -659,8 +860,8 @@ coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
     switch(iBadge)
     {
     default: ASSERT(false)
-    case BADGE_HARD:   return 15u;
-    case BADGE_NORMAL: return 10u;
+    case BADGE_HARD:   return 5u;
+    case BADGE_NORMAL: return 5u;
     case BADGE_EASY:   return 5u;
     }
 }
@@ -700,6 +901,8 @@ coreBool cGame::__HandleIntro()
         // do not start while game resources are still loading
         if(Core::Manager::Resource->IsLoading()) return false;   // mission
         REMOVE_FLAG(m_iStatus, GAME_STATUS_LOADING)
+    
+        if(!HAS_FLAG(m_iStatus, GAME_STATUS_CONTINUE)) this->FadeMusic(0.7f);
     }
 
     if(HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
@@ -707,6 +910,7 @@ coreBool cGame::__HandleIntro()
         if(Core::Manager::Resource->IsLoading()) return false;   // background
 
         // 
+        const coreFloat fOldTime = m_fTimeInOut;
         m_fTimeInOut.Update(1.0f);
 
         if(m_fTimeInOut >= GAME_INTRO_DURATION)
@@ -722,7 +926,8 @@ coreBool cGame::__HandleIntro()
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
             // 
-            m_Interface.SetVisible(true);
+            m_Interface .SetVisible(true);
+            m_CombatText.SetVisible(true);
 
             // 
             g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_START(m_pCurMission->GetID()));
@@ -745,14 +950,13 @@ coreBool cGame::__HandleIntro()
             this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 // calculate new player position and rotation
-                const coreFloat   fTime = CLAMP((i ? 0.0f : 0.08f) + m_fTimeInOut / GAME_INTRO_DURATION, 0.0f, 1.0f);
+                const coreFloat   fTime = CLAMP01((i ? 0.0f : 0.08f) + m_fTimeInOut / GAME_INTRO_DURATION);
                 const coreVector2 vPos  = s_Spline.CalcPositionLerp(LERPB(0.0f, 1.0f,    fTime));
                 const coreVector2 vDir  = coreVector2::Direction   (LERPS(0.0f, 4.0f*PI, fTime));
 
                 // 
                 if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
                 {
-                    g_pSpecialEffects->PlaySound      (pPlayer->GetPosition(), 1.0f, SOUND_RUSH_LONG);
                     g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, pPlayer->GetEnergyColor());
                 }
 
@@ -762,6 +966,17 @@ coreBool cGame::__HandleIntro()
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
             });
+
+            // 
+            if(InBetween(0.65f, fOldTime, m_fTimeInOut))
+            {
+                const coreChar* pcName = m_pCurMission->GetMusicName();
+                if(pcName && pcName[0])
+                {
+                    g_MusicPlayer.SelectName(pcName);
+                    g_MusicPlayer.Control()->Play();
+                }
+            }
         }
     }
 
@@ -773,23 +988,30 @@ coreBool cGame::__HandleIntro()
 // handle outro animation
 coreBool cGame::__HandleOutro()
 {
-    if(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO) || HAS_FLAG(m_iStatus, GAME_STATUS_FINISHED))
     {
         // 
         m_fTimeInOut.Update(1.0f);
 
         this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            // calculate new player position and rotation
-            const coreFloat   fTime = MAX((i ? -0.16f : 0.0f) + m_fTimeInOut, 0.0f);
-            const coreFloat   fPos  = MIN(pPlayer->GetPosition().y + 90.0f * fTime * TIME, 1000.0f);
-            const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 2.0f*PI, 0.6f * fTime));
+            if((m_iOutroType == GAME_OUTRO_MISSION) || (m_iOutroType == GAME_OUTRO_SEGMENT) || (m_iOutroType == GAME_OUTRO_BEGINNING))
+            {
+                // calculate new player position and rotation
+                const coreFloat   fTime = MAX((i ? -0.16f : 0.0f) + m_fTimeInOut, 0.0f);
+                const coreFloat   fPos  = MIN(pPlayer->GetPosition().y + 90.0f * fTime * TIME, 1000.0f);
+                const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 2.0f*PI, 0.6f * fTime));
 
-            // fly player animated out of the game field
-            pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, fPos, pPlayer->GetPosition().z));
-            pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
-            pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-            pPlayer->UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+                // fly player animated out of the game field
+                pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, fPos, pPlayer->GetPosition().z));
+                pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
+                pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+                pPlayer->UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+            }
+            else
+            {
+                if(m_fTimeInOut >= 5.0f) pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+            }
         });
     }
 
@@ -817,7 +1039,7 @@ void cGame::__HandleDefeat()
             // 
             g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
-            if(this->IsMulti() && bDefeated && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
+            if(this->IsMulti() && bDefeated && !m_pRepairEnemy)
             {
                 // 
                 m_pRepairEnemy = new cRepairEnemy();
@@ -828,17 +1050,14 @@ void cGame::__HandleDefeat()
 
         if(bAllDefeated)
         {
-            if(m_pCurMission->GetID() == cIntroMission::ID)
-            {
-                // 
-                this->StartOutro(2u);
-            }
-            else
-            {
-                // 
-                REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
-                ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
-            }
+            // 
+            REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
+            ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
+
+            // 
+            m_BulletManagerPlayer.ClearBullets(true);
+            
+            m_BulletManagerPlayerTop.ClearBullets(true);
 
             if(m_pRepairEnemy)
             {
@@ -846,6 +1065,8 @@ void cGame::__HandleDefeat()
                 g_pSpecialEffects->CreateSplashDark(m_pRepairEnemy->GetPosition(), SPECIAL_SPLASH_TINY);
                 SAFE_DELETE(m_pRepairEnemy)
             }
+            
+            g_MusicPlayer.Control()->Stop();
         }
 
         if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
@@ -867,6 +1088,8 @@ void cGame::__HandleDefeat()
                 pPlayer->SetCurShield(5u);
             }
                 
+            // 
+            g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_REPAIR);
 
             // 
             pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;
@@ -899,8 +1122,10 @@ void cGame::__HandleCollisions()
         {
             if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST_PLAYER))
             {
-                if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
+                if(true || pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
                 {
+                    if(pEnemy->GetLifeTime() >= 1.0f)   // TODO 1: modifiers are not applied
+                    
                     // 
                     pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
                 }
@@ -914,6 +1139,7 @@ void cGame::__HandleCollisions()
                     // 
                     g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLAYER_INTERRUPT);
                 }
             }
         }
@@ -972,6 +1198,13 @@ void cGame::__HandleCollisions()
 
                     // 
                     g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+
+                    // 
+                    if(!m_fHitDelay && !pEnemy->ReachedDeath())
+                    {
+                        m_fHitDelay = 1.0f;
+                        g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_BULLET_HIT);
+                    }
                 }
 
                 if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
@@ -982,6 +1215,13 @@ void cGame::__HandleCollisions()
                         // 
                         const coreVector2 vDiff = (vIntersection.xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * TIME)) - pEnemy->GetPosition().xy();
                         pBullet->Reflect(pEnemy, vIntersection.xy(), vDiff.Normalized());
+
+                        // 
+                        if(!m_fHitDelay)
+                        {
+                            m_fHitDelay = 1.0f;
+                            g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_BULLET_REFLECT);
+                        }
                     }
                 }
             }
@@ -1026,6 +1266,8 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
     m_CrashManager       .ClearCrashes(bAnimated);
+    
+    m_BulletManagerPlayerTop.ClearBullets(bAnimated);
 
     // 
     this->HideHelpers();

@@ -27,10 +27,12 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_pOutdoor = new cOutdoor();
     m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
-    // allocate stone list
+    // allocate meteor list
     pList1 = new coreBatchList(SPACE_METEOR_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
     {
+        coreBool bBlack = false;
+
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  ("environment_stone_01.md3");
@@ -45,28 +47,29 @@ cSpaceBackground::cSpaceBackground()noexcept
             const coreFloat   fHeight   = Core::Rand->Float(-30.0f, -5.0f);   // # shadow issues below -30.0f
 
             if(!cBackground::_CheckIntersectionQuick3(pList1, coreVector3(vPosition, fHeight), POW2(11.5f)))
-            //if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(8.0f)))
             {
                 // create object
                 coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                 // set object properties
                 pObject->SetPosition   (coreVector3(vPosition, fHeight));
-                pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f) * 2.0f);
+                pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f) * 2.1f);
                 pObject->SetDirection  (coreVector3::Rand());
                 pObject->SetOrientation(coreVector3::Rand());
-                pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f) * (Core::Rand->Bool() ? 0.5f : 1.0f));
-                //pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f) * MIN(1.0f - 0.6f * (fHeight+5.0f)/-25.0f, 1.0f));
+                pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f) * (bBlack ? 0.5f : 1.0f));
 
                 // add object to the list
                 pList1->BindObject(pObject);
+
+                // 
+                bBlack = !bBlack;
             }
         }
 
         // 
         m_iCopyUpper = pList1->List()->size();
 
-        // post-process list and add it to the ground
+        // post-process list and add to the ground
         cBackground::_FillInfinite(pList1, SPACE_METEOR_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
@@ -83,6 +86,15 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);
+
+    // 
+    m_Cover2.DefineTexture(0u, "environment_space_outside.png");
+    m_Cover2.DefineProgram("menu_single_program");
+    m_Cover2.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Cover2.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
+    m_Cover2.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.15f) * 1.3f);
+    m_Cover2.SetAlpha     (0.7f);
+    m_Cover2.SetTexSize   (coreVector2(1.0f,1.0f) * 4.2f);
 
     // 
     m_Nebula.DefineTexture(0u, "environment_clouds_low.png");
@@ -133,13 +145,18 @@ void cSpaceBackground::__ExitOwn()
 void cSpaceBackground::__RenderOwnBefore()
 {
     glDepthMask(false);
-    glDisable(GL_BLEND);
     {
+        glDisable(GL_BLEND);
+        {
+            // 
+            m_Cover.Render();
+        }
+        glEnable(GL_BLEND);
+
         // 
-        m_Cover.Render();
+        m_Cover2.Render();
     }
     glDepthMask(true);
-    glEnable(GL_BLEND);
 }
 
 
@@ -152,12 +169,11 @@ void cSpaceBackground::__RenderOwnAfter()
     if(!m_Nebula.GetProgram()->Enable())  return;
 
     coreRand oRand(1u);
-    
+
     // 
     coreProgram* pLocal = m_Nebula.GetProgram().GetResource();
     for(coreUintW i = 0u; i < SPACE_NEBULA_NUM; ++i)
     {
-        //const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.36f,0.36f) * I_TO_F(POW2(i));
         const coreVector2 vNewTexOffset = m_Nebula.GetTexOffset() + coreVector2::Rand(0.0f,1.0f, 0.0f,1.0f, &oRand);
         const coreFloat   fNewScale     = 1.0f - 0.15f * I_TO_F(i);
 
@@ -194,31 +210,35 @@ void cSpaceBackground::__MoveOwn()
     pList->MoveNormal();
 
     // 
-    const coreVector2 vMove      = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
-    const coreVector2 vTexOffset = m_Cover.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.05f * TIME);
+    const coreVector2 vEnvMove    = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
+    const coreVector2 vTexOffset  = m_Cover .GetTexOffset() + (coreVector2(0.0f,0.0f) + vEnvMove) * (0.05f * TIME);
+    const coreVector2 vTexOffset2 = m_Cover2.GetTexOffset() + (coreVector2(0.0f,0.0f) + vEnvMove) * (0.28f * TIME);
 
     // 
     m_Cover.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
     m_Cover.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Cover.Move();
-    
-    
-    
-    
-    // 
-    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.15f * g_pEnvironment->GetSpeed());
-    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.4f;
-    const coreVector2 vTexOffset2 = m_Nebula.GetTexOffset() + (m_vNebulaMove.InvertedX() + vEnvMove) * (0.5f * TIME);         
 
     // 
-    m_Nebula.SetDirection(m_Cover.GetDirection());
-    m_Nebula.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir.InvertedX()));
-    m_Nebula.SetColor3   (m_Cover.GetColor3() * RCP(m_Cover.GetColor3().Max()));
+    m_Cover2.SetDirection(m_Cover.GetDirection());
+    m_Cover2.SetTexOffset(vTexOffset2.Processed(FRACT));
+    m_Cover2.Move();
+
+    // 
+    const coreVector2 vEnvMove2   = coreVector2(0.0f,1.0f) * (-0.15f * g_pEnvironment->GetSpeed());
+    const coreVector2 vTexSize    = coreVector2(1.0f,1.0f) * 5.4f;
+    const coreVector2 vTexOffset3 = m_Nebula.GetTexOffset() + (m_vNebulaMove.InvertedX() + vEnvMove2) * (0.5f * TIME);
+
+    // 
+    m_Nebula.SetDirection(MapToAxisInv(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
+    m_Nebula.SetColor3   (m_Cover.GetColor3().MinRatio());
     m_Nebula.SetTexSize  (vTexSize);
-    m_Nebula.SetTexOffset(vTexOffset2.Processed(FRACT));
+    m_Nebula.SetTexOffset(vTexOffset3.Processed(FRACT));
     m_Nebula.Move();
 
     // adjust volume of the base sound-effect
     if(m_pBaseSound->EnableRef(this))
+    {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    }
 }

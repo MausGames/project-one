@@ -41,7 +41,7 @@ cDharukBoss::cDharukBoss()noexcept
     this->SetSize(coreVector3(3.4f,3.4f,3.4f));
 
     // configure the boss
-    this->Configure(2800, COLOR_SHIP_RED);
+    this->Configure(2800, 0u, COLOR_SHIP_RED);
 
     // create duplicate object
     m_Duplicate.DefineModelHigh("ship_boss_dharuk_high.md3");
@@ -49,7 +49,7 @@ cDharukBoss::cDharukBoss()noexcept
     m_Duplicate.DefineTexture  (0u, "effect_energy.png");
     m_Duplicate.DefineProgram  ("effect_energy_blink_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
-    m_Duplicate.Configure      (500, COLOR_ENERGY_RED * 0.8f);
+    m_Duplicate.Configure      (500, 0u, COLOR_ENERGY_RED * 0.8f);
     m_Duplicate.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL);
 
     // create duplicate trail list
@@ -143,9 +143,6 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
     g_pGlow->UnbindList(&m_DuplicateTrail);
     g_pGlow->UnbindList(&m_Boomerang);
     g_pGlow->UnbindList(&m_BoomerangTrail);
-
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 
@@ -187,7 +184,11 @@ void cDharukBoss::__MoveOwn()
     // 
     this->_UpdateBoss();
 
-    if(this->ReachedDeath()) this->Kill(true);   
+    if(this->ReachedDeath())
+    {
+        this->Kill(true);   
+        this->_EndBoss();
+    }
 
     // 
     const coreVector2 vOldBasePos   = this->GetPosition   ().xy();

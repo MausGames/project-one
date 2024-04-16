@@ -159,7 +159,7 @@ void cScoreMenu::Move()
     }
 
     // 
-    cMenu::UpdateButton(&m_DefaultTab, true);
+    cMenu::UpdateTab(&m_DefaultTab, true, true);
 
     // 
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());

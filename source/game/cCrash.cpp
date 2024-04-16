@@ -148,7 +148,7 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
             oObject.SetSize       (oBase.GetSize       ());
             oObject.SetDirection  (oBase.GetDirection  ());
             oObject.SetOrientation(oBase.GetOrientation());
-            oObject.SetColor3     (COLOR_SHIP_GREY * 0.4f);
+            oObject.SetColor3     (COLOR_SHIP_BLACK);
 
             // 
             oStatus.vDir  = oBase.GetDirection();

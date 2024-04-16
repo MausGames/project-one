@@ -14,10 +14,14 @@
 cShieldEffect::cShieldEffect()noexcept
 : m_ShieldList (SHIELD_SHIELDS)
 , m_apOwner    {}
+, m_iCurShield (0u)
+, m_fScale     (0.0f)
+, m_fTexScale  (0.0f)
+, m_fTexSpeed  (0.0f)
 , m_fAnimation (0.0f)
 {
     // 
-    //g_pGlow->BindList(&m_ShieldList);
+    g_pGlow->BindList(&m_ShieldList);
 }
 
 
@@ -26,27 +30,38 @@ cShieldEffect::cShieldEffect()noexcept
 cShieldEffect::~cShieldEffect()
 {
     // 
-    //g_pGlow->UnbindList(&m_ShieldList);
+    g_pGlow->UnbindList(&m_ShieldList);
 }
 
 
 // ****************************************************************
 // 
-void cShieldEffect::Construct(const coreHashString& sProgramSingleName, const coreHashString& sProgramInstancedName, const coreVector3 vColor)
+void cShieldEffect::Construct(const coreHashString& sModelName, const coreHashString& sProgramSingleName, const coreHashString& sProgramInstancedName, const coreFloat fScale, const coreFloat fTexScale, const coreVector3 vColor)
 {
     // 
-    for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
+    m_ShieldList.DefineProgram(sProgramInstancedName);
     {
-        m_aShield[i].DefineModel  ("object_sphere.md3");
-        m_aShield[i].DefineTexture(0u, "effect_energy.png");
-        m_aShield[i].DefineProgram(sProgramSingleName);
-        m_aShield[i].SetColor3    (vColor);
-        m_aShield[i].SetAlpha     (0.0f);
-        m_aShield[i].SetTexSize   (coreVector2(3.0f,3.0f));
+        for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
+        {
+            // load object resources
+            coreObject3D* pShield = &m_aShield[i];
+            pShield->DefineModel  (sModelName);
+            pShield->DefineTexture(0u, "effect_energy.png");
+            pShield->DefineProgram(sProgramSingleName);
+
+            // set object properties
+            pShield->SetColor3 (vColor);
+            pShield->SetAlpha  (0.0f);
+            pShield->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_ShieldList.BindObject(pShield);
+        }
     }
 
     // 
-    m_ShieldList.DefineProgram(sProgramInstancedName);
+    m_fScale    = fScale;
+    m_fTexScale = fTexScale;
 }
 
 
@@ -63,30 +78,43 @@ void cShieldEffect::Render()
 // move the shield effect
 void cShieldEffect::Move()
 {
-    if(m_ShieldList.List()->empty()) return;
-
     // 
-    m_fAnimation.UpdateMod(1.0f, 10.0f);
+    m_fAnimation.UpdateMod(m_fTexSpeed, 10.0f);
+    m_fTexSpeed = 0.0f;
 
     // 
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
     {
-        if(!m_apOwner[i]) continue;
-
-        coreObject3D& oShield = m_aShield[i];
-        cEnemy*       pOwner  = m_apOwner[i];
+        coreObject3D* pShield = &m_aShield[i];
+        if(!pShield->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
+        const cEnemy* pOwner = m_apOwner[i];
         if(pOwner)
         {
+            const coreFloat fRealScale    = m_fScale * pOwner->GetVisualRadius();
+            const coreFloat fRealTexScale = m_fTexScale * fRealScale;
+
             // 
-            oShield.SetPosition(pOwner->GetPosition());
-            oShield.SetSize    (coreVector3(1.1f,1.1f,1.1f) * pOwner->GetVisualRadius());
+            pShield->SetPosition(pOwner->GetPosition());
+            pShield->SetSize    (coreVector3(1.1f,1.1f,1.1f) * fRealScale);
+            pShield->SetTexSize (coreVector2(1.0f,1.0f)      * fRealTexScale);
+
+            // 
+            m_fTexSpeed = 0.04f * fRealTexScale;
         }
 
+        const coreFloat fOffset = I_TO_F(i) * (1.0f/8.0f);
+
         // 
-        oShield.SetAlpha    (1.0f);
-        oShield.SetTexOffset(coreVector2(FRACT(m_fAnimation * 0.1f), 0.0f));
+        if(pOwner) pShield->SetAlpha(MIN1(pShield->GetAlpha() + 5.0f * TIME));
+              else pShield->SetAlpha(MAX0(pShield->GetAlpha() - 5.0f * TIME));
+
+        // 
+        if(!pShield->GetAlpha()) pShield->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+        // 
+        pShield->SetTexOffset(coreVector2(FRACT(m_fAnimation + fOffset), 0.0f));
     }
 
     // 
@@ -98,11 +126,17 @@ void cShieldEffect::Move()
 // 
 void cShieldEffect::ClearShields(const coreBool bAnimated)
 {
+    // 
+    std::memset(m_apOwner, 0, sizeof(m_apOwner));
+
     if(!bAnimated)
     {
         // 
-        std::memset(m_apOwner, 0, sizeof(m_apOwner));
-        m_ShieldList.Clear();
+        for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
+        {
+            m_aShield[i].SetAlpha  (0.0f);
+            m_aShield[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        }
     }
 }
 
@@ -114,21 +148,27 @@ void cShieldEffect::BindEnemy(cEnemy* pEnemy)
     if(pEnemy->HasStatus(ENEMY_STATUS_SHIELDED)) return;
 
     // 
-    coreUintW i = 0u;
-    for(; i < SHIELD_SHIELDS; ++i)
+    for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
     {
-        if(!m_apOwner[i]) break;
+        // 
+        if(++m_iCurShield >= SHIELD_SHIELDS) m_iCurShield = 0u;
+
+        if(!m_apOwner[m_iCurShield])
+        {
+            // 
+            m_aShield[m_iCurShield].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
+            // 
+            m_apOwner[m_iCurShield] = pEnemy;
+
+            // 
+            pEnemy->AddStatus(ENEMY_STATUS_SHIELDED);
+            return;
+        }
     }
-    ASSERT(i < SHIELD_SHIELDS)
 
     // 
-    m_apOwner[i] = pEnemy;
-
-    // 
-    pEnemy->AddStatus(ENEMY_STATUS_SHIELDED);
-
-    // 
-    m_ShieldList.BindObject(&m_aShield[i]);
+    WARN_IF(true) {}
 }
 
 
@@ -148,15 +188,12 @@ void cShieldEffect::UnbindEnemy(cEnemy* pEnemy)
 
             // 
             pEnemy->RemoveStatus(ENEMY_STATUS_SHIELDED);
-
-            // 
-            m_ShieldList.UnbindObject(&m_aShield[i]);
-
             return;
         }
     }
 
-    //ASSERT(false)
+    // 
+    WARN_IF(true) {}
 }
 
 
@@ -165,8 +202,9 @@ void cShieldEffect::UnbindEnemy(cEnemy* pEnemy)
 cShieldManager::cShieldManager()noexcept
 {
     // 
-    m_aShieldEffect[SHIELD_EFFECT_INVINCIBLE].Construct("effect_energy_spheric_program", "effect_energy_spheric_inst_program", COLOR_ENERGY_BLUE);
-    m_aShieldEffect[SHIELD_EFFECT_DAMAGING]  .Construct("effect_energy_program",         "effect_energy_inst_program",         COLOR_ENERGY_RED);
+    m_aShieldEffect[SHIELD_EFFECT_INVINCIBLE].Construct("object_sphere.md3", "effect_energy_flat_spheric_program", "effect_energy_flat_spheric_inst_program", 1.05f, 0.7f, COLOR_ENERGY_BLUE);
+    m_aShieldEffect[SHIELD_EFFECT_DAMAGING]  .Construct("object_star.md3",   "effect_energy_flat_spheric_program", "effect_energy_flat_spheric_inst_program", 0.8f, 0.1f, COLOR_ENERGY_RED * 0.6f);
+    m_aShieldEffect[SHIELD_EFFECT_BASE]      .Construct("object_sphere.md3", "effect_energy_flat_program", "effect_energy_flat_inst_program", 1.0f, 1.0f, COLOR_ENERGY_WHITE * 0.6f);
 }
 
 
@@ -175,8 +213,8 @@ cShieldManager::cShieldManager()noexcept
 void cShieldManager::Render()
 {
     //
-    //for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
-    //    m_aShieldEffect[i].Render();
+    for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
+        m_aShieldEffect[i].Render();
 }
 
 

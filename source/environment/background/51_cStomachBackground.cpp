@@ -19,7 +19,7 @@ cStomachBackground::cStomachBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("mars", "rock", OUTDOOR_ALGORITHM_STOMACH, 4.0f, false);
+    m_pOutdoor = new cOutdoor("rock", "rock", OUTDOOR_ALGORITHM_STOMACH, 4.0f, false);
 
     // allocate cloud list
     pList1 = new coreBatchList(STOMACH_CLOUD_RESERVE);
@@ -44,14 +44,15 @@ cStomachBackground::cStomachBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(LERP(COLOR_MENU_RED, coreVector3(1.0f,1.0f,1.0f), 0.5f) * (0.8f + 0.2f * fHeight/60.0f), 0.65f));
+            pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/60.0f));
+            pObject->SetAlpha    (0.65f);
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
             pList1->BindObject(pObject);
         }
 
-        // post-process list and add it to the air
+        // post-process list and add to the air
         cBackground::_FillInfinite   (pList1, STOMACH_CLOUD_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
@@ -74,8 +75,6 @@ cStomachBackground::~cStomachBackground()
 // 
 void cStomachBackground::__InitOwn()
 {
-    // create water-surface object
-    m_pWater = new cWater("environment_mars_diff.png");
 }
 
 
@@ -83,8 +82,6 @@ void cStomachBackground::__InitOwn()
 // 
 void cStomachBackground::__ExitOwn()
 {
-    // 
-    SAFE_DELETE(m_pWater)
 }
 
 
@@ -103,32 +100,8 @@ void cStomachBackground::__RenderOwnAfter()
 
 // ****************************************************************
 // 
-void cStomachBackground::__MoveOwn()
-{
-    // 
-    const coreFloat fMove = TIME * 6.0f;
-
-    // 
-    coreBatchList* pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
-    {
-        coreObject3D* pCloud = (*pList->List())[i];
-
-        // 
-        coreFloat fNewPos = pCloud->GetPosition().y - fMove;
-        if(fNewPos <= -I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL) fNewPos += I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL;
-
-        // 
-        pCloud->SetPosition(coreVector3(pCloud->GetPosition().x, fNewPos, pCloud->GetPosition().z));
-    }
-    pList->MoveNormal();
-}
-
-
-// ****************************************************************
-// 
 void cStomachBackground::__UpdateOwn()
 {
     // 
-    m_Headlight.UpdateDefault();
+    m_Headlight.UpdateDefault(0u);
 }

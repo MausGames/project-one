@@ -38,7 +38,7 @@ cExtraMenu::cExtraMenu()noexcept
     m_StatsTab.SetSize      (m_ProgressTab.GetSize());
     m_StatsTab.SetAlignment (m_ProgressTab.GetAlignment());
     m_StatsTab.SetTexSize   (m_ProgressTab.GetTexSize());
-    m_StatsTab.SetTexOffset (m_ProgressTab.GetTexOffset() + coreVector2(m_StatsTab.GetPosition().x - m_ProgressTab.GetPosition().x, 0.0));
+    m_StatsTab.SetTexOffset (m_ProgressTab.GetTexOffset() + coreVector2(m_StatsTab.GetPosition().x - m_ProgressTab.GetPosition().x, 0.0f));
     m_StatsTab.GetCaption()->SetTextLanguage("EXTRA_STATS");
 
     m_OtherTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -47,7 +47,7 @@ cExtraMenu::cExtraMenu()noexcept
     m_OtherTab.SetSize      (m_ProgressTab.GetSize());
     m_OtherTab.SetAlignment (m_ProgressTab.GetAlignment());
     m_OtherTab.SetTexSize   (m_ProgressTab.GetTexSize());
-    m_OtherTab.SetTexOffset (m_ProgressTab.GetTexOffset() + coreVector2(m_OtherTab.GetPosition().x - m_ProgressTab.GetPosition().x, 0.0));
+    m_OtherTab.SetTexOffset (m_ProgressTab.GetTexOffset() + coreVector2(m_OtherTab.GetPosition().x - m_ProgressTab.GetPosition().x, 0.0f));
     m_OtherTab.GetCaption()->SetTextLanguage("EXTRA_OTHER");
 
     m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
@@ -261,9 +261,9 @@ void cExtraMenu::Move()
     m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
-         if(m_ProgressTab.IsClicked()) this->ChangeSurface(SURFACE_EXTRA_PROGRESS, 0.0f);
-    else if(m_StatsTab   .IsClicked()) this->ChangeSurface(SURFACE_EXTRA_STATS,    0.0f);
-    else if(m_OtherTab   .IsClicked()) this->ChangeSurface(SURFACE_EXTRA_OTHER,    0.0f);
+         if(m_ProgressTab.IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_PROGRESS);
+    else if(m_StatsTab   .IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_STATS);
+    else if(m_OtherTab   .IsClicked()) cMenu::ChangeTab(this, SURFACE_EXTRA_OTHER);
 
     // 
     switch(this->GetCurSurface())
@@ -304,7 +304,7 @@ void cExtraMenu::Move()
             {
                 pArcadeInput->Start("", 16u);
                 
-                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_PASSWORD, 3.0f);
+                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_PASSWORD, 3.0f, 1u);
             }
 
             // 
@@ -312,7 +312,7 @@ void cExtraMenu::Move()
             {
                 pCreditRoll->Start();
                 
-                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_CREDITS, 3.0f);
+                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_CREDITS, 3.0f, 1u);
             }
 
             // 
@@ -326,7 +326,7 @@ void cExtraMenu::Move()
         {
             if(pArcadeInput->GetFinished())
             {
-                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f);
+                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f, 2u);
             }
         }
         break;
@@ -349,9 +349,9 @@ void cExtraMenu::Move()
     }
 
     // 
-    cMenu::UpdateButton(&m_ProgressTab, (this->GetCurSurface() == SURFACE_EXTRA_PROGRESS) || m_ProgressTab.IsFocused());
-    cMenu::UpdateButton(&m_StatsTab,    (this->GetCurSurface() == SURFACE_EXTRA_STATS)    || m_StatsTab   .IsFocused());
-    cMenu::UpdateButton(&m_OtherTab,    (this->GetCurSurface() == SURFACE_EXTRA_OTHER)    || m_OtherTab   .IsFocused());
+    cMenu::UpdateTab(&m_ProgressTab, (this->GetCurSurface() == SURFACE_EXTRA_PROGRESS), m_ProgressTab.IsFocused());
+    cMenu::UpdateTab(&m_StatsTab,    (this->GetCurSurface() == SURFACE_EXTRA_STATS),    m_StatsTab   .IsFocused());
+    cMenu::UpdateTab(&m_OtherTab,    (this->GetCurSurface() == SURFACE_EXTRA_OTHER),    m_OtherTab   .IsFocused());
 
     // 
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());

@@ -14,6 +14,7 @@
 // TODO 2: fix controller support (mouse gets warped because of input-lock)
 // TODO 3: X character is off some pixels (font problem)
 // TODO 4: why do I use coreInt32+coreInt32 for the internal callback ?
+// TODO 3: do not react to input for a very short time, when opening a non-mapping msg-box
 
 
 // ****************************************************************
@@ -33,7 +34,7 @@
 
 // ****************************************************************
 // message box class
-class cMsgBox final : public cGuiObject
+class cMsgBox final : public coreFullscreen
 {
 private:
     cGuiObject m_Box;                                        // 
@@ -153,6 +154,9 @@ template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nC
 
     // 
     m_Navigator.ResetFirst();
+
+    // 
+    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_SHOW);
 }
 
 

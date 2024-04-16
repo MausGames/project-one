@@ -44,6 +44,7 @@ public:
 
     // 
     void Render();
+    void Move();
 
     // set object properties
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
@@ -58,8 +59,10 @@ public:
 
 protected:
     // 
-    coreBool _IsOwnerDarkShading()const;
-    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet)const {if(this->_IsOwnerDarkShading()) ptBullet->MakeWhite(); return ptBullet;}
+    coreBool    _IsOwnerDarkShading()const;
+    coreBool    _IsOwnerProjectOne ()const;
+    coreVector3 _GetEnergyColor    ()const;
+    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet)const {if(this->_IsOwnerProjectOne()) ptBullet->SetColor3(this->_GetEnergyColor()); else ptBullet->MakeWhite(); return ptBullet;}
 
 
 private:
@@ -69,6 +72,7 @@ private:
     virtual void __ReleaseOwn(const coreUint8 iMode)                                     {}
     virtual void __ShootOwn  ()                                                          {}
     virtual void __RenderOwn ()                                                          {}
+    virtual void __MoveOwn   ()                                                          {}
 };
 
 
@@ -89,15 +93,18 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    coreBool m_bBurst;             // 
+    coreBool m_bBurst;   // 
+    
+    coreObject3D m_aMuzzle[2];   //
+    coreFlow m_fMuzzleTime;
+    coreUint8 m_iMuzzleTick;
 
-    coreSoundPtr m_pBulletSound;   // 
-    coreSoundPtr m_pRocketSound;   // 
-    coreSoundPtr m_pMineSound;     // 
+    coreFlow m_fVolume;
 
 
 public:
     cRayWeapon()noexcept;
+    ~cRayWeapon();
 
     DISABLE_COPY(cRayWeapon)
     ASSIGN_ID(1, "Laser Gun")
@@ -110,9 +117,12 @@ public:
 
 private:
     // execute own routines
+    void __UpdateOwn (const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
     void __TriggerOwn(const coreUint8 iMode)final;
     void __ReleaseOwn(const coreUint8 iMode)final;
     void __ShootOwn  ()final;
+    void __RenderOwn ()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -121,9 +131,7 @@ private:
 class cPulseWeapon final : public cWeapon
 {
 private:
-    coreFlow m_fCharge;            // 
-
-    coreSoundPtr m_pBulletSound;   // 
+    coreFlow m_fCharge;   // 
 
 
 public:
@@ -149,10 +157,6 @@ private:
 // wave weapon class
 class cWaveWeapon final : public cWeapon
 {
-private:
-    coreSoundPtr m_pBulletSound;    // 
-
-
 public:
     cWaveWeapon()noexcept;
 
@@ -176,11 +180,9 @@ private:
 class cTeslaWeapon final : public cWeapon
 {
 private:
-    coreInt8  m_iShotType;         // 
-    coreUint8 m_iStrikeType;       // 
-    coreFloat m_fStrikeOffset;     // 
-
-    coreSoundPtr m_pBulletSound;   // 
+    coreInt8  m_iShotType;       // 
+    coreUint8 m_iStrikeType;     // 
+    coreFloat m_fStrikeOffset;   // 
 
 
 public:

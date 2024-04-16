@@ -8,13 +8,12 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO 1: wind sound sollte noch ausgetauscht werden, dieses schnell+langsam abwechselnd is orsch
-
 
 // ****************************************************************
 // constructor
 cCloudBackground::cCloudBackground()noexcept
-: m_fOffset (0.0f)
+: m_vRainMove (coreVector2(-0.5f,-1.2f))
+, m_fOffset   (0.0f)
 {
     coreBatchList* pList1;
 
@@ -44,20 +43,28 @@ cCloudBackground::cCloudBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * MIN(0.0f + 1.0f * fHeight/50.0f, 1.0f), 0.85f));
+            pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * MIN(0.0f + 1.0f * fHeight/50.0f, 1.0f));
+            pObject->SetAlpha    (0.85f);
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
             pList1->BindObject(pObject);
         }
 
-        // post-process list and add it to the air
+        // post-process list and add to the air
         cBackground::_FillInfinite   (pList1, CLOUD_CLOUD_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
         ASSERT(pList1->GetCurCapacity() == CLOUD_CLOUD_RESERVE)
     }
+
+    // 
+    m_Rain.DefineTexture(0u, "effect_rain.png");
+    m_Rain.DefineProgram("effect_weather_rain_cloud_program");
+    m_Rain.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Rain.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
+    m_Rain.SetAlpha     (0.6f);
 
     // 
     m_Cover.DefineTexture(0u, "environment_clouds_grey.png");
@@ -120,9 +127,47 @@ void cCloudBackground::__RenderOwnBefore()
 
 
 // ****************************************************************
+// 
+void cCloudBackground::__RenderOwnAfter()
+{
+    // enable the shader-program
+    if(!m_Rain.GetProgram().IsUsable()) return;
+    if(!m_Rain.GetProgram()->Enable())  return;
+
+    // 
+    coreProgram* pLocal = m_Rain.GetProgram().GetResource();
+    for(coreUintW i = 0u; i < CLOUD_RAIN_NUM; ++i)
+    {
+        const coreVector2 vNewTexOffset = m_Rain.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(POW2(i));
+        const coreFloat   fNewScale     = 1.0f - 0.15f * I_TO_F(i);
+
+        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+    }
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Rain.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
+}
+
+
+// ****************************************************************
 // move the cloud background
 void cCloudBackground::__MoveOwn()
 {
+    // 
+    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * MAX0(g_pEnvironment->GetSpeed()));
+    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 6.0f;
+    const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f, -m_vRainMove.Length()) + vEnvMove) * (1.0f * TIME);
+
+    // 
+    m_Rain.SetDirection(MapToAxisInv(-m_vRainMove.InvertedX().Normalized(), g_pEnvironment->GetDirection()));
+    m_Rain.SetTexSize  (vTexSize);
+    m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
+    m_Rain.Move();
+
     // 
     m_fOffset.Update(-0.08f * g_pEnvironment->GetSpeed());
 
@@ -133,5 +178,7 @@ void cCloudBackground::__MoveOwn()
 
     // adjust volume of the base sound-effect
     if(m_pBaseSound->EnableRef(this))
+    {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    }
 }

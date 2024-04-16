@@ -136,15 +136,27 @@ void cHeadlight::Update()
 
 // ****************************************************************
 // 
-void cHeadlight::UpdateDefault()
+void cHeadlight::UpdateDefault(const coreUint8 iType)
 {
     if(STATIC_ISVALID(g_pGame))
     {
-        // 
-        g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
+        if(iType == 0u)
         {
-            this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection() * 1.15f, coreVector2(60.0f,100.0f) * 1.2f, pPlayer->GetDirection().xy());
-        });
+            // 
+            g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
+            {
+                this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection() * 1.15f, coreVector2(60.0f,100.0f) * 1.2f, pPlayer->GetDirection().xy());
+            });
+        }
+        else
+        {
+            // 
+            g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
+            {
+                this->DrawPoint(pPlayer->GetPosition(), coreVector2(1.0f,1.0f) * 30.0f);
+            });
+        }
+        
     
     if(g_pGame->GetCurMission() && !g_pGame->GetCurMission()->GetCurBoss())
         g_pPostProcessing->SetBorderAll(0.0f);

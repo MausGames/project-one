@@ -17,6 +17,7 @@ cMuscusMission::cMuscusMission()noexcept
 , m_afGenerateTime {}
 , m_afGenerateBang {}
 , m_afGenerateView {}
+, m_bGenerateTest  (true)
 , m_Pearl          (MUSCUS_PEARLS)
 , m_PearlWave      (MUSCUS_PEARLS)
 , m_iPearlActive   (0u)
@@ -71,7 +72,6 @@ cMuscusMission::cMuscusMission()noexcept
             pPearl->DefineProgram(iType ? "effect_energy_flat_spheric_program" : "effect_energy_flat_program");
 
             // set object properties
-            pPearl->SetColor3 (COLOR_ENERGY_YELLOW * 0.7f);
             pPearl->SetTexSize(coreVector2(1.5f,3.0f) * 0.6f);
             pPearl->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -85,8 +85,8 @@ cMuscusMission::cMuscusMission()noexcept
     for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
     {
         m_aStrikeSpline[i].Reserve(2u);
-        m_aStrikeSpline[i].AddNode(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.0f));
-        m_aStrikeSpline[i].AddNode(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.0f), 3.0f);
+        m_aStrikeSpline[i].AddNode(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.0f),  2.0f);
+        m_aStrikeSpline[i].AddNode(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.0f), 10.0f);
     }
 
     // 
@@ -222,8 +222,12 @@ void cMuscusMission::StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, cons
     ASSERT(pPlayer && pTarget && HAS_BIT(m_iPearlActive, iIndex))
 
     // 
-    const coreVector2 vDirIn  = (pTarget->GetPosition().xy() - pPearl->GetPosition().xy()).Normalized();
-    const coreVector2 vDirOut = (-vDirIn + vDirIn.Rotated90() * Core::Rand->Float(1.0f) * ((iIndex & 0x01u) ? -1.0f : 1.0f)).Normalized() * Core::Rand->Float(2.5f,3.5f);
+    const coreVector2 vDiff = pTarget->GetPosition().xy() - pPearl->GetPosition().xy();
+    const coreFloat   fLen  = LERP(8.0f, 1.0f, STEP(0.0f, 0.6f * FOREGROUND_AREA.x, vDiff.Length()));
+
+    // 
+    const coreVector2 vDirIn  = vDiff.Normalized();
+    const coreVector2 vDirOut = (-vDirIn + vDirIn.Rotated90() * (Core::Rand->Float(0.4f, 1.0f) * ((iIndex & 0x01u) ? -1.0f : 1.0f))) * (Core::Rand->Float(2.5f, 3.5f) * fLen);
 
     // 
     m_aStrikeSpline[iIndex].EditNodePosition(0u, pPearl ->GetPosition().xy());
@@ -235,25 +239,6 @@ void cMuscusMission::StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, cons
     m_afStrikeTime  [iIndex] = 0.0f;
     m_apStrikePlayer[iIndex] = pPlayer;
     m_apStrikeTarget[iIndex] = pTarget;
-}
-
-
-// ****************************************************************
-// 
-void cMuscusMission::__RenderOwnUnder()
-{
-    DEPTH_PUSH
-
-    glDepthMask(false);
-    {
-        // 
-        m_PearlWave.Render();
-    }
-    glDepthMask(true);
-
-    // 
-    m_Pearl.Render();
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Pearl);
 }
 
 
@@ -273,6 +258,19 @@ void cMuscusMission::__RenderOwnOver()
     // 
     m_Generate.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Generate);
+
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_PearlWave.Render();
+    }
+    glDepthMask(true);
+
+    // 
+    m_Pearl.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Pearl);
 }
 
 
@@ -327,6 +325,26 @@ void cMuscusMission::__MoveOwnAfter()
         pWave->SetDirection(pGenerate->GetDirection());
         pWave->SetAlpha    (pGenerate->GetAlpha    () * LERP(1.0f, 0.0f, fBang));
         pWave->SetTexOffset(pGenerate->GetTexOffset());
+
+        // 
+        if(m_bGenerateTest)
+        {
+            // 
+            cPlayer::TestCollision(PLAYER_TEST_NORMAL, pGenerate, [&](cPlayer* OUTPUT pPlayer, const coreObject3D* pGenerate, const coreVector3 vIntersection, const coreBool bFirstHit)
+            {
+                if(!bFirstHit) return;
+
+                // 
+                pPlayer->TakeDamage(5, ELEMENT_GREEN, vIntersection.xy());
+
+                // 
+                this->BangGenerate(i);
+
+                // 
+                g_pSpecialEffects->CreateSplashColor(pGenerate->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            });
+        }
     }
 
     // 
@@ -357,7 +375,7 @@ void cMuscusMission::__MoveOwnAfter()
             {
                 // 
                 this->DisablePearl(i, true);
-                g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_YELLOW);
+                g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
 
                 // 
                 ADD_BIT(m_iStrikeState, i)
@@ -375,16 +393,17 @@ void cMuscusMission::__MoveOwnAfter()
         // 
         const coreFloat fOffset = I_TO_F(MUSCUS_PEARLS - i) * (1.0f/7.0f);
         const coreFloat fValue  = FRACT(7.0f * m_fAnimation + fOffset);
-        STATIC_ASSERT(coreMath::IsAligned(MUSCUS_PEARLS, 7u))
 
         // 
         pPearl->SetSize     (coreVector3(2.0f,2.0f,2.0f) * pPearl->GetAlpha());
+        pPearl->SetColor3   (m_apStrikeTarget[i] ? (COLOR_ENERGY_WHITE * 0.6f) : (COLOR_ENERGY_YELLOW * 0.7f));
         pPearl->SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
 
         // 
         pWave->SetPosition (pPearl->GetPosition ());
         pWave->SetSize     (pPearl->GetSize     () * LERPH3(0.0f, 2.0f, fValue));
         pWave->SetDirection(pPearl->GetDirection());
+        pWave->SetColor3   (pPearl->GetColor3   ());
         pWave->SetAlpha    (pPearl->GetAlpha    () * LERPH3(0.0f, 1.0f, 1.0f - fValue));
         pWave->SetTexOffset(pPearl->GetTexOffset());
     }

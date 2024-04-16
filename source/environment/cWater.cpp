@@ -190,7 +190,7 @@ void cWater::UpdateReflection()
 
 // ****************************************************************
 // update water depth map
-void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apGroundObjectList)
+void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apObjectList)
 {
     if(!m_Depth.GetIdentifier()) return;
 
@@ -206,6 +206,9 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
                 pOutdoor->RenderDepth();
             }
             glDepthFunc(GL_LEQUAL);
+
+            // 
+            FOR_EACH(it, apObjectList) (*it)->Render();
         }
     }
     else m_Depth.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
@@ -217,7 +220,7 @@ void cWater::Reshape()
 {
     const coreVector2 vWaterResolution = g_vGameResolution * WATER_SCALE_FACTOR;
 
-    if(m_Reflection.GetIdentifier())
+    if(m_Reflection.GetColorTarget(0u).IsValid())
     {
         // 
         m_Reflection.Delete();
@@ -228,7 +231,7 @@ void cWater::Reshape()
     m_Refraction.Delete();
     m_Refraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-    if(m_Depth.GetIdentifier())
+    if(m_Depth.GetDepthTarget().IsValid())
     {
         // create depth frame buffer
         m_Depth.Delete();

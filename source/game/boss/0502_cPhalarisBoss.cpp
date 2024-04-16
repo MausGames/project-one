@@ -22,14 +22,14 @@
 cPhalarisBoss::cPhalarisBoss()noexcept
 {
     // load models
-    this->DefineModelHigh("ship_projectone.md3"); 
-    this->DefineModelLow ("ship_projectone.md3"); 
+    this->DefineModelHigh("ship_projectone_high.md3"); 
+    this->DefineModelLow ("ship_projectone_low.md3"); 
 
     // set object properties
     this->SetSize(coreVector3(1.0f,1.0f,1.0f)); 
 
     // configure the boss
-    this->Configure(10000, COLOR_SHIP_GREY); 
+    this->Configure(10000, 0u, COLOR_SHIP_GREY); 
 }
 
 

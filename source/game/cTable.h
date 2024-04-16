@@ -72,6 +72,10 @@ public:
     void Reset();
 
     // 
+    void RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void RevertSegment();
+
+    // 
     RETURN_NONNULL sCounter* EditCounterTotal  ();
     RETURN_NONNULL sCounter* EditCounterMission(const coreUintW iMissionIndex);
     RETURN_NONNULL sCounter* EditCounterMission();
@@ -96,13 +100,15 @@ public:
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
-    inline const sCounter&  GetCounterTotal  ()const                                                             {return m_CounterTotal;}
-    inline const sCounter&  GetCounterMission(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aCounterMission [iMissionIndex];}
-    inline const sCounter&  GetCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaCounterSegment[iMissionIndex][iSegmentIndex];}
-    inline const coreUint8& GetMedalMission  (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiMedalMission  [iMissionIndex];}
-    inline const coreUint8& GetMedalSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMedalSegment [iMissionIndex][iSegmentIndex];}
-    inline       coreBool   GetFragment      (const coreUintW iMissionIndex, const coreUintW iBossIndex)const    {ASSERT(iMissionIndex < TABLE_MISSIONS && iBossIndex    < TABLE_BOSSES)   return HAS_BIT(m_aiFragment[iMissionIndex], iBossIndex);}
-    inline       coreBool   GetBadge         (const coreUintW iBadgeIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iBadgeIndex < BADGES && iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return HAS_BIT(m_aiBadge   [iMissionIndex], iBadgeIndex + BADGES * iSegmentIndex);}
+    inline const sCounter&   GetCounterTotal  ()const                                                             {return m_CounterTotal;}
+    inline const sCounter&   GetCounterMission(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aCounterMission [iMissionIndex];}
+    inline const sCounter&   GetCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaCounterSegment[iMissionIndex][iSegmentIndex];}
+    inline const coreUint8&  GetMedalMission  (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiMedalMission  [iMissionIndex];}
+    inline const coreUint8&  GetMedalSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMedalSegment [iMissionIndex][iSegmentIndex];}
+    inline const coreUint8&  GetFragmentAll   (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiFragment      [iMissionIndex];}
+    inline const coreUint32& GetBadgeAll      (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiBadge         [iMissionIndex];}
+    inline       coreBool    GetFragment      (const coreUintW iMissionIndex, const coreUintW iBossIndex)const    {ASSERT(iMissionIndex < TABLE_MISSIONS && iBossIndex    < TABLE_BOSSES)   return HAS_BIT(m_aiFragment[iMissionIndex], iBossIndex);}
+    inline       coreBool    GetBadge         (const coreUintW iBadgeIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iBadgeIndex < BADGES && iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return HAS_BIT(m_aiBadge   [iMissionIndex], iBadgeIndex + BADGES * iSegmentIndex);}
 };
 
 
@@ -133,6 +139,10 @@ public:
 
     // 
     void Reset();
+
+    // 
+    void RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void RevertSegment();
 
     // control scoring stats   
     coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
@@ -194,6 +204,10 @@ public:
 
     // 
     void Reset();
+
+    // 
+    void RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void RevertSegment();
 
     // 
     void AddShiftGood(const coreUint16 iValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);

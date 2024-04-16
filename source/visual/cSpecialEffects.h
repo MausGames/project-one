@@ -21,13 +21,14 @@
 // TODO 3: discard every X particle (create min 1) on low quality ?
 // TODO 1: separate particles for background rendering (automatic selection, based on start-position ? would be easier to expose)
 // TODO 3: extend particle system to allow custom move algorithms
+// TODO 3: options to completely disable certain sound effects: turn, player shooting
 
 
 // ****************************************************************
 // special-effects definitions
 #define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
+#define SPECIAL_GUSTS            (16u)     // 
 #define SPECIAL_BLASTS           (8u)      // number of energy-blasts
-#define SPECIAL_SOUNDS           (8u)      // number of sound-effect files
 
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
 #define SPECIAL_LIGHTNING_CUTOUT (0.5f)    // 
@@ -54,15 +55,75 @@
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
-enum eSoundEffect : coreUint16   // 0xAABBu -> AA sub-index, BB file-index
+#define SPECIAL_RELATIVE (coreVector3(0.0f,0.0f,0.0f))
+#define SPECIAL_SOUND_MEDAL(x) (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
+
+enum eSoundEffect : coreUint8
 {
-    SOUND_EXPLOSION_ENERGY_SMALL   = 0x0000u,
-    SOUND_EXPLOSION_ENERGY_BIG     = 0x0100u,
-    SOUND_EXPLOSION_PHYSICAL_SMALL = 0x0001u,
-    SOUND_EXPLOSION_PHYSICAL_BIG   = 0x0101u,
-    SOUND_RUSH_SHORT               = 0x0002u,
-    SOUND_RUSH_LONG                = 0x0102u,
-    SOUND_FFFF                     = 0xFFFFu
+    SOUND_PLAYER_EXPLOSION,
+    SOUND_PLAYER_FEEL,
+    SOUND_PLAYER_TURN,
+    SOUND_PLAYER_INTERRUPT,
+    SOUND_PLAYER_REPAIR,
+
+    SOUND_ENEMY_EXPLOSION_01,
+    SOUND_ENEMY_EXPLOSION_02,
+    SOUND_ENEMY_EXPLOSION_03,
+    SOUND_ENEMY_EXPLOSION_04,
+    SOUND_ENEMY_EXPLOSION_05,
+    SOUND_ENEMY_EXPLOSION_06,
+    SOUND_ENEMY_EXPLOSION_07,
+    SOUND_ENEMY_EXPLOSION_08,
+    SOUND_ENEMY_EXPLOSION_09,
+    SOUND_ENEMY_EXPLOSION_10,
+
+    SOUND_WEAPON_RAY,
+    SOUND_WEAPON_ENEMY,
+
+    SOUND_BULLET_HIT,
+    SOUND_BULLET_REFLECT,
+
+    SOUND_SHIELD_HIT,
+    SOUND_SHIELD_DESTROY,
+
+    SOUND_MEDAL_BRONZE,
+    SOUND_MEDAL_SILVER,
+    SOUND_MEDAL_GOLD,
+    SOUND_MEDAL_PLATINUM,
+    SOUND_MEDAL_DARK,
+
+    SOUND_BADGE,
+
+    SOUND_FRAGMENT_HELPER,
+    SOUND_FRAGMENT_APPEAR,
+    SOUND_FRAGMENT_COLLECT,
+
+    SOUND_SUMMARY_TEXT,
+    SOUND_SUMMARY_SCORE,
+    SOUND_SUMMARY_MEDAL,
+
+    SOUND_CONTINUE_TICK,
+    SOUND_CONTINUE_ACCEPT,
+
+    SOUND_MENU_START,
+    SOUND_MENU_MSGBOX_SHOW,
+    SOUND_MENU_MSGBOX_YES,
+    SOUND_MENU_MSGBOX_NO,
+    SOUND_MENU_BUTTON_PRESS,
+    SOUND_MENU_SWITCH_ENABLED,
+    SOUND_MENU_SWITCH_DISABLED,
+    SOUND_MENU_CHANGE_BUTTON,
+    SOUND_MENU_CHANGE_TAB,
+    SOUND_MENU_CHANGE_LINE,
+    SOUND_MENU_SCROLL,
+    SOUND_MENU_SUB_IN,
+    SOUND_MENU_SUB_OUT,
+
+    SOUND_EFFECT_SHAKE,   // bomb, laser
+
+    SOUND_PLACEHOLDER,
+
+    SOUND_MAX
 };
 
 
@@ -82,21 +143,30 @@ private:
     coreBatchList m_LightningList;                          // 
     coreUintW     m_iCurLightning;                          // 
 
+    coreObject3D  m_aGust     [SPECIAL_GUSTS];              // 
+    coreFlow      m_afGustTime[SPECIAL_GUSTS];              // 
+    coreFloat     m_afGustSide[SPECIAL_GUSTS];              // 
+    coreFloat     m_fGustAngle;                             // 
+    coreFlow      m_fGustSpawn;                             // 
+    coreBatchList m_GustList;                               // 
+    coreUintW     m_iCurGust;                               // 
+
     coreObject3D m_aBlast[SPECIAL_BLASTS];                  // 
     coreModelPtr m_apBlastModel[3];                         // 
     coreUintW    m_iCurBlast;                               // 
 
-    coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
-    eSoundEffect m_eSoundGuard;                             // last played sound-effect (to reduce multiple same sound-effects within one frame)
+    coreSoundPtr m_apSound[SOUND_MAX];                      // 
+    coreUint64   m_iSoundGuard;                             // (to reduce multiple same sound-effects within one frame) 
 
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
     coreUint8 m_iShakeCount;                                // 
 
-    coreFloat m_fFreezeTime;
+    coreFloat m_fFreezeTime;                                // 
 
-    coreUint8 m_iEffectCount;                               // 
-    coreUint8 m_iBreakupCount;                              // 
+    coreUint16 m_iEffectFrame;                              // 
+    coreUint8  m_iEffectCount;                              // 
+    coreUint8  m_iBreakupCount;                             // 
 
     coreBool m_bActive;                                     // 
 
@@ -110,6 +180,7 @@ public:
     void Render();
     void RenderBottom();
     void Move();
+    void MoveAlways();
     
 
     // 
@@ -143,12 +214,15 @@ public:
     void      CreateLightning(coreObject3D*     pOwner,   const coreVector2 vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3 vColor, const coreVector2 vTexSizeFactor, const coreFloat fTexOffset);
 
     // 
+    void CreateGust(const coreFloat fFrequency, const coreFloat fAngle);
+
+    // 
     void CreateBlastSphere(const coreVector3 vPosition,                               const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
     void CreateBlastCube  (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
     void CreateBlastTetra (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
 
     // 
-    void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex);
+    void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex);
 
     // 
     void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs);

@@ -62,7 +62,7 @@ public:
 
     // update water reflection and depth
     void UpdateReflection();
-    void UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apGroundObjectList);
+    void UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apObjectList);
 
     // set object properties
     inline void SetFlyOffset(const coreFloat fFlyOffset) {m_fFlyOffset = fFlyOffset;}

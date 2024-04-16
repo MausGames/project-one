@@ -38,7 +38,7 @@ cGameMenu::cGameMenu()noexcept
     m_TrainingTab.SetSize      (m_StandardTab.GetSize());
     m_TrainingTab.SetAlignment (m_StandardTab.GetAlignment());
     m_TrainingTab.SetTexSize   (m_StandardTab.GetTexSize());
-    m_TrainingTab.SetTexOffset (m_StandardTab.GetTexOffset() + coreVector2(m_TrainingTab.GetPosition().x - m_StandardTab.GetPosition().x, 0.0));
+    m_TrainingTab.SetTexOffset (m_StandardTab.GetTexOffset() + coreVector2(m_TrainingTab.GetPosition().x - m_StandardTab.GetPosition().x, 0.0f));
     m_TrainingTab.GetCaption()->SetTextLanguage("GAME_TAB_TRAINING");
 
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -460,8 +460,8 @@ void cGameMenu::Move()
     m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
-         if(m_StandardTab.IsClicked()) this->ChangeSurface(SURFACE_GAME_STANDARD, 0.0f);
-    else if(m_TrainingTab.IsClicked()) this->ChangeSurface(SURFACE_GAME_TRAINING, 0.0f);
+         if(m_StandardTab.IsClicked()) cMenu::ChangeTab(this, SURFACE_GAME_STANDARD);
+    else if(m_TrainingTab.IsClicked()) cMenu::ChangeTab(this, SURFACE_GAME_TRAINING);
 
     // 
     switch(this->GetCurSurface())
@@ -474,7 +474,7 @@ void cGameMenu::Move()
                 m_iCurPage = 0u;
 
                 // 
-                g_pMenu->ShiftSurface(this, SURFACE_GAME_ARMORY, 3.0f, true, false);
+                g_pMenu->ShiftSurface(this, SURFACE_GAME_ARMORY, 3.0f, 1u, true, false);
             }
             else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
@@ -510,7 +510,7 @@ void cGameMenu::Move()
                         m_iCurPage = 1u;
 
                         // 
-                        g_pMenu->ShiftSurface(this, SURFACE_GAME_ARMORY, 3.0f, true, false);
+                        g_pMenu->ShiftSurface(this, SURFACE_GAME_ARMORY, 3.0f, 1u, true, false);
                         break;
                     }
 
@@ -591,7 +591,7 @@ void cGameMenu::Move()
             if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
-                g_pMenu->ShiftSurface(this, this->GetOldSurface(), 3.0f, false, true);
+                g_pMenu->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u, false, true);
             }
         }
         break;
@@ -614,7 +614,7 @@ void cGameMenu::Move()
                 if(m_aWeapon[0].GetOverride() >= 0)
                 {
                     // 
-                    g_pMenu->ShiftSurface(this, this->GetOldSurface(), 3.0f, false, true);
+                    g_pMenu->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u, false, true);
                 }
                 else
                 {
@@ -691,12 +691,12 @@ void cGameMenu::Move()
     
     if(m_OptionButton.IsClicked())
     {
-        g_pMenu->ShiftSurface(this, SURFACE_GAME_OPTIONS, 3.0f, true, false);
+        g_pMenu->ShiftSurface(this, SURFACE_GAME_OPTIONS, 3.0f, 1u, true, false);
     }
 
     // 
-    cMenu::UpdateButton(&m_StandardTab, (this->GetCurSurface() == SURFACE_GAME_STANDARD) || m_StandardTab.IsFocused());
-    cMenu::UpdateButton(&m_TrainingTab, (this->GetCurSurface() == SURFACE_GAME_TRAINING) || m_TrainingTab.IsFocused());
+    cMenu::UpdateTab(&m_StandardTab, (this->GetCurSurface() == SURFACE_GAME_STANDARD), m_StandardTab.IsFocused());
+    cMenu::UpdateTab(&m_TrainingTab, (this->GetCurSurface() == SURFACE_GAME_TRAINING), m_TrainingTab.IsFocused());
 
     // 
     cMenu::UpdateButton(&m_StartButton,  m_StartButton .IsFocused());
@@ -744,6 +744,25 @@ void cGameMenu::LoadValues()
         const coreBool bEnable = (g_pSave->GetHeader().oProgress.aiAdvance[i] != 0u);
         m_WorldMap.EnablePin(i, bEnable, bEnable || (g_aMissionData[i].iID == cAterMission::ID));
     }
+    
+    
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
+    {
+        const coreUintW iIndex   = i + 1u + ((i >= 7u) ? 1u : 0u);
+        const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[iIndex];
+
+        for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j)
+        {
+            const coreBool bEnabled = (iAdvance >= j + 1u);
+
+            m_aaStage[i][j].SetEnabled  (bEnabled ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aaStage[i][j].SetFocusable(bEnabled);
+        }
+
+        m_aMissionName[i].SetEnabled(iAdvance ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        m_aMissionLine[i].SetEnabled(iAdvance ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    }
+    
 
     // 
     m_WorldMap.SelectPin(g_pSave->GetHeader().oOptions.iStandard);
@@ -788,7 +807,7 @@ void cGameMenu::SaveValues()
 
 // ****************************************************************
 // 
-void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo)//const
+void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo, coreUint8* OUTPUT piKind)//const
 {
     
     // TODO 1: intro liefert m_aiCurIndex[0]==-1
@@ -802,6 +821,7 @@ void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTP
         (*piMissionID) = g_aMissionData[m_aiCurIndex[0]].iID;
         (*piTakeFrom)  = 0u;
         (*piTakeTo)    = TAKE_MISSION;
+        (*piKind)      = GAME_KIND_MISSION;
     }
     else if(m_iCurPage == 1u)
     {
@@ -809,6 +829,7 @@ void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTP
         (*piMissionID) = g_aMissionData[m_aiCurIndex[1]].iID;
         (*piTakeFrom)  = m_aiCurIndex[2];
         (*piTakeTo)    = m_aiCurIndex[2];
+        (*piKind)      = GAME_KIND_SEGMENT;
     }
     else ASSERT(false)
 }

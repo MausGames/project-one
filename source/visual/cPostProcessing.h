@@ -19,6 +19,7 @@
 // TODO 3: remove overdraw when rendering border object (own shader with discard ?)
 // TODO 3: border might flicker-disappear when rotating, briefly passing 0.0f, and shaking screen
 // TODO 3: if overdraw can be handled, then N "shadow-border" can be used when rotating (like on Dharuk) (own shader with discard ?)
+// TODO 1: implement outomatic smooth reset for certain values (e.g. wall offset, frame value, etc.)
 
 
 // ****************************************************************
@@ -41,6 +42,7 @@ class cPostProcessing final : public coreObject2D, public coreResourceRelation
 private:
     coreProgramPtr m_pProgramSimple;            // 
     coreProgramPtr m_pProgramDistorted;         // 
+    coreProgramPtr m_pProgramTransparent;       // 
     coreProgramPtr m_pProgramDebug;             // 
 
     coreObject2D m_aInterior[POST_INTERIORS];   // 
@@ -59,6 +61,10 @@ private:
     coreBool    m_bOffsetActive;                // 
 
     coreFlow m_fAnimation;                      // 
+
+    coreFullscreen m_Frame;                     // 
+    coreFloat      m_fFrameValue;               // 
+    coreFlow       m_fFrameAnimation;           // 
 
 
 public:
@@ -85,6 +91,7 @@ public:
     inline void SetWallOffset   (const coreUintW   iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; m_bOffsetActive = true;}
     inline void SetSplitScreen  (const coreBool    bSplitScreen)                        {m_bSplitScreen   = bSplitScreen;}
     inline void SetDirectionGame(const coreVector2 vDirectionGame)                      {m_vDirectionGame = vDirectionGame; ASSERT(vDirectionGame.IsNormalized())}
+    inline void SetFrameValue   (const coreFloat   fFrameValue) {m_fFrameValue = fFrameValue;}
     inline void SetSaturation   (const coreUintW   iIndex, const coreFloat fSaturation) {ASSERT((iIndex < POST_INTERIORS) && (fSaturation >= 0.0f) && (fSaturation <= 1.0f)) m_avData[iIndex].x = LERP(0.0f, 0.94f, fSaturation);}
     inline void SetValue        (const coreUintW   iIndex, const coreFloat fValue)      {ASSERT((iIndex < POST_INTERIORS) && (fValue      >= 0.0f) && (fValue      <= 1.0f)) m_avData[iIndex].y = LERP(0.0f, 1.0f,  fValue);}
     inline void SetBorder       (const coreUintW   iIndex, const coreFloat fBorder)     {ASSERT((iIndex < POST_INTERIORS) && (fBorder     >= 0.0f) && (fBorder     <= 1.0f)) m_avData[iIndex].z = LERP(0.4f, 2.0f,  fBorder);}

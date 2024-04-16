@@ -20,11 +20,15 @@ cPostProcessing::cPostProcessing()noexcept
 , m_afOffset          {}
 , m_bOffsetActive     (false)
 , m_fAnimation        (0.0f)
+
+, m_fFrameValue       (0.0f)
+, m_fFrameAnimation   (0.0f)
 {
     // load post-processing shader-programs
-    m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
-    m_pProgramDistorted = Core::Manager::Resource->Get<coreProgram>("full_post_distorted_program");
-    m_pProgramDebug     = Core::Manager::Resource->Get<coreProgram>("full_post_debug_program");
+    m_pProgramSimple      = Core::Manager::Resource->Get<coreProgram>("full_post_program");
+    m_pProgramDistorted   = Core::Manager::Resource->Get<coreProgram>("full_post_distorted_program");
+    m_pProgramTransparent = Core::Manager::Resource->Get<coreProgram>("full_post_transparent_program");
+    m_pProgramDebug       = Core::Manager::Resource->Get<coreProgram>("full_post_debug_program");
     this->Recompile();
 
     // create interiors
@@ -54,6 +58,11 @@ cPostProcessing::cPostProcessing()noexcept
     this->SetSaturationAll(1.0f);
     this->SetValueAll     (1.0f);
     this->SetBorderAll    (0.0f);
+
+
+    // 
+    m_Frame.DefineTexture(0u, "menu_background_black.png");
+    m_Frame.DefineProgram("effect_frame_program");
 }
 
 
@@ -65,9 +74,10 @@ void cPostProcessing::Render()
     coreFrameBuffer::EndDraw();
 
     // select between debug, distorted or simple shader-program
-                    if(g_bDebugOutput) this->DefineProgram(m_pProgramDebug);
+         if(g_bDebugOutput)            this->DefineProgram(m_pProgramDebug);
+    else if(g_bTiltMode)               this->DefineProgram(m_pProgramTransparent);
     else if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
-                                  else this->DefineProgram(m_pProgramSimple);
+    else                               this->DefineProgram(m_pProgramSimple);
 
     // bind all required frame buffers
     for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
@@ -82,7 +92,7 @@ void cPostProcessing::Render()
     this->__UpdateData();
 
     // 
-    const coreBool bDisableBlend = (m_aWall[0].GetAlpha() >= 1.0f);
+    const coreBool bDisableBlend = ((m_aWall[0].GetAlpha() >= 1.0f) && !m_fFrameValue);
 
     if(bDisableBlend) glDisable(GL_BLEND);
     {
@@ -90,13 +100,22 @@ void cPostProcessing::Render()
         if(!this->GetDirection().IsAligned())
             m_Border.Render();
 
+        if(m_fFrameValue >= 1.0f)
+        {
+            // 
+            m_Frame.Render();
+        }
+
         // render interiors (post-process)
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
             m_aInterior[i].Render(this->GetProgram());
 
-        // render wallpapers
-        for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
-            m_aWall[i].Render();
+        if(m_fFrameValue < 1.0f)
+        {
+            // render wallpapers
+            for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
+                m_aWall[i].Render();
+        }
     }
     if(bDisableBlend) glEnable(GL_BLEND);
 
@@ -148,6 +167,39 @@ void cPostProcessing::Move()
         if(std::all_of(m_afOffset, m_afOffset + POST_WALLS, [](const coreFloat x) {return coreMath::IsNear(x, 0.0f);}))
             m_bOffsetActive = false;
     }
+
+
+    if(m_fFrameValue > 1.0f)
+    {
+        if(!g_pMenu->IsPaused()) m_fFrameAnimation.Update(1.0f);
+
+        coreVector2 vPos = coreVector2(0.0f,0.0f);
+        if(STATIC_ISVALID(g_pGame) && g_bShiftMode)
+        {
+            vPos += g_pGame->GetPlayer(0u)->GetPosition().xy() * 0.3f;
+        }
+    
+        // 
+        m_Frame.SetPosition(coreVector2(vPos * -0.0045f));
+        m_Frame.SetSize    (coreVector2(1.15f,1.15f) * MaxAspectRatio(Core::System->GetResolution()));
+        m_Frame.SetAlpha   (BLENDH3(MAX0(m_fFrameValue - 1.0f)) * 0.5f);
+        m_Frame.SetTexOffset(coreVector2((m_fFrameAnimation * 0.01f) * (2.0f*PI), 0.0f));
+        m_Frame.Move();
+    
+        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+        {
+            m_aInterior[i].SetAlpha(BLENDH3(MAX0(m_fFrameValue - 1.0f)));
+        }
+    }
+    else
+    {
+        m_fFrameAnimation = 0.0f;
+    
+        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+        {
+            m_aInterior[i].SetAlpha(0.0f);
+        }
+    }
 }
 
 
@@ -159,17 +211,20 @@ void cPostProcessing::Recompile()
 
     const coreChar* pcConfig1 =               g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "";
     const coreChar* pcConfig2 = PRINT("%s%s", g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "", pcConfig1);
-    const coreChar* pcConfig3 = PRINT("%s%s",                                    SHADER_DEBUG,           pcConfig2);
+    const coreChar* pcConfig3 = PRINT("%s%s",                                    SHADER_TRANSPARENT,     pcConfig1);
+    const coreChar* pcConfig4 = PRINT("%s%s",                                    SHADER_DEBUG,           pcConfig2);
 
     // change configuration of post-processing shaders
-    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetRawResource())->SetCustomCode(pcConfig1);
-    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")->GetRawResource())->SetCustomCode(pcConfig2);
-    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")    ->GetRawResource())->SetCustomCode(pcConfig3);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")            ->GetRawResource())->SetCustomCode(pcConfig1);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")  ->GetRawResource())->SetCustomCode(pcConfig2);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_transparent.frag")->GetRawResource())->SetCustomCode(pcConfig3);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")      ->GetRawResource())->SetCustomCode(pcConfig4);
 
     // recompile and relink
-    m_pProgramSimple   .GetHandle()->Reload();
-    m_pProgramDistorted.GetHandle()->Reload();
-    m_pProgramDebug    .GetHandle()->Reload();
+    m_pProgramSimple     .GetHandle()->Reload();
+    m_pProgramDistorted  .GetHandle()->Reload();
+    m_pProgramTransparent.GetHandle()->Reload();
+    m_pProgramDebug      .GetHandle()->Reload();
 
     // finish now
     if(Core::System->GetCurFrame())

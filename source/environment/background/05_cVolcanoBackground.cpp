@@ -61,13 +61,13 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         // 
         this->_StoreHeight(pList1, 0.0f);
 
-        // post-process list and add it to the ground
+        // post-process list and add to the ground
         cBackground::_FillInfinite(pList1, VOLCANO_SMOKE_RESERVE);
         m_apGroundObjectList.push_back(pList1);
     }
 
     // 
-    pList1 = new coreBatchList(MOSS_GRAVE_RESERVE);
+    pList1 = new coreBatchList(VOLCANO_PYRAMID_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
     {
         // load object resources
@@ -77,19 +77,19 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         oBase.DefineTexture(1u, "environment_pyramid2_norm.png");
         oBase.DefineProgram("object_ground_program");
 
-        for(coreUintW i = 0u; i < MOSS_GRAVE_NUM/2; ++i)
+        for(coreUintW i = 0u; i < VOLCANO_PYRAMID_NUM; ++i)
         {
             const coreFloat fSize = Core::Rand->Bool() ? 5.0f : 3.0f;
+
             // calculate position and height
-            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, MOSS_GRAVE_NUM/2);
-            const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(fSize,0.0f));
-            
-            const coreFloat   fHeight2   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(-fSize,0.0f));
-            const coreFloat   fHeight3   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(0.0f,fSize));
-            const coreFloat   fHeight4   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(0.0f,-fSize));
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, VOLCANO_PYRAMID_NUM);
+            const coreFloat   fHeight1  = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2( fSize, 0.0f));
+            const coreFloat   fHeight2  = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(-fSize, 0.0f));
+            const coreFloat   fHeight3  = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(0.0f,  fSize));
+            const coreFloat   fHeight4  = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(0.0f, -fSize));
 
             // test for valid values
-            if((fHeight > -15.0f) && (fHeight2 > -15.0f) && (fHeight3 > -15.0f) && (fHeight4 > -15.0f))// && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            if((fHeight1 > -15.0f) && (fHeight2 > -15.0f) && (fHeight3 > -15.0f) && (fHeight4 > -15.0f))
             {
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(22.0f)))
                 {
@@ -98,8 +98,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
-                    pObject->SetSize       (coreVector3(1.0f,1.0f,1.1f) * fSize * 1.2f * 1.3f);
-                    pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
+                    pObject->SetSize       (coreVector3(1.0f,1.0f,1.1f) * fSize * 1.56f);
                     pObject->SetDirection  (coreVector3(1.0f,1.0f,0.0f).Normalized());
                     pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
 
@@ -112,34 +111,33 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         // 
         this->_StoreHeight(pList1, -2.0f);
 
-        // post-process list and add it to the ground
-        cBackground::_FillInfinite(pList1, MOSS_GRAVE_RESERVE);
+        // post-process list and add to the ground
+        cBackground::_FillInfinite(pList1, VOLCANO_PYRAMID_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
-        // bind stone list to shadow map
+        // 
         m_pOutdoor->GetShadowMap()->BindList(pList1);
     }
 
     // 
-    pList1 = new coreBatchList(SNOW_REED_RESERVE);
+    pList1 = new coreBatchList(VOLCANO_PLANT_1_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
 
-    pList2 = new coreBatchList(SNOW_REED_RESERVE);
+    pList2 = new coreBatchList(VOLCANO_PLANT_2_RESERVE);
     pList2->DefineProgram("object_ground_inst_program");
     {
         // load object resources
         coreObject3D oBase;
         oBase.DefineTexture(0u, "environment_plant.png");
-        //oBase.DefineTexture(0u, "environment_sea.png");
         oBase.DefineTexture(1u, "default_normal.png");
         oBase.DefineProgram("object_ground_program");
 
-        for(coreUintW i = 0u; i < SNOW_REED_NUM; ++i)
+        for(coreUintW i = 0u; i < VOLCANO_PLANT_NUM; ++i)
         {
             for(coreUintW j = 4u; j--; )   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SNOW_REED_NUM);
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, VOLCANO_PLANT_NUM);
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
                 // test for valid values
@@ -147,28 +145,21 @@ cVolcanoBackground::cVolcanoBackground()noexcept
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(7.0f))  &&
                        !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, POW2(7.0f))  &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(15.0f)) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(15.0f)))
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(15.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(15.0f)))
                     {
                         // determine object type
                         const coreBool bType = Core::Rand->Bool(0.7f);
-                        
-                        
-                    //const coreVector3 vNormal = m_pOutdoor->RetrieveBackNormal(vPosition);
 
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
                         pObject->DefineModel(bType ? "environment_plant_08.md3" : "environment_plant_09.md3");
-                        //pObject->DefineModel(bType ? "environment_sea_06.md3" : "environment_sea_07.md3");
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
-                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 1.1f * 1.1f * 1.5f);
-                        pObject->SetSize     (pObject->GetSize() * coreVector3(coreVector2(1.0f,1.0f) * (bType ? 1.0f : 1.3f), 1.0f));
+                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 1.85f * coreVector3(coreVector2(1.0f,1.0f) * (bType ? 1.0f : 1.3f), 1.0f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-                        //pObject->SetDirection(coreVector3::Cross(vNormal, coreVector3::Cross(vNormal, coreVector3(0.0f,0.0f,1.0f)).Normalized()));
                         pObject->SetColor3   (coreVector3(1.0f,1.0f,0.0f) * Core::Rand->Float(0.85f, 1.0f));
-                       // pObject->SetColor3   (LERP(coreVector3(54.0f/255.0f, 204.0f/255.0f, 255.0f/255.0f), coreVector3(1.0f,1.0f,1.0f), Core::Rand->Float(1.0f)));
 
                         // add object to the list
                         if(bType) pList1->BindObject(pObject);
@@ -183,20 +174,20 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         this->_StoreHeight(pList1, -0.4f);
         this->_StoreHeight(pList2,  0.0f);
 
-        // post-process lists and add them to the ground
-        cBackground::_FillInfinite(pList1, SNOW_REED_RESERVE);
+        // post-process list and add to the ground
+        cBackground::_FillInfinite(pList1, VOLCANO_PLANT_1_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
-        cBackground::_FillInfinite(pList2, SNOW_REED_RESERVE);
+        cBackground::_FillInfinite(pList2, VOLCANO_PLANT_2_RESERVE);
         m_apGroundObjectList.push_back(pList2);
 
-        // bind reed lists to shadow map
+        // 
         m_pOutdoor->GetShadowMap()->BindList(pList1);
         m_pOutdoor->GetShadowMap()->BindList(pList2);
     }
 
     // allocate spark list
-    pList1 = new coreBatchList(VOLCANO_SPARK_RESERVE*2u);
+    pList1 = new coreBatchList(VOLCANO_SPARK_RESERVE);
     pList1->DefineProgram("effect_decal_single_inst_program");
     {
         // load object resources
@@ -205,12 +196,12 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         oBase.DefineTexture(0u, "environment_algae2.png");
         oBase.DefineProgram("effect_decal_single_program");
 
-        for(coreUintW i = 0u; i < VOLCANO_SPARK_NUM/4; ++i)
+        for(coreUintW i = 0u; i < VOLCANO_SPARK_NUM; ++i)
         {
             for(coreUintW j = 20u; j--; )   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, VOLCANO_SPARK_NUM/4);
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, VOLCANO_SPARK_NUM);
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 50.0f);
 
                 // test for valid values
@@ -221,9 +212,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
-                    pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                    //pObject->SetColor4  (coreVector4(COLOR_ENERGY_ORANGE * (0.8f + 0.2f * fHeight/40.0f), 0.95f));
-                    pObject->SetColor4  (coreVector4(LERP(COLOR_ENERGY_ORANGE, COLOR_ENERGY_YELLOW, 0.9f), 0.95f));
+                    pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f) * 1.2f * 1.2f);
                     pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * 0.6f);
                     pObject->SetAlpha   (Core::Rand->Float(0.3f, 0.8f));
 
@@ -246,19 +235,13 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         m_iSparkNum = papContent->size();
         ASSERT(!(m_iSparkNum % 2u))
 
-        // post-process list and add it to the air
-        cBackground::_FillInfinite(pList1, VOLCANO_SPARK_RESERVE*2u);
+        // post-process list and add to the air
+        cBackground::_FillInfinite(pList1, VOLCANO_SPARK_RESERVE);
         m_apAirObjectList.push_back(pList1);
     }
-    
-    
-    
-    
-    
-    
-#if 1
+
     // allocate cloud list
-    pList1 = new coreBatchList(GRASS_CLOUD_RESERVE);
+    pList1 = new coreBatchList(VOLCANO_CLOUD_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
         // load object resources
@@ -267,10 +250,10 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         oBase.DefineTexture(0u, "environment_clouds_mid.png");
         oBase.DefineProgram("environment_clouds_program");
 
-        for(coreUintW i = 0u; i < GRASS_CLOUD_NUM; ++i)
+        for(coreUintW i = 0u; i < VOLCANO_CLOUD_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, GRASS_CLOUD_NUM);
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, VOLCANO_CLOUD_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
@@ -280,37 +263,32 @@ cVolcanoBackground::cVolcanoBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(COLOR_FIRE_ORANGE * (0.8f + 0.2f * fHeight/60.0f), 0.85f));
-            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * (0.3f + 0.2f * fHeight/60.0f), 0.85f));
+            pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (0.3f + 0.2f * fHeight/60.0f));
+            pObject->SetAlpha    (0.85f);
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
             pList1->BindObject(pObject);
         }
 
-        // post-process list and add it to the air
-        cBackground::_FillInfinite   (pList1, GRASS_CLOUD_RESERVE);
+        // post-process list and add to the air
+        cBackground::_FillInfinite   (pList1, VOLCANO_CLOUD_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
-        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUD_RESERVE)
+        ASSERT(pList1->GetCurCapacity() == VOLCANO_CLOUD_RESERVE)
     }
-#endif
-
-    
-
 
     // 
-    m_Smoke.DefineProgram("effect_particle_smoke_program"); 
-    m_Smoke.DefineProgram("effect_particle_fire_program"); 
-    m_Smoke.DefineTexture(0u, "effect_smoke.png"); 
+    m_Smoke.DefineProgram("effect_particle_fire_program");   
+    m_Smoke.DefineTexture(0u, "effect_smoke.png");   
 
-    pList1 = m_apGroundObjectList[0]; 
-    m_aSmokeEffect.reserve(pList1->List()->size()); 
-    FOR_EACH(it, *pList1->List()) 
+    pList1 = m_apGroundObjectList[0];   
+    m_aSmokeEffect.reserve(pList1->List()->size());   
+    FOR_EACH(it, *pList1->List())   
     {
-        m_aSmokeEffect.emplace_back(&m_Smoke); 
-        m_aSmokeEffect.back().SetOrigin(*it); 
+        m_aSmokeEffect.emplace_back(&m_Smoke);   
+        m_aSmokeEffect.back().SetOrigin(*it);   
     }
 }
 
@@ -319,12 +297,6 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 // destructor
 cVolcanoBackground::~cVolcanoBackground()
 {
-    
-
-    m_Smoke.ClearAll();  
-
-    m_aSmokeEffect.clear();
-    
     // 
     this->__ExitOwn();
 }
@@ -368,20 +340,13 @@ void cVolcanoBackground::__RenderOwnBefore()
     glEnable(GL_BLEND);
 
     glDisable(GL_DEPTH_TEST);
+    glBlendFunc(FOREGROUND_BLEND_SUM);
     {
-        
-        
-            glBlendFunc        (FOREGROUND_BLEND_SUM);
-            {
-                // render fire particle system
-                m_Smoke.Render();
-            }
-            glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
-                       
         // 
-       // m_Smoke.Render();
+        m_Smoke.Render();
     }
     glEnable(GL_DEPTH_TEST);
+    glBlendFunc(FOREGROUND_BLEND_DEFAULT);
 }
 
 
@@ -430,8 +395,7 @@ void cVolcanoBackground::__MoveOwn()
     m_fSparkTime.Update(0.25f * MAX(ABS(g_pEnvironment->GetSpeed()), 2.0f));
 
     // 
-  //  coreBatchList* 
-        pList = m_apAirObjectList[0];
+    pList = m_apAirObjectList[0];
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pSpark = (*pList->List())[i];
@@ -449,8 +413,9 @@ void cVolcanoBackground::__MoveOwn()
     }
     pList->MoveNormal();
 
-
     // adjust volume of the base sound-effect
     if(m_pBaseSound->EnableRef(this))
+    {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    }
 }

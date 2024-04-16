@@ -12,15 +12,38 @@
 // ****************************************************************
 // constructor
 cCombatText::cCombatText()noexcept
-: m_afTimer     {}
-, m_aiType      {}
-, m_apOrder     {}
-, m_iOrderNum   (0u)
-, m_fBadgeTimer (0.0f)
+: m_afTimer      {}
+, m_aiType       {}
+, m_apOrder      {}
+, m_iOrderNum    (0u)
+, m_iMarkerState (0u)
+, m_fBadgeTimer  (0.0f)
+, m_bVisible     (false)
+, m_fAlpha       (0.0f)
 {
     // create label objects
     for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    
+    
+    
+    
+    for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
+    {
+        m_aMarker[i].Construct (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+        m_aMarker[i].SetAlpha  (0.0f);
+        m_aMarker[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aMarker[i].SetRectify(false);
+    }
+    
+    for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
+    {
+        m_aMarkerBack[i].DefineTexture(0u, "effect_headlight_point.png");
+        m_aMarkerBack[i].DefineProgram("menu_single_program");
+        m_aMarkerBack[i].SetColor4    (coreVector4(0.0f,0.0f,0.0f,0.0f));
+        m_aMarkerBack[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
 
     // 
     m_BadgeIcon.DefineTexture(0u, "menu_star.png");
@@ -40,16 +63,30 @@ cCombatText::cCombatText()noexcept
 // render the combat text
 void cCombatText::Render()
 {
-    // render active label objects
-    for(coreUintW i = 0u, ie = m_iOrderNum; i < ie; ++i)
-        m_apOrder[i]->Render();
-
     // 
-    if(m_fBadgeTimer)
+    const coreVector2 vCorner = coreVector2(0.5f,0.5f) * (g_vGameResolution / Core::Graphics->GetViewResolution().xy());
+    if(!g_bTiltMode) Core::Graphics->StartScissorTest(-vCorner, vCorner);
     {
-        m_BadgeLabel.Render();
-        m_BadgeIcon .Render();
+        // render active label objects
+        for(coreUintW i = 0u, ie = m_iOrderNum; i < ie; ++i)
+            m_apOrder[i]->Render();
+        
+        
+        
+        for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
+            m_aMarkerBack[i].Render();
+        
+        for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
+            m_aMarker[i].Render();
+    
+        // 
+        if(m_fBadgeTimer)
+        {
+            m_BadgeLabel.Render();
+            m_BadgeIcon .Render();
+        }
     }
+    if(!g_bTiltMode) Core::Graphics->EndScissorTest();
 }
 
 
@@ -57,6 +94,9 @@ void cCombatText::Render()
 // move the combat text
 void cCombatText::Move()
 {
+    // 
+    const coreFloat fAlphaFull = BLENDH3(m_fAlpha) * MENU_INSIDE_ALPHA;
+
     // 
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
     {
@@ -70,8 +110,8 @@ void cCombatText::Move()
 
         // 
         const coreVector2 vPosition = coreVector2(oLabel.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - fTimer));
-        const coreVector2 vCenter   = cCombatText::__RestrictCenter(vPosition, oLabel.GetCenter());
-        const coreFloat   fAlpha    = LERPH3(0.0f, 1.0f, MIN((fTimer)        *  6.0f, 1.0f)) * MENU_INSIDE_ALPHA;
+        const coreVector2 vCenter   = cCombatText::__RestrictCenter(vPosition, coreVector2(0.0f,0.0f), oLabel.GetCenter());
+        const coreFloat   fAlpha    = LERPH3(0.0f, 1.0f, MIN((fTimer)        *  6.0f, 1.0f)) * fAlphaFull;
         const coreFloat   fScale    = LERPB (0.5f, 1.0f, MIN((1.0f - fTimer) * 10.0f, 1.0f));
 
         // update label object
@@ -81,6 +121,30 @@ void cCombatText::Move()
         oLabel.SetScale   (fScale);
         oLabel.Move();
     }
+    
+    
+    
+    for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
+    {
+        cGuiLabel&  oMarker = m_aMarker    [i];
+        cGuiObject& oBack   = m_aMarkerBack[i];
+        if(!oMarker.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+        
+        if(!HAS_BIT(m_iMarkerState, i))
+        {
+            oMarker.SetAlpha(MAX0(oMarker.GetAlpha() - 5.0f * TIME));
+            if(!oMarker.GetAlpha()) oMarker.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        }
+
+        oMarker.SetScale(LERPBR(1.2f, 1.0f, oMarker.GetAlpha()));
+        oMarker.Move();
+
+        oBack.SetAlpha(oMarker.GetAlpha());
+        oBack.Move();
+    }
+
+
+    m_iMarkerState = 0u;
 
     // 
     if(m_fBadgeTimer)
@@ -91,8 +155,8 @@ void cCombatText::Move()
         // 
         const coreVector2 vPosition  = coreVector2(m_BadgeIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fBadgeTimer));
         const coreVector2 vDirection = coreVector2::Direction(LERPB(0.5f*PI, 2.0f*PI, MIN((1.0f - m_fBadgeTimer) * 1.5f, 1.0f)));
-        const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, m_BadgeIcon.GetCenter());
-        const coreFloat   fAlpha     = LERPH3(0.0f, 1.0f, MIN(m_fBadgeTimer * 8.0f, 1.0f)) * MENU_INSIDE_ALPHA;
+        const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, coreVector2(0.0f,0.0f), m_BadgeIcon.GetCenter());
+        const coreFloat   fAlpha     = LERPH3(0.0f, 1.0f, MIN(m_fBadgeTimer * 8.0f, 1.0f)) * fAlphaFull;
 
         // 
         m_BadgeIcon.SetPosition (vPosition);
@@ -107,6 +171,11 @@ void cCombatText::Move()
         m_BadgeLabel.SetAlpha   (m_BadgeIcon.GetAlpha   ());
         m_BadgeLabel.Move();
     }
+
+    // smoothly toggle combat text visibility (after forwarding, to allow overriding)
+    if(m_bVisible)
+         m_fAlpha.UpdateMin( 2.0f, 1.0f);
+    else m_fAlpha.UpdateMax(-2.0f, 0.0f);
 }
 
 
@@ -136,6 +205,18 @@ void cCombatText::DrawShift(const coreUint32 iValue, const coreVector3 vPosition
     this->__DrawLabel(PRINT("+%u", iValue), vPosition, true, COLOR_MENU_RED, 3u);
 }
 
+void cCombatText::DrawProgress(const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition)
+{
+    // 
+    this->__DrawLabel(PRINT("%u/%u", iCurrent, iTotal), vPosition, true, COLOR_MENU_INSIDE, 4u);
+}
+
+void cCombatText::DrawText(const coreChar* pcText, const coreVector3 vPosition)
+{
+    // 
+    this->__DrawLabel(pcText, vPosition, true, COLOR_MENU_INSIDE, 5u);
+}
+
 
 // ****************************************************************
 // 
@@ -163,6 +244,30 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
     // 
     ASSERT(!m_fBadgeTimer)
     m_fBadgeTimer = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor)
+{
+    ASSERT(iIndex < COMBAT_MARKERS)
+    
+    
+    const coreVector2 vOnScreen = cCombatText::__TransformPosition(vPosition);
+    
+    m_aMarker[iIndex].SetText  (pcText);
+    m_aMarker[iIndex].SetCenter(vOnScreen);
+    m_aMarker[iIndex].SetColor4(coreVector4(vColor, 1.0f));
+    m_aMarker[iIndex].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    
+    m_aMarkerBack[iIndex].SetSize   (coreVector2(0.07f,0.07f));
+    m_aMarkerBack[iIndex].SetCenter (vOnScreen);
+    m_aMarkerBack[iIndex].SetAlpha  (1.0f);
+    m_aMarkerBack[iIndex].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    ADD_BIT(m_iMarkerState, iIndex)
 }
 
 
@@ -277,14 +382,22 @@ coreVector2 cCombatText::__TransformPosition(const coreVector3 vPosition)
     ASSERT(vFinal.IsNormalized())
 
     // 
-    return MapToAxisInv(g_pForeground->Project2D(vPosition) * coreVector2(fSide, 1.0f), vFinal);
+    return MapToAxisInv(g_pForeground->Project2D(vPosition    - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * coreVector2(fSide, 1.0f), vFinal);
 }
 
 
 // ****************************************************************
 // 
-coreVector2 cCombatText::__RestrictCenter(const coreVector2 vPosition, const coreVector2 vCenter)
+coreVector2 cCombatText::__RestrictCenter(const coreVector2 vPosition, const coreVector2 vSize, const coreVector2 vCenter)
 {
+    if(g_bTiltMode)
+    {
+        const coreVector2 vRealBorder = Core::System->GetResolution().MaxRatio() * 0.5f - (0.5f - COMBAT_BORDER);
+
+        return coreVector2(CLAMP(vCenter.x, -vRealBorder.x - vPosition.x, vRealBorder.x - vPosition.x),
+                           CLAMP(vCenter.y, -vRealBorder.y - vPosition.y, vRealBorder.y - vPosition.y));
+    }
+
     return coreVector2(CLAMP(vCenter.x, -COMBAT_BORDER - vPosition.x, COMBAT_BORDER - vPosition.x),
                        CLAMP(vCenter.y, -COMBAT_BORDER - vPosition.y, COMBAT_BORDER - vPosition.y));
 }

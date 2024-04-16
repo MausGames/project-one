@@ -10,6 +10,9 @@
 
 coreVector2     g_vGameResolution = coreVector2(0.0f,0.0f);
 coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
+coreBool        g_bTiltMode       = false;
+coreBool        g_bShiftMode      = false;
+coreBool        g_bDemoVersion    = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -48,20 +51,33 @@ void CoreApp::Init()
     Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
 
     // set listener to default values
-    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
+    Core::Audio->SetListener(LISTENER_POSITION * 0.0f, LISTENER_VELOCITY, coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
     // load configuration
     LoadConfig();
 
     // load available music files
-    g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
-    g_MusicPlayer.Shuffle();
-    g_MusicPlayer.Control()->Play();
+    g_MusicPlayer.AddMusicFolder ("data/music",              "*.ogg");
+    //g_MusicPlayer.AddMusicArchive("data/archives/pack1.cfa", "data/music/*.ogg");
+    //g_MusicPlayer.AddMusicArchive("data/archives/pack2.cfa", "data/music/*.ogg");
+    
+    //g_MusicPlayer.AddMusicFile("data/music/boss_00.ogg")
+
+    for(coreUintW i = 0u, ie = g_MusicPlayer.GetNumMusic(); i < ie; ++i)
+    {
+        coreMusic* pMusic = g_MusicPlayer.GetMusic(i);
+        pMusic->SetLoop(std::strstr(pMusic->GetPath(), "_intro") == NULL);
+    }
+    
+    g_MusicPlayer.StartThread();
 
     // init system properties
     InitResolution(Core::System->GetResolution());
     InitDirection();
     InitFramerate();
+
+    // check for demo version (game would crash otherwise anyway)
+    g_bDemoVersion = !coreData::FileExists("data/archives/pack2.cfa");
 
     // create and init main components
     cShadow::GlobalInit();
@@ -101,6 +117,7 @@ void CoreApp::Exit()
     cShadow::GlobalExit();
 
     // unload music files
+    g_MusicPlayer.KillThread();
     g_MusicPlayer.ClearMusic();
 
     // save configuration
@@ -135,7 +152,7 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Environment");
         Core::Debug->MeasureStart("Foreground");
         {
-            if(STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive() || g_pWindscreen->IsActive())
+            if((STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive() || g_pWindscreen->IsActive()) && !g_bTiltMode)
             {
                 // create foreground frame buffer
                 g_pForeground->Start();
@@ -201,6 +218,20 @@ void CoreApp::Render()
         {
             // render post-processing
             g_pPostProcessing->Render();
+
+
+            if(g_bTiltMode)
+            {
+                if(STATIC_ISVALID(g_pGame))
+                {
+                    glEnable(GL_DEPTH_TEST);
+                    {
+                        g_pGame->Render();
+                    }
+                    glDisable(GL_DEPTH_TEST);
+                }
+            }
+
         }
         Core::Debug->MeasureEnd("Post Processing");
         Core::Debug->MeasureStart("Interface");
@@ -224,6 +255,9 @@ void CoreApp::Render()
         if(g_CurConfig.Game.iMirrorMode) glEnable(GL_CULL_FACE);
     }
     glEnable(GL_DEPTH_TEST);
+
+    // override frame time (again)
+    if(TIME) c_cast<coreFloat&>(TIME) = s_fLogicalTime;
 }
 
 
@@ -273,9 +307,23 @@ void CoreApp::Move()
             // move special-effects
             g_pSpecialEffects->Move();
         }
+        
+        g_pSpecialEffects->MoveAlways();
+
+        // 
+        if(STATIC_ISVALID(g_pGame)) g_pGame->MoveAlways();
 
         // move post-processing
         g_pPostProcessing->Move();   // TODO 1: splitscreen value should not be updated outside of pause, but rest should
+        
+        
+    if(!STATIC_ISVALID(g_pGame) && !g_pSave->GetHeader().oProgress.bFirstPlay)
+    {
+        g_MusicPlayer.SelectName("menu.ogg");
+        
+        g_MusicPlayer.Control()->SetVolume(1.0f * MUSIC_VOLUME);
+        g_MusicPlayer.Control()->Play();
+    }
 
         // update the music-player
         g_MusicPlayer.Update();
@@ -404,15 +452,16 @@ static void LockFramerate()
         s_iOldPerfTime = iNewPerfTime;
     }
 
-    //coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
-    //if(fFreezeTime)
-    //{
-    //    fFreezeTime = MAX(fFreezeTime - TIME, 0.0f);
-    //    c_cast<coreFloat&>(TIME) *= 0.001f;
-    //}
-
     // override frame time
     if(TIME) c_cast<coreFloat&>(TIME) = s_fLogicalTime;
+
+    // 
+    coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
+    if(fFreezeTime)
+    {
+        fFreezeTime = MAX(fFreezeTime - TIME, 0.0f);
+        c_cast<coreFloat&>(TIME) *= 0.001f;
+    }
 }
 
 
@@ -465,14 +514,14 @@ static void DebugGame()
             sGameOptions oOptions = {};
             oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
             oOptions.iMode       = GAME_MODE_STANDARD;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : GAME_DIFFICULTY_NORMAL;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_NORMAL;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
                 oOptions.aaiSupport[i][0] = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 1u : 0u;
             }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->Activate(); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN, ARRAY_SIZE(GAME_MISSION_LIST_MAIN)) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->Activate(); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -484,24 +533,6 @@ static void DebugGame()
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) __LOAD_GAME(cErrorMission  ::ID)
             #undef __LOAD_GAME
-        }
-
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RALT), CORE_INPUT_HOLD))
-        {
-            sGameOptions oOptions = {};
-            oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
-            oOptions.iMode       = GAME_MODE_STANDARD;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : GAME_DIFFICULTY_NORMAL;
-            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
-            {
-                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
-                oOptions.aaiSupport[i][0] = 0u;
-            }
-
-            STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_DEMO)
-            g_pGame->LoadMissionID(cDemoMission::ID);
-            g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);
-            g_pPostProcessing->SetWallOpacity(1.0f);
         }
     }
 
@@ -538,7 +569,7 @@ static void DebugGame()
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cSnowBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cMossBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cDarkBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cNoBackground     ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cStomachBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
     }
 
     // set background movement
@@ -693,14 +724,16 @@ static void DebugGame()
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_PRESS))
     {
-        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
     }
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))
     {
-        if(g_pEnvironment->GetBackground()->GetID() == cDarkBackground::ID)
-        {
-            d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->Dissolve();
-        }
+        //if(g_pEnvironment->GetBackground()->GetID() == cDarkBackground::ID)
+        //{
+        //    d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->Dissolve();
+        //}
+        
+        if(STATIC_ISVALID(g_pGame)) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
     }
 }

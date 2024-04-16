@@ -12,14 +12,15 @@
 // ****************************************************************
 // constructor
 cSummaryMenu::cSummaryMenu()noexcept
-: coreMenu       (SURFACE_SUMMARY_MAX, SURFACE_SUMMARY_SOLO)
-, m_iFinalValue  (0u)
-, m_aiFinalPart  {}
-, m_aiApplyBonus {}
-, m_aiApplyMedal {}
-, m_fIntroTimer  (0.0f)
-, m_fOutroTimer  (0.0f)
-, m_eState       (SUMMARY_INTRO)
+: coreMenu        (SURFACE_SUMMARY_MAX, SURFACE_SUMMARY_MISSION_SOLO)
+, m_iFinalValue   (0u)
+, m_aiFinalPart   {}
+, m_aiApplyBonus  {}
+, m_aiApplyMedal  {}
+, m_fIntroTimer   (0.0f)
+, m_fOutroTimer   (0.0f)
+, m_fFinalSpinOld (0.0f)
+, m_eState        (SUMMARY_INTRO)
 {
     // create menu objects
     m_BackgroundMain.DefineTexture(0u, "menu_detail_04.png");
@@ -48,7 +49,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_aHeader[0].SetPosition(coreVector2(0.0f,0.39f));
     m_aHeader[0].SetColor3  (COLOR_MENU_WHITE);
 
-    m_aHeader[1].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    m_aHeader[1].Construct  (MENU_FONT_STANDARD_6, MENU_OUTLINE_SMALL);
     m_aHeader[1].SetPosition(coreVector2(0.0f, m_aHeader[0].GetPosition().y - 0.05f));
     m_aHeader[1].SetColor3  (COLOR_MENU_WHITE);
 
@@ -59,7 +60,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i)
     {
-        const coreVector2 vOffset = MISSION_SEGMENT_IS_BOSS(i) ? coreVector2(0.0f,-0.157f) : coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.065f, I_TO_F(i / 3u) * -0.075f);
+        const coreVector2 vOffset = MISSION_SEGMENT_IS_BOSS(i) ? coreVector2(0.0f,-0.16f) : coreVector2(((i < 3u) ? (I_TO_F(i) - 1.0f) : ((I_TO_F(i - 3u) - 0.5f))) * 0.075f, I_TO_F(i / 3u) * -0.075f);
 
         m_aMedalSegment[i].DefineTexture(0u, "menu_medal.png");
         m_aMedalSegment[i].DefineProgram("default_2d_program");
@@ -70,7 +71,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i)
     {
         m_aName[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-        m_aName[i].SetPosition(coreVector2(0.0f, -0.01f - 0.1f*I_TO_F(i)));
+        m_aName[i].SetPosition(coreVector2(0.0f, -0.013f - 0.1f*I_TO_F(i)));
         m_aName[i].SetColor3  (COLOR_MENU_WHITE);
 
         m_aValue[i].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
@@ -90,7 +91,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_aName[1].SetTextLanguage("BONUS_SURVIVE");
 
     m_TotalName.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-    m_TotalName.SetPosition    (coreVector2(0.0f,-0.245f));
+    m_TotalName.SetPosition    (coreVector2(0.0f,-0.242f));
     m_TotalName.SetColor3      (COLOR_MENU_WHITE);
     m_TotalName.SetTextLanguage("SUMMARY_TOTAL");
 
@@ -108,9 +109,9 @@ cSummaryMenu::cSummaryMenu()noexcept
     }
 
     // bind menu objects
-    this->BindObject(SURFACE_SUMMARY_COOP, &m_BackgroundCoop);
+    this->BindObject(SURFACE_SUMMARY_MISSION_COOP, &m_BackgroundCoop);
 
-    for(coreUintW j = SURFACE_SUMMARY_SOLO; j <= SURFACE_SUMMARY_COOP; ++j)
+    for(coreUintW j = SURFACE_SUMMARY_MISSION_SOLO; j <= SURFACE_SUMMARY_MISSION_COOP; ++j)
     {
         this->BindObject(j, &m_BackgroundMain);
         this->BindObject(j, &m_MedalMission);
@@ -127,8 +128,8 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
     {
-        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_COOP, &m_aaPart[i][j]);
-        this->BindObject(SURFACE_SUMMARY_COOP, &m_aTotalPart[j]);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_MISSION_COOP, &m_aaPart[i][j]);
+        this->BindObject(SURFACE_SUMMARY_MISSION_COOP, &m_aTotalPart[j]);
     }
 
     this->BindObject(SURFACE_SUMMARY_TITLE, &m_aTitle[0]);
@@ -160,8 +161,8 @@ void cSummaryMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_SUMMARY_SOLO:
-    case SURFACE_SUMMARY_COOP:
+    case SURFACE_SUMMARY_MISSION_SOLO:
+    case SURFACE_SUMMARY_MISSION_COOP:
         {
             // 
             constexpr coreFloat fSpinFrom = (2.5f + 0.8f * I_TO_F(MENU_SUMMARY_ENTRIES));
@@ -171,10 +172,14 @@ void cSummaryMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= MENU_SUMMARY_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
+                const eSummaryState eOld = m_eState;
+                
                 // 
                      if(m_eState      >= SUMMARY_SKIPPED) m_eState = SUMMARY_OUTRO;     // leave summary
                 else if(m_fIntroTimer >= fSpinTo)         m_eState = SUMMARY_OUTRO;
                 else if(m_fIntroTimer <  fSpinTo)         m_eState = SUMMARY_SKIPPED;   // skip blend-in
+                
+                if((eOld != SUMMARY_OUTRO) && (m_eState == SUMMARY_OUTRO)) g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
             }
 
             // 
@@ -209,42 +214,57 @@ void cSummaryMenu::Move()
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * MENU_SUMMARY_BANNER_SPEED;
 
                 // 
-                const auto nBlendMedalFunc = [&](cGuiObject* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold)
+                const auto nBlendMedalFunc = [&](cGuiObject* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold, const coreBool bMission)
                 {
-                    const coreFloat fFadeIn = CLAMP((fBlendIn - fThreshold) * 10.0f, 0.0f, 1.0f);
+                    const coreFloat        fFadeIn     = CLAMP01((fBlendIn - fThreshold) * 10.0f);
+                    const coreObjectEnable eEnabledOld = pMedal->GetEnabled();
+                    const coreObjectEnable eEnabledNew = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
                     // 
-                    pMedal->SetSize (coreVector2(fScale, fScale) * LERP(1.5f, 1.0f, fFadeIn));
-                    pMedal->SetAlpha(MIN(fFadeIn, fBlendOut));
+                    pMedal->SetSize   (coreVector2(fScale, fScale) * LERP(1.5f, 1.0f, fFadeIn));
+                    pMedal->SetAlpha  (MIN(fFadeIn, fBlendOut));
+                    pMedal->SetEnabled(eEnabledNew);
 
                     // 
                     pMedal->Move();
+
+                    // 
+                    if(!eEnabledOld && eEnabledNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, bMission ? SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]) : SOUND_SUMMARY_MEDAL);
                 };
-                nBlendMedalFunc(&m_MedalMission, 0.1f, 5.5f);
-                for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) nBlendMedalFunc(&m_aMedalSegment[i], MISSION_SEGMENT_IS_BOSS(i) ? 0.085f : 0.07f, 0.8f + 0.1f * I_TO_F(i));
+                nBlendMedalFunc(&m_MedalMission, 0.1f, 5.5f, true);
+                for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) nBlendMedalFunc(&m_aMedalSegment[i], MISSION_SEGMENT_IS_BOSS(i) ? 0.085f : 0.07f, 0.8f + 0.1f * I_TO_F(i), false);
 
                 // 
                 const auto nBlendLabelFunc = [&](cGuiLabel* OUTPUT pName, cGuiLabel* OUTPUT pValue, cGuiLabel* OUTPUT pPart, const coreFloat fThreshold)
                 {
-                    const coreObjectEnable eEnabled = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+                    const coreObjectEnable eEnabledOld = pName->GetEnabled();
+                    const coreObjectEnable eEnabledNew = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
                     // blend-in
-                    pName ->SetEnabled(eEnabled);
-                    pValue->SetEnabled(eEnabled);
-                    for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) pPart[i].SetEnabled(eEnabled);
+                    pName ->SetEnabled(eEnabledNew);
+                    pValue->SetEnabled(eEnabledNew);
+                    for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) pPart[i].SetEnabled(eEnabledNew);
 
                     // blend-out
                     pName ->SetAlpha(fBlendOut);
                     pValue->SetAlpha(fBlendOut);
                     for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) pPart[i].SetAlpha(fBlendOut);
+
+                    // 
+                    if(!eEnabledOld && eEnabledNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_SUMMARY_TEXT);
                 };
                 for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) nBlendLabelFunc(&m_aName[i], &m_aValue[i], m_aaPart[i], 2.5f + 0.8f * I_TO_F(i));
                 nBlendLabelFunc(&m_TotalName, &m_TotalValue, m_aTotalPart, fSpinFrom);
 
                 // spin-up final score value
-                const coreFloat fFinalSpin = CLAMP((fBlendIn - fSpinFrom) * (1.0f/1.35f), 0.0f, 1.0f);
+                const coreFloat fFinalSpin = CLAMP01((fBlendIn - fSpinFrom) * (1.0f/1.35f));
                 m_TotalValue.SetText(PRINT("%.0f", I_TO_F(m_iFinalValue) * fFinalSpin));
                 for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) m_aTotalPart[i].SetText(PRINT("%.0f", I_TO_F(m_aiFinalPart[i]) * fFinalSpin));
+
+                // 
+                const coreFloat fTickStep = 1.35f * RCP(ROUND(RCP(20.0f * TIME)) * TIME);
+                if(F_TO_UI(m_fFinalSpinOld * fTickStep) < F_TO_UI(fFinalSpin * fTickStep)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_SUMMARY_SCORE);
+                m_fFinalSpinOld = fFinalSpin;
 
                 // calculate visibility and animation value
                 const coreFloat fVisibility = MAX(MIN(m_fIntroTimer, MENU_SUMMARY_BANNER_SPEED_REV - m_fOutroTimer), 0.0f) * MENU_SUMMARY_BANNER_SPEED;
@@ -278,9 +298,20 @@ void cSummaryMenu::Move()
         }
         break;
 
-    case SURFACE_SUMMARY_BEGIN:
+    case SURFACE_SUMMARY_SEGMENT_SOLO:
+    case SURFACE_SUMMARY_SEGMENT_COOP:
+        {
+            // 
+            m_iStatus = 1;
+        }
+        break;
+
+    case SURFACE_SUMMARY_BEGINNING:
     case SURFACE_SUMMARY_TITLE:
         {
+            // 
+            const coreFloat fOldTime = m_fIntroTimer;
+
             // 
             m_fIntroTimer.Update(1.0f);
 
@@ -292,15 +323,18 @@ void cSummaryMenu::Move()
                 // 
                 if(g_pSave->GetHeader().oProgress.bFirstPlay)   // TODO 1: replace
                 {
-                    if(m_fIntroTimer >= 12.0f)
+                    if(InBetween(12.0f, fOldTime, m_fIntroTimer))
                     {
                         // 
-                        this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.7f);
+                        this->ChangeSurface(SURFACE_SUMMARY_BEGINNING, 0.7f);
+
+                        // 
+                        g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
                     }
-                    else if(m_fIntroTimer >= 6.0f)
+                    else if(InBetween(6.0f, fOldTime, m_fIntroTimer))
                     {
                         // 
-                        g_pMenu->ShiftSurface(this, SURFACE_SUMMARY_TITLE, 0.5f);
+                        g_pMenu->ShiftSurface(this, SURFACE_SUMMARY_TITLE, 0.5f, 0u);
                     }
                 }
 
@@ -313,15 +347,10 @@ void cSummaryMenu::Move()
                     m_eState = SUMMARY_OUTRO;
 
                     // 
-                    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+                    //g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
 
                     // 
-                    g_pPostProcessing->SetSaturationAll(1.0f);
-                    g_pPostProcessing->SetValueAll     (1.0f);
-
-                    // prevent flickering (# render function)
-                    g_pGlow->Clear();
-                    g_pSpecialEffects->ClearAll();
+                    cMenu::ClearScreen();
                 }
             }
 
@@ -335,6 +364,53 @@ void cSummaryMenu::Move()
                     m_aTitle[1].SetPosition(coreVector2(fDiff * 0.5f, m_aTitle[1].GetPosition().y));
                 });
             });
+        }
+        break;
+
+    case SURFACE_SUMMARY_ENDING_NORMAL:
+        {
+            // 
+            m_fIntroTimer.Update(1.0f);
+
+            // 
+            g_pPostProcessing->SetValueAll(1.0f - STEPH3(3.0f, 5.0f, m_fIntroTimer));
+
+            if(m_fIntroTimer >= 5.0f)
+            {
+                // 
+                m_iStatus = 2;
+
+                // 
+                m_eState = SUMMARY_OUTRO;
+
+                // 
+                g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+
+                // 
+                cMenu::ClearScreen();
+            }
+        }
+        break;
+
+    case SURFACE_SUMMARY_ENDING_SECRET:
+        {
+            // 
+            m_fIntroTimer.Update(1.0f);
+
+            if(m_fIntroTimer >= 1.0f)
+            {
+                // 
+                m_iStatus = 2;
+
+                // 
+                m_eState = SUMMARY_OUTRO;
+
+                // 
+                g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+
+                // 
+                cMenu::ClearScreen();
+            }
         }
         break;
 
@@ -352,22 +428,10 @@ void cSummaryMenu::ShowMission()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    m_iFinalValue = 0u;
-    std::memset(m_aiFinalPart,  0, sizeof(m_aiFinalPart));
-    std::memset(m_aiApplyBonus, 0, sizeof(m_aiApplyBonus));
-    std::memset(m_aiApplyMedal, 0, sizeof(m_aiApplyMedal));
-    m_fIntroTimer = 0.0f;
-    m_fOutroTimer = 0.0f;
-    m_eState      = SUMMARY_INTRO;
+    this->__ResetState();
 
     // 
-    m_BackgroundMain.SetSize(coreVector2(0.0f,0.0f));
-    m_BackgroundMain.Move();
-    m_BackgroundCoop.SetSize(coreVector2(0.0f,0.0f));
-    m_BackgroundCoop.Move();
-
-    // 
-    m_aHeader[0].SetText(PRINT("%s %d", Core::Language->GetString("MISSION"), g_pGame->GetCurMission()->GetID()));
+    m_aHeader[0].SetText(PRINT("%s %zu", Core::Language->GetString("MISSION"), g_pGame->GetCurMissionIndex()));
     m_aHeader[1].SetText(g_pGame->GetCurMission()->GetName());
 
     // 
@@ -432,8 +496,7 @@ void cSummaryMenu::ShowMission()
     m_aValue[1].SetText(coreData::ToChars(iBonusSurvive * iModifier));
 
     // 
-    this->SetAlpha(0.0f);
-    this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_COOP : SURFACE_SUMMARY_SOLO, 0.0f);
+    this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_MISSION_COOP : SURFACE_SUMMARY_MISSION_SOLO, 0.0f);
 }
 
 
@@ -443,29 +506,55 @@ void cSummaryMenu::ShowSegment()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
-    // TODO 1: implement
-    WARN_IF(true) {}
+    // 
+    this->__ResetState();
+    
+    // TODO 1: implement, restart, exit, show some data NEW RECORD, bla
+
+    // 
+    this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_SEGMENT_COOP : SURFACE_SUMMARY_SEGMENT_SOLO, 0.0f);
 }
 
 
 // ****************************************************************
 // 
-void cSummaryMenu::ShowBegin()
+void cSummaryMenu::ShowBeginning()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    m_iFinalValue = 0u;
-    std::memset(m_aiFinalPart,  0, sizeof(m_aiFinalPart));
-    std::memset(m_aiApplyBonus, 0, sizeof(m_aiApplyBonus));
-    std::memset(m_aiApplyMedal, 0, sizeof(m_aiApplyMedal));
-    m_fIntroTimer = 0.0f;
-    m_fOutroTimer = 0.0f;
-    m_eState      = SUMMARY_INTRO;
+    this->__ResetState();
 
     // 
-    this->SetAlpha(0.0f);
-    this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.0f);
+    this->ChangeSurface(SURFACE_SUMMARY_BEGINNING, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::ShowEndingNormal()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    // 
+    this->__ResetState();
+
+    // 
+    this->ChangeSurface(SURFACE_SUMMARY_ENDING_NORMAL, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::ShowEndingSecret()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    // 
+    this->__ResetState();
+
+    // 
+    this->ChangeSurface(SURFACE_SUMMARY_ENDING_SECRET, 0.0f);
 }
 
 
@@ -495,4 +584,28 @@ void cSummaryMenu::__SetMedalSegment(const coreUintW iIndex, const coreUint8 iMe
     // 
     ASSERT(iIndex < MENU_SUMMARY_MEDALS)
     cMenu::ApplyMedalTexture(&m_aMedalSegment[iIndex], iMedal, MISSION_SEGMENT_IS_BOSS(iIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::__ResetState()
+{
+    // 
+    m_iFinalValue = 0u;
+    std::memset(m_aiFinalPart,  0, sizeof(m_aiFinalPart));
+    std::memset(m_aiApplyBonus, 0, sizeof(m_aiApplyBonus));
+    std::memset(m_aiApplyMedal, 0, sizeof(m_aiApplyMedal));
+    m_fIntroTimer = 0.0f;
+    m_fOutroTimer = 0.0f;
+    m_eState      = SUMMARY_INTRO;
+
+    // 
+    m_BackgroundMain.SetSize(coreVector2(0.0f,0.0f));
+    m_BackgroundMain.Move();
+    m_BackgroundCoop.SetSize(coreVector2(0.0f,0.0f));
+    m_BackgroundCoop.Move();
+
+    // 
+    this->SetAlpha(0.0f);
 }

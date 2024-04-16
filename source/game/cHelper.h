@@ -26,6 +26,8 @@ class cHelper final : public cShip
 private:
     coreUint8 m_iElement;              // 
 
+    cCustomEnemy* m_pShield;           // (dynamic) 
+
     static coreFlow    s_fAnimation;   // 
     static coreVector2 s_vDirection;   // 
 
@@ -46,6 +48,10 @@ public:
     // control life and death
     void Resurrect();
     void Kill     (const coreBool bAnimated);
+
+    // 
+    void EnableShield();
+    void DisableShield(const coreBool bAnimated);
 
     // 
     static void GlobalUpdate();

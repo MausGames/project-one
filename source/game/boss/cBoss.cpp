@@ -108,7 +108,7 @@ void cBoss::_StartBoss()
 
 // ****************************************************************
 // 
-void cBoss::_EndBoss(const coreBool bAnimated)
+void cBoss::_EndBoss()
 {
     // 
     g_pGame->GetCurMission()->DeactivateBoss();
@@ -117,6 +117,20 @@ void cBoss::_EndBoss(const coreBool bAnimated)
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         pPlayer->GetScoreTable()->ResetOverride();
+    });
+
+    g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        if(pPlayer->HasStatus(PLAYER_STATUS_DEAD))
+        {
+            pPlayer->Resurrect();
+
+            pPlayer->SetCurHealth(1u);
+            if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+            {
+                pPlayer->SetCurShield(5u);
+            }
+        }
     });
 }
 
@@ -134,6 +148,28 @@ void cBoss::_UpdateBoss()
     {
         pPlayer->GetScoreTable()->SetOverride(1.0f - this->GetCurHealthPct());
     });
+    
+    if(InBetween(INTERFACE_BANNER_DURATION_ALERT, m_fLifeTimeBefore, m_fLifeTime))
+    {
+        const coreChar* pcName = this->GetMusicName();
+        if(pcName && pcName[0])
+        {
+            g_MusicPlayer.SelectName(pcName);
+            g_MusicPlayer.Control()->Play();
+        }
+    }
+}
+
+
+// ****************************************************************
+// 
+void cBoss::_ResurrectBoss()
+{
+    // 
+    g_pGame->GetInterface()->ShowAlert();
+
+    // 
+    g_pGame->FadeMusic(0.3f);
 }
 
 

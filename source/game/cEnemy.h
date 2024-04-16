@@ -16,6 +16,11 @@
 // TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 // TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
 // TODO 4: move parent-child system to custom-enemy or boss-enemy, if not elsewhere required
+// TODO 3: scripted enemy rotation should use DefaultRotate/DefaultOrientate instead of manually using coreVector2::Direction + SetDirection/SetOrientation, to utilize the rota cache
+// TODO 1: completely remove PlayerSide aiming (for coop)
+// TODO 3: normale gruppen-gegner mit TOP haben doppelte outline (einmal im batch, und einmal durch TOP)
+// TODO 3 instancing for special effects, can be done with shield manager, or new system in enemy manager
+// TODO 3: warrior model eiert etwas beim drehen um die Z-achse (siehe secret enemies bei mimic-wave)
 
 
 // ****************************************************************
@@ -24,7 +29,7 @@
 #define ENEMY_SET_COUNT   (16u)     // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
-enum eEnemyStatus : coreUint16
+enum eEnemyStatus : coreUint32
 {
     ENEMY_STATUS_DEAD         = 0x0001u,   // completely removed from the game
     ENEMY_STATUS_ASSIGNED     = 0x0002u,   // enemy is currently assigned to something
@@ -42,7 +47,10 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_GHOST_BULLET = 0x2000u,   // 
     ENEMY_STATUS_GHOST        = ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_GHOST_BULLET,
     ENEMY_STATUS_HIDDEN       = 0x4000u,   // 
-    ENEMY_STATUS_WORTHLESS    = 0x8000u    // TODO 1: should be changed to explicit score value ?
+    ENEMY_STATUS_WORTHLESS    = 0x8000u,   // TODO 1: should be changed to explicit score value in configure (boss?) + setter ?
+    ENEMY_STATUS_LIGHT = 0x10000u,
+    ENEMY_STATUS_SECRET = 0x20000u
+   // ENEMY_STATUS_UNDER = 0x20000u
 };
 
     //ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### geschosse werden reflektiert (bubble)  
@@ -60,9 +68,12 @@ protected:
 
     coreUint8 m_iLastAttacker;     // 
     coreBool  m_bWasDamaged;       // 
+    coreUint16 m_iScore;
     coreInt32 m_iDamageForwarded;   // 
 
     coreSet<cEnemy*> m_apMember;   // 
+
+    static coreUint8 s_iExhaustCount;   // 
 
 
 public:
@@ -74,7 +85,7 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure(const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted = false);
+    void Configure(const coreInt32 iHealth, const coreUint16 iScore, const coreVector3 vColor, const coreBool bInverted = false, const coreBool bIgnored = false);
 
     // render and move the enemy
     void Render()final;
@@ -109,6 +120,8 @@ public:
     void ChangeToBottom();
     void ChangeToTop   ();
     void ChangeToNormal();
+    
+    inline coreUintW GetOutlineStyle()const {return HAS_FLAG(m_iStatus, ENEMY_STATUS_LIGHT) ? OUTLINE_STYLE_LIGHT : OUTLINE_STYLE_FULL;}
 
     // 
     cPlayer*    LastAttacker        ()const;
@@ -120,8 +133,9 @@ public:
     coreVector2 AimAtPlayerDual     (const coreUintW iIndex)const;
 
     // get object properties
-    inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
-    inline const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
+    inline  const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
+    inline  const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
+    virtual eSoundEffect     GetExplosionSound()const {return SOUND_ENEMY_EXPLOSION_01;}
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}
@@ -130,6 +144,9 @@ public:
 protected:
     // 
     void _SetParent(cEnemy* pParent);
+
+    // 
+    static coreFloat _GetExhaustOffset();
 
 
 private:
@@ -229,7 +246,7 @@ public:
     // 
     template <typename T> void AllocateEnemies(const coreUint8 iNumEnemies);
     void FreeEnemies();
-    void ClearEnemies(const coreBool bAnimated);
+    void ClearEnemies(const coreBool bAnimated)const;
 
     // 
     cEnemy* FindEnemy   (const coreVector2 vPosition)const;
@@ -270,11 +287,31 @@ public:
 // scout enemy class
 class cScoutEnemy final : public cEnemy
 {
+private:
+    coreObject3D m_Exhaust;   // 
+
+    coreFlow m_fAnimation;    // 
+
+
 public:
     cScoutEnemy()noexcept;
 
     ENABLE_COPY(cScoutEnemy)
     ASSIGN_ID(1, "Scout")
+
+    // 
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAnimation = cEnemy::_GetExhaustOffset();}
+
+    // get object properties
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_09;}
+
+
+private:
+    // execute own routines
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -282,11 +319,31 @@ public:
 // warrior enemy class
 class cWarriorEnemy final : public cEnemy
 {
+private:
+    coreObject3D m_aExhaust[2];   // 
+
+    coreFlow m_fAnimation;        // 
+
+
 public:
     cWarriorEnemy()noexcept;
 
     ENABLE_COPY(cWarriorEnemy)
     ASSIGN_ID(2, "Warrior")
+
+    // 
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAnimation = cEnemy::_GetExhaustOffset();}
+
+    // get object properties
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_02;}
+
+
+private:
+    // execute own routines
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -295,7 +352,10 @@ public:
 class cStarEnemy final : public cEnemy
 {
 private:
-    coreFlow m_fAngle;   // rotation angle
+    coreObject3D m_Exhaust;   // 
+
+    coreFlow m_fAngle;        // rotation angle
+    coreFlow m_fAnimation;    // 
 
 
 public:
@@ -305,18 +365,22 @@ public:
     ASSIGN_ID(3, "Star")
 
     // 
-    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f; m_fAnimation = cEnemy::_GetExhaustOffset();}
 
     // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
 
-    // 
-    inline const coreFloat& GetAngle()const {return m_fAngle;}
+    // get object properties
+    inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
+    inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_10;}
 
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -325,7 +389,10 @@ private:
 class cArrowEnemy final : public cEnemy
 {
 private:
-    coreFlow m_fAngle;   // rotation angle
+    coreObject3D m_Exhaust;   // 
+
+    coreFlow m_fAngle;        // rotation angle
+    coreFlow m_fAnimation;    // 
 
 
 public:
@@ -335,18 +402,22 @@ public:
     ASSIGN_ID(4, "Arrow")
 
     // 
-    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f; m_fAnimation = cEnemy::_GetExhaustOffset();}
 
     // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
 
-    // 
-    inline const coreFloat& GetAngle()const {return m_fAngle;}
+    // get object properties
+    inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
+    inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_04;}
 
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -354,11 +425,31 @@ private:
 // miner enemy class
 class cMinerEnemy final : public cEnemy
 {
+private:
+    coreObject3D m_Exhaust;   // 
+
+    coreFlow m_fAnimation;    // 
+
+
 public:
     cMinerEnemy()noexcept;
 
     ENABLE_COPY(cMinerEnemy)
     ASSIGN_ID(5, "Miner")
+
+    // 
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAnimation = cEnemy::_GetExhaustOffset();}
+
+    // get object properties
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_04;}
+
+
+private:
+    // execute own routines
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -367,7 +458,10 @@ public:
 class cFreezerEnemy final : public cEnemy
 {
 private:
-    coreFlow m_fAngle;   // rotation angle
+    coreObject3D m_Exhaust;   // 
+
+    coreFlow m_fAngle;        // rotation angle
+    coreFlow m_fAnimation;    // 
 
 
 public:
@@ -377,18 +471,22 @@ public:
     ASSIGN_ID(6, "Freezer")
 
     // 
-    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f; m_fAnimation = cEnemy::_GetExhaustOffset();}
 
     // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
 
-    // 
-    inline const coreFloat& GetAngle()const {return m_fAngle;}
+    // get object properties
+    inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
+    inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_06;}
 
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -397,7 +495,10 @@ private:
 class cCinderEnemy final : public cEnemy
 {
 private:
-    coreFlow m_fAngle;   // rotation angle
+    coreObject3D m_Exhaust;   // 
+
+    coreFlow m_fAngle;        // rotation angle
+    coreFlow m_fAnimation;    // 
 
 
 public:
@@ -407,18 +508,22 @@ public:
     ASSIGN_ID(7, "Cinder")
 
     // 
-    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f; m_fAnimation = cEnemy::_GetExhaustOffset();}
 
     // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
 
-    // 
-    inline const coreFloat& GetAngle()const {return m_fAngle;}
+    // get object properties
+    inline const coreFloat& GetAngle         ()const       {return m_fAngle;}
+    inline eSoundEffect     GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_07;}
 
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -431,6 +536,9 @@ public:
 
     ENABLE_COPY(cMeteorEnemy)
     ASSIGN_ID(8, "Meteor")
+
+    // get object properties
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_07;}
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_blink_inst_program";}
@@ -502,7 +610,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK_NUM, 1u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK_NUM, 1u, GL_FLOAT, sizeof(coreFloat), false, 0u, 0u);
     },
     [](coreByte* OUTPUT pData, const coreObject3D* pEnemy)
     {

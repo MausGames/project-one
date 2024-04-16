@@ -13,6 +13,7 @@
 // constructor
 cGeluMission::cGeluMission()noexcept
 : m_Fang          (GELU_FANGS)
+, m_iFangActive   (0u)
 , m_Way           (GELU_WAYS)
 , m_WayArrow      (GELU_WAYS)
 , m_iWayActive    (0u)
@@ -159,6 +160,10 @@ void cGeluMission::EnableFang(const coreUintW iIndex)
     WARN_IF(oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
+    ADD_BIT(m_iFangActive, iIndex)
+    STATIC_ASSERT(GELU_FANGS <= sizeof(m_iFangActive)*8u)
+
+    // 
     m_avOldPos[iIndex] = coreVector2(0.0f,0.0f);
     STATIC_ASSERT(GELU_FANGS <= GELU_POSITIONS)
 
@@ -177,6 +182,9 @@ void cGeluMission::DisableFang(const coreUintW iIndex, const coreBool bAnimated)
 
     // 
     if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    REMOVE_BIT(m_iFangActive, iIndex)
 
     // 
     oFang.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -228,6 +236,13 @@ void cGeluMission::DisableWay(const coreUintW iIndex, const coreBool bAnimated)
 
     // 
     REMOVE_BIT(m_iWayActive, iIndex)
+    if(!m_iWayActive)
+    {
+        g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+        });
+    }
 
     // 
     if(!bAnimated)
@@ -336,7 +351,7 @@ void cGeluMission::__RenderOwnBottom()
     DEPTH_PUSH
 
     // 
-    m_Orb .Render();
+    m_Orb.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Orb);
 }
 
@@ -369,117 +384,9 @@ void cGeluMission::__MoveOwnAfter()
 {
     // 
     m_fAnimation.UpdateMod(0.2f, 10.0f);
-    
-    
-    
-    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
-    {
-        cLodObject& oFang = m_aFangRaw[i];
-        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        oFang.SetPosition(coreVector3(oFang.GetPosition().xy(), -0.1f));   // make sure player can be inside pyramid geometry
-        // needs to be before collision handling
-    }
-    
-    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        coreVector2 vNewPos = pPlayer->GetPosition().xy();
-
-        const coreVector2 vFangRange = m_aFangRaw[0].GetCollisionRange().xy();
-        if(vFangRange.IsNull()) return;
-
-        coreFloat afDistance[4] = {};
-        coreUint8 iHitIndex     = 255u;
-
-        for(coreUintW j = 0u; j < GELU_FANGS; ++j)
-        {
-            const cLodObject& oFang = m_aFangRaw[j];
-            if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            const coreVector2 vFangPos = oFang.GetPosition().xy();
-            const coreVector2 vShift   = (pPlayer->GetOldPos() - vFangPos) / vFangRange * 0.02f;
-
-            coreVector2 vFangMove = vFangPos - m_avOldPos[j];
-            if(vFangMove.LengthSq() > vFangRange.LengthSq()) vFangMove = coreVector2(0.0f,0.0f);   // handle teleportation
-
-            const coreVector2 vRayPos = pPlayer->GetOldPos() + vFangMove + vShift;
-
-            for(coreUintW k = 0u; k < 4u; ++k)
-            {
-                const coreVector2 vRayDir = StepRotated90(k);
-
-                coreFloat fHitDistance = 0.0f;
-                coreUint8 iHitCount    = 1u;
-                if(Core::Manager::Object->TestCollision(&oFang, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), &fHitDistance, &iHitCount))
-                {
-                    if(iHitCount & 0x01u)
-                    {
-                        iHitIndex = j;
-
-                        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vFangPos;
-                        if(IsHorizontal(vDiff)) vNewPos.x = vFangPos.x + SIGN(vDiff.x) * vFangRange.x;
-                                           else vNewPos.y = vFangPos.y + SIGN(vDiff.y) * vFangRange.y;
-
-                        //ASSERT(k == 0u)  triggered while moving within blocks, maybe edge case when moving along the tilted edge
-                        break;
-                    }
-                    else
-                    {
-                        const coreFloat fNewDistance = fHitDistance + coreVector2::Dot(vFangMove + vShift - pPlayer->GetMove(), vRayDir) - CORE_MATH_PRECISION;
-                        if(fNewDistance < afDistance[k])
-                        {
-                            afDistance[k] = fNewDistance;
-                        }
-                    }
-                }
-            }
-        }
-
-        coreBool bIntersect = false;
-        coreBool bCrush     = false;
-        for(coreUintW j = 0u; j < GELU_FANGS; ++j)
-        {
-            const cLodObject& oFang = m_aFangRaw[j];
-            if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            if(InBetween(pPlayer->GetPosition().xy(), oFang.GetPosition().xy() - vFangRange, oFang.GetPosition().xy() + vFangRange))
-            {
-                bIntersect = true;
-                if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
-            }
-        }
-
-        if(pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) m_abCrushImmune[i] = true;
-
-        if(bIntersect && !m_abCrushImmune[i])
-        {
-            vNewPos.y += afDistance[0];
-            vNewPos.x -= afDistance[1];
-            vNewPos.y -= afDistance[2];
-            vNewPos.x += afDistance[3];
-
-            pPlayer->SetPosition(coreVector3(vNewPos, 0.0f));
-
-            if(bCrush || !InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
-            {
-                if(pPlayer->IsNormal())
-                {
-                    pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
-                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
-                }
-            }
-        }
-        else if(!bIntersect && m_abCrushImmune[i])
-        {
-            if(pPlayer->IsNormal() || !HAS_BIT(m_iCrushState, 1u))
-            {
-                m_abCrushImmune[i] = false;
-            }
-        }
-    });
-    
-    
-    
+    // 
+    this->__UpdateCollisionFang();
 
     // 
     for(coreUintW i = 0u; i < GELU_FANGS; ++i)
@@ -489,20 +396,11 @@ void cGeluMission::__MoveOwnAfter()
 
         // 
         m_avOldPos[i] = oFang.GetPosition().xy();
-    }
 
-    // 
-    m_Fang.MoveNormal();
-
-
-    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
-    {
-        cLodObject& oFang = m_aFangRaw[i];
-        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
+        // 
         const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
         {
-            if(InBetween(pBullet->GetPosition().xy(), FOREGROUND_AREA * -1.05f, FOREGROUND_AREA * 1.05f))
+            if(g_pForeground->IsVisiblePoint(pBullet->GetPosition().xy(), 1.05f))
             {
                 const coreVector2 vDiff = pBullet->GetPosition().xy() - oFang.GetPosition().xy();
 
@@ -513,108 +411,14 @@ void cGeluMission::__MoveOwnAfter()
                 }
             }
         };
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletFangCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
+        g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletFangCollFunc);
     }
-    
-    
-    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        coreVector2 vNewPos = pPlayer->GetPosition().xy();
 
-        const coreVector2 vWayRange = (*m_Way.List())[0]->GetCollisionRange().xy();
-        if(vWayRange.IsNull()) return;
+    // 
+    m_Fang.MoveNormal();
 
-        coreFloat afDistance[4] = {};
-        coreUint8 iHitIndex     = 255u;
-
-        for(coreUintW j = 0u; j < GELU_WAYS; ++j)
-        {
-            const coreObject3D* pWay = (*m_Way.List())[j];
-            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j)) continue;
-
-            const coreVector2 vFangPos = pWay->GetPosition().xy();
-            const coreVector2 vShift   = (pPlayer->GetOldPos() - vFangPos) / vWayRange * 0.02f;
-
-            coreVector2 vFangMove = vFangPos - m_avOldPos[j];
-            if(vFangMove.LengthSq() > vWayRange.LengthSq()) vFangMove = coreVector2(0.0f,0.0f);   // handle teleportation
-
-            const coreVector2 vRayPos = pPlayer->GetOldPos() + vFangMove + vShift;
-
-            for(coreUintW k = 0u; k < 4u; ++k)
-            {
-                const coreVector2 vRayDir = StepRotated90(k);
-
-                coreFloat fHitDistance = 0.0f;
-                coreUint8 iHitCount    = 1u;
-                if(Core::Manager::Object->TestCollision(pWay, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), &fHitDistance, &iHitCount))
-                {
-                    if(iHitCount & 0x01u)
-                    {
-                        iHitIndex = j;
-
-                        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vFangPos;
-                        if(IsHorizontal(vDiff)) vNewPos.x = vFangPos.x + SIGN(vDiff.x) * vWayRange.x;
-                                           else vNewPos.y = vFangPos.y + SIGN(vDiff.y) * vWayRange.y;
-
-                        // ASSERT(k == 0u) same as for fangs
-                        break;
-                    }
-                    else
-                    {
-                        const coreFloat fNewDistance = fHitDistance + coreVector2::Dot(vFangMove + vShift - pPlayer->GetMove(), vRayDir) - CORE_MATH_PRECISION;
-                        if(fNewDistance < afDistance[k])
-                        {
-                            afDistance[k] = fNewDistance;
-                        }
-                    }
-                }
-            }
-        }
-
-        coreBool bIntersect = false;
-        coreBool bCrush     = false;
-        for(coreUintW j = 0u; j < GELU_WAYS; ++j)
-        {
-            const coreObject3D* pWay = (*m_Way.List())[j];
-            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j)) continue;
-
-            if(InBetween(pPlayer->GetPosition().xy(), pWay->GetPosition().xy() - vWayRange, pWay->GetPosition().xy() + vWayRange))
-            {
-                bIntersect = true;
-                if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
-            }
-        }
-
-        if(pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) m_abCrushImmune[i] = true;
-
-        if(bIntersect && !m_abCrushImmune[i])
-        {
-            vNewPos.y += afDistance[0];
-            vNewPos.x -= afDistance[1];
-            vNewPos.y -= afDistance[2];
-            vNewPos.x += afDistance[3];
-
-            pPlayer->SetPosition(coreVector3(vNewPos, 0.0f));
-
-            if(bCrush || !InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
-            {
-                if(pPlayer->IsNormal())
-                {
-                    pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
-                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
-                }
-            }
-        }
-        else if(!bIntersect && m_abCrushImmune[i])
-        {
-            if(pPlayer->IsNormal() || !HAS_BIT(m_iCrushState, 1u))
-            {
-                m_abCrushImmune[i] = false;
-            }
-        }
-    });
-    
-    
+    // 
+    this->__UpdateCollisionWay();
 
     // 
     for(coreUintW i = 0u; i < GELU_WAYS; ++i)
@@ -653,68 +457,69 @@ void cGeluMission::__MoveOwnAfter()
         pArrow->SetDirection(pWay->GetDirection());
         pArrow->SetAlpha    (bVisible ? 1.0f : 0.4f);
         pArrow->SetTexOffset(pWay->GetTexOffset());
-        
-        
+
         // 
         m_avOldPos[i] = pWay->GetPosition().xy();
+
+        // 
+        if(HAS_BIT(m_iWayActive, i))
+        {
+            const cPlayer* pPlayer = g_pGame->FindPlayerSide(pWay->GetPosition().xy());
+
+            if(coreVector2::Dot(pPlayer->GetDirection().xy(), pWay->GetDirection().xy()) > 0.9f)
+            {
+                REMOVE_BIT(m_iWayVisible, i)
+            }
+            else
+            {
+                ADD_BIT(m_iWayVisible, i)
+
+                const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet)
+                {
+                    const coreVector2 vDiff = pBullet->GetPosition().xy() - pWay->GetPosition().xy();
+
+                    if(InBetween(vDiff, -pWay->GetCollisionRange().xy(), pWay->GetCollisionRange().xy()))
+                        pBullet->Deactivate(true);
+                };
+                g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletWayCollFunc);
+                g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletWayCollFunc);
+            }
+        }
     }
 
     // 
     m_Way     .MoveNormal();
     m_WayArrow.MoveNormal();
-    
-    
-    for(coreUintW i = 0u; i < GELU_WAYS; ++i)
+
+    if(m_iWayActive)
     {
-        const coreObject3D* pWay = (*m_Way.List())[i];
-        if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, i)) continue;
-
-        if(coreVector2::Dot(g_pGame->FindPlayerSide(pWay->GetPosition().xy())->GetDirection().xy(), pWay->GetDirection().xy()) > 0.9f)
+        // 
+        g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)   // copied from group "force rotation"
         {
-            REMOVE_BIT(m_iWayVisible, i)
-        }
-        else
-        {
-            ADD_BIT(m_iWayVisible, i)
+            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
 
-            const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet)
+            if(!pPlayer->IsRolling())
             {
-                const coreVector2 vDiff = pBullet->GetPosition().xy() - pWay->GetPosition().xy();
+                const coreVector2 vPos = pPlayer->GetPosition().xy();
 
-                if(InBetween(vDiff, -pWay->GetCollisionRange().xy(), pWay->GetCollisionRange().xy()))
-                    pBullet->Deactivate(true);
-            };
-            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletWayCollFunc);
-            g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletWayCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
-        }
-    }
-
-    // 
-    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)   // copied from group "force rotation"
-    {
-        pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
-
-        if(!pPlayer->IsRolling())
-        {
-            const coreVector2 vPos = pPlayer->GetPosition().xy();
-
-            for(coreUintW j = 0u; j < GELU_WAYS; ++j)
-            {
-                const coreObject3D* pWay = (*m_Way.List())[i];
-                if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, i) || pWay->GetAlpha()) continue;
-
-                const coreVector2 vSize = pWay->GetCollisionRange().xy() * 1.1f;   // TODO 1: otherwise you can rotate when between blocks and take damage
-                const coreVector2 vDiff = MapToAxis(pWay->GetPosition().xy() - vPos, pWay->GetDirection().xy());
-
-                if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
+                for(coreUintW j = 0u; j < GELU_WAYS; ++j)
                 {
-                    pPlayer->SetDirection(pWay->GetDirection());
-                    pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
-                    break;
+                    const coreObject3D* pWay = (*m_Way.List())[j];
+                    if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, j) || pWay->GetAlpha()) continue;
+
+                    const coreVector2 vSize = pWay->GetCollisionRange().xy() * 1.1f;   // otherwise you can rotate when between blocks and take damage
+                    const coreVector2 vDiff = pWay->GetPosition().xy() - vPos;
+
+                    if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
+                    {
+                        pPlayer->SetDirection(pWay->GetDirection());
+                        pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
+                        break;
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
     // 
     for(coreUintW i = 0u; i < GELU_ORBS; ++i)
@@ -803,4 +608,223 @@ void cGeluMission::__MoveOwnAfter()
 
     // 
     m_Line.MoveNormal();
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::__UpdateCollisionFang()
+{
+    if(!m_iFangActive) return;
+
+    // 
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+    {
+        cLodObject& oFang = m_aFangRaw[i];
+        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        oFang.SetPosition(coreVector3(oFang.GetPosition().xy(), -0.1f));   // make sure player can be inside pyramid geometry
+    }
+
+    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        coreVector2 vNewPos = pPlayer->GetPosition().xy();
+
+        const coreVector2 vFangRange = m_aFangRaw[0].GetCollisionRange().xy();
+        if(vFangRange.IsNull()) return;
+
+        coreFloat afDistance[4] = {};
+        coreUint8 iHitIndex     = 255u;
+
+        for(coreUintW j = 0u; j < GELU_FANGS; ++j)
+        {
+            const cLodObject& oFang = m_aFangRaw[j];
+            if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            const coreVector2 vFangPos = oFang.GetPosition().xy();
+            const coreVector2 vShift   = (pPlayer->GetOldPos() - vFangPos) / vFangRange * 0.02f;
+
+            coreVector2 vFangMove = vFangPos - m_avOldPos[j];
+            if(vFangMove.LengthSq() >= POW2(vFangRange.x)) vFangMove = coreVector2(0.0f,0.0f);   // handle teleportation
+
+            const coreVector2 vRayPos = pPlayer->GetOldPos() + vFangMove + vShift;
+
+            for(coreUintW k = 0u; k < 4u; ++k)
+            {
+                const coreVector2 vRayDir = StepRotated90(k);
+
+                coreFloat fHitDistance = 0.0f;
+                coreUint8 iHitCount    = 1u;
+                if(Core::Manager::Object->TestCollision(&oFang, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), &fHitDistance, &iHitCount))
+                {
+                    if(iHitCount & 0x01u)
+                    {
+                        iHitIndex = j;
+
+                        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vFangPos;
+                        if(IsHorizontal(vDiff)) vNewPos.x = vFangPos.x + SIGN(vDiff.x) * vFangRange.x;
+                                           else vNewPos.y = vFangPos.y + SIGN(vDiff.y) * vFangRange.y;
+
+                        //ASSERT(k == 0u)  triggered while moving within blocks, maybe edge case when moving along the tilted edge
+                        break;
+                    }
+                    else
+                    {
+                        const coreFloat fNewDistance = fHitDistance + coreVector2::Dot(vFangMove + vShift - pPlayer->GetMove(), vRayDir) - CORE_MATH_PRECISION;
+                        if(fNewDistance < afDistance[k])
+                        {
+                            afDistance[k] = fNewDistance;
+                        }
+                    }
+                }
+            }
+        }
+
+        coreBool bIntersect = false;
+        coreBool bCrush     = false;
+        for(coreUintW j = 0u; j < GELU_FANGS; ++j)
+        {
+            const cLodObject& oFang = m_aFangRaw[j];
+            if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            if(InBetween(pPlayer->GetPosition().xy(), oFang.GetPosition().xy() - vFangRange, oFang.GetPosition().xy() + vFangRange))
+            {
+                bIntersect = true;
+                if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
+            }
+        }
+
+        if(pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) m_abCrushImmune[i] = true;
+
+        if(bIntersect && !m_abCrushImmune[i])
+        {
+            vNewPos.y += afDistance[0];
+            vNewPos.x -= afDistance[1];
+            vNewPos.y -= afDistance[2];
+            vNewPos.x += afDistance[3];
+
+            pPlayer->SetPosition(coreVector3(vNewPos, 0.0f));
+
+            if(bCrush || !InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
+            {
+                if(pPlayer->IsNormal())
+                {
+                    pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
+                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
+                }
+            }
+        }
+        else if(!bIntersect && m_abCrushImmune[i])
+        {
+            if(pPlayer->IsNormal() || !HAS_BIT(m_iCrushState, 1u))
+            {
+                m_abCrushImmune[i] = false;
+            }
+        }
+    });
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::__UpdateCollisionWay()
+{
+    if(!m_iWayActive) return;
+
+    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        coreVector2 vNewPos = pPlayer->GetPosition().xy();
+
+        const coreVector2 vWayRange = (*m_Way.List())[0]->GetCollisionRange().xy();
+        if(vWayRange.IsNull()) return;
+
+        coreFloat afDistance[4] = {};
+        coreUint8 iHitIndex     = 255u;
+
+        for(coreUintW j = 0u; j < GELU_WAYS; ++j)
+        {
+            const coreObject3D* pWay = (*m_Way.List())[j];
+            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j)) continue;
+
+            const coreVector2 vWayPos = pWay->GetPosition().xy();
+            const coreVector2 vShift  = (pPlayer->GetOldPos() - vWayPos) / vWayRange * 0.02f;
+
+            coreVector2 vWayMove = vWayPos - m_avOldPos[j];
+            if(vWayMove.LengthSq() >= POW2(vWayRange.x)) vWayMove = coreVector2(0.0f,0.0f);   // handle teleportation
+
+            const coreVector2 vRayPos = pPlayer->GetOldPos() + vWayMove + vShift;
+
+            for(coreUintW k = 0u; k < 4u; ++k)
+            {
+                const coreVector2 vRayDir = StepRotated90(k);
+
+                coreFloat fHitDistance = 0.0f;
+                coreUint8 iHitCount    = 1u;
+                if(Core::Manager::Object->TestCollision(pWay, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), &fHitDistance, &iHitCount))
+                {
+                    if(iHitCount & 0x01u)
+                    {
+                        iHitIndex = j;
+
+                        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vWayPos;
+                        if(IsHorizontal(vDiff)) vNewPos.x = vWayPos.x + SIGN(vDiff.x) * vWayRange.x;
+                                           else vNewPos.y = vWayPos.y + SIGN(vDiff.y) * vWayRange.y;
+
+                        // ASSERT(k == 0u) same as for fangs
+                        break;
+                    }
+                    else
+                    {
+                        const coreFloat fNewDistance = fHitDistance + coreVector2::Dot(vWayMove + vShift - pPlayer->GetMove(), vRayDir) - CORE_MATH_PRECISION;
+                        if(fNewDistance < afDistance[k])
+                        {
+                            afDistance[k] = fNewDistance;
+                        }
+                    }
+                }
+            }
+        }
+
+        coreBool bIntersect = false;
+        coreBool bCrush     = false;
+        for(coreUintW j = 0u; j < GELU_WAYS; ++j)
+        {
+            const coreObject3D* pWay = (*m_Way.List())[j];
+            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j)) continue;
+
+            if(InBetween(pPlayer->GetPosition().xy(), pWay->GetPosition().xy() - vWayRange, pWay->GetPosition().xy() + vWayRange))
+            {
+                bIntersect = true;
+                if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
+            }
+        }
+
+        if(pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) m_abCrushImmune[i] = true;
+
+        if(bIntersect && !m_abCrushImmune[i])
+        {
+            vNewPos.y += afDistance[0];
+            vNewPos.x -= afDistance[1];
+            vNewPos.y -= afDistance[2];
+            vNewPos.x += afDistance[3];
+
+            pPlayer->SetPosition(coreVector3(vNewPos, 0.0f));
+
+            if(bCrush || !InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
+            {
+                if(pPlayer->IsNormal())
+                {
+                    pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
+                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
+                }
+            }
+        }
+        else if(!bIntersect && m_abCrushImmune[i])
+        {
+            if(pPlayer->IsNormal() || !HAS_BIT(m_iCrushState, 1u))
+            {
+                m_abCrushImmune[i] = false;
+            }
+        }
+    });
 }

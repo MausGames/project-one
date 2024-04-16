@@ -176,6 +176,56 @@ void cHarenaMission::DisableSpike(const coreUintW iIndex, const coreBool bAnimat
 
 // ****************************************************************
 // 
+void cHarenaMission::CreateExternChild(const coreVector2 vPosition, const coreVector2 vMove, const coreUint8 iType)
+{
+    // 
+    sChildData oData;
+    oData.vPosition = vPosition;
+    oData.vMove     = vMove;
+    oData.iType     = iType;
+
+    // 
+    m_avChildData.push_back(oData);
+}
+
+
+// ****************************************************************
+// 
+void cHarenaMission::PlayInsanity()
+{
+    if(m_iInsanity == HARENA_INSANITY_P1)
+    {
+        ASSERT(m_anStage.empty())
+
+        // 
+        m_fStageTimeBefore = m_fStageTime;
+        m_fStageTime.Update(1.0f);
+
+        // 
+        m_fStageSubTimeBefore = m_fStageSubTime;
+        m_fStageSubTime.Update(1.0f);
+
+        // 
+        m_aInsanityStage[3]();
+    }
+    else if(m_iInsanity)
+    {
+        // 
+        switch(m_iInsanity)
+        {
+        default: ASSERT(false)
+        case 1u: m_aInsanityStage[0](); break;   // ghost
+        case 2u: m_aInsanityStage[1](); break;   // mole
+        case 3u: m_aInsanityStage[2](); break;   // tower
+        case 4u: m_aInsanityStage[3](); break;   // mother
+        case 5u: m_aInsanityStage[4](); break;   // spike
+        }
+    }
+}
+
+
+// ****************************************************************
+// 
 void cHarenaMission::ChangeInsanity(const coreUint8 iInsanity)
 {
     // 
@@ -205,9 +255,22 @@ void cHarenaMission::ChangeInsanity(const coreUint8 iInsanity)
 
 // ****************************************************************
 // 
+void cHarenaMission::ChangeInsanityP1()
+{
+    // 
+    this->ChangeInsanity(HARENA_INSANITY_P1);
+
+    // 
+    this->Setup(0xFFu, 0xFFu);
+    m_anStage.clear();
+}
+
+
+// ****************************************************************
+// 
 void cHarenaMission::CrashEnemy(cEnemy* OUTPUT pEnemy)const
 {
-    if(!m_iInsanity) return;
+    if(!m_iInsanity || (m_iInsanity == HARENA_INSANITY_P1)) return;
 
     // 
     pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);

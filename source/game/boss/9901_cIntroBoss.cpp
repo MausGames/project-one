@@ -21,6 +21,7 @@
 // TODO 1: das erste fragment bekommt man im intro (die mitte der tafel, das viereck), und saugt einen ein und zerstört das schiff, und erzeugt eine graue kopie (Eigengrau) -> erst dann bekommt man blauen schein und quad, auch health-icon anders
 // TODO 1: improve intro and outro (including fragment collection)
 // TODO 1: es sollten noch paar manuelle orientation-flips eingebaut werden (e.g. vorm runter-chargen in die wand)
+// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 
 
 // ****************************************************************
@@ -47,30 +48,30 @@ cIntroBoss::cIntroBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.5f);
 
     // configure the boss
-    this->Configure(4400, COLOR_SHIP_PURPLE);
+    this->Configure(4400, 0u, COLOR_SHIP_PURPLE);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
     m_Blade.DefineModelHigh("ship_boss_intro_sword_blade_high.md3");
     m_Blade.DefineModelLow ("ship_boss_intro_sword_blade_low.md3");
     m_Blade.SetSize        (this->GetSize());
-    m_Blade.Configure      (1, COLOR_SHIP_PURPLE);
-    m_Blade.AddStatus      (ENEMY_STATUS_DAMAGING);
+    m_Blade.Configure      (1, 0u, COLOR_SHIP_PURPLE);
+    m_Blade.AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
     m_Blade.SetParent      (this);
 
     // 
     m_Hilt.DefineModelHigh("ship_boss_intro_sword_hilt_high.md3");
     m_Hilt.DefineModelLow ("ship_boss_intro_sword_hilt_low.md3");
     m_Hilt.SetSize        (this->GetSize());
-    m_Hilt.Configure      (1, COLOR_SHIP_PURPLE);
+    m_Hilt.Configure      (1, 0u, COLOR_SHIP_PURPLE);
     m_Hilt.SetParent      (this);
 
     // 
     m_Shield.DefineModelHigh("ship_boss_intro_shield_high.md3");
     m_Shield.DefineModelLow ("ship_boss_intro_shield_low.md3");
     m_Shield.SetSize        (this->GetSize());
-    m_Shield.Configure      (1, COLOR_SHIP_PURPLE);
-    m_Shield.AddStatus      (ENEMY_STATUS_INVINCIBLE);
+    m_Shield.Configure      (1, 0u, COLOR_SHIP_PURPLE);
+    m_Shield.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
     m_Shield.SetParent      (this);
 }
 
@@ -79,6 +80,8 @@ cIntroBoss::cIntroBoss()noexcept
 // 
 void cIntroBoss::__ResurrectOwn()
 {
+    // 
+    this->_ResurrectBoss();
 }
 
 
@@ -86,8 +89,6 @@ void cIntroBoss::__ResurrectOwn()
 // 
 void cIntroBoss::__KillOwn(const coreBool bAnimated)
 {
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 
@@ -510,7 +511,10 @@ void cIntroBoss::__MoveOwn()
             m_avVector[BURST_DATA].x = fTime;
 
             if(PHASE_FINISHED)
+            {
                 this->Kill(true);
+                this->_EndBoss();
+            }
         });
     }
 

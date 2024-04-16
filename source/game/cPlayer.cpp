@@ -35,10 +35,13 @@ cPlayer::cPlayer()noexcept
 , m_fAnimation      (0.0f)
 , m_iLook           (0u)
 , m_vOldDir         (coreVector2(0.0f,1.0f))
+, m_vSmoothOri      (coreVector2(0.0f,0.0f))
+, m_fSmoothTilt     (0.0f)
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
+, m_fCircleValue    (0.0f)
 
-, vTest (coreVector2(0.0f,0.0f))
+, m_fHitDelay (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -55,7 +58,7 @@ cPlayer::cPlayer()noexcept
 
     // 
     this->SetMaxHealth(PLAYER_LIVES);
-    this->SetBaseColor(COLOR_SHIP_GREY * 0.6f);
+    this->SetBaseColor(COLOR_SHIP_BLACK);
 
     // load first weapons
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
@@ -118,10 +121,17 @@ cPlayer::cPlayer()noexcept
     }
 
     // 
+    m_Circle.DefineModel  ("object_sphere.md3");
+    m_Circle.DefineTexture(0u, "effect_energy.png");
+    m_Circle.DefineProgram("effect_energy_flat_spheric_program");
+    m_Circle.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.8f, 0.0f));
+    m_Circle.SetTexSize   (coreVector2(1.0f,5.0f));
+    m_Circle.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     m_Exhaust.DefineModel  ("object_tube_open.md3");
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
-    m_Exhaust.SetDirection (this->GetDirection());
     m_Exhaust.SetAlpha     (0.7f);
     m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
     m_Exhaust.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -153,9 +163,9 @@ void cPlayer::Configure(const coreUintW iShipType)
     switch(iShipType)
     {
     default: ASSERT(false)
-    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_BLUE   * 1.1f; break;
-    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_ENERGY_YELLOW * 0.7f; break;
-    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone.md3";      sModelLow = "ship_projectone.md3";     sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_GREEN  * 0.8f; break;
+    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_BLUE   * 1.1f;  break;
+    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_ENERGY_YELLOW * 0.7f;  break;
+    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_ENERGY_GREEN  * 0.77f; break;
     }
 
     // load models
@@ -252,13 +262,19 @@ void cPlayer::RenderBefore()
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
+        m_Circle.Render();
+
+        // 
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+            m_apWeapon[i]->Render();
+        // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Bubble);
 
         // 
         m_Bubble    .Render();
         m_aShield[1].Render();
-        m_Exhaust   .Render();
         m_Wind      .Render();
+        m_Exhaust   .Render();
     }
 }
 
@@ -276,17 +292,12 @@ void cPlayer::RenderAfter()
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
-        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
-            m_apWeapon[i]->Render();
-
-        // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Arrow);
 
         // 
         m_Arrow.Render();   // # swapped
         m_Range.Render();
-        //m_Wind .Render();
     }
 }
 
@@ -313,6 +324,9 @@ void cPlayer::Move()
             if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
                 vNewDir =  vNewDir.Rotated90();
 
+            // 
+            if(vNewDir != this->GetDirection().xy()) g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_TURN);
+
             // set new direction
             this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
         }
@@ -331,9 +345,9 @@ void cPlayer::Move()
 
             // 
             const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(MAX(TIME * FRAMERATE_MIN, CORE_MATH_PRECISION));
-            const coreVector2 vDiff2 = vDiff - vTest;
-            if(!vDiff2.IsNull()) vTest = vTest + vDiff2.Normalized() * (30.0f * TIME * SmoothTowards(vDiff2.Length(), 1.0f));
-            vNewOri = coreVector3(CLAMP(vTest.x, -0.8f, 0.8f), CLAMP(vTest.y, -0.8f, 0.8f), 1.0f).NormalizedUnsafe();
+            const coreVector2 vTarget = vDiff - m_vSmoothOri;
+            if(!vTarget.IsNull()) m_vSmoothOri = m_vSmoothOri + vTarget.Normalized() * (30.0f * TIME * SmoothTowards(vTarget.Length(), 1.0f));
+            vNewOri = coreVector3(CLAMP(m_vSmoothOri.x, -0.8f, 0.8f), CLAMP(m_vSmoothOri.y, -0.8f, 0.8f), 1.0f).NormalizedUnsafe();
 
             // restrict movement to the foreground area
                  if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
@@ -341,7 +355,7 @@ void cPlayer::Move()
                  if(vNewPos.y < m_vArea.y) {vNewPos.y = m_vArea.y; m_vForce.y =  ABS(m_vForce.y);}
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
         }
-        else vTest = coreVector2(0.0f,0.0f);
+        else m_vSmoothOri = coreVector2(0.0f,0.0f);
 
         // 
         if(m_fRollTime >= 1.0f) this->EndRolling();
@@ -364,7 +378,7 @@ void cPlayer::Move()
             }
 
             // set new position and orientation
-            this->coreObject3D::SetPosition   (coreVector3(vNewPos, this->GetPosition().z));
+            this->coreObject3D::SetPosition(coreVector3(vNewPos, this->GetPosition().z));
             this->SetOrientation(vNewOri);
         }
         
@@ -386,16 +400,23 @@ void cPlayer::Move()
         const coreMatrix3 mTiltMat = coreMatrix4::RotationX(m_fTilt).m123();
         const coreVector3 vOldDir  = this->GetDirection  ();
         const coreVector3 vOldOri  = this->GetOrientation();
+        
+        if(m_fTilt)
+        {
+            const coreFloat fTarget = this->GetMove().y * 0.5f - m_fSmoothTilt;
+            m_fSmoothTilt = m_fSmoothTilt + SIGN(fTarget) * (30.0f * TIME * SmoothTowards(ABS(fTarget), 1.0f));
+        }
+        else m_fSmoothTilt = 0.0f;
 
         // 
-        this->coreObject3D::SetDirection  (vOldDir * mTiltMat);
-        this->SetOrientation(vOldOri * mTiltMat);
+        this->coreObject3D::SetDirection((vOldDir * mTiltMat + coreVector3(0.0f, m_fSmoothTilt, 0.0f)).Normalized());
+        this->SetOrientation((vOldOri * mTiltMat + coreVector3(0.0f, ABS(m_fSmoothTilt), 0.0f)).Normalized());//(vOldOri * mTiltMat);
 
         // move the 3d-object
         this->coreObject3D::Move();
 
         // 
-        this->coreObject3D::SetDirection  (vOldDir);
+        this->coreObject3D::SetDirection(vOldDir);
         this->SetOrientation(vOldOri);
 
         // update all weapons (shooting and stuff)
@@ -440,8 +461,7 @@ void cPlayer::Move()
             m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_RANGE_SIZE * PLAYER_SIZE_FACTOR * fScale);
             m_Range.SetDirection(coreVector3(vDir, 0.0f));
             m_Range.SetAlpha    (STEP(0.0f, 0.15f, fScale));
-            //m_Range.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.1f));
-                            m_Range.SetTexOffset(m_Range.GetTexOffset() - 0.1f * TIME * m_Range.GetDirection().xy());
+            m_Range.SetTexOffset(m_Range.GetTexOffset() - m_Range.GetDirection().xy() * (0.1f * TIME));
             m_Range.Move();
         }
 
@@ -457,8 +477,8 @@ void cPlayer::Move()
             m_Arrow.SetPosition (this->GetPosition () + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR);
             m_Arrow.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.3f * PLAYER_SIZE_FACTOR);
             m_Arrow.SetDirection(this->GetDirection());
-            m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
             m_Arrow.SetAlpha    (LERPH3(0.0f, 1.0f, m_fArrowValue));
+            m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
             m_Arrow.Move();
         }
 
@@ -493,8 +513,7 @@ void cPlayer::Move()
             m_Bubble.SetPosition (this->GetPosition());
             m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * PLAYER_SIZE_FACTOR * m_Bubble.GetAlpha());
             m_Bubble.SetDirection(coreVector3(vDir, 0.0f));
-            //m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
-                            m_Bubble.SetTexOffset(m_Bubble.GetTexOffset() - 0.2f * TIME * m_Bubble.GetDirection().xy());
+            m_Bubble.SetTexOffset(m_Bubble.GetTexOffset() - m_Bubble.GetDirection().xy() * (0.2f * TIME));
             m_Bubble.Move();
         }
 
@@ -514,17 +533,33 @@ void cPlayer::Move()
             m_aShield[0].SetPosition   (this->GetPosition());
             m_aShield[0].SetSize       (coreVector3(4.7f,4.7f,4.7f) * PLAYER_SIZE_FACTOR);
             m_aShield[0].SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-            m_aShield[0].SetTexOffset  (coreVector2(fBounce, 0.0f));
             m_aShield[0].SetAlpha      (LERPH3(0.0f, 1.0f, MIN(m_fIgnoreTime * 1.4f, 1.0f)));
+            m_aShield[0].SetTexOffset  (coreVector2(fBounce, 0.0f));
             m_aShield[0].Move();
 
             // 
             m_aShield[1].SetPosition   (m_aShield[0].GetPosition   ());
             m_aShield[1].SetSize       (coreVector3(4.7f,4.7f,4.7f) * -PLAYER_SIZE_FACTOR);
             m_aShield[1].SetOrientation(m_aShield[0].GetOrientation() * -1.0f);
-            m_aShield[1].SetTexOffset  (m_aShield[0].GetTexOffset  ());
             m_aShield[1].SetAlpha      (m_aShield[0].GetAlpha      ());
+            m_aShield[1].SetTexOffset  (m_aShield[0].GetTexOffset  ());
             m_aShield[1].Move();
+        }
+
+        if(m_Circle.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            m_fCircleValue.Update(-5.0f);
+
+            // 
+            if(m_fCircleValue <= 0.0f) this->DisableCircle();
+
+            // 
+            m_Circle.SetPosition (this->GetPosition());
+            m_Circle.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.5f * PLAYER_SIZE_FACTOR * LERPBR(4.0f, 1.0f, m_fCircleValue));
+            m_Circle.SetAlpha    (LERPBR(0.0f, 1.0f, m_fCircleValue));
+            m_Circle.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.3f));
+            m_Circle.Move();
         }
 
         // 
@@ -548,7 +583,27 @@ void cPlayer::Move()
 
         // 
         m_fDesaturate.UpdateMax(-1.0f, 0.0f);
+        
+        
+        if(this->IsProjectOne())
+        {
+            coreVector3 vEnergyColor, vBlockColor, vLevelColor;
+            cProjectOneBoss::CalcColorLerp(FMOD(m_fAnimation / 20.0f * 24.0f, 8.0f), &vEnergyColor, &vBlockColor, &vLevelColor);
+            
+            m_Range     .SetColor3(vEnergyColor);
+            m_Arrow     .SetColor3(vEnergyColor * (0.9f/1.1f));
+            m_Wind      .SetColor3(vEnergyColor * (1.6f/1.1f));
+            m_aShield[0].SetColor3(vEnergyColor * (1.0f/1.1f));
+            m_aShield[1].SetColor3(vEnergyColor * (1.0f/1.1f));
+            m_Exhaust   .SetColor3(vEnergyColor);
+            
+            m_Bubble   .SetColor3(vEnergyColor);
+        }
     }
+
+    // 
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+        m_apWeapon[i]->Move();
 
     // 
     m_DataTable .Update();
@@ -559,6 +614,15 @@ void cPlayer::Move()
 
     // 
     this->_UpdateAlwaysAfter();
+    
+    if(m_fHitDelay)
+    {
+        m_fHitDelay.UpdateMax(-1.0f, 0.0f, 0);
+        if(!m_fHitDelay)
+        {
+
+        }
+    }
 }
 
 
@@ -595,12 +659,18 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             {
                 // 
                 this->StartIgnoring(m_iCurShield ? 0u : 1u);
+
+                // 
+                if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.1f);
             }
             else
             {
                 // 
                 this->SetDesaturate(PLAYER_DESATURATE);
                 this->StartFeeling (PLAYER_FEEL_TIME, 0u);
+
+                // 
+                if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(0.2f);
             }
 
             // 
@@ -610,6 +680,9 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
         {
             // 
             this->Kill(true);
+
+            // 
+            if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(1.5f);
         }
 
         // 
@@ -695,7 +768,16 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->DisableWind();
     this->DisableBubble();
     this->DisableShield();
+    this->DisableCircle();
     this->UpdateExhaust(0.0f);
+
+    // 
+    m_vArea  = PLAYER_AREA_DEFAULT;
+    m_vForce = coreVector2(0.0f,0.0f);
+
+    // 
+    m_fMoveSpeed  = 1.0f;
+    m_fShootSpeed = 1.0f;
 
     // 
     m_fInterrupt      = 0.0f;
@@ -703,13 +785,19 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fLightningAngle = 0.0f;
 
     // 
-    m_vOldDir     = coreVector2(0.0f,1.0f);
-    m_fRangeValue = 0.0f;
-    m_fArrowValue = 0.0f;
+    m_vOldDir      = coreVector2(0.0f,1.0f);
+    m_vSmoothOri   = coreVector2(0.0f,0.0f);
+    m_fSmoothTilt  = 0.0f;
+    m_fRangeValue  = 0.0f;
+    m_fArrowValue  = 0.0f;
+    m_fCircleValue = 0.0f;
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    {
         g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
+        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_EXPLOSION);
+    }
 
     // remove ship from global shadow and outline
     cShadow::GetGlobalContainer()->UnbindObject(this);
@@ -730,6 +818,16 @@ void cPlayer::ShowArrow()
     // 
     if(m_fArrowValue <= 0.0f) this->EnableArrow();
     m_fArrowValue = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::ShowCircle()
+{
+    // 
+    if(m_fCircleValue <= 0.0f) this->EnableCircle();
+    m_fCircleValue = 1.0f;
 }
 
 
@@ -779,6 +877,9 @@ void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
     // 
          if(iType == 0u) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
     else if(iType == 1u) g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+
+    // 
+    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_FEEL);
 }
 
 
@@ -812,6 +913,9 @@ void cPlayer::StartIgnoring(const coreUint8 iType)
 
     // 
     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+
+    // 
+    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, iType ? SOUND_SHIELD_DESTROY : SOUND_SHIELD_HIT);
 }
 
 
@@ -837,16 +941,17 @@ void cPlayer::TurnIntoEnemy()
     ASSERT(!this->IsEnemyLook())
     
     
-    this->DefineModelHigh("ship_enemy_warrior_high.md3");
-    this->DefineModelLow ("ship_enemy_warrior_low.md3");
+    this->DefineModelHigh("ship_enemy_miner_high.md3");
+    this->DefineModelLow ("ship_enemy_miner_low.md3");
     this->DefineTexture  (0u, "ship_enemy.png");
     
     this->SetBaseColor(COLOR_SHIP_MAGENTA);           
+    this->RefreshColor(1.0f);        
     SAFE_DELETE(m_apWeapon[0])
     m_apWeapon[0] = new cEnemyWeapon();
     m_apWeapon[0]->SetOwner(this);
     //this->EquipWeapon(0u, cEnemyWeapon::ID);           // <- bad overwrite
-    this->ActivateNormalShading();           
+    //this->ActivateNormalShading();           
     
 }
 
@@ -861,8 +966,12 @@ void cPlayer::TurnIntoPlayer()
 
     this->Configure(GET_BITVALUE(m_iLook, 4u, 0u));//, coreVector4::UnpackUnorm4x8(GET_BITVALUE(m_iLook, 8u, 4u)).xyz());
     this->EquipWeapon(0u, GET_BITVALUE(m_iLook, 4u, 12u));
-    this->ActivateDarkShading();
+    //this->ActivateDarkShading();
     // TODO 1: color
+    
+    
+    this->SetBaseColor(COLOR_SHIP_BLACK);
+    this->RefreshColor(1.0f);        
 }
 
 
@@ -1013,6 +1122,33 @@ void cPlayer::DisableShield()
 
 // ****************************************************************
 // 
+void cPlayer::EnableCircle()
+{
+    WARN_IF(m_Circle.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Circle.SetAlpha(0.0f);
+
+    // 
+    m_Circle.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Circle);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableCircle()
+{
+    if(!m_Circle.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Circle.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Circle);
+}
+
+
+// ****************************************************************
+// 
 void cPlayer::UpdateExhaust(const coreFloat fStrength)
 {
     // 
@@ -1097,24 +1233,28 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
 coreBool cPlayer::TestCollisionPrecise(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, coreFloat* OUTPUT pfHitDistance, coreUint8* OUTPUT piHitCount, coreBool* OUTPUT pbFirstHit)
 {
     ASSERT(vRayDir.IsNormalized() && pRef && pfHitDistance && piHitCount && pbFirstHit)
-    
-    
-    const coreVector4 vOldRay = this->__NewRayData(vRayPos, vRayDir, pRef);
-    
-    const coreVector2 vDiff = this->GetPosition().xy() - vRayPos;
-    const coreFloat   fDot  = coreVector2::Dot(vDiff, vRayDir.Rotated90());
 
-    const coreVector2 vDiff2 = this->GetOldPos() - vOldRay.xy();
-    const coreFloat   fDot2  = coreVector2::Dot(vDiff2, vOldRay.zw().Rotated90());
-    
-    if((ABS(fDot) < 5.0f) && (ABS(fDot2) < 5.0f) && (SIGN(fDot) != SIGN(fDot2)))
+    // 
+    const sRayData oOldRay = this->__NewRayData(vRayPos, vRayDir, pRef);
+
+    // 
+    const coreVector2 vDiff    = this->GetPosition().xy() - vRayPos;
+    const coreVector2 vDiffOld = this->GetOldPos()        - oOldRay.vPosition;
+
+    // 
+    const coreFloat fDot    = coreVector2::Dot(vDiff,    vRayDir           .Rotated90());
+    const coreFloat fDotOld = coreVector2::Dot(vDiffOld, oOldRay.vDirection.Rotated90());
+
+    // 
+    if((SIGN(fDot) != SIGN(fDotOld)) && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f))   // to handle teleportation
     {
+        // 
         (*pfHitDistance) = coreVector2::Dot(vDiff, vRayDir);
         (*piHitCount)    = 1u;
         (*pbFirstHit)    = this->__NewCollision(pRef);
         return true;
     }
-    
+
     return false;
 }
 
@@ -1177,13 +1317,39 @@ coreBool cPlayer::__NewCollision(const coreObject3D* pObject)
     if(m_aiCollision.count(pObject))
     {
         // update frame number
-        m_aiCollision.at(pObject) = Core::System->GetCurFrame();
+        m_aiCollision.at(pObject) = g_pGame->GetTimeTable()->GetTimeEventRaw();//Core::System->GetCurFrame();
         return false;
     }
 
     // add collision to list
-    m_aiCollision.emplace(pObject, Core::System->GetCurFrame());
+    m_aiCollision.emplace(pObject, g_pGame->GetTimeTable()->GetTimeEventRaw());//Core::System->GetCurFrame());
     return true;
+}
+
+
+// ****************************************************************
+// 
+cPlayer::sRayData cPlayer::__NewRayData(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef)
+{
+    // 
+    sRayData oData;
+    oData.iFrame     = g_pGame->GetTimeTable()->GetTimeEventRaw();//Core::System->GetCurFrame();
+    oData.vPosition  = vRayPos;
+    oData.vDirection = vRayDir;
+
+    // 
+    if(m_aRayData.count(pRef))
+    {
+        const sRayData oOldData = m_aRayData.at(pRef);
+
+        // 
+        m_aRayData.at(pRef) = oData;
+        return oOldData;
+    }
+
+    // 
+    m_aRayData.emplace(pRef, oData);
+    return oData;
 }
 
 
@@ -1191,43 +1357,32 @@ coreBool cPlayer::__NewCollision(const coreObject3D* pObject)
 // 
 void cPlayer::__UpdateCollisions()
 {
+    const coreUint32 iCurFrame = g_pGame->GetTimeTable()->GetTimeEventRaw() - 1u;//Core::System->GetCurFrame() - 1u;
+
     // loop through all collisions
-    const coreUint32 iCurFrame = Core::System->GetCurFrame() - 1u;
     FOR_EACH_DYN(it, m_aiCollision)
     {
         // check for old entries and remove them
         if((*it) == iCurFrame) DYN_KEEP  (it)
                           else DYN_REMOVE(it, m_aiCollision)
     }
-    
-    
+
+    // 
     FOR_EACH_DYN(it, m_aRayData)
     {
         // check for old entries and remove them
         if(it->iFrame == iCurFrame) DYN_KEEP  (it)
-                          else DYN_REMOVE(it, m_aRayData)
+                               else DYN_REMOVE(it, m_aRayData)
     }
 }
 
 
-
-coreVector4 cPlayer::__NewRayData(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef)
+// ****************************************************************
+// 
+coreBool cPlayer::__CheckPlayerTest(const ePlayerTest eTest)const
 {
-    sRayData oData;
-    oData.iFrame = Core::System->GetCurFrame();
-    oData.vPos   = vRayPos;
-    oData.vDir   = vRayDir;
-    
-    // find existing collision
-    if(m_aRayData.count(pRef))
-    {
-        const sRayData oOldData = m_aRayData.at(pRef);
-        // update frame number
-        m_aRayData.at(pRef) = oData;
-        return coreVector4(oOldData.vPos, oOldData.vDir);
-    }
-
-    // add collision to list
-    m_aRayData.emplace(pRef, oData);
-    return coreVector4(vRayPos, vRayDir);
+    if(this->IsRolling ()) return HAS_FLAG(eTest, PLAYER_TEST_ROLL);
+    if(this->IsFeeling ()) return HAS_FLAG(eTest, PLAYER_TEST_FEEL);
+    if(this->IsIgnoring()) return HAS_FLAG(eTest, PLAYER_TEST_IGNORE);
+                           return HAS_FLAG(eTest, PLAYER_TEST_NORMAL);
 }

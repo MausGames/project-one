@@ -17,11 +17,18 @@ void cNevoMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+        }
     });
 
     // ################################################################
-    // 
+    // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
@@ -33,27 +40,34 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_NOW
     });
 
     // ################################################################
-    // 
+    // show mission name
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(STAGE_BEGINNING)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
         {
-            g_pGame->GetInterface()->ShowMission(this);
+            STAGE_FINISH_NOW
         }
+        else
+        {
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->GetInterface()->ShowMission(this);
+            }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+            STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        }
     });
 
     // ################################################################
-    // change background appearance (split)
-    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_FINISH_PLAY
     });
@@ -74,8 +88,9 @@ void cNevoMission::__SetupOwn()
     // TODO 1: handle enemy inside (on feel)
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top)
     // TODO 1: make enemies damaging ?
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     // TODO 1: hard-mode: bullets get bigger with time
+    // TODO 1: hard-mode: bullets are bigger in general
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;
@@ -85,7 +100,7 @@ void cNevoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(30, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_YELLOW);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP);
             });
 
@@ -225,7 +240,7 @@ void cNevoMission::__SetupOwn()
             pEnemy->SetPosition(coreVector3(vCurPos, 0.0f));
             pEnemy->DefaultMoveForward(vCurDir, 29.0f);
 
-            if(STAGE_TICK_TIME(9.0f, 0.0f))
+            if(STAGE_TICK_TIME(9.0f, 0.0f))   // TODO 1: STAGE_TICK_TIME2 instead ?
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy();
@@ -314,29 +329,36 @@ void cNevoMission::__SetupOwn()
                 else if((pBulletPlayer->GetOwner() == g_pGame->GetPlayer(1u)) && (pBulletEnemy->GetID() != cTriangleBullet::ID)) return;
             }
 
-            pBulletEnemy->Deactivate(true, vIntersection.xy());
+            pBulletEnemy->Deactivate(true, vIntersection.xy(), pBulletPlayer->GetFlyDir());
         });
 
-        if(g_pGame->GetBulletManagerEnemy()->GetNumBulletsEst() > 1000u)   // to prevent infinite creation
+        if(g_pGame->GetBulletManagerEnemy()->GetNumBulletsEst() > 1000u)   // to prevent infinite creation  // TODO 1: handle this differently, it just cleared all bullets from sub1 in sub2, maybe limit bullets per enemy
         {
             g_pGame->GetBulletManagerEnemy()->ForEachBullet([](cBullet* OUTPUT pBullet)
             {
-                if(pBullet->GetFlyTime() > 20.0f) pBullet->Deactivate(true);
+                if(pBullet->GetFlyTime() >= 20.0f) pBullet->Deactivate(true);
             });
         }
 
-        STAGE_WAVE("SIEBEN", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "SIEBEN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         g_pGame->GetBulletManagerEnemy()->ResetOrder();
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -357,7 +379,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: flipswitch galaxy, || =, mit blink delay wie bei rot+blau blöcke in Mario 3D World
     // TODO 1: vielleicht statt dem turm, mehrere untersch. große verteilte überlagernde platten (mit einem doppel oder dreier) (bei turm sollte der äußere aber schon aktiv sein, so wie jtzt)
     // TWIST (boss?): plate moves around and has positive effect when activated, negative when deactivated, never locks in
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -368,11 +390,12 @@ void cNevoMission::__SetupOwn()
             pPath1->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 60u)
+        STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 60u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, COLOR_SHIP_GREY);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -564,7 +587,7 @@ void cNevoMission::__SetupOwn()
             for(coreUintW i = 0u; i < NEVO_TILES; ++i)
             {
                 coreObject3D& oTile = m_aTileRaw[i];
-                if(!oTile.IsEnabled(CORE_OBJECT_ENABLE_ALL) || (m_afTileTime[i] < 0.0f)) continue;
+                if(!this->IsTileEnabled(i)) continue;
 
                 STAGE_FOREACH_PLAYER(pPlayer, j)
                 {
@@ -632,7 +655,7 @@ void cNevoMission::__SetupOwn()
             else if(i >= 40u && i < 45u) pEnemy->Rotate90 ();
             else if(i >= 45u && i < 50u) pEnemy->Rotate270();
 
-            if(!(i % 5u) && STAGE_TICK_TIME(0.8f, 0.0f))
+            if(!(i % 5u) && STAGE_TICK_TIME(0.8f, 0.0f))   // TODO 1: STAGE_TICK_TIME2 instead ?
             {
                 const coreVector2 vPos  = pEnemy->GetPosition ().xy();
                 const coreFloat   fBase = pEnemy->GetDirection().xy().Rotated90().Angle();
@@ -641,8 +664,8 @@ void cNevoMission::__SetupOwn()
                 {
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 2.0f) * 8.0f) + fBase);
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.5f, pEnemy, vPos,  vDir)->ChangeSize(1.3f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 0.5f, pEnemy, vPos, -vDir)->ChangeSize(1.3f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.5f, pEnemy, vPos,  vDir)->ChangeSize(1.3f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.5f, pEnemy, vPos, -vDir)->ChangeSize(1.3f);
                 }
             }
 
@@ -658,14 +681,14 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ACHT", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(1u, "ACHT", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < NEVO_TILES; ++i)
             this->DisableTile(i, false);
@@ -674,14 +697,9 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 2u, 3u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -705,24 +723,24 @@ void cNevoMission::__SetupOwn()
     // TODO 1: vielleicht rotierende bomben als vorletztes (würde einiges vereinfachen)
     // TODO 1: spieler sollte nicht mit gegner kollidieren können ?
     // TODO 1: gegner sollte sich nicht so linear und roboter-haft bewegen, vielleicht sinus (mittig langsam) ?
-    // TODO 1: letzte phase is ziemlich brutal, vielleicht 2 linien ohne strahl
+    // TODO 1: letzte phase is ziemlich brutal, vielleicht 2 linien ohne strahl (7 statt 8 bomben)
     // TODO 1: bomben delay ganz leicht erhöhen (vielleicht)
     // TODO 1: gegner ist manchmal schlecht sichtbar, weil er grau wird, sollte leuchten oder so
     // TODO 1: die bomben-wand (OOOXXXOOO) kommt sehr überraschend, vielleicht kleine pause davor
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 58u)
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 58u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(50, COLOR_SHIP_BLUE);
+                pEnemy->Configure(50, 0u, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP);
             });
         });
 
-        STAGE_GET_START(9u + NEVO_BOMBS * 4u)
+        STAGE_GET_START(9u + NEVO_BOMBS * 3u)
             STAGE_GET_VEC2       (vClusterPos, vClusterPos = coreVector2(-1.3f,0.5f) * FOREGROUND_AREA)
             STAGE_GET_VEC2       (vClusterDir, vClusterDir = coreVector2( 1.0f,0.0f))
             STAGE_GET_UINT       (iCurBomb)
@@ -730,9 +748,8 @@ void cNevoMission::__SetupOwn()
             STAGE_GET_UINT       (iWarpCount)
             STAGE_GET_UINT       (iRotaCount)
             STAGE_GET_UINT       (iWallCount)
-            STAGE_GET_FLOAT_ARRAY(afDelay, NEVO_BOMBS)
-            STAGE_GET_VEC2_ARRAY (avMove,  NEVO_BOMBS)
-            STAGE_GET_UINT_ARRAY (aiType,  NEVO_BOMBS)
+            STAGE_GET_VEC2_ARRAY (avMove, NEVO_BOMBS)
+            STAGE_GET_UINT_ARRAY (aiType, NEVO_BOMBS)
         STAGE_GET_END
 
         const auto nTargetFunc = [](const coreBool bType, const coreFloat fFactor, const coreVector2 vTarget, coreVector2* OUTPUT pvPos, coreVector2* OUTPUT pvForce)
@@ -795,12 +812,7 @@ void cNevoMission::__SetupOwn()
 
                 if(oBomb.IsEnabled(CORE_OBJECT_ENABLE_ALL))
                 {
-                    const coreFloat fPrevDelay = afDelay[i];
-                    afDelay[i] += 1.0f * TIME;
-
-                    if(InBetween(2.0f, fPrevDelay, afDelay[i]))
-                        this->EnableBlast(i);
-
+                    const coreFloat  fTime = this->GetBombTime(i);
                     const coreUint32 iType = aiType[i];
 
                     if((iType == 1u) || (iType == 2u))   // break movement
@@ -808,7 +820,7 @@ void cNevoMission::__SetupOwn()
                         oBomb.SetPosition(coreVector3(oBomb.GetPosition().xy() + avMove[i] * TIME, 0.0f));
                         avMove[i] *= FrictionFactor(1.5f);
 
-                        if(iType == 2u) oBomb.SetDirection(coreVector3(coreVector2::Direction(afDelay[i] * ((i % 2u) ? 1.0f : -1.0f)), 0.0f));
+                        if(iType == 2u) oBomb.SetDirection(coreVector3(coreVector2::Direction(fTime * ((i % 2u) ? 1.0f : -1.0f)), 0.0f));
                     }
                     else if(iType == 3u)   // linear movement
                     {
@@ -834,8 +846,8 @@ void cNevoMission::__SetupOwn()
                     }
                     else if(iType == 5u)   // rotating movement
                     {
-                        const coreVector2 vRota   = coreVector2::Direction(afDelay[i] * (-0.5f*PI) * (avMove[i].Length() * 0.01f));
-                        const coreFloat   fLen    = LERPB(1.2f * SQRT2, 0.9f, MIN1(afDelay[i] * 0.5f)) * FOREGROUND_AREA.x;
+                        const coreVector2 vRota   = coreVector2::Direction(fTime * (-0.5f*PI) * (avMove[i].Length() * 0.01f));
+                        const coreFloat   fLen    = LERPB(1.2f * SQRT2, 0.9f, MIN1(fTime * 0.5f)) * FOREGROUND_AREA.x;
                         const coreVector2 vNewPos = MapToAxis(-avMove[i].Normalized(), vRota) * fLen;
 
                         oBomb.SetPosition(coreVector3(vNewPos, 0.0f));
@@ -843,7 +855,7 @@ void cNevoMission::__SetupOwn()
                     else if((iType == 6u) || (iType == 7u))   // lerp movement
                     {
                         coreVector2 vNewPos = oBomb.GetPosition().xy();
-                        vNewPos.arr(iType == 7u) = LERPB(avMove[i].x, avMove[i].y, MIN1(afDelay[i] * 0.5f));
+                        vNewPos.arr(iType == 7u) = LERPB(avMove[i].x, avMove[i].y, MIN1(fTime * 0.5f));
 
                         oBomb.SetPosition(coreVector3(vNewPos, 0.0f));
                     }
@@ -864,8 +876,6 @@ void cNevoMission::__SetupOwn()
                             if(pPlayer->IsNormal()) pPlayer->TakeDamage(10, ELEMENT_ORANGE, pPlayer->GetPosition().xy());
                         }
                     });
-
-                    afDelay[i] = 0.0f;
                 }
             }
 
@@ -986,14 +996,26 @@ void cNevoMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE("NEUN", {60.0f, 80.0f, 100.0f, 120.0f})
+        cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
+
+        if(STAGE_BEGINNING) pBackground->GetOutdoor()->LerpHeight(0.2f, -17.0f);
+
+        const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
+
+        pBackground->SetGroundDensity(1u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(2u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
+        pBackground->SetGroundDensity(4u, STEP(0.5f, 1.0f, fEnvLerp));
+        pBackground->SetGroundDensity(5u, STEP(0.5f, 1.0f, fEnvLerp));
+
+        STAGE_WAVE(2u, "NEUN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < NEVO_BOMBS; ++i)
             this->DisableBomb(i, false);
@@ -1002,6 +1024,29 @@ void cNevoMission::__SetupOwn()
             this->DisableBlast(i, false);
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 3u, 4u, 5u})
+    {
+        cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetOutdoor()->LerpHeightNow(0.2f, -17.0f);
+        pBackground->SetGroundDensity(1u, 0.0f);
+        pBackground->SetGroundDensity(2u, 0.0f);
+        pBackground->SetGroundDensity(3u, 0.0f);
+        pBackground->SetGroundDensity(4u, 1.0f);
+        pBackground->SetGroundDensity(5u, 1.0f);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1024,7 +1069,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: gegner sollten sich nicht so starr bewegen, vielleicht leichten schwung reinbringen +0.1f
     // TODO 1: vielleicht auch die gruppen größer, e.g. 3x3 statt 2x2
     // TODO 1: gruppe 8 wurde so schnell zerstört, dass ein pfeil in 9 nicht aktiviert wurde, der noch aus gruppe 7 war (vielleicht ÜBERALL nach dem warn_if nicht returnen sondern disable machen)
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1051,12 +1096,12 @@ void cNevoMission::__SetupOwn()
             pPath3->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 124u)
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 124u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, COLOR_SHIP_GREEN);
-                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_GREEN);
+                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
             });
         });
 
@@ -1357,20 +1402,20 @@ void cNevoMission::__SetupOwn()
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
                 const coreVector2 vDir = vSide;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
             }
 
             pBullet->Deactivate(true);
         });
 
-        STAGE_WAVE("ZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(3u, "ZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
             this->DisableArrow(i, false);
@@ -1379,14 +1424,9 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
-    // change background appearance
-    STAGE_MAIN({TAKE_ALWAYS, 4u, 5u, 6u})
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        if(STAGE_BEGINNING)
-        {
-
-        }
-
         STAGE_FINISH_PLAY
     });
 
@@ -1418,7 +1458,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: sphere-sphere colision needs optimization, currently O(n'2)
     // TODO 1: move stuff from here (and Leviathan) into grow-bullet ?
     // TODO 1: geschosse vom rand starten mit 1, geschosse von gegnern mit 0 ? damit man gegner besser sehen kann, oder wegen difficulty (ausweichen, oder damit man sie trifft) ?
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1445,12 +1485,12 @@ void cNevoMission::__SetupOwn()
             pPath3->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 19u)
+        STAGE_ADD_SQUAD(pSquad1, cFreezerEnemy, 19u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.4f,1.4f,1.4f));
-                pEnemy->Configure(50, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(50, 0u, COLOR_SHIP_PURPLE);
             });
         });
 
@@ -1638,58 +1678,23 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cGrowBullet>([](cGrowBullet* OUTPUT pBullet)
-        {
-            const coreFloat fNewSize = MIN(pBullet->GetSize().x + (7.0f * TIME), 15.0f);
-
-            pBullet->SetSize(coreVector3(1.0f,1.0f,1.0f) * fNewSize);
-        });
-
-        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cGrowBullet>([](cGrowBullet* OUTPUT pBullet)
-        {
-            if(coreMath::IsNear(pBullet->GetSpeed(), 0.1f)) return;
-
-            if(((pBullet->GetPosition().x <  -FOREGROUND_AREA.x * 1.0f) && (pBullet->GetFlyDir().x < 0.0f)) ||
-               ((pBullet->GetPosition().x >=  FOREGROUND_AREA.y * 1.0f) && (pBullet->GetFlyDir().x > 0.0f)) ||
-               ((pBullet->GetPosition().y <  -FOREGROUND_AREA.y * 1.0f) && (pBullet->GetFlyDir().y < 0.0f)) ||
-               ((pBullet->GetPosition().y >=  FOREGROUND_AREA.y * 1.0f) && (pBullet->GetFlyDir().y > 0.0f)))
-            {
-                pBullet->SetSpeed(0.1f);
-                return;
-            }
-
-            Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, pBullet, [](const cBullet* pBullet1, cBullet* OUTPUT pBullet2, const coreVector3 vIntersection, const coreBool bFirstHit)
-            {
-                if(((pBullet1->GetPosition().x <  -FOREGROUND_AREA.x * 1.0f) && (pBullet2->GetFlyDir().x < 0.0f)) ||   // 1 2
-                   ((pBullet1->GetPosition().x >=  FOREGROUND_AREA.y * 1.0f) && (pBullet2->GetFlyDir().x > 0.0f)) ||
-                   ((pBullet1->GetPosition().y <  -FOREGROUND_AREA.y * 1.0f) && (pBullet2->GetFlyDir().y < 0.0f)) ||
-                   ((pBullet1->GetPosition().y >=  FOREGROUND_AREA.y * 1.0f) && (pBullet2->GetFlyDir().y > 0.0f)))
-                {
-                    pBullet2->SetSpeed(0.1f);
-                    return;
-                }
-            });
-        });
-
-        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
-        {
-            if(!bFirstHit || !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
-
-            pBulletEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * (pBulletEnemy->GetSize().x * POW(0.9f, I_TO_F(pBulletPlayer->GetDamage()))));
-
-            pBulletPlayer->Deactivate(true);
-        });
-
-        STAGE_WAVE("ELF", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(4u, "ELF", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
-        //g_pGame->GetHelper(ELEMENT_)->Kill(false);   // TODO 1
+        g_pGame->KillHelpers();
 
         STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // wait for play
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -1711,7 +1716,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: gegner versuchen dich in mustern zu berühren, schlange,
     // TODO 1: frei gewordene objekte fliegen auf spieler zu oder in kreiselbewegung nach außen
     // TODO 1: triangles, spheres, quads, all have different (basic) behavior
-    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         constexpr coreUintW iBig = 0u;
@@ -1744,7 +1749,7 @@ void cNevoMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_ORANGE);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP);
             });
         });
@@ -2031,14 +2036,14 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("ZWÖLF", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "ZWÖLF", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // reset helper
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(false);
+        g_pGame->KillHelpers();
 
         for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i)
             this->DisableBlock(i, false);
@@ -2047,8 +2052,15 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
+    // wait for play
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Leviathan, {60.0f, 120.0f, 180.0, 240.0f})
     });

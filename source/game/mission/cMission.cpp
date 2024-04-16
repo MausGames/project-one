@@ -20,7 +20,6 @@ cMission::cMission()noexcept
 : m_apBoss              {}
 , m_pCurBoss            (NULL)
 , m_iCurBossIndex       (MISSION_NO_BOSS)
-, m_iCurWaveCount       (0u)
 , m_iCurWaveIndex       (MISSION_NO_WAVE)
 , m_iCurSegmentIndex    (MISSION_NO_SEGMENT)
 , m_piData              (NULL)
@@ -118,7 +117,11 @@ void cMission::MoveBefore()
             m_anStage.back()();
 
             // 
-            if(m_anStage.empty()) g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? 0u : 1u);
+            if(m_anStage.empty())
+            {
+                g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? GAME_OUTRO_MISSION : GAME_OUTRO_SEGMENT);
+                g_pGame->FadeMusic(0.3f);
+            }
         }
     }
     while(m_bRepeat);
@@ -206,6 +209,13 @@ void cMission::DeactivateBoss()
     if(m_iCurSegmentIndex == MISSION_NO_SEGMENT) return;
 
     // 
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+
+    // 
+    coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex + 1u];
+    iAdvance = MAX(iAdvance, 1u);
+
+    // 
     this->__CloseSegment();
 
     // 
@@ -220,15 +230,14 @@ void cMission::DeactivateBoss()
 
 // ****************************************************************
 // 
-void cMission::ActivateWave(const coreChar* pcName)
+void cMission::ActivateWave(const coreUintW iIndex, const coreChar* pcName)
 {
     ASSERT(m_iCurSegmentIndex == MISSION_NO_SEGMENT)
 
     // 
-    ASSERT(m_iCurWaveCount < MISSION_WAVES)
-    m_iCurWaveIndex    = m_iCurWaveCount++;
+    ASSERT(iIndex < MISSION_WAVES)
+    m_iCurWaveIndex    = iIndex;
     m_iCurSegmentIndex = MISSION_WAVE_TO_SEGMENT(m_iCurWaveIndex);
-    // TODO 1: m_iCurWaveCount must be able to skip empty waves (4, 5), and start related to m_iTakeFrom, intro should be ok (bosses are already skipped)  
 
     // 
     this->__OpenSegment();
@@ -240,6 +249,13 @@ void cMission::ActivateWave(const coreChar* pcName)
 void cMission::DeactivateWave()
 {
     if(m_iCurSegmentIndex == MISSION_NO_SEGMENT) return;
+
+    // 
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+
+    // 
+    coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex];
+    iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 2u);
 
     // 
     this->__CloseSegment();
@@ -286,6 +302,9 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 
     // 
     g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
+
+    // 
+    g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
 }
 
 
@@ -295,10 +314,6 @@ void cMission::__OpenSegment()
 {
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
-
-    // 
-    coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex];
-    iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 1u);
 
     // 
     g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_START(iMissionIndex, m_iCurSegmentIndex));
@@ -331,7 +346,7 @@ void cMission::__CloseSegment()
     const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted);
 
     // 
-    coreUint8 iMedal = 0u;
+    coreUint8 iMedal = MEDAL_NONE;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         const coreUint32 iScoreSegment = pPlayer->GetScoreTable()->GetScoreSegment(iMissionIndex, m_iCurSegmentIndex);
@@ -351,6 +366,7 @@ void cMission::__CloseSegment()
 
     // 
     if(g_pGame->IsCoop()) iMedal /= GAME_PLAYERS;
+    ASSERT(iMedal != MEDAL_NONE)
 
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -362,6 +378,9 @@ void cMission::__CloseSegment()
     const coreUint8 iShowMedal     = iMedal;
     const coreUint8 iShowMedalType = MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE;
     g_pGame->GetInterface()->ShowScore(iBonus, iShowMedal, iShowMedalType);
+
+    // 
+    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SPECIAL_SOUND_MEDAL(iMedal));
 
     // 
     g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_END(iMissionIndex, m_iCurSegmentIndex));
@@ -389,8 +408,16 @@ void cMission::__CloseSegment()
     }
 
     // 
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        ADD_FLAG(g_pSave->EditProgress()->aiFragment[iMissionIndex], pPlayer->GetDataTable()->GetFragmentAll(iMissionIndex))
+        ADD_FLAG(g_pSave->EditProgress()->aiBadge   [iMissionIndex], pPlayer->GetDataTable()->GetBadgeAll   (iMissionIndex))
+    });
+
+    // 
     g_pSave->SaveFile();
 
+    
     
     g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {

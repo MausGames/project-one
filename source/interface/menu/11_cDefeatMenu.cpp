@@ -90,7 +90,11 @@ void cDefeatMenu::Move()
                 if(HAS_BIT(g_TotalInput.iActionPress, 0u))
                 {
                     // 
-                    if(m_eState < DEFEAT_BURST) m_eState = DEFEAT_BURST;
+                    if(m_eState < DEFEAT_BURST)
+                    {
+                        m_eState = DEFEAT_BURST;
+                        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_CONTINUE_ACCEPT);
+                    }
                 }
                 else if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
                 {
@@ -109,6 +113,8 @@ void cDefeatMenu::Move()
 
             if(m_eState < DEFEAT_BURST)
             {
+                const coreFloat fOldCountdown = m_fCountdown;
+
                 // 
                 m_fCountdown.Update(-0.5f);
                 if(m_fCountdown <= 0.0f)
@@ -119,6 +125,10 @@ void cDefeatMenu::Move()
 
                 // 
                 m_ContinueTimer.SetText(PRINT("%.0f", MAX(FLOOR(m_fCountdown.ToFloat()), 0.0f)));
+
+                // 
+                if((fOldCountdown >= 0.0f) && (fOldCountdown < 11.0f) && (F_TO_SI(fOldCountdown) != F_TO_SI(m_fCountdown)))
+                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_CONTINUE_TICK);
             }
             else
             {
@@ -162,7 +172,11 @@ void cDefeatMenu::Move()
             {
                 // 
                 m_eState = DEFEAT_OUTRO;
-                if(STATIC_ISVALID(g_pGame)) g_pGame->GetInterface()->SetVisible(false);
+                if(STATIC_ISVALID(g_pGame))
+                {
+                    g_pGame->GetInterface ()->SetVisible(false);
+                    g_pGame->GetCombatText()->SetVisible(false);
+                }
             }
 
             // 
@@ -221,15 +235,8 @@ void cDefeatMenu::ShowContinue()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    m_fCountdown  = 11.0f;
-    m_fBurst      = 0.0f;
-    m_fIntroTimer = 0.0f;
-    m_fOutroTimer = 0.0f;
-    m_eState      = DEFEAT_INTRO;
-
-    // 
-    m_Background.SetSize(coreVector2(0.0f,0.0f));
-    m_Background.Move();
+    this->__ResetState();
+    m_fCountdown = 11.0f;
 
     // 
     const coreUint8 iContinues = g_pGame->GetContinues();
@@ -246,7 +253,6 @@ void cDefeatMenu::ShowContinue()
     }
 
     // 
-    this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_DEFEAT_CONTINUE, 0.0f);
 }
 
@@ -258,9 +264,22 @@ void cDefeatMenu::ShowGameOver()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
+    this->__ResetState();
+    m_fIntroTimer = -MENU_DEFEAT_DELAY_INTRO;
+
+    // 
+    this->ChangeSurface(SURFACE_DEFEAT_GAMEOVER, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cDefeatMenu::__ResetState()
+{
+    // 
     m_fCountdown  = 0.0f;
     m_fBurst      = 0.0f;
-    m_fIntroTimer = -MENU_DEFEAT_DELAY_INTRO;
+    m_fIntroTimer = 0.0f;
     m_fOutroTimer = 0.0f;
     m_eState      = DEFEAT_INTRO;
 
@@ -270,5 +289,4 @@ void cDefeatMenu::ShowGameOver()
 
     // 
     this->SetAlpha(0.0f);
-    this->ChangeSurface(SURFACE_DEFEAT_GAMEOVER, 0.0f);
 }

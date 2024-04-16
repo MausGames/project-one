@@ -55,6 +55,7 @@ enum eOutdoorAlgorithm : coreUint8
     OUTDOOR_ALGORITHM_SEA,
     OUTDOOR_ALGORITHM_VOLCANO,
     OUTDOOR_ALGORITHM_UNUSED_2,
+    OUTDOOR_ALGORITHM_UNUSED_3,
     OUTDOOR_ALGORITHM_STOMACH
 };
 
@@ -141,10 +142,11 @@ public:
     FUNC_PURE coreVector3 RetrieveIntersect (const coreVector3 vRayPosition, const coreVector3 vRayDirection)const;
 
     // 
-    void                   LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 0u);
+    void                   LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 100u);
     void                   LerpHeightNow (const coreFloat fMul, const coreFloat fAdd);
     FUNC_LOCAL coreVector2 CalcLerpVector(const coreFloat fPositionY)const;
-    inline coreBool IsLerping()const {return (m_aiLerpRange[0] != m_aiLerpRange[1]);}
+    inline coreBool  IsLerping()const {return (m_aiLerpRange[0] != m_aiLerpRange[1]);}
+    inline coreFloat GetLerp  ()const {return (m_aiLerpRange[1] ? (I_TO_F(m_aiLerpRange[0]) * RCP(I_TO_F(m_aiLerpRange[1]))) : 1.0f);}
 
     // access shadow and light map object
     inline cShadow*         GetShadowMap() {return &m_ShadowMap;}

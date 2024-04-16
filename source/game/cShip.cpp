@@ -23,19 +23,17 @@ cShip::cShip()noexcept
 {
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    
-    
-    this->DefineTexture(1u, "menu_background_black.png");
 }
 
 
 // ****************************************************************
 // 
-void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted)
+void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted, const coreBool bIgnored)
 {
     // 
     m_iBaseColor = coreVector4(vColor, 0.0f).PackUnorm4x8();
     if(bInverted) ADD_BIT(m_iBaseColor, SHIP_INVERTED_BIT)
+    if(bIgnored)  ADD_BIT(m_iBaseColor, SHIP_IGNORED_BIT)
 
     // 
     this->SetColor3(vColor);

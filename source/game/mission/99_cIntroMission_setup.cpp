@@ -40,16 +40,25 @@ void cIntroMission::__SetupOwn()
         }
         else
         {
-            STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+            if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_QUICK))
+            {
+                STAGE_FINISH_NOW
+            }
+            else
+            {
+                STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
+            }
         }
     });
 
     // ################################################################
-    // 
+    // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
         if(m_bFirstPlay)
         {
+            ASSERT(g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID)
+
             g_pEnvironment->SetTargetSpeedNow(LERPH3(ENVIRONMENT_DEFAULT_SPEED, 4.0f, MIN1(m_fStageTime * 0.15f)));
 
             if(STAGE_TIME_POINT(1.0f))
@@ -76,14 +85,21 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // show mission name (not really)
     STAGE_MAIN({TAKE_MISSION})
     {
-        STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
+        {
+            STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_FINISH_AFTER(MISSION_WAIT_PLAY)
+        }
     });
 
     // ################################################################
-    // change background appearance
+    // wait for play
     STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_FINISH_PLAY
@@ -94,6 +110,7 @@ void cIntroMission::__SetupOwn()
     // teaches: moving (general), shooting (general, sustained), combo, enemies from every side, enemies fly infinite (#1), segment structure, sub-stage structure
     // - 5: from different side than previous group, to not fly into players
     // TODO 1: control intro should be separate for each player
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -117,7 +134,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, COLOR_SHIP_RED);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
             });
         });
 
@@ -172,12 +189,12 @@ void cIntroMission::__SetupOwn()
             STAGE_REPEAT(pPath->GetTotalDistance())
 
             const coreVector2 vFactor = coreVector2(((i % 12u) < 6u) ? -1.0f : 1.0f, (i < 24u) ? 1.0f : -1.0f);
-            const coreVector2 vOffset = coreVector2((i >= 24u) ? -0.2f : 0.0f, 0.0f);
+            const coreVector2 vOffset = coreVector2((i < 24u) ? 0.0f : -0.2f, 0.0f);
 
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE("TEST", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "TEST", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -189,7 +206,7 @@ void cIntroMission::__SetupOwn()
     // TODO 1: badge sollte über letzter kill-position erscheinen
     // TODO 1: control intro should be separate for each player
     // TODO 1: GetNumEnemiesAlive should only check for the bottom 12 enemies
-    // TODO 1: remove area-change on successful turn
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -213,11 +230,12 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, COLOR_SHIP_RED);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
             });
         });
 
-        STAGE_GET_START(2u)
+        STAGE_GET_START(3u)
+            STAGE_GET_UINT (iResetArea)
             STAGE_GET_UINT (iInputState)
             STAGE_GET_FLOAT(fInputDelay)
         STAGE_GET_END
@@ -238,6 +256,11 @@ void cIntroMission::__SetupOwn()
                 ADD_BIT(iInputState, 0u)
                 fInputDelay = 0.0f;
             }
+
+            if(pPlayer->GetDirection().y < 1.0f)
+            {
+                iResetArea = 1u;
+            }
         });
 
         if(pSquad1->GetNumEnemiesAlive() == 12u)
@@ -251,7 +274,7 @@ void cIntroMission::__SetupOwn()
             }
         }
 
-        const coreVector4 vArea = PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,0.0f) * ((m_iStageSub == 1u) ? (BLENDH3(MIN1(m_fStageSubTime * 1.0f)) * 12.0f) : 0.0f);
+        const coreVector4 vArea = PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,0.0f) * (((m_iStageSub == 1u) && !iResetArea) ? (BLENDH3(MIN1(m_fStageSubTime * 1.0f)) * 12.0f) : 0.0f);
 
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -296,7 +319,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(1u, "", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -320,6 +343,7 @@ void cIntroMission::__SetupOwn()
     // TODO 1: charge sollte passieren, bis sie einmal den spieler berührt haben
     // TODO 1: vielleicht gezielter gerader charge von seite (+ infinity) (könnten aber beim spawnen schon angegriffen werden)
     // TODO 1: badge
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -335,7 +359,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, COLOR_SHIP_RED);
+                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
             });
 
             const auto nInitFunc = [&](const coreUintW iIndex, const coreVector2 vPos, const coreVector2 vDir)
@@ -439,7 +463,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(2u, "", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -448,6 +472,7 @@ void cIntroMission::__SetupOwn()
     // gegner unten sollten möglichst nah am rand sein, damit der spieler sich drehen muss
     // TODO 1: badge (beim 4. spawnt ein zusätzlicher gegner ?)
     // TODO 1: kaputte gegner sollten rauchen
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -479,7 +504,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(120, COLOR_SHIP_RED);
+                pEnemy->Configure(120, 0u, COLOR_SHIP_BLACK);
             });
         });
 
@@ -520,8 +545,10 @@ void cIntroMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = coreVector2::Direction(I_TO_F(s_iTick) * DEG_TO_RAD(27.0f));
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.5f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.7f);
+
+                    g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 25.0f, 1u, COLOR_ENERGY_GREEN);
                 }
             }
             else
@@ -539,7 +566,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(3u, "", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
@@ -556,6 +583,7 @@ void cIntroMission::__SetupOwn()
     // TODO 1: make aiHits more stable, vielleicht mit bullet-damage als ID
     // TODO 1: make full-waves come with less delay, based on the player-state (also coop) (if possible) (maybe with the ID)
     // TODO 1: bullets könnten sich etwas besser überlagern (e.g. alle in die selbe richtung, mit selben offset (zwischen loch und nicht-loch welle), also von der seite kommend)
+    // TODO 1: MAIN: helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -571,7 +599,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(30, COLOR_SHIP_RED);
+                pEnemy->Configure(30, 0u, COLOR_SHIP_BLACK);
             });
         });
 
@@ -686,25 +714,25 @@ void cIntroMission::__SetupOwn()
             else if(i == 9u) pEnemy->Rotate270();
         });
 
-        STAGE_WAVE("", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(4u, "", {60.0f, 80.0f, 100.0f, 120.0f})
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Intro, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         if(!g_pGame->GetItemManager()->GetNumItems())
         {
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
-                pPlayer->SetBaseColor(COLOR_SHIP_GREY * 0.6f);
+                pPlayer->SetBaseColor(COLOR_SHIP_BLACK);
             });
 
             STAGE_FINISH_NOW
@@ -724,7 +752,11 @@ void cIntroMission::__SetupOwn()
     {
         if(m_bFirstPlay)
         {
-            if(STAGE_BEGINNING) g_pGame->StartOutro(2u);
+            if(STAGE_BEGINNING)
+            {
+                g_pGame->StartOutro(GAME_OUTRO_BEGINNING);
+                g_pGame->FadeMusic(0.16f);
+            }
         }
         else
         {

@@ -118,8 +118,11 @@ void cDistortion::CreateWave(const coreVector3 vPosition, const coreFloat fScale
     coreObject2D& oWave = m_aWave[m_iCurWave];
 
     // 
+    const coreFloat fDelay = fSpeed * TIME;
+
+    // 
     oWave.SetPosition(g_pForeground->Project2D(vPosition) * DISTORTION_SCALE_FACTOR);
-    oWave.SetColor4  (coreVector4(fScale, fSpeed, 0.0f, 1.0f));
+    oWave.SetColor4  (coreVector4(fScale, fSpeed, 0.0f, 1.0f + fDelay));
 }
 
 
@@ -134,8 +137,11 @@ void cDistortion::CreateBurst(const coreVector3 vPosition, const coreVector2 vDi
     coreObject2D& oBurst = m_aBurst[m_iCurBurst];
 
     // 
+    const coreFloat fDelay = fSpeed * TIME;
+
+    // 
     oBurst.SetPosition(g_pForeground->Project2D(vPosition) * DISTORTION_SCALE_FACTOR);
-    oBurst.SetColor4  (coreVector4(fScale, vDirection * SQRT(fSpeed), 1.0f));
+    oBurst.SetColor4  (coreVector4(fScale, vDirection * SQRT(fSpeed), 1.0f + fDelay));
 }
 
 

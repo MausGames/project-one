@@ -32,6 +32,7 @@ void cReplay::CreateGame()
 
     // 
     sGameOptions oOptions = {};
+    oOptions.iKind        = m_Header.iOptionKind;
     oOptions.iType        = m_Header.iOptionType;
     oOptions.iMode        = m_Header.iOptionMode;
     oOptions.iDifficulty  = m_Header.iOptionDifficulty;
@@ -66,6 +67,7 @@ void cReplay::StartRecording()
     m_Header.iNumSegments    = REPLAY_SEGMENTS;
 
     // 
+    m_Header.iOptionKind       = g_pGame->GetOptions().iKind;
     m_Header.iOptionType       = g_pGame->GetOptions().iType;
     m_Header.iOptionMode       = g_pGame->GetOptions().iMode;
     m_Header.iOptionDifficulty = g_pGame->GetOptions().iDifficulty;
@@ -393,7 +395,7 @@ void cReplay::SaveFile(const coreChar* pcName)
     oArchive.CreateFile("body",   pBodyData,   iBodySize)      ->Compress();
 
     // 
-    WARN_IF(oArchive.Save(coreData::UserFolder(coreData::DateTimePrint(REPLAY_FILE_FOLDER "/replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION))) != CORE_OK)
+    WARN_IF(oArchive.Save(coreData::UserFolderPrivate(coreData::DateTimePrint(REPLAY_FILE_FOLDER "replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION))) != CORE_OK)
     {
 
     }
@@ -431,7 +433,7 @@ void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
 
     // 
     coreList<coreString> asFile;
-    coreData::FolderScan(coreData::UserFolder(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
+    coreData::FolderScan(coreData::UserFolderPrivate(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
 
     // 
     paInfoList->reserve(asFile.size());
@@ -580,6 +582,7 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
 
     // 
     // TODO 1: force solo if players == 1
+    pHeader->iOptionKind       = CLAMP(pHeader->iOptionKind,       0u, GAME_KIND_MAX      -1u);
     pHeader->iOptionType       = CLAMP(pHeader->iOptionType,       0u, GAME_TYPE_MAX      -1u);
     pHeader->iOptionMode       = CLAMP(pHeader->iOptionMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->iOptionDifficulty = CLAMP(pHeader->iOptionDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);

@@ -35,7 +35,9 @@
 // TODO 1: (finale) phase bei der alle objekte nochmal erzeugt werden ?
 // TODO 1: die turrets sollten vielleicht abhängig vom sprung-start erzeugt werden (entweder X oder Y seite)
 // TODO 1: size got increased, adjust intro animation
-// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
+// TODO 1: schilde können sich auf und ab bewegen
+// TODO 1: all custom enemies ENEMY_STATUS_TOP (particle not visible) oder bottom (waves overwrite outline) here ? other bosses ? to fix interference with outlines of boss
 
 
 // ****************************************************************
@@ -52,6 +54,7 @@
 #define OVERDRIVE_HIT (1u)
 #define JUMP_TARGET   (2u)
 #define COLOR_CHANGE  (3u)
+#define BARRIER_ANGLE (4u)
 
 
 // ****************************************************************
@@ -81,7 +84,8 @@ cTorusBoss::cTorusBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 2.0f);
 
     // configure the boss
-    this->Configure(7500, COLOR_SHIP_GREY);
+    this->Configure(7500, 0u, COLOR_SHIP_GREY);
+    this->AddStatus(ENEMY_STATUS_SECRET);
 
     // 
     m_Emitter.DefineModel  ("object_boss_torus_emitter.md3");
@@ -118,8 +122,8 @@ cTorusBoss::cTorusBoss()noexcept
         m_aTurret[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aTurret[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.85f);
         m_aTurret[i].SetTexSize     (coreVector2(0.8f,0.3f));
-        m_aTurret[i].Configure      (10, COLOR_ENERGY_CYAN * 0.7f);
-        m_aTurret[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL);
+        m_aTurret[i].Configure      (10, 0u, COLOR_ENERGY_CYAN * 0.7f);
+        m_aTurret[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET);
     }
 
     // 
@@ -153,8 +157,8 @@ cTorusBoss::cTorusBoss()noexcept
         m_aGunner[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aGunner[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
         m_aGunner[i].SetTexSize     (coreVector2(0.8f,0.3f));
-        m_aGunner[i].Configure      (10, COLOR_ENERGY_RED * 0.8f);
-        m_aGunner[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL);
+        m_aGunner[i].Configure      (10, 0u, COLOR_ENERGY_RED * 0.8f);
+        m_aGunner[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET);
     }
 
     // 
@@ -188,8 +192,8 @@ cTorusBoss::cTorusBoss()noexcept
         m_aCharger[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aCharger[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.5f);
         m_aCharger[i].SetTexSize     (coreVector2(0.5f,0.2f) * 2.0f);
-        m_aCharger[i].Configure      (10, COLOR_ENERGY_ORANGE * 1.0f);
-        m_aCharger[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_BULLET);
+        m_aCharger[i].Configure      (10, 0u, COLOR_ENERGY_ORANGE * 1.0f);
+        m_aCharger[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_TOP | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_BULLET | ENEMY_STATUS_SECRET);   // TODO 1: top   
     }
 
     // 
@@ -223,8 +227,8 @@ cTorusBoss::cTorusBoss()noexcept
         m_aDriver[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aDriver[i].SetSize        (coreVector3(2.6f,2.0f,2.6f) * 2.0f);
         m_aDriver[i].SetTexSize     (coreVector2(0.4f,0.2f) * 2.0f);
-        m_aDriver[i].Configure      (10, COLOR_ENERGY_PURPLE * 1.0f);
-        m_aDriver[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL);
+        m_aDriver[i].Configure      (10, 0u, COLOR_ENERGY_PURPLE * 1.0f);
+        m_aDriver[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET);
     }
 
     // 
@@ -258,8 +262,8 @@ cTorusBoss::cTorusBoss()noexcept
         m_aWaver[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aWaver[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 3.1f);
         m_aWaver[i].SetTexSize     (coreVector2(4.5f,4.5f));
-        m_aWaver[i].Configure      (10, COLOR_ENERGY_GREEN * 0.8f);
-        m_aWaver[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL);
+        m_aWaver[i].Configure      (10, 0u, COLOR_ENERGY_GREEN * 0.8f);
+        m_aWaver[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET);
     }
 
     // 
@@ -314,6 +318,9 @@ void cTorusBoss::__ResurrectOwn()
     // 
     constexpr coreUint8 aiNewOrder[] = {cSpearBullet::ID};
     g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
+
+    // 
+    this->_ResurrectBoss();
 }
 
 
@@ -371,9 +378,6 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     g_pGame->GetBulletManagerEnemy()->ResetOrder();
-
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 
@@ -424,7 +428,11 @@ void cTorusBoss::__MoveOwn()
     // 
     this->_UpdateBoss();
 
-    if(this->ReachedDeath()) this->Kill(true);   
+    if(this->ReachedDeath())
+    {
+        this->Kill(true);   
+        this->_EndBoss();
+    }
     
     
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
@@ -447,20 +455,24 @@ void cTorusBoss::__MoveOwn()
         static coreFloat fCurHeight = 0.0f;
         PHASE_CONTROL_TIMER(0u, 0.15f, LERP_LINEAR)
         {
-            if(PHASE_BEGINNING) this->AddStatus(ENEMY_STATUS_GHOST);
+            if(PHASE_BEGINNING)
+            {
+                g_pEnvironment->SetTargetSpeedNow(0.0f);
+                this->AddStatus(ENEMY_STATUS_GHOST);
+            }
             
-            if(PHASE_BEGINNING) g_pGame->GetInterface()->ShowAlert();
+            //if(PHASE_BEGINNING) g_pGame->GetInterface()->ShowAlert();
 
             // TODO 1: spin faster at the end, like a real coin
             
             if(fTime < 0.85f)
             {            
             const coreVector2 vDir = coreVector2::Direction(LERPB(12.0f*PI, 0.0f*PI, 1.0f - fTime));
-            const coreFloat fLen = LERPS(0.0f, 1.5f, MAX(1.0f - fTime * 1.5f, 0.0f)) * FOREGROUND_AREA.x;
+            const coreFloat fLen = LERPS(0.0f, 1.5f, MAX0(1.0f - fTime * 1.5f)) * FOREGROUND_AREA.x;
             
             const coreFloat fBonus = LERPS(0.0f, 1.0f, CLAMP((fTime - (2.0f/3.0f)) * 6.0f, 0.0f, 1.0f));
             const coreVector2 vDir2 = coreVector2::Direction(LERPB(12.0f*PI, 0.0f*PI, 1.0f - fTime)       + 0.0f*LERPB(-2.0f*PI, 0.0f*PI, 1.0f - fBonus));
-            const coreFloat fLen2 = LERPS(0.3f, 5.0f, MAX(1.0f - fTime * 1.5f, 0.0f)) * FOREGROUND_AREA.x    * (1.0f - fBonus);
+            const coreFloat fLen2 = LERPS(0.0f, 5.0f, MAX0(1.0f - fTime * 1.5f)) * FOREGROUND_AREA.x    * (1.0f - fBonus);
           
             const coreVector3 vAnchor = coreVector3(vDir2 * fLen2, -2.0f);
             
@@ -474,13 +486,15 @@ void cTorusBoss::__MoveOwn()
             fCurHeight = LERP(fCurHeight, fHeight, 10.0f * TIME);
             this->SetPosition(coreVector3(vNewPos, fCurHeight + LERP(this->GetVisualRange().x - 2.0f, this->GetVisualRange().z + 1.0f*0.0f, ABS(vOri2.z))));
             
-            if(fTime < 0.5f) this->__CreateOverdrive(coreVector3(vNewPos + vOffset, fCurHeight));
+            if(fTime < 0.57f) this->__CreateOverdrive(coreVector3(vNewPos + vOffset, fCurHeight));
             
-            m_fRotationBoss.UpdateMod(-LERPB(5.0f, 8.8f, fTime) - TORUS_BOSS_ROTATION, 2.0f*PI);
+            m_fRotationBoss.UpdateMod(((ABS(vOri2.z) == 1.0f) ? 0.0f : -LERPB(5.0f, 8.3f, fTime)) - TORUS_BOSS_ROTATION, 2.0f*PI);
             vNewOri = -vOri2;
             
             
-            vTestDir = coreVector3(-vDir2, 0.0f);
+            //vTestDir = coreVector3(-vDir2, 0.0f);
+            //vTestDir = vNewOri.RotatedZ90();
+            vTestDir = -coreVector3(0.0f,1.0f,0.0f);
             }
             else
             {
@@ -509,7 +523,11 @@ void cTorusBoss::__MoveOwn()
         static coreFloat fTestHeight = this->GetPosition().z;
         PHASE_CONTROL_TIMER(0u, 0.6f, LERP_LINEAR)
         {
-             if(PHASE_BEGINNING) this->RemoveStatus(ENEMY_STATUS_GHOST);
+            if(PHASE_BEGINNING)
+            {
+                this->RemoveStatus(ENEMY_STATUS_GHOST);
+            }
+            g_pEnvironment->SetTargetSpeedNow(LERPH3(0.0f, 6.0f, fTime));
              
              m_fRotationBoss.UpdateMod(-TORUS_BOSS_ROTATION * (1.0f - fTime), 2.0f*PI);
              vTestDir = coreVector3(coreVector2::Direction(LERPB(12.0f*PI, 0.0f*PI, 0.15f)), 0.0f);
@@ -637,6 +655,7 @@ void cTorusBoss::__MoveOwn()
                 this->RemoveStatus(ENEMY_STATUS_DAMAGING);
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_EFFECT_SHAKE);
                 
                 this->__EnableDriver(F_TO_UI(m_avVector[GRIND_VALUE].x) % TORUS_DRIVERS, this->GetPosition().xy(), AlongCrossNormal(this->GetPosition().xy()));   // TODO 1: anderer index
             }
@@ -658,7 +677,7 @@ void cTorusBoss::__MoveOwn()
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
 
             if(ABS(this->GetPosition().y) > 0.5f * FOREGROUND_AREA.y)
-                this->__EnableTurret(F_TO_UI(m_avVector[GRIND_VALUE].x) % TORUS_TURRETS, this->GetPosition().xy());
+                this->__EnableTurret(F_TO_UI(m_avVector[GRIND_VALUE].x * 0.5f) % TORUS_TURRETS, this->GetPosition().xy());
 
             if(this->GetCurHealth() < 3500)
             {
@@ -700,7 +719,7 @@ void cTorusBoss::__MoveOwn()
            (InBetweenExt(1.5f + (1.0f/3.0f), FMOD(fPrevGrind, 2.0f), FMOD(m_avVector[GRIND_VALUE].x, 2.0f)) == 1))
         {
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                this->__EnableGunner(F_TO_UI(m_avVector[GRIND_VALUE].x * 2.0f) % TORUS_GUNNERS, this->GetPosition().xy());
+            this->__EnableGunner(F_TO_UI(m_avVector[GRIND_VALUE].x + 0.5f) % TORUS_GUNNERS, this->GetPosition().xy());
         }
     }
 
@@ -750,10 +769,10 @@ void cTorusBoss::__MoveOwn()
             {
                 PHASE_CHANGE_INC
 
-                pMission->EnableBarrier(0u, this, coreVector2( 0.0f, 1.0f), -1, 3.0f);
-                pMission->EnableBarrier(1u, this, coreVector2( 0.0f,-1.0f), -1, 3.0f);
-                pMission->EnableBarrier(2u, this, coreVector2( 0.0f, 1.0f),  4, 2.0f);
-                pMission->EnableBarrier(3u, this, coreVector2( 0.0f,-1.0f),  4, 2.0f);
+                pMission->EnableBarrier(0u, VIRIDO_BARRIER_FREE, coreVector2(0.0f,1.0f), 3.0f);
+                pMission->EnableBarrier(1u, VIRIDO_BARRIER_FREE, coreVector2(0.0f,1.0f), 3.0f);
+                pMission->EnableBarrier(2u, VIRIDO_BARRIER_FREE, coreVector2(0.0f,1.0f), 2.0f);
+                pMission->EnableBarrier(3u, VIRIDO_BARRIER_FREE, coreVector2(0.0f,1.0f), 2.0f);
             }
         });
     }
@@ -1048,6 +1067,26 @@ void cTorusBoss::__MoveOwn()
     // ################################################################
     // ################################################################
 
+    if(pMission->GetBarrier(0u)->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        m_avVector[BARRIER_ANGLE].x += 1.0f * TIME;
+
+        const coreVector2 vDir1 = coreVector2::Direction(m_avVector[BARRIER_ANGLE].x * (-0.1f*PI));
+        const coreVector2 vDir2 = coreVector2::Direction(m_avVector[BARRIER_ANGLE].x * ( 0.4f*PI));
+
+        const coreVector2 vPos1 = vDir1 * 28.0f;
+        const coreVector2 vPos2 = vDir2 * 14.0f;
+
+        pMission->GetBarrier(0u)->SetPosition(coreVector3( vPos1, 0.0f));
+        pMission->GetBarrier(1u)->SetPosition(coreVector3(-vPos1, 0.0f));
+        pMission->GetBarrier(2u)->SetPosition(coreVector3( vPos2, 0.0f));
+        pMission->GetBarrier(3u)->SetPosition(coreVector3(-vPos2, 0.0f));
+
+        pMission->GetBarrier(0u)->SetDirection(coreVector3( vDir1, 0.0f));
+        pMission->GetBarrier(1u)->SetDirection(coreVector3(-vDir1, 0.0f));
+        pMission->GetBarrier(2u)->SetDirection(coreVector3( vDir2, 0.0f));
+        pMission->GetBarrier(3u)->SetDirection(coreVector3(-vDir2, 0.0f));
+    }
     
     
     // 
@@ -1121,7 +1160,6 @@ void cTorusBoss::__MoveOwn()
             const auto nBounceEffect = [](const coreVector2 vEffectPos)
             {
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vEffectPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_RED);
-                g_pSpecialEffects->PlaySound        (coreVector3(vEffectPos, 0.0f), 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
             };
 
             // 

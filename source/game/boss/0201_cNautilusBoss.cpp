@@ -40,7 +40,7 @@ cNautilusBoss::cNautilusBoss()noexcept
     this->SetSize(coreVector3(2.0f,2.0f,2.0f));
 
     // configure the boss
-    this->Configure(8000, COLOR_SHIP_PURPLE);
+    this->Configure(8000, 0u, COLOR_SHIP_PURPLE);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClaw); ++i)
@@ -48,7 +48,7 @@ cNautilusBoss::cNautilusBoss()noexcept
         m_aClaw[i].DefineModelHigh("ship_boss_nautilus_claw_high.md3");
         m_aClaw[i].DefineModelLow ("ship_boss_nautilus_claw_low.md3");
         m_aClaw[i].SetSize        (coreVector3(2.0f,2.0f,2.0f));
-        m_aClaw[i].Configure      (1, COLOR_SHIP_PURPLE);
+        m_aClaw[i].Configure      (1, 0u, COLOR_SHIP_PURPLE);
         m_aClaw[i].SetParent      (this);
     }
 
@@ -91,9 +91,6 @@ void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     this->__DisableBullet(bAnimated);
-
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 

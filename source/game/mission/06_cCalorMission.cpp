@@ -20,8 +20,9 @@ cCalorMission::cCalorMission()noexcept
 , m_apStarOwner    {}
 , m_avStarOffset   {}
 , m_afStarLength   {}
-, m_iStarState     (0u)
-, m_fSwingSpeed    (7.0f)
+, m_iStarSwing     (0u)
+, m_iStarAnimate   (0u)
+, m_fSwingSpeed    (1.0f)
 , m_fSwingStart    (0.0f)
 , m_afSwingValue   {}
 , m_apCatchObject  {}
@@ -32,6 +33,8 @@ cCalorMission::cCalorMission()noexcept
 {
     // 
     m_apBoss[0] = &m_Zeroth;
+
+#if defined(_P1_UNUSED_)
 
     // 
     m_Load.DefineProgram("effect_energy_flat_invert_inst_program");
@@ -59,6 +62,8 @@ cCalorMission::cCalorMission()noexcept
     m_LoadCopy.SetColor3    (COLOR_ENERGY_RED);
     m_LoadCopy.SetTexSize   (coreVector2(3.0f,3.0f));
     m_LoadCopy.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+#endif
 
     // 
     m_Star     .DefineProgram("effect_energy_flat_invert_inst_program");
@@ -93,13 +98,16 @@ cCalorMission::cCalorMission()noexcept
     m_Boulder.DefineTexture  (1u, "environment_stone_norm.png");
     m_Boulder.DefineProgram  ("object_meteor_blink_program");
     m_Boulder.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
-    m_Boulder.Configure      (50, coreVector3(1.0f,1.0f,1.0f));
-    m_Boulder.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS);
+    m_Boulder.Configure      (50, 0u, coreVector3(1.0f,1.0f,1.0f));
+    m_Boulder.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
 
     // 
     g_pGlow->BindList(&m_Load);
     g_pGlow->BindList(&m_Star);
     g_pGlow->BindList(&m_StarChain);
+
+    STATIC_ASSERT(CALOR_STARS <= sizeof(m_iStarSwing)  *8u)
+    STATIC_ASSERT(CALOR_STARS <= sizeof(m_iStarAnimate)*8u)
 }
 
 
@@ -128,6 +136,8 @@ cCalorMission::~cCalorMission()
 // 
 void cCalorMission::EnableLoad(const cShip* pOwner)
 {
+#if defined(_P1_UNUSED_)
+
     coreObject3D& oLoad = m_aLoadRaw[0];
 
     // 
@@ -151,6 +161,8 @@ void cCalorMission::EnableLoad(const cShip* pOwner)
     // 
     m_LoadCopy.DefineModel(pOwner->GetModelHigh());
     g_pGlow->BindObject(&m_LoadCopy);
+
+#endif
 }
 
 
@@ -158,6 +170,8 @@ void cCalorMission::EnableLoad(const cShip* pOwner)
 // 
 void cCalorMission::DisableLoad(const coreBool bAnimated)
 {
+#if defined(_P1_UNUSED_)
+
     coreObject3D& oLoad = m_aLoadRaw[0];
 
     // 
@@ -180,6 +194,8 @@ void cCalorMission::DisableLoad(const coreBool bAnimated)
         m_LoadCopy.DefineModel(NULL);
         g_pGlow->UnbindObject(&m_LoadCopy);
     }
+
+#endif
 }
 
 
@@ -203,8 +219,8 @@ void cCalorMission::EnableStar(const coreUintW iIndex, const cShip* pOwner, cons
     // 
     const auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
     {
-        pObject->SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            pObject->SetPosition(coreVector3(HIDDEN_POS + 1.0f, 0.0f));             
+        pObject->SetPosition(coreVector3(HIDDEN_POS + 1.0f, 0.0f));
+        pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
     };
     nInitFunc(pStar);
     for(coreUintW i = 0u; i < CALOR_CHAINS; ++i) nInitFunc(pChain + i);
@@ -222,11 +238,21 @@ void cCalorMission::DisableStar(const coreUintW iIndex, const coreBool bAnimated
     // 
     if(!pStar->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
-    // 
-    m_apStarOwner[iIndex] = NULL;
-
-    if(!bAnimated)
+    if(bAnimated)
     {
+        // 
+        ADD_BIT(m_iStarAnimate, iIndex)
+    }
+    else
+    {
+        // 
+        REMOVE_BIT(m_iStarAnimate, iIndex)
+
+        // 
+        m_apStarOwner [iIndex] = NULL;
+        m_avStarOffset[iIndex] = coreVector2(0.0f,0.0f);
+        m_afStarLength[iIndex] = 0.0f;
+
         // 
         const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
         {
@@ -241,8 +267,10 @@ void cCalorMission::DisableStar(const coreUintW iIndex, const coreBool bAnimated
 // 
 void cCalorMission::StartSwing(const coreFloat fSpeed)
 {
+    ASSERT(!m_iStarSwing)
+
     // 
-    m_iStarState  = BITLINE(CALOR_STARS);
+    m_iStarSwing  = BITLINE(CALOR_STARS);
     m_fSwingSpeed = fSpeed;
     m_fSwingStart = 0.0f;
 
@@ -262,8 +290,8 @@ void cCalorMission::StartSwing(const coreFloat fSpeed)
 void cCalorMission::StopSwing()
 {
     // 
-    m_iStarState  = 0u;
-    m_fSwingSpeed = 0.0f;
+    m_iStarSwing  = 0u;
+    m_fSwingSpeed = 1.0f;
     m_fSwingStart = 0.0f;
 }
 
@@ -273,7 +301,7 @@ void cCalorMission::StopSwing()
 void cCalorMission::CatchObject(const coreUintW iIndex, cShip* pObject)
 {
     ASSERT(iIndex < CALOR_STARS)
-    coreObject3D* pStar = (*m_Star.List())[iIndex];
+    const coreObject3D* pStar = (*m_Star.List())[iIndex];
 
     // 
     ASSERT(m_apStarOwner[iIndex])
@@ -332,10 +360,14 @@ void cCalorMission::__RenderOwnUnder()
 // 
 void cCalorMission::__RenderOwnOver()
 {
+#if defined(_P1_UNUSED_)
+
     DEPTH_PUSH
 
     // 
     m_LoadCopy.Render();
+
+#endif
 }
 
 
@@ -343,10 +375,14 @@ void cCalorMission::__RenderOwnOver()
 // 
 void cCalorMission::__RenderOwnTop()
 {
+#if defined(_P1_UNUSED_)
+
     DEPTH_PUSH
 
     // 
     m_Load.Render();
+
+#endif
 }
 
 
@@ -365,7 +401,7 @@ void cCalorMission::__MoveOwnMiddle()
         if(!pStar->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        m_afSwingValue[i].UpdateMod(7.0f * m_fSwingSpeed * m_fSwingStart, 2.0f*PI);
+        m_afSwingValue[i].UpdateMod(CALOR_SWING_SPEED * m_fSwingSpeed * m_fSwingStart, 2.0f*PI);
 
         // 
         const cShip* pOwner = m_apStarOwner[i];
@@ -376,7 +412,7 @@ void cCalorMission::__MoveOwnMiddle()
             // 
             if(pPlayer == pOwner)
             {
-                if(HAS_BIT(m_iStarState, i))
+                if(HAS_BIT(m_iStarSwing, i))
                 {
                     const coreVector2 vDir = coreVector2::Direction(m_afSwingValue[i]) * coreVector2(i ? -1.0f : 1.0f, 1.0f);
 
@@ -386,14 +422,6 @@ void cCalorMission::__MoveOwnMiddle()
 
                     // 
                     pPlayer->SetMoveSpeed(m_fSwingStart);
-                }
-                else
-                {
-                    //const coreVector2 vBase = pPlayer->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pPlayer->GetDirection().xy());
-                    //const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
-
-                    // 
-                    //pPlayer->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), m_afStarLength[i]), 0.0f));
                 }
             }
             else
@@ -454,7 +482,8 @@ void cCalorMission::__MoveOwnMiddle()
                     // 
                     Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, pCopy, [](cBullet* OUTPUT pBullet, const cEnemy* pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                     {
-                        if(pBullet->GetID() == cConeBullet::ID) return;   
+                        if((pBullet->GetID() != cFlipBullet::ID) && (pBullet->GetID() != cTriangleBullet::ID)) return;
+
                         pBullet->Deactivate(true, vIntersection.xy());
                     });
 
@@ -462,29 +491,30 @@ void cCalorMission::__MoveOwnMiddle()
                     Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                     {
                         if(!m_apCatchObject[i]) return;
-                        if(pObject->HasStatus(ENEMY_STATUS_BOSS)) return;
+                        if(pObject->HasStatus(ENEMY_STATUS_BOSS)) return;   // boss should not collide with own children
 
                         // 
                         const coreBool bEnemyBig  = (pEnemy ->GetMaxHealth() >= 10) || pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild();
                         const coreBool bObjectBig = (pObject->GetMaxHealth() >= 10);
 
-                        if(!bEnemyBig || bObjectBig)
+                        if(bObjectBig || !bEnemyBig)
                         {
-                            const coreBool bOther = (pEnemy == m_apCatchObject[1u - i]);
-                            
+                            // 
+                            const coreBool bOther      = (pEnemy == m_apCatchObject[1u - i]);
                             const coreBool bInvincible = pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE);
 
                             // 
                             pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pEnemy->TakeDamage  (pObject->GetCurHealth() / (g_pGame->IsCoop() ? 1 : 2), ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
+                            pEnemy->TakeDamage  (pObject->GetCurHealth() / (g_pGame->IsMulti() ? 1 : GAME_PLAYERS), ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
 
-                            if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
-                            
                             // 
                             if(bOther) this->UncatchObject(1u - i);
+
+                            // 
+                            if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
                         }
 
-                        if(!bObjectBig || bEnemyBig)
+                        if(bEnemyBig || !bObjectBig)
                         {
                             // 
                             pObject->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
@@ -496,19 +526,45 @@ void cCalorMission::__MoveOwnMiddle()
                     });
                 }
             }
-            else
-            {
-                if(m_apCatchObject[i])
-                {
-                    cShip* pCopy = m_apCatchObject[i];
-
-                    // 
-                    pCopy->SetPosition (coreVector3(MapToAxis(m_avCatchPos[i], -vDir), 0.0f) + pStar->GetPosition());
-                    pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], -vDir), 0.0f));
-                }
-            }
 
             STATIC_ASSERT(CALOR_STARS == 2u)
+        }
+        else
+        {
+            // 
+            m_afStarLength[i] += 1.0f * TIME;
+            if(m_afStarLength[i] >= 2.0f) this->DisableStar(i, false);
+
+            // 
+            const coreFloat   fSpeed = 6.0f * TIME * m_avStarOffset[i].y;
+            const coreVector2 vDir1  = coreVector2::Direction(m_avStarOffset[i].x);
+            const coreVector2 vPos1  = pStar->GetPosition().xy() + vDir1 * fSpeed;
+
+            // 
+            pStar->SetPosition(coreVector3(vPos1, 0.0f));
+
+            // 
+            for(coreUintW j = 0u; j < CALOR_CHAINS; ++j)
+            {
+                coreObject3D* pChain = (*m_StarChain.List())[i*CALOR_CHAINS + j];
+                if(!pChain->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                // 
+                const coreVector2 vDir2 = coreVector2::Direction(I_TO_F(j) * -0.3f + (1.0f*PI));
+                const coreVector2 vPos2 = pChain->GetPosition().xy() + (vDir2 + vDir1 * 20.0f).Normalized() * fSpeed;
+
+                // 
+                pChain->SetPosition(coreVector3(vPos2, 0.0f));
+            }
+
+            if(m_apCatchObject[i])
+            {
+                cEnemy* pCopy = d_cast<cEnemy*>(m_apCatchObject[i]);
+
+                // 
+                pCopy->SetPosition (coreVector3(MapToAxis(m_avCatchPos[i], vDir1), 0.0f) + pStar->GetPosition());
+                pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], vDir1), 0.0f));
+            }
         }
     }
 
@@ -526,6 +582,8 @@ void cCalorMission::__MoveOwnAfter()
 
     // 
     m_Snow.Move();
+
+#if defined(_P1_UNUSED_)
 
     // 
     for(coreUintW i = 0u; i < CALOR_LOADS; ++i)
@@ -592,6 +650,8 @@ void cCalorMission::__MoveOwnAfter()
     m_afLoadPower[1] = m_afLoadPower[0];
     m_afLoadPower[2].UpdateMax(-1.0f, 0.0f);
 
+#endif
+
     // 
     for(coreUintW i = 0u; i < CALOR_STARS; ++i)
     {
@@ -606,11 +666,7 @@ void cCalorMission::__MoveOwnAfter()
 
             if(pPlayer == pOwner)
             {
-                if(HAS_BIT(m_iStarState, i))
-                {
-
-                }
-                else
+                if(!HAS_BIT(m_iStarSwing, i))
                 {
                     const coreVector2 vBase = pPlayer->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pPlayer->GetDirection().xy());
                     const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
@@ -621,11 +677,10 @@ void cCalorMission::__MoveOwnAfter()
             }
 
             // 
-            const coreVector2 vBase    = pOwner->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pOwner->GetDirection().xy());
-            const coreVector2 vDiff    = vBase - pStar->GetPosition().xy();
-            const coreVector2 vDir     = vDiff.Normalized();
-            const coreFloat   fLen     = vDiff.Length();
-            //const coreFloat   fTension = STEPH3(CALOR_CHAIN_CONSTRAINT2 - 5.0f, CALOR_CHAIN_CONSTRAINT2, (pPlayer == pOwner) ? fLen : 0.0f);
+            const coreVector2 vBase = pOwner->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pOwner->GetDirection().xy());   // # again
+            const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
+            const coreVector2 vDir  = vDiff.Normalized();
+            const coreFloat   fLen  = vDiff.Length();
 
             // 
             for(coreUintW j = 0u; j < CALOR_CHAINS; ++j)
@@ -638,11 +693,44 @@ void cCalorMission::__MoveOwnAfter()
 
                 // 
                 pChain->SetPosition(coreVector3(vPos, 0.0f));
-                //pChain->SetColor3  (LERP(COLOR_ENERGY_WHITE * 0.8f, COLOR_ENERGY_RED * 0.8f, fTension));
                 pChain->SetColor3  (COLOR_ENERGY_WHITE * 0.8f);
                 pChain->SetAlpha   (STEPH3(1.7f, 2.2f, fLen - fOffset));
                 pChain->SetEnabled (pChain->GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             }
+
+            // 
+            if(pPlayer != pOwner)
+            {
+                if(m_apCatchObject[i])
+                {
+                    cShip* pCopy = m_apCatchObject[i];
+
+                    // 
+                    pCopy->SetPosition (coreVector3(MapToAxis(m_avCatchPos[i], -vDir), 0.0f) + pStar->GetPosition());
+                    pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], -vDir), 0.0f));
+
+                    // 
+                    Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, pCopy, [](cBullet* OUTPUT pBullet, const cEnemy* pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
+                    {
+                        if((pBullet->GetID() != cFlipBullet::ID) && (pBullet->GetID() != cTriangleBullet::ID)) return;
+
+                        pBullet->Deactivate(true, vIntersection.xy());
+                    });
+                }
+            }
+
+            // 
+            if(HAS_BIT(m_iStarAnimate, i))
+            {
+                REMOVE_BIT(m_iStarAnimate, i)
+
+                // 
+                m_apStarOwner [i] = NULL;
+                m_avStarOffset[i] = coreVector2(vDiff.Angle(), fLen * m_fSwingSpeed);
+                m_afStarLength[i] = 0.0f;
+            }
+
+            STATIC_ASSERT(CALOR_STARS == 2u)
         }
     }
 

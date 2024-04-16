@@ -12,10 +12,13 @@
 // ****************************************************************
 // constructor
 cDarkBackground::cDarkBackground()noexcept
-: m_Block      (DARK_BLOCKS)
-, m_fFlyOffset (0.0f)
-, m_fDissolve  (-1.0f)
-, m_afFade     {}
+: m_Block           (DARK_BLOCKS)
+, m_afStartHeight   {}
+, m_fFlyOffset      (0.0f)
+, m_iIndexOffset    (0u)
+, m_fDissolve       (-1.0f)
+, m_afFade          {}
+, m_fLightningFlash (0.0f)
 {
     // 
     this->__InitOwn();
@@ -40,10 +43,19 @@ cDarkBackground::cDarkBackground()noexcept
             coreObject3D* pBlock = &m_aBlockRaw[i];
             (*pBlock) = oBase;
 
+            // 
+            m_afStartHeight[i] = Core::Rand->Float(-0.5f, 0.5f) * DARK_DETAIL;
+            
+            const coreVector3 vColor = DARK_COLOR_DEFAULT * LERP(0.1f, 1.0f, STEP(-DARK_DETAIL * 1.5f, DARK_DETAIL * 1.5f, m_afStartHeight[i]));
+
             // set object properties
-            pBlock->SetPosition(coreVector3(0.0f, 0.0f, DARK_HEIGHT + Core::Rand->Float(-0.5f, 0.5f) * DARK_DETAIL));
+            pBlock->SetPosition(coreVector3(0.0f, 0.0f, DARK_HEIGHT + m_afStartHeight[i]));
             pBlock->SetSize    (coreVector3(0.5f,0.5f,0.5f) * DARK_DETAIL);
-            pBlock->SetColor4  (coreVector4(1.0f,1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+            pBlock->SetColor4  (coreVector4(vColor, 1.0f) * Core::Rand->Float(0.85f, 1.0f));
+            
+            const coreUintW iType = ((i + (i / DARK_BLOCKS_X)) * 3u) % 8u;
+            pBlock->SetTexSize  (coreVector2(0.25f,0.5f));
+            pBlock->SetTexOffset(coreVector2(I_TO_F(iType % 4u) * 0.25f, I_TO_F((iType / 4u) % 2u) * 0.5f));
 
             // add object to the list
             m_Block.BindObject(pBlock);
@@ -52,6 +64,16 @@ cDarkBackground::cDarkBackground()noexcept
 
     // 
     m_pOutdoor->GetShadowMap()->BindList(&m_Block);
+
+    // 
+    m_Lightning.DefineProgram("menu_color_program");
+    m_Lightning.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Lightning.SetSize      (coreVector2(1.0f,1.0f));
+    m_Lightning.SetAlpha     (0.0f);
+    m_Lightning.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    m_Headlight.SetAlpha(0.0f);
 }
 
 
@@ -106,14 +128,31 @@ void cDarkBackground::__ExitOwn()
 // 
 void cDarkBackground::__RenderOwnBefore()
 {
-    if(this->IsDissolved()) return;
+    if(!this->IsDissolved())
+    {
+        glDisable(GL_BLEND);
+        {
+            // 
+            m_Block.Render();
+        }
+        glEnable(GL_BLEND);
+    }
+}
 
-    glDisable(GL_BLEND);
+
+// ****************************************************************
+// 
+void cDarkBackground::__RenderOwnAfter()
+{
+    glDisable(GL_DEPTH_TEST);
     {
         // 
-        m_Block.Render();
+        m_Lightning.Render();
+
+        // 
+        if(m_Headlight.GetAlpha()) m_Headlight.Render();
     }
-    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -121,63 +160,88 @@ void cDarkBackground::__RenderOwnBefore()
 // 
 void cDarkBackground::__MoveOwn()
 {
-    if(this->IsDissolved()) return;
-
     // 
     m_fFlyOffset.Update(g_pEnvironment->GetSpeed() * DARK_SPEED);
 
-    // 
-    const coreVector2 vCamPos = g_pEnvironment->GetCameraPos().xy();
-    const coreFloat   fRange  = I_TO_F(DARK_BLOCKS_Y) * DARK_DETAIL * 0.5f;
-
-    // 
-    for(coreUintW i = 0u; i < DARK_BLOCKS; ++i)
+    if(!this->IsDissolved())
     {
         // 
-        const coreFloat   fX   = (I_TO_F(i % DARK_BLOCKS_X) - I_TO_F(DARK_BLOCKS_X - 1u) * 0.5f) * DARK_DETAIL;
-        const coreFloat   fY   = (I_TO_F(i / DARK_BLOCKS_X) - I_TO_F(DARK_BLOCKS_Y - 1u) * 0.5f) * DARK_DETAIL;
-        const coreVector2 vPos = coreVector2(fX, FmodRange(fY - m_fFlyOffset, -fRange, fRange));
-
-        // 
-        m_aBlockRaw[i].SetPosition(coreVector3(vCamPos + vPos, m_aBlockRaw[i].GetPosition().z));
-    }
-
-    if(m_fDissolve >= 0.0f)
-    {
-        // 
-        m_fDissolve.Update(2.0f);
+        const coreVector2 vCamPos = g_pEnvironment->GetCameraPos().xy();
+        const coreFloat   fRange  = I_TO_F(DARK_BLOCKS_Y) * DARK_DETAIL * 0.5f;
 
         // 
         for(coreUintW i = 0u; i < DARK_BLOCKS; ++i)
         {
             // 
-            const coreVector2 vAbsPos = m_aBlockRaw[i].GetPosition().xy();
-            const coreVector2 vRelPos = (vAbsPos - vCamPos) * 0.1f;
+            const coreFloat   fX   = (I_TO_F(i % DARK_BLOCKS_X) - I_TO_F(DARK_BLOCKS_X - 1u) * 0.5f) * DARK_DETAIL;
+            const coreFloat   fY   = (I_TO_F(i / DARK_BLOCKS_X) - I_TO_F(DARK_BLOCKS_Y - 1u) * 0.5f) * DARK_DETAIL;
+            const coreVector2 vPos = coreVector2(fX, FmodRange(fY - m_fFlyOffset, -fRange, fRange));
 
             // 
-            const coreFloat fDist  = MAX(ABS(vRelPos.x), ABS(vRelPos.y));
-            const coreFloat fShift = 0.5f + 0.5f * COS(18.0f * (vRelPos.x + 2.0f * vRelPos.y));
-            m_afFade[i].Update(MAX(m_fDissolve - (0.7f * fDist) - (0.8f * fShift), 0.0f) * 0.2f);
-
-            // 
-            const coreFloat   fLerp = LERPH3(0.0f, 1.0f, MIN(m_afFade[i], 1.0f));
-            const coreVector2 vNorm = vRelPos.Normalized();
-            const coreVector3 vAxis = coreVector3::Cross(coreVector3(vNorm, 0.0f), coreVector3(0.0f,0.0f,1.0f));
-            const coreMatrix3 mRota = coreMatrix4::RotationAxis(fLerp * -3.0f, vAxis).m123();
-
-            // 
-            m_aBlockRaw[i].SetPosition   (coreVector3(vAbsPos + vNorm * (fLerp * 50.0f), DARK_HEIGHT + (fLerp * 100.0f)));
-            m_aBlockRaw[i].SetDirection  (coreVector3(0.0f,1.0f,0.0f) * mRota);
-            m_aBlockRaw[i].SetOrientation(coreVector3(0.0f,0.0f,1.0f) * mRota);
+            m_aBlockRaw[i].SetPosition(coreVector3(vCamPos + vPos, m_aBlockRaw[i].GetPosition().z));
         }
-    }
 
-    // 
-    m_Block.MoveNormal();
+        // 
+        m_iIndexOffset = DARK_BLOCKS - (F_TO_UI(m_fFlyOffset / DARK_DETAIL) * DARK_BLOCKS_X) % DARK_BLOCKS;
+
+        if(m_fDissolve >= 0.0f)
+        {
+            // 
+            m_fDissolve.Update(2.0f);
+
+            // 
+            for(coreUintW i = 0u; i < DARK_BLOCKS; ++i)
+            {
+                // 
+                const coreVector2 vAbsPos = m_aBlockRaw[i].GetPosition().xy();
+                const coreVector2 vRelPos = (vAbsPos - vCamPos) * 0.1f;
+
+                // 
+                const coreFloat fDist  = MAX(ABS(vRelPos.x), ABS(vRelPos.y));
+                const coreFloat fShift = 0.5f + 0.5f * COS(18.0f * (vRelPos.x + 2.0f * vRelPos.y));
+                m_afFade[i].Update(MAX0(m_fDissolve - (0.7f * fDist) - (0.8f * fShift)) * 0.2f);
+
+                // 
+                const coreFloat   fLerp = BLENDH3(MIN1(m_afFade[i]));
+                const coreVector2 vNorm = vRelPos.Normalized();
+                const coreVector3 vAxis = coreVector3::Cross(coreVector3(vNorm, 0.0f), coreVector3(0.0f,0.0f,1.0f));
+                const coreMatrix3 mRota = coreMatrix4::RotationAxis(fLerp * -3.0f, vAxis).m123();
+
+                // 
+                m_aBlockRaw[i].SetPosition   (coreVector3(vAbsPos + vNorm * (fLerp * 50.0f), DARK_HEIGHT + (fLerp * 100.0f)));
+                m_aBlockRaw[i].SetDirection  (coreVector3(0.0f,1.0f,0.0f) * mRota);
+                m_aBlockRaw[i].SetOrientation(coreVector3(0.0f,0.0f,1.0f) * mRota);
+                m_aBlockRaw[i].SetEnabled    ((m_afFade[i] >= 1.0f) ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+            }
+        }
+
+        // 
+        m_Block.MoveNormal();
+    }
 
     // adjust volume of the base sound-effect
     if(m_pBaseSound->EnableRef(this))
+    {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    }
+
+    // 
+    m_fLightningFlash.UpdateMax(-1.0f, 0.0f);
+
+    // 
+    m_Lightning.SetColor3 (g_CurConfig.Graphics.iFlash ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_BLACK);
+    m_Lightning.SetAlpha  (BLENDH3(MIN1(m_fLightningFlash)) * 0.7f);
+    m_Lightning.SetEnabled(m_fLightningFlash ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Lightning.Move();
+}
+
+
+// ****************************************************************
+// 
+void cDarkBackground::__UpdateOwn()
+{
+    // 
+    if(m_Headlight.GetAlpha()) m_Headlight.UpdateDefault(1u);
 }
 
 

@@ -10,12 +10,13 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
+// TODO 3: player cone has wrong position on intro flight
+
 
 // ****************************************************************
 // foreground definitions
-#define FOREGROUND_AREA (coreVector2(41.5f,41.5f))   // area range for the foreground plane (+/-, needs to be adapted after camera height change)
-
-#define FOREGROUND_AREA3 (coreVector3(FOREGROUND_AREA, 1.0f))
+#define FOREGROUND_AREA  (coreVector2(41.5f,41.5f))             // area range for the foreground plane (+/-, needs to be adapted after camera height change)
+#define FOREGROUND_AREA3 (coreVector3(FOREGROUND_AREA, 1.0f))   // 
 
 #define FOREGROUND_BLEND_DEFAULT (GL_SRC_ALPHA), (GL_ONE_MINUS_SRC_ALPHA)   // default blending mode  (A*x + (1-A)*y)
 #define FOREGROUND_BLEND_SUM     (GL_SRC_ALPHA), (GL_ONE)                   // additive blending mode (A*x +       y)

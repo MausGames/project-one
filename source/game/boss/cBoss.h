@@ -21,12 +21,15 @@
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
 // TODO 1: boss hat mit PHASE_CONTROL_TICKER noch einmal geschossen, nachdem er gestorben ist und alle geschosse zerstört wurden, sollte allgemein verhindert werden, auch bei normalen waves
 // TODO 1: check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
+// TODO 4: remove counters and vectors (first remove usage)
+// TODO 1: damage done to boss might not count to correct stats object before name is on screen
+// TODO 1: chain sollte beim erscheinen des time-bonus-banners gebrochen werden
 
 
 // ****************************************************************
 // boss definitions
 #define BOSS_TIMERS   (8u)    // 
-#define BOSS_COUNTERS (10u)   // 
+#define BOSS_COUNTERS (16u)   // 
 #define BOSS_VECTORS  (12u)   // 
 
 
@@ -71,9 +74,10 @@
 #define TIGER_STINGS              (32u * TIGER_SIDES)                          // 
 #define TIGER_STINGS_SIDE         (32u)                                        // 
 #define TIGER_WEAPONS             (5u)                                         // 
-#define TIGER_SUBS                (3u)                                         // 
+#define TIGER_SUBS                (5u)                                         // 
 #define TIGER_DAMAGE              (70)                                         // 
 
+#define MESSIER_SHELLS            (2u)                                         // 
 #define MESSIER_RINGS             (3u)                                         // 
 #define MESSIER_ENEMIES_SMALL     (8u)                                         // 
 #define MESSIER_ENEMIES_BIG       (8u)                                         // 
@@ -101,6 +105,15 @@
 #define GEMINGA_ENEMIES_LEGION    (10u)                                        // 
 
 #define PROJECTONE_SHIELDS        (HELPERS - 1u)                               // 
+#define PROJECTONE_CLONES         (5u)                                         // 
+#define PROJECTONE_ENEMIES_METEOR (8u)                                         // 
+#define PROJECTONE_ENEMIES_LEGION (4u)                                         // 
+#define PROJECTONE_COLL_SCALE     (1.1f)                                       // 
+
+#define EIGENGRAU_LAYERS          (4u)                                         // 
+#define EIGENGRAU_PARASITES       (18u)                                        // 
+#define EIGENGRAU_FOLLOWERS       (52u)                                        // 
+#define EIGENGRAU_DEPTH           (-340.0f)                                    // 
 
 
 // ****************************************************************
@@ -185,17 +198,21 @@ public:
     void StoreRotation(const coreVector3 vDir, const coreVector3 vOri);
     void StoreRotation();
 
-    // 
-    inline const coreUint8& GetPhase()const {return m_iPhase;}
+    // get object properties
+    inline  const coreUint8& GetPhase    ()const {return m_iPhase;}
+    virtual const coreChar*  GetMusicName()const {return "";}
 
 
 protected:
     // 
     void _StartBoss();
-    void _EndBoss(const coreBool bAnimated);
+    void _EndBoss();
 
     // 
     void _UpdateBoss();
+
+    // 
+    void _ResurrectBoss();
 
     // 
     template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
@@ -368,6 +385,9 @@ public:
     DISABLE_COPY(cTorusBoss)
     ASSIGN_ID_EX(102, "TORUS", COLOR_MENU_GREEN)
 
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_01.ogg";}
+
 
 private:
     // execute own routines
@@ -538,6 +558,9 @@ public:
     DISABLE_COPY(cLeviathanBoss)
     ASSIGN_ID_EX(203, "LEVIATHAN", COLOR_MENU_CYAN)
 
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_02.ogg";}
+
 
 private:
     // execute own routines
@@ -617,6 +640,9 @@ public:
 
     DISABLE_COPY(cTigerBoss)
     ASSIGN_ID_EX(302, "TIGER MK-III", COLOR_MENU_YELLOW)
+
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_03.ogg";}
 
 
 private:
@@ -698,6 +724,8 @@ private:
 class cMessierBoss final : public cBoss
 {
 private:
+    cCustomEnemy m_aShell[MESSIER_SHELLS];           // 
+
     coreObject3D m_aRing[MESSIER_RINGS];             // 
     coreFlow     m_fRingTime;                        // 
     coreFlow     m_fRingScreen;                      // 
@@ -719,6 +747,9 @@ public:
 
     DISABLE_COPY(cMessierBoss)
     ASSIGN_ID_EX(403, "MESSIER 87", COLOR_MENU_MAGENTA)
+
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_04.ogg";}
 
 
 private:
@@ -808,6 +839,9 @@ public:
 
     DISABLE_COPY(cCholBoss)
     ASSIGN_ID_EX(503, "CHOL", COLOR_MENU_ORANGE)
+
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_05.ogg";}
 
 
 private:
@@ -901,6 +935,9 @@ public:
     // 
     void ResurrectIntro();
 
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_06.ogg";}
+
 
 private:
     // execute own routines
@@ -945,20 +982,19 @@ private:
 class cGemingaBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_InsideTop;           // 
-    cCustomEnemy m_InsideBottom;        // 
-    cCustomEnemy m_Top;                 // 
-    cCustomEnemy m_Bottom;              // 
+    cCustomEnemy m_InsideTop;            // 
+    cCustomEnemy m_InsideBottom;         // 
+    cCustomEnemy m_Top;                  // 
+    cCustomEnemy m_Bottom;               // 
 
-    cCustomEnemy m_Tooth[4];            // 
-    
-    cDharukSubBoss m_Dharuk;            // 
+    cDharukSubBoss m_Dharuk;             // 
 
-    coreFloat m_fMouthAngle;            // 
+    coreFloat m_fMouthAngle;             // 
 
-    coreSpline2 m_ChangePath;           // 
+    coreSpline2 m_ChangePath;            // 
+    coreSpline2 m_aPackPath[3];          // 
 
-    coreTexturePtr m_apStomachTex[4];   // 
+    coreTexturePtr m_apStomachTex[15];   // (textures are the slowest to load) 
 
 
 public:
@@ -966,6 +1002,9 @@ public:
 
     DISABLE_COPY(cGemingaBoss)
     ASSIGN_ID_EX(702, "GEMINGA", COLOR_MENU_RED)
+
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_07.ogg";}
 
 
 private:
@@ -1003,6 +1042,17 @@ class cProjectOneBoss final : public cBoss
 private:
     cCustomEnemy m_aShield[PROJECTONE_SHIELDS];   // 
 
+    cCustomEnemy m_aClone[PROJECTONE_CLONES];     // 
+
+    coreObject3D m_Range;                         // 
+    coreObject3D m_Arrow;                         // 
+    coreObject3D m_Wind;                          // 
+    coreObject3D m_Bubble;                        // 
+    coreObject3D m_Exhaust;                       // 
+
+    coreVector2 m_vOldDir;                        // 
+    coreFlow    m_fArrowValue;                    // 
+
     coreSpline2 m_HelperPath;                     // 
     coreUint8   m_iHelperState;                   // 
 
@@ -1010,22 +1060,104 @@ private:
 
     coreFlow m_fAnimation;                        // 
 
+    coreFlow    m_fWaveValue;                     // 
+    coreVector3 m_vColorFrom;                     // 
+    coreVector3 m_vColorTo;                       // 
+
+    coreFlow  m_fPatternValue;                    // 
+    coreFlow  m_fPatternStrength;                 // 
+    coreUint8 m_iPatternType;                     // 
+
+    coreFlow m_fFinalLerp;                        // 
+
+    coreBool m_bDead;                             // 
+
+    // yellow
+    coreFlow m_fFangTime;                         // 
+
+    // magenta
+    coreFlow  m_fPlateTime;                       // 
+    coreUint8 m_iMeteorDir;                       // 
+    coreFloat m_fGameAngle;                       // 
+
+    // purple
+    coreSpline2 m_aPurplePath[2];                 // 
+
+    // blue
+    coreFloat   m_fPushForce;                     // 
+    coreVector2 m_vPushDir;                       // 
+
 
 public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(801, "???")   // TODO 1: currently saved name, maybe even steam name 
+    ASSIGN_ID(801, "ONE")
+
+    // get object properties
+    inline coreVector3     GetColor    ()const final {return m_vLevelColor;}
+    inline const coreChar* GetMusicName()const final {return "boss_08_intro.ogg";}
 
     // 
-    inline coreVector3 GetColor()const final {return m_vLevelColor;}
+    static void CalcColor    (const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor);
+    static void CalcColorLerp(const coreFloat fValue, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor);
 
 
 private:
     // execute own routines
-    void __ResurrectOwn()final;
-    void __KillOwn     (const coreBool bAnimated)final;
-    void __MoveOwn     ()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnTop  ()final;
+    void __MoveOwn       ()final;
+
+    // 
+    void __MoveYellow ();
+    void __MoveOrange ();
+    void __MoveRed    ();
+    void __MoveMagenta();
+    void __MovePurple ();
+    void __MoveBlue   ();
+    void __MoveCyan   ();
+    void __MoveGreen  ();
+    void __MoveWhite  ();
+    void __MoveIntro  ();
+
+    // 
+    void __ShowArrow();
+
+    // 
+    void __StartFeeling();
+    void __EndFeeling  ();
+
+    // 
+    void __EnableRange  ();
+    void __DisableRange ();
+    void __EnableArrow  ();
+    void __DisableArrow ();
+    void __EnableWind   ();
+    void __DisableWind  ();
+    void __EnableBubble ();
+    void __DisableBubble();
+    void __UpdateExhaust(const coreFloat fStrength);
+
+    // 
+    void __SetEnergyColor(const coreVector3 vColor);
+
+    // 
+    void __SwitchHealth(const coreUintW iIndex);
+    void __SwitchColor (const coreUintW iIndex, const coreBool bWave);
+
+    // 
+    void __StartMission(const coreUintW iIndex);
+    void __EndMission  (const coreBool bAnimated, const coreBool bReturn);
+
+    // 
+    void __EndExplosion(const coreBool bClear);
+    void __EndAnimation(const coreFloat fTime);
+
+    // 
+    cBullet* __AddRainbowBullet(const coreUintW iType, const coreInt32 iDamage, const coreFloat fSpeed, const coreVector2 vPos, const coreVector2 vDir);
 };
 
 
@@ -1034,19 +1166,68 @@ private:
 class cEigengrauBoss final : public cBoss
 {
 private:
+    cLodObject m_aLayer[EIGENGRAU_LAYERS];           // 
+    coreObject3D m_Range;
+    coreObject3D m_RangePlayer;
+
+    cCustomEnemy m_aParasite[EIGENGRAU_PARASITES];   // 
+    cCustomEnemy m_aFollower[EIGENGRAU_FOLLOWERS];   // 
     
+    coreFlow m_afParasiteAlpha[EIGENGRAU_PARASITES];
+    coreFlow m_afFollowerAlpha[EIGENGRAU_FOLLOWERS];
+
+    coreFlow m_fAnimation;                           // 
+    coreFlow m_fRotation;
+    coreFlow m_fRotationSpeed;
+    
+    coreFlow  m_fRangeAnim;
+    coreFlow  m_fRangeAnimPlayer;
+    coreFloat m_fRangeSpeed;
+    coreFloat m_fRangeSpeedPlayer;
+
+    coreFullscreen m_Lightning;               // 
+    coreFlow       m_fLightningDelay;         // 
+    
+    coreFloat m_fRotaSpeed;
+    
+    coreUint16 m_iBurstTick;
+    
+    coreSpline2 m_PlayerPath;
+
+
 public:
     cEigengrauBoss()noexcept;
 
     DISABLE_COPY(cEigengrauBoss)
-    ASSIGN_ID_EX(802, "EIGENGRAU", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(802, "EIGENGRAU", COLOR_MENU_WHITE)
+
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_99.ogg";}
 
 
 private:
     // execute own routines
-    void __ResurrectOwn()final;
-    void __KillOwn     (const coreBool bAnimated)final;
-    void __MoveOwn     ()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnTop  ()final;
+    void __MoveOwn       ()final;
+
+    // 
+    coreVector3 __AimAtPlayerDual(const coreUintW iIndex)const;
+
+    // 
+    cBullet* __AddBullet     (const coreInt32 iDamage, const coreFloat fSpeed, const coreVector3 vPos, const coreVector3 vDir);
+    void     __AddBulletLine (const coreInt32 iDamage, const coreFloat fSpeed, const coreVector2 vLinePos, const coreVector2 vLineDir);
+    void     __AddBulletBurst();
+
+    // 
+    void __ResurrectParasite(const coreUintW iIndex);
+    void __KillParasite     (const coreUintW iIndex);
+
+    // 
+    void __ResurrectFollower(const coreUintW iIndex);
+    void __KillFollower     (const coreUintW iIndex);
 };
 
 
@@ -1065,6 +1246,9 @@ public:
 
     DISABLE_COPY(cIntroBoss)
     ASSIGN_ID_EX(9901, "SHINAI", COLOR_MENU_PURPLE)
+
+    // get object properties
+    inline const coreChar* GetMusicName()const final {return "boss_00.ogg";}
 
 
 private:

@@ -25,7 +25,7 @@
 // TODO 1: tod: gegner wird von seinen eigenen flügeln aufgespießt, tak-tak-tak-tak-boom
 // TODO 1: tod: fliegt in lava, kommt wieder raus
 // TODO 1: boss glüht nach dem einschlag in boden (und wand ?)
-// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: mehrere einzelne einschläge schon während der background sich noch bewegt, dann bleibt er stehen und alle 5 schlagen nochmal ein
 // TODO 1: banner-anzeige bei finalem tod hat anderen text "Real Time Bonus" (Real farbig ? und separat rausstehend)
 // TODO 1: wellen beim sturmangriff sind zu ähnlich wie von sword, vielleicht kreis-wellen wie beim alten leviathan ?
@@ -50,6 +50,9 @@
 // TODO 1: remove the remaining squishy movement in orb-phase (in sync with wave part)
 // TODO 1: wenn man die teile aus der wand schlägt, sollten sie zur seite fliegen, damit man nicht unabsichtlich glaubt man muss ihnen ausweichen
 // TODO 1: wenn einzelteile rotiert werden (zb. bei explosion) sollten sie geshiftet werden wie bei einzelteil-phase
+// TODO 1: im finale geht drehung los, bevor bewegung
+// TODO 1: view-bullets wurden von way-blöcken aufgehalten, und eigentlich sind beide rosa
+// TODO 1: vielleicht fliegt boss in erster phase auch rauf und runter (separat oder gemischt mit links-rechts)
 
 
 // ****************************************************************
@@ -96,8 +99,8 @@ cCholBoss::cCholBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.0f);
 
     // configure the boss
-    this->Configure(5500, COLOR_SHIP_ORANGE);
-    this->AddStatus(ENEMY_STATUS_DAMAGING);
+    this->Configure(5500, 0u, COLOR_SHIP_ORANGE);
+    this->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
 
     // 
     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
@@ -105,8 +108,8 @@ cCholBoss::cCholBoss()noexcept
         m_aWing[i].DefineModelHigh("ship_boss_chol_wing_high.md3");
         m_aWing[i].DefineModelLow ("ship_boss_chol_wing_low.md3");
         m_aWing[i].SetSize        (this->GetSize());
-        m_aWing[i].Configure      (10000, COLOR_SHIP_ORANGE);
-        m_aWing[i].AddStatus      (ENEMY_STATUS_DAMAGING);
+        m_aWing[i].Configure      (10000, 0u, COLOR_SHIP_ORANGE);
+        m_aWing[i].AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
         m_aWing[i].SetParent      (this);
     }
 
@@ -129,6 +132,9 @@ void cCholBoss::__ResurrectOwn()
     // 
     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
         this->__ChangeWingIntro(i);
+
+    // 
+    this->_ResurrectBoss();
 }
 
 
@@ -155,7 +161,8 @@ void cCholBoss::__KillOwn(const coreBool bAnimated)
         pMission->DisableLine(i, bAnimated);
 
     // 
-    g_pPostProcessing->SetWallOffset(2u, 0.0f);
+    for(coreUintW i = 0u; i < POST_WALLS; ++i)
+        g_pPostProcessing->SetWallOffset(i, 0.0f);
 
     // 
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -166,9 +173,6 @@ void cCholBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     this->__DisableFire(bAnimated);
-
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 
@@ -559,10 +563,7 @@ void cCholBoss::__MoveOwn()
         {
             m_avVector[WALL_OFFSET].z = 0.0f;
 
-            g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cConeBullet>([](cConeBullet* OUTPUT pBullet)
-            {
-                pBullet->Deactivate(true);
-            });
+            g_pGame->GetBulletManagerEnemy()->ClearBulletsTyped<cConeBullet>(true);
 
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
         }
@@ -664,7 +665,11 @@ void cCholBoss::__MoveOwn()
             g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos, -vDir.Rotated60 ())->ChangeSize(1.4f);
         });
 
-        if(this->ReachedDeath()) this->Kill(true);
+        if(this->ReachedDeath())
+        {
+            this->Kill(true);      
+            this->_EndBoss();
+        }
     }
 
     // ################################################################
@@ -783,6 +788,7 @@ void cCholBoss::__MoveOwn()
             for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
                 this->__ChangeWingSpike(i);
 
+            pMission->GetOrb(0u)->SetPosition(coreVector3(HIDDEN_POS, 0.0f));   // because line 0 is enabled for a single frame
             pMission->SetLineMode(1u);
         }
 

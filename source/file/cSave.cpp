@@ -13,7 +13,7 @@
 // constructor
 cSave::cSave()noexcept
 : m_Header {}
-, m_sPath  (coreData::UserFolder(SAVE_FILE_FOLDER "/save." SAVE_FILE_EXTENSION))
+, m_sPath  (coreData::UserFolderPrivate(SAVE_FILE_FOLDER "save." SAVE_FILE_EXTENSION))
 , m_iToken (0u)
 {
     // 
@@ -65,6 +65,8 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW 
         return &m_Header.aaLocalStatsSegment[iMissionIndex][iSegmentIndex];
     }
 
+    WARN_IF(false) {}
+
     // 
     static sLocalStats s_LocalStatsDummy;
     return &s_LocalStatsDummy;
@@ -101,7 +103,7 @@ coreBool cSave::LoadFile()
         coreData::FileMove(m_sPath.c_str(), PRINT("%s.invalid_%s", m_sPath.c_str(), coreData::DateTimePrint("%Y%m%d_%H%M%S")));
 
         // 
-        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.backup", m_sPath.c_str())))
+        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.bak", m_sPath.c_str())))
         {
             // 
             this->Clear();
@@ -128,12 +130,12 @@ void cSave::SaveFile()
     std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
 
     // 
-    Core::Manager::Resource->DetachFunction(m_iToken);
+    //Core::Manager::Resource->DetachFunction(m_iToken);   // TODO 1: memory leak of pHeaderData
 
     m_iToken = Core::Manager::Resource->AttachFunction([=, this]()
     {
         // 
-        coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));
+        coreData::FileMove(m_sPath.c_str(), PRINT("%s.bak", m_sPath.c_str()));
 
         // 
         sHeader* pHeader   = r_cast<sHeader*>(pHeaderData);

@@ -11,71 +11,19 @@
 #define _P1_GUARD_TURF_H_
 
 // TODO 1: use snow as base instead, the functionality there is quite advanced, if necessary as new base (cCanvas)
-
-/*
-
-    DEPTH_PUSH
-
-    glDisable(GL_DEPTH_TEST);
-    {
-        // 
-        m_Turf.Render();
-    }
-    glEnable(GL_DEPTH_TEST);
-
-
-
-if(m_Turf.IsActive())
-{
-    const coreFloat fOld = m_Turf.CalcPercent();
-    
-    g_pGame->GetBulletManagerPlayer()->ForEachBullet([this](cBullet* OUTPUT pBullet)
-    {
-        if(m_Turf.DrawPoint(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 4.0f, 1u) +
-           m_Turf.DrawPoint(pBullet->GetPosition().xy(),                                4.0f, 1u))
-        {
-            //pBullet->Deactivate(true);
-        }
-    });
-    
-    const coreFloat fNew = m_Turf.CalcPercent();
-    
-    if((fOld < 0.8f) && (fNew >= 0.8f))
-    {
-        m_Turf.DrawAll(1u);
-        m_Turf.Flash();
-    }
-}
-    // 
-    m_Turf.Move();
-
-
-
- */
+// TODO 3: cache and recalculate percentage value only on changes
 
 
 // ****************************************************************
 // 
-#define TURF_SIZE (64u)   // 
-
-
-// ****************************************************************
-// 
-class cTurf final : public coreFullscreen, public coreResourceRelation
+class cTurf final : public cSnow
 {
 private:
-    coreTexturePtr m_pTurfMap;     // 
-    coreUint8*     m_piTurfData;   // 
-
-    coreFloat m_fVisibility;       // 
-    coreFloat m_fDelay;            // 
-    coreFlow  m_fFlash;            // 
-    coreBool  m_bDirty;            // 
+    coreFlow m_fFlash;   // 
 
 
 public:
     cTurf()noexcept;
-    ~cTurf()final;
 
     DISABLE_COPY(cTurf)
 
@@ -84,32 +32,10 @@ public:
     void Move  ()final;
 
     // 
-    void Enable ();
-    void Disable(const coreFloat fDelay);
+    coreFloat CalcPercent()const;
 
     // 
-    coreUintW DrawPoint(const coreVector2 vPosition, const coreFloat fSize, const coreUint8 iType);
-    coreUintW DrawLine (const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const coreUint8 iType);
-    void      DrawAll  (const coreUint8 iType);
-    
-    coreFloat CalcPercent();
-    
-    void Flash();
-
-    // 
-    coreBool TestCollision(const coreVector2 vPosition)const;
-
-    // 
-    inline coreBool IsActive()const {return (m_fVisibility != 0.0f);}
-
-
-private:
-    // reset with the resource manager
-    void __Reset(const coreResourceReset eInit)final;
-
-    // 
-    static coreUintW __GetMapIndex(const coreFloat fValue);
-    static coreFloat __GetMapValue(const coreUintW iIndex);
+    inline void Flash() {m_fFlash = 1.0f;}
 };
 
 

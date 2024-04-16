@@ -29,7 +29,7 @@
 // TODO 1: arrow für schussrichtung ? (gelb)
 // TODO 1: manche gegner in mission sollen schon abstürzen
 // TODO 1: fixup scoring (enemies or damaging boss makes score ? how to handle chain ?)
-// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: MAIN: fragment, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: reifen unrealistisch animieren, damit sie bei hoher geschwindigkeit noch gut aussehen ?
 // TODO 1: hard-mode: wind + minen
 // TODO 1: make sure health is same in coop and non-coop (should already be, but check and confirm)
@@ -40,6 +40,10 @@
 // TODO 1: maybe add rotation to purple attack ? (would make this weapon more distinct, other weapons are already distinct)
 // TODO 1: farbe von raketen is auch grün, vielleicht ändern ? blau is noch frei
 // TODO 1: restliche modelle: laser schaut derzeit orsch aus, raketen-werfer, violette haubitze
+// TODO 1: weißer rauch bei laser-waffe vermischt sich mti weißem rauch von maulwürfen
+// TODO 1: raketen vielleicht hochdrehen, 1, 2, 3, 4
+// TODO 1: Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
+// TODO 1: bei stacheln keine doppelten platten erzeugen, alle überschüssigen schon am anfang erzeugen
 
 // TODO 1: (mines need to be enemies to allow blinking, combo/chain)
 // TODO 1: (in die stacheln schießen erzeugt effekt (knusprig))
@@ -81,24 +85,24 @@ cTigerBoss::cTigerBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.5f);
 
     // configure the boss
-    this->Configure(TIGER_DAMAGE * 104, COLOR_SHIP_YELLOW);
-    this->AddStatus(ENEMY_STATUS_BOTTOM);
+    this->Configure(TIGER_DAMAGE * 104, 0u, COLOR_SHIP_YELLOW);
+    this->AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
 
     // 
-    m_Track.DefineModelHigh("ship_boss_tiger_track_high.md3");
-    m_Track.DefineModelLow ("ship_boss_tiger_track_low.md3");
+    m_Track.DefineModelHigh("ship_boss_tiger_track.md3");
+    m_Track.DefineModelLow ("ship_boss_tiger_track.md3");
     m_Track.DefineTexture  (0u, "effect_track.png");
     m_Track.DefineProgram  ("effect_track_program");
     m_Track.SetSize        (this->GetSize());
     m_Track.SetTexSize     (coreVector2(1.0f,2.0f));
-    m_Track.Configure      (1, coreVector3(1.0f,1.0f,1.0f));
+    m_Track.Configure      (1, 0u, coreVector3(1.0f,1.0f,1.0f));
     m_Track.AddStatus      (ENEMY_STATUS_BOTTOM);
     m_Track.SetParent      (this);
 
     for(coreUintW i = 0u; i < TIGER_SUBS; ++i)
     {
         // 
-        m_aWeapon[i].Configure(1, COLOR_SHIP_YELLOW);
+        m_aWeapon[i].Configure(1, 0u, COLOR_SHIP_YELLOW);
         m_aWeapon[i].AddStatus(ENEMY_STATUS_BOTTOM);
         m_aWeapon[i].SetParent(this);
     }
@@ -106,7 +110,7 @@ cTigerBoss::cTigerBoss()noexcept
     for(coreUintW i = 0u; i < TIGER_SUBS; ++i)
     {
         // 
-        m_aWeaponOld[i].Configure(1, COLOR_SHIP_YELLOW);
+        m_aWeaponOld[i].Configure(1, 0u, COLOR_SHIP_YELLOW);
         m_aWeaponOld[i].AddStatus(ENEMY_STATUS_BOTTOM);
         m_aWeaponOld[i].SetParent(this);
     }
@@ -140,7 +144,7 @@ cTigerBoss::cTigerBoss()noexcept
     }
 
     // 
-    constexpr coreUintW aiSubs[] = {2u, 2u, 1u, 2u, 1u};
+    constexpr coreUintW aiSubs[] = {2u, 2u, 2u, 2u, 2u};
     STATIC_ASSERT((ARRAY_SIZE(aiSubs) == TIGER_WEAPONS) && std::any_of(aiSubs, aiSubs + ARRAY_SIZE(aiSubs), [](const coreUintW A) {return (A > 0u) && (A <= TIGER_SUBS);}))
 
     // 
@@ -154,6 +158,8 @@ cTigerBoss::cTigerBoss()noexcept
     }
     m_aapModelHigh[1][2] = m_aapModelHigh[1][1];
     m_aapModelLow [1][2] = m_aapModelLow [1][1];
+    m_aapModelHigh[4][4] = m_aapModelHigh[4][3] = m_aapModelHigh[4][2] = m_aapModelHigh[4][1];
+    m_aapModelLow [4][4] = m_aapModelLow [4][3] = m_aapModelLow [4][2] = m_aapModelLow [4][1];
 
     // 
     this->__SwitchWeapon(0u);
@@ -176,6 +182,9 @@ void cTigerBoss::__ResurrectOwn()
 
         if((m_iPhase == 50u) && (this->GetCurHealth() <= TIGER_DAMAGE * 16)) this->AddStatus(ENEMY_STATUS_INVINCIBLE);
     });
+
+    // 
+    this->_ResurrectBoss();
 }
 
 
@@ -189,9 +198,6 @@ void cTigerBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     g_pGame->GetCrashManager()->SetImpactCallback(NULL);
-
-    // 
-    this->_EndBoss(bAnimated);
 }
 
 
@@ -222,7 +228,11 @@ void cTigerBoss::__MoveOwn()
 
     cHarenaMission* pMission = d_cast<cHarenaMission*>(g_pGame->GetCurMission());
 
-    if(this->ReachedDeath()) this->Kill(true);   
+    if(this->ReachedDeath())
+    {
+        this->Kill(true);   
+        this->_EndBoss();
+    }
 
     // ################################################################
     // 
@@ -472,6 +482,7 @@ void cTigerBoss::__MoveOwn()
     const coreVector2 vEnvDirection = g_pEnvironment->GetDirection();
     const coreFloat   fEnvSpeed     = g_pEnvironment->GetSpeed();
     const coreFloat   fEnvFlyOffset = g_pEnvironment->GetFlyOffset();
+    ASSERT(fEnvSpeed > 0.0f)
 
     // 
     if(fEnvFlyOffset * OUTDOOR_DETAIL < m_vGroundPos.y) m_vGroundPos.y -= I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL;
@@ -510,7 +521,7 @@ void cTigerBoss::__MoveOwn()
                     m_aiCounter[WEAPON_SHOT] += 1;
                 }
 
-                const coreVector2 vAim    = this->AimAtPlayerDual((m_aiCounter[WEAPON_SHOT] / 2) % 2).Normalized();
+                const coreVector2 vAim    = (this->NearestPlayerDual((m_aiCounter[WEAPON_SHOT] / 2) % 2)->GetPosition().xy() - g_pForeground->Project3D(this->GetPosition())).Normalized();
                 const coreVector2 vNewDir = SmoothAim(m_aWeapon[0].GetDirection().xy(), vAim, 5.0f);
 
                 m_aWeapon[0].SetDirection(coreVector3(vNewDir, 0.0f));
@@ -519,7 +530,7 @@ void cTigerBoss::__MoveOwn()
                 {
                     if((m_iWeaponType != 1u) || ((m_aiCounter[WEAPON_SHOT] - 1) % 4 >= 2))
                     {
-                        const coreVector2 vWeaponPos = m_aWeapon[0].GetPosition ().xy();
+                        const coreVector2 vWeaponPos = g_pForeground->Project3D(m_aWeapon[0].GetPosition());
                         const coreVector2 vWeaponDir = m_aWeapon[0].GetDirection().xy();
                         const coreVector2 vHit       = vWeaponPos + vWeaponDir * g_pForeground->RayIntersection(vWeaponPos, vWeaponDir);
 
@@ -561,6 +572,8 @@ void cTigerBoss::__MoveOwn()
 
                                 g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.4f, this, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
                             }
+
+                            m_avVector[RECOIL_TIME].x = 1.0f;
                         }
                         else if(m_iWeaponType == 3u)
                         {
@@ -602,7 +615,7 @@ void cTigerBoss::__MoveOwn()
                     m_aiCounter[WEAPON_SHOT] += 1;
                 }
 
-                const coreVector2 vNewDir = coreVector2::Direction(m_fLifeTime);
+                const coreVector2 vNewDir = coreVector2::Direction(m_fLifeTime * 2.0f);
 
                 m_aWeapon[0].SetDirection(coreVector3(vNewDir, 0.0f));
 
@@ -610,13 +623,17 @@ void cTigerBoss::__MoveOwn()
                 {
                     if(m_aiCounter[WEAPON_SHOT] % 4 == 2)
                     {
+                        const coreVector2 vBase = g_pForeground->Project3D(m_aWeapon[0].GetPosition());
+
                         for(coreUintW i = 4u; i--; )
                         {
-                            const coreVector2 vDir = MapToAxis(vNewDir, coreVector2::Direction(I_TO_F(i) * (0.5f*PI)));
-                            const coreVector2 vPos = m_aWeapon[0].GetPosition().xy() + vDir * 3.0f;
+                            const coreVector2 vDir = StepRotated90(i);
+                            const coreVector2 vPos = vBase + vDir * 3.0f;
 
-                            g_pGame->GetBulletManagerEnemy()->AddBullet<cRocketBullet>(5, 1.0f, this, vPos, vDir)->SetTarget(this->NearestPlayerDual(m_aiCounter[WEAPON_SHOT] % 2))->ChangeSize(1.4f);
+                            g_pGame->GetBulletManagerEnemy()->AddBullet<cRocketBullet>(5, 1.0f, this, vPos, vDir)->SetTarget(this->NearestPlayerDual((m_aiCounter[WEAPON_SHOT] / 4) % 2))->ChangeSize(1.4f);
                         }
+
+                        m_avVector[RECOIL_TIME].x = 1.0f;
                     }
 
                     PHASE_RESET(3u)
@@ -677,8 +694,8 @@ void cTigerBoss::__MoveOwn()
     // 
     const coreVector2 vTrailPos1 = vBodyPos - vBodyDir * 8.0f + vBodyDir.Rotated90() * 6.8f;
     const coreVector2 vTrailPos2 = vBodyPos - vBodyDir * 8.0f - vBodyDir.Rotated90() * 6.8f;
-    this->__CreateTrail(0u, coreVector3(vTrailPos1, g_pEnvironment->RetrieveSafeHeight(vTrailPos1) - 1.0f));
-    this->__CreateTrail(1u, coreVector3(vTrailPos2, g_pEnvironment->RetrieveSafeHeight(vTrailPos2) - 1.0f));
+    this->__CreateTrail(0u, coreVector3(vTrailPos1, g_pEnvironment->RetrieveSafeHeight(vTrailPos1) - 0.0f));
+    this->__CreateTrail(1u, coreVector3(vTrailPos2, g_pEnvironment->RetrieveSafeHeight(vTrailPos2) - 0.0f));
 
 
 
@@ -840,6 +857,25 @@ void cTigerBoss::__MoveOwn()
         m_aWeaponOld[2].SetPosition(m_aWeaponOld[0].GetPosition() - vOffset);
     }
 
+    if(m_iWeaponType == 4u)
+    {
+        const coreVector3 vDir = m_aWeapon[0].GetDirection();
+
+        for(coreUintW i = 1u; i < TIGER_SUBS; ++i)
+        {
+            m_aWeapon[i].SetDirection(MapToAxis(vDir, StepRotated90X(i % 4u)));
+        }
+    }
+    if(m_iWeaponTypeOld == 4u)
+    {
+        const coreVector3 vDir = m_aWeaponOld[0].GetDirection();
+
+        for(coreUintW i = 1u; i < TIGER_SUBS; ++i)
+        {
+            m_aWeaponOld[i].SetDirection(MapToAxis(vDir, StepRotated90X(i % 4u)));
+        }
+    }
+
     m_avVector[RECOIL_TIME].xy((m_avVector[RECOIL_TIME].xy() - 1.0f * TIME).Processed(MAX, 0.0f));
 
     if(m_iWeaponType == 0u)
@@ -851,10 +887,24 @@ void cTigerBoss::__MoveOwn()
         m_aWeapon[1].SetPosition(m_aWeapon[1].GetPosition() - m_aWeapon[1].GetDirection() * (2.5f * m_aWeapon[1].GetSize().x * STEP(0.5f, 1.0f, m_avVector[RECOIL_TIME].x)));
         m_aWeapon[2].SetPosition(m_aWeapon[2].GetPosition() - m_aWeapon[2].GetDirection() * (2.5f * m_aWeapon[2].GetSize().x * STEP(0.5f, 1.0f, m_avVector[RECOIL_TIME].y)));
     }
+    else if(m_iWeaponType == 2u)
+    {
+        m_aWeapon[1].SetPosition(m_aWeapon[1].GetPosition() - m_aWeapon[1].GetDirection() * ((-0.5f + 1.0f * (1.0f - STEP(0.5f, 1.0f, m_avVector[RECOIL_TIME].x))) * m_aWeapon[1].GetSize().x));
+    }
     else if(m_iWeaponType == 3u)
     {
-        m_aWeapon[1].SetPosition(m_aWeapon[1].GetPosition() - m_aWeapon[1].GetDirection() * (2.8f * m_aWeapon[1].GetSize().x * STEP(0.5f, 1.0f, m_avVector[RECOIL_TIME].x)));
+        m_aWeapon[1].SetPosition(m_aWeapon[1].GetPosition() - m_aWeapon[1].GetDirection() * ((-0.7f + 1.6f * STEP(0.5f, 1.0f, m_avVector[RECOIL_TIME].x)) * m_aWeapon[1].GetSize().x));
     }
+    else if(m_iWeaponType == 4u)
+    {
+        for(coreUintW i = 1u; i < TIGER_SUBS; ++i)
+        {
+            m_aWeapon[i].SetPosition(m_aWeapon[i].GetPosition() - m_aWeapon[i].GetDirection() * (0.8f * m_aWeapon[i].GetSize().x * STEP(0.5f, 1.0f, m_avVector[RECOIL_TIME].x)));
+        }
+    }
+
+    // 
+    pMission->PlayInsanity();
 }
 
 
@@ -1005,7 +1055,7 @@ void cTigerBoss::__CreateTrail(const coreUintW iIndex, const coreVector3 vInters
                 coreObject3D* pObject = MANAGED_NEW(coreObject3D);
                 pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
                 pObject->DefineTexture(0u, "default_white.png");
-                pObject->DefineProgram("effect_decal_single_program");   // TODO 1: eigenen decal_color shader (similar to menu_color)
+                pObject->DefineProgram("effect_decal_single_program");   // TODO 1: eigenen decal_color shader (similar to menu_color, ohne textur)
 
                 // set object properties
                 pObject->SetSize     (coreVector3(vDecalSize, 1.0f));

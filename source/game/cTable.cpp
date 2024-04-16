@@ -47,6 +47,25 @@ void cDataTable::Reset()
 
 // ****************************************************************
 // 
+void cDataTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+
+    m_aiFragment[iMissionIndex] = 0u;   // reset whole mission
+    SET_BITVALUE(m_aiBadge[iMissionIndex], BADGES, BADGES * iSegmentIndex, 0u)
+}
+
+void cDataTable::RevertSegment()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
 RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterTotal()
 {
     // 
@@ -76,6 +95,8 @@ RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUi
         ASSERT(iSegmentIndex < TABLE_SEGMENTS)
         return &m_aaCounterSegment[iMissionIndex][iSegmentIndex];
     }
+
+    WARN_IF(false) {}
 
     // 
     static sCounter s_CounterDummy;
@@ -155,9 +176,6 @@ void cDataTable::GiveFragment(const coreUintW iMissionIndex, const coreUintW iBo
     g_pSave->EditGlobalStats      ()                                                  ->iFragmentsEarned += 1u;
     g_pSave->EditLocalStatsMission(iMissionIndex)                                     ->iFragmentsEarned += 1u;
     g_pSave->EditLocalStatsSegment(iMissionIndex, MISSION_BOSS_TO_SEGMENT(iBossIndex))->iFragmentsEarned += 1u;
-
-    // 
-    ADD_BIT(g_pSave->EditProgress()->aiFragment[iMissionIndex], iBossIndex)
 }
 
 void cDataTable::GiveFragment()
@@ -182,9 +200,6 @@ void cDataTable::GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMission
     g_pSave->EditGlobalStats      ()                            ->iBadgesEarned += 1u;
     g_pSave->EditLocalStatsMission(iMissionIndex)               ->iBadgesEarned += 1u;
     g_pSave->EditLocalStatsSegment(iMissionIndex, iSegmentIndex)->iBadgesEarned += 1u;
-
-    // 
-    ADD_BIT(g_pSave->EditProgress()->aiBadge[iMissionIndex], iBadgeIndex + BADGES * iSegmentIndex)
 }
 
 void cDataTable::GiveBadge(const coreUintW iBadgeIndex)
@@ -232,6 +247,31 @@ void cScoreTable::Reset()
     m_aiChainValue[1] = m_aiChainValue[0] = 0u;
     m_fCooldown =  0.0f;
     m_fOverride = -1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+
+    m_iScoreTotal                                  -= m_aaiScoreSegment[iMissionIndex][iSegmentIndex];
+    m_aiScoreMission [iMissionIndex]               -= m_aaiScoreSegment[iMissionIndex][iSegmentIndex];
+    m_aaiScoreSegment[iMissionIndex][iSegmentIndex] = 0u;
+
+    m_aiComboValue[1] = m_aiComboValue[0] = 0u;
+    m_aiChainValue[1] = m_aiChainValue[0] = 0u;
+    m_fCooldown =  0.0f;
+    m_fOverride = -1.0f;
+}
+
+void cScoreTable::RevertSegment()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -434,6 +474,31 @@ void cTimeTable::Reset()
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiShiftGoodSegment[j][i] = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiShiftBadMission [j] = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiShiftBadSegment [j][i] = 0u;
+}
+
+
+// ****************************************************************
+// 
+void cTimeTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+
+    m_iTimeTotal                                  -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
+    m_aiTimeMission [iMissionIndex]               -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
+    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * RCP(m_fFrameTime)) : 0u;
+
+    m_aiShiftGoodMission [iMissionIndex]               -= m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex];
+    m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex] = 0u;
+    m_aiShiftBadMission  [iMissionIndex]               -= m_aaiShiftBadSegment [iMissionIndex][iSegmentIndex];
+    m_aaiShiftBadSegment [iMissionIndex][iSegmentIndex] = 0u;
+}
+
+void cTimeTable::RevertSegment()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 

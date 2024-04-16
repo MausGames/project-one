@@ -36,85 +36,108 @@
 // TODO 3: use __Reset in water class, instead of __OwnInit
 // TODO 3: tropfen einschlag bei moss
 // TODO 3: there is no shadow on the lava (add shadow to lava or blend on edges ?)
+// TODO 3: if dark-background blocks are only using 1 channel, only use single-channel texture, but requires special shader (merge with normal map then ?)
+// TODO 2: if flashes are disabled, disabling darkness in moss background cannot be hidden by lightning, so implement smooth blending (or black lightning with single fade (no flicker))
+// TODO 4: move base-sound into base class ?
+// TODO 3: caustics for sea background
 
 
 // ****************************************************************
 // background definitions
 #define BACKGROUND_OBJECT_RANGE  (95.0f)   // default Y-range where objects on ground are considered visible (+/-)
-#define BACKGROUND_ADD_EXTENSION (3.0f)    // multiplier with Y-range where temporary additional objects are kept alive
+#define BACKGROUND_ADD_EXTENSION (1.5f)    // multiplier with Y-range where temporary additional objects are kept alive
 
 #define __BACKGROUND_SCANLINE(x,i,n) (coreVector2((x) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i) / I_TO_F(n)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW / 2u)) * OUTDOOR_DETAIL)
 
 
 // ****************************************************************
 // background distribution values
-#define GRASS_STONE_NUM       (1536u)
-#define GRASS_STONE_RESERVE   (256u)
-#define GRASS_REED_NUM        (3072u)
-#define GRASS_REED_1_RESERVE  (1024u)
-#define GRASS_REED_2_RESERVE  (256u)
-#define GRASS_FLOWER_NUM      (2048u)
-#define GRASS_FLOWER_RESERVE  (1024u)
-#define GRASS_LEAF_NUM        (2048u)
-#define GRASS_LEAF_RESERVE    (512u)
-#define GRASS_CLOUD_NUM       (64u)
-#define GRASS_CLOUD_RESERVE   (76u)   // # exact
+#define GRASS_STONE_NUM         (3072u)
+#define GRASS_STONE_RESERVE     (384u)
+#define GRASS_PLANT_NUM         (3072u)
+#define GRASS_PLANT_1_RESERVE   (1024u)
+#define GRASS_PLANT_2_RESERVE   (256u)
+#define GRASS_SHIP_NUM          (1024u)
+#define GRASS_SHIP_RESERVE      (64u)
+#define GRASS_FLOWER_NUM        (2048u)
+#define GRASS_FLOWER_RESERVE    (1024u)
+#define GRASS_LEAF_NUM          (2048u)
+#define GRASS_LEAF_RESERVE      (512u)
+#define GRASS_CLOUD_NUM         (64u)
+#define GRASS_CLOUD_RESERVE     (76u)   // # exact
 
-#define SEA_STONE_NUM         (1536u)
-#define SEA_STONE_RESERVE     (256u)
-#define SEA_WEED_NUM          (3072u)
-#define SEA_WEED_RESERVE      (3072u)
-#define SEA_ANIMAL_NUM        (1536u)
-#define SEA_ANIMAL_1_RESERVE  (192u)
-#define SEA_ANIMAL_2_RESERVE  (36u)
-#define SEA_ALGAE_NUM         (2048u)
-#define SEA_ALGAE_RESERVE     (512u)
+#define SEA_CORAL_NUM           (2048u)
+#define SEA_CORAL_1_RESERVE     (256u)
+#define SEA_CORAL_2_RESERVE     (256u)
+#define SEA_CORAL_3_RESERVE     (64u)
+#define SEA_WEED_NUM            (3072u)
+#define SEA_WEED_RESERVE        (3072u)
+#define SEA_ANIMAL_NUM          (1536u)
+#define SEA_ANIMAL_1_RESERVE    (256u)
+#define SEA_ANIMAL_2_RESERVE    (64u)
+#define SEA_ALGAE_NUM           (512u)
+#define SEA_ALGAE_RESERVE       (768u)
 
-#define DESERT_PILLAR_NUM     (1536u)
-#define DESERT_PILLAR_RESERVE (192u)
-#define DESERT_STONE_NUM      (1536u)
-#define DESERT_STONE_RESERVE  (192u)
-#define GRASS_SHIP_NUM        (1024u)    
-#define GRASS_SHIP_RESERVE    (256u)    
-#define DESERT_SAND_NUM       (7u)
+#define DESERT_PILLAR_NUM       (1536u)
+#define DESERT_PILLAR_RESERVE   (64u)
+#define DESERT_STONE_NUM        (1536u)
+#define DESERT_STONE_RESERVE    (192u)
+#define DESERT_PLANT_NUM        (3072u)
+#define DESERT_PLANT_RESERVE    (768u)
+#define DESERT_CACTUS_NUM       (3072u)
+#define DESERT_CACTUS_RESERVE   (256u)
+#define DESERT_SAND_NUM         (7u)
 
-#define SPACE_METEOR_NUM      (1536u)
-#define SPACE_METEOR_RESERVE  (1024u)
-#define SPACE_NEBULA_NUM      (4u)
+#define SPACE_METEOR_NUM        (1536u)
+#define SPACE_METEOR_RESERVE    (1024u)
+#define SPACE_NEBULA_NUM        (4u)
 
-#define VOLCANO_SMOKE_NUM     (512u)
-#define VOLCANO_SMOKE_RESERVE (64u)
-#define VOLCANO_SPARK_NUM     (2048u)
-#define VOLCANO_SPARK_RESERVE (1024u)
+#define VOLCANO_SMOKE_NUM       (512u)
+#define VOLCANO_SMOKE_RESERVE   (64u)
+#define VOLCANO_PYRAMID_NUM     (768u)
+#define VOLCANO_PYRAMID_RESERVE (128u)
+#define VOLCANO_PLANT_NUM       (3072u)
+#define VOLCANO_PLANT_1_RESERVE (256u)
+#define VOLCANO_PLANT_2_RESERVE (128u)
+#define VOLCANO_SPARK_NUM       (512u)
+#define VOLCANO_SPARK_RESERVE   (768u)
+#define VOLCANO_CLOUD_NUM       (64u)
+#define VOLCANO_CLOUD_RESERVE   (76u)   // # exact
 
-#define SNOW_STONE_NUM        (1536u)
-#define SNOW_STONE_RESERVE    (128u)
-#define SNOW_REED_NUM         (3072u)
-#define SNOW_REED_RESERVE     (769u)
-#define SNOW_SNOW_NUM         (12u)
-#define SNOW_CLOUD_NUM        (128u)
-#define SNOW_CLOUD_RESERVE    (152u)   // # exact
+#define SNOW_PLANT_NUM          (3072u)
+#define SNOW_PLANT_RESERVE      (512u)
+#define SNOW_STING_1_NUM        (3072u)
+#define SNOW_STING_2_NUM        (3072u)
+#define SNOW_STING_1_RESERVE    (768u)
+#define SNOW_STING_2_RESERVE    (768u)
+#define SNOW_CLOUD_NUM          (128u)
+#define SNOW_CLOUD_RESERVE      (152u)   // # exact
+#define SNOW_SNOW_NUM           (12u)
 
-#define MOSS_TREE_NUM         (1536u)
-#define MOSS_TREE_RESERVE     (192u)
-#define MOSS_GRAVE_NUM        (1536u)
-#define MOSS_GRAVE_RESERVE    (256u)
-#define MOSS_RAIN_NUM         (6u)
-#define MOSS_CLOUD_NUM        (64u)
-#define MOSS_CLOUD_RESERVE    (76u)   // # exact
+#define MOSS_TREE_NUM           (1536u)
+#define MOSS_TREE_1_RESERVE     (128u)
+#define MOSS_TREE_2_RESERVE     (64u)
+#define MOSS_TREE_3_RESERVE     (32u)
+#define MOSS_GRAVE_NUM          (1536u)
+#define MOSS_GRAVE_RESERVE      (384u)
+#define MOSS_CLOUD_NUM          (64u)
+#define MOSS_CLOUD_RESERVE      (76u)   // # exact
+#define MOSS_RAIN_NUM           (6u)
 
-#define DARK_DETAIL           (10.0f)
-#define DARK_BLOCKS_X         (12u)
-#define DARK_BLOCKS_Y         (13u)
-#define DARK_BLOCKS           (DARK_BLOCKS_X * DARK_BLOCKS_Y)
-#define DARK_HEIGHT           (WATER_HEIGHT)
-#define DARK_SPEED            (OUTDOOR_DETAIL)
+#define DARK_DETAIL             (10.0f)
+#define DARK_BLOCKS_X           (12u)
+#define DARK_BLOCKS_Y           (13u)
+#define DARK_BLOCKS             (DARK_BLOCKS_X * DARK_BLOCKS_Y)
+#define DARK_HEIGHT             (WATER_HEIGHT)
+#define DARK_SPEED              (OUTDOOR_DETAIL)
+#define DARK_COLOR_DEFAULT      (coreVector3(1.0f,1.0f,1.0f) * 0.75f)
 
-#define STOMACH_CLOUD_NUM     (256u)
-#define STOMACH_CLOUD_RESERVE (304u)   // # exact
+#define STOMACH_CLOUD_NUM       (256u)
+#define STOMACH_CLOUD_RESERVE   (304u)   // # exact
 
-#define CLOUD_CLOUD_NUM       (1024u)
-#define CLOUD_CLOUD_RESERVE   (1216u)   // # exact
+#define CLOUD_CLOUD_NUM         (1024u)
+#define CLOUD_CLOUD_RESERVE     (1216u)   // # exact
+#define CLOUD_RAIN_NUM          (6u)
 
 
 // ****************************************************************
@@ -140,6 +163,8 @@ protected:
     coreMapStr<coreBatchList*> m_apGroundAddList;    // temporary objects connected to the ground
     coreMapStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
     coreMapStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
+
+    coreList<coreBatchList*> m_apWaterRefList;       // 
 
     uDataMap<coreUint16> m_aaiBaseHeight;            // 
     uDataMap<coreUint32> m_aaiBaseNormal;            // 
@@ -169,9 +194,9 @@ public:
     void ClearAdds();
 
     // 
-    void SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity);
-    void SetDecalDensity (const coreUintW iIndex, const coreFloat fDensity);
-    void SetAirDensity   (const coreUintW iIndex, const coreFloat fDensity);
+    void SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce = false);
+    void SetDecalDensity (const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce = false);
+    void SetAirDensity   (const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce = false);
 
     // access frame buffer
     inline coreFrameBuffer* GetResolvedTexture() {return &m_ResolvedTexture;}
@@ -235,8 +260,8 @@ private:
 class cGrassBackground final : public cBackground
 {
 private:
-    coreFlow  m_fLeafTime;        // 
-    coreUintW m_iLeafNum;         // 
+    coreFlow  m_fLeafTime;       // 
+    coreUintW m_iLeafNum;        // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
 
@@ -263,6 +288,9 @@ class cSeaBackground final : public cBackground
 {
 private:
     coreFlow m_fWaveTime;        // 
+
+    coreFlow  m_fAlgaeTime;      // 
+    coreUintW m_iAlgaeNum;       // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
 
@@ -293,6 +321,14 @@ private:
     coreVector2    m_vSandMove;   // 
     coreFlow       m_fSandWave;   // 
 
+    coreFullscreen m_Veil;        // 
+    
+    coreVector3 m_avTrailHit[2];   // 
+    coreFlow    m_fTrailBlend;
+    coreBool    m_bTrail;
+    
+    coreVector2 m_vGroundPos;
+
     coreSoundPtr m_pBaseSound;    // base sound-effect
 
 
@@ -304,7 +340,9 @@ public:
     ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW)
 
     // 
-    inline void SetSandMove(const coreVector2 vMove) {m_vSandMove = vMove;}
+    inline void SetSandMove (const coreVector2 vMove)  {m_vSandMove = vMove;}
+    inline void SetVeilAlpha(const coreFloat   fAlpha) {m_Veil.SetAlpha(fAlpha);}
+    inline void SetTrail    (const coreBool    bTrail) {m_bTrail    = bTrail;}
 
     // 
     inline const coreVector2& GetSandMove()const {return m_vSandMove;}
@@ -316,6 +354,9 @@ private:
     void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
+
+    // 
+    void __CreateTrail(const coreUintW iIndex, const coreVector3 vIntersect);
 };
 
 
@@ -325,6 +366,7 @@ class cSpaceBackground final : public cBackground
 {
 private:
     coreFullscreen m_Cover;         // 
+    coreFullscreen m_Cover2;        // 
     coreVector2    m_vCoverDir;     // 
 
     coreFloat  m_fMeteorSpeed;      // 
@@ -345,7 +387,7 @@ public:
     ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
 
     // 
-    inline void SetCoverColor (const coreVector3 vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);}
+    inline void SetCoverColor (const coreVector3 vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f); m_Cover2.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.15f) * 1.3f);}
     inline void SetCoverDir   (const coreVector2 vDir)   {m_vCoverDir    = vDir; ASSERT(vDir.IsNormalized())}
     inline void SetMeteorSpeed(const coreFloat   fSpeed) {m_fMeteorSpeed = fSpeed;}
 
@@ -370,16 +412,13 @@ class cVolcanoBackground final : public cBackground
 private:
     cLava m_Lava;                           // 
 
-    //coreObject3D       m_aSmokeObject[2];   // 
-    //coreParticleEffect m_aSmokeEffect[2];   // 
-
-    coreSoundPtr m_pBaseSound;              // base sound-effect
-
     coreParticleSystem m_Smoke;
     coreList<coreParticleEffect> m_aSmokeEffect;
 
     coreFlow  m_fSparkTime;         // 
     coreUintW m_iSparkNum;          // 
+
+    coreSoundPtr m_pBaseSound;              // base sound-effect
 
 
 public:
@@ -441,6 +480,7 @@ private:
 
     coreFullscreen m_Lightning;         // 
     coreFlow       m_fLightningDelay;   // 
+    coreFlow       m_fLightningFlash;   // 
     coreTimer      m_LightningTicker;   // 
 
     coreSoundPtr m_apThunder[3];        // 
@@ -463,8 +503,11 @@ public:
     ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED)
 
     // 
+    inline void FlashLightning() {m_fLightningFlash = 1.0f;}
+
+    // 
     inline void SetRainMove       (const coreVector2 vMove)   {m_vRainMove        = vMove;}
-    inline void SetEnableLightning(const coreBool    bEnable) {m_bEnableLightning = bEnable; m_fLightningDelay = 0.0f;}
+    inline void SetEnableLightning(const coreBool    bEnable) {m_bEnableLightning = bEnable;}
     inline void SetEnableHeadlight(const coreBool    bEnable) {m_bEnableHeadlight = bEnable;}
 
     // 
@@ -489,12 +532,21 @@ private:
     coreBatchList m_Block;                    // 
     coreObject3D  m_aBlockRaw[DARK_BLOCKS];   // 
 
+    coreFloat m_afStartHeight[DARK_BLOCKS];   // 
+
     coreFlow m_fFlyOffset;                    // 
+
+    coreUintW m_iIndexOffset;                 // 
 
     coreFlow m_fDissolve;                     // 
     coreFlow m_afFade[DARK_BLOCKS];           // 
 
     coreSoundPtr m_pBaseSound;                // base sound-effect
+
+    coreFullscreen m_Lightning;               // 
+    coreFlow       m_fLightningFlash;         // 
+
+    cHeadlight m_Headlight;                   // 
 
 
 public:
@@ -509,12 +561,22 @@ public:
     inline coreBool IsDissolved()const {return (m_fDissolve >= 10.0f);}
 
     // 
-    inline void SetBlockHeight(const coreUintW iIndex, const coreFloat   fHeight) {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetPosition(coreVector3(m_aBlockRaw[iIndex].GetPosition().xy(), fHeight));}
+    inline void FlashLightning() {m_fLightningFlash = 1.0f;}
+
+    // 
+    inline void SetBlockHeight(const coreUintW iIndex, const coreFloat   fHeight) {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetPosition(coreVector3(m_aBlockRaw[iIndex].GetPosition().xy(), DARK_HEIGHT + fHeight));}
     inline void SetBlockColor (const coreUintW iIndex, const coreVector3 vColor)  {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetColor3  (vColor * m_aBlockRaw[iIndex].GetAlpha());}
 
     // 
-    inline coreVector2      GetBlockPosition(const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().xy() - cDarkBackground::__GetCameraPos();}
-    inline const coreFloat& GetBlockHeight  (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().z;}
+    inline coreVector2      GetBlockPosition    (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().xy() - cDarkBackground::__GetCameraPos();}
+    inline coreVector2      GetBlockPositionNorm(const coreUintW iIndex)const {return this->GetBlockPosition(iIndex) / (coreVector2(I_TO_F(DARK_BLOCKS_X - 1u), I_TO_F(DARK_BLOCKS_Y - 1u)) / 2.0f * DARK_DETAIL);}
+    inline const coreFloat& GetBlockHeight      (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().z;}
+    inline coreVector3      GetBlockColor       (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetColor3() / m_aBlockRaw[iIndex].GetAlpha();}
+    inline const coreFloat& GetStartHeight      (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_afStartHeight[iIndex];}
+    inline coreUintW        GetRelativeIndex    (const coreUintW iIndex)const {return (iIndex + m_iIndexOffset) % DARK_BLOCKS;}
+
+    // 
+    inline cHeadlight* GetHeadlight() {return &m_Headlight;}
 
 
 private:
@@ -522,7 +584,9 @@ private:
     void __InitOwn        ()final;
     void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
+    void __RenderOwnAfter ()final;
     void __MoveOwn        ()final;
+    void __UpdateOwn      ()final;
 
     // 
     static coreVector2 __GetCameraPos();
@@ -550,7 +614,6 @@ private:
     void __InitOwn       ()final;
     void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
-    void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
 };
 
@@ -560,10 +623,13 @@ private:
 class cCloudBackground final : public cBackground
 {
 private:
-    coreFullscreen m_Cover;      // 
-    coreFlow       m_fOffset;    // 
+    coreFullscreen m_Rain;        // 
+    coreVector2    m_vRainMove;   // 
 
-    coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreFullscreen m_Cover;       // 
+    coreFlow       m_fOffset;     // 
+
+    coreSoundPtr m_pBaseSound;    // base sound-effect
 
 
 public:
@@ -579,6 +645,7 @@ private:
     void __InitOwn        ()final;
     void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
+    void __RenderOwnAfter ()final;
     void __MoveOwn        ()final;
 };
 

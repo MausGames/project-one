@@ -24,9 +24,12 @@
 #define OUTLINE_STYLE_BULLET_FULL   (4u)   // 
 #define OUTLINE_STYLE_BULLET_DIRECT (5u)   // 
 #define OUTLINE_STYLE_LIGHT         (6u)   // 
-#define OUTLINE_STYLES              (7u)   // 
+#define OUTLINE_STYLE_LIGHT_THICK   (7u)   // 
+#define OUTLINE_STYLE_LIGHT_BULLET  (8u)   // 
+#define OUTLINE_STYLES              (9u)   // 
 
-#define OUTLINE_THICKNESS (0.35f)
+#define OUTLINE_THICKNESS       (0.35f)
+#define OUTLINE_THICKNESS_THICK (0.8f)
 
 
 // ****************************************************************
@@ -52,6 +55,8 @@ public:
     // apply immediate outline-style
     void ApplyObject(coreObject3D*  pObject)const;
     void ApplyList  (coreBatchList* pList)const;
+    
+    inline const coreProgramPtr& GetProgramSingle()const {return s_pProgramSingle;}
 };
 
 

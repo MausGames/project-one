@@ -18,11 +18,13 @@
 // TODO 3: check if num of streams and snapshots and sizes per stream would exceed anything, also replayhash + bodysize (those two are referencing the second file)
 // TODO 1: snapshot data: both player positions and state (roll, feel, force, interrupt, health, dead/repair (stats), continues, scores, shoot (timer), input), bullets, (chroma (bullets)), background
 // TODO 1: handle unsuccessful saving
+// TODO 1: first-play and other outside-variables need to be handled
+// TODO 1: stats, unlocks, etc. should not change during replay playback
 
 
 // ****************************************************************
 // 
-#define REPLAY_FILE_FOLDER      "replays"                // 
+#define REPLAY_FILE_FOLDER      "replays/"               // 
 #define REPLAY_FILE_EXTENSION   "p1rp"                   // 
 #define REPLAY_FILE_MAGIC       (UINT_LITERAL("P1RP"))   // 
 #define REPLAY_FILE_VERSION     (0x00000001u)            // 
@@ -78,6 +80,7 @@ public:
         coreUint8  iNumMissions;                                                           // 
         coreUint8  iNumSegments;                                                           // 
 
+        coreUint8  iOptionKind;
         coreUint8  iOptionType;                                                            // 
         coreUint8  iOptionMode;                                                            // 
         coreUint8  iOptionDifficulty;                                                      // 
