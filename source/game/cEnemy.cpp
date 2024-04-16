@@ -372,7 +372,7 @@ void cEnemy::ApplyScore(cPlayer* pPlayer)
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
     {
         // 
-        const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(this->GetRealScore(), true);
+        const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(g_pGame->RaiseValue(this->GetRealScore()), true);
         pPlayer->GetScoreTable()->AddCombo(1u);
 
         // 
@@ -996,6 +996,7 @@ cScoutEnemy::cScoutEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_scout_high.md3");
     this->DefineModelLow ("ship_enemy_scout_low.md3");
+    this->DefineVolume   ("ship_enemy_scout_volume.md3");
 }
 
 
@@ -1024,6 +1025,7 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_warrior_high.md3");
     this->DefineModelLow ("ship_enemy_warrior_low.md3");
+    this->DefineVolume   ("ship_enemy_warrior_volume.md3");
 }
 
 
@@ -1053,6 +1055,7 @@ cStarEnemy::cStarEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_star_high.md3");
     this->DefineModelLow ("ship_enemy_star_low.md3");
+    this->DefineVolume   ("ship_enemy_star_volume.md3");
 }
 
 
@@ -1094,6 +1097,7 @@ cArrowEnemy::cArrowEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_arrow_high.md3");
     this->DefineModelLow ("ship_enemy_arrow_low.md3");
+    this->DefineVolume   ("ship_enemy_arrow_volume.md3");
 }
 
 
@@ -1134,6 +1138,7 @@ cMinerEnemy::cMinerEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_miner_high.md3");
     this->DefineModelLow ("ship_enemy_miner_low.md3");
+    this->DefineVolume   ("ship_enemy_miner_volume.md3");
 }
 
 
@@ -1163,6 +1168,7 @@ cFreezerEnemy::cFreezerEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_freezer_high.md3");
     this->DefineModelLow ("ship_enemy_freezer_low.md3");
+    this->DefineVolume   ("ship_enemy_freezer_volume.md3");
 }
 
 
@@ -1204,6 +1210,7 @@ cCinderEnemy::cCinderEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_cinder_high.md3");
     this->DefineModelLow ("ship_enemy_cinder_low.md3");
+    this->DefineVolume   ("ship_enemy_cinder_volume.md3");
 }
 
 
@@ -1275,6 +1282,7 @@ cUfoEnemy::cUfoEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_miner_high.md3");
     this->DefineModelLow ("ship_enemy_miner_low.md3");
+    this->DefineVolume   ("ship_enemy_miner_volume.md3");
 }
 
 
@@ -1303,6 +1311,7 @@ cCoreEnemy::cCoreEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_boss_messier_core.md3");
     this->DefineModelLow ("ship_boss_messier_core.md3");
+    this->DefineVolume   ("ship_boss_messier_core_volume.md3");
 }
 
 

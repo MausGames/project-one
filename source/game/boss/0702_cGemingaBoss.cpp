@@ -1834,7 +1834,7 @@ void cGemingaBoss::__MoveOwn()
             break;
 
         default:
-            ASSERT(false)
+            UNREACHABLE
             break;
         }
 
@@ -1842,7 +1842,7 @@ void cGemingaBoss::__MoveOwn()
             pBullet->Deactivate(true);
     });
 
-    pMission->SetCollEnemyBullet([COLL_THIS](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
+    pMission->SetCollEnemyBullet([COLL_THIS](const cEnemy* pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if((pEnemy != &m_InsideTop) && (pEnemy != &m_InsideBottom)) return;
         if(!this->GetCurHealth()) return;

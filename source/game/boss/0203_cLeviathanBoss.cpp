@@ -79,6 +79,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     // 
     m_Head.DefineModelHigh     ("ship_boss_leviathan_head_high.md3");
     m_Head.DefineModelLow      ("ship_boss_leviathan_head_low.md3");
+    m_Head.DefineVolume        ("ship_boss_leviathan_head_volume.md3");
     m_Head.SetSize             (coreVector3(1.5f,1.5f,1.5f) * 1.3f);
     m_Head.SetCollisionModifier(this->GetCollisionModifier());
     m_Head.Configure           (500, 0u, COLOR_SHIP_CYAN);
@@ -89,6 +90,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     {
         m_aBody[i].DefineModelHigh     ("ship_boss_leviathan_body_high.md3");
         m_aBody[i].DefineModelLow      ("ship_boss_leviathan_body_low.md3");
+        m_aBody[i].DefineVolume        ("ship_boss_leviathan_body_volume.md3");
         m_aBody[i].SetSize             (coreVector3(1.7f,1.7f,1.7f) * 1.3f);
         m_aBody[i].SetCollisionModifier(this->GetCollisionModifier());
         m_aBody[i].Configure           (300, 0u, COLOR_SHIP_CYAN);
@@ -98,6 +100,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     // 
     m_Tail.DefineModelHigh     ("ship_boss_leviathan_tail_high.md3");
     m_Tail.DefineModelLow      ("ship_boss_leviathan_tail_low.md3");
+    m_Tail.DefineVolume        ("ship_boss_leviathan_tail_volume.md3");
     m_Tail.SetSize             (coreVector3(1.7f,1.7f,1.7f) * 1.3f);
     m_Tail.SetCollisionModifier(this->GetCollisionModifier());
     m_Tail.Configure           (300, 0u, COLOR_SHIP_CYAN);
@@ -791,7 +794,7 @@ void cLeviathanBoss::__MoveOwn()
             coreUint8 iPhase;
             switch(m_aiCounter[CYCLE_COUNT])
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 1: iPhase = 10u; break;
             case 2: iPhase = 50u; break;
             case 3: iPhase = 80u; break;
@@ -832,7 +835,7 @@ void cLeviathanBoss::__MoveOwn()
             coreVector2 vTarget;
             switch(m_aiCounter[EMERGE_TARGET] % 8)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0: vTarget = coreVector2( 0.0f, 1.0f); break;
             case 1: vTarget = coreVector2( 1.0f,-1.0f); break;
             case 2: vTarget = coreVector2(-1.0f, 0.0f); break;
@@ -847,7 +850,7 @@ void cLeviathanBoss::__MoveOwn()
             coreUint8 iArrow;
             switch((m_aiCounter[ARROW_ACTIVE] & 0xFFu) % 6u)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0: iArrow = 0u; break;
             case 1: iArrow = 1u; break;
             case 2: iArrow = 2u; break;
@@ -968,7 +971,7 @@ void cLeviathanBoss::__MoveOwn()
                         g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                     });
                 }
-                else ASSERT(false)
+                else UNREACHABLE
             }
 
             if(m_aiCounter[EMERGE_PART] == 2u)
@@ -1242,7 +1245,7 @@ void cLeviathanBoss::__MoveOwn()
                 coreVector2 vNewDir;
                 switch(m_aiSwimCount[i] % 8u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vNewDir = coreVector2( 1.0f, 0.5f); break;
                 case 1u: vNewDir = coreVector2( 0.5f,-1.0f); break;
                 case 2u: vNewDir = coreVector2(-1.0f, 0.5f); break;

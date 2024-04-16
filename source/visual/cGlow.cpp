@@ -30,7 +30,7 @@ void cGlow::Update()
     }
 
     // create glow only with active objects
-    m_bActive = !this->IsEmpty() || g_pSpecialEffects->IsActive();
+    m_bActive = (!this->IsEmpty() || g_pSpecialEffects->IsActive()) && (g_fShiftMode < 1.0f);
     if(m_bActive)
     {
         const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();

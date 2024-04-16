@@ -7,7 +7,6 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
-#include "additional/switch/sdl.h"
 
 
 // ****************************************************************
@@ -274,6 +273,8 @@ void cSave::SaveFile()
             Core::Log->Warning("Save (%s) could not be saved (status %u)", m_sPath.c_str(), coreUint32(m_eStatus));
             return CORE_OK;
         }
+
+        coreFile::FlushFilesystem();
 
         // 
         m_iActive = 2u;

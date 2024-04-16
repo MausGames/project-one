@@ -232,7 +232,7 @@ void cBonus1Mission::__SetupOwn()
 
             (i ? pHelperBlue : pHelperGreen)->SetPosition(coreVector3(oShelter.GetPosition().xy() - vDir * 13.0f, 0.0f));
 
-            cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &oShelter, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pShelter, const coreVector3& vIntersection, const coreBool bFirstHit)
+            cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &oShelter, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pShelter, const coreVector3& vIntersection, const coreBool bFirstHit)
             {
                 if(!bFirstHit) return;
 
@@ -245,7 +245,7 @@ void cBonus1Mission::__SetupOwn()
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             });
 
-            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oShelter, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pShelter, const coreVector3& vIntersection, const coreBool bFirstHit)
+            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oShelter, [](cBullet* OUTPUT pBullet, const coreObject3D* pShelter, const coreVector3& vIntersection, const coreBool bFirstHit)
             {
                 if(!bFirstHit) return;
 
@@ -257,7 +257,7 @@ void cBonus1Mission::__SetupOwn()
 
         if(!InBetween(m_fBeamTime, 1.0f, 2.0f))
         {
-            cPlayer::TestCollision(PLAYER_TEST_NORMAL, &m_Beam, [this](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBeam, const coreVector3& vIntersection, const coreBool bFirstHit)
+            cPlayer::TestCollision(PLAYER_TEST_NORMAL, &m_Beam, [this](cPlayer* OUTPUT pPlayer, const coreObject3D* pBeam, const coreVector3& vIntersection, const coreBool bFirstHit)
             {
                 for(coreUintW i = 0u; i < BONUS1_SHELTERS; ++i)
                 {
@@ -340,7 +340,7 @@ void cBonus1Mission::__SetupOwn()
                 coreVector2 vDir;
                 switch(s_iTick % 4u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vDir = coreVector2( 0.0f, 1.0f); break;
                 case 1u: vDir = coreVector2( 1.0f, 0.0f); break;
                 case 2u: vDir = coreVector2(-1.0f, 0.0f); break;

@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cVolcanoBackground::cVolcanoBackground()noexcept
-: m_Smoke      (256u)
+: cBackground  (false)
+, m_Smoke      (256u)
 , m_fSparkTime (Core::Rand->Float(10.0f))
 , m_Loaded     ()
 {
@@ -234,7 +235,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
         // 
         m_iSparkNum = papContent->size();
-        ASSERT(!(m_iSparkNum % 2u))
+        ASSERT(coreMath::IsAligned(m_iSparkNum, 2u))
 
         // post-process list and add to the air
         cBackground::_FillInfinite(pList1, VOLCANO_SPARK_RESERVE);
@@ -376,7 +377,7 @@ void cVolcanoBackground::__MoveOwn()
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pSmoke = (*pList->List())[i];
         if(!pSmoke->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
@@ -400,7 +401,7 @@ void cVolcanoBackground::__MoveOwn()
 
     // 
     pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pSpark = (*pList->List())[i];
 
@@ -427,7 +428,7 @@ void cVolcanoBackground::__MoveOwn()
     const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     pList = m_apAirObjectList[1];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));

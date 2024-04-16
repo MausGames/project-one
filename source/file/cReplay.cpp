@@ -82,10 +82,10 @@ void cReplay::StartRecording()
     }
 
     // 
-    m_Header.iConfigGameSpeed    = g_CurConfig.Game.iGameSpeed;
-    m_Header.iConfigBackRotation = g_CurConfig.Game.iBackRotation;
-    m_Header.iConfigBackSpeed    = g_CurConfig.Game.iBackSpeed;
-    m_Header.iConfigUpdateFreq   = g_CurConfig.Game.iUpdateFreq;   // TODO 1: should not be 0 
+    m_Header.iConfigGameSpeed    = GetCurGameSpeed();
+    m_Header.iConfigBackRotation = GetCurBackRotation();
+    m_Header.iConfigBackSpeed    = GetCurBackSpeed();
+    m_Header.iConfigUpdateFreq   = GetCurUpdateFreq();   // TODO 1: should not be 0 
     m_Header.iConfigVersion      = g_pGame->GetVersion();
 
     // 

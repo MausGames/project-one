@@ -248,7 +248,7 @@ void CheckAchievements()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 }
@@ -270,6 +270,22 @@ void InitLeaderboards()
 
 // ****************************************************************
 // 
+static coreUint16 GetUpdateFreqReal()
+{
+    // 
+    if(GetCurUpdateFreq()) return GetCurUpdateFreq();
+
+    // get current display mode
+    SDL_DisplayMode oMode = {};
+    SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
+
+    // 
+    return (oMode.refresh_rate > 0) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
+}
+
+
+// ****************************************************************
+// 
 static void FillBaseScoreData(sScoreData* pData)
 {
     ASSERT(pData)
@@ -280,7 +296,7 @@ static void FillBaseScoreData(sScoreData* pData)
 
 // ****************************************************************
 // 
-static void QueueScore(const coreUint8 iMissionIndex, const coreUint8 iSegmentIndex, const coreUint32 iScore, const sScoreData& oData)
+static void QueueScore(const coreUint8 iMissionIndex, const coreUint8 iSegmentIndex, const coreUint32 iScore, const coreBool bPure, const sScoreData& oData)
 {
     // 
     cSave::sScorePack* pPack = MANAGED_NEW(cSave::sScorePack);
@@ -314,7 +330,7 @@ static void QueueScore(const coreUint8 iMissionIndex, const coreUint8 iSegmentIn
 
 // ****************************************************************
 // 
-static void QueueTime(const coreUint8 iMissionIndex, const coreUint8 iSegmentIndex, const coreUint32 iTimeShifted, const sScoreData& oData)
+static void QueueTime(const coreUint8 iMissionIndex, const coreUint8 iSegmentIndex, const coreUint32 iTimeShifted, const coreBool bPure, const sScoreData& oData)
 {
     // 
     cSave::sScorePack* pPack = MANAGED_NEW(cSave::sScorePack);
@@ -348,6 +364,19 @@ static void QueueTime(const coreUint8 iMissionIndex, const coreUint8 iSegmentInd
 
 // ****************************************************************
 // 
+static coreBool IsPure(const sScoreData& oData)
+{
+    return (oData.iConfigGameSpeed    == SCORE_PURE_GAMESPEED)    &&
+           (oData.iConfigBackRotation == SCORE_PURE_BACKROTATION) &&
+           (oData.iConfigBackSpeed    == SCORE_PURE_BACKSPEED)    &&
+           (oData.iConfigUpdateFreq   == SCORE_PURE_UPDATEFREQ)   &&
+           (oData.aiOptionShield[0]   == SCORE_PURE_SHIELD)       &&
+           ((oData.iOptionType == GAME_TYPE_SOLO) || (oData.aiOptionShield[1] == SCORE_PURE_SHIELD));
+}
+
+
+// ****************************************************************
+// 
 void UploadLeaderboardsArcade(const coreUint32 iScore, const coreUint32 iTimeShifted)
 {
     if(g_bDemoVersion || !g_bLeaderboards || DEFINED(_CORE_SWITCH_)) return;
@@ -361,7 +390,7 @@ void UploadLeaderboardsArcade(const coreUint32 iScore, const coreUint32 iTimeShi
     // ...
 
     coreUint32& iScoreCache = s_aaiCacheScoreArcade[oData.iOptionType][oData.iOptionDifficulty];
-    if(!iScoreCache || (iScoreCache <= iScore))
+    if(iScore && (!iScoreCache || (iScoreCache <= iScore)))
     {
         iScoreCache = iScore;
 
@@ -369,7 +398,7 @@ void UploadLeaderboardsArcade(const coreUint32 iScore, const coreUint32 iTimeShi
     }
 
     coreUint32& iTimeCache = s_aaiCacheTimeArcade[oData.iOptionType][oData.iOptionDifficulty];
-    if(!iTimeCache || (iTimeCache >= iTimeShifted))
+    if(iTimeShifted && (!iTimeCache || (iTimeCache >= iTimeShifted)))
     {
         iTimeCache = iTimeShifted;
 
@@ -391,7 +420,7 @@ void UploadLeaderboardsMission(const coreUintW iMissionIndex, const coreUint32 i
     // ...
 
     coreUint32& iScoreCache = s_aaaiCacheScoreMission[oData.iOptionType][oData.iOptionDifficulty][iMissionIndex];
-    if(!iScoreCache || (iScoreCache <= iScore))
+    if(iScore && (!iScoreCache || (iScoreCache <= iScore)))
     {
         iScoreCache = iScore;
 
@@ -399,7 +428,7 @@ void UploadLeaderboardsMission(const coreUintW iMissionIndex, const coreUint32 i
     }
 
     coreUint32& iTimeCache = s_aaaiCacheTimeMission[oData.iOptionType][oData.iOptionDifficulty][iMissionIndex];
-    if(!iTimeCache || (iTimeCache >= iTimeShifted))
+    if(iTimeShifted && (!iTimeCache || (iTimeCache >= iTimeShifted)))
     {
         iTimeCache = iTimeShifted;
 
@@ -422,7 +451,7 @@ void UploadLeaderboardsSegment(const coreUintW iMissionIndex, const coreUintW iS
     // ...
 
     coreUint32& iScoreCache = s_aaaaiCacheScoreSegment[oData.iOptionType][oData.iOptionDifficulty][iMissionIndex][iSegmentIndex];
-    if(!iScoreCache || (iScoreCache <= iScore))
+    if(iScore && (!iScoreCache || (iScoreCache <= iScore)))
     {
         iScoreCache = iScore;
 
@@ -430,7 +459,7 @@ void UploadLeaderboardsSegment(const coreUintW iMissionIndex, const coreUintW iS
     }
 
     coreUint32& iTimeCache = s_aaaaiCacheTimeSegment[oData.iOptionType][oData.iOptionDifficulty][iMissionIndex][iSegmentIndex];
-    if(!iTimeCache || (iTimeCache >= iTimeShifted))
+    if(iTimeShifted && (!iTimeCache || (iTimeCache >= iTimeShifted)))
     {
         iTimeCache = iTimeShifted;
 
@@ -453,6 +482,27 @@ void CheckLeaderboards()
 
     // ...
 
+    std::sort(g_pSave->GetScoreQueue()->begin(), g_pSave->GetScoreQueue()->end(), [](const cSave::sScorePack* A, const cSave::sScorePack* B)
+    {
+        // pure before any
+        if( HAS_BIT(A->iType, 7u) && !HAS_BIT(B->iType, 7u)) return true;
+        if(!HAS_BIT(A->iType, 7u) &&  HAS_BIT(B->iType, 7u)) return false;
+
+        // score before time
+        if(!HAS_BIT(A->iType, 0u) &&  HAS_BIT(B->iType, 0u)) return true;
+        if( HAS_BIT(A->iType, 0u) && !HAS_BIT(B->iType, 0u)) return false;
+
+        // mission before segment
+        if( (A->iSegmentIndex >= SCORE_SEGMENTS) && !(B->iSegmentIndex >= SCORE_SEGMENTS)) return true;
+        if(!(A->iSegmentIndex >= SCORE_SEGMENTS) &&  (B->iSegmentIndex >= SCORE_SEGMENTS)) return false;
+
+        // arcade before mission
+        if( (A->iMissionIndex >= SCORE_MISSIONS) && !(B->iMissionIndex >= SCORE_MISSIONS)) return true;
+        if(!(A->iMissionIndex >= SCORE_MISSIONS) &&  (B->iMissionIndex >= SCORE_MISSIONS)) return false;
+
+        return (A->iSegmentIndex < B->iSegmentIndex);
+    });
+
     FOR_EACH(it, *g_pSave->GetScoreQueue())
     {
         cSave::sScorePack* pCur = (*it);
@@ -470,6 +520,27 @@ void CheckLeaderboards()
             // ...
         }
     }
+}
+
+
+// ****************************************************************
+// 
+const sScoreData* GetScoreData(const coreScore* pScore)
+{
+    static sScoreData s_Static;
+
+    const sScoreData* pData = r_cast<const sScoreData*>(pScore->aData);
+
+    if(pData->iVersion <= 2u)
+    {
+        std::memcpy(&s_Static, pData, sizeof(sScoreData));
+        std::memmove(&s_Static.iSystemOs,      r_cast<coreByte*>(&s_Static) + 34u, sizeof(coreUint8)  * 3u);
+        std::memmove( s_Static.aiScoreMission, r_cast<coreByte*>(&s_Static) + 40u, sizeof(coreUint32) * SCORE_MISSIONS);
+
+        return &s_Static;
+    }
+
+    return pData;
 }
 
 

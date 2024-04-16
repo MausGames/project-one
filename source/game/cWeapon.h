@@ -30,6 +30,8 @@ protected:
     coreTimer m_CooldownTimer;    // controls the cooldown between two successive primary shots
     coreUint8 m_iLastStatus;      // last shoot status (to determine trigger and release)
 
+    coreUint8 m_iBurst;           // 
+
     cPlayer* m_pOwner;            // associated owner of the weapon (and bullets)
 
 
@@ -55,12 +57,15 @@ public:
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // get object properties
-    inline  coreBool         GetCooldown   ()const {return m_CooldownTimer.GetStatus();}
-    inline  const coreUint8& GetLastStatus ()const {return m_iLastStatus;}
-    inline  cPlayer*         GetOwner      ()const {return m_pOwner;}
-    virtual coreVector3      GetColorEnergy()const {return coreVector3(0.5f,0.5f,0.5f);}
-    virtual coreVector3      GetColorShip  ()const {return coreVector3(0.5f,0.5f,0.5f);}
-    virtual coreUint8        GetElement    ()const {return ELEMENT_NEUTRAL;}
+    inline  coreBool         GetCooldown     ()const {return m_CooldownTimer.GetStatus();}
+    inline  coreFloat        GetCooldownTime ()const {return m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL);}
+    inline  coreFloat        GetCooldownSpeed()const {return m_CooldownTimer.GetSpeed();}
+    inline  const coreUint8& GetLastStatus   ()const {return m_iLastStatus;}
+    inline  const coreUint8& GetBurst        ()const {return m_iBurst;}
+    inline  cPlayer*         GetOwner        ()const {return m_pOwner;}
+    virtual coreVector3      GetColorEnergy  ()const {return coreVector3(0.5f,0.5f,0.5f);}
+    virtual coreVector3      GetColorShip    ()const {return coreVector3(0.5f,0.5f,0.5f);}
+    virtual coreUint8        GetElement      ()const {return ELEMENT_NEUTRAL;}
 
 
 protected:
@@ -104,8 +109,6 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    coreUint8 m_iBurst;            // 
-
     coreObject3D m_aMuzzle[2];     // 
     coreFlow     m_fMuzzleTime;    // 
     coreFlow     m_fMuzzleAnim;    // 
@@ -143,7 +146,6 @@ class cPulseWeapon final : public cWeapon
 {
 private:
     coreFlow  m_fCharge;           // 
-    coreUint8 m_iBurst;            // 
     coreUint8 m_iShotType;         // 
 
     coreObject3D m_Charge;         // 
@@ -187,10 +189,6 @@ private:
 // wave weapon class
 class cWaveWeapon final : public cWeapon
 {
-private:
-    coreUint8 m_iBurst;            // 
-
-
 public:
     cWaveWeapon()noexcept;
 
@@ -309,6 +307,7 @@ private:
 constexpr cWeapon::cWeapon()noexcept
 : m_CooldownTimer (coreTimer(1.0f, 1.0f, 0u))
 , m_iLastStatus   (0u)
+, m_iBurst        (0u)
 , m_pOwner        (NULL)
 {
 }

@@ -134,7 +134,7 @@ void cPauseMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 }

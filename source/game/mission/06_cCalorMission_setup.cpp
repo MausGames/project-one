@@ -226,7 +226,7 @@ void cCalorMission::__SetupOwn()
             {
                 switch(i)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case  0u: vStart = coreVector2(-1.3f, 0.2f); vLocation = coreVector2(-0.4f, 0.3f) + coreVector2( 0.1f, 0.1f); vEvade = coreVector2( 0.2f, 0.2f); break;
                 case  1u: vStart = coreVector2(-1.3f, 0.2f); vLocation = coreVector2(-0.4f, 0.3f) + coreVector2( 0.1f,-0.1f); vEvade = coreVector2( 0.2f,-0.2f); break;
                 case  2u: vStart = coreVector2(-1.3f, 0.2f); vLocation = coreVector2(-0.4f, 0.3f) + coreVector2(-0.1f, 0.1f); vEvade = coreVector2(-0.2f, 0.2f); break;
@@ -546,7 +546,7 @@ void cCalorMission::__SetupOwn()
                 coreFloat fTime;
                 switch(i)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: fTime = STEP(0.0f,  2.0f, afRecover[50u % iNumData]); break;
                 case 1u: fTime = STEP(2.0f,  4.0f, afRecover[56u % iNumData]); break;
                 case 2u: fTime = STEP(2.0f,  4.0f, afRecover[65u % iNumData]); break;
@@ -557,7 +557,7 @@ void cCalorMission::__SetupOwn()
                 coreVector2 vPos;
                 switch(i)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vPos = LERP(coreVector2(-1.2f,-0.8f), coreVector2( 1.2f,-0.8f), fTime); break;
                 case 1u: vPos = LERP(coreVector2( 0.5f, 1.2f), coreVector2(-0.5f,-1.2f), fTime); break;
                 case 2u: vPos = coreVector2::Direction(LERP(LERP(-1.25f*PI, -4.0f*PI, 2.0f/5.0f), LERP(-1.25f*PI, -4.0f*PI, 4.0f/5.0f) + (2.0f*PI), fTime)) * 0.5f; break;
@@ -1294,7 +1294,7 @@ void cCalorMission::__SetupOwn()
 
             switch(iCreationDelay++)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u:
                 nCreateBlockFunc(-2, -4, BIT(3u) | BIT(2u));
                 nCreateBlockFunc(-1, -4, BIT(2u));

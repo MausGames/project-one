@@ -101,9 +101,9 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 
     // set target transformation properties
-    inline void SetTargetDirection    (const coreVector2 vDirection, const coreFloat fStrength) {m_avDirection[1] = vDirection; m_afStrength[0] = fStrength; m_afLerp[0] = 0.0f; ASSERT(vDirection.IsNormalized()) if(!g_CurConfig.Game.iBackRotation) m_avDirection[1] = ENVIRONMENT_DEFAULT_DIRECTION;}
+    inline void SetTargetDirection    (const coreVector2 vDirection, const coreFloat fStrength) {m_avDirection[1] = vDirection; m_afStrength[0] = fStrength; m_afLerp[0] = 0.0f; ASSERT(vDirection.IsNormalized()) if(!GetCurBackRotation()) m_avDirection[1] = ENVIRONMENT_DEFAULT_DIRECTION;}
     inline void SetTargetSide         (const coreVector2 vSide,      const coreFloat fStrength) {m_avSide     [1] = vSide;      m_afStrength[1] = fStrength; m_afLerp[1] = 0.0f;}
-    inline void SetTargetSpeed        (const coreFloat   fSpeed,     const coreFloat fStrength) {m_afSpeed    [1] = fSpeed;     m_afStrength[2] = fStrength; m_afLerp[2] = 0.0f; m_afSpeed[1] *= I_TO_F(g_CurConfig.Game.iBackSpeed) / 100.0f;}
+    inline void SetTargetSpeed        (const coreFloat   fSpeed,     const coreFloat fStrength) {m_afSpeed    [1] = fSpeed;     m_afStrength[2] = fStrength; m_afLerp[2] = 0.0f; m_afSpeed[1] *= I_TO_F(GetCurBackSpeed()) / 100.0f;}
     inline void SetTargetHeight       (const coreFloat   fHeight,    const coreFloat fStrength) {m_afHeight   [1] = fHeight;    m_afStrength[3] = fStrength; m_afLerp[3] = 0.0f;}
     inline void SetTargetDirectionNow (const coreVector2 vDirection)                            {this->SetTargetDirection(vDirection, 0.0f); m_avDirection[0] = m_avDirection[1];}
     inline void SetTargetSideNow      (const coreVector2 vSide)                                 {this->SetTargetSide     (vSide,      0.0f); m_avSide     [0] = m_avSide     [1];}

@@ -55,7 +55,7 @@ void cAterMission::LoadInnerMission(const coreInt32 iID)
     // create new mission
     switch(iID)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case cNoMission     ::ID: m_pInnerMission = new cNoMission     (); break;
     case cViridoMission ::ID: m_pInnerMission = new cViridoMission (); break;
     case cNevoMission   ::ID: m_pInnerMission = new cNevoMission   (); break;

@@ -375,7 +375,7 @@ void cRutilusMission::__SetupOwn()
                     coreFloat fSide;
                     switch(((i - 32u) / 2u) % 4u)
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case 0u: fSide = -3.5f; break;
                     case 1u: fSide =  3.5f; break;
                     case 2u: fSide = -1.5f; break;
@@ -393,7 +393,7 @@ void cRutilusMission::__SetupOwn()
                     coreFloat fSide, fFlip;
                     switch(i - 56u)
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case  0u: fSide =  3.5f; fFlip = -1.0f; break;
                     case  1u: fSide =  3.5f; fFlip = -1.0f; break;
                     case  2u: fSide = -3.5f; fFlip = -1.0f; break;
@@ -674,7 +674,7 @@ void cRutilusMission::__SetupOwn()
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
         };
 
-        const coreFloat fBackSpeed = (g_CurConfig.Game.iBackRotation ? 0.95f : 0.5f);
+        const coreFloat fBackSpeed = (GetCurBackRotation() ? 0.95f : 0.5f);
 
         if(STAGE_CLEARED)
         {
@@ -815,7 +815,7 @@ void cRutilusMission::__SetupOwn()
 
             pHelper->SetPosition(coreVector3(LERPBR(1.08f, -1.2f, fTime) * FOREGROUND_AREA.x, 0.0f, 0.0f));
 
-            if(g_CurConfig.Game.iBackRotation)
+            if(GetCurBackRotation())
             {
                 fRotationValue = LERPBR(fRotationFrom, fRotationTo, fTime);
             }
@@ -833,7 +833,7 @@ void cRutilusMission::__SetupOwn()
             {
                 pHelper->Kill(false);
 
-                if(g_CurConfig.Game.iBackRotation)
+                if(GetCurBackRotation())
                 {
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
                     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
@@ -928,7 +928,7 @@ void cRutilusMission::__SetupOwn()
 
         g_pPostProcessing->SetDirectionGame(vDirection);
 
-        if(!g_CurConfig.Game.iBackRotation)
+        if(!GetCurBackRotation())
         {
             d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverDir(g_pPostProcessing->GetDirectionGame().InvertedX());
         }
@@ -1465,7 +1465,7 @@ void cRutilusMission::__SetupOwn()
                 coreFloat fSide;
                 switch(i - 10u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: fSide =  0.0f;  break;
                 case 1u: fSide = -0.75f; break;
                 case 2u: fSide =  0.75f; break;
@@ -2312,7 +2312,7 @@ void cRutilusMission::__SetupOwn()
                     coreInt32 iHealth;
                     switch(iType)
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case 0u: fScale = 11.0f * fBaseScale; fSpeed = 50.0f; iHealth = 120; break;
                     case 1u: fScale =  3.0f * fBaseScale; fSpeed = 40.0f; iHealth =  10; break;
                     case 2u: fScale =  5.0f * fBaseScale; fSpeed = 25.0f; iHealth =  50; break;
@@ -2550,7 +2550,7 @@ void cRutilusMission::__SetupOwn()
                         coreVector2 vDir;
                         switch(j)
                         {
-                        default: ASSERT(false)
+                        default: UNREACHABLE
                         case 0u: vDir = coreVector2(-2.0f,1.0f).Normalized(); break;
                         case 1u: vDir = coreVector2(-1.0f,2.0f).Normalized(); break;
                         case 2u: vDir = coreVector2( 1.0f,2.0f).Normalized(); break;

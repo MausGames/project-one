@@ -55,7 +55,7 @@ cArcadeInput::cArcadeInput()noexcept
             const coreChar* pcText;
             switch(g_acArcadeGlyph[i])
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case ARCADE_COMMAND_DEL: pcText = "DEL"; break;
             case ARCADE_COMMAND_END: pcText = "END"; break;
             }

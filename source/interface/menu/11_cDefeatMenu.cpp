@@ -40,11 +40,11 @@ cDefeatMenu::cDefeatMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
     {
-        m_ContinueImage[i].DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
-        m_ContinueImage[i].DefineProgram("default_2d_program");
-        m_ContinueImage[i].SetSize      (coreVector2(1.0f,1.0f) * 0.058f);
-        m_ContinueImage[i].SetTexSize   (ICON_TEXSIZE);
-        m_ContinueImage[i].SetTexOffset (ICON_TEXOFFSET * I_TO_F(i + 1u));
+        m_aContinueImage[i].DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
+        m_aContinueImage[i].DefineProgram("default_2d_program");
+        m_aContinueImage[i].SetSize      (coreVector2(1.0f,1.0f) * 0.058f);
+        m_aContinueImage[i].SetTexSize   (ICON_TEXSIZE);
+        m_aContinueImage[i].SetTexOffset (ICON_TEXOFFSET * I_TO_F(i + 1u));
     }
 
     // bind menu objects
@@ -53,7 +53,7 @@ cDefeatMenu::cDefeatMenu()noexcept
     this->BindObject(SURFACE_DEFEAT_CONTINUE, &m_ContinueText);
     this->BindObject(SURFACE_DEFEAT_CONTINUE, &m_ContinueTimer);
 
-    for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i) this->BindObject(SURFACE_DEFEAT_CONTINUE, &m_ContinueImage[i]);
+    for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i) this->BindObject(SURFACE_DEFEAT_CONTINUE, &m_aContinueImage[i]);
 
     this->BindObject(SURFACE_DEFEAT_GAMEOVER, &m_Background);
     this->BindObject(SURFACE_DEFEAT_GAMEOVER, &m_GameOverText);
@@ -85,10 +85,6 @@ void cDefeatMenu::Move()
     {
     case SURFACE_DEFEAT_CONTINUE:
         {
-            
-            for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
-                m_ContinueImage[i].SetDirection(coreVector2::Direction(coreFloat(Core::System->GetTotalTime()) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_DEFEAT_CONTINUES))));
-            
             // 
             m_fIntroTimer.Update(1.0f);
             if(m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV)
@@ -160,8 +156,8 @@ void cDefeatMenu::Move()
                     }();
 
                     // 
-                    cGuiObject&       oTarget = m_ContinueImage[iContinues - 1u];
-                    const cGuiObject& oSource = m_ContinueImage[iContinues % MENU_DEFEAT_CONTINUES];
+                    cGuiObject&       oTarget = m_aContinueImage[iContinues - 1u];
+                    const cGuiObject& oSource = m_aContinueImage[iContinues % MENU_DEFEAT_CONTINUES];
                     oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPositionLerp(BLENDBR(MIN1(m_fBurst))).y));
 
                     STATIC_ASSERT(MENU_DEFEAT_CONTINUES > 1u)
@@ -196,7 +192,7 @@ void cDefeatMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 
@@ -223,11 +219,14 @@ void cDefeatMenu::Move()
         m_Background.Move();
 
         // 
-        m_GameOverText .SetAlpha(fVisibility);
-        m_ContinueText .SetAlpha(fVisibility);
-        m_ContinueTimer.SetAlpha(fVisibility);
-        for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i) m_ContinueImage[i].SetAlpha(fVisibility);
+        m_GameOverText .SetAlpha(m_GameOverText .GetAlpha() * fVisibility);
+        m_ContinueText .SetAlpha(m_ContinueText .GetAlpha() * fVisibility);
+        m_ContinueTimer.SetAlpha(m_ContinueTimer.GetAlpha() * fVisibility);
+        for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i) m_aContinueImage[i].SetAlpha(m_aContinueImage[i].GetAlpha() * fVisibility);
     }
+    
+    for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
+        m_aContinueImage[i].SetDirection(coreVector2::Direction(coreFloat(Core::System->GetTotalTime()) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_DEFEAT_CONTINUES))));
 
     // 
     g_pPostProcessing->SetSaturationAll(MIN1(m_fOutroTimer * MENU_DEFEAT_BANNER_SPEED));
@@ -254,8 +253,8 @@ void cDefeatMenu::ShowContinue()
     // 
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
     {
-        m_ContinueImage[i].SetPosition(m_ContinueText.GetPosition() + coreVector2((I_TO_F(i) - 0.5f * I_TO_F(iContinues-1u)) * 0.055f, -0.11f));
-        m_ContinueImage[i].SetEnabled ((iContinues > i) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        m_aContinueImage[i].SetPosition(m_ContinueText.GetPosition() + coreVector2((I_TO_F(i) - 0.5f * I_TO_F(iContinues-1u)) * 0.055f, -0.11f));
+        m_aContinueImage[i].SetEnabled ((iContinues > i) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
 
     // 

@@ -131,7 +131,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
     coreFloat (*nAlgorithmFunc) (const coreFloat, const coreFloat);
     switch(iAlgorithm)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case OUTDOOR_ALGORITHM_SNOW:     nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI * (1.2f + 0.3f * SIN(y*0.075f*PI))) * 10.0f);                                                           return r;}; break;
     case OUTDOOR_ALGORITHM_GRASS:    nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) + SIN(x*0.075f*PI)) * 8.0f - 6.0f);                                                                                                 return r;}; break;
     case OUTDOOR_ALGORITHM_DESERT:   nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.5f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 13.0f);                                                       return r;}; break;
@@ -353,7 +353,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         const coreByte* pInput2 = s_cast<const coreByte*>(pSurface2->pixels);
 
         // merge XY components of both normal maps (divided by Z, partial-derivative)
-        for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
+        for(coreUintW i = 0u, j = 0u; i < LOOP_NONZERO(iSize); i += 4u, j += 3u)
         {
             const coreFloat x1 =             (I_TO_F(*(pInput1 + j))      - 127.5f);
             const coreFloat y1 =             (I_TO_F(*(pInput1 + j + 1u)) - 127.5f);

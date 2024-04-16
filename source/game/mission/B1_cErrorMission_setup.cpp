@@ -633,7 +633,7 @@ void cErrorMission::__SetupOwn()
         {
             coreVector2 vOffset = coreVector2(0.0f,0.0f);
 
-            g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pBullet)
             {
                  coreVector2 vDiff  = vOffset - pBullet->GetPosition().xy(); vDiff.y *= 0.0f;
                 const coreFloat   fLenSq = vDiff.LengthSq();
@@ -2539,7 +2539,7 @@ void UnusedWaves()
             }
         });
 #if 0
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pPlayerBullet)
+        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pPlayerBullet)
         {
             g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pEnemyBullet)
             {

@@ -53,7 +53,7 @@ void cViridoMission::__SetupOwn()
         pBackground->SetGroundDensity(0u, 0.0f);
         pBackground->SetGroundDensity(1u, 0.0f);
         pBackground->SetGroundDensity(2u, 0.0f);
-        pBackground->SetGroundDensity(3u, 1.0f);
+        pBackground->SetGroundDensity(3u, 0.0f);
         pBackground->SetDecalDensity (0u, 0.0f);
         pBackground->SetAirDensity   (2u, 1.0f);
 
@@ -599,7 +599,7 @@ void cViridoMission::__SetupOwn()
                 coreUintW iSize;
                 switch(pBullet->GetID())
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case cRayBullet  ::ID: iSize = sizeof(cRayBullet);   break;
                 case cPulseBullet::ID: iSize = sizeof(cPulseBullet); break;
                 case cSurgeBullet::ID: iSize = sizeof(cSurgeBullet); break;
@@ -636,6 +636,7 @@ void cViridoMission::__SetupOwn()
             pBackground->SetGroundDensity(0u, 1.0f, true);
             pBackground->SetGroundDensity(1u, 1.0f, true);
             pBackground->SetGroundDensity(2u, 1.0f, true);
+            pBackground->SetGroundDensity(3u, 1.0f, true);
             pBackground->SetDecalDensity (0u, 1.0f, true);
         }
 
@@ -712,7 +713,7 @@ void cViridoMission::__SetupOwn()
     // TASK: gegner in finaler phase in bestimmter reihenfolge töten, ändert sich je nach start-gegner
     // ACHIEVEMENT: touch every laser at least once
     // TODO 1: effect on laser when pole dancing
-    // TODO 1: hard mode: laser halten geschosse auf
+    // TODO 1: hard mode: laser halten geschosse auf -> aber kollision mit gegner muss priorität haben    -> nur bei wave, nicht bei boss?
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumData = 8u;
@@ -868,7 +869,7 @@ void cViridoMission::__SetupOwn()
             coreFloat   fDelay, fShift, fSide;
             switch(i)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case  0u: vBasePos = coreVector2( 0.7f,-0.1f); vBaseDir = coreVector2(-2.0f,-1.0f).Normalized(); fDelay = 0.0f;        fShift =           0.0f; fSide = -1.0f; break;
             case  1u: vBasePos = coreVector2( 0.2f,-0.7f); vBaseDir = coreVector2( 1.0f,-2.0f).Normalized(); fDelay = 0.3f;        fShift =         -15.0f; fSide =  1.0f; break;
             case  2u: vBasePos = coreVector2( 0.0f, 0.8f); vBaseDir = coreVector2( 1.0f, 1.0f).Normalized(); fDelay = 0.45f;       fShift =         -35.0f; fSide =  1.0f; break;
@@ -940,7 +941,7 @@ void cViridoMission::__SetupOwn()
             else if(i < 30u) vLerpPos = LERPB(vBasePos - vTan * 2.0f, vBasePos,          MIN1(fTime * 1.2f)) * (FOREGROUND_AREA)        * coreMatrix3::Rotation(fTime *  2.0f).m12();
             else if(i < 35u) vLerpPos = LERPB(-vTan * 1.4f,          -vTan * 0.5f,       MIN1(fTime * 1.2f)) * (FOREGROUND_AREA * 1.2f) * coreMatrix3::Rotation(fTime * -1.1f).m12();
             else if(i < 43u) vLerpPos = LERP (-vTan,                  vTan,             FRACT(fTime * 0.8f)) * (FOREGROUND_AREA * 1.2f);
-            else ASSERT(false)
+            else UNREACHABLE
 
             coreVector2 vLerpDir;
                  if(i <  7u) vLerpDir = vBaseDir;
@@ -951,7 +952,7 @@ void cViridoMission::__SetupOwn()
             else if(i < 30u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime *  2.0f).m12();
             else if(i < 35u) vLerpDir = vBaseDir * coreMatrix3::Rotation(fTime * -1.1f).m12();
             else if(i < 43u) vLerpDir = vBaseDir;
-            else ASSERT(false)
+            else UNREACHABLE
 
             coreFloat& fDistance = STAGE_SINK_FLOAT(afDistance[i % iNumData]);
 
@@ -1095,7 +1096,7 @@ void cViridoMission::__SetupOwn()
                     coreFloat fGlobeDist;
                     switch(i)
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case  6u: fGlobeDist =   0.0f; break;
                     case 14u: fGlobeDist =   0.0f; break;
                     case 19u: fGlobeDist =  30.0f; break;
@@ -1516,7 +1517,7 @@ void cViridoMission::__SetupOwn()
             {
                 const coreBool bPillar = ((fWait < (fWaitSpeed * fEasySpeed)) && !pEnemy->ReachedDeath());
 
-                pEnemy->DefineVolume        (bPillar ? "object_sphere.md3" : NULL);
+                pEnemy->DefineVolume        (bPillar ? "object_sphere.md3" : "ship_enemy_scout_volume.md3");
                 pEnemy->SetCollisionModifier(bPillar ? coreVector3(3.0f,3.0f,40.0f) : coreVector3(1.0f,1.0f,1.0f));
 
                 if(pEnemy->ReachedDeath())
@@ -1635,7 +1636,7 @@ void cViridoMission::__SetupOwn()
                             }
                             vNewAngle = vOldAngle + 2.0f*PI;
                         }
-                        else ASSERT(false)
+                        else UNREACHABLE
 
                         if(!pEnemy->ReachedDeath())
                         {
@@ -1818,7 +1819,7 @@ void cViridoMission::__SetupOwn()
 
                             if(!vDiff1.IsNull() && !vDiff2.IsNull() && (coreVector2::Dot(vDiff1, vDiff2) > 0.0f))
                             {
-                                pBig->DefineVolume        (NULL);   // TODO 1
+                                pBig->DefineVolume        ("ship_enemy_scout_volume.md3");   // TODO 1
                                 pBig->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 0.9f);
 
                                 const coreVector3 vRayPos = coreVector3(avPlayerPos[i],      0.0f);
@@ -2531,7 +2532,7 @@ void cViridoMission::__SetupOwn()
 
             switch(i)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
 
             // mirror
             case  0u: vNewPos = vNewPos * -0.85f + coreVector2(-1.0f,-1.0f).Rotated45() * 0.24f; break;
@@ -2694,7 +2695,7 @@ void cViridoMission::__SetupOwn()
 
             switch(i)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: vNewPos = vNewPos * coreVector2(-1.0f,1.0f) + coreVector2( 1.0f, 1.0f) * 1.9f; vNewRefPos = coreVector2( 1.0f, 1.0f) * 3.0f; break;
             case 1u: vNewPos = vNewPos * coreVector2(-1.0f,1.0f) + coreVector2(-1.0f,-1.0f) * 1.9f; vNewRefPos = coreVector2(-1.0f,-1.0f) * 3.0f; break;
             case 2u: vNewPos = vNewPos * coreVector2( 1.0f,1.0f) + coreVector2(-1.0f, 0.0f) * 1.9f; vNewRefPos = coreVector2(-1.0f, 0.0f) * 3.0f; break;

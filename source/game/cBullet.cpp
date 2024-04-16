@@ -53,7 +53,7 @@ void cBullet::Move()
     
     if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE))
     {
-        this->SetEnabled(bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+        this->SetEnabled((bVisible && this->GetAlpha()) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);   // alpha-check is only optimization for cTiltBullet
     }
     
     // move the 3d-object
@@ -215,6 +215,8 @@ void cBullet::_EnableDepth()const
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 : oBulletActive ()
 , iCurBullet    (0u)
+
+, iOutline (0u)
 {
 }
 
@@ -265,10 +267,12 @@ void cBulletManager::Render()
 
         // render bullet set
         pBulletActive->Render();
+        
+        m_Outline.GetStyle(m_apBulletSet[m_aiOrder[i]]->iOutline)->ApplyList(pBulletActive);
     }
 
     // 
-    m_Outline.Apply();
+    //m_Outline.Apply();
 }
 
 
@@ -658,6 +662,7 @@ cTeslaBullet::cTeslaBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_orb.md3");
+    this->DefineVolume ("bullet_orb_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_spheric_program");
 
@@ -782,6 +787,7 @@ cOrbBullet::cOrbBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_orb.md3");
+    this->DefineVolume ("bullet_orb_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
 }
@@ -968,6 +974,7 @@ cTriangleBullet::cTriangleBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_triangle.md3");
+    this->DefineVolume ("bullet_triangle_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 }
@@ -1047,6 +1054,7 @@ cQuadBullet::cQuadBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_quad.md3");
+    this->DefineVolume ("bullet_quad_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 }
@@ -1158,7 +1166,7 @@ void cCardBullet::__MoveOwn()
     m_fSpeed = m_fSpeed - 40.0f * TIME;
 
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
     m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
@@ -1416,7 +1424,7 @@ void cRocketBullet::__MoveOwn()
 cGrowBullet::cGrowBullet()noexcept
 {
     // load object resources
-    this->DefineModel  ("bullet_orb.md3");
+    this->DefineModel  ("bullet_orb.md3");   // # no volume
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_spheric_program");
 }
@@ -1480,14 +1488,9 @@ cTiltBullet::cTiltBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_orb.md3");
+    this->DefineVolume ("bullet_orb_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
-    
-    //this->DefineModel  ("bullet_quad.md3");
-    //this->DefineTexture(0u, "effect_energy.png");
-    //this->DefineProgram("effect_energy_bullet_direct_program");
-    
-    //this->DefineModel  ("object_cube_rota.md3");
 
     // set object properties
     //this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
@@ -1507,27 +1510,23 @@ void cTiltBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForc
 // 
 void cTiltBullet::__RenderOwnAfter()
 {
-    if(this->GetPosition().z > 5.0f)
+    if(this->GetPosition().z > 5.0f)   // render over player
     {
         const coreFloat fHeight = this->GetPosition().z;
-        
-       // this->SetPosition(coreVector3(this->GetPosition().xy(), 0.0f));
-       
 
-        this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f * 4.0f);// * (1.0f - STEPH3(0.0f, 60.0f, fHeight)));
+        this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f * 4.0f);
         this->SetAlpha(1.0f - STEPH3(0.0f, 100.0f, fHeight));
-        
-        this->_EnableDepth();
-        this->Render();
-        
-        
-                this->_EnableDepth(g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_BULLET_THICK)->GetProgramSingle());
-                g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_BULLET_THICK)->ApplyObject(this);
-        
-        //this->SetPosition(coreVector3(this->GetPosition().xy(), fHeight));
+        this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
+            this->_EnableDepth();
+            this->Render();   // # alternating because of transparency
+
+            this->_EnableDepth(g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_BULLET_THICK)->GetProgramSingle());
+            g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_BULLET_THICK)->ApplyObject(this);
 
         this->SetSize(coreVector3(0.0f,0.0f,0.0f));
         this->SetAlpha(0.0f);
+        this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
     }
 }
 
@@ -1550,7 +1549,7 @@ void cTiltBullet::__MoveOwn()
     // update fade
     //this->SetAlpha(MIN1(20.0f * m_fFade));
 
-    const coreVector2 vTrace = (this->GetPosition() + ABS(this->GetPosition().z) * m_vFlyDir3D / m_vFlyDir3D.z).xy();
+    const coreVector2 vTrace = (this->GetPosition() + ABS(this->GetPosition().z) * m_vFlyDir3D * RCP(m_vFlyDir3D.z)).xy();
     const coreFloat   fBlend = STEPH3(0.0f, 10.0f, this->GetPosition().z);
 
     const coreVector2 vDiff  = vTrace - g_pGame->GetPlayer(0u)->GetPosition().xy();

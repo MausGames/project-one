@@ -327,8 +327,8 @@ void cIntroMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(1u + GAME_PLAYERS * 3u)
-            STAGE_GET_UINT       (iResetArea)
+        STAGE_GET_START(GAME_PLAYERS * 4u)
+            STAGE_GET_UINT_ARRAY (aiResetArea,  GAME_PLAYERS)
             STAGE_GET_UINT_ARRAY (aiLastPack,   GAME_PLAYERS)
             STAGE_GET_UINT_ARRAY (aiInputState, GAME_PLAYERS)
             STAGE_GET_FLOAT_ARRAY(afInputDelay, GAME_PLAYERS)
@@ -351,21 +351,38 @@ void cIntroMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER(pPlayer, i)
         {
+            coreUint32& iResetArea  = aiResetArea [i];
             coreUint32& iInputState = aiInputState[i];
             coreFloat&  fInputDelay = afInputDelay[i];
 
-            if(!HAS_BIT(iInputState, 0u) && (pPlayer->GetDirection().y < 1.0f - CORE_MATH_PRECISION))
+            if(pPlayer->GetWeapon(0u)->GetID() == cWaveWeapon::ID)
             {
-                ADD_BIT(iInputState, 0u)
-                ADD_BIT(iResetArea,  0u)
-            }
-            else if(!HAS_BIT(iInputState, 1u) && (pPlayer->GetDirection().y > -1.0f + CORE_MATH_PRECISION))
-            {
-                ADD_BIT(iInputState, 1u)
-                ADD_BIT(iResetArea,  1u)
-            }
+                if(!HAS_BIT(iInputState, 0u) && !coreMath::IsNear(pPlayer->GetDirection().x, 0.0f))
+                {
+                    ADD_BIT(iInputState, 0u)
+                    ADD_BIT(iInputState, 1u)
+                }
 
-            if(!bFront || !bBack) fInputDelay += 1.0f * TIME;
+                ADD_BIT(iResetArea, 0u)
+                ADD_BIT(iResetArea, 1u)
+
+                if(m_iStageSub >= 2u) fInputDelay += 1.0f * TIME;
+            }
+            else
+            {
+                if(!HAS_BIT(iInputState, 0u) && (pPlayer->GetDirection().y < 1.0f - CORE_MATH_PRECISION))
+                {
+                    ADD_BIT(iInputState, 0u)
+                    ADD_BIT(iResetArea,  0u)
+                }
+                else if(!HAS_BIT(iInputState, 1u) && (pPlayer->GetDirection().y > -1.0f + CORE_MATH_PRECISION))
+                {
+                    ADD_BIT(iInputState, 1u)
+                    ADD_BIT(iResetArea,  1u)
+                }
+
+                if(!bFront || !bBack) fInputDelay += 1.0f * TIME;
+            }
 
             if((!HAS_BIT(iInputState, 0u) || !HAS_BIT(iInputState, 1u)) && (fInputDelay >= 4.0f))
             {
@@ -380,14 +397,18 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        const coreFloat   fShift = (m_iStageSub == 1u) ? (BLENDH3(MIN1(m_fStageSubTime)) * 12.0f) : 0.0f;
-        const coreVector4 vArea  = PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,0.0f) * (HAS_BIT(iResetArea, 0u) ? 0.0f : fShift)
-                                                       - coreVector4(0.0f,0.0f,0.0f,1.0f) * (HAS_BIT(iResetArea, 1u) ? 0.0f : fShift);
-
-        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        if(m_bFirstPlay)
         {
-            pPlayer->SetArea(vArea);
-        });
+            const coreFloat fShift = (m_iStageSub == 1u) ? (BLENDH3(MIN1(m_fStageSubTime)) * 12.0f) : 0.0f;
+
+            STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+            {
+                const coreVector4 vArea  = PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,0.0f) * (HAS_BIT(aiResetArea[i], 0u) ? 0.0f : fShift)
+                                                               - coreVector4(0.0f,0.0f,0.0f,1.0f) * (HAS_BIT(aiResetArea[i], 1u) ? 0.0f : fShift);
+
+                pPlayer->SetArea(vArea);
+            });
+        }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -1074,7 +1095,7 @@ void cIntroMission::__SetupOwn()
 
             if(g_pGame->IsTask())
             {
-                g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+                g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](const cBullet* pBullet)
                 {
                     STAGE_FOREACH_PLAYER(pPlayer, i)
                     {
@@ -1108,7 +1129,7 @@ void cIntroMission::__SetupOwn()
                 coreFloat fSide;
                 switch(i)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: fSide = -0.2f; break;
                 case 1u: fSide = -0.6f; break;
                 case 2u: fSide =  0.2f; break;

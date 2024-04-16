@@ -72,6 +72,7 @@ cCholBoss::cCholBoss()noexcept
     // load models
     this->DefineModelHigh("ship_boss_chol_body_high.md3");
     this->DefineModelLow ("ship_boss_chol_body_low.md3");
+    this->DefineVolume   ("ship_boss_chol_body_volume.md3");
 
     // set object properties
     this->SetSize             (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
@@ -86,6 +87,7 @@ cCholBoss::cCholBoss()noexcept
     {
         m_aWing[i].DefineModelHigh     ("ship_boss_chol_wing_high.md3");
         m_aWing[i].DefineModelLow      ("ship_boss_chol_wing_low.md3");
+        m_aWing[i].DefineVolume        ("ship_boss_chol_wing_volume.md3");
         m_aWing[i].SetSize             (this->GetSize());
         m_aWing[i].SetCollisionModifier(this->GetCollisionModifier());
         m_aWing[i].Configure           (1, 0u, COLOR_SHIP_ORANGE);
@@ -446,7 +448,7 @@ void cCholBoss::__MoveOwn()
             coreVector2 vTarget;
             switch(m_aiCounter[INCURSION_COUNT] % 4)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0: vTarget = coreVector2(-1.0f, 0.0f) * fSide; break;
             case 1: vTarget = coreVector2( 1.0f, 0.0f) * fSide; break;
             case 2: vTarget = coreVector2( 0.0f,-1.0f);         break;
@@ -534,7 +536,7 @@ void cCholBoss::__MoveOwn()
             coreUintW iIndex;
             switch(iTick)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: iIndex = 0u; break;
             case 1u: iIndex = 2u; break;
             case 2u: iIndex = 1u; break;
@@ -670,7 +672,7 @@ void cCholBoss::__MoveOwn()
             coreUintW iOrder;
             switch(X)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: iOrder = 0u; break;
             case 1u: iOrder = 2u; break;
             case 2u: iOrder = 4u; break;
@@ -779,7 +781,7 @@ void cCholBoss::__MoveOwn()
     {
         this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
 
-        PHASE_CONTROL_PAUSE(0u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE - 2.0f))
+        PHASE_CONTROL_PAUSE(0u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE_2 - 2.0f))
         {
             PHASE_CHANGE_INC
 
@@ -885,7 +887,7 @@ void cCholBoss::__MoveOwn()
             coreFloat fDelay;
             switch(m_aiCounter[STORM_COUNT])
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0: vFrom = coreVector2( 0.0f, 0.7f); vTo = coreVector2( 0.0f,-1.7f); fDelay = 1.0f; break;
             case 1: vFrom = coreVector2(-0.5f, 1.7f); vTo = coreVector2(-0.5f,-1.7f); fDelay = 1.0f; break;
             case 2: vFrom = coreVector2( 0.5f, 1.7f); vTo = coreVector2( 0.5f,-1.7f); fDelay = 1.0f; break;
@@ -1328,7 +1330,7 @@ void cCholBoss::__MoveOwn()
             //g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[ENV_ROTATION].x, 0.0f*PI, fTime)));   end rotation
         });
 
-        PHASE_CONTROL_PAUSE(1u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE - 2.0f))
+        PHASE_CONTROL_PAUSE(1u, 1.0f / (INTERFACE_BANNER_DURATION_SCORE_2 - 2.0f))
         {
             if(PHASE_FINISHED)
             {
@@ -1382,7 +1384,7 @@ void cCholBoss::__MoveOwn()
             coreVector2 vPos, vDir;
             switch(m_iPhase)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 200u: vPos = coreVector2(1.0f, fHeight + 0.6f); vDir = coreVector2( 0.0f,1.0f); break;
             case 201u: vPos = coreVector2(-fHeight, 1.0f);       vDir = coreVector2(-1.0f,0.0f); break;
             case 202u: vPos = coreVector2(-1.0f, fHeight);       vDir = coreVector2( 0.0f,1.0f); break;
@@ -1801,7 +1803,7 @@ void cCholBoss::__MoveOwn()
                 break;
 
             default:
-                ASSERT(false)
+                UNREACHABLE
                 break;
             }
         }
@@ -1902,7 +1904,7 @@ void cCholBoss::__MoveOwn()
             m_Fire.SetPosition (this->GetPosition() + this->GetDirection() * -19.0f);
             m_Fire.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.56f));
         }
-        else ASSERT(false)
+        else UNREACHABLE
 
         m_Fire.SetDirection  (this->GetDirection());
         m_Fire.SetOrientation(vBodyOri);
@@ -1975,7 +1977,7 @@ void cCholBoss::__MoveOwn()
     {
         const coreFloat fOld = m_fCountdown;
 
-        m_fCountdown.UpdateMax(-1.0f / INTERFACE_BANNER_DURATION_SCORE, 0.0f);
+        m_fCountdown.UpdateMax(-1.0f / INTERFACE_BANNER_DURATION_SCORE_2, 0.0f);
 
         const coreFloat fLerp  = STEP(0.0f, 0.5f, m_fCountdown);
         const coreUint8 iMedal = F_TO_UI(LERP(I_TO_F(MEDAL_BRONZE), I_TO_F(MEDAL_MAX) - CORE_MATH_PRECISION, fLerp));
@@ -1986,7 +1988,7 @@ void cCholBoss::__MoveOwn()
         const coreFloat fLerpOld  = STEP(0.0f, 0.5f, fOld);
         const coreUint8 iMedalOld = F_TO_UI(LERP(I_TO_F(MEDAL_BRONZE), I_TO_F(MEDAL_MAX) - CORE_MATH_PRECISION, fLerpOld));
 
-        const coreFloat fTickStep = 4.0f * RCP(ROUND(RCP(20.0f * TIME)) * TIME);
+        const coreFloat fTickStep = 4.0f * (TIME ? RCP(ROUND(RCP(20.0f * TIME)) * TIME) : 20.0f);
         if(F_TO_UI(fLerpOld * fTickStep) > F_TO_UI(fLerp * fTickStep)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_EFFECT_ERROR);
 
         if(iMedalOld != iMedal)
@@ -2132,7 +2134,7 @@ void cCholBoss::__EnableFire(const coreUint8 iType)
         m_Fire.SetSize    (this->GetSize() * coreVector3(15.0f,10.0f,15.0f));
         m_Fire.SetTexSize (coreVector2(1.5f,0.2f) * 2.5f);
     }
-    else ASSERT(false)
+    else UNREACHABLE
 
     // 
     m_Fire.SetAlpha(0.0f);

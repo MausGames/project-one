@@ -1095,10 +1095,10 @@ void cViridoMission::__MoveOwnAfter()
                 const coreFloat fRealRange = ABS(coreVector2::Dot(pBullet->GetDirection().xy().Rotated90() * pBullet->GetCollisionRange().x, vRayDir));
                 
                 // 
-                if(((SIGN(fDot) != SIGN(fDotOld)) || (bAlways && (SIGN(fDot) > 0.0f)))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&   // to handle teleportation
+                if(((SIGN(fDot) != SIGN(fDotOld)) || (bAlways && (fDot > 0.0f)))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&   // to handle teleportation
                     (/*ABS(coreVector2::Dot(vDiff,    vRayDir))*/vRealDiff.LengthSq()    < POW2(oBarrier.GetCollisionRange().x + fRealRange)))
                 {
-                    const coreVector2 vIntersection = vRayPos + vRayDir * coreVector2::Dot(vDiff, vRayDir);
+                    const coreVector2 vIntersection = vRealIntersection;//vRayPos + vRayDir * coreVector2::Dot(vDiff, vRayDir);
 
                     // 
                     if(!g_pForeground->IsVisiblePoint(vIntersection))
@@ -1297,6 +1297,45 @@ void cViridoMission::__MoveOwnAfter()
                 m_fPoleCount.Update(1.0f);
             }
         });
+        
+        
+        if(g_pGame->IsHard())
+        {
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+            {
+                const coreVector2 vOriginDiff = pBullet->GetOwner()->GetPosition().xy() - vRayPos;
+                const coreFloat fOwnerDot = coreVector2::Dot(vOriginDiff, vRayDir.Rotated90());
+
+                const coreFloat   fRadius = pBullet->GetCollisionRange().xy().Max();       
+                const coreVector2 vNewPos = pBullet->GetPosition().xy() + pBullet->GetFlyDir() * fRadius;
+                const coreVector2 vOldPos = pBullet->GetPosition().xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * BULLET_SPEED_FACTOR * TIME);
+                
+                
+                const coreVector2 vOldRayPos = m_avLaserPos[i] - m_avLaserDir[i] * pLaser->GetSize().y;
+                const coreVector2 vOldRayDir = m_avLaserDir[i];
+                
+                // 
+                const coreVector2 vDiff    = vNewPos - vRayPos;
+                const coreVector2 vDiffOld = vOldPos - vOldRayPos;
+            
+                // 
+                const coreFloat fDot    = coreVector2::Dot(vDiff,    vRayDir   .Rotated90());
+                const coreFloat fDotOld = coreVector2::Dot(vDiffOld, vOldRayDir.Rotated90());
+                
+                coreVector2 vRealIntersection;
+                if(!RayIntersection(vNewPos, pBullet->GetFlyDir(), vRayPos, vRayDir, &vRealIntersection)) return;
+                
+                
+                const coreBool bAlways = (pBullet->GetFlyTime() < 0.1f);
+
+                // 
+                if(((SIGN(fDot) != SIGN(fDotOld)) && (SIGN(fDot) != SIGN(fOwnerDot))) || (bAlways && (SIGN(fDot) != SIGN(fOwnerDot))))
+                {
+                    // 
+                    pBullet->Deactivate(true, vRealIntersection);
+                }
+            });
+        }
     }
 
     // 

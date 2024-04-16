@@ -16,6 +16,7 @@ coreBool        g_bTiltMode       = false;
 coreFloat       g_fShiftMode      = 0.0f;
 coreBool        g_bDemoVersion    = false;
 coreBool        g_bLeaderboards   = false;
+coreBool        g_bSteamDeck      = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -421,7 +422,7 @@ void CoreApp::Move()
     coreVector2 vTarget = coreVector2(0.0f,0.0f);
     if(STATIC_ISVALID(g_pGame))
     {
-        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
         {
             vTarget += pPlayer->GetPosition().xy();
         });
@@ -446,6 +447,11 @@ void InitResolution(const coreVector2 vResolution)
 
     // 
     if(F_TO_UI(vResolution.x + vResolution.y) & 0x01u) g_vGameResolution.arr(IsHorizontal(vResolution) ? 0u : 1u) -= 1.0f;
+    
+    
+
+    // 
+    g_bSteamDeck = (vResolution == coreVector2(1280.0f,800.0f));
 }
 
 
@@ -478,13 +484,13 @@ void InitFramerate()
     SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
     // 
-    const coreUint32 iRefreshRate = (oMode.refresh_rate > 0) ? oMode.refresh_rate : 60u;
+    const coreUint32 iRefreshRate = (oMode.refresh_rate > 0) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
 
     // calculate logical and physical frame time
     if(!STATIC_ISVALID(g_pGame))
     {
-        const coreDouble dUpdateFreq = coreDouble(g_CurConfig.Game.iUpdateFreq ? g_CurConfig.Game.iUpdateFreq : iRefreshRate);
-        const coreDouble dGameSpeed  = coreDouble(g_CurConfig.Game.iGameSpeed  ? g_CurConfig.Game.iGameSpeed  : 100u) / 100.0;
+        const coreDouble dUpdateFreq = coreDouble(GetCurUpdateFreq() ? GetCurUpdateFreq() : iRefreshRate);
+        const coreDouble dGameSpeed  = coreDouble(GetCurGameSpeed () ? GetCurGameSpeed () : 100u) / 100.0;
 
         const coreDouble dRawRate   = dUpdateFreq / dGameSpeed;
         const coreDouble dFixedRate = MIN(CEIL(coreDouble(FRAMERATE_MIN) / dRawRate) * dRawRate, coreDouble(FRAMERATE_MAX));   // increase in multiples, if below minimum frame rate
@@ -507,8 +513,8 @@ void InitFramerate()
         SDL_GL_SetSwapInterval(0);
     }
 
-    // TODO 1: coreProtect in variadic argument is not portable
-    //Core::Log->Info("Frame rate properties configured (refresh rate %u, logical rate %.1f, physical rate %.1f)", iRefreshRate, s_fLogicalRate, 1.0 / s_dPhysicalTime);
+    // 
+    Core::Log->Info("Frame rate properties configured (refresh rate %u, logical rate %.1f, physical rate %.1f)", iRefreshRate, coreFloat(s_fLogicalRate), 1.0 / coreDouble(s_dPhysicalTime));
 }
 
 
@@ -517,7 +523,9 @@ void InitFramerate()
 FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq)
 {
     ASSERT((fFreq > 0.0f) && (fFreq <= FRAMERATE_MIN))
-    return RCP(ROUND(RCP(fFreq) * s_fLogicalRate)) * s_fLogicalRate;
+
+    const coreFloat fLocal = s_fLogicalRate;
+    return RCP(ROUND(RCP(fFreq) * fLocal)) * fLocal;
 }
 
 
@@ -543,21 +551,27 @@ static void LockFramerate()
         coreUint64 iNewPerfTime;
         coreDouble dDifference;
 
+        // 
+        const coreUint64 iLocalOldPerfTime  = s_iOldPerfTime;
+        const coreDouble dLocalPhysicalTime = s_dPhysicalTime;
+
         // measure and calculate current frame time
         const auto nMeasureFunc = [&]()
         {
             iNewPerfTime = SDL_GetPerformanceCounter();
-            dDifference  = coreDouble(iNewPerfTime - s_iOldPerfTime) * Core::System->GetPerfFrequency();
+            dDifference  = coreDouble(iNewPerfTime - iLocalOldPerfTime) * Core::System->GetPerfFrequency();
         };
 
         // spin as long as frame time is too low
-        for(nMeasureFunc(); dDifference < s_dPhysicalTime; nMeasureFunc())
+        for(nMeasureFunc(); dDifference < dLocalPhysicalTime; nMeasureFunc())
         {
+            (void)dDifference;
+
             // 
             constexpr coreUint32 iMargin = 1u;
 
             // sleep (once) to reduce overhead
-            const coreUint32 iSleep = MAX(F_TO_UI((s_dPhysicalTime - dDifference) * 1000.0), iMargin) - iMargin;
+            const coreUint32 iSleep = MAX(F_TO_UI((dLocalPhysicalTime - dDifference) * 1000.0), iMargin) - iMargin;
             if(iSleep) SDL_Delay(iSleep);
 
             // 
@@ -677,7 +691,7 @@ static void DebugGame()
             oOptions.iKind       = GAME_KIND_ALL;
             oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
             oOptions.iMode       = GAME_MODE_STANDARD;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_NORMAL;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(S), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_NORMAL;
             oOptions.iFlags      = GAME_FLAG_TASK | GAME_FLAG_FRAGMENT;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
@@ -918,7 +932,7 @@ static void DebugGame()
             ASSERT(iTime)
             iTime -= 1'000u;
             
-            UploadLeaderboardsArcade(iScore, iTime);
+            //UploadLeaderboardsArcade(iScore, iTime);
             
             Core::Debug->InspectValue("Score", iScore);
             Core::Debug->InspectValue("Time",  iTime);

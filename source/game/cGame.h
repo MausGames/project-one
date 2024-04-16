@@ -21,11 +21,12 @@
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS        (PLAYERS)     // default number of players
-#define GAME_HELPERS        (HELPERS)     // 
-#define GAME_CONTINUES      (CONTINUES)   // 
-#define GAME_INTRO_OFFSET   (0.4f)        // 
-#define GAME_INTRO_DURATION (4.1f)        // 
+#define GAME_PLAYERS          (PLAYERS)     // default number of players
+#define GAME_HELPERS          (HELPERS)     // 
+#define GAME_CONTINUES        (CONTINUES)   // 
+#define GAME_INTRO_OFFSET     (0.4f)        // 
+#define GAME_INTRO_DURATION   (4.1f)        // 
+#define GAME_RAISE_DEFAULT    (0u)          // 
 
 enum eGameStatus : coreUint16
 {
@@ -244,6 +245,7 @@ private:
     coreBool m_bDefeatDelay;                // 
 
     coreUint8 m_iContinues;                 // 
+    coreUint8 m_iRaise;                     // 
 
     coreUint8 m_iDepthLevel;                // 
     coreUint8 m_iDepthDebug;                // 
@@ -318,6 +320,13 @@ public:
     coreVector3 CalculateCamShift()const;
 
     // 
+#if defined(_CORE_SWITCH_) || 1   // [SW]
+    inline coreUint32 RaiseValue(const coreUint32 iValue)const {return iValue;}
+#else
+    inline coreUint32 RaiseValue(const coreUint32 iValue)const {return (iValue * (100u + m_iRaise)) / (100u + GAME_RAISE_DEFAULT);}
+#endif
+
+    // 
     inline void SetVisibleCheck(const coreBool bCheck)                        {m_bVisibleCheck = bCheck;}
     inline void SetRepairMove  (const coreUintW iIndex, const coreBool bMove) {ASSERT(iIndex < GAME_PLAYERS) SET_BIT(m_iRepairMove, iIndex, bMove)}
     inline coreBool HasRepairMove(const coreUintW iIndex) {ASSERT(iIndex < GAME_PLAYERS) return HAS_BIT(m_iRepairMove, iIndex);}
@@ -333,8 +342,8 @@ public:
     // 
     RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2 vPosition);
     RETURN_NONNULL cPlayer* FindPlayerDual(const coreUintW   iIndex);
-    template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
-    template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
+    template <typename F> FORCE_INLINE void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
+    template <typename F> FORCE_INLINE void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
     // 
     inline coreBool IsMulti    ()const                          {return (this->GetType      () != GAME_TYPE_SOLO);}
@@ -379,6 +388,7 @@ public:
     inline const coreInt32*    GetMissionList()const {ASSERT(m_piMissionList) return m_piMissionList;}
     inline const coreUintW&    GetNumMissions()const {return m_iNumMissions;}
     inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
+    inline const coreUint8&    GetRaise      ()const {return m_iRaise;}
     inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
     inline const sGameOptions& GetOptions    ()const {return m_Options;}
     inline const coreUint8&    GetKind       ()const {return m_Options.iKind;}
@@ -397,6 +407,10 @@ public:
     static coreUint32 CalcBonusBadge  (const coreUint8 iBadge);
     static coreUint32 CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead);
 
+    // 
+    static coreUint8 CalcRaiseSpeed (const coreUint8 iValue);
+    static coreUint8 CalcRaiseShield(const coreUint8 iValue);
+
 
 private:
     // 
@@ -412,7 +426,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename F> void cGame::ForEachPlayer(F&& nFunction)
+template <typename F> FORCE_INLINE void cGame::ForEachPlayer(F&& nFunction)
 {
     // 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
@@ -428,7 +442,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 
 // ****************************************************************
 // 
-template <typename F> void cGame::ForEachPlayerAll(F&& nFunction)
+template <typename F> FORCE_INLINE void cGame::ForEachPlayerAll(F&& nFunction)
 {
     // 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)

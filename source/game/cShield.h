@@ -56,7 +56,7 @@ public:
     void ClearShields(const coreBool bAnimated);
 
     // 
-    template <typename F> void ForEachShield(F&& nFunction);   // [](coreObject3D* OUTPUT pShield, const cEnemy* pOwner) -> void
+    template <typename F> FORCE_INLINE void ForEachShield(F&& nFunction);   // [](coreObject3D* OUTPUT pShield, const cEnemy* pOwner) -> void
 
     // 
     void SetActive(const coreBool bActive);
@@ -97,7 +97,7 @@ public:
 
 // ****************************************************************
 // 
-template <typename F> void cShieldEffect::ForEachShield(F&& nFunction)
+template <typename F> FORCE_INLINE void cShieldEffect::ForEachShield(F&& nFunction)
 {
     // 
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)

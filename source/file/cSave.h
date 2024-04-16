@@ -99,7 +99,7 @@ enum eSaveState : coreUint8   // # never change bits after release
 
 
                   
-template <typename T, typename F> coreBool AllVariants(T& tArray, F&& nFunction)
+template <typename T, typename F> FORCE_INLINE coreBool AllVariants(T& tArray, F&& nFunction)
 {
     for(coreUintW i = 0u; i < SAVE_TYPES; ++i)
     {

@@ -65,6 +65,7 @@ cMessierBoss::cMessierBoss()noexcept
     // load models
     this->DefineModelHigh("ship_boss_messier_core.md3");
     this->DefineModelLow ("ship_boss_messier_core.md3");
+    this->DefineVolume   ("ship_boss_messier_core_volume.md3");
 
     // set object properties
     this->SetSize       (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
@@ -77,9 +78,9 @@ cMessierBoss::cMessierBoss()noexcept
     // 
     for(coreUintW i = 0u; i < MESSIER_SHELLS; ++i)
     {
-        m_aShell[i].DefineModelHigh(i ? "ship_boss_messier_inside_high.md3" : "ship_boss_messier_outside_high.md3");
-        m_aShell[i].DefineModelLow (i ? "ship_boss_messier_inside_low.md3"  : "ship_boss_messier_outside_low.md3");
-        m_aShell[i].DefineVolume   ("ship_boss_messier_volume.md3");
+        m_aShell[i].DefineModelHigh(i ? "ship_boss_messier_inside_high.md3"   : "ship_boss_messier_outside_high.md3");
+        m_aShell[i].DefineModelLow (i ? "ship_boss_messier_inside_low.md3"    : "ship_boss_messier_outside_low.md3");
+        m_aShell[i].DefineVolume   (i ? "ship_boss_messier_inside_volume.md3" : "ship_boss_messier_outside_volume.md3");
         m_aShell[i].SetSize        (this->GetSize() * 1.08f * (i ? 1.0f : 1.1f));
         m_aShell[i].Configure      (1, 0u, COLOR_SHIP_MAGENTA);
         m_aShell[i].AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
@@ -310,7 +311,7 @@ void cMessierBoss::__MoveOwn()
     
     
 
-    const coreFloat fBackSpeed = (g_CurConfig.Game.iBackRotation ? 1.0f : 0.5f);
+    const coreFloat fBackSpeed = (GetCurBackRotation() ? 1.0f : 0.5f);
 
     
     const coreFloat fTotalSpeed = pMission->GetAreaSpeed() * m_fTimeFactor;
@@ -979,7 +980,7 @@ void cMessierBoss::__MoveOwn()
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
         }
 
-        if(g_CurConfig.Game.iBackRotation)
+        if(GetCurBackRotation())
         {
             PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
             {
@@ -1027,7 +1028,7 @@ void cMessierBoss::__MoveOwn()
                 m_pVoidSound->PlayRelative(this, 4.0f, 0.5f, true, SOUND_EFFECT);
             }
 
-            if(g_CurConfig.Game.iBackRotation)
+            if(GetCurBackRotation())
             {
                 pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x + BLENDBR(fTime) * (3.0f*PI)));
 
@@ -1079,7 +1080,7 @@ void cMessierBoss::__MoveOwn()
         const coreFloat   fMove      = 70.0f * MIN1(m_fPhaseTime * 0.25f) * TIME;
 
         coreBatchList* pList = pBackground->GetMeteorList();
-        for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
         {
             coreObject3D* pMeteor = (*pList->List())[i];
             if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
@@ -1201,7 +1202,7 @@ void cMessierBoss::__MoveOwn()
 
         // 
         coreBatchList* pList = pBackground->GetMeteorList();
-        for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
         {
             coreObject3D* pMeteor = (*pList->List())[i];
             if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
@@ -1244,7 +1245,7 @@ void cMessierBoss::__MoveOwn()
         g_pPostProcessing->SetDirectionGame(coreVector2::Direction(m_avVector[COVER_ROTATION].y));
     }
 
-    if(!g_CurConfig.Game.iBackRotation)
+    if(!GetCurBackRotation())
     {
         d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverDir(g_pPostProcessing->GetDirectionGame().InvertedX());
     }
@@ -1792,7 +1793,7 @@ void cMessierBoss::__AddBullet(const coreUintW iType, const coreFloat fSpeed, co
     cBullet* pBullet;
     switch(iType)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: pBullet = g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(iDamage, fSpeed, this, vPos, vDir)->ChangeSize(1.7f); break;
     case 1u: pBullet = g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet> (iDamage, fSpeed, this, vPos, vDir)->ChangeSize(1.7f); break;
     case 2u: pBullet = g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(iDamage, fSpeed, this, vPos, vDir)->ChangeSize(1.3f); break;

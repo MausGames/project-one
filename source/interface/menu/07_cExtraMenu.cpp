@@ -509,7 +509,7 @@ void cExtraMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 

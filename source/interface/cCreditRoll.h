@@ -120,7 +120,9 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryTextur
     "Patrick Hoesly",
     "Rob Tuytel",
     "s58y",
+#if !defined(_CORE_SWITCH_)
     "textures.com"
+#endif
 };
 
 // 

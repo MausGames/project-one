@@ -12,7 +12,7 @@ sConfig    g_CurConfig               = {};
 sConfig    g_OldConfig               = {};
 sGameInput g_aGameInput[INPUT_TYPES] = {};
 sGameInput g_TotalInput              = {};
-coreUint8  g_iTotalType              = 0u;
+coreUint8  g_iTotalType              = INPUT_SETS_KEYBOARD;   // # always start with joystick
 sMenuInput g_MenuInput               = {};
 
 static coreBool  s_abFireToggle[INPUT_TYPES + 1u] = {};
@@ -204,6 +204,7 @@ void LoadConfig()
     g_OldConfig.Game.iBackRotation  = Core::Config->GetInt(CONFIG_GAME_BACK_ROTATION);
     g_OldConfig.Game.iBackSpeed     = Core::Config->GetInt(CONFIG_GAME_BACK_SPEED);
     g_OldConfig.Game.iUpdateFreq    = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
+    g_OldConfig.Game.iPureMode      = Core::Config->GetInt(CONFIG_GAME_PURE_MODE);
     g_OldConfig.Game.iVersion       = Core::Config->GetInt(CONFIG_GAME_VERSION);
 
     // 
@@ -278,6 +279,7 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GAME_BACK_ROTATION,  g_OldConfig.Game.iBackRotation);
     Core::Config->SetInt(CONFIG_GAME_BACK_SPEED,     g_OldConfig.Game.iBackSpeed);
     Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,    g_OldConfig.Game.iUpdateFreq);
+    Core::Config->SetInt(CONFIG_GAME_PURE_MODE,      g_OldConfig.Game.iPureMode);
     Core::Config->SetInt(CONFIG_GAME_VERSION,        g_OldConfig.Game.iVersion);
 
     // 
@@ -312,7 +314,7 @@ void UpdateInput()
     std::memset(&g_MenuInput,  0, sizeof(g_MenuInput));
 
     // loop trough input sets
-    for(coreUintW i = 0u; i < INPUT_SETS; ++i)
+    for(coreUintW i = DEFINED(_CORE_SWITCH_) ? INPUT_SETS_KEYBOARD : 0u; i < INPUT_SETS; ++i)
     {
         const auto& oSet = g_CurConfig.Input.aSet[i];
         sGameInput  oMap = {};
@@ -612,9 +614,9 @@ void UpdateInput()
                  if(bFireA) s_abFireSpeed[iToggleIndex] = false;
             else if(bFireB) s_abFireSpeed[iToggleIndex] = true;
 
-            SET_BIT(pInput->iActionPress,   8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionPress,   0u))
-            SET_BIT(pInput->iActionRelease, 8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionRelease, 0u))
-            SET_BIT(pInput->iActionHold,    8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionHold,    0u))
+            SET_BIT(pInput->iActionPress,   8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionPress,   0u)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionPress,   0u)
+            SET_BIT(pInput->iActionRelease, 8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionRelease, 0u)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionRelease, 0u)
+            SET_BIT(pInput->iActionHold,    8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionHold,    0u)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionHold,    0u)
         }
 
         // 

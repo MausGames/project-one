@@ -144,7 +144,7 @@ void cMission::Close()
     }
 
     // 
-    if(g_CurConfig.Game.iGameSpeed >= 200u)
+    if(GetCurGameSpeed() >= 200u)
     {
         ADD_BIT(g_pSave->EditLocalStatsMission()->iFeat, FEAT_TWOHUNDRED)
     }
@@ -381,7 +381,7 @@ void cMission::DeactivateWave()
         const coreUint32 iCombo = pPlayer->GetScoreTable()->GetCurCombo();
         if(iCombo)
         {
-            const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(100u * iCombo, false);
+            const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(g_pGame->RaiseValue(100u * iCombo), false);
             g_pGame->GetCombatText()->DrawExtra(iScore, pPlayer->GetPosition(), true);
 
             pPlayer->GetScoreTable()->CancelCooldown();
@@ -397,7 +397,7 @@ void cMission::DeactivateWave()
 
     // 
     m_iStageSub  = 0xFFu;
-    m_fStageWait = 6.0f;
+    m_fStageWait = INTERFACE_BANNER_DURATION_SCORE_1 + 1.0f;
 
     // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;
@@ -483,7 +483,7 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 void cMission::AddExtraScore(cPlayer* OUTPUT pPlayer, const coreUint32 iScore, const coreVector3 vPosition)
 {
     // 
-    const coreUint32 iFinalScore = pPlayer->GetScoreTable()->AddScore(iScore, true);
+    const coreUint32 iFinalScore = pPlayer->GetScoreTable()->AddScore(g_pGame->RaiseValue(iScore), true);
     pPlayer->GetScoreTable()->AddCombo(1u);
 
     // 
@@ -528,7 +528,7 @@ void cMission::__CloseSegment()
     // 
     const coreFloat  fTime        = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
     const coreFloat  fTimeShifted = g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe();
-    const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted, m_pfMedalGoal);
+    const coreUint32 iBonus       = g_pGame->RaiseValue(cGame::CalcBonusTime(fTimeShifted, m_pfMedalGoal));
 
     // 
     coreUint8  iMedal         = MEDAL_NONE;
@@ -613,7 +613,7 @@ void cMission::__CloseSegment()
     }
 
     // 
-    if(g_CurConfig.Game.iGameSpeed >= 200u)
+    if(GetCurGameSpeed() >= 200u)
     {
         ADD_BIT(g_pSave->EditLocalStatsSegment()->iFeat, FEAT_TWOHUNDRED)
     }

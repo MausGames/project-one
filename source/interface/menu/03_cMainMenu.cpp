@@ -207,7 +207,7 @@ void cMainMenu::Move()
             else if(m_SteamButton.IsClicked())
             {
                 // 
-                SDL_OpenURL(cMenu::GetStoreLink());
+                cMenu::OpenStoreLink();
             }
             else if(m_CreditsButton.IsClicked())
             {
@@ -237,7 +237,7 @@ void cMainMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 }

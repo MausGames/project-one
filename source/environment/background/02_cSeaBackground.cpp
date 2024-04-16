@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cSeaBackground::cSeaBackground()noexcept
-: m_fWaveTime       (0.0f)
+: cBackground       (false)
+, m_fWaveTime       (0.0f)
 , m_fAlgaeTime      (0.0f)
 , m_fOverdriveTime  (0.0f)
 , m_vOverdriveCount (0u)
@@ -278,7 +279,7 @@ cSeaBackground::cSeaBackground()noexcept
 
         // 
         m_iAlgaeNum = papContent->size();
-        ASSERT(!(m_iAlgaeNum % 2u))
+        ASSERT(coreMath::IsAligned(m_iAlgaeNum, 2u))
 
         // post-process list and add to the ground (# for distortion)
         cBackground::_FillInfinite(pList1, SEA_ALGAE_RESERVE);
@@ -344,7 +345,7 @@ void cSeaBackground::__MoveOwn()
 
     // 
     coreBatchList* pList = m_apDecalObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pAlgae = (*pList->List())[i];
 
@@ -365,7 +366,7 @@ void cSeaBackground::__MoveOwn()
 
     //
     pList = m_apGroundObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pWeed = (*pList->List())[i];
         if(!pWeed->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all

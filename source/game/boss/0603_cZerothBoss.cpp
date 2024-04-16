@@ -441,7 +441,7 @@ void cZerothBoss::__MoveOwn()
                     coreUintW iNextLimb;
                     switch(m_aiCounter[EVADE_COUNT])
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case 4: iNextLimb = 0u; break;
                     case 5: iNextLimb = 4u; break;
                     case 6: iNextLimb = 2u; break;
@@ -481,7 +481,7 @@ void cZerothBoss::__MoveOwn()
                 coreFloat fOldAngle, fNewAngle;
                 switch(m_aiCounter[EVADE_COUNT])
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 1: fOldAngle =  (3.0f/3.0f)*PI; fNewAngle =  (1.0f/3.0f)*PI; break;
                 case 2: fOldAngle =  (1.0f/3.0f)*PI; fNewAngle = (-1.0f/3.0f)*PI; break;
                 case 3: fOldAngle = (-1.0f/3.0f)*PI; fNewAngle = (-8.0f/3.0f)*PI; break;
@@ -1088,7 +1088,7 @@ void cZerothBoss::__MoveOwn()
         coreBool    bEnviron;
         switch(m_iPhase)
         {
-        default: ASSERT(false)
+        default: UNREACHABLE
         case 60u: fSpeed = 0.25f; vTarget = coreVector2(-4.0f, 0.0f); iPhase = 10u; bEnviron = true;  break;
         case 61u: fSpeed = 0.2f;  vTarget = coreVector2( 8.0f, 4.0f); iPhase = 20u; bEnviron = true;  break;
         case 62u: fSpeed = 0.2f;  vTarget = coreVector2(-6.0f,-3.9f); iPhase = 30u; bEnviron = false; break;
@@ -1179,14 +1179,14 @@ void cZerothBoss::__MoveOwn()
         {
             const coreFloat fSide = m_aiCounter[DRAG_SIDE] ? -1.0f : 1.0f;
 
-            const coreVector2 vDir = (g_CurConfig.Game.iBackRotation ? coreVector2::Direction((I_TO_F(m_aiCounter[DRAG_COUNT]) + fTime) * (0.5f*PI)) : ENVIRONMENT_DEFAULT_DIRECTION) * fSide;
+            const coreVector2 vDir = (GetCurBackRotation() ? coreVector2::Direction((I_TO_F(m_aiCounter[DRAG_COUNT]) + fTime) * (0.5f*PI)) : ENVIRONMENT_DEFAULT_DIRECTION) * fSide;
 
             this->SetPosition (coreVector3(vDir * FOREGROUND_AREA * 0.7f, 0.0f));
             this->SetDirection(coreVector3(vDir, 0.0f));
 
             g_pEnvironment->SetTargetDirectionNow(vDir * SIGN(g_pEnvironment->GetSpeed()));
 
-            if(!g_CurConfig.Game.iBackRotation)
+            if(!GetCurBackRotation())
             {
                 const coreFloat fBase = m_aiCounter[DRAG_SIDE] ? (1.0f*PI) : (0.0f*PI);
                 this->DefaultRotateLerp(fBase, fBase + (4.0f*PI) * fSide, fTime);
@@ -1370,7 +1370,7 @@ void cZerothBoss::__MoveOwn()
                 m_aiCounter[FLY_COUNT] += 1;
                 switch(m_aiCounter[FLY_COUNT])
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 1: vNewPos.x = -0.1f * fSide * FOREGROUND_AREA.x; break;
                 case 2: vNewPos.x =  0.4f * fSide * FOREGROUND_AREA.x; break;
                 }

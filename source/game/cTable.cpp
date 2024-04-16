@@ -295,6 +295,19 @@ void cScoreTable::Reset()
     m_fCooldown = 0.0f;
     m_iOverride = UINT32_MAX;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiMaxSeriesSegment[j][i] = 0u;
+
+    // 
+    for(coreUintW k = 0u; k < TABLE_RUNS; ++k)
+    {
+        // (# no memset) 
+        m_aiRunTotal[k] = 0u;
+        for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aaiRunMission[k][j] = 0u;
+        for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaaiRunSegment[k][j][i] = 0u;
+
+        // (# no memset) 
+        m_aiRunMissionIndex[k] = 0xFFu;
+        m_aiRunSegmentIndex[k] = 0xFFu;
+    }
 }
 
 
@@ -323,6 +336,53 @@ void cScoreTable::RevertSegment()
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::RevertSegmentNew(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+
+    // reset all score values (# no memset)
+    m_iScoreTotal = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiScoreMission[j] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiScoreSegment[j][i] = 0u;
+
+    // 
+    m_iCurCombo = 0u;
+    m_iCurChain = 0u;
+    m_fCooldown = 0.0f;
+    m_iOverride = UINT32_MAX;
+    m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex] = 0u;
+}
+
+void cScoreTable::RevertSegmentNew()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->RevertSegmentNew(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::StoreRun(const coreUintW iRunIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    ASSERT(iRunIndex     < TABLE_RUNS)
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+
+    // (# no memcpy) 
+    m_aiRunTotal[iRunIndex] = m_iScoreTotal;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aaiRunMission[iRunIndex][j] = m_aiScoreMission[j];
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaaiRunSegment[iRunIndex][j][i] = m_aaiScoreSegment[j][i];
+
+    // 
+    m_aiRunMissionIndex[iRunIndex] = iMissionIndex;
+    m_aiRunSegmentIndex[iRunIndex] = iSegmentIndex;
 }
 
 
@@ -394,12 +454,13 @@ void cScoreTable::TransferChain()
 {
     if(m_iCurChain)
     {
+        ASSERT(STATIC_ISVALID(g_pGame))
+
         // 
-        const coreUint32 iScore = this->AddScore(m_iCurChain, true);
+        const coreUint32 iScore = this->AddScore(g_pGame->RaiseValue(m_iCurChain), true);
         m_iCurChain = 0u;
 
         // 
-        ASSERT(STATIC_ISVALID(g_pGame))
         g_pGame->GetCombatText()->DrawChain(iScore, m_pOwner->GetPosition());
     }
 }
@@ -583,6 +644,29 @@ void cTimeTable::RevertSegment()
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+void cTimeTable::RevertSegmentNew(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+
+    // 
+    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0 / m_dFrameTime) : 0u;
+
+    // 
+    m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex] = 0u;
+    m_aaiShiftBadSegment [iMissionIndex][iSegmentIndex] = 0u;
+}
+
+void cTimeTable::RevertSegmentNew()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->RevertSegmentNew(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 

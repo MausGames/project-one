@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cMossBackground::cMossBackground()noexcept
-: m_vRainMove        (coreVector2(-0.5f,-1.2f))
+: cBackground        (false)
+, m_vRainMove        (coreVector2(-0.5f,-1.2f))
 , m_fLightningDelay  (Core::Rand->Float(15.0f, 30.0f))
 , m_fLightningFlash  (0.0f)
 , m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
@@ -372,7 +373,7 @@ void cMossBackground::__MoveOwn()
     const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     coreBatchList* pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));

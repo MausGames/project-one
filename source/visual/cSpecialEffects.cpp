@@ -453,7 +453,7 @@ void cSpecialEffects::Move()
         }
 
         // 
-        const coreFloat fPower = m_fShakeStrength * I_TO_F(g_CurConfig.Graphics.iShake) * m_fShakeOverride * 0.000085f;
+        const coreFloat fPower = m_fShakeStrength * m_fShakeOverride * I_TO_F(g_CurConfig.Graphics.iShake) * 0.00008f;
         g_pPostProcessing->SetPosition((vBase * fPower * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
 
         // 
@@ -1092,7 +1092,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     coreUint8 iType;
     switch(eSoundIndex)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case SOUND_PLAYER_EXPLOSION:     fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_01:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_02:   fBaseVolume = 1.3f; fBasePitch = 0.7f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;

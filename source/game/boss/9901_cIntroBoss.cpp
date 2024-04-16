@@ -52,6 +52,7 @@ cIntroBoss::cIntroBoss()noexcept
     // 
     m_Blade.DefineModelHigh("ship_boss_intro_sword_blade_high.md3");
     m_Blade.DefineModelLow ("ship_boss_intro_sword_blade_low.md3");
+    m_Blade.DefineVolume   ("ship_boss_intro_sword_blade_volume.md3");
     m_Blade.SetSize        (this->GetSize());
     m_Blade.Configure      (1, 0u, COLOR_SHIP_PURPLE);
     m_Blade.AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
@@ -60,6 +61,7 @@ cIntroBoss::cIntroBoss()noexcept
     // 
     m_Hilt.DefineModelHigh("ship_boss_intro_sword_hilt_high.md3");
     m_Hilt.DefineModelLow ("ship_boss_intro_sword_hilt_low.md3");
+    m_Hilt.DefineVolume   ("ship_boss_intro_sword_hilt_volume.md3");
     m_Hilt.SetSize        (this->GetSize());
     m_Hilt.Configure      (1, 0u, COLOR_SHIP_PURPLE);
     m_Hilt.AddStatus      (ENEMY_STATUS_BOTTOM);

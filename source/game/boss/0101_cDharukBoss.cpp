@@ -42,6 +42,7 @@ cDharukBoss::cDharukBoss()noexcept
     // load models
     this->DefineModelHigh("ship_boss_dharuk_high.md3");
     this->DefineModelLow ("ship_boss_dharuk_low.md3");
+    this->DefineVolume   ("ship_boss_dharuk_volume.md3");
 
     // set object properties
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.4f);
@@ -53,6 +54,7 @@ cDharukBoss::cDharukBoss()noexcept
     // create duplicate object
     m_Duplicate.DefineModelHigh("ship_boss_dharuk_high.md3");
     m_Duplicate.DefineModelLow ("ship_boss_dharuk_low.md3");
+    m_Duplicate.DefineVolume   ("ship_boss_dharuk_volume.md3");
     m_Duplicate.DefineTexture  (0u, "effect_energy.png");
     m_Duplicate.DefineProgram  ("effect_energy_blink_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
@@ -96,6 +98,7 @@ cDharukBoss::cDharukBoss()noexcept
             // load object resources
             coreObject3D* pBoomerang = &m_aBoomerangRaw[i];
             pBoomerang->DefineModel  ("ship_boss_dharuk_boomerang.md3");
+            pBoomerang->DefineVolume ("ship_boss_dharuk_boomerang_volume.md3");
             pBoomerang->DefineTexture(0u, "effect_energy.png");
             pBoomerang->DefineProgram("effect_energy_invert_program");
 
@@ -351,7 +354,7 @@ void cDharukBoss::__MoveOwn()
             coreFloat fSide;
             switch(m_aiCounter[TELEPORT_COUNT] % (g_pGame->IsEasy() ? 4 : 5))
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0: fSide = -1.0f; break;
             case 1: fSide =  1.0f; break;
             case 2: fSide = -1.0f; break;

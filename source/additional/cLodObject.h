@@ -56,9 +56,9 @@ public:
 
 private:
     // 
-    inline void DefineModel(std::nullptr_t)               {ASSERT(false)}
-    inline void DefineModel(const coreModelPtr&   pModel) {ASSERT(false)}
-    inline void DefineModel(const coreHashString& sName)  {ASSERT(false)}
+    inline void DefineModel(std::nullptr_t)               {UNREACHABLE}
+    inline void DefineModel(const coreModelPtr&   pModel) {UNREACHABLE}
+    inline void DefineModel(const coreHashString& sName)  {UNREACHABLE}
 };
 
 

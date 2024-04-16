@@ -411,7 +411,7 @@ coreFloat cMuscusMission::RetrievePearlPitch()
 
     switch(iValue)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: return 0.9f;
     case 1u: return 0.95f;
     case 2u: return 1.0f;

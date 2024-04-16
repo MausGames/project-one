@@ -36,7 +36,7 @@ coreVector3 cIntroMission::RetrieveEnemyColor(const coreUintW iIndex)
 {
     switch(iIndex % 8u)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: return COLOR_SHIP_YELLOW;
     case 1u: return COLOR_SHIP_ORANGE;
     case 2u: return COLOR_SHIP_RED;
@@ -75,7 +75,7 @@ void cIntroMission::__RenderOwnTop()
 void cIntroMission::__MoveOwnAfter()
 {
     // 
-    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayerAll([&](const cPlayer* pPlayer, const coreUintW i)
     {
         if((pPlayer->GetInput() != &g_TotalInput) && (P_TO_UI(pPlayer->GetInput() - g_aGameInput) >= INPUT_SETS)) return;   // # skip replay
 

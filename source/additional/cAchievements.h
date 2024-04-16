@@ -18,16 +18,23 @@
 
 // ****************************************************************
 // 
-#define SCORE_FILE_MAGIC     (UINT_LITERAL("P1  ") % 0xFFFFu)   // 
-#define SCORE_FILE_VERSION   (0x0002u)                          // 
+#define SCORE_FILE_MAGIC        (UINT_LITERAL("P1  ") % 0xFFFFu)   // 
+#define SCORE_FILE_VERSION      (0x0003u)                          // 
 
-#define SCORE_PLAYERS        (PLAYERS)                          // 
-#define SCORE_MISSIONS       (MISSIONS - 2u)                    // (aligned to 2) 
-#define SCORE_SEGMENTS       (SEGMENTS)                         // 
-#define SCORE_TYPE           (GAME_TYPE_MAX)                    // 
-#define SCORE_DIFFICULTIES   (GAME_DIFFICULTY_MAX)              // 
-#define SCORE_EQUIP_WEAPONS  (EQUIP_WEAPONS)                    // 
-#define SCORE_EQUIP_SUPPORTS (EQUIP_SUPPORTS)                   // 
+#define SCORE_PLAYERS           (PLAYERS)                          // 
+#define SCORE_MISSIONS          (MISSIONS - 2u)                    // (aligned to 2) 
+#define SCORE_MISSIONS_EX       (MISSIONS - 3u + CONTINUES)        // 
+#define SCORE_SEGMENTS          (SEGMENTS)                         // 
+#define SCORE_TYPE              (GAME_TYPE_MAX)                    // 
+#define SCORE_DIFFICULTIES      (GAME_DIFFICULTY_MAX)              // 
+#define SCORE_EQUIP_WEAPONS     (EQUIP_WEAPONS)                    // 
+#define SCORE_EQUIP_SUPPORTS    (EQUIP_SUPPORTS)                   // 
+
+#define SCORE_PURE_GAMESPEED    (100u)                             // 
+#define SCORE_PURE_BACKROTATION (1u)                               // 
+#define SCORE_PURE_BACKSPEED    (100u)                             // 
+#define SCORE_PURE_UPDATEFREQ   (60u)                              // 
+#define SCORE_PURE_SHIELD       (0u)                               // 
 
 struct sScoreData final
 {
@@ -56,14 +63,18 @@ struct sScoreData final
     coreUint8  iConfigBackSpeed;
     coreUint16 iConfigUpdateFreq;
     coreUint16 iConfigVersion;
+    coreUint8  iConfigPureMode;
 
     coreUint8  iSystemOs;
     coreUint8  iSystemCpu;
     coreUint8  iSystemGpu;
 
-    coreUint8  aiPadding1[3];
+    coreUint16 aiContinues[2];
+    coreUint8  iRaise;
 
-    coreUint32 aaiScoreMission   [SCORE_PLAYERS][SCORE_MISSIONS];
+    coreUint8  aiPadding1[29];
+
+    coreUint32 aiScoreMission    [SCORE_MISSIONS_EX];
     coreUint32 aiTimeMission     [SCORE_MISSIONS];
     coreUint16 aiShiftGoodMission[SCORE_MISSIONS];
     coreUint16 aiShiftBadMission [SCORE_MISSIONS];
@@ -75,6 +86,7 @@ struct sScoreData final
     coreUint8  aiPadding2[2];
 
     coreUint64 iTimestamp;
+    // TODO 1: exe hash
 };
 
 STATIC_ASSERT(sizeof(sScoreData) == 0x100u)
@@ -94,6 +106,7 @@ extern void UploadLeaderboardsArcade (                                          
 extern void UploadLeaderboardsMission(const coreUintW iMissionIndex,                                const coreUint32 iScore, const coreUint32 iTimeShifted);
 extern void UploadLeaderboardsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex, const coreUint32 iScore, const coreUint32 iTimeShifted);
 extern void CheckLeaderboards();
+extern const sScoreData* GetScoreData(const coreScore* pScore);
 
 
 #endif // _P1_GUARD_ACHIEVEMENTS_H_

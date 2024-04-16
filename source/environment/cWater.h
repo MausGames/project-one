@@ -83,8 +83,8 @@ private:
     virtual void __UpdateOwn() {}
 
     // hide default render functions
-    inline void Render(const coreProgramPtr& pProgram)final {ASSERT(false)}
-    inline void Render()final                               {ASSERT(false)}
+    inline void Render(const coreProgramPtr& pProgram, const coreBool bWithTextures = true)final {UNREACHABLE}
+    inline void Render()final                                                                    {UNREACHABLE}
 };
 
 

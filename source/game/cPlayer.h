@@ -40,6 +40,7 @@
 #define PLAYER_FEEL_TIME           (3.0f)               // 
 #define PLAYER_FEEL_TIME_CONTINUE  (5.0f)               // 
 #define PLAYER_FEEL_TIME_REPAIR    (5.0f)               // 
+#define PLAYER_FEEL_TIME_COOP      (0.1f)               // 
 #define PLAYER_FEEL_TIME_SHIELD    (10.0f)              // 
 #define PLAYER_IGNORE_TIME         (1.1f)               // 
 #define PLAYER_INTERRUPT           (0.3f)               // 
@@ -337,8 +338,8 @@ public:
     void SetDirection(const coreVector3 vDirection);
     // coreObject3D::Move in teleport
     
-    inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {ASSERT(false) return false;}
-    inline coreBool ReachedHealthPct(const coreFloat fHealthPct)const {ASSERT(false) return false;}
+    inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {UNREACHABLE return false;}
+    inline coreBool ReachedHealthPct(const coreFloat fHealthPct)const {UNREACHABLE return false;}
     inline const coreBool& WasDamaged()const {return m_bWasDamaged;}
 
 

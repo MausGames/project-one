@@ -25,11 +25,11 @@ void cOutlineStyle::Apply()
 {
     // render single objects
     FOR_EACH(it, this->GetObjectSet())
-        (*it)->Render(s_pProgramSingle);
+        (*it)->Render(s_pProgramSingle, false);
 
     // render lists with objects
     FOR_EACH(it, this->GetListSet())
-        (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
+        (*it)->Render(s_pProgramInstanced, s_pProgramSingle, false);
 }
 
 
@@ -37,7 +37,7 @@ void cOutlineStyle::Apply()
 // apply immediate outline-style to single object
 void cOutlineStyle::ApplyObject(coreObject3D* pObject)const
 {
-    pObject->Render(s_pProgramSingle);
+    pObject->Render(s_pProgramSingle, false);
 }
 
 
@@ -45,7 +45,7 @@ void cOutlineStyle::ApplyObject(coreObject3D* pObject)const
 // apply immediate outline-style to list with objects
 void cOutlineStyle::ApplyList(coreBatchList* pList)const
 {
-    pList->Render(s_pProgramInstanced, s_pProgramSingle);
+    pList->Render(s_pProgramInstanced, s_pProgramSingle, false);
 }
 
 

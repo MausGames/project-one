@@ -99,7 +99,7 @@ void cExhaustManager::Move()
         // 
         switch(it->eType)
         {
-        default: ASSERT(false)
+        default: UNREACHABLE
 
         case EXHAUST_TYPE_SCOUT:
             {
@@ -259,7 +259,7 @@ void cExhaustManager::BindEnemy(cEnemy* pEnemy, const eExhaustType eType)
         coreUint8 iBase;
         switch(eType)
         {
-        default: ASSERT(false)
+        default: UNREACHABLE
         case EXHAUST_TYPE_SCOUT:   iBase = 0u; break;
         case EXHAUST_TYPE_WARRIOR: iBase = 0u; break;
         case EXHAUST_TYPE_STAR:    iBase = 1u; break;

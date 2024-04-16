@@ -37,7 +37,7 @@ cFinishMenu::cFinishMenu()noexcept
     m_TotalName.SetTextLanguage("FINISH_TOTAL");
 
     m_TotalValue.Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.03f));
+    m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.033f));
     m_TotalValue.SetCenter  (m_Background.GetCenter());
     m_TotalValue.SetColor3  (COLOR_MENU_WHITE);
 
@@ -123,7 +123,7 @@ void cFinishMenu::Move()
                 if(m_SteamButton.IsClicked())
                 {
                     // 
-                    SDL_OpenURL(cMenu::GetStoreLink());
+                    cMenu::OpenStoreLink();
                 }
                 else if(m_ExitButton.IsClicked())
                 {
@@ -187,7 +187,7 @@ void cFinishMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 }
@@ -204,20 +204,30 @@ void cFinishMenu::ShowThankYou()
     m_fIntroTimer = -MENU_FINISH_DELAY_INTRO - 1.5f;
 
     // 
-    coreUint32 iSumScore = 0u;
+    coreUint32 aiScoreFull [TABLE_RUNS + 1u]                    = {};
+    coreUint32 aaiScorePart[TABLE_RUNS + 1u][MENU_FINISH_PARTS] = {};
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        const coreUint32 iScore = pPlayer->GetScoreTable()->GetScoreTotal();
+        for(coreUintW j = 0u; j < TABLE_RUNS + 1u; ++j)
+        {
+            const coreUint32 iScore = (j < TABLE_RUNS) ? pPlayer->GetScoreTable()->GetRunTotal(j) : pPlayer->GetScoreTable()->GetScoreTotal();
 
-        // 
-        m_aTotalPart[i].SetText(g_pGame->IsMulti() ? coreData::ToChars(iScore) : "");
-
-        // 
-        iSumScore += iScore;
+            aiScoreFull [j]    += iScore;
+            aaiScorePart[j][i] += iScore;
+        }
     });
 
     // 
-    m_TotalValue.SetText(coreData::ToChars(iSumScore));
+    const coreUintW iMaxIndex = std::max_element(aiScoreFull, aiScoreFull + TABLE_RUNS + 1u) - aiScoreFull;
+
+    // 
+    m_TotalValue.SetText(coreData::ToChars(aiScoreFull[iMaxIndex]));
+
+    // 
+    for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i)
+    {
+        m_aTotalPart[i].SetText(g_pGame->IsMulti() ? coreData::ToChars(aaiScorePart[iMaxIndex][i]) : "");
+    }
 
     // 
     g_pSave->EditGlobalStats     ()->aiMedalsEarned[MEDAL_BRONZE] += 1u;
@@ -228,9 +238,9 @@ void cFinishMenu::ShowThankYou()
     iMedalArcade = MAX(iMedalArcade, MEDAL_BRONZE);
 
     // 
-    g_pSave->EditLocalStatsArcade()->iScoreBest   = MAX(g_pSave->EditLocalStatsArcade()->iScoreBest,       iSumScore);
-    g_pSave->EditLocalStatsArcade()->iScoreWorst  = MIN(g_pSave->EditLocalStatsArcade()->iScoreWorst - 1u, iSumScore - 1u) + 1u;
-    g_pSave->EditLocalStatsArcade()->iScoreTotal += iSumScore;
+    g_pSave->EditLocalStatsArcade()->iScoreBest   = MAX(g_pSave->EditLocalStatsArcade()->iScoreBest,       aiScoreFull[iMaxIndex]);
+    g_pSave->EditLocalStatsArcade()->iScoreWorst  = MIN(g_pSave->EditLocalStatsArcade()->iScoreWorst - 1u, aiScoreFull[iMaxIndex] - 1u) + 1u;
+    g_pSave->EditLocalStatsArcade()->iScoreTotal += aiScoreFull[iMaxIndex];
 
     // 
     g_pSave->SaveFile();

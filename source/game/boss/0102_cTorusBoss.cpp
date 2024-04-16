@@ -75,6 +75,7 @@ cTorusBoss::cTorusBoss()noexcept
     // load models
     this->DefineModelHigh("ship_boss_torus_high.md3");
     this->DefineModelLow ("ship_boss_torus_low.md3");
+    this->DefineVolume   ("ship_boss_torus_volume.md3");
 
     // set object properties
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 2.0f);
@@ -928,7 +929,7 @@ void cTorusBoss::__MoveOwn()
             coreVector2 vTarget;
             switch(m_aiCounter[CUR_TARGET] % 8)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0: vTarget = coreVector2( 0.0f, 1.0f); break;
             case 1: vTarget = coreVector2( 1.0f,-1.0f); break;
             case 2: vTarget = coreVector2(-1.0f, 0.0f); break;
@@ -1206,7 +1207,7 @@ void cTorusBoss::__MoveOwn()
                     coreFloat fSide;
                     switch(m_aiCounter[SLIDE_COUNT])
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case 1: fSide =  0.4f; break;
                     case 2: fSide = -0.4f; break;
                     case 3: fSide =  0.0f; break;
@@ -1798,7 +1799,7 @@ void cTorusBoss::__MoveOwn()
         {
             switch(iType)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: return COLOR_ENERGY_WHITE   * 0.3f;
             case 1u: return COLOR_ENERGY_YELLOW  * 0.8f;
             case 2u: return COLOR_ENERGY_ORANGE  * 0.9f;

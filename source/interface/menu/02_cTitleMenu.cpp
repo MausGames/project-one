@@ -49,14 +49,14 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f));
     m_aVersionText[0].SetAlignment(coreVector2(0.0f, 1.0f));
     m_aVersionText[0].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[0].SetText     ("(c) 2010, 2023 Martin Mauersics (www.maus-games.at)");
+    m_aVersionText[0].SetText     (DEFINED(_CORE_SWITCH_) ? "(c) 2010, 2023 Martin Mauersics" : "(c) 2010, 2023 Martin Mauersics (www.maus-games.at)");
 
     m_aVersionText[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_BIG);
     m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.03f));
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[1].SetText     (PRINT("Project One%s (%s) - v1.2.1 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", Core::Platform->GetIdentifier(), __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One%s%s - v%s third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", DEFINED(_CORE_SWITCH_) ? "" : PRINT(" (%s)", Core::Platform->GetIdentifier()), CoreApp::Settings::Version, __DATE__, __TIME__));
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_Shadow);
@@ -124,7 +124,7 @@ void cTitleMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 

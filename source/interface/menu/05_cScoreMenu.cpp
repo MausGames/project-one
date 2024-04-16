@@ -12,13 +12,14 @@
 // ****************************************************************
 // constructor
 cScoreMenu::cScoreMenu()noexcept
-: coreMenu        (SURFACE_SCORE_MAX, SURFACE_SCORE_DEFAULT)
-, m_iCurIndex     (0u)
-, m_iPageOffset   (0u)
-, m_iPageMax      (0u)
-, m_bPageChanged  (false)
-, m_iWorkUpload   (0u)
-, m_iWorkDownload (0u)
+: coreMenu         (SURFACE_SCORE_MAX, SURFACE_SCORE_DEFAULT)
+, m_iCurIndex      (0u)
+, m_iPageOffset    (0u)
+, m_iPageMax       (0u)
+, m_bPageChanged   (false)
+, m_iWorkUpload    (0u)
+, m_iWorkDownload1 (0u)
+, m_iWorkDownload2 (0u)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -185,12 +186,11 @@ cScoreMenu::cScoreMenu()noexcept
     m_Loading.SetText    (ICON_GEAR);
     m_Loading.SetRectify (false);
 
-    m_LoadingPlayer.Construct   (MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
-    m_LoadingPlayer.SetPosition (m_PlayerRank.GetPosition() + coreVector2(-0.005f,0.0f));
-    m_LoadingPlayer.SetAlignment(coreVector2(1.0f,0.0f));
-    m_LoadingPlayer.SetColor3   (COLOR_MENU_WHITE);
-    m_LoadingPlayer.SetText     (ICON_GEAR);
-    m_LoadingPlayer.SetRectify  (false);
+    m_LoadingPlayer.Construct  (MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_LoadingPlayer.SetPosition(m_PlayerLine.GetPosition());
+    m_LoadingPlayer.SetColor3  (COLOR_MENU_WHITE);
+    m_LoadingPlayer.SetText    (ICON_GEAR);
+    m_LoadingPlayer.SetRectify (false);
 
     // 
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
@@ -316,7 +316,7 @@ void cScoreMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 
@@ -330,12 +330,37 @@ void cScoreMenu::Move()
     cMenu::UpdateButton(&m_BackButton, &m_Navigator, m_BackButton.IsFocused());
 
     // 
-    const coreBool bNewWorkUpload = !g_pSave->GetScoreQueue()->empty();
-    if(m_iWorkUpload && !bNewWorkUpload)
+    //const coreBool bNewWorkUpload = !g_pSave->GetScoreQueue()->empty();
+    const coreBool bNewWorkUpload2 = std::any_of(g_pSave->GetScoreQueue()->begin(), g_pSave->GetScoreQueue()->end(), [this](const cSave::sScorePack* pPack)
+    {
+        if(HAS_BIT(pPack->iType, 0u))
+        {
+            return false;
+        }
+        if(pPack->oData.iOptionDifficulty != m_FilterDifficulty.GetCurValue())
+        {
+            return false;
+        }
+        if((pPack->iMissionIndex >= SAVE_MISSIONS) && (m_FilterMission.GetCurValue() >= SAVE_MISSIONS) &&
+           (pPack->iSegmentIndex >= SAVE_SEGMENTS) && (m_FilterSegment.GetCurValue() >= SAVE_SEGMENTS))
+        {
+            if((m_FilterSegment.GetCurValue() == 255u) == HAS_BIT(pPack->iType, 7u))
+            {
+                return true;
+            }
+        }
+        if((pPack->iMissionIndex == m_FilterMission.GetCurValue()) &&
+           (pPack->iSegmentIndex == m_FilterSegment.GetCurValue()))
+        {
+            return true;
+        }
+        return false;
+    });
+    if(m_iWorkUpload && !bNewWorkUpload2 && !m_iWorkDownload1)
     {
         this->__UpdateScores();
     }
-    m_iWorkUpload = bNewWorkUpload;
+    m_iWorkUpload = bNewWorkUpload2;
 
     // 
     const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTime());
@@ -344,10 +369,10 @@ void cScoreMenu::Move()
     m_Loading      .SetDirection(vDirection);
     m_LoadingPlayer.SetDirection(vDirection);
 
-    m_Loading      .SetEnabled(m_iWorkDownload ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
-    m_LoadingPlayer.SetEnabled(m_iWorkUpload   ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+    m_Loading      .SetEnabled((m_iWorkDownload1)                  ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+    m_LoadingPlayer.SetEnabled((m_iWorkUpload || m_iWorkDownload2) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 
-    if(m_iWorkDownload)
+    if(m_iWorkDownload1)
     {
         for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
         {
@@ -360,11 +385,11 @@ void cScoreMenu::Move()
         }
     }
 
-    if(m_iWorkUpload)
+    if(m_iWorkUpload || m_iWorkDownload2)
     {
-        m_PlayerRank .SetAlpha(m_PlayerRank .GetAlpha() * 0.0f);   // #
+        m_PlayerRank .SetAlpha(m_PlayerRank .GetAlpha() * 0.5f);
         m_PlayerName .SetAlpha(m_PlayerName .GetAlpha() * 0.5f);
-        m_PlayerTime .SetAlpha(m_PlayerTime .GetAlpha() * 0.5f);
+        m_PlayerTime .SetAlpha(m_PlayerTime .GetAlpha() * 0.0f);   // #
         m_PlayerScore.SetAlpha(m_PlayerScore.GetAlpha() * 0.5f);
         m_PlayerIcon .SetAlpha(m_PlayerIcon .GetAlpha() * 0.5f);
         m_PlayerMedal.SetAlpha(m_PlayerIcon .GetAlpha() * 0.5f);
@@ -394,6 +419,9 @@ void cScoreMenu::LoadMissions()
     // 
     m_FilterDifficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
     this->LoadSegments(m_FilterMission.GetCurValue());
+
+    m_FilterSegment.SelectValue(g_CurConfig.Game.iPureMode ? 255u : 254u);
+    
     this->__ResetScores();
     this->__UpdateScores();
     m_ScoreBox.SetCurOffset(0.0f);
@@ -413,8 +441,8 @@ void cScoreMenu::LoadSegments(const coreUintW iMissionIndex)
     if(iMissionIndex == 254u)
     {
         m_FilterSegment.ClearEntries();
-        m_FilterSegment.AddEntryLanguage("FILTER_COMPLETE", 255u);
-        m_FilterSegment.SetOverride(-1);
+        m_FilterSegment.AddEntryLanguage("FILTER_ANY",  254u);
+        m_FilterSegment.AddEntryLanguage("FILTER_PURE", 255u);
 
         m_FilterIcon.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
 
@@ -445,7 +473,7 @@ void cScoreMenu::LoadSegments(const coreUintW iMissionIndex)
     }
 
     // 
-    if(m_iCurIndex && (!m_aiCurFilter.count(m_iCurIndex) || !m_FilterSegment.SelectValue(m_aiCurFilter.at(m_iCurIndex)))) m_FilterSegment.SelectFirst();
+    if(!m_aiCurFilter.count(m_iCurIndex) || !m_FilterSegment.SelectValue(m_aiCurFilter.at(m_iCurIndex))) m_FilterSegment.SelectFirst();
 }
 
 
@@ -453,6 +481,8 @@ void cScoreMenu::LoadSegments(const coreUintW iMissionIndex)
 // 
 void cScoreMenu::__UpdateScores(const coreBool bPlayer)
 {
+    if(!g_bLeaderboards) return;
+
     const coreUint32 iStart = m_iPageOffset * MENU_SCORE_ENTRIES;
 
     const coreUint8 iMissionValue    = m_FilterMission   .GetCurValue();
@@ -462,19 +492,20 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
     const coreBool bMission = (iMissionValue < SAVE_MISSIONS);
     const coreBool bSegment = (iSegmentValue < SAVE_SEGMENTS);
 
-    const coreChar* pcDifficulty  = iDifficultyValue ? "normal" : "easy";
-    const coreChar* pcLeaderboard = bSegment ? PRINT("stage_score_solo_%s_%02u_%02u", pcDifficulty, iMissionValue, iSegmentValue + 1u) : PRINT("arcade_score_solo_%s", pcDifficulty);
+    const coreChar* pcDifficulty  = (iDifficultyValue)      ? "normal" : "easy";
+    const coreChar* pcPure        = (iSegmentValue == 255u) ? "_pure"  : "";
+    const coreChar* pcLeaderboard = bSegment ? PRINT("stage_score_solo_%s_%02u_%02u", pcDifficulty, iMissionValue, iSegmentValue + 1u) : PRINT("arcade_score_solo_%s%s", pcDifficulty, pcPure);
 
-    m_iWorkDownload += 1u;
+    m_iWorkDownload1 += 1u;
     Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_GLOBAL, iStart + 1u, iStart + MENU_SCORE_ENTRIES, [=, this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal)
     {
-        m_iWorkDownload -= 1u;
+        m_iWorkDownload1 -= 1u;
 
         const coreUint32 iRealNum = MIN(iNum, MENU_SCORE_ENTRIES);
 
         for(coreUintW i = 0u, ie = iRealNum; i < ie; ++i)
         {
-            const sScoreData* pData = r_cast<const sScoreData*>(pScore[i].aData);
+            const sScoreData* pData = GetScoreData(&pScore[i]);
 
             coreInt32 iShift = 0;
             coreFloat fTime  = 0.0f;
@@ -528,14 +559,14 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
 
     if(bPlayer)
     {
-        m_iWorkDownload += 1u;
+        m_iWorkDownload2 += 1u;
         Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_USER, 0, 0, [=, this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal)
         {
-            m_iWorkDownload -= 1u;
+            m_iWorkDownload2 -= 1u;
 
             if(iNum)
             {
-                const sScoreData* pData = r_cast<const sScoreData*>(pScore->aData);
+                const sScoreData* pData = GetScoreData(pScore);
 
                 coreInt32 iShift = 0;
                 coreFloat fTime  = 0.0f;
@@ -622,7 +653,7 @@ void cScoreMenu::__SetWeaponIcon(cGuiObject* OUTPUT pObject, const coreUint8 iWe
 
     switch(iWeapon)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 1u: vColor = COLOR_MENU_YELLOW; vTexOffset = coreVector2(0.0f, 0.0f); break;
     case 2u: vColor = COLOR_MENU_PURPLE; vTexOffset = coreVector2(0.25f,0.0f); break;
     case 3u: vColor = COLOR_MENU_GREEN;  vTexOffset = coreVector2(0.5f, 0.0f); break;
@@ -649,7 +680,7 @@ void cScoreMenu::__SetMedalIconArcade(cGuiObject* OUTPUT pObject, const coreUint
     coreUint16 iMedalTotal = 0u;
     coreUint8  iMedalCount = 0u;
 
-    for(coreUintW j = 0u, je = MISSION_BASE; j < je; ++j)
+    for(coreUintW j = 0u; j < MISSION_BASE; ++j)
     {
         // 
         const coreBool bAter = (j == MISSION_ATER);

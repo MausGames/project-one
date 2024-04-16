@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cDarkBackground::cDarkBackground()noexcept
-: m_Block           (DARK_BLOCKS)
+: cBackground       (false)
+, m_Block           (DARK_BLOCKS)
 , m_afStartHeight   {}
 , m_fFlyOffset      (0.0f)
 , m_iIndexOffset    (0u)

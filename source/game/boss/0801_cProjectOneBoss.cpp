@@ -325,7 +325,7 @@ void cProjectOneBoss::CalcColor(const coreUintW iIndex, coreVector3* OUTPUT pvEn
 
     switch(iIndex)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: (*pvEnergyColor) = COLOR_PLAYER_YELLOW;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_YELLOW,  1.0f); (*pvLevelColor) = COLOR_MENU_YELLOW;  (*pvBackColor) = cDesertBackground ::Color; (*pvLedColor) = COLOR_LED_YELLOW;  break;
     case 1u: (*pvEnergyColor) = COLOR_PLAYER_ORANGE;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_ORANGE,  1.0f); (*pvLevelColor) = COLOR_MENU_ORANGE;  (*pvBackColor) = cVolcanoBackground::Color; (*pvLedColor) = COLOR_LED_ORANGE;  break;
     case 2u: (*pvEnergyColor) = COLOR_PLAYER_RED;     (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_RED,     0.9f); (*pvLevelColor) = COLOR_MENU_RED;     (*pvBackColor) = cMossBackground   ::Color; (*pvLedColor) = COLOR_LED_RED;     break;
@@ -523,7 +523,7 @@ void cProjectOneBoss::__MoveOwn()
             coreFloat fSide;
             switch(i % 4u)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: fSide = -0.45f; break;
             case 1u: fSide =  0.85f; break;
             case 2u: fSide = -0.85f; break;
@@ -602,7 +602,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
+            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 
@@ -1459,7 +1459,7 @@ void cProjectOneBoss::__MoveOwn()
             coreFloat fValue;
             switch(m_iPatternType)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 1u: /* yellow  */ fValue = COS((1.5f*PI) * vPos.x - m_fPatternValue * 0.3f) * SIN((1.5f*PI) * vPos.y - m_fPatternValue * 0.5f);                 break;   // checkerboard (from bottom left)
             case 2u: /* orange  */ fValue = SIN(vPos.Angle() * 2.0f + m_fPatternValue * 1.1f);                                                                   break;   // rotation
             case 3u: /* red     */ fValue = COS((4.0f*PI) * vPos.x - m_fPatternValue * 0.7f) * SIN((3.5f*PI) * vPos.y - m_fPatternValue * 0.5f);                 break;   // random
@@ -1677,7 +1677,7 @@ void cProjectOneBoss::__MoveYellow()
                 coreVector2 vPos;
                 switch(m_iPhase - 53u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vPos = MapStepRotated90(coreVector2(0.4f,0.8f), i % 4u) * (i ? 1.0f : 0.0f);                             break;
                 case 1u: vPos = coreVector2(SIN(m_fPhaseTime * 1.0f + I_TO_F(i) * 2.0f) * 0.8f, (I_TO_F(i) - 2.0f) * 0.4f);       break;
                 case 2u: vPos = coreVector2::Direction(-m_fPhaseTime + I_TO_F(i) / I_TO_F(PROJECTONE_CLONES) * (2.0f*PI)) * 0.8f; break;
@@ -1870,7 +1870,7 @@ void cProjectOneBoss::__MoveOrange()
             pGelu->SetLineMode(0u);
         }
 
-        g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
         {
             if(pPlayer->WasDamaged()) ADD_BIT(m_iSlowdown, 0u)
         });
@@ -2025,7 +2025,7 @@ void cProjectOneBoss::__MoveOrange()
                 coreUintW iCompare;
                 switch(Y)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iCompare = 3u; break;
                 case 1u: iCompare = 2u; break;
                 case 2u: iCompare = 2u; break;
@@ -2064,7 +2064,7 @@ void cProjectOneBoss::__MoveOrange()
     // 
     else if(m_iPhase == 64u)
     {
-        g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
         {
             if(pPlayer->WasDamaged()) ADD_BIT(m_iSlowdown, 1u)
         });
@@ -2143,7 +2143,7 @@ void cProjectOneBoss::__MoveOrange()
                 coreUintW iCompare;
                 switch(X)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iCompare = 3u; break;
                 case 1u: iCompare = 2u; break;
                 case 2u: iCompare = 2u; break;
@@ -2335,7 +2335,7 @@ void cProjectOneBoss::__MoveOrange()
         coreVector2 vDir = coreVector2(0.0f, -1.0f);
         switch(iWall)
         {
-        default: ASSERT(false)
+        default: UNREACHABLE
         case 0u: vPos = -vPos.Rotated90(); vDir = -vDir.Rotated90(); break;
         case 1u: vPos =  vPos.Rotated90(); vDir =  vDir.Rotated90(); break;
         case 2u: vPos = -vPos;             vDir = -vDir;             break;
@@ -2815,7 +2815,7 @@ void cProjectOneBoss::__MoveMagenta()
     const cEnemySquad* pSquad1 = g_pGame->GetCurMission()->GetEnemySquad(0u);
     ASSERT(pSquad1->GetNumEnemies() == PROJECTONE_ENEMIES_METEOR)
 
-    const coreFloat fBackSpeed = (g_CurConfig.Game.iBackRotation ? 1.0f : 0.5f);
+    const coreFloat fBackSpeed = (GetCurBackRotation() ? 1.0f : 0.5f);
 
     if(m_iPhase >= 82u)
     {
@@ -3029,7 +3029,7 @@ void cProjectOneBoss::__MoveMagenta()
             pSquad1->GetEnemy(iTick)->Kill(true);
         });
 
-        if(g_CurConfig.Game.iBackRotation)
+        if(GetCurBackRotation())
         {
             PHASE_CONTROL_TIMER(2u, 0.5f, LERP_LINEAR)
             {
@@ -3562,7 +3562,7 @@ void cProjectOneBoss::__MoveBlue()
             coreVector2 vNewPos;
             switch(m_aiCounter[EVADE_COUNT])
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0: vNewPos = coreVector2(-1.3f, 0.5f); break;
             case 1: vNewPos = coreVector2( 0.5f,-1.3f); break;
             case 2: vNewPos = coreVector2(-0.5f, 1.3f); break;
@@ -3595,7 +3595,7 @@ void cProjectOneBoss::__MoveBlue()
                 coreUintW iType;
                 switch(m_aiCounter[EVADE_COUNT])
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0: iType = 4; break;
                 case 1: iType = 4; break;
                 case 2: iType = 4; break;
@@ -5307,7 +5307,7 @@ void cProjectOneBoss::__SwitchHealth(const coreUintW iIndex)
     coreInt32 iHealth;
     switch(iIndex)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u:  iHealth = 2000;                    break;   // yellow
     case 1u:  iHealth = 1800;                    break;   // orange
     case 2u:  iHealth = 2200 + 90 * 6 + 850 * 4; break;   // red
@@ -5372,7 +5372,7 @@ void cProjectOneBoss::__RequestMission(const coreUintW iIndex)
     // 
     switch(iIndex)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: pAter->RequestInnerMission(cHarenaMission ::ID); break;   // yellow
     case 1u: pAter->RequestInnerMission(cGeluMission   ::ID); break;   // orange
     case 2u: pAter->RequestInnerMission(cMuscusMission ::ID); break;   // red
@@ -5394,7 +5394,7 @@ void cProjectOneBoss::__StartMission(const coreUintW iIndex)
     // 
     switch(iIndex)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: PHASE_CHANGE_TO( 50u) break;   // yellow
     case 1u: PHASE_CHANGE_TO( 60u) break;   // orange
     case 2u: PHASE_CHANGE_TO( 70u) break;   // red
@@ -5497,7 +5497,7 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
     {
         // nothing
     }
-    else ASSERT(false)
+    else UNREACHABLE
 
     // 
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * PROJECTONE_COLL_SCALE);
@@ -5615,7 +5615,7 @@ cBullet* cProjectOneBoss::__AddRainbowBullet(const coreUintW iType, const coreIn
 {
     //switch(iType)
     //{
-    //default: ASSERT(false)
+    //default: UNREACHABLE
     //case 0u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_YELLOW);  break;
     //case 1u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_ORANGE);  break;
     //case 2u: g_pSpecialEffects->CreateBlowColor(coreVector3(vPos, 0.0f), coreVector3(vDir, 0.0f), 50.0f, 1u, COLOR_ENERGY_RED);     break;
@@ -5628,7 +5628,7 @@ cBullet* cProjectOneBoss::__AddRainbowBullet(const coreUintW iType, const coreIn
 
     switch(iType)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: return g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>   (iDamage, fSpeed, this, vPos - 0.7f * vDir, vDir)->ChangeSize(1.5f);
     case 1u: return g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>    (iDamage, fSpeed, this, vPos,               vDir)->ChangeSize(1.6f);
     case 2u: return g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(iDamage, fSpeed, this, vPos,               vDir)->ChangeSize(1.3f);

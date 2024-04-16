@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.2.1 (https://www.maus-games.at)                             |//
+//| Project One v1.2.2 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -38,21 +38,18 @@
 // TODO 3: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
 // TODO 4: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
 // TODO 3: reduce number of shader-lights with static_assert, change something like that into static config
-// TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
 // TODO 3: make sure everything with at least 4 instances uses batch-lists
 // TODO 4: replace / with RCP where possible
 // TODO 4: ENABLE_BITWISE when ?
 // TODO 2: reshape causes some batch-list to be initialized twice
 // TODO 5: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
-// TODO 3: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
 // TODO 3: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
 // TODO 5: convert bigger sound-effects (ambient) to music ?
 // TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
 // TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
-// TODO 4: check all lambdas if OUTPUT can be replaced with const (maybe check everything for it, engine + p1)
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types, blender decimate tool factor ~0.1)
 // TODO 1: all sounds need IsUsable checks
@@ -61,18 +58,15 @@
 // TODO 3: for uneven resolutions, some objects need g_vGameResolution.AspectRatio() (on both axes, with max(1.0f)): menu transition, postprocessing
 // TODO 4: change arrays of structs to structs of arrays where possible (also in engine)
 // TODO 2: test maximum number of replays, provide upper limit, define communication when approaching or reaching limit
-// TODO 2: prevent shaking of center-aligned rectified animated text
+// TODO 2: prevent shaking of center-aligned rectified animated text (did I mean something like seconds?)
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
-// TODO 4: check if any % (modulo) can be changed to coreMath::IsAligned
 // TODO 2: fix broken pw-database printing on MacOS (maybe put TODO into engine) (maybe related to geteuid<>getuid) (# replaced geteuid with getuid, which seems to be correct'er, just need to check if that was the issue on macos)
 // TODO 1: look if enemies with health 10 should be changed to 4
 // TODO 1: make frequency rounding corrections: boss ticker, player weapon
 // TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
-// TODO 3: remove unused mechanics (#ifdef would be enough) so they don't take up code and memory
 // TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
-// TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 // TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
@@ -87,7 +81,6 @@
 // TODO 3: better player bullet creation effect (muzzle flash)
 // TODO 5: plant movement
 // TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (maybe with separation of active-list), eine liste für shadow
-// TODO 3: bei Torus, rückseite von spear bullets zerstören outline von orb bullets
 // TODO 3: improve big boss explosion: Sakurai https://www.youtube.com/watch?v=ZDopYzDX-Jg   https://youtu.be/D-4RsUI3ZNI?t=246   energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
 // TODO 1: [MF] fixup update frequency (allow less than 60?, how to communicate increases? (on low speed))
 // TODO 1: [MF] praise the player ! https://www.youtube.com/watch?v=fryDyXROp8A
@@ -108,7 +101,6 @@
 // TODO 4: enemy bottom/top + special bottom, menu transition, interface, menu changes (INSIDE), mission data, (pause/msgbox stretch)
 // TODO 4: Torus, Leviathan
 // TODO 3: sound: button-click und menu-in/menu-out überlagern sich
-// TODO 3: fix demo save
 
 
 // ****************************************************************
@@ -265,7 +257,10 @@ struct sVersion final
 constexpr sVersion g_aVersion[] =
 {
     {"1.2.0", 1u},
-    {"1.2.1", 2u}
+    {"1.2.1", 2u},
+#if !defined(_CORE_SWITCH_)   // [SW]
+    {"1.2.2", 3u}
+#endif
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 
@@ -368,6 +363,7 @@ extern coreBool        g_bTiltMode;         //
 extern coreFloat       g_fShiftMode;        // 
 extern coreBool        g_bDemoVersion;      // 
 extern coreBool        g_bLeaderboards;     // 
+extern coreBool        g_bSteamDeck;        // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 

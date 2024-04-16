@@ -291,7 +291,7 @@ constexpr FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
     // 3 4 5
     switch(iPack)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: return coreVector2( 0.0f, 1.0f);
     case 1u: return coreVector2(-1.0f, 1.0f) * (1.0f/SQRT2);
     case 2u: return coreVector2(-1.0f, 0.0f);
@@ -338,7 +338,7 @@ constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2 vDirection, 
 {
     switch(iStep)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: return  vDirection;
     case 1u: return -vDirection.Rotated135();
     case 2u: return -vDirection.Rotated90 ();
@@ -354,7 +354,7 @@ constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2 vDirection, 
 {
     switch(iStep)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: return  vDirection;
     case 1u: return -vDirection.Rotated90();
     case 2u: return -vDirection;
@@ -504,7 +504,7 @@ constexpr FUNC_CONST coreBool SameDirection(const coreVector2 x, const coreVecto
 constexpr FUNC_CONST coreBool SameDirection90(const coreVector2 x, const coreVector2 y)
 {
     ASSERT(x.IsNormalized() && y.IsNormalized())
-    return (coreVector2::Dot(x, y) >= (1.0f / SQRT2));
+    return (coreVector2::Dot(x, y) >= (1.0f / SQRT2) - CORE_MATH_PRECISION);
 }
 
 

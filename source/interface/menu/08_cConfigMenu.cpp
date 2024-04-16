@@ -111,6 +111,7 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_AUDIO_QUALITY);
         aiSkip.insert(ENTRY_INPUT_TYPE);
         aiSkip.insert(ENTRY_GAME_UPDATEFREQ);
+        aiSkip.insert(ENTRY_GAME_PUREMODE);
     #endif
     #if !defined(_CORE_DEBUG_)
         aiSkip.insert(ENTRY_GAME_VERSION);
@@ -147,7 +148,11 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_GAME_GAMEDIRECTION)  ++iOffset;
         if(i == ENTRY_GAME_HUDDIRECTION)   ++iOffset;
         if(i == ENTRY_GAME_BACKROTATION)   ++iOffset;
+#if defined(_CORE_SWITCH_)
+        if(i == ENTRY_GAME_PUREMODE)     ++iOffset;
+#else
         if(i == ENTRY_GAME_UPDATEFREQ)     ++iOffset;
+#endif
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -222,11 +227,13 @@ cConfigMenu::cConfigMenu()noexcept
     m_aCueLock[1].SetPosition(m_aLabel[ENTRY_GAME_BACKSPEED]   .GetPosition() + coreVector2(0.472f,0.0f));
 #if defined(_CORE_SWITCH_)
     m_aCueLock[2].SetPosition(HIDDEN_POS);
+    m_aCueLock[3].SetPosition(HIDDEN_POS);
 #else
     m_aCueLock[2].SetPosition(m_aLabel[ENTRY_GAME_UPDATEFREQ]  .GetPosition() + coreVector2(0.472f,0.0f));
+    m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_PUREMODE]  .GetPosition() + coreVector2(0.472f,0.0f));
 #endif
-    //m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_VERSION]     .GetPosition() + coreVector2(0.472f,0.0f));
-    m_aCueLock[3].SetPosition(HIDDEN_POS);
+    //m_aCueLock[4].SetPosition(m_aLabel[ENTRY_GAME_VERSION]     .GetPosition() + coreVector2(0.472f,0.0f));
+    m_aCueLock[4].SetPosition(HIDDEN_POS);
 
     m_Description.Construct  (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_Description.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f,0.045f));
@@ -278,6 +285,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_BackRotation,    GAME_BACKROTATION,    0.31f)
         __SET_OPTION(m_BackSpeed,       GAME_BACKSPEED,       0.31f)
         __SET_OPTION(m_UpdateFreq,      GAME_UPDATEFREQ,      0.31f)
+        __SET_OPTION(m_PureMode,        GAME_PUREMODE,        0.31f)
         __SET_OPTION(m_Version,         GAME_VERSION,         0.31f)
 
         m_Language     .SetEndless(true);
@@ -312,8 +320,9 @@ cConfigMenu::cConfigMenu()noexcept
         m_Navigator.BindObject(&m_CombatText,      &m_HudType,        NULL, &m_BackRotation,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
         m_Navigator.BindObject(&m_BackRotation,    &m_CombatText,     NULL, &m_BackSpeed,       NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
         m_Navigator.BindObject(&m_BackSpeed,       &m_BackRotation,   NULL, &m_UpdateFreq,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_UpdateFreq,      &m_BackSpeed,      NULL, &m_Version,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_Version,         &m_UpdateFreq,     NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_UpdateFreq,      &m_BackSpeed,      NULL, &m_PureMode,        NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_PureMode,        &m_UpdateFreq,     NULL, &m_Version,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_Version,         &m_PureMode,       NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
     }
     #undef __SET_OPTION
 
@@ -550,6 +559,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_BackRotation   .AddEntryLanguage("VALUE_OFF",              0u);
     m_BackRotation   .AddEntryLanguage("VALUE_ON",               1u);
     for(coreUintW i = 50u; i <= 200u; i += 5u) m_BackSpeed.AddEntry(PRINT("%zu%%", i), i);
+    m_PureMode       .AddEntryLanguage("VALUE_OFF",              0u);
+    m_PureMode       .AddEntryLanguage("VALUE_ON",               1u);
     m_Version        .AddEntry        ("1.0.0",                  1u);
     m_Version        .AddEntryLanguage("VERSION_LATEST",         0u);   // TODO 1: "Latest (1.2.0)"
 
@@ -560,13 +571,13 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindObject(&m_GameTab,  &m_SaveButton, &m_InputTab, &m_Monitor, &m_VideoTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
 
     m_Navigator.BindObject(&m_SaveButton,    &m_Version, &m_BackButton,    &m_Monitor, &m_DiscardButton, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_DiscardButton, &m_Version, &m_SaveButton,    &m_Monitor, &m_InputButton,    MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_DiscardButton, &m_Version, &m_SaveButton,    &m_Monitor, &m_InputButton,   MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_InputButton,   &m_Version, &m_DiscardButton, &m_Monitor, &m_BackButton,    MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_BackButton,    &m_Version, &m_InputButton,   &m_Monitor, &m_SaveButton,    MENU_TYPE_DEFAULT);
 
     m_Navigator.BindSurface(&m_VideoTab, SURFACE_CONFIG_VIDEO, &m_ChromaEffects, NULL, &m_Monitor,         NULL);
     m_Navigator.BindSurface(&m_AudioTab, SURFACE_CONFIG_AUDIO, &m_3DSound,       NULL, &m_GlobalVolume,    NULL);
-    m_Navigator.BindSurface(&m_InputTab, SURFACE_CONFIG_INPUT, &m_SwapInput,     NULL, &m_aInput[0].oType, NULL);
+    m_Navigator.BindSurface(&m_InputTab, SURFACE_CONFIG_INPUT, &m_SwapInput,     NULL, DEFINED(_CORE_SWITCH_) ? &m_aInput[0].oRumble : &m_aInput[0].oType, NULL);
     m_Navigator.BindSurface(&m_GameTab,  SURFACE_CONFIG_GAME,  &m_Version,       NULL, &m_Language,        NULL);
 
     m_Navigator.BindScroll(&m_VideoBox);
@@ -630,6 +641,7 @@ cConfigMenu::cConfigMenu()noexcept
     if(!m_BackRotation   .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_BackRotation);
     if(!m_BackSpeed      .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_BackSpeed);
     if(!m_UpdateFreq     .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_UpdateFreq);
+    if(!m_PureMode       .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_PureMode);
     if(!m_Version        .GetStatus()) this->BindObject(SURFACE_CONFIG_GAME,  &m_Version);
 
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_VideoBox);
@@ -998,6 +1010,16 @@ void cConfigMenu::Move()
                 this->__UpdateBackSpeed();
 
             // 
+            if(m_BackRotation.GetUserSwitch() ||
+               m_BackSpeed   .GetUserSwitch() ||
+               m_UpdateFreq  .GetUserSwitch())
+                this->__UpdatePureModeBase();
+
+            // 
+            if(m_PureMode.GetUserSwitch())
+                this->__UpdatePureMode();
+
+            // 
             if(m_GameDirection.GetUserSwitch() ||
                m_MirrorMode   .GetUserSwitch() ||
                m_HudDirection .GetUserSwitch() ||
@@ -1008,16 +1030,18 @@ void cConfigMenu::Move()
             m_aCueRota[0].SetDirection(MapToAxisInv(g_pPostProcessing->GetDirection(), g_vHudDirection));
 
             // 
-            m_BackRotation.SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
-            m_BackSpeed   .SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
-            m_UpdateFreq  .SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
-            m_Version     .SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
+            m_BackRotation .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
+            m_BackSpeed    .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
+            m_UpdateFreq   .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
+            m_PureMode     .SetOverride((STATIC_ISVALID(g_pGame))                               ? -1 : 0);
+            m_Version      .SetOverride((STATIC_ISVALID(g_pGame))                               ? -1 : 0);
 
             // 
-            m_aCueLock[0].SetEnabled(STATIC_ISVALID(g_pGame) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-            m_aCueLock[1].SetEnabled(STATIC_ISVALID(g_pGame) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-            m_aCueLock[2].SetEnabled(STATIC_ISVALID(g_pGame) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-            m_aCueLock[3].SetEnabled(STATIC_ISVALID(g_pGame) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aCueLock[0].SetEnabled((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aCueLock[1].SetEnabled((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aCueLock[2].SetEnabled((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aCueLock[3].SetEnabled((STATIC_ISVALID(g_pGame))                               ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aCueLock[4].SetEnabled((STATIC_ISVALID(g_pGame))                               ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
             // 
             cMenu::UpdateSwitchBox(&m_Language);
@@ -1029,6 +1053,7 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_BackRotation);
             cMenu::UpdateSwitchBox(&m_BackSpeed);
             cMenu::UpdateSwitchBox(&m_UpdateFreq);
+            cMenu::UpdateSwitchBox(&m_PureMode);
             cMenu::UpdateSwitchBox(&m_Version);
 
             // 
@@ -1038,7 +1063,7 @@ void cConfigMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 
@@ -1145,35 +1170,36 @@ void cConfigMenu::CheckValues()
 
     // 
     const coreBool bSave = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                           (m_Monitor        .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                                     ||
-                           (m_DisplayMode    .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                                  ||
-                           (m_Vsync          .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))                                       ||
-                           (m_AntiAliasing   .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                              ||
-                           (m_TextureFilter  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                         ||
-                           (m_RenderQuality  .GetCurValue() != g_OldConfig.Graphics.iRender)                                                         ||
-                           (m_ShadowQuality  .GetCurValue() != g_OldConfig.Graphics.iShadow)                                                         ||
-                           (m_ShakeEffects   .GetCurValue() != g_OldConfig.Graphics.iShake)                                                          ||
-                           (m_FlashEffects   .GetCurValue() != g_OldConfig.Graphics.iFlash)                                                          ||
-                           (m_HitStopEffects .GetCurValue() != g_OldConfig.Graphics.iHitStop)                                                        ||
-                           (m_ChromaEffects  .GetCurValue() != g_OldConfig.Graphics.iChroma)                                                         ||
-                           (m_GlobalVolume   .GetCurValue() != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME))) ||
-                           (m_MusicVolume    .GetCurValue() != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))  ||
-                           (m_EffectVolume   .GetCurValue() != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                        ||
-                           (m_AmbientVolume  .GetCurValue() != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fAmbientVolume))                       ||
-                           (m_MenuVolume     .GetCurValue() != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fMenuVolume))                          ||
-                           (m_AudioQuality   .GetCurValue() != g_OldConfig.Audio.iQuality)                                                           ||
-                           (m_AudioMode      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_AUDIO_MODE))                                         ||
-                           (m_3DSound        .GetCurValue() != g_OldConfig.Audio.i3DSound)                                                           ||
-                           (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                              ||
-                           (m_GameDirection  .GetCurValue() != g_OldConfig.Game.iGameDirection)                                                      ||
-                           (m_MirrorMode     .GetCurValue() != g_OldConfig.Game.iMirrorMode)                                                         ||
-                           (m_HudDirection   .GetCurValue() != g_OldConfig.Game.iHudDirection)                                                       ||
-                           (m_HudType        .GetCurValue() != g_OldConfig.Game.iHudType)                                                            ||
-                           (m_CombatText     .GetCurValue() != g_OldConfig.Game.iCombatText)                                                         ||
-                           (m_BackRotation   .GetCurValue() != g_OldConfig.Game.iBackRotation)                                                       ||
-                           (m_BackSpeed      .GetCurValue() != g_OldConfig.Game.iBackSpeed)                                                          ||
-                           (m_UpdateFreq     .GetCurValue() != g_OldConfig.Game.iUpdateFreq)                                                         ||
-                           (m_Version        .GetCurValue() != g_OldConfig.Game.iVersion)                                                            ||
+                           (m_Monitor        .GetCurValue() !=  Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                                       ||
+                           (m_DisplayMode    .GetCurValue() !=  Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                                    ||
+                           (m_Vsync          .GetCurValue() !=  Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))                                         ||
+                           (m_AntiAliasing   .GetCurValue() !=  Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                                ||
+                           (m_TextureFilter  .GetCurValue() !=  Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                           ||
+                           (m_RenderQuality  .GetCurValue() !=  g_OldConfig.Graphics.iRender)                                                           ||
+                           (m_ShadowQuality  .GetCurValue() !=  g_OldConfig.Graphics.iShadow)                                                           ||
+                           (m_ShakeEffects   .GetCurValue() !=  g_OldConfig.Graphics.iShake)                                                            ||
+                           (m_FlashEffects   .GetCurValue() !=  g_OldConfig.Graphics.iFlash)                                                            ||
+                           (m_HitStopEffects .GetCurValue() !=  g_OldConfig.Graphics.iHitStop)                                                          ||
+                           (m_ChromaEffects  .GetCurValue() !=  g_OldConfig.Graphics.iChroma)                                                           ||
+                           (m_GlobalVolume   .GetCurValue() !=  cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME)))   ||
+                           (m_MusicVolume    .GetCurValue() !=  cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))    ||
+                           (m_EffectVolume   .GetCurValue() !=  cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                          ||
+                           (m_AmbientVolume  .GetCurValue() !=  cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fAmbientVolume))                         ||
+                           (m_MenuVolume     .GetCurValue() !=  cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fMenuVolume))                            ||
+                           (m_AudioQuality   .GetCurValue() !=  g_OldConfig.Audio.iQuality)                                                             ||
+                           (m_AudioMode      .GetCurValue() !=  Core::Config->GetInt(CORE_CONFIG_AUDIO_MODE))                                           ||
+                           (m_3DSound        .GetCurValue() !=  g_OldConfig.Audio.i3DSound)                                                             ||
+                           (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                                 ||
+                           (m_GameDirection  .GetCurValue() !=  g_OldConfig.Game.iGameDirection)                                                        ||
+                           (m_MirrorMode     .GetCurValue() !=  g_OldConfig.Game.iMirrorMode)                                                           ||
+                           (m_HudDirection   .GetCurValue() !=  g_OldConfig.Game.iHudDirection)                                                         ||
+                           (m_HudType        .GetCurValue() !=  g_OldConfig.Game.iHudType)                                                              ||
+                           (m_CombatText     .GetCurValue() !=  g_OldConfig.Game.iCombatText)                                                           ||
+                           (m_BackRotation   .GetCurValue() != (g_OldConfig.Game.iPureMode ? SCORE_PURE_BACKROTATION : g_OldConfig.Game.iBackRotation)) ||
+                           (m_BackSpeed      .GetCurValue() != (g_OldConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_OldConfig.Game.iBackSpeed))    ||
+                           (m_UpdateFreq     .GetCurValue() != (g_OldConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_OldConfig.Game.iUpdateFreq))   ||
+                           (m_PureMode       .GetCurValue() !=  g_OldConfig.Game.iPureMode)                                                             ||
+                           (m_Version        .GetCurValue() !=  g_OldConfig.Game.iVersion)                                                              ||
                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
@@ -1239,9 +1265,10 @@ void cConfigMenu::LoadValues()
     m_HudDirection .SelectValue(g_CurConfig.Game.iHudDirection);
     m_HudType      .SelectValue(g_CurConfig.Game.iHudType);
     m_CombatText   .SelectValue(g_CurConfig.Game.iCombatText);
-    m_BackRotation .SelectValue(g_CurConfig.Game.iBackRotation);
-    m_BackSpeed    .SelectValue(g_CurConfig.Game.iBackSpeed);
-    m_UpdateFreq   .SelectValue(g_CurConfig.Game.iUpdateFreq);
+    m_BackRotation .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKROTATION : g_CurConfig.Game.iBackRotation);
+    m_BackSpeed    .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_CurConfig.Game.iBackSpeed);
+    m_UpdateFreq   .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_CurConfig.Game.iUpdateFreq);
+    m_PureMode     .SelectValue(g_CurConfig.Game.iPureMode);
     m_Version      .SelectValue(g_CurConfig.Game.iVersion);
 
     // 
@@ -1263,6 +1290,9 @@ void cConfigMenu::LoadValues()
         this->__UpdateBackSpeed();
         this->__UpdateInterface();
     }
+
+    // 
+    this->__UpdatePureMode();
 
     // 
     m_SaveButton   .SetOverride(-1);
@@ -1320,9 +1350,10 @@ void cConfigMenu::SaveValues()
     g_CurConfig.Game.iHudDirection  = m_HudDirection .GetCurValue();
     g_CurConfig.Game.iHudType       = m_HudType      .GetCurValue();
     g_CurConfig.Game.iCombatText    = m_CombatText   .GetCurValue();
-    g_CurConfig.Game.iBackRotation  = m_BackRotation .GetCurValue();
-    g_CurConfig.Game.iBackSpeed     = m_BackSpeed    .GetCurValue();
-    g_CurConfig.Game.iUpdateFreq    = m_UpdateFreq   .GetCurValue();
+    g_CurConfig.Game.iBackRotation  = m_PureMode     .GetCurValue() ? g_CurConfig.Game.iBackRotation : m_BackRotation.GetCurValue();
+    g_CurConfig.Game.iBackSpeed     = m_PureMode     .GetCurValue() ? g_CurConfig.Game.iBackSpeed    : m_BackSpeed   .GetCurValue();
+    g_CurConfig.Game.iUpdateFreq    = m_PureMode     .GetCurValue() ? g_CurConfig.Game.iUpdateFreq   : m_UpdateFreq  .GetCurValue();
+    g_CurConfig.Game.iPureMode      = m_PureMode     .GetCurValue();
     g_CurConfig.Game.iVersion       = m_Version      .GetCurValue();
 
     // 
@@ -1397,6 +1428,9 @@ void cConfigMenu::ResetNavigator()
     // 
     m_GameNew      .Acquire();
     m_MirrorModeNew.Acquire();
+
+    // 
+    this->__RefreshTabs();
 }
 
 
@@ -1469,6 +1503,9 @@ void cConfigMenu::__UpdateLanguage()
     this->__LoadMonitors();
     this->__LoadFrequencies(Core::System->GetDisplayIndex());
     this->__LoadInputs();
+
+    // 
+    this->__RefreshTabs();
 }
 
 
@@ -1478,6 +1515,34 @@ void cConfigMenu::__UpdateBackSpeed()
 {
     // 
     g_CurConfig.Game.iBackSpeed = m_BackSpeed.GetCurValue();
+
+    // 
+    if(!STATIC_ISVALID(g_pGame)) g_pEnvironment->SetTargetSpeedNow(ENVIRONMENT_DEFAULT_SPEED);
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__UpdatePureModeBase()
+{
+    // 
+    g_CurConfig.Game.iBackRotation = m_BackRotation.GetCurValue();
+    g_CurConfig.Game.iBackSpeed    = m_BackSpeed   .GetCurValue();
+    g_CurConfig.Game.iUpdateFreq   = m_UpdateFreq  .GetCurValue();
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__UpdatePureMode()
+{
+    // 
+    g_CurConfig.Game.iPureMode = m_PureMode.GetCurValue();
+
+    // 
+    m_BackRotation.SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKROTATION : g_CurConfig.Game.iBackRotation);
+    m_BackSpeed   .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_CurConfig.Game.iBackSpeed);
+    m_UpdateFreq  .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_CurConfig.Game.iUpdateFreq);
 
     // 
     if(!STATIC_ISVALID(g_pGame)) g_pEnvironment->SetTargetSpeedNow(ENVIRONMENT_DEFAULT_SPEED);
@@ -1730,6 +1795,33 @@ void cConfigMenu::__RefreshManual()
         });
         g_pMenu->InvokePauseStep();
     }
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__RefreshTabs()
+{
+    if(Core::Language->GetString("OVERFLOW_CONFIG_TABS")[0] != '0')
+    {
+        m_VideoTab.Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_AudioTab.Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_InputTab.Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_GameTab .Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    }
+    else
+    {
+        m_VideoTab.Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_AudioTab.Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_InputTab.Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_GameTab .Construct(MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    }
+
+    // 
+    m_VideoTab.DefineProgram("menu_border_program");
+    m_AudioTab.DefineProgram("menu_border_program");
+    m_InputTab.DefineProgram("menu_border_program");
+    m_GameTab .DefineProgram("menu_border_program");
 }
 
 

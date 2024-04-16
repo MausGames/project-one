@@ -30,6 +30,7 @@ cVausBoss::cVausBoss()noexcept
     // load models
     this->DefineModelHigh("ship_boss_vaus_high.md3");
     this->DefineModelLow ("ship_boss_vaus_low.md3");
+    this->DefineVolume   ("ship_boss_vaus_volume.md3");
 
     // set object properties
     this->SetSize(coreVector3(2.5f,2.5f,2.5f));
@@ -42,6 +43,7 @@ cVausBoss::cVausBoss()noexcept
     {
         m_aCompanion[i].DefineModelHigh("ship_boss_vaus_companion_high.md3");
         m_aCompanion[i].DefineModelLow ("ship_boss_vaus_companion_low.md3");
+        m_aCompanion[i].DefineVolume   ("ship_boss_vaus_companion_volume.md3");
         m_aCompanion[i].SetSize        (coreVector3(2.2f,2.2f,2.2f));
         m_aCompanion[i].Configure      (1, 0u, COLOR_SHIP_YELLOW);
     }

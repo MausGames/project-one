@@ -234,7 +234,7 @@ public:
     // 
     cEnemy* FindEnemy   (const coreVector2 vPosition)const;
     cEnemy* FindEnemyRev(const coreVector2 vPosition)const;
-    template <typename F> void ForEachEnemy(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy) -> void
+    template <typename F> FORCE_INLINE void ForEachEnemy(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // 
     template <typename T> void PrefetchEnemy();
@@ -272,8 +272,8 @@ public:
     // 
     cEnemy* FindEnemy   (const coreVector2 vPosition)const;
     cEnemy* FindEnemyRev(const coreVector2 vPosition)const;
-    template <typename F> void ForEachEnemy   (F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
-    template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+    template <typename F> FORCE_INLINE void ForEachEnemy   (F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+    template <typename F> FORCE_INLINE void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 
     // 
     inline cEnemy*   GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
@@ -698,6 +698,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 
     // save current pool size
     const coreUintW iSize = pSet->apEnemyPool.size();
+    ASSERT(iSize)
 
     // loop through all enemies
     while(pSet->iTopEnemy < iSize)
@@ -727,7 +728,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 
 // ****************************************************************
 // 
-template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)const
+template <typename F> FORCE_INLINE void cEnemyManager::ForEachEnemy(F&& nFunction)const
 {
     // 
     const coreList<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
@@ -781,9 +782,10 @@ template <typename T> void cEnemyManager::ReserveEnemy(const coreUintW iNumEnemi
 // 
 template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnemies)
 {
-    ASSERT(m_apEnemy.empty())
+    ASSERT(iNumEnemies)
 
     // 
+    ASSERT(m_apEnemy.empty())
     m_apEnemy.reserve(iNumEnemies);
 
     // 
@@ -800,7 +802,7 @@ template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnem
 
 // ****************************************************************
 // 
-template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)const
+template <typename F> FORCE_INLINE void cEnemySquad::ForEachEnemy(F&& nFunction)const
 {
     // 
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
@@ -813,7 +815,7 @@ template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)const
     }
 }
 
-template <typename F> void cEnemySquad::ForEachEnemyAll(F&& nFunction)const
+template <typename F> FORCE_INLINE void cEnemySquad::ForEachEnemyAll(F&& nFunction)const
 {
     // 
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)

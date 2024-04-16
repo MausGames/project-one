@@ -19,7 +19,6 @@
 // TODO 3: discard every X particle (create min 1) on low quality ?
 // TODO 1: separate particles for background rendering (automatic selection, based on start-position ? would be easier to expose)
 // TODO 3: extend particle system to allow custom move algorithms
-// TODO 3: options to completely disable certain sound effects: turn, player shooting
 // TODO 3: update 3d-sound settings in real-time (store position)
 // TODO 3: move some global sound effects to local pointers (where it makes sense), to reduce permanent memory load
 // TODO 1: no rumble in replays (might already be possible, but still check e.g. for NULL)

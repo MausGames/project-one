@@ -96,6 +96,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hard-mode: bullets get bigger with time
     // TODO 1: hard-mode: bullets are bigger in general
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top) (die finalen wellen könnten sonst verwirren)
+    // TODO 1: bullet-bullet collision has a 1 frame delay, maybe other bullet-any collisions as well
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;
@@ -401,7 +402,7 @@ void cNevoMission::__SetupOwn()
             else if(m_iStageSub == 5u) vLerp = (fChange < 1.0f) ? LERPS(avFlow[1], avFlow[0], MIN1(fChange)) : LERPS(avFlow[0], avFlow[2], MIN1(fChange - 1.0f));
             else if(m_iStageSub == 6u) vLerp = avFlow[2];
             else if(m_iStageSub == 7u) vLerp = LERPS(avFlow[2], avFlow[0], MIN1(fChange));
-            else ASSERT(false)
+            else UNREACHABLE
 
             const coreVector2 vMove1 = vLerp.xy() * TIME;
             const coreVector2 vMove2 = vLerp.zw() * TIME;
@@ -1261,7 +1262,7 @@ void cNevoMission::__SetupOwn()
 
                         oBomb.SetPosition(coreVector3(vNewPos, 0.0f));
                     }
-                    else ASSERT(false)
+                    else UNREACHABLE
                 }
 
                 if(this->GetBombGone(i))
@@ -1367,7 +1368,7 @@ void cNevoMission::__SetupOwn()
                         coreUint8 iX, iY;
                         switch(iWallCount % 8u)
                         {
-                        default: ASSERT(false)
+                        default: UNREACHABLE
                         case 0u: iX = 3u; iY = 3u; break;
                         case 1u: iX = 5u; iY = 7u; break;   // first
                         case 2u: iX = 7u; iY = 3u; break;

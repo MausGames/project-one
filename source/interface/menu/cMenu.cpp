@@ -330,7 +330,7 @@ void cMenu::Move()
                     // 
                     switch(g_pGame->GetOutroType())
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case GAME_OUTRO_MISSION:       m_SummaryMenu.ShowMission();      break;
                     case GAME_OUTRO_SEGMENT:       m_SummaryMenu.ShowSegment();      break;
                     case GAME_OUTRO_BEGINNING:     m_SummaryMenu.ShowBeginning();    break;
@@ -845,7 +845,7 @@ void cMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 
@@ -854,6 +854,8 @@ void cMenu::Move()
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
          m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*TIME, 0.25f));
     else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*TIME, 0.0f));
+    
+    m_PauseLayer.SetEnabled(m_PauseLayer.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_RENDER);
 
     // 
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
@@ -883,18 +885,19 @@ void cMenu::Move()
     // 
     m_NoticeSave.SetPosition(coreVector2(-0.033f - 0.02f * BLENDB(1.0f - m_fNoticeSaveTime), 0.023f));
     m_NoticeSave.SetAlpha   (BLENDBR(m_fNoticeSaveTime));
+    m_NoticeSave.SetEnabled (m_NoticeSave.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_RENDER);
     m_NoticeSave.Move();
     
-    m_NoticeSave.RetrieveDesiredSize([this](const coreVector2 vSize)
-    {
-        const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTime());
-        const coreVector2 vDirection = coreVector2::Direction(fRotation * (0.5f*PI));
-
-        m_NoticeSaveIcon.SetPosition (m_NoticeSave.GetPosition() + coreVector2(vSize.x * -1.0f - 0.005f, 0.0f));
-        m_NoticeSaveIcon.SetDirection(vDirection);
-        m_NoticeSaveIcon.SetAlpha    (m_NoticeSave.GetAlpha());
-        m_NoticeSaveIcon.Move();
-    });
+    //if(m_fNoticeSaveTime) m_NoticeSave.RetrieveDesiredSize([this](const coreVector2 vSize)
+    //{
+    //    const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTime());
+    //    const coreVector2 vDirection = coreVector2::Direction(fRotation * (0.5f*PI));
+//
+    //    m_NoticeSaveIcon.SetPosition (m_NoticeSave.GetPosition() + coreVector2(vSize.x * -1.0f - 0.005f, 0.0f));
+    //    m_NoticeSaveIcon.SetDirection(vDirection);
+    //    m_NoticeSaveIcon.SetAlpha    (m_NoticeSave.GetAlpha());
+    //    m_NoticeSaveIcon.Move();
+    //});
     
     if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)) && (!STATIC_ISVALID(g_pGame) || (g_pGame->GetCurMission()->GetID() != cAterMission::ID)))
     {
@@ -959,9 +962,9 @@ void cMenu::Move()
     if(m_pCurLine != m_pNewLine)
     {
         m_pCurLine = m_pNewLine;
-        if(m_pCurLine)
+        if(m_pCurLine && cMenuNavigator::IsUsingJoystick())
         {
-            //g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_LINE);
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.9f, 1.0f, SOUND_MENU_CHANGE_LINE);
         }
     }
     m_pNewLine = NULL;
@@ -1184,10 +1187,10 @@ const coreChar* cMenu::GetStoreText()
 
 // ****************************************************************
 // 
-const coreChar* cMenu::GetStoreLink()
+void cMenu::OpenStoreLink()
 {
     static const coreBool bEpic = coreData::FileExists("data/other/epic.txt");
-    return bEpic ? "https://store.epicgames.com/p/eigengrau-62aef0" : "https://store.steampowered.com/app/1624320/Eigengrau/";
+    SDL_OpenURL(bEpic ? "https://store.epicgames.com/p/eigengrau-62aef0" : "https://store.steampowered.com/app/1624320/Eigengrau/");
 }
 
 

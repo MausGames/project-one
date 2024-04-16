@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cSpaceBackground::cSpaceBackground()noexcept
-: m_vCoverDir    (coreVector2(0.0f,1.0f))
+: cBackground    (false)
+, m_vCoverDir    (coreVector2(0.0f,1.0f))
 , m_fCoverScale  (1.0f)
 , m_fMeteorSpeed (1.0f)
 , m_iCopyLower   (0u)
@@ -202,7 +203,7 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pMeteor = (*pList->List())[i];
         if((i >= m_iCopyLower) && (i < m_iCopyUpper) && !pMeteor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all

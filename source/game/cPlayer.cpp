@@ -185,7 +185,7 @@ void cPlayer::Configure(const coreUintW iShipType)
     coreVector3    vEnergy;
     switch(iShipType)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_PLAYER_BLUE;   m_vMenuColor = COLOR_MENU_BLUE;   m_vLedColor = COLOR_LED_BLUE;   m_fRangeScale = 1.0f;  break;
     case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_PLAYER_YELLOW; m_vMenuColor = COLOR_MENU_YELLOW; m_vLedColor = COLOR_LED_YELLOW; m_fRangeScale = 1.0f;  break;
     case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_PLAYER_GREEN;  m_vMenuColor = COLOR_MENU_GREEN;  m_vLedColor = COLOR_LED_GREEN;  m_fRangeScale = 1.08f; break;
@@ -255,7 +255,7 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
     // create new weapon
     switch(iID)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case cNoWeapon   ::ID: m_apWeapon[iIndex] = new cNoWeapon   (); break;
     case cRayWeapon  ::ID: m_apWeapon[iIndex] = new cRayWeapon  (); break;
     case cPulseWeapon::ID: m_apWeapon[iIndex] = new cPulseWeapon(); break;
@@ -295,7 +295,7 @@ void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
     // 
     switch(iID)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case 0u: break;
     }
 }
@@ -423,7 +423,7 @@ void cPlayer::Move()
 
                 switch(PackDirection(MapToAxisInv(m_pInput->vMove, vFinal) * vFlip))
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: m_iLastHold = 0u; break;
                 case 1u: m_iLastHold = (m_iLastHold == 0u) ? 2u : 0u; break;
                 case 2u: m_iLastHold = 2u; break;
@@ -651,29 +651,42 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
-            if(/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt/* && bToggle*/)
+            if(/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt)
             {
-                if(HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_RAPID_FIRE))
-                {
-                    m_iShootToggle = !m_iShootToggle;
-                    m_apWeapon[i]->Update(m_iShootToggle, m_fShootSpeed);
-                }
-                else
-                {
-                    m_iShootToggle = 0u;
+                const coreUint8 iShoot     = (m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES);
+                const coreBool  bShootFast = HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_RAPID_FIRE);
 
-                    const coreUint8 iShoot = (m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES);
-                    m_apWeapon[i]->Update(iShoot, m_fShootSpeed);
+                if((iShoot || bShootFast) && m_apWeapon[i]->GetCooldown() && !HAS_BIT(m_iShootToggle, 0u))
+                {
+                    ADD_BIT(m_iShootToggle, 0u)   // shoot state
+                    ADD_BIT(m_iShootToggle, 1u)   // tap lock
                 }
+
+                if(iShoot)
+                {
+                    ADD_BIT(m_iShootToggle, 0u)
+                }
+                else if(bShootFast && (m_apWeapon[i]->GetCooldownTime() < (1.0f - ((m_apWeapon[i]->GetCooldownSpeed() * m_fShootSpeed) / FRAMERATE_MIN))))
+                {
+                    ADD_BIT(m_iShootToggle, 0u)
+                }
+                else if(!HAS_BIT(m_iShootToggle, 1u))
+                {
+                    REMOVE_BIT(m_iShootToggle, 0u)
+                }
+
+                if(m_apWeapon[i]->Update(m_iShootToggle & BIT(0u), m_fShootSpeed))
+                {
+                    REMOVE_BIT(m_iShootToggle, 1u)
+                }
+
+                STATIC_ASSERT(WEAPON_MODES == 1u)
             }
             else
             {
                 m_iShootToggle = 0u;
-
                 m_apWeapon[i]->Update(0u, m_fShootSpeed);
             }
-
-            //const coreBool bToggle = !(HAS_BIT(m_pInput->iStatus, 1u) && m_apWeapon[i]->GetLastStatus());
         }
 
         // 
@@ -759,14 +772,14 @@ void cPlayer::Move()
         if(m_Gyro.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-            const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+            //const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+            //const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
 
-            coreVector2 vAlong = vRealDir.xy();
-            while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();
+            //coreVector2 vAlong = vRealDir.xy();
+            //while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();   might hang, change to for-loop
 
             // 
-            m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
+            //m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
             m_Gyro.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 2.0f * PLAYER_SIZE_FACTOR_EXT);
             m_Gyro.SetDirection(vRealDir.RotatedZ45());   // TODO 1: is this correct ?
             m_Gyro.SetAlpha    (BLENDH3(m_fGyroValue));
@@ -1270,7 +1283,7 @@ void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
     else if(iType == 1u) g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
 
     // 
-    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_EXPLOSION);
+    if(iType < 2u) g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_EXPLOSION);
 }
 
 
@@ -1712,7 +1725,7 @@ coreVector2 cPlayer::CalcMove()const
 coreFloat cPlayer::CalcMoveSpeed()const
 {
     // 
-    const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_RAPID_FIRE) && !m_fBoost) ? 20.0f : 50.0f;
+    const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_fBoost) ? 20.0f : 50.0f;
     return m_fMoveSpeed * fModifier;
 }
 
@@ -1735,14 +1748,14 @@ void cPlayer::SetPosition(const coreVector3 vPosition)
 
     
     // 
-    const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-    const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+    //const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+    //const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
     
-    coreVector2 vAlong = this->GetDirection().xy();
-    while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();
+    //coreVector2 vAlong = this->GetDirection().xy();
+    //while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();   might hang, change to for-loop
 
     // 
-    m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
+    //m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
     
     Timeless([this]()
     {

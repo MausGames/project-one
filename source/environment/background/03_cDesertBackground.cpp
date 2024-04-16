@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cDesertBackground::cDesertBackground()noexcept
-: m_vSandMove  (coreVector2(0.0f,-1.0f))
+: cBackground  (false)
+, m_vSandMove  (coreVector2(0.0f,-1.0f))
 , m_fSandWave  (0.0f)
 
 , m_avTrailHit  {}

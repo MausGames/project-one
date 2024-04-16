@@ -211,7 +211,7 @@ void cGeluMission::__SetupOwn()
                     coreFloat fOffset;
                     switch((i - 40u) / 8u)
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case 0u: fOffset =  0.5f; break;
                     case 1u: fOffset = -0.5f; break;
                     case 2u: fOffset =  0.5f; break;
@@ -1145,7 +1145,7 @@ void cGeluMission::__SetupOwn()
                 coreVector2 vDir = coreVector2(0.0f, -1.0f);
                 switch(iWall)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vPos = -vPos.Rotated90(); vDir = -vDir.Rotated90(); break;
                 case 1u: vPos =  vPos.Rotated90(); vDir =  vDir.Rotated90(); break;
                 case 2u: vPos = -vPos;             vDir = -vDir;             break;
@@ -1190,7 +1190,7 @@ void cGeluMission::__SetupOwn()
                 coreFloat fHeight;
                 switch(i - 62u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 3u: case 1u: fHeight =  0.6f; break;
                 case 0u: case 5u: fHeight =  0.2f; break;
                 case 2u: case 7u: fHeight = -0.2f; break;
@@ -2025,7 +2025,7 @@ void cGeluMission::__SetupOwn()
 
                 switch(i - 50u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: pEnemy->Rotate270(); break;
                 case 1u:                      break;
                 case 2u: pEnemy->Rotate90 (); break;
@@ -2579,7 +2579,7 @@ void cGeluMission::__SetupOwn()
                 coreUintW iOffset, iRota;
                 switch(i)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case  0u:           iOffset = 0u; iRota = 0u; break;
                 case  1u:           iOffset = 0u; iRota = 1u; break;
                 case  2u:           iOffset = 1u; iRota = 3u; break;
@@ -2627,7 +2627,7 @@ void cGeluMission::__SetupOwn()
 
                 switch(iRota)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u:                      break;
                 case 1u: pEnemy->Rotate90 (); break;   // right
                 case 2u: pEnemy->Rotate180(); break;
@@ -3081,7 +3081,7 @@ void cGeluMission::__SetupOwn()
                             coreVector2 vDir;
                             switch(iCheckerCount)
                             {
-                            default: ASSERT(false)
+                            default: UNREACHABLE
                             case 5u: case 10u: case 12u: case 17u:           vDir = coreVector2( 1.0f, 0.0f); break;
                             case 2u: case  7u: case  9u: case 14u:           vDir = coreVector2(-1.0f, 0.0f); break;
                             case 1u: case  3u: case  8u: case 13u: case 15u: vDir = coreVector2( 0.0f, 1.0f); break;
@@ -3241,7 +3241,7 @@ void cGeluMission::__SetupOwn()
                 coreUintW X, Y, D;
                 switch(i - 47u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: X = 1u; Y = 1u; D = 2u; break;
                 case 1u: X = 0u; Y = 2u; D = 3u; break;
                 case 2u: X = 4u; Y = 2u; D = 3u; break;

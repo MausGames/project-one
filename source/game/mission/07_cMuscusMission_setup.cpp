@@ -396,7 +396,7 @@ void cMuscusMission::__SetupOwn()
                 coreVector2 vPos;
                 switch(i - 16u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vPos = coreVector2(-0.9f, 0.0f); break;
                 case 1u: vPos = coreVector2( 0.9f,-0.9f); break;
                 case 2u: vPos = coreVector2( 0.0f, 0.9f); break;
@@ -439,7 +439,7 @@ void cMuscusMission::__SetupOwn()
                 coreVector2 vPos;
                 switch(iStepHit)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vPos = coreVector2(-0.8f, 0.8f); break;
                 case 1u: vPos = coreVector2( 0.8f,-0.8f); break;
                 case 2u: vPos = coreVector2(-0.8f, 0.0f); break;
@@ -621,7 +621,7 @@ void cMuscusMission::__SetupOwn()
             coreVector2 vPos;
             switch(i)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: vPos = coreVector2( 0.0f, 0.0f); break;
             case 1u: vPos = coreVector2(-0.9f,-0.9f); break;
             case 2u: vPos = coreVector2(-0.8f, 0.8f); break;
@@ -894,7 +894,7 @@ void cMuscusMission::__SetupOwn()
                 coreFloat fClamp;
                 switch(iSpawnCount % 5u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u:
                     fClamp = CLAMP(fOffset, -3.5f * fStep, 2.5f * fStep);
                     nCreateGenerateFunc(0u, 1.0f, fClamp,         0.0f);
@@ -950,7 +950,7 @@ void cMuscusMission::__SetupOwn()
                     coreUintW iHole;
                     switch(iSpawnCount % 4u)
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case 0u: iHole = 3u; break;
                     case 1u: iHole = 2u; break;
                     case 2u: iHole = 4u; break;
@@ -1191,7 +1191,7 @@ void cMuscusMission::__SetupOwn()
 
                 switch(aiGenerateType[i] % 4u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: break;
                 case 1u: pGenerate->SetPosition( pGenerate->GetPosition().RotatedZ90()); break;
                 case 2u: pGenerate->SetPosition(-pGenerate->GetPosition());              break;
@@ -1541,7 +1541,7 @@ void cMuscusMission::__SetupOwn()
                 coreVector2 vPos;
                 switch(i)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case  0u: vPos = coreVector2( 2.0f, 0.0f); break;
                 case  1u: vPos = coreVector2( 3.0f, 0.0f); break;
                 case  2u: vPos = coreVector2( 4.0f, 0.0f); break;
@@ -1597,7 +1597,7 @@ void cMuscusMission::__SetupOwn()
                         coreUint8 iHeight;
                         switch(i % 6u)
                         {
-                        default: ASSERT(false)
+                        default: UNREACHABLE
                         case 0u: iHeight = 1u; break;
                         case 1u: iHeight = 4u; break;
                         case 2u: iHeight = 2u; break;
@@ -2288,7 +2288,7 @@ void cMuscusMission::__SetupOwn()
                 coreVector2 vDir;
                 switch(m_iStageSub - 12u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vDir = coreVector2( 0.0f, 1.0f); break;
                 case 1u: vDir = coreVector2( 0.0f,-1.0f); break;
                 case 2u: vDir = coreVector2(-1.0f, 0.0f); break;
@@ -2412,7 +2412,7 @@ void cMuscusMission::__SetupOwn()
                 coreUint8 iStep;
                 switch(i - 89u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: fSide = -0.5f; iStep = 0u; break;
                 case 1u: fSide =  0.5f; iStep = 0u; break;
                 case 2u: fSide = -1.5f; iStep = 1u; break;
@@ -3227,7 +3227,7 @@ void cMuscusMission::__SetupOwn()
                     break;
 
                 default:
-                    ASSERT(false)
+                    UNREACHABLE
                     break;
                 }
 

@@ -14,13 +14,11 @@
 // TODO 1: score-menu names are restricted to characters from the text-board
 // TODO 3: score-menu names must be sanitized
 // TODO 3: unload fonts currently not used (e.g. from score-menu)
-// TODO 3: options menu: highlight changed options mit sternchen oder eigenem icon (damit text nicht immer erneuert werden muss)
+// TODO 3: options menu: highlight changed options mit sternchen oder eigenem icon (damit text nicht immer erneuert werden muss) (oder farb-änderung)
 // TODO 3: options menu: 15 second on video change, yes, no
 // TODO 5: display unattached joysticks and joystick names somehow
 // TODO 3: highlight which joystick is which input set
 // TODO 3: update texture filter and render quality in realtime (resource-manager reset ?)
-// TODO 3: double initial languages by switching to two columns (on demand?)
-// TODO 3: when switching resolution, the next mouse click is not recognized (no press event is coming from SDL, only the release event)
 // TODO 3: swapping controls should swap buttons visually
 // TODO 3: load replay number only on first entry, load headers async on demand, handle changes during runtime
 // TODO 3: display gamepad/device name in options description
@@ -38,15 +36,16 @@
 // TODO 2: this->ChangeSurface(XXX, 0.0f) mit timeless wrappen
 // TODO 1: click-wave when clicking on active button or tab (not for switch-box), what about stage tile ?
 // TODO 4: remove unnecessary tiles, medals, and others related to the missing Ater segments (and possible second bosses everywhere else)
-// TODO 3: check render-reihenfolge (bind-object) in ALLEN menüs und view-boxen
 // TODO 1: show mission summary for Ater before arcade summary on ?
 // TODO 1: show player separation for arcade summary
 // TODO 3: add auto-scroll for armory-segment-switch, for shoulder-buttons and arrow-keys
 // TODO 1: going into extra menu with mouse and selecting credits, then switching to gamepad accidentally selects the stats-switchbox
 // TODO 2: latam language, text in summary menu is etwas zu nah beinander
 // TODO 1: alle menü rendering orders optimieren, speziell für shader, speziell im game-menü
+// TODO 3: check render-reihenfolge (bind-object) in ALLEN menüs und view-boxen
 // TODO 1: (remove mission page in armory)
 // TODO 1: get rid of the additional interface object in config-menu
+// TODO 3: when switching resolution (AA change, engine reset), the next mouse click is not recognized (no press event is coming from SDL, only the release event) (nicht immer!)
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
 // NOTE: every object in menu needs outline: weapons, medals, icons
@@ -85,6 +84,7 @@
 #define MENU_CONFIG_INPUTS            (PLAYERS)
 #define MENU_PAUSE_RESUME_POSITION    (coreVector2(0.0f,0.135f))
 #define MENU_SUMMARY_ARCADES          (9u)
+#define MENU_SUMMARY_RUNS             (CONTINUES + 1u)
 #define MENU_SUMMARY_MEDALS           (6u)
 #define MENU_SUMMARY_ENTRIES          (2u)
 #define MENU_SUMMARY_PARTS            (PLAYERS)
@@ -193,7 +193,8 @@ enum eSurface : coreUint8
     SURFACE_PAUSE_LIGHT,
     SURFACE_PAUSE_MAX,
 
-    SURFACE_SUMMARY_ARCADE = 0u,
+    SURFACE_SUMMARY_ARCADE_1 = 0u,
+    SURFACE_SUMMARY_ARCADE_2,
     SURFACE_SUMMARY_MISSION_SOLO,
     SURFACE_SUMMARY_MISSION_COOP,
     SURFACE_SUMMARY_SEGMENT_SOLO,
@@ -280,6 +281,7 @@ enum eEntry : coreUint8
     ENTRY_GAME_BACKROTATION,
     ENTRY_GAME_BACKSPEED,
     ENTRY_GAME_UPDATEFREQ,
+    ENTRY_GAME_PUREMODE,
     ENTRY_GAME_VERSION,
     ENTRY_MAX
 };
@@ -499,6 +501,9 @@ private:
     cGuiSwitchBox m_aArmoryWeapon    [MENU_GAME_PLAYERS];         // 
     cGuiLabel     m_aArmoryPlayer    [MENU_GAME_PLAYERS];         // 
     cGuiObject    m_aArmoryWeaponIcon[MENU_GAME_PLAYERS];         // 
+    cGuiLabel     m_aArmoryRaise     [3];                         // 
+    cGuiLabel     m_ArmoryRaiseText;                              // 
+    cGuiLabel     m_aArmoryCueLock[2];                            // 
 
     cGuiLabel  m_FirstHeader;                                     // 
     cGuiLabel  m_aFirstName[MENU_GAME_FIRSTS];                    // 
@@ -509,6 +514,9 @@ private:
     cGuiSwitchBox m_FirstSpeed;                                   // 
     cGuiSwitchBox m_aFirstShield[MENU_GAME_PLAYERS];              // 
     cGuiLabel     m_aFirstPlayer[MENU_GAME_PLAYERS];              // 
+    cGuiLabel     m_aFirstRaise [3];                              // 
+    cGuiLabel     m_FirstRaiseText;                               // 
+    cGuiLabel     m_aFirstCueLock[2];                             // 
 
     cGuiLabel  m_DemoHeader;                                      // 
     cGuiLabel  m_aDemoName[MENU_GAME_DEMOS];                      // 
@@ -521,6 +529,9 @@ private:
     cGuiObject    m_DemoStageIcon;                                // 
     cGuiSwitchBox m_aDemoShield[MENU_GAME_PLAYERS];               // 
     cGuiLabel     m_aDemoPlayer[MENU_GAME_PLAYERS];               // 
+    cGuiLabel     m_aDemoRaise [3];                               // 
+    cGuiLabel     m_DemoRaiseText;                                // 
+    cGuiLabel     m_aDemoCueLock[2];                              // 
 
     coreUint8 m_iCurPage;                                         // 
     coreUintW m_aiCurIndex[4];                                    // 
@@ -533,7 +544,7 @@ private:
     coreBool m_bFirstPlay;
 
     coreTexturePtr m_apFragment[FRAGMENTS];
-    coreTexturePtr m_apSegment[2];
+    coreTexturePtr m_apSegment [2];
 
     cNewIndicator m_SpeedNew;
     cNewIndicator m_ShieldNew;
@@ -600,7 +611,7 @@ private:
     void __PrepareArcade ();
 
     // 
-    coreBool __SetupInput();
+    coreBool __SetupInput(const coreBool bAlways);
 };
 
 
@@ -650,7 +661,8 @@ private:
     coreUint32 m_iPageMax;                          // 
     coreBool   m_bPageChanged;                      // 
     coreUint8  m_iWorkUpload;                       // 
-    coreUint8  m_iWorkDownload;                     // 
+    coreUint8  m_iWorkDownload1;                    // 
+    coreUint8  m_iWorkDownload2;                    // 
 
     cMenuNavigator m_Navigator;
 
@@ -859,7 +871,7 @@ private:
     cGuiObject m_aLine    [ENTRY_MAX];         // 
     cGuiLabel  m_aCueInput[INPUT_KEYS];        // 
     cGuiLabel  m_aCueRota [2];                 // 
-    cGuiLabel  m_aCueLock [4];                 // 
+    cGuiLabel  m_aCueLock [5];                 // 
 
     cGuiLabel       m_Description;             // 
     const coreChar* m_apcDescKey[ENTRY_MAX];   // 
@@ -893,6 +905,7 @@ private:
     cGuiSwitchBox m_BackRotation;
     cGuiSwitchBox m_BackSpeed;
     cGuiSwitchBox m_UpdateFreq;
+    cGuiSwitchBox m_PureMode;
     cGuiSwitchBox m_Version;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
@@ -939,6 +952,8 @@ private:
     void __UpdateVolume();
     void __UpdateLanguage();
     void __UpdateBackSpeed();
+    void __UpdatePureModeBase();
+    void __UpdatePureMode();
     void __UpdateInterface();
 
     // 
@@ -950,6 +965,7 @@ private:
 
     // 
     void __RefreshManual();
+    void __RefreshTabs();
 
     // 
     coreBool __SetupInput();
@@ -1025,7 +1041,8 @@ private:
     cGuiLabel      m_ArcadeHeader;                                  // 
 
     cGuiLabel  m_aArcadeName         [MENU_SUMMARY_ARCADES];              // 
-    cGuiLabel  m_aArcadeScore        [MENU_SUMMARY_ARCADES];              // 
+    cGuiLabel  m_aaArcadeScoreRun    [MENU_SUMMARY_ARCADES][MENU_SUMMARY_RUNS];   // 
+    cGuiLabel  m_aArcadeScore        [MENU_SUMMARY_ARCADES];   // 
     cGuiLabel  m_aArcadeTime         [MENU_SUMMARY_ARCADES];              // 
     cGuiObject m_aArcadeIcon         [MENU_SUMMARY_ARCADES];              // 
     cGuiObject m_aArcadeIconBack     [MENU_SUMMARY_ARCADES];              // 
@@ -1033,12 +1050,15 @@ private:
     cGuiObject m_aaArcadeMedalSegment[MENU_SUMMARY_ARCADES][MENU_SUMMARY_MEDALS];
     cGuiObject m_aArcadeLine         [MENU_SUMMARY_ARCADES];              // 
 
+    cGuiLabel  m_aArcadeSum[MENU_SUMMARY_RUNS];                     // 
     cGuiLabel  m_aArcadeTotalName[2];
     cGuiLabel  m_aArcadeTotalBest[2];
     cGuiLabel  m_ArcadeTotalScore;
     cGuiLabel  m_ArcadeTotalTime;
     cGuiLabel  m_ArcadeOptions;
     cGuiObject m_ArcadeTotalMedal;
+
+    cGuiObject m_aContinueImage[MENU_SUMMARY_RUNS];                 // 
 
     cGuiLabel  m_aHeader[2];                                        // 
     cGuiObject m_Icon;                                              // 
@@ -1054,6 +1074,8 @@ private:
     cGuiLabel m_TotalValue;                                         // 
     cGuiLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
     cGuiLabel m_TotalBest;                                          // 
+
+    cGuiLabel m_Raise;
 
     coreUint32 m_iFinalValue;                                       // (just for display) 
     coreUint32 m_aiFinalPart [MENU_SUMMARY_PARTS];                  // (just for display) 
@@ -1080,6 +1102,8 @@ private:
     
     cGuiObject m_aSegmentBadge    [MENU_SUMMARY_BADGES];
     cGuiObject m_aSegmentBadgeWave[MENU_SUMMARY_BADGES];
+    
+    cGuiLabel m_SegmentRaise;
     
     coreUint8 m_iSelection;
     
@@ -1151,20 +1175,20 @@ private:
 
 
 private:
-    cGuiObject m_Background;                             // 
+    cGuiObject m_Background;                              // 
 
-    cGuiLabel  m_GameOverText;                           // 
-    cGuiLabel  m_ContinueText;                           // 
-    cGuiLabel  m_ContinueTimer;                          // 
-    cGuiObject m_ContinueImage[MENU_DEFEAT_CONTINUES];   // 
+    cGuiLabel  m_GameOverText;                            // 
+    cGuiLabel  m_ContinueText;                            // 
+    cGuiLabel  m_ContinueTimer;                           // 
+    cGuiObject m_aContinueImage[MENU_DEFEAT_CONTINUES];   // 
 
-    coreFlow m_fCountdown;                               // 
-    coreFlow m_fBurst;                                   // 
+    coreFlow m_fCountdown;                                // 
+    coreFlow m_fBurst;                                    // 
 
-    coreFlow m_fIntroTimer;                              // 
-    coreFlow m_fOutroTimer;                              // 
+    coreFlow m_fIntroTimer;                               // 
+    coreFlow m_fOutroTimer;                               // 
 
-    eDefeatState m_eState;                               // 
+    eDefeatState m_eState;                                // 
 
 
 public:
@@ -1435,7 +1459,7 @@ public:
     static const coreChar* GetSegmentLetters(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
     
     static const coreChar* GetStoreText();
-    static const coreChar* GetStoreLink();
+    static void            OpenStoreLink();
 
     // menu helper routines
     static void UpdateButton        (coreButton*    OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow = true, const coreBool bSound = true);

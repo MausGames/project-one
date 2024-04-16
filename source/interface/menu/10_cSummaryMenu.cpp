@@ -81,19 +81,29 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_ArcadeLayer.SetStyle     (CORE_OBJECT2D_STYLE_VIEWDIR);
 
     m_ArcadeHeader.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
-    m_ArcadeHeader.SetPosition    (coreVector2(0.0f,0.42f));
+    m_ArcadeHeader.SetPosition    (coreVector2(0.0f,0.43f));
     m_ArcadeHeader.SetColor3      (COLOR_MENU_WHITE);
     m_ArcadeHeader.SetTextLanguage("SUMMARY_ARCADE");
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
     {
+#if defined(_CORE_SWITCH_)    // [SW]
         const coreFloat fHeight = 0.3f - 0.07f*I_TO_F(i);
+#else
+        const coreFloat fHeight = 0.26f - 0.06f*I_TO_F(i);
+#endif
 
         m_aArcadeName[i].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
         m_aArcadeName[i].SetPosition (coreVector2(-0.45f, fHeight));
         m_aArcadeName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aArcadeName[i].SetColor3   (g_aMissionData[i].vColor);
         m_aArcadeName[i].SetText     (g_aMissionData[i].pcName);
+
+        for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j)
+        {
+            m_aaArcadeScoreRun[i][j].Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+            m_aaArcadeScoreRun[i][j].SetPosition(coreVector2(-0.18f + I_TO_F(j) * 0.18f, fHeight));
+        }
 
         m_aArcadeScore[i].Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
         m_aArcadeScore[i].SetPosition(coreVector2(-0.21f, fHeight));
@@ -140,6 +150,11 @@ cSummaryMenu::cSummaryMenu()noexcept
         m_aArcadeLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
 
+    for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j)
+    {
+        m_aArcadeSum[j].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    }
+
     m_aArcadeTotalName[0].Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aArcadeTotalName[0].SetPosition    (coreVector2(-0.275f,-0.355f));
     m_aArcadeTotalName[0].SetColor3      (COLOR_MENU_WHITE);
@@ -174,7 +189,16 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_ArcadeTotalMedal.DefineProgram("default_2d_program");
     m_ArcadeTotalMedal.SetPosition  (coreVector2(0.34f,-0.394f));
     m_ArcadeTotalMedal.SetTexSize   (coreVector2(0.25f,0.25f));
-    
+
+    for(coreUintW i = 0u; i < MENU_SUMMARY_RUNS; ++i)
+    {
+        m_aContinueImage[i].DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
+        m_aContinueImage[i].DefineProgram("default_2d_program");
+        m_aContinueImage[i].SetPosition  (m_aaArcadeScoreRun[0][i].GetPosition() + coreVector2(0.0f,0.065f));
+        m_aContinueImage[i].SetSize      (coreVector2(1.0f,1.0f) * 0.058f);
+        m_aContinueImage[i].SetTexSize   (ICON_TEXSIZE);
+        m_aContinueImage[i].SetTexOffset (ICON_TEXOFFSET * I_TO_F(i + 1u));
+    }
     
 
     m_aHeader[0].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -249,7 +273,10 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_TotalBest.Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     m_TotalBest.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.09f));
     m_TotalBest.SetColor3  (COLOR_MENU_WHITE * 0.5f);
-    
+
+    m_Raise.Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+    m_Raise.SetPosition(coreVector2(0.0f,-0.465f));
+    m_Raise.SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
     
     
     
@@ -302,6 +329,12 @@ cSummaryMenu::cSummaryMenu()noexcept
         m_aSegmentBadgeWave[i].DefineTexture(0u, "effect_headlight_point.png");
         m_aSegmentBadgeWave[i].DefineProgram("menu_single_program");
     }
+
+    m_SegmentRaise.Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+    //m_SegmentRaise.SetPosition(m_SegmentMedal.GetPosition() + coreVector2(-0.115f,0.0f));
+    m_SegmentRaise.SetPosition(coreVector2(0.0f,-0.465f));
+    m_SegmentRaise.SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    
     
     
 
@@ -337,26 +370,37 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_Navigator.ShowIcon  (true);
 
     // bind menu objects
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeLayer);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeLine        [i]);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeIconBack    [i]);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeIcon        [i]);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeMedalMission[i]);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aaArcadeMedalSegment[i][j]);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeTotalMedal);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeHeader);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeName        [i]);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeScore       [i]);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTime        [i]);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalName[0]);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalName[1]);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalBest[0]);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalBest[1]);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeTotalScore);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeTotalTime);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeOptions);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aRecord[4]);
-    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aRecord[5]);
+    for(coreUintW k = SURFACE_SUMMARY_ARCADE_1; k <= SURFACE_SUMMARY_ARCADE_2; ++k)
+    {
+        this->BindObject(k, &m_ArcadeLayer);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(k, &m_aArcadeLine    [i]);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(k, &m_aArcadeIconBack[i]);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(k, &m_aArcadeIcon    [i]);
+        this->BindObject(k, &m_ArcadeTotalMedal);
+    }
+
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE_1, &m_aArcadeMedalMission[i]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j) this->BindObject(SURFACE_SUMMARY_ARCADE_1, &m_aaArcadeMedalSegment[i][j]);
+    for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS;    ++j) this->BindObject(SURFACE_SUMMARY_ARCADE_2, &m_aContinueImage[j]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS;   ++j) this->BindObject(SURFACE_SUMMARY_ARCADE_2, &m_aaArcadeScoreRun    [i][j]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE_1, &m_aArcadeScore[i]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE_1, &m_aArcadeTime [i]);
+    for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS;    ++j) this->BindObject(SURFACE_SUMMARY_ARCADE_2, &m_aArcadeSum  [j]);
+
+    for(coreUintW k = SURFACE_SUMMARY_ARCADE_1; k <= SURFACE_SUMMARY_ARCADE_2; ++k)
+    {
+        this->BindObject(k, &m_ArcadeHeader);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(k, &m_aArcadeName[i]);
+        this->BindObject(k, &m_aArcadeTotalName[0]);
+        this->BindObject(k, &m_aArcadeTotalName[1]);
+        this->BindObject(k, &m_aArcadeTotalBest[0]);
+        this->BindObject(k, &m_aArcadeTotalBest[1]);
+        this->BindObject(k, &m_ArcadeTotalScore);
+        this->BindObject(k, &m_ArcadeTotalTime);
+        this->BindObject(k, &m_ArcadeOptions);
+        this->BindObject(k, &m_aRecord[4]);
+        this->BindObject(k, &m_aRecord[5]);
+    }
 
     this->BindObject(SURFACE_SUMMARY_MISSION_COOP, &m_BackgroundCoop);
 
@@ -375,6 +419,7 @@ cSummaryMenu::cSummaryMenu()noexcept
         for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(j, &m_aValue[i]);
         this->BindObject(j, &m_TotalValue);
         this->BindObject(j, &m_TotalBest);
+        //this->BindObject(j, &m_Raise);
 
         this->BindObject(j, &m_aPerfect[0]);
         this->BindObject(j, &m_aPerfect[1]);
@@ -409,6 +454,7 @@ cSummaryMenu::cSummaryMenu()noexcept
         for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES_SEGMENT; ++i) this->BindObject(j, &m_aaSegmentValue[i][0]);
         for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES_SEGMENT; ++i) this->BindObject(j, &m_aaSegmentValue[i][1]);
         //for(coreUintW i = 0u; i < MENU_SUMMARY_SIDES;           ++i) this->BindObject(j, &m_aSegmentShift [i]);
+        //this->BindObject(j, &m_SegmentRaise);
         
         this->BindObject(j, &m_aRecord[0]);
         this->BindObject(j, &m_aRecord[1]);
@@ -433,7 +479,8 @@ cSummaryMenu::cSummaryMenu()noexcept
 // render the summary menu
 void cSummaryMenu::Render()
 {
-    if(this->GetCurSurface() == SURFACE_SUMMARY_ARCADE)
+    if((this->GetCurSurface() == SURFACE_SUMMARY_ARCADE_1) ||
+       (this->GetCurSurface() == SURFACE_SUMMARY_ARCADE_2))
     {
         // 
         const coreVector2 vCorner = coreVector2(0.5f,0.5f) * (g_vGameResolution * Core::Graphics->GetViewResolution().zw());
@@ -470,7 +517,8 @@ void cSummaryMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_SUMMARY_ARCADE:
+    case SURFACE_SUMMARY_ARCADE_1:
+    case SURFACE_SUMMARY_ARCADE_2:
         {
             constexpr coreFloat fSpinFrom = 1.0f;
             
@@ -478,8 +526,33 @@ void cSummaryMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= fSpinFrom + 0.1f * I_TO_F(m_iOtherNumMission) + 0.05f * I_TO_F(m_iOtherNumMedal) + 1.45f + 1.0f) && (m_eState != SUMMARY_OUTRO) && g_MenuInput.bAny)
             {
+#if defined(_CORE_SWITCH_)    // [SW]
+
                 m_eState = SUMMARY_OUTRO;
                 g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_YES);
+#else
+                if(!this->GetTransition().GetStatus())
+                {
+                    if(this->GetCurSurface() == SURFACE_SUMMARY_ARCADE_1)
+                    {
+                        this->ChangeSurface(SURFACE_SUMMARY_ARCADE_2, 3.0f);
+                        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SUB_OUT);
+                    }
+                    else
+                    {
+                        if(g_MenuInput.bCancel)
+                        {
+                            this->ChangeSurface(SURFACE_SUMMARY_ARCADE_1, 3.0f);
+                            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SUB_IN);
+                        }
+                        else
+                        {
+                            m_eState = SUMMARY_OUTRO;
+                            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_YES);
+                        }
+                    }
+                }
+#endif
             }
             
             
@@ -501,7 +574,7 @@ void cSummaryMenu::Move()
 
                 // 
                 pMedal->SetSize (coreVector2(fScale, fScale) * LERP(1.5f, 1.0f, fFadeIn));
-                pMedal->SetAlpha(MIN(fFadeIn, fBlendOut));
+                pMedal->SetAlpha(pMedal->GetAlpha() * MIN(fFadeIn, fBlendOut));
                 pMedal->SetStatus(iStatusdNew);
 
                 // 
@@ -536,6 +609,7 @@ void cSummaryMenu::Move()
                 const coreFloat fTime  = (i < m_iOtherNumMission) ? CLAMP01((m_fIntroTimer - fDelay) * 10.0f) : 0.0f;
 
                 nAlphaFunc(&m_aArcadeName    [i], fTime);
+                for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j) nAlphaFunc(&m_aaArcadeScoreRun[i][j], fTime);
                 nAlphaFunc(&m_aArcadeScore   [i], fTime);
                 nAlphaFunc(&m_aArcadeTime    [i], fTime);
                 nAlphaFunc(&m_aArcadeIcon    [i], fTime);
@@ -561,10 +635,12 @@ void cSummaryMenu::Move()
             m_ArcadeTotalTime .SetText(PRINT("%.1f %+.0f", m_fOtherTime * fFinalSpin, I_TO_F(m_iOtherShift) * fFinalSpin));
             
             
-            const coreFloat fTickStep = 1.35f * RCP(ROUND(RCP(20.0f * TIME)) * TIME);
+            const coreFloat fTickStep = 1.35f * (TIME ? RCP(ROUND(RCP(20.0f * TIME)) * TIME) : 20.0f);
             if(F_TO_UI(m_fFinalSpinOld * fTickStep) < F_TO_UI(fFinalSpin * fTickStep)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_SUMMARY_SCORE);
             m_fFinalSpinOld = fFinalSpin;
             
+
+            for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j) nAlphaFunc(&m_aArcadeSum[j], fFinalSpin ? 1.0f : 0.0f);
             
             nAlphaFunc(&m_aArcadeTotalName[0], fFinalSpin ? 1.0f : 0.0f, SOUND_SUMMARY_TEXT);
             nAlphaFunc(&m_aArcadeTotalName[1], fFinalSpin ? 1.0f : 0.0f);
@@ -612,6 +688,13 @@ void cSummaryMenu::Move()
                 m_aArcadeIcon    [i].Move();
                 m_aArcadeIconBack[i].SetDirection(coreVector2::Direction(fRotation * (-0.1f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
                 m_aArcadeIconBack[i].Move();
+            }
+            
+    
+            for(coreUintW i = 0u; i < MENU_SUMMARY_RUNS; ++i)
+            {
+                m_aContinueImage[i].SetDirection(coreVector2::Direction(coreFloat(Core::System->GetTotalTime()) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_RUNS))));
+                m_aContinueImage[i].SetAlpha    (m_aContinueImage[i].GetAlpha() * fBlendOut);
             }
         }
         break;
@@ -717,7 +800,7 @@ void cSummaryMenu::Move()
                 m_TotalBest.SetAlpha  (m_TotalValue.GetAlpha());
 
                 // 
-                const coreFloat fTickStep = 1.35f * RCP(ROUND(RCP(20.0f * TIME)) * TIME);
+                const coreFloat fTickStep = 1.35f * (TIME ? RCP(ROUND(RCP(20.0f * TIME)) * TIME) : 20.0f);
                 if(F_TO_UI(m_fFinalSpinOld * fTickStep) < F_TO_UI(fFinalSpin * fTickStep)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_SUMMARY_SCORE);
                 m_fFinalSpinOld = fFinalSpin;
 
@@ -1125,7 +1208,7 @@ void cSummaryMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 
@@ -1145,34 +1228,51 @@ void cSummaryMenu::ShowArcade()
     this->__ResetState();
 
     // 
-    coreUint16 iContinuesUsed = 0u;
-    coreUint16 iShiftGood     = 0u;
-    coreUint16 iShiftBad      = 0u;
-    coreUint16 iMedalTotal    = 0u;
-    coreUint8  iMedalCount    = 0u;
+    const coreUint16 iContinuesUsed = g_pGame->GetPlayer(0u)->GetDataTable()->GetCounterTotal().iContinuesUsed;
+
+    // 
+    coreUint32 aiScoreFull[MENU_SUMMARY_RUNS] = {};
+    coreUint16 iShiftGood  = 0u;
+    coreUint16 iShiftBad   = 0u;
+    coreUint16 iMedalTotal = 0u;
+    coreUint8  iMedalCount = 0u;
     for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
     {
         // 
-        coreUint32 iScoreFull = 0u;
+        coreUint32 aiRunScore[MENU_SUMMARY_RUNS] = {};
+        coreUint8  aiRunIndex[MENU_SUMMARY_RUNS] = {}; std::memset(aiRunIndex, 0xFFu, sizeof(aiRunIndex));
         g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW j)
         {
             // 
-            iScoreFull += pPlayer->GetScoreTable()->GetScoreMission(i);
-        });
+            for(coreUintW k = 0u; k < iContinuesUsed; ++k)
+            {
+                aiRunScore[MENU_SUMMARY_RUNS - 1u - iContinuesUsed + k] += pPlayer->GetScoreTable()->GetRunMission(k, i);
+                aiRunIndex[MENU_SUMMARY_RUNS - 1u - iContinuesUsed + k]  = pPlayer->GetScoreTable()->GetRunMissionIndex(k);
+            }
 
-        // 
-        iContinuesUsed += g_pGame->GetPlayer(0u)->GetDataTable()->GetCounterTotal().iContinuesUsed;
+            // 
+            aiRunScore[MENU_SUMMARY_RUNS - 1u] += pPlayer->GetScoreTable()->GetScoreMission(i);
+            aiRunIndex[MENU_SUMMARY_RUNS - 1u]  = g_pGame->GetCurMissionIndex();
+        });
 
         // 
         const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftMission(i);
         const coreFloat fTime  = g_pGame->GetTimeTable()->GetTimeMission (i);
 
         // 
-        m_aArcadeScore[i].SetText(coreData::ToChars(iScoreFull));
-        m_aArcadeTime [i].SetText(PRINT("%.1f %+d", fTime, iShift));
+        for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j)
+        {
+            // 
+            m_aaArcadeScoreRun[i][j].SetText((aiRunScore[j] || (aiRunIndex[j] == i)) ? coreData::ToChars(aiRunScore[j]) : "");
+
+            // 
+            aiScoreFull[j] += aiRunScore[j];
+        }
 
         // 
-        m_iFinalValue += iScoreFull;
+        m_aArcadeTime[i].SetText(PRINT("%.1f %+d", fTime, iShift));
+
+        // 
         m_fOtherTime  += fTime;
         m_iOtherShift += iShift;
 
@@ -1207,6 +1307,36 @@ void cSummaryMenu::ShowArcade()
 
         // 
         if(fTime || DEFINED(_CORE_DEBUG_)) m_iOtherNumMission += 1u;
+    }
+
+    // 
+    m_iFinalValue = (*std::max_element(aiScoreFull, aiScoreFull + MENU_SUMMARY_RUNS));
+
+    // 
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
+    {
+        for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j)
+        {
+            const coreBool bBest = (aiScoreFull[j] == m_iFinalValue);
+
+            m_aaArcadeScoreRun[i][j].SetColor3(COLOR_MENU_WHITE * (bBest ? 1.0f : MENU_LIGHT_IDLE));
+            if(bBest) m_aArcadeScore[i].SetText(m_aaArcadeScoreRun[i][j].GetText());
+        }
+    }
+
+    // 
+    for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j)
+    {
+        ASSERT(m_iOtherNumMission)
+        
+        const coreVector2 vBase    = m_aaArcadeScoreRun[m_iOtherNumMission - 1u][j].GetPosition();
+        const coreBool    bVisible = (j >= MENU_SUMMARY_RUNS - 1u - iContinuesUsed);
+
+        m_aArcadeSum[j].SetPosition(vBase + coreVector2(0.0f,-0.065f));
+        m_aArcadeSum[j].SetColor3  (COLOR_MENU_WHITE * ((aiScoreFull[j] == m_iFinalValue) ? 1.0f : MENU_LIGHT_IDLE));
+        m_aArcadeSum[j].SetText    (bVisible ? coreData::ToChars(aiScoreFull[j]) : "");
+        
+        m_aContinueImage[j].SetEnabled(bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
     }
 
     // 
@@ -1245,13 +1375,19 @@ void cSummaryMenu::ShowArcade()
     // 
     constexpr const coreChar* apcNameType      [] = {"GAME_TYPE_SOLO",       "GAME_TYPE_COOP",         ""};
     constexpr const coreChar* apcNameDifficulty[] = {"GAME_DIFFICULTY_EASY", "GAME_DIFFICULTY_NORMAL", "GAME_DIFFICULTY_HARD"};
-    const coreChar* pcOption = PRINT("%s - %s%s", Core::Language->GetString(apcNameType[g_pGame->GetType()]), Core::Language->GetString(apcNameDifficulty[g_pGame->GetDifficulty()]), bOneColorClear ? " - 1CC" : "");
+
+#if defined(_CORE_SWITCH_) || 1   // [SW]
+    const coreChar* pcOption = PRINT("%s / %s%s", Core::Language->GetString(apcNameType[g_pGame->GetType()]), Core::Language->GetString(apcNameDifficulty[g_pGame->GetDifficulty()]), bOneColorClear ? " / 1CC" : "");
+#else
+    const coreUint8 iRaise   = g_pGame->GetRaise();
+    const coreChar* pcOption = PRINT("%s / %s / +%u%%%s", Core::Language->GetString(apcNameType[g_pGame->GetType()]), Core::Language->GetString(apcNameDifficulty[g_pGame->GetDifficulty()]), iRaise, bOneColorClear ? " / 1CC" : "");
+#endif
 
     // 
     m_ArcadeOptions.SetText(pcOption);
 
     // 
-    SET_BIT(m_iSignalActive, 6u, (m_iFinalValue > g_pSave->EditLocalStatsSegment()->iScoreBest))
+    SET_BIT(m_iSignalActive, 6u, (m_iFinalValue > iBestScore))
     SET_BIT(m_iSignalActive, 7u, (false))
 
     // 
@@ -1297,20 +1433,20 @@ void cSummaryMenu::ShowArcade()
         }
 
         // 
-        if(g_CurConfig.Game.iGameSpeed >= 200u)
+        if(GetCurGameSpeed() >= 200u)
         {
             ADD_BIT(g_pSave->EditLocalStatsArcade()->iFeat, FEAT_TWOHUNDRED)
         }
     }
 
     // 
-    UploadLeaderboardsArcade(m_iFinalValue, TABLE_TIME_TO_UINT(m_fOtherTime + I_TO_F(iShiftBad) - I_TO_F(iShiftGood)));
+    UploadLeaderboardsArcade(m_iFinalValue, bComplete ? (TABLE_TIME_TO_UINT(m_fOtherTime + I_TO_F(iShiftBad) - I_TO_F(iShiftGood))) : 0u);
 
     // 
     g_pSave->SaveFile();
 
     // 
-    this->ChangeSurface(SURFACE_SUMMARY_ARCADE, 0.0f);
+    this->ChangeSurface(SURFACE_SUMMARY_ARCADE_1, 0.0f);
 }
 
 
@@ -1371,6 +1507,10 @@ void cSummaryMenu::ShowMission()
     });
 
     // 
+    iBonusMedal   = g_pGame->RaiseValue(iBonusMedal);
+    iBonusSurvive = g_pGame->RaiseValue(iBonusSurvive);
+
+    // 
     const coreUint32 iModifier = g_pGame->IsCoop() ? GAME_PLAYERS : 1u;
     iBonusSurvive /= iModifier;
 
@@ -1402,6 +1542,10 @@ void cSummaryMenu::ShowMission()
     // 
     const coreUint32 iBestScore = g_pSave->GetHeader().aaaaLocalStatsMission[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex].iScoreBest;
     m_TotalBest.SetText(coreData::ToChars(MAX(m_iFinalValue, iBestScore)));
+
+    // 
+    const coreUint8 iRaise = g_pGame->GetRaise();
+    m_Raise.SetText(PRINT("+%u%%", iRaise));
 
     // 
     SET_BIT(m_iSignalActive, 0u, (iMedalMission == MEDAL_DARK))
@@ -1495,6 +1639,10 @@ void cSummaryMenu::ShowSegment()
         m_aSegmentBadgeWave[i].SetPosition(m_aSegmentBadge[i].GetPosition());
         m_aSegmentBadgeWave[i].SetEnabled (bState ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
+
+    // 
+    const coreUint8 iRaise = g_pGame->GetRaise();
+    m_SegmentRaise.SetText(PRINT("+%u%%", iRaise));
 
     // 
     const coreUint8 iRecordBroken = g_pGame->GetCurMission()->GetRecordBroken();

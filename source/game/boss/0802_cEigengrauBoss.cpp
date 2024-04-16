@@ -288,8 +288,6 @@ void cEigengrauBoss::__RenderOwnTop()
 // 
 void cEigengrauBoss::__MoveOwn()
 {
-    cDarkBackground* pBackground = d_cast<cDarkBackground*>(g_pEnvironment->GetBackground());
-
     // 
     this->_UpdateBoss();
 
@@ -351,6 +349,7 @@ void cEigengrauBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
+            cDarkBackground* pBackground = d_cast<cDarkBackground*>(g_pEnvironment->GetBackground());
             pBackground->Dissolve();
         }
 
@@ -389,6 +388,8 @@ void cEigengrauBoss::__MoveOwn()
                 });
 
                 g_pGame->GetInterface()->SetVisible(true);
+
+                g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);   // optimization
             }
         });
     }
@@ -1114,7 +1115,7 @@ void cEigengrauBoss::__MoveOwn()
 
             vPos = vDir * fLen;
         }
-        else ASSERT(false)
+        else UNREACHABLE
 
         const coreVector2 vDir    = s_RotaCache.Direction(-fTime);
         const coreFloat   fOffset = I_TO_F(i) / I_TO_F(EIGENGRAU_PARASITES);
@@ -1175,7 +1176,7 @@ void cEigengrauBoss::__MoveOwn()
 
             vPos = (fReal > 1.0f) ? HIDDEN_POS : coreVector2(SIN(m_avVector[ROTA_VALUE].y) * 0.5f, FmodRange(fReal, -1.0f, 1.0f));
         }
-        else ASSERT(false)
+        else UNREACHABLE
 
         vPos *= FOREGROUND_AREA * 2.4f;
 

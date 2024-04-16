@@ -70,9 +70,12 @@ void cMenuNavigator::Render()
             m_aCursor[i].SetAlpha(this->GetAlpha() * 0.65f);
             m_aCursor[i].Render();
         }
+
+        // 
+        if(m_bShowIcon) this->cGuiObject::Render();
     }
 
-    if(s_bJoystick)
+    if(s_bJoystick || DEFINED(_CORE_SWITCH_))
     {
         // 
         if((m_aTab.size() >= 2u) || (m_bShoulder && m_nShoulderLeft))
@@ -94,9 +97,6 @@ void cMenuNavigator::Render()
             m_aPrompt[2].SetAlpha(this->GetAlpha());
             m_aPrompt[2].Render();
         }
-
-        // 
-        if(m_bShowIcon) this->cGuiObject::Render();
     }
 }
 
@@ -203,7 +203,7 @@ void cMenuNavigator::Move()
         m_aCursor[i].Move();
     }
 
-    if(s_bJoystick)
+    if(s_bJoystick || DEFINED(_CORE_SWITCH_))
     {
         // 
         m_aPrompt[0].SetBase(s_iJoystickType);
@@ -414,7 +414,7 @@ void cMenuNavigator::Update()
 
                 switch(iPack)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: pNewObject = this->__ToObject(oEntry.iMoveUp);    break;
                 case 2u: pNewObject = this->__ToObject(oEntry.iMoveLeft);  break;
                 case 4u: pNewObject = this->__ToObject(oEntry.iMoveDown);  break;
@@ -429,7 +429,7 @@ void cMenuNavigator::Update()
                         {
                             switch(iPack)
                             {
-                            default: ASSERT(false)
+                            default: UNREACHABLE
                             case 0u: pNewObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallUp);    break;
                             case 2u: pNewObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallLeft);  break;
                             case 4u: pNewObject = this->__ToObject(m_aTab.get_valuelist()[j].iFallDown);  break;
@@ -457,7 +457,7 @@ void cMenuNavigator::Update()
                     {
                         switch(iPack)
                         {
-                        default: ASSERT(false)
+                        default: UNREACHABLE
                         case 0u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveUp);    break;
                         case 2u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveLeft);  break;
                         case 4u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveDown);  break;

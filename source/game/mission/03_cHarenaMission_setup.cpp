@@ -250,7 +250,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(iChangeCount % 4u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupD; break;
                 case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupA; break;
                 case 2u: iStateActive &= ~iGroupC; iStateGhost = iGroupB; break;
@@ -271,7 +271,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(iChangeCount % 2u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupA; break;
                 case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupB; break;
                 }
@@ -290,7 +290,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(iChangeCount % 2u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupA; break;
                 case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupB; break;
                 }
@@ -334,7 +334,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(iChangeCount % 2u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupA; break;
                 case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupB; break;
                 }
@@ -374,7 +374,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(pSquad1->GetNumEnemiesAlive())
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 12u: iStateActive = BIT((iFirst +  3u) % iRange); break;
                 case 11u: iStateActive = BIT((iFirst +  7u) % iRange); break;
                 case 10u: iStateActive = BIT((iFirst + 10u) % iRange); break;
@@ -471,7 +471,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(iChangeCount % 2u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupA; break;
                 case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupB; break;
                 }
@@ -496,7 +496,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(iChangeCount % 2u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupA; break;
                 case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupB; break;
                 }
@@ -1101,7 +1101,7 @@ void cHarenaMission::__SetupOwn()
                             coreUintW iStep;
                             switch(iIndex % 6u)
                             {
-                            default: ASSERT(false)
+                            default: UNREACHABLE
                             case 0u: iStep = 0u; break;
                             case 1u: iStep = 2u; break;
                             case 2u: iStep = 4u; break;
@@ -1126,7 +1126,7 @@ void cHarenaMission::__SetupOwn()
                             coreUintW iStep;
                             switch(iIndex % 4u)
                             {
-                            default: ASSERT(false)
+                            default: UNREACHABLE
                             case 0u: iStep = 0u; break;
                             case 1u: iStep = 2u; break;
                             case 2u: iStep = 3u; break;
@@ -1139,7 +1139,7 @@ void cHarenaMission::__SetupOwn()
                             coreUintW iStep;
                             switch(iIndex % 6u)
                             {
-                            default: ASSERT(false)
+                            default: UNREACHABLE
                             case 0u: iStep = 0u; break;
                             case 1u: iStep = 3u; break;
                             case 2u: iStep = 4u; break;
@@ -1154,7 +1154,7 @@ void cHarenaMission::__SetupOwn()
                             coreUintW iStep;
                             switch(iIndex % 8u)
                             {
-                            default: ASSERT(false)
+                            default: UNREACHABLE
                             case 0u: iStep = 0u; break;
                             case 1u: iStep = 3u; break;
                             case 2u: iStep = 6u; break;
@@ -1700,7 +1700,7 @@ void cHarenaMission::__SetupOwn()
                         coreFloat fOffset;
                         switch((i - 8u) / 2u)
                         {
-                        default: ASSERT(false)
+                        default: UNREACHABLE
                         case 0u: fOffset = -1.0f; break;
                         case 1u: fOffset =  1.0f; break;
                         case 2u: fOffset =  1.0f; break;
@@ -1963,6 +1963,7 @@ void cHarenaMission::__SetupOwn()
     // bewegte mothers sollten exakt zwischen den arrows sein, um die gefahr eines schlechten spieler-angriffs zu reduzieren (bei der nur 1 von 2 geschosse trifft)
     // multi-schild und sonne müssen sich verlangsamt ausbreiten, weil der spieler sonst nicht mehr reagieren kann
     // multi-schild braucht guten abstand zwischen schichten, damit spieler reinfliegen kann, wenn er will
+    // man könnte jeden zweiten gegner nicht resurrecten und die muster wären alle noch schön
     // TASK: kill N arrows at the start
     // TASK: kill all marked arrows
     // ACHIEVEMENT: never destroy one of the small enemies
@@ -2685,14 +2686,14 @@ void cHarenaMission::__SetupOwn()
             }
             else
             {
-                     if(STAGE_SUB( 1u)) {STAGE_RESURRECT(pSquad1,  0u,  3u) fEnemyDelay = 0.0f;}
-                else if(STAGE_SUB( 2u)) {STAGE_RESURRECT(pSquad1,  4u,  9u) fEnemyDelay = 2.0f;}
-                else if(STAGE_SUB( 3u)) {STAGE_RESURRECT(pSquad1, 10u, 15u) fEnemyDelay = 5.0f;}
-                else if(STAGE_SUB( 4u)) {STAGE_RESURRECT(pSquad1, 16u, 23u) fEnemyDelay = 5.0f;}
-                else if(STAGE_SUB( 5u)) {STAGE_RESURRECT(pSquad1, 24u, 29u) fEnemyDelay = 4.0f;}
-                else if(STAGE_SUB( 6u)) {STAGE_RESURRECT(pSquad1, 58u, 58u) fEnemyDelay = 0.0f;}
-                else if(STAGE_SUB( 7u)) {STAGE_RESURRECT(pSquad1, 30u, 37u) fEnemyDelay = 5.0f;}
-                else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1, 38u, 41u) fEnemyDelay = 2.0f; if(!iMiddleState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())}
+                     if(STAGE_SUB( 1u)) {STAGE_RESURRECT(pSquad1,  0u,  3u) fEnemyDelay = g_pGame->IsEasy() ? 0.0f : 0.0f;}
+                else if(STAGE_SUB( 2u)) {STAGE_RESURRECT(pSquad1,  4u,  9u) fEnemyDelay = g_pGame->IsEasy() ? 2.5f : 2.0f;}
+                else if(STAGE_SUB( 3u)) {STAGE_RESURRECT(pSquad1, 10u, 15u) fEnemyDelay = g_pGame->IsEasy() ? 6.0f : 5.0f;}
+                else if(STAGE_SUB( 4u)) {STAGE_RESURRECT(pSquad1, 16u, 23u) fEnemyDelay = g_pGame->IsEasy() ? 5.5f : 5.0f;}
+                else if(STAGE_SUB( 5u)) {STAGE_RESURRECT(pSquad1, 24u, 29u) fEnemyDelay = g_pGame->IsEasy() ? 5.0f : 4.0f;}
+                else if(STAGE_SUB( 6u)) {STAGE_RESURRECT(pSquad1, 58u, 58u) fEnemyDelay = g_pGame->IsEasy() ? 0.0f : 0.0f;}
+                else if(STAGE_SUB( 7u)) {STAGE_RESURRECT(pSquad1, 30u, 37u) fEnemyDelay = g_pGame->IsEasy() ? 5.5f : 5.0f;}
+                else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1, 38u, 41u) fEnemyDelay = g_pGame->IsEasy() ? 2.0f : 2.0f; if(!iMiddleState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())}
                 else if(STAGE_SUB( 9u))
                 {
                     for(coreUintW i = 0u; i < HARENA_SPIKES; ++i)
@@ -2702,8 +2703,6 @@ void cHarenaMission::__SetupOwn()
 
             iSpikeCount = 0u;
             fSpikeDelay = (m_iStageSub == 1u) ? 1.0f : 0.5f;
-
-            if(g_pGame->IsEasy()) fEnemyDelay += 0.5f;
 
             std::memset(afIntroTime, 0, sizeof(coreFloat) * iNumData);
         }
@@ -2824,7 +2823,7 @@ void cHarenaMission::__SetupOwn()
                 coreUintW iSkip;
                 switch((iSpikeCount / 6u) % 4u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iSkip = 1u; break;
                 case 1u: iSkip = 3u; break;
                 case 2u: iSkip = 4u; break;
@@ -2864,7 +2863,7 @@ void cHarenaMission::__SetupOwn()
                 coreUintW iQuad;
                 switch(iSpikeCount % 4u)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: iQuad = 0u; break;
                 case 1u: iQuad = 1u; break;
                 case 2u: iQuad = 3u; break;
@@ -2900,7 +2899,7 @@ void cHarenaMission::__SetupOwn()
 
                 switch(iNewCount)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 17u: this->EnableSpike( 2u, false); this->EnableSpike(30u, false);                                                                       break;
                 case 16u: this->EnableSpike( 0u, false); this->EnableSpike(29u, false); this->LaunchSpike( 2u, fInfinity); this->LaunchSpike(30u, fInfinity); break;
                 case 15u: this->EnableSpike(12u, false); this->EnableSpike(35u, false); this->LaunchSpike( 0u, fInfinity); this->LaunchSpike(29u, fInfinity); break;
@@ -2996,7 +2995,7 @@ void cHarenaMission::__SetupOwn()
             coreUintW iColumn, iRow;
             switch(i)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case  0u: iColumn = 0u; iRow = 2u; break;
             case  1u: iColumn = 4u; iRow = 5u; break;
             case  2u: iColumn = 3u; iRow = 1u; break;

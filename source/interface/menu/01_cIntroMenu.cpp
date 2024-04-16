@@ -52,24 +52,27 @@ void cIntroMenu::Move()
     // 
     if(this->GetCurSurface() == SURFACE_INTRO_LANGUAGE)
     {
-        // 
-        FOR_EACH(it, m_apLanguageButton)
+        if(!g_pMenu->IsShifting())
         {
-            if((*it)->IsClicked())
+            // 
+            FOR_EACH(it, m_apLanguageButton)
             {
-                const coreChar* pcPath = m_apLanguageButton.get_key(it)->c_str();
+                if((*it)->IsClicked())
+                {
+                    const coreChar* pcPath = m_apLanguageButton.get_key(it)->c_str();
 
-                // 
-                Core::Language->Load(pcPath);
-                Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, pcPath);
-                Core::Config->Save();
+                    // 
+                    Core::Language->Load(pcPath);
+                    Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, pcPath);
+                    Core::Config->Save();
 
-                // 
-                cMenu::UpdateLanguageFont();
+                    // 
+                    cMenu::UpdateLanguageFont();
 
-                // 
-                this->ChangeSurface(SURFACE_INTRO_EMPTY, 1.0f);
-                break;
+                    // 
+                    this->ChangeSurface(SURFACE_INTRO_EMPTY, 1.0f);
+                    break;
+                }
             }
         }
 
@@ -79,7 +82,7 @@ void cIntroMenu::Move()
             coreVector3 vColor;
             switch(m_apLanguageButton.get_valuelist().index(it) % 8u)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: vColor = COLOR_MENU_YELLOW;  break;
             case 1u: vColor = COLOR_MENU_ORANGE;  break;
             case 2u: vColor = COLOR_MENU_RED;     break;

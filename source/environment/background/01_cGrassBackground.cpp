@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cGrassBackground::cGrassBackground()noexcept
-: m_fLeafTime (Core::Rand->Float(10.0f))
+: cBackground (false)
+, m_fLeafTime (Core::Rand->Float(10.0f))
 , m_fOffset   (0.0f)
 , m_Loaded    ()
 {
@@ -348,7 +349,7 @@ cGrassBackground::cGrassBackground()noexcept
 
         // 
         m_iLeafNum = papContent->size();
-        ASSERT(!(m_iLeafNum % 4u))
+        ASSERT(coreMath::IsAligned(m_iLeafNum, 4u))
 
         // post-process list and add to the air
         cBackground::_FillInfinite(pList1, GRASS_LEAF_RESERVE);
@@ -474,6 +475,11 @@ void cGrassBackground::__InitOwn()
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
         m_Loaded.Acquire();
     });
+    
+    
+    //m_Music.AddMusicFile("data/sounds/environment_grass.ogg");
+    //m_Music.GetMusic(0u)->SetLoop(true);
+    //m_Music.Play();
 }
 
 
@@ -490,6 +496,8 @@ void cGrassBackground::__ExitOwn()
         if(m_Loaded && pResource->EnableRef(this))
             pResource->Stop();
     });
+    
+    //m_Music.Stop();
 }
 
 
@@ -518,7 +526,7 @@ void cGrassBackground::__MoveOwn()
 
     // 
     coreBatchList* pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pLeaf = (*pList->List())[i];
 
@@ -566,12 +574,14 @@ void cGrassBackground::__MoveOwn()
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
     
+    //m_Music.SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    //m_Music.Update();
     
     
     const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     pList = m_apAirObjectList[1];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
@@ -581,7 +591,7 @@ void cGrassBackground::__MoveOwn()
     pList = m_apAirObjectList[2];
     if(pList->GetCurEnabled())
     {
-        for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
         {
             coreObject3D* pCloud = (*pList->List())[i];
             pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));

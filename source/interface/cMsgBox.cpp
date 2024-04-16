@@ -201,6 +201,12 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
     
     
     
+        Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
+        for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+        {
+            Core::Input->SetJoystickRelative(i, 0u, 0.0f);
+            Core::Input->SetJoystickRelative(i, 1u, 0.0f);
+        }
         Core::Input->ClearButtonAll();
         
 

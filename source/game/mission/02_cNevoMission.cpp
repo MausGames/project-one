@@ -817,7 +817,7 @@ void cNevoMission::SetTileStyle(const coreUintW iIndex, const coreUint8 iStyle)
 
     switch(iStyle)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
 
     // 
     case 0u:

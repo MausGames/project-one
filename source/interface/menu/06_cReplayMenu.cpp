@@ -197,7 +197,7 @@ void cReplayMenu::Move()
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 

@@ -10,12 +10,10 @@
 #ifndef _P1_GUARD_BULLET_H_
 #define _P1_GUARD_BULLET_H_
 
-// TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO 3: add memory pool for bullets, instead of always reallocating
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this even be fixed ?)
-// TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
 // TODO 4: ID 0 is not used
@@ -119,10 +117,11 @@ public:
     inline       coreVector2  GetFlyMove()const {return m_vFlyDir * (m_fSpeed * TIME);}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
-    static inline coreUintW       ConfigOutlineStyle        () {ASSERT(false) return OUTLINE_STYLE_FULL;}
-    static inline coreBool        ConfigShadow              () {ASSERT(false) return false;}
-    static inline coreUintW       ConfigReserve             () {ASSERT(false) return 0u;}
+    static inline const coreChar* ConfigProgramInstancedName() {UNREACHABLE return "";}
+    static inline coreUintW       ConfigOutlineStyle        () {UNREACHABLE return OUTLINE_STYLE_FULL;}
+    static inline coreBool        ConfigShadow              () {UNREACHABLE return false;}
+    static inline coreBool        ConfigGlow                () {UNREACHABLE return false;}
+    static inline coreUintW       ConfigReserve             () {UNREACHABLE return 0u;}
 
     // 
     static void GlobalInit() {}
@@ -169,6 +168,8 @@ private:
     {
         coreBatchList oBulletActive;   // list with active bullets
         coreUintW     iCurBullet;      // current bullet (next one to check in pool)
+        
+        coreUintW iOutline;
 
         sBulletSetGen()noexcept;
         virtual ~sBulletSetGen() = default;
@@ -210,8 +211,8 @@ public:
     // 
     inline cBullet*          FindBullet     (const coreVector2 vPosition)const;
     template <typename T> T* FindBulletTyped(const coreVector2 vPosition)const;
-    template <typename F> void             ForEachBullet     (F&& nFunction)const;   // [](cBullet* OUTPUT pBullet) -> void
-    template <typename T, typename F> void ForEachBulletTyped(F&& nFunction)const;   // [](T*       OUTPUT pBullet) -> void
+    template <typename F>             FORCE_INLINE void ForEachBullet     (F&& nFunction)const;   // [](cBullet* OUTPUT pBullet) -> void
+    template <typename T, typename F> FORCE_INLINE void ForEachBulletTyped(F&& nFunction)const;   // [](T*       OUTPUT pBullet) -> void
 
     // 
     template <typename T> void PrefetchBullet();
@@ -255,16 +256,17 @@ public:
     inline cRayBullet* MakeYellow () {this->_MakeYellow (1.0f); return this;}
     inline cRayBullet* MakeOrange () {this->_MakeOrange (1.0f); return this;}
     inline cRayBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
-    inline cRayBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cRayBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cRayBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
     inline cRayBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
-    inline cRayBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cRayBullet* MakeCyan   () {UNREACHABLE               return this;}
     inline cRayBullet* MakeGreen  () {this->_MakeGreen  (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 32u;}
     static constexpr coreFloat       ConfigSpeed               () {return 8.0f;}
 
@@ -299,19 +301,20 @@ public:
 
     // change default color
     inline cPulseBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
-    inline cPulseBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cPulseBullet* MakeOrange () {ASSERT(false)             return this;}
-    inline cPulseBullet* MakeRed    () {ASSERT(false)             return this;}
-    inline cPulseBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cPulseBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cPulseBullet* MakeOrange () {UNREACHABLE               return this;}
+    inline cPulseBullet* MakeRed    () {UNREACHABLE               return this;}
+    inline cPulseBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cPulseBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
-    inline cPulseBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cPulseBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cPulseBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cPulseBullet* MakeBlue   () {UNREACHABLE               return this;}
+    inline cPulseBullet* MakeCyan   () {UNREACHABLE               return this;}
+    inline cPulseBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 32u;}
     static constexpr coreFloat       ConfigSpeed               () {return 6.0f;}
 
@@ -346,19 +349,20 @@ public:
 
     // change default color
     inline cSurgeBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
-    inline cSurgeBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cSurgeBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cSurgeBullet* MakeOrange () {UNREACHABLE               return this;}
     inline cSurgeBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
-    inline cSurgeBullet* MakeMagenta() {ASSERT(false)             return this;}
-    inline cSurgeBullet* MakePurple () {ASSERT(false)             return this;}
-    inline cSurgeBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cSurgeBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakeMagenta() {UNREACHABLE               return this;}
+    inline cSurgeBullet* MakePurple () {UNREACHABLE               return this;}
+    inline cSurgeBullet* MakeBlue   () {UNREACHABLE               return this;}
+    inline cSurgeBullet* MakeCyan   () {UNREACHABLE               return this;}
     inline cSurgeBullet* MakeGreen  () {this->_MakeGreen  (1.1f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 32u;}
     static constexpr coreFloat       ConfigSpeed               () {return 6.0f;}
 
@@ -396,19 +400,20 @@ public:
 
     // change default color
     inline cTeslaBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
-    inline cTeslaBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cTeslaBullet* MakeOrange () {ASSERT(false)             return this;}
-    inline cTeslaBullet* MakeRed    () {ASSERT(false)             return this;}
-    inline cTeslaBullet* MakeMagenta() {ASSERT(false)             return this;}
-    inline cTeslaBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cTeslaBullet* MakeOrange () {UNREACHABLE               return this;}
+    inline cTeslaBullet* MakeRed    () {UNREACHABLE               return this;}
+    inline cTeslaBullet* MakeMagenta() {UNREACHABLE               return this;}
+    inline cTeslaBullet* MakePurple () {UNREACHABLE               return this;}
     inline cTeslaBullet* MakeBlue   () {this->_MakeBlue   (0.9f); return this;}
-    inline cTeslaBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cTeslaBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakeCyan   () {UNREACHABLE               return this;}
+    inline cTeslaBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 32u;}
 
 
@@ -451,6 +456,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return false;}
     static constexpr coreUintW       ConfigReserve             () {return 32u;}
     static constexpr coreFloat       ConfigSpeed               () {return 16.0f;}
 
@@ -477,19 +483,20 @@ public:
 
     // change default color
     inline cOrbBullet* MakeWhite  () {this->_MakeWhite  (0.6f); return this;}
-    inline cOrbBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cOrbBullet* MakeYellow () {UNREACHABLE               return this;}
     inline cOrbBullet* MakeOrange () {this->_MakeOrange (0.9f); return this;}
     inline cOrbBullet* MakeRed    () {this->_MakeRed    (0.9f); return this;}
-    inline cOrbBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cOrbBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cOrbBullet* MakePurple () {this->_MakePurple (0.9f); return this;}
     inline cOrbBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
-    inline cOrbBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cOrbBullet* MakeCyan   () {UNREACHABLE               return this;}
     inline cOrbBullet* MakeGreen  () {this->_MakeGreen  (0.8f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -517,17 +524,18 @@ public:
     inline cConeBullet* MakeWhite  () {this->_MakeWhite  (0.6f); return this;}
     inline cConeBullet* MakeYellow () {this->_MakeYellow (0.8f); return this;}
     inline cConeBullet* MakeOrange () {this->_MakeOrange (1.0f); return this;}
-    inline cConeBullet* MakeRed    () {ASSERT(false)             return this;}
-    inline cConeBullet* MakeMagenta() {ASSERT(false)             return this;}
-    inline cConeBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cConeBullet* MakeRed    () {UNREACHABLE               return this;}
+    inline cConeBullet* MakeMagenta() {UNREACHABLE               return this;}
+    inline cConeBullet* MakePurple () {UNREACHABLE               return this;}
     inline cConeBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
-    inline cConeBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cConeBullet* MakeCyan   () {UNREACHABLE               return this;}
     inline cConeBullet* MakeGreen  () {this->_MakeGreen  (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -554,19 +562,20 @@ public:
 
     // change default color
     inline cWaveBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
-    inline cWaveBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cWaveBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cWaveBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cWaveBullet* MakeOrange () {UNREACHABLE               return this;}
     inline cWaveBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
-    inline cWaveBullet* MakeMagenta() {ASSERT(false)             return this;}
-    inline cWaveBullet* MakePurple () {ASSERT(false)             return this;}
-    inline cWaveBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cWaveBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cWaveBullet* MakeMagenta() {UNREACHABLE               return this;}
+    inline cWaveBullet* MakePurple () {UNREACHABLE               return this;}
+    inline cWaveBullet* MakeBlue   () {UNREACHABLE               return this;}
+    inline cWaveBullet* MakeCyan   () {UNREACHABLE               return this;}
     inline cWaveBullet* MakeGreen  () {this->_MakeGreen  (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -594,18 +603,19 @@ public:
     // change default color
     inline cSpearBullet* MakeWhite  () {this->_MakeWhite  (0.8f); return this;}
     inline cSpearBullet* MakeYellow () {this->_MakeYellow (0.9f); return this;}
-    inline cSpearBullet* MakeOrange () {ASSERT(false)             return this;}
-    inline cSpearBullet* MakeRed    () {ASSERT(false)             return this;}
-    inline cSpearBullet* MakeMagenta() {ASSERT(false)             return this;}
-    inline cSpearBullet* MakePurple () {ASSERT(false)             return this;}
-    inline cSpearBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cSpearBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cSpearBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cSpearBullet* MakeOrange () {UNREACHABLE               return this;}
+    inline cSpearBullet* MakeRed    () {UNREACHABLE               return this;}
+    inline cSpearBullet* MakeMagenta() {UNREACHABLE               return this;}
+    inline cSpearBullet* MakePurple () {UNREACHABLE               return this;}
+    inline cSpearBullet* MakeBlue   () {UNREACHABLE               return this;}
+    inline cSpearBullet* MakeCyan   () {UNREACHABLE               return this;}
+    inline cSpearBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -632,19 +642,20 @@ public:
 
     // change default color
     inline cTriangleBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
-    inline cTriangleBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cTriangleBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cTriangleBullet* MakeOrange () {UNREACHABLE               return this;}
     inline cTriangleBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
-    inline cTriangleBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cTriangleBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
-    inline cTriangleBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cTriangleBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cTriangleBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeBlue   () {UNREACHABLE               return this;}
+    inline cTriangleBullet* MakeCyan   () {UNREACHABLE               return this;}
+    inline cTriangleBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -670,19 +681,20 @@ public:
 
     // change default color
     inline cFlipBullet* MakeWhite  () {this->_MakeWhite  (0.6f); return this;}
-    inline cFlipBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cFlipBullet* MakeOrange () {ASSERT(false)             return this;}
-    inline cFlipBullet* MakeRed    () {ASSERT(false)             return this;}
-    inline cFlipBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cFlipBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cFlipBullet* MakeOrange () {UNREACHABLE               return this;}
+    inline cFlipBullet* MakeRed    () {UNREACHABLE               return this;}
+    inline cFlipBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cFlipBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
-    inline cFlipBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cFlipBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cFlipBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cFlipBullet* MakeBlue   () {UNREACHABLE               return this;}
+    inline cFlipBullet* MakeCyan   () {UNREACHABLE               return this;}
+    inline cFlipBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -708,19 +720,20 @@ public:
 
     // change default color
     inline cQuadBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
-    inline cQuadBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cQuadBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cQuadBullet* MakeOrange () {UNREACHABLE               return this;}
     inline cQuadBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
-    inline cQuadBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cQuadBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
-    inline cQuadBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeBlue   () {UNREACHABLE               return this;}
     inline cQuadBullet* MakeCyan   () {this->_MakeCyan   (0.9f); return this;}
-    inline cQuadBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -746,19 +759,20 @@ public:
 
     // change default color
     inline cViewBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
-    inline cViewBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cViewBullet* MakeOrange () {ASSERT(false)             return this;}
-    inline cViewBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cViewBullet* MakeOrange () {UNREACHABLE               return this;}
+    inline cViewBullet* MakeRed    () {UNREACHABLE               return this;}
     inline cViewBullet* MakeMagenta() {this->_MakeMagenta(1.0f); return this;}
-    inline cViewBullet* MakePurple () {ASSERT(false)             return this;}
-    inline cViewBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cViewBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cViewBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cViewBullet* MakePurple () {UNREACHABLE               return this;}
+    inline cViewBullet* MakeBlue   () {UNREACHABLE               return this;}
+    inline cViewBullet* MakeCyan   () {UNREACHABLE               return this;}
+    inline cViewBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -781,16 +795,16 @@ public:
     ASSIGN_ID(13, "Card")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeWhite(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeWhite(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
     inline cCardBullet* MakeWhite  () {this->_MakeWhite  (0.5f); return this;}
-    inline cCardBullet* MakeYellow () {ASSERT(false)             return this;}
-    inline cCardBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cCardBullet* MakeYellow () {UNREACHABLE               return this;}
+    inline cCardBullet* MakeOrange () {UNREACHABLE               return this;}
     inline cCardBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
-    inline cCardBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cCardBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cCardBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
-    inline cCardBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cCardBullet* MakeBlue   () {UNREACHABLE               return this;}
     inline cCardBullet* MakeCyan   () {this->_MakeCyan   (0.9f); return this;}
     inline cCardBullet* MakeGreen  () {this->_MakeGreen  (0.8f); return this;}
 
@@ -798,6 +812,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_invert_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 8u;}
 
 
@@ -829,6 +844,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 8u;}
 
     // 
@@ -865,6 +881,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 16u;}
 
     // 
@@ -904,6 +921,7 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 16u;}
 
 
@@ -929,20 +947,21 @@ public:
     inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f) * 3.0f); this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 0.95f); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cGrowBullet* MakeWhite  () {ASSERT(false)             return this;}
-    inline cGrowBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeWhite  () {UNREACHABLE               return this;}
+    inline cGrowBullet* MakeYellow () {UNREACHABLE               return this;}
     inline cGrowBullet* MakeOrange () {this->_MakeOrange (0.9f); return this;}
     inline cGrowBullet* MakeRed    () {this->_MakeRed    (0.9f); return this;}
-    inline cGrowBullet* MakeMagenta() {ASSERT(false)             return this;}
-    inline cGrowBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeMagenta() {UNREACHABLE               return this;}
+    inline cGrowBullet* MakePurple () {UNREACHABLE               return this;}
     inline cGrowBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
-    inline cGrowBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cGrowBullet* MakeGreen  () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeCyan   () {UNREACHABLE               return this;}
+    inline cGrowBullet* MakeGreen  () {UNREACHABLE               return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 64u;}
 
 
@@ -981,19 +1000,20 @@ public:
 
     // change default color
     inline cTiltBullet* MakeWhite  () {this->_MakeWhite  (0.1f); return this;}
-    inline cTiltBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cTiltBullet* MakeYellow () {UNREACHABLE               return this;}
     inline cTiltBullet* MakeOrange () {this->_MakeOrange (0.9f); return this;}
     inline cTiltBullet* MakeRed    () {this->_MakeRed    (0.9f); return this;}
-    inline cTiltBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cTiltBullet* MakeMagenta() {UNREACHABLE               return this;}
     inline cTiltBullet* MakePurple () {this->_MakePurple (0.9f); return this;}
     inline cTiltBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
-    inline cTiltBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cTiltBullet* MakeCyan   () {UNREACHABLE               return this;}
     inline cTiltBullet* MakeGreen  () {this->_MakeGreen  (0.8f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_LIGHT_BULLET_THICK;}
     static constexpr coreBool        ConfigShadow              () {return false;}
+    static constexpr coreBool        ConfigGlow                () {return false;}
     static constexpr coreUintW       ConfigReserve             () {return 256u;}
 
 
@@ -1031,7 +1051,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
 
     // add bullet set to global shadow and glow
     if(T::ConfigShadow()) cShadow::GetGlobalContainer()->BindList(&oBulletActive);
-    g_pGlow->BindList(&oBulletActive);
+    if(T::ConfigGlow  ()) g_pGlow->BindList(&oBulletActive);
 
     // add bullet set to outline (will be cleared entirely)
     pOutline->GetStyle(T::ConfigOutlineStyle())->BindList(&oBulletActive);
@@ -1039,6 +1059,8 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     // set bullet pool to initial size       
     oBulletActive.Reallocate(T::ConfigReserve());
     aBulletPool  .resize    (T::ConfigReserve());
+    
+    iOutline = T::ConfigOutlineStyle();
 }
 
 
@@ -1051,7 +1073,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet::~sBulletSet()
 
     // remove bullet set from global shadow and glow
     if(T::ConfigShadow()) cShadow::GetGlobalContainer()->UnbindList(&oBulletActive);
-    g_pGlow->UnbindList(&oBulletActive);
+    if(T::ConfigGlow  ()) g_pGlow->UnbindList(&oBulletActive);
 
     // clear memory
     aBulletPool.clear();
@@ -1066,8 +1088,11 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     this->PrefetchBullet<T>();
     sBulletSet<T>* pSet = d_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
 
-    // save and check current pool size
+    // save current pool size
     const coreUintW iSize = pSet->aBulletPool.size();
+    ASSERT(iSize)
+
+    // 
     if(pSet->oBulletActive.List()->size() < iSize)
     {
         // loop through all bullets
@@ -1193,7 +1218,7 @@ template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2 vPosi
 
 // ****************************************************************
 // 
-template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)const
+template <typename F> FORCE_INLINE void cBulletManager::ForEachBullet(F&& nFunction)const
 {
     // 
     const coreList<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
@@ -1210,7 +1235,7 @@ template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)const
 
 // ****************************************************************
 // 
-template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nFunction)const
+template <typename T, typename F> FORCE_INLINE void cBulletManager::ForEachBulletTyped(F&& nFunction)const
 {
     STATIC_ASSERT(T::ID < BULLET_SET_COUNT)
 
@@ -1250,7 +1275,30 @@ template <typename T> void cBulletManager::PrefetchBullet()
 // 
 template <typename T> void cBulletManager::ReserveBullet(const coreUintW iNumBullets)
 {
+    /*
+    // get requested bullet set
+    this->PrefetchBullet<T>();
+    sBulletSet<T>* pSet = d_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
 
+    if(pSet->apEnemyPool.size() < iNumBullets) nicht richtig für bullets
+    {
+        const coreUintW iNumPot = coreMath::CeilPot(iNumBullets);
+
+        const coreUintW iBefore = P_TO_UI(pSet->aBulletPool.data());
+
+        // increase list and pool size by 100%
+        pSet->oBulletActive.Reallocate(iNumPot);
+        pSet->aBulletPool  .resize    (iNumPot);
+
+        const coreUintW iAfter = P_TO_UI(pSet->aBulletPool.data());
+
+        // fix addresses for all active bullets
+        FOR_EACH(it, *pSet->oBulletActive.List())
+        {
+            (*it) = s_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
+        }
+    }
+     */
 }
 
 

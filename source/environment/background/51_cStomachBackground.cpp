@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cStomachBackground::cStomachBackground()noexcept
-: m_Loaded ()
+: cBackground (false)
+, m_Loaded    ()
 {
     coreBatchList* pList1;
 
@@ -129,7 +130,7 @@ void cStomachBackground::__MoveOwn()
     const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     coreBatchList* pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));

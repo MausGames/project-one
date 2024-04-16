@@ -31,6 +31,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_fVanishDelay        (0.0f)
 , m_bDefeatDelay        (false)
 , m_iContinues          ((g_bDemoVersion || !g_pSave->GetHeader().oProgress.bFirstPlay) ? GAME_CONTINUES : 0u)
+, m_iRaise              (0u)
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (GAME_OUTRO_MISSION)
@@ -90,6 +91,13 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 
     // 
     cHelper::GlobalReset();
+
+    // 
+    const coreUint8 iRaiseSpeed   = cGame::CalcRaiseSpeed (GetCurGameSpeed());
+    const coreUint8 iRaiseShield1 = cGame::CalcRaiseShield(oOptions.aiShield[0]);
+    const coreUint8 iRaiseShield2 = cGame::CalcRaiseShield(oOptions.aiShield[1]);
+    const coreUint8 iRaiseShield  = (oOptions.iType != GAME_TYPE_SOLO) ? ((iRaiseShield1 + iRaiseShield2) / 2u) : iRaiseShield1;
+    m_iRaise = iRaiseSpeed + iRaiseShield;
 
     // 
     g_pSave->SaveFile();
@@ -364,7 +372,7 @@ void cGame::Render()
         Core::Graphics->SetCamera(CAMERA_POSITION + vShift * 0.02f, CAMERA_DIRECTION, CAMERA_ORIENTATION);
 
         coreVector2 vTarget = coreVector2(0.0f,0.0f);
-        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
         {
             vTarget += pPlayer->GetPosition().xy();
         });
@@ -652,7 +660,7 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     // create new mission
     switch(iID)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case cNoMission     ::ID: m_pCurMission = new cNoMission     (); break;
     case cViridoMission ::ID: m_pCurMission = new cViridoMission (); break;
     case cNevoMission   ::ID: m_pCurMission = new cNevoMission   (); break;
@@ -909,9 +917,17 @@ void cGame::UseContinue()
 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
+#if !defined(_CORE_SWITCH_)   // [SW]
         // 
-        m_aPlayer[i].GetDataTable ()->RevertSegment(iMissionIndex, iSegmentIndex);
+        m_aPlayer[i].GetScoreTable()->StoreRun(m_aPlayer[i].GetDataTable()->GetCounterTotal().iContinuesUsed, iMissionIndex, iSegmentIndex);
+#endif
+        // 
+        m_aPlayer[i].GetDataTable ()->RevertSegment   (iMissionIndex, iSegmentIndex);
+#if defined(_CORE_SWITCH_)   // [SW]
         m_aPlayer[i].GetScoreTable()->RevertSegment(iMissionIndex, iSegmentIndex);
+#else
+        m_aPlayer[i].GetScoreTable()->RevertSegmentNew(iMissionIndex, iSegmentIndex);
+#endif
 
         // 
         m_aPlayer[i].GetDataTable()->EditCounterTotal  ()                            ->iContinuesUsed += 1u;
@@ -920,7 +936,11 @@ void cGame::UseContinue()
     }
 
     // 
+#if defined(_CORE_SWITCH_)   // [SW]
     m_TimeTable.RevertSegment(iMissionIndex, iSegmentIndex);
+#else
+    m_TimeTable.RevertSegmentNew(iMissionIndex, iSegmentIndex);
+#endif
 
     // 
     g_pSave->EditGlobalStats      ()                            ->iContinuesUsed += 1u;
@@ -1180,7 +1200,7 @@ coreUint32 cGame::CalcBonusMedal(const coreUint8 iMedal)
     // 
     switch(iMedal)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case MEDAL_DARK:     return 10000u;
     case MEDAL_PLATINUM: return  5000u;
     case MEDAL_GOLD:     return  3000u;
@@ -1198,7 +1218,7 @@ coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
     // 
     switch(iBadge)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case BADGE_ACHIEVEMENT: return 0u;
     case BADGE_HARD:        return 5u;
     case BADGE_NORMAL:      return 5u;
@@ -1229,6 +1249,30 @@ coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool
     }
 
     //return 0u;
+}
+
+
+// ****************************************************************
+// 
+coreUint8 cGame::CalcRaiseSpeed(const coreUint8 iValue)
+{
+#if defined(_CORE_SWITCH_) || 1   // [SW]
+    return 0u;
+#else
+    return (iValue < 100u) ? (iValue - 50u) : 50u;
+#endif
+}
+
+
+// ****************************************************************
+// 
+coreUint8 cGame::CalcRaiseShield(const coreUint8 iValue)
+{
+#if defined(_CORE_SWITCH_) || 1   // [SW]
+    return 0u;
+#else
+    return iValue ? ((iValue >= 40u) ? 0u : (40u - iValue)) : 50u;
+#endif
 }
 
 
@@ -1497,6 +1541,15 @@ void cGame::__HandleDefeat()
                     // 
                     m_pRepairEnemy->AssignPlayer(pPlayer);
                     m_pRepairEnemy->Resurrect();
+
+                    // 
+                    for(coreUintW j = 0u, je = this->GetNumPlayers(); j < je; ++j)
+                    {
+                        if(!m_aPlayer[j].HasStatus(PLAYER_STATUS_DEAD))
+                        {
+                            m_aPlayer[j].StartFeeling(PLAYER_FEEL_TIME_COOP, 2u);
+                        }
+                    }
                 }
             }
 

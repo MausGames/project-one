@@ -32,7 +32,8 @@
 #define INTERFACE_BANNER_ANIMATION        (2.9f)           // animation duration
 #define INTERFACE_BANNER_DURATION_MISSION (3.7f)           // 
 #define INTERFACE_BANNER_DURATION_BOSS    (3.7f)           // display duration (with fading)  
-#define INTERFACE_BANNER_DURATION_SCORE   (5.0f)           // 
+#define INTERFACE_BANNER_DURATION_SCORE_1 (3.5f)           // 
+#define INTERFACE_BANNER_DURATION_SCORE_2 (5.0f)           // 
 #define INTERFACE_BANNER_DURATION_ALERT   (3.5f)           // 
 #define INTERFACE_BANNER_HEIGHT           (0.03f)          // 
 
@@ -93,6 +94,7 @@ private:
     cGuiLabel  m_SegmentName;                       // segment name
     cGuiLabel  m_SegmentBest;                       // 
     coreString m_sSegmentString;                    // 
+    coreBool   m_bSegmentSmall;                     // 
 
     cGuiObject m_aTurfBar[3];                       // 
     cGuiLabel  m_TurfValue;                         // 

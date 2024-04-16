@@ -65,8 +65,8 @@
 #define GRASS_LEAF_RESERVE      (512u)
 #define GRASS_CLOUD_1_NUM       (64u)
 #define GRASS_CLOUD_1_RESERVE   (76u)   // # exact
-#define GRASS_CLOUD_2_NUM       (64u * 10u)
-#define GRASS_CLOUD_2_RESERVE   (76u * 10u)   // # exact
+#define GRASS_CLOUD_2_NUM       (64u * 6u)
+#define GRASS_CLOUD_2_RESERVE   (76u * 6u)   // # exact
 
 #define SEA_CORAL_NUM           (2048u)
 #define SEA_CORAL_1_RESERVE     (256u)
@@ -139,8 +139,8 @@
 #define STOMACH_CLOUD_NUM       (256u)
 #define STOMACH_CLOUD_RESERVE   (304u)   // # exact
 
-#define CLOUD_CLOUD_NUM         (1280u)
-#define CLOUD_CLOUD_RESERVE     (1520u)   // # exact
+#define CLOUD_CLOUD_NUM         (128u * 9u)
+#define CLOUD_CLOUD_RESERVE     (152u * 9u)   // # exact
 #define CLOUD_RAIN_NUM          (6u)
 
 
@@ -173,6 +173,8 @@ protected:
     uDataMap<coreUint16> m_aaiBaseHeight;            // 
     uDataMap<coreUint32> m_aaiBaseNormal;            // 
 
+    coreBool m_bEmpty;                               // 
+
     static coreMemoryPool s_MemoryPool;              // 
 
     static coreRand       s_Rand;                    // 
@@ -180,7 +182,7 @@ protected:
 
 
 public:
-    cBackground()noexcept;
+    cBackground(const coreBool bEmpty)noexcept;
     virtual ~cBackground()override;
 
     DISABLE_COPY(cBackground)
@@ -252,15 +254,10 @@ private:
 class cNoBackground final : public cBackground
 {
 public:
-    cNoBackground() = default;
+    cNoBackground()noexcept : cBackground (true) {}
 
     DISABLE_COPY(cNoBackground)
     ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f), coreVector3(0.8f,0.8f,0.8f), coreVector2(-1.0f,-1.0f))
-
-
-private:
-    // execute own routines
-    inline void __RenderOwnAfter()final {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
 
@@ -277,6 +274,7 @@ private:
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
     coreAtomic<coreUint8> m_Loaded;       // 
+    //coreMusicPlayer m_Music;
 
 
 public:
@@ -318,6 +316,7 @@ private:
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
     coreAtomic<coreUint8> m_Loaded;       // 
+    //coreMusicPlayer m_Music;
 
 
 public:

@@ -13,10 +13,9 @@
 // TODO 3: change projection to perfectly fit the screen
 // TODO 3: check if reusing the center of the shadow-map is feasible
 // TODO 5: poisson sampling
-// TODO 3: make sure no textures are changed when rendering shadow or outline
 // TODO 3: check if projected texture-sampling-offsets in shader are correct (and check if shadow of stings on stings in snow-background can be fixed)
 // TODO 2: shader-program recompile might not work, if there are more than 1 reference for its shaders
-// TODO 3: sort bound objects and lists by by models, handle index/address (global only)
+// TODO 5: sort bound objects and lists by by models, handle index/address (global only)
 
 // NOTE: shadow map binds local objects (per frame buffer) and global objects (on all frame buffers, for transitions)
 // NOTE: all global objects are on the foreground

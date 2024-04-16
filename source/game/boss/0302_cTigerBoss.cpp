@@ -344,7 +344,7 @@ void cTigerBoss::__MoveOwn()
             coreVector2 vDir;
             switch(iTick)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: vDir = coreVector2( 0.2f,1.0f); break;
             case 1u: vDir = coreVector2( 0.5f,1.0f); break;
             case 2u: vDir = coreVector2(-0.2f,1.0f); break;
@@ -784,7 +784,7 @@ void cTigerBoss::__MoveOwn()
                 coreVector2 vPos;
                 switch(iTick)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: vPos = coreVector2(-1.5f, 1.0f); break;
                 case 1u: vPos = coreVector2( 1.5f,-0.5f); break;
                 case 2u: vPos = coreVector2(-1.0f,-1.0f); break;
@@ -981,7 +981,7 @@ void cTigerBoss::__MoveOwn()
             coreFloat fShootSpeed;
             switch(m_iWeaponType)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: fShootSpeed = 0.5f; break;
             case 1u: fShootSpeed = 2.0f; break;
             case 2u: fShootSpeed = 1.0f; break;
@@ -1053,7 +1053,7 @@ void cTigerBoss::__MoveOwn()
         {
             // no weapon
         }
-        else ASSERT(false)
+        else UNREACHABLE
     }
     
 
@@ -1810,7 +1810,7 @@ void cTigerBoss::__ShootWeapon()
                 g_pGame->GetHelper(ELEMENT_PURPLE)->SetPosition(coreVector3(vHit, 0.0f));
             }
         }
-        else ASSERT(false)
+        else UNREACHABLE
 
         const coreVector3 vStart = m_aWeapon[0].GetPosition() + m_aWeapon[0].GetDirection() * 9.0f;
         const coreVector3 vDiff  = coreVector3(vHit, 0.0f) - vStart;

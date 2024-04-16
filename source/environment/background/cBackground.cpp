@@ -31,18 +31,22 @@ __STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SPACE_NEBULA_NU
 
 // ****************************************************************
 // constructor
-cBackground::cBackground()noexcept
+cBackground::cBackground(const coreBool bEmpty)noexcept
 : m_pOutdoor (NULL)
 , m_pWater   (NULL)
+, m_bEmpty   (bEmpty)
 {
-    // create background frame buffer
-    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
-    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-    m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    if(!bEmpty)
+    {
+        // create background frame buffer
+        m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+        m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+        m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    }
 
     // create resolved texture
     m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
-    m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_ResolvedTexture.Create(bEmpty ? coreVector2(4.0f,4.0f) : g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 
 
@@ -99,6 +103,12 @@ void cBackground::Exit()
 // render the background
 void cBackground::Render()
 {
+    if(!m_FrameBuffer.GetIdentifier())
+    {
+        m_ResolvedTexture.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+        return;
+    }
+
     if(m_pWater)
     {
         // update water reflection and depth map
@@ -202,7 +212,7 @@ void cBackground::Move()
     }
 
     // control and move all persistent objects
-    const auto nControlObjectsFunc = [this](coreList<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreMatrix2& mRota)
+    const auto nControlObjectsFunc = [this](coreList<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreVector2 vShift, const coreMatrix2& mRota)
     {
         // cache current camera position (to improve performance)
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
@@ -226,7 +236,7 @@ void cBackground::Move()
                 const coreVector2 vScreenDiff = pObject->GetPosition().xy() - vCameraPos;
 
                 // determine logical visibility (and handle infinity)
-                const coreVector2 vScreenPosWrap = coreVector2(vScreenDiff.x, FMOD(ABS(vScreenDiff.y) + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) - I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL) * mRota;
+                const coreVector2 vScreenPosWrap = coreVector2(vScreenDiff.x, FMOD(ABS(vScreenDiff.y) + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) - I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL) * mRota + vShift;
                 const coreBool    bIsVisibleWrap = ((ABS(vScreenPosWrap.x) + ABS(vScreenPosWrap.y)) < fRange);
                 if(bIsVisibleWrap != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
@@ -242,7 +252,7 @@ void cBackground::Move()
                 }
 
                 // determine real visibility
-                const coreVector2 vScreenPos = vScreenDiff * mRota;
+                const coreVector2 vScreenPos = vScreenDiff * mRota + vShift;
                 const coreBool    bIsVisible = ((ABS(vScreenPos.x) + ABS(vScreenPos.y)) < fRange) && pObject->GetStatus();
                 if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
                 {
@@ -281,9 +291,9 @@ void cBackground::Move()
         }
     };
     const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotated45()).m12();
-    nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE + 30.0f, mRota);
-    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE -  9.0f, mRota);
-    nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
+    nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE + 15.0f, coreVector2(-15.0f,15.0f).Rotated135(), mRota); STATIC_ASSERT((LIGHT_DIRECTION.x > 0.0f) && (LIGHT_DIRECTION.y < 0.0f))
+    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE -  9.0f, coreVector2(  0.0f, 0.0f),              mRota);
+    nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, coreVector2(  0.0f, 0.0f),              mRota);
 
     // control and move all temporary objects
     const auto nControlAddFunc = [](coreMapStr<coreBatchList*>* OUTPUT papList, const coreFloat fRange)
@@ -616,8 +626,8 @@ void cBackground::__Reset(const coreResourceReset eInit)
     if(eInit)
     {
         // 
-        m_FrameBuffer    .Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
-        m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        if(m_FrameBuffer.GetColorTarget(0u).IsValid()) m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+        m_ResolvedTexture.Create(m_bEmpty ? coreVector2(4.0f,4.0f) : g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // 
         this->__InitOwn();
@@ -632,7 +642,7 @@ void cBackground::__Reset(const coreResourceReset eInit)
     else
     {
         // 
-        m_FrameBuffer    .Delete();
+        if(m_FrameBuffer.GetColorTarget(0u).IsValid()) m_FrameBuffer.Delete();
         m_ResolvedTexture.Delete();
 
         // 
@@ -645,13 +655,16 @@ void cBackground::__Reset(const coreResourceReset eInit)
 // reshape with the resource manager
 void cBackground::__Reshape()
 {
-    // 
-    m_FrameBuffer.Delete();
-    m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    if(m_FrameBuffer.GetColorTarget(0u).IsValid())
+    {
+        // 
+        m_FrameBuffer.Delete();
+        m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    }
 
     // 
     m_ResolvedTexture.Delete();
-    m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_ResolvedTexture.Create(m_bEmpty ? coreVector2(4.0f,4.0f) : g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 
     if(m_pWater) m_pWater->Reshape();

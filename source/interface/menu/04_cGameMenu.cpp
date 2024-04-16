@@ -548,6 +548,31 @@ cGameMenu::cGameMenu()noexcept
         m_aArmoryWeaponIcon[i].SetTexSize   (coreVector2(0.25f,0.5f));
     }
 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryRaise); ++i)
+    {
+        m_aArmoryRaise[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aArmoryRaise[i].SetAlignment(coreVector2((i == 2u) ? 1.0f : -1.0f, 0.0f));
+        m_aArmoryRaise[i].SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    }
+    m_aArmoryRaise[0].SetPosition(m_ArmorySpeed      .GetPosition() + coreVector2(-0.48f, 0.0f));
+    m_aArmoryRaise[1].SetPosition(m_aArmoryShield[1] .GetPosition() + coreVector2(-0.48f, 0.0f));
+    m_aArmoryRaise[2].SetPosition(m_StartButtonArmory.GetPosition() + m_StartButtonArmory.GetSize()*coreVector2(1.0f,-0.5f) + coreVector2(0.025f,-0.016f));
+
+    m_ArmoryRaiseText.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_ArmoryRaiseText.SetPosition    (m_StartButtonArmory.GetPosition() + m_StartButtonArmory.GetSize()*coreVector2(1.0f,-0.5f) + coreVector2(0.025f,0.016f));
+    m_ArmoryRaiseText.SetAlignment   (coreVector2(1.0f,0.0f));
+    m_ArmoryRaiseText.SetColor3      (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    m_ArmoryRaiseText.SetTextLanguage("SCORE_RAISE");
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryCueLock); ++i)
+    {
+        m_aArmoryCueLock[i].Construct(MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aArmoryCueLock[i].SetColor3(COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+        m_aArmoryCueLock[i].SetText  (ICON_LOCK);
+    }
+    m_aArmoryCueLock[0].SetPosition(m_aArmoryName[2].GetPosition() + coreVector2(0.312f,0.0f));
+    m_aArmoryCueLock[1].SetPosition(m_aArmoryName[4].GetPosition() + coreVector2(0.312f,0.0f));
+
     m_FirstHeader.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_FirstHeader.SetPosition    (m_BackgroundFirst.GetPosition() + m_BackgroundFirst.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.06f));
     m_FirstHeader.SetColor3      (COLOR_MENU_WHITE);
@@ -608,6 +633,31 @@ cGameMenu::cGameMenu()noexcept
         m_aFirstPlayer[i].SetPosition(m_aFirstShield[i].GetPosition() - coreVector2(m_aFirstShield[i].GetSize().x * 0.5f, 0.05f));
         m_aFirstPlayer[i].SetColor3  (COLOR_MENU_WHITE);
     }
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFirstRaise); ++i)
+    {
+        m_aFirstRaise[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aFirstRaise[i].SetAlignment(coreVector2((i == 2u) ? 1.0f : -1.0f, 0.0f));
+        m_aFirstRaise[i].SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    }
+    m_aFirstRaise[0].SetPosition(m_FirstSpeed      .GetPosition() + coreVector2(-0.48f, 0.0f));
+    m_aFirstRaise[1].SetPosition(m_aFirstShield[1] .GetPosition() + coreVector2(-0.48f, 0.0f));
+    m_aFirstRaise[2].SetPosition(m_StartButtonFirst.GetPosition() + m_StartButtonFirst.GetSize()*coreVector2(1.0f,-0.5f) + coreVector2(0.025f,-0.016f));
+
+    m_FirstRaiseText.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_FirstRaiseText.SetPosition    (m_StartButtonFirst.GetPosition() + m_StartButtonFirst.GetSize()*coreVector2(1.0f,-0.5f) + coreVector2(0.025f,0.016f));
+    m_FirstRaiseText.SetAlignment   (coreVector2(1.0f,0.0f));
+    m_FirstRaiseText.SetColor3      (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    m_FirstRaiseText.SetTextLanguage("SCORE_RAISE");
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFirstCueLock); ++i)
+    {
+        m_aFirstCueLock[i].Construct(MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aFirstCueLock[i].SetColor3(COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+        m_aFirstCueLock[i].SetText  (ICON_LOCK);
+    }
+    m_aFirstCueLock[0].SetPosition(m_aFirstName[1].GetPosition() + coreVector2(0.312f,0.0f));
+    m_aFirstCueLock[1].SetPosition(m_aFirstName[3].GetPosition() + coreVector2(0.312f,0.0f));
 
     m_DemoHeader.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_DemoHeader.SetPosition    (m_BackgroundDemo.GetPosition() + m_BackgroundDemo.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.06f));
@@ -683,6 +733,31 @@ cGameMenu::cGameMenu()noexcept
         m_aDemoPlayer[i].SetPosition(m_aDemoShield[i].GetPosition() - coreVector2(m_aDemoShield[i].GetSize().x * 0.5f, 0.05f));
         m_aDemoPlayer[i].SetColor3  (COLOR_MENU_WHITE);
     }
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRaise); ++i)
+    {
+        m_aDemoRaise[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aDemoRaise[i].SetAlignment(coreVector2((i == 2u) ? 1.0f : -1.0f, 0.0f));
+        m_aDemoRaise[i].SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    }
+    m_aDemoRaise[0].SetPosition(m_DemoSpeed      .GetPosition() + coreVector2(-0.48f, 0.0f));
+    m_aDemoRaise[1].SetPosition(m_aDemoShield[1] .GetPosition() + coreVector2(-0.48f, 0.0f));
+    m_aDemoRaise[2].SetPosition(m_StartButtonDemo.GetPosition() + m_StartButtonDemo.GetSize()*coreVector2(1.0f,-0.5f) + coreVector2(0.025f,-0.016f));
+
+    m_DemoRaiseText.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_DemoRaiseText.SetPosition    (m_StartButtonDemo.GetPosition() + m_StartButtonDemo.GetSize()*coreVector2(1.0f,-0.5f) + coreVector2(0.025f,0.016f));
+    m_DemoRaiseText.SetAlignment   (coreVector2(1.0f,0.0f));
+    m_DemoRaiseText.SetColor3      (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    m_DemoRaiseText.SetTextLanguage("SCORE_RAISE");
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoCueLock); ++i)
+    {
+        m_aDemoCueLock[i].Construct(MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aDemoCueLock[i].SetColor3(COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+        m_aDemoCueLock[i].SetText  (ICON_LOCK);
+    }
+    m_aDemoCueLock[0].SetPosition(m_aDemoName[1].GetPosition() + coreVector2(0.312f,0.0f));
+    m_aDemoCueLock[1].SetPosition(m_aDemoName[4].GetPosition() + coreVector2(0.312f,0.0f));
 
     m_SpeedNew.SetPosition(m_ArmorySpeed.GetPosition() + coreVector2(0.045f,0.0f));
     m_SpeedNew.SetIndex   (NEW_ARMORY_GAMESPEED);
@@ -811,8 +886,9 @@ cGameMenu::cGameMenu()noexcept
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryArea2);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedalBack2[i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryIconBig);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryLine      [i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeBack [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;           ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryLine     [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryCueLock); ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryCueLock  [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeBack[i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryHelperBack);
     //this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryMedalBack);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryFragmentBack);
@@ -826,14 +902,18 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeWave [i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadge     [i]);
 #if defined(_CORE_DEBUG_)
-    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS;           ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryWeaponIcon[i]);
+    //for(coreUintW i = 0u; i < MENU_GAME_PLAYERS;           ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryWeaponIcon[i]);
 #endif
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryArrow    [i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedal    [i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedalBest[i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc[i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc2[i][j]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryName     [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryArrow    [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedal    [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedalBest[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;    ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc2[i][j]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;         ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryName     [i]);
+#if !defined(_CORE_SWITCH_) && 0   // [SW]
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryRaise); ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryRaise    [i]);
+    this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryRaiseText);
+#endif
     //this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryHeader);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryTrophy);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryTitle); ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryTitle [i]);
@@ -858,8 +938,13 @@ cGameMenu::cGameMenu()noexcept
     this->BindObject(SURFACE_GAME_FIRST, &m_InputButtonFirst);
 #endif
     this->BindObject(SURFACE_GAME_FIRST, &m_BackButtonFirst);
-    for(coreUintW i = 0u; i < MENU_GAME_FIRSTS; ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstLine[i]);
-    for(coreUintW i = 0u; i < MENU_GAME_FIRSTS; ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstName[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_FIRSTS;            ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstLine   [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFirstCueLock); ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstCueLock[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_FIRSTS;            ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstName   [i]);
+#if !defined(_CORE_SWITCH_) && 0   // [SW]
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFirstRaise); ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstRaise[i]);
+    this->BindObject(SURFACE_GAME_FIRST, &m_FirstRaiseText);
+#endif
     this->BindObject(SURFACE_GAME_FIRST, &m_FirstHeader);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_FIRST, &m_aFirstPlayer[i]);
     this->BindObject(SURFACE_GAME_FIRST, &m_FirstType);
@@ -875,8 +960,13 @@ cGameMenu::cGameMenu()noexcept
 #endif
     this->BindObject(SURFACE_GAME_DEMO, &m_BackButtonDemo);
     for(coreUintW i = 0u; i < MENU_GAME_DEMOS; ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoLine[i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoCueLock); ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoCueLock[i]);
     this->BindObject(SURFACE_GAME_DEMO, &m_DemoStageIcon);
-    for(coreUintW i = 0u; i < MENU_GAME_DEMOS; ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoName[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_DEMOS;          ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoName [i]);
+#if !defined(_CORE_SWITCH_) && 0   // [SW]
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRaise); ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoRaise[i]);
+    this->BindObject(SURFACE_GAME_DEMO, &m_DemoRaiseText);
+#endif
     this->BindObject(SURFACE_GAME_DEMO, &m_DemoHeader);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_DEMO, &m_aDemoPlayer[i]);
     this->BindObject(SURFACE_GAME_DEMO, &m_DemoType);
@@ -898,7 +988,7 @@ void cGameMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case SURFACE_GAME_MAIN:   m_NavigatorMain  .Update(); break;
     case SURFACE_GAME_ARMORY: m_NavigatorArmory.Update(); break;
     case SURFACE_GAME_FIRST:  m_NavigatorFirst .Update(); break;
@@ -1163,7 +1253,7 @@ void cGameMenu::Move()
             if(m_StartButtonArmory.IsClicked())
             {
                 // 
-                this->__SetupInput();
+                this->__SetupInput(false);
 
                 // 
                 g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const coreInt32 iAnswer)
@@ -1192,7 +1282,7 @@ void cGameMenu::Move()
             else if(m_InputButtonArmory.IsClicked())
             {
                 // 
-                this->__SetupInput();
+                this->__SetupInput(true);
             }
             else if(m_BackButtonArmory.IsClicked() || g_MenuInput.bCancel)
             {
@@ -1228,7 +1318,7 @@ void cGameMenu::Move()
                 // 
                 switch(m_iCurPage)
                 {
-                default: ASSERT(false)
+                default: UNREACHABLE
                 case 0u: this->__PrepareMission(m_aiCurIndex[0]);                  break;
                 case 1u: this->__PrepareSegment(m_aiCurIndex[1], m_aiCurIndex[2]); break;
                 case 2u: this->__PrepareArcade();                                  break;
@@ -1244,7 +1334,7 @@ void cGameMenu::Move()
             coreVector3 vMenuColor;
             switch(m_iCurPage)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: vMenuColor = g_aMissionData[m_aiCurIndex[0]].vColor2; break;
             case 1u: vMenuColor = g_aMissionData[m_aiCurIndex[1]].vColor2; break;
             case 2u: vMenuColor = g_aMissionData[MISSION_ATER]   .vColor2; break;
@@ -1275,6 +1365,17 @@ void cGameMenu::Move()
 
             m_ArmoryFragment.SetTexOffset(coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * 0.1f));
 
+            
+
+            // 
+            m_ArmorySpeed     .SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+            m_aArmoryShield[0].SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+            m_aArmoryShield[1].SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+
+            // 
+            m_aArmoryCueLock[0].SetEnabled(g_CurConfig.Game.iPureMode ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aArmoryCueLock[1].SetEnabled(g_CurConfig.Game.iPureMode ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
             // 
             //cMenu::UpdateSwitchBox(&m_ArmorySelection);
             cMenu::UpdateSwitchBox(&m_ArmoryType);
@@ -1293,7 +1394,7 @@ void cGameMenu::Move()
                 {
                     switch(m_aArmoryWeapon[i].GetCurValue())
                     {
-                    default: ASSERT(false)
+                    default: UNREACHABLE
                     case 1u: vColor = COLOR_MENU_YELLOW; vTexOffset = coreVector2(0.0f, 0.0f); break;
                     case 2u: vColor = COLOR_MENU_PURPLE; vTexOffset = coreVector2(0.25f,0.0f); break;
                     case 3u: vColor = COLOR_MENU_GREEN;  vTexOffset = coreVector2(0.5f, 0.0f); break;
@@ -1308,6 +1409,18 @@ void cGameMenu::Move()
                 //m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.6f * m_aArmoryWeapon[i].GetAlpha());
                 m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.8f * m_aArmoryWeapon[i].GetAlpha());
             }
+            
+            //const coreUint8 iRaiseSpeed   = cGame::CalcRaiseSpeed (m_ArmorySpeed     .GetCurValue());
+            //const coreUint8 iRaiseShield1 = cGame::CalcRaiseShield(m_aArmoryShield[0].GetCurValue());
+            //const coreUint8 iRaiseShield2 = cGame::CalcRaiseShield(m_aArmoryShield[1].GetCurValue());
+            //const coreUint8 iRaiseShield  = bMulti ? ((iRaiseShield1 + iRaiseShield2) / 2u) : iRaiseShield1;
+            //const coreUint8 iRaiseFull    = iRaiseSpeed + iRaiseShield;
+//
+            //m_aArmoryRaise[0].SetText(PRINT("+%u%%", iRaiseSpeed));
+            //m_aArmoryRaise[1].SetText(PRINT("+%u%%", iRaiseShield));
+            //m_aArmoryRaise[2].SetText(PRINT("+%u%%", iRaiseFull));
+//
+            //STATIC_ASSERT(GAME_PLAYERS == 2u)
 
             //for(coreUintW i = 0u; i < MENU_GAME_ARMORY_WAVES; ++i)
             //{
@@ -1367,7 +1480,7 @@ void cGameMenu::Move()
             }
 
             // 
-            if(!m_aArmoryBadgeDesc[1].GetText()[0] && !m_aArmoryBadgeDesc2[1][0].GetText()[0]) m_aArmoryBadgeBack[1].SetAlpha(m_aArmoryBadgeBack[1].GetAlpha() * 0.6f);
+            if(!m_aArmoryBadgeDesc[1].GetText()[0] && !m_aArmoryBadgeDesc2[1][0].GetText()[0]) m_aArmoryBadgeBack[1].SetAlpha(m_aArmoryBadgeBack[1].GetAlpha() * 0.5f);
         }
         break;
 
@@ -1379,7 +1492,7 @@ void cGameMenu::Move()
                 this->SaveValues();
 
                 // 
-                this->__SetupInput();
+                this->__SetupInput(false);
 
                 // 
                 g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const coreInt32 iAnswer)
@@ -1395,7 +1508,7 @@ void cGameMenu::Move()
             else if(m_InputButtonFirst.IsClicked())
             {
                 // 
-                this->__SetupInput();
+                this->__SetupInput(true);
             }
             else if(m_BackButtonFirst.IsClicked() || g_MenuInput.bCancel)
             {
@@ -1433,6 +1546,27 @@ void cGameMenu::Move()
             const coreBool bMulti = (m_FirstType.GetCurValue() != GAME_TYPE_SOLO);
             m_aFirstShield[1].SetOverride(bMulti ? 0 : -1);
             m_aFirstPlayer[1].SetColor3  (COLOR_MENU_WHITE * (bMulti ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
+
+            // 
+            m_FirstSpeed     .SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+            m_aFirstShield[0].SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+            m_aFirstShield[1].SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+
+            // 
+            m_aFirstCueLock[0].SetEnabled(g_CurConfig.Game.iPureMode ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aFirstCueLock[1].SetEnabled(g_CurConfig.Game.iPureMode ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            
+            //const coreUint8 iRaiseSpeed   = cGame::CalcRaiseSpeed (m_FirstSpeed     .GetCurValue());
+            //const coreUint8 iRaiseShield1 = cGame::CalcRaiseShield(m_aFirstShield[0].GetCurValue());
+            //const coreUint8 iRaiseShield2 = cGame::CalcRaiseShield(m_aFirstShield[1].GetCurValue());
+            //const coreUint8 iRaiseShield  = bMulti ? ((iRaiseShield1 + iRaiseShield2) / 2u) : iRaiseShield1;
+            //const coreUint8 iRaiseFull    = iRaiseSpeed + iRaiseShield;
+//
+            //m_aFirstRaise[0].SetText(PRINT("+%u%%", iRaiseSpeed));
+            //m_aFirstRaise[1].SetText(PRINT("+%u%%", iRaiseShield));
+            //m_aFirstRaise[2].SetText(PRINT("+%u%%", iRaiseFull));
+//
+            //STATIC_ASSERT(GAME_PLAYERS == 2u)
         }
         break;
 
@@ -1444,7 +1578,7 @@ void cGameMenu::Move()
                 this->SaveValues();
 
                 // 
-                this->__SetupInput();
+                this->__SetupInput(false);
 
                 // 
                 g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const coreInt32 iAnswer)
@@ -1460,7 +1594,7 @@ void cGameMenu::Move()
             else if(m_InputButtonDemo.IsClicked())
             {
                 // 
-                this->__SetupInput();
+                this->__SetupInput(true);
             }
             else if(m_BackButtonDemo.IsClicked() || g_MenuInput.bCancel)
             {
@@ -1511,17 +1645,38 @@ void cGameMenu::Move()
             m_aDemoName[3].SetColor3  (COLOR_MENU_WHITE * (bUnlocked ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
 
             // 
+            m_DemoSpeed     .SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+            m_aDemoShield[0].SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+            m_aDemoShield[1].SetOverride(g_CurConfig.Game.iPureMode ? -1 : 0);
+
+            // 
+            m_aDemoCueLock[0].SetEnabled(g_CurConfig.Game.iPureMode ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aDemoCueLock[1].SetEnabled(g_CurConfig.Game.iPureMode ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
+            // 
             m_DemoStageIcon.SetColor3   (g_aMissionData[m_DemoStage.GetCurValue()].vColor * 0.8f);
             m_DemoStageIcon.SetTexOffset(g_aMissionData[m_DemoStage.GetCurValue()].vIcon);
             m_DemoStageIcon.SetEnabled  (bUnlocked ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
             // 
             m_DemoStageIcon.SetAlpha(m_DemoStageIcon.GetAlpha() * 0.6f);
+            
+            //const coreUint8 iRaiseSpeed   = cGame::CalcRaiseSpeed (m_DemoSpeed     .GetCurValue());
+            //const coreUint8 iRaiseShield1 = cGame::CalcRaiseShield(m_aDemoShield[0].GetCurValue());
+            //const coreUint8 iRaiseShield2 = cGame::CalcRaiseShield(m_aDemoShield[1].GetCurValue());
+            //const coreUint8 iRaiseShield  = bMulti ? ((iRaiseShield1 + iRaiseShield2) / 2u) : iRaiseShield1;
+            //const coreUint8 iRaiseFull    = iRaiseSpeed + iRaiseShield;
+//
+            //m_aDemoRaise[0].SetText(PRINT("+%u%%", iRaiseSpeed));
+            //m_aDemoRaise[1].SetText(PRINT("+%u%%", iRaiseShield));
+            //m_aDemoRaise[2].SetText(PRINT("+%u%%", iRaiseFull));
+//
+            //STATIC_ASSERT(GAME_PLAYERS == 2u)
         }
         break;
 
     default:
-        ASSERT(false)
+        UNREACHABLE
         break;
     }
 
@@ -1562,12 +1717,12 @@ void cGameMenu::LoadValues()
     m_ArmoryType      .SelectValue(g_pSave->GetHeader().oOptions.iType);
     m_ArmoryMode      .SelectValue(g_pSave->GetHeader().oOptions.iMode);
     m_ArmoryDifficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
-    m_ArmorySpeed     .SelectValue(g_CurConfig.Game.iGameSpeed);
+    m_ArmorySpeed     .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_GAMESPEED : g_CurConfig.Game.iGameSpeed);
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        m_aArmoryShield[i].SelectValue(g_pSave->GetHeader().oOptions.aiShield [i]);
+        m_aArmoryShield[i].SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_SHIELD : g_pSave->GetHeader().oOptions.aiShield[i]);
         m_aArmoryWeapon[i].SelectValue(g_pSave->GetHeader().oOptions.aaiWeapon[i][0]);
         m_aArmoryPlayer[i].SetText    (PRINT("%s %zu", Core::Language->GetString("PLAYER"), i + 1u));
     }
@@ -1577,12 +1732,12 @@ void cGameMenu::LoadValues()
         // 
         m_FirstType      .SelectValue(g_pSave->GetHeader().oOptions.iType);
         m_FirstDifficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
-        m_FirstSpeed     .SelectValue(g_CurConfig.Game.iGameSpeed);
+        m_FirstSpeed     .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_GAMESPEED : g_CurConfig.Game.iGameSpeed);
 
         // 
         for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
         {
-            m_aFirstShield[i].SelectValue(g_pSave->GetHeader().oOptions.aiShield[i]);
+            m_aFirstShield[i].SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_SHIELD : g_pSave->GetHeader().oOptions.aiShield[i]);
             m_aFirstPlayer[i].SetText    (PRINT("%s %zu", Core::Language->GetString("PLAYER"), i + 1u));
         }
     }
@@ -1597,23 +1752,23 @@ void cGameMenu::LoadValues()
         m_DemoStage.ClearEntries();
 
         // 
-        m_DemoStage.AddEntry(PRINT("%s 0", Core::Language->GetString("MISSION")), 0u);
+        m_DemoStage.AddEntry(g_aMissionData[0].pcName, 0u);
         if(!g_pSave->GetHeader().oProgress.bFirstPlay)
         {
-            m_DemoStage.AddEntry(PRINT("%s 1", Core::Language->GetString("MISSION")), 1u);
-            m_DemoStage.AddEntry(PRINT("%s 2", Core::Language->GetString("MISSION")), 2u);
+            m_DemoStage.AddEntry(g_aMissionData[1].pcName, 1u);
+            m_DemoStage.AddEntry(g_aMissionData[2].pcName, 2u);
         }
 
         // 
         m_DemoType      .SelectValue(g_pSave->GetHeader().oOptions.iType);
         m_DemoDifficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
-        m_DemoSpeed     .SelectValue(g_CurConfig.Game.iGameSpeed);
+        m_DemoSpeed     .SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_GAMESPEED : g_CurConfig.Game.iGameSpeed);
         m_DemoStage     .SelectValue(g_pSave->GetHeader().oOptions.iNavigation);
 
         // 
         for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
         {
-            m_aDemoShield[i].SelectValue(g_pSave->GetHeader().oOptions.aiShield[i]);
+            m_aDemoShield[i].SelectValue(g_CurConfig.Game.iPureMode ? SCORE_PURE_SHIELD : g_pSave->GetHeader().oOptions.aiShield[i]);
             m_aDemoPlayer[i].SetText    (PRINT("%s %zu", Core::Language->GetString("PLAYER"), i + 1u));
         }
     }
@@ -1631,12 +1786,12 @@ void cGameMenu::SaveValues()
     g_pSave->EditOptions()->iType       = m_ArmoryType      .GetCurValue();
     g_pSave->EditOptions()->iMode       = m_ArmoryMode      .GetCurValue();
     g_pSave->EditOptions()->iDifficulty = m_ArmoryDifficulty.GetCurValue();
-    g_CurConfig.Game.iGameSpeed         = m_ArmorySpeed     .GetCurValue();
+    g_CurConfig.Game.iGameSpeed         = g_CurConfig.Game.iPureMode ? g_CurConfig.Game.iGameSpeed : m_ArmorySpeed.GetCurValue();
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        g_pSave->EditOptions()->aiShield [i]    = m_aArmoryShield[i].GetCurValue();
+        g_pSave->EditOptions()->aiShield [i]    = g_CurConfig.Game.iPureMode ? g_pSave->EditOptions()->aiShield[i] : m_aArmoryShield[i].GetCurValue();
         g_pSave->EditOptions()->aaiWeapon[i][0] = m_aArmoryWeapon[i].GetCurValue();
     }
 
@@ -1694,7 +1849,7 @@ void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTP
         (*piTakeTo)    = TAKE_MISSION;
         (*piKind)      = GAME_KIND_ALL;
     }
-    else ASSERT(false)
+    else UNREACHABLE
 }
 
 
@@ -1771,7 +1926,7 @@ void cGameMenu::SelectPrevious()
     {
         // nothing
     }
-    else ASSERT(false)
+    else UNREACHABLE
 }
 
 
@@ -1835,7 +1990,7 @@ void cGameMenu::SelectNext()
     {
         // nothing
     }
-    else ASSERT(false)
+    else UNREACHABLE
 }
 
 
@@ -1862,7 +2017,7 @@ void cGameMenu::SelectTrophy(const coreUintW iMissionIndex, const coreUintW iSeg
 void cGameMenu::__LoadUnlocks()
 {
     const coreBool bDuelType       = false;
-    const coreBool bHardDifficulty = false;
+    const coreBool bHardDifficulty = DEFINED(_CORE_DEBUG_);
     const coreBool bGameSpeedUp    = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP);
     const coreBool bPowerShield    = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD);
     const coreBool bWeaponPulse    = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_PULSE);
@@ -2534,6 +2689,34 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
     
     
     
+
+    // 
+    if(!m_aArmoryBadgeDesc[1].GetText()[0] && !m_aArmoryBadgeDesc2[1][0].GetText()[0])
+    {
+        //m_aArmoryBadge    [1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        //m_aArmoryBadgeBack[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+        //m_aArmoryBadgeBack[0].SetPosition(m_ArmoryArea2.GetPosition() + coreVector2(0.01f - 0.39f, 0.0f));
+    }
+    else
+    {
+        //m_aArmoryBadgeBack[0].SetPosition(m_ArmoryArea2.GetPosition() + coreVector2(0.01f - 0.39f, 0.0f + (I_TO_F(0) - 0.5f) * -0.06f));
+    }
+
+    //m_aArmoryBadgeDesc[0].SetPosition(m_aArmoryBadgeBack[0].GetPosition() + coreVector2(0.05f,0.0f));
+    //for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j)
+    //{
+    //    m_aArmoryBadgeDesc2[0][j].SetPosition(m_aArmoryBadgeBack[0].GetPosition() + coreVector2(0.05f, j ? -0.015f : 0.015f));
+    //}
+    //
+    //m_aArmoryBadgeBack[0].Move();
+    //m_aArmoryBadgeDesc[0].Move();
+    //for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j)
+    //{
+    //    m_aArmoryBadgeDesc2[0][j].Move();
+    //}
+    
+    
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_HELPERS; ++i)
     {
         constexpr coreUintW aiOrder[] = {3u, 5u, 7u, 4u, 0u, 6u, 2u, 1u};
@@ -2546,7 +2729,7 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
             coreVector3 vColor;
             switch(i)
             {
-            default: ASSERT(false)
+            default: UNREACHABLE
             case 0u: vColor = COLOR_MENU_YELLOW;  break;
             case 1u: vColor = COLOR_MENU_ORANGE;  break;
             case 2u: vColor = COLOR_MENU_RED;     break;
@@ -2760,7 +2943,7 @@ void cGameMenu::__PrepareArcade()
 
 // ****************************************************************
 // 
-coreBool cGameMenu::__SetupInput()
+coreBool cGameMenu::__SetupInput(const coreBool bAlways)
 {
     return false;
 }

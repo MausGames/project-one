@@ -169,8 +169,7 @@ void cWeapon::_TrackBullet()
 // ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
-: m_iBurst       (0u)
-, m_fMuzzleTime  (0.0f)
+: m_fMuzzleTime  (0.0f)
 , m_fMuzzleAnim  (0.0f)
 , m_fMuzzleScale (0.0f)
 {
@@ -390,7 +389,6 @@ void cRayWeapon::__PrefetchOwn()
 // constructor
 cPulseWeapon::cPulseWeapon()noexcept
 : m_fCharge      (0.0f)
-, m_iBurst       (0u)
 , m_iShotType    (0u)
 , m_fMuzzleTime  (0.0f)
 , m_fMuzzleAnim  (0.0f)
@@ -633,7 +631,6 @@ void cPulseWeapon::__PrefetchOwn()
 // ****************************************************************
 // constructor
 cWaveWeapon::cWaveWeapon()noexcept
-: m_iBurst (0u)
 {
     // set base fire-rate
     m_CooldownTimer.SetSpeed(16.0f);

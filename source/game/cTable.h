@@ -20,6 +20,7 @@
 #define TABLE_SEGMENTS (SEGMENTS)       // 
 #define TABLE_BADGES   (BADGES)         // 
 #define TABLE_HELPERS  (HELPERS - 1u)   // 
+#define TABLE_RUNS     (CONTINUES)      // 
 
 #define TABLE_TIME_TO_UINT(x)   (F_TO_UI  (coreDouble(x) * 1000.0))
 #define TABLE_TIME_TO_FLOAT(x)  (coreFloat(coreDouble(x) / 1000.0))
@@ -125,19 +126,25 @@ public:
 class cScoreTable final
 {
 private:
-    coreProtect<coreUint32> m_iScoreTotal;                                           // 
-    coreProtect<coreUint32> m_aiScoreMission [TABLE_MISSIONS];                       // 
-    coreProtect<coreUint32> m_aaiScoreSegment[TABLE_MISSIONS][TABLE_SEGMENTS];       // 
+    coreProtect<coreUint32> m_iScoreTotal;                                                    // 
+    coreProtect<coreUint32> m_aiScoreMission [TABLE_MISSIONS];                                // 
+    coreProtect<coreUint32> m_aaiScoreSegment[TABLE_MISSIONS][TABLE_SEGMENTS];                // 
 
-    coreProtect<coreUint32> m_iCurCombo;                                             // 
-    coreProtect<coreUint32> m_iCurChain;                                             // 
+    coreProtect<coreUint32> m_iCurCombo;                                                      // 
+    coreProtect<coreUint32> m_iCurChain;                                                      // 
 
-    coreProtect<coreFlow>   m_fCooldown;                                             // 
-    coreProtect<coreUint32> m_iOverride;                                             // 
+    coreProtect<coreFlow>   m_fCooldown;                                                      // 
+    coreProtect<coreUint32> m_iOverride;                                                      // 
 
-    coreProtect<coreUint32> m_aaiMaxSeriesSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+    coreProtect<coreUint32> m_aaiMaxSeriesSegment[TABLE_MISSIONS][TABLE_SEGMENTS];            // 
 
-    cPlayer* m_pOwner;                                                               // 
+    coreProtect<coreUint32> m_aiRunTotal       [TABLE_RUNS];                                   // 
+    coreProtect<coreUint32> m_aaiRunMission    [TABLE_RUNS][TABLE_MISSIONS];                   // 
+    coreProtect<coreUint32> m_aaaiRunSegment   [TABLE_RUNS][TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+    coreProtect<coreUint8>  m_aiRunMissionIndex[TABLE_RUNS];                                   // 
+    coreProtect<coreUint8>  m_aiRunSegmentIndex[TABLE_RUNS];                                   // 
+
+    cPlayer* m_pOwner;                                                                         // 
 
 
 public:
@@ -152,8 +159,13 @@ public:
     void Reset();
 
     // 
-    void RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    void RevertSegment();
+    void RevertSegment   (const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void RevertSegment   ();
+    void RevertSegmentNew(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void RevertSegmentNew();
+
+    // 
+    void StoreRun(const coreUintW iRunIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 
     // control scoring stats   
     coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
@@ -178,14 +190,19 @@ public:
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
-    inline coreUint32 GetScoreTotal      ()const                                                             {return m_iScoreTotal;}
-    inline coreUint32 GetScoreMission    (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiScoreMission [iMissionIndex];}
-    inline coreUint32 GetScoreSegment    (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiScoreSegment[iMissionIndex][iSegmentIndex];}
-    inline coreUint32 GetCurCombo        ()const                                                             {return m_iCurCombo;}
-    inline coreUint32 GetCurChain        ()const                                                             {return m_iCurChain;}
-    inline coreFloat  GetCooldown        ()const                                                             {return m_fCooldown;}
-    inline coreUint32 GetModifier        ()const                                                             {return this->HasOverride() ? (m_iOverride + 0u) : (m_iCurCombo + 10u);}
-    inline coreUint32 GetMaxSeriesSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex];}
+    inline coreUint32 GetScoreTotal      ()const                                                                                        {return m_iScoreTotal;}
+    inline coreUint32 GetScoreMission    (const coreUintW iMissionIndex)const                                                           {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiScoreMission [iMissionIndex];}
+    inline coreUint32 GetScoreSegment    (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const                            {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiScoreSegment[iMissionIndex][iSegmentIndex];}
+    inline coreUint32 GetCurCombo        ()const                                                                                        {return m_iCurCombo;}
+    inline coreUint32 GetCurChain        ()const                                                                                        {return m_iCurChain;}
+    inline coreFloat  GetCooldown        ()const                                                                                        {return m_fCooldown;}
+    inline coreUint32 GetModifier        ()const                                                                                        {return this->HasOverride() ? (m_iOverride + 0u) : (m_iCurCombo + 10u);}
+    inline coreUint32 GetMaxSeriesSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const                            {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex];}
+    inline coreUint32 GetRunTotal        (const coreUintW iRunIndex)const                                                               {ASSERT(iRunIndex < TABLE_RUNS) return m_aiRunTotal[iRunIndex];}
+    inline coreUint32 GetRunMission      (const coreUintW iRunIndex, const coreUintW iMissionIndex)const                                {ASSERT(iRunIndex < TABLE_RUNS && iMissionIndex < TABLE_MISSIONS)                                   return m_aaiRunMission [iRunIndex][iMissionIndex];}
+    inline coreUint32 GetRunSegment      (const coreUintW iRunIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iRunIndex < TABLE_RUNS && iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaaiRunSegment[iRunIndex][iMissionIndex][iSegmentIndex];}
+    inline coreUint8  GetRunMissionIndex (const coreUintW iRunIndex)const                                                               {ASSERT(iRunIndex < TABLE_RUNS) return m_aiRunMissionIndex[iRunIndex];}
+    inline coreUint8  GetRunSegmentIndex (const coreUintW iRunIndex)const                                                               {ASSERT(iRunIndex < TABLE_RUNS) return m_aiRunSegmentIndex[iRunIndex];}
 
 
 private:
@@ -227,8 +244,10 @@ public:
     void Reset();
 
     // 
-    void RevertSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    void RevertSegment();
+    void RevertSegment   (const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void RevertSegment   ();
+    void RevertSegmentNew(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void RevertSegmentNew();
 
     // 
     void StartBoss(const coreUintW iMissionIndex, const coreUintW iBossIndex);

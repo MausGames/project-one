@@ -64,6 +64,7 @@
 #define CONFIG_GAME_BACK_ROTATION    "Game",     "BackRotation",                         (1)
 #define CONFIG_GAME_BACK_SPEED       "Game",     "BackSpeed",                            (100)
 #define CONFIG_GAME_UPDATE_FREQ      "Game",     "UpdateFreq",                           (0)
+#define CONFIG_GAME_PURE_MODE        "Game",     "PureMode",                             (0)
 #define CONFIG_GAME_VERSION          "Game",     "Version",                              (0)
 
 #define CONFIG_LEGACY_ROTATION_TURN  "Legacy",   "RotationTurn",                         (0)
@@ -167,6 +168,7 @@ struct sConfig final
         coreUint8  iBackRotation;    // 
         coreUint8  iBackSpeed;       // 
         coreUint16 iUpdateFreq;      //   TODO 1: cannot be handled by switchbox8 (make sure to handle cMenu::UpdateSwitchBox)
+        coreUint8  iPureMode;        // 
         coreUint16 iVersion;         //   TODO 1: cannot be handled by switchbox8
     }
     Game;
@@ -210,6 +212,14 @@ extern sMenuInput g_MenuInput;                 //
 extern void LoadConfig();
 extern void SaveConfig();
 extern void UpdateInput();
+
+
+// ****************************************************************
+// 
+inline coreUint8  GetCurGameSpeed   () {return g_CurConfig.Game.iPureMode ? SCORE_PURE_GAMESPEED    : g_CurConfig.Game.iGameSpeed;}
+inline coreUint8  GetCurBackRotation() {return g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKROTATION : g_CurConfig.Game.iBackRotation;}
+inline coreUint8  GetCurBackSpeed   () {return g_CurConfig.Game.iPureMode ? SCORE_PURE_BACKSPEED    : g_CurConfig.Game.iBackSpeed;}
+inline coreUint16 GetCurUpdateFreq  () {return g_CurConfig.Game.iPureMode ? SCORE_PURE_UPDATEFREQ   : g_CurConfig.Game.iUpdateFreq;}
 
 
 #endif // _P1_GUARD_CONFIG_H_

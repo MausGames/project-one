@@ -430,7 +430,7 @@ void cHarenaMission::PlayInsanity()
         // 
         switch(m_iInsanity)
         {
-        default: ASSERT(false)
+        default: UNREACHABLE
         case 1u: m_aInsanityStage[0](); break;   // ghost
         case 2u: m_aInsanityStage[1](); break;   // mole
         case 3u: m_aInsanityStage[2](); break;   // tower

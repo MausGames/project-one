@@ -66,7 +66,7 @@ void cHelper::Configure(const coreUint8 iElement)
     coreVector3    vEnergy;
     switch(iElement)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case ELEMENT_WHITE:   sModel = "ship_helper_01.md3"; vBase = COLOR_ENERGY_WHITE   * 0.6f; vEnergy = COLOR_ENERGY_WHITE;   break;
     case ELEMENT_YELLOW:  sModel = "ship_helper_03.md3"; vBase = COLOR_ENERGY_YELLOW  * 0.7f; vEnergy = COLOR_ENERGY_YELLOW;  break;
     case ELEMENT_ORANGE:  sModel = "ship_helper_06.md3"; vBase = COLOR_ENERGY_ORANGE  * 0.9f; vEnergy = COLOR_ENERGY_ORANGE;  break;
@@ -282,7 +282,7 @@ void cHelper::EnableShield()
     coreVector3 vColor;
     switch(m_iElement)
     {
-    default: ASSERT(false)
+    default: UNREACHABLE
     case ELEMENT_WHITE:   vColor = COLOR_ENERGY_WHITE;   break;
     case ELEMENT_YELLOW:  vColor = COLOR_ENERGY_YELLOW;  break;
     case ELEMENT_ORANGE:  vColor = COLOR_ENERGY_ORANGE;  break;

@@ -72,6 +72,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 : m_aView             {}
 , m_iNumViews         (iNumViews)
 , m_fBossSpin         (0.0f)
+, m_bSegmentSmall     (false)
 , m_fGoalBump         (0.0f)
 , m_iGoalOld          (MEDAL_NONE)
 , m_afHelperBump      {}
@@ -543,7 +544,7 @@ void cInterface::Move()
         {
             // 
             //const coreVector2 vSide = coreVector2(i ? -1.0f : 1.0f, 1.0f);
-            const coreVector2 vPos  = coreVector2(0.007f + I_TO_F(j) * 0.055f, 0.005f);
+            const coreVector2 vPos  = coreVector2((g_bSteamDeck ? 0.002f : 0.007f) + I_TO_F(j) * 0.055f, 0.005f);
             const coreVector2 vSize = coreVector2(1.0f,1.0f) * 0.058f;
 
             // 
@@ -566,21 +567,22 @@ void cInterface::Move()
         // display score
         oView.oScore.SetText(PRINT("%07u", bInGame ? pScoreTable->GetScoreTotal() : 0));
 
-        const coreUint32 iModifier  = bInGame ? pScoreTable->GetModifier() : 100u;
-        const coreUint32 iChain     = bInGame ? pScoreTable->GetCurChain() : 1000u;
-        const coreFloat  fCooldown  = bInGame ? pScoreTable->GetCooldown() : 1.0f;
+        const coreUint32 iModifier  = bInGame ? pScoreTable->GetModifier()                      : 100u;
+        const coreUint32 iChain     = bInGame ? g_pGame->RaiseValue(pScoreTable->GetCurChain()) : 1000u;
+        const coreFloat  fCooldown  = bInGame ? pScoreTable->GetCooldown()                      : 1.0f;
         const coreBool   bShowValue = !bInGame || ((iModifier > (pScoreTable->HasOverride() ? 0u : 10u)));
         const coreBool   bShowBar   = !bInGame || (bShowValue && (!pScoreTable->HasOverride() || iChain));
 
         // 
-        oView.oCooldownBar.SetSize  (coreVector2(bShowBar ? (0.15f * MIN1(fCooldown * 1.1f)) : 0.0f, 0.013f));
-        oView.oCooldownBar.SetColor3(bInGame ? ((fCooldown > 0.5f) ? pPlayer->GetMenuColor() : COLOR_MENU_RED) : COLOR_MENU_BLUE);
+        oView.oCooldownBar.SetSize   (coreVector2(bShowBar ? (0.15f * MIN1(fCooldown * 1.1f)) : 0.0f, 0.013f));
+        oView.oCooldownBar.SetColor3 (bInGame ? ((fCooldown > 0.5f) ? pPlayer->GetMenuColor() : COLOR_MENU_RED) : COLOR_MENU_BLUE);
+        oView.oCooldownBar.SetEnabled(bShowBar ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
         // 
         oView.oComboValue.SetText(bShowValue ? PRINT("x%u.%u", iModifier / 10u, iModifier % 10u) : "");
         oView.oChainValue.SetText((bShowValue && iChain) ? PRINT("+%u", iChain) : "");
 
-        oView.oComboValue.SetEnabled(oView.oComboValue.GetText()[0] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        oView.oComboValue.SetEnabled(oView.oComboValue.GetText()[0] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);   // for cover
         oView.oChainValue.SetEnabled(oView.oChainValue.GetText()[0] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
         // 
@@ -887,7 +889,7 @@ void cInterface::Move()
         coreVector3 vColor;
         switch(i)
         {
-        default: ASSERT(false)
+        default: UNREACHABLE
         case 0u: vColor = COLOR_MENU_YELLOW;  break;
         case 1u: vColor = COLOR_MENU_ORANGE;  break;
         case 2u: vColor = COLOR_MENU_RED;     break;
@@ -1424,7 +1426,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
 
     // save animation properties
     m_fBannerStart    = g_pGame->GetTimeTable()->GetTimeEvent() + 0.1f;
-    m_fBannerDuration = INTERFACE_BANNER_DURATION_SCORE;
+    m_fBannerDuration = (iMedalType == MEDAL_TYPE_BOSS) ? INTERFACE_BANNER_DURATION_SCORE_2 : INTERFACE_BANNER_DURATION_SCORE_1;
     m_fBannerSpeed    = INTERFACE_BANNER_SPEED;
     m_iBannerType     = INTERFACE_BANNER_TYPE_SCORE;
 
@@ -1676,7 +1678,7 @@ void cInterface::UpdateLayout(const coreBool bForce)
         
         const coreVector2 vSide2 = coreVector2(i ? -1.0f : 1.0f, 1.0f);
         
-        oView.aShieldBar[0].SetPosition(coreVector2(0.025f,0.06f) * vSide2);
+        oView.aShieldBar[0].SetPosition(coreVector2(g_bSteamDeck? 0.02f : 0.025f, 0.06f) * vSide2);
         oView.aShieldBar[1].SetPosition(oView.aShieldBar[0].GetPosition() + coreVector2(0.01f,0.01f) * 0.5f * vSide2);
         oView.aShieldBar[2].SetPosition(oView.aShieldBar[1].GetPosition());
         oView.oShieldValue .SetPosition(oView.aShieldBar[0].GetPosition() + coreVector2(0.035f,0.01f) * vSide2);
@@ -1789,8 +1791,8 @@ void cInterface::UpdateSpacing()
     }
 
     // 
-    nSetSpacingFunc(&m_SegmentName,  0.0f);
-    nSetSpacingFunc(&m_SegmentBest, -0.05f);
+    nSetSpacingFunc(&m_SegmentName, 0.0f);
+    nSetSpacingFunc(&m_SegmentBest, m_bSegmentSmall ? -0.037f : -0.05f);
 }
 
 
@@ -1920,6 +1922,19 @@ coreFloat cInterface::CalcGameCover(const coreObject2D* pObject, const coreVecto
 void cInterface::__Update()
 {
     //m_aBannerText[2].SetText(pcSub);
+    
+    // TODO 1: wird nicht aufgerufen wenn die resolution geändert wird
+    
+    if(g_bSteamDeck && (Core::Language->GetString("OVERFLOW_SEGMENT_NAME")[0] != '0'))
+    {
+        m_SegmentName.Construct(MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_bSegmentSmall = true;
+    }
+    else
+    {
+        m_SegmentName.Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+        m_bSegmentSmall = false;
+    }
     
     if(!m_sSegmentString.empty())
     {
