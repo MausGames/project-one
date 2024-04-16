@@ -19,11 +19,11 @@
 #define TABLE_BOSSES   (BOSSES)     // 
 #define TABLE_SEGMENTS (SEGMENTS)   // 
 
-#define TABLE_TIME_TO_UINT(x)   (F_TO_UI((x)  * 1000.0f))
-#define TABLE_TIME_TO_FLOAT(x)  (I_TO_F ((x)) / 1000.0f))
+#define TABLE_TIME_TO_UINT(x)     (F_TO_UI((x)  * 1000.0f))
+#define TABLE_TIME_TO_FLOAT(x)    (I_TO_F ((x)) / 1000.0f))
 
-#define __TABLE_SCORE_COMBO(x)  (1.0f + 0.1f * I_TO_F(x))
-#define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
+#define __TABLE_SCORE_MODIFIER(x) (1.0f + 0.1f * I_TO_F(x))
+#define __TABLE_TIME_CONVERT(x)   (I_TO_F(x) * m_fFrameTime)
 
 
 // ****************************************************************
@@ -157,7 +157,7 @@ public:
     inline coreUint32 GetCurChain    ()const                                                             {return m_aiChainValue[0];}
     inline coreUint32 GetMaxChain    ()const                                                             {return m_aiChainValue[1];}
     inline coreFloat  GetCooldown    ()const                                                             {return m_fCooldown;}
-    inline coreFloat  GetModifier    ()const                                                             {return __TABLE_SCORE_COMBO(m_aiComboValue[0]);}
+    inline coreFloat  GetModifier    ()const                                                             {return __TABLE_SCORE_MODIFIER(m_aiComboValue[0]);}
 };
 
 

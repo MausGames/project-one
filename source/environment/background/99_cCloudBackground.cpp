@@ -59,7 +59,7 @@ cCloudBackground::cCloudBackground()noexcept
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
-    m_Cover.SetColor3    (LERP(COLOR_SHIP_PURPLE, coreVector3(1.0f,1.0f,1.0f), 0.5f) * 0.5f);
+    m_Cover.SetColor3    (LERP(COLOR_MENU_PURPLE, coreVector3(1.0f,1.0f,1.0f), 0.45f) * 0.5f);
     m_Cover.SetTexSize   (coreVector2(1.0f,1.0f) * SQRT2 * 1.2f);
 
     // load wind sound-effect

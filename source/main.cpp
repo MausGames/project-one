@@ -192,6 +192,12 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
+    static coreFlow fBorder = 0.0f;
+    if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 1.0f, 1.0f);
+                           else fBorder.UpdateMax(-1.0f, 0.0f);
+    g_pPostProcessing->SetBorderAll(LERPH3(0.0f, 1.0f, fBorder));
+
+
     // reshape and resize game
     if(Core::System->GetWinSizeChanged()) ReshapeGame();
 
@@ -335,16 +341,16 @@ static void LockFramerate()
 
     // override frame time
     if(TIME) c_cast<coreFloat&>(TIME) = coreFloat(s_dLogicalTime);
-    
-    
-    coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
-    if(fFreezeTime)
-    {
-        fFreezeTime = MAX(fFreezeTime - TIME, 0.0f);
-        c_cast<coreFloat&>(TIME) *= 0.001f;
-    }
-}
 
+}
+    
+    
+    //coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
+    //if(fFreezeTime)
+    //{
+    //    fFreezeTime = MAX(fFreezeTime - TIME, 0.0f);
+    //    c_cast<coreFloat&>(TIME) *= 0.001f;
+    //}
 
 // ****************************************************************
 // reshape and resize game
@@ -595,5 +601,13 @@ static void DebugGame()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_PRESS))
     {
         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+    }
+
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))
+    {
+        if(g_pEnvironment->GetBackground()->GetID() == cDarkBackground::ID)
+        {
+            d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->Dissolve();
+        }
     }
 }

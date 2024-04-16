@@ -10,11 +10,12 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
-// TODO 3: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
-// TODO 4: manager: Find, ForEach, ForEachAll -> typed 
+// TODO 4: manager: Find, ForEach, ForEachAll -> typed
 // TODO 3: implement own enemy-types for custom-enemies which would require instancing
 // TODO 3: memory-pool for each enemy-set (if single allocations still used)
 // TODO 3: add score-value to cEnemy class, either for base, or for extra score
+// TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
+// TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
 
 
 // ****************************************************************
@@ -28,19 +29,23 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
     ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
     ENEMY_STATUS_CHILD       = 0x0004u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x0008u,   // TODO 1 
+    ENEMY_STATUS_SHIELDED    = 0x0008u,   // TODO 1: currently not used, needs to be automatic ? 
     ENEMY_STATUS_BOSS        = 0x0010u,   // 
     ENEMY_STATUS_SINGLE      = 0x0020u,   // 
     ENEMY_STATUS_ENERGY      = 0x0040u,   // 
-    ENEMY_STATUS_BOTTOM      = 0x0080u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### geschosse werden reflektiert (bubble)  
-    ENEMY_STATUS_DAMAGING    = 0x0200u,   //    ### kollision verursacht schaden (spikes)  
-    ENEMY_STATUS_IMMORTAL    = 0x0400u,   //    ### soll nicht sterben, geschosse gehen hindurch  
-    ENEMY_STATUS_GHOST       = 0x0800u,   //    ### keine kollisionen mit spieler oder geschosse mehr    
+    ENEMY_STATUS_BOTTOM      = 0x0080u,   // TODO 1: not yet used 
+    ENEMY_STATUS_INVINCIBLE  = 0x0100u,   // 
+    ENEMY_STATUS_DAMAGING    = 0x0200u,   // 
+    ENEMY_STATUS_IMMORTAL    = 0x0400u,   // 
+    ENEMY_STATUS_GHOST       = 0x0800u,   // 
     ENEMY_STATUS_HIDDEN      = 0x1000u,   // 
     ENEMY_STATUS_WORTHLESS   = 0x2000u    // 
 };
 
+    //ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### geschosse werden reflektiert (bubble)  
+    //ENEMY_STATUS_DAMAGING    = 0x0200u,   //    ### kollision verursacht schaden (spikes)  
+    //ENEMY_STATUS_IMMORTAL    = 0x0400u,   //    ### soll nicht sterben, geschosse gehen hindurch  
+    //ENEMY_STATUS_GHOST       = 0x0800u,   //    ### keine kollisionen mit spieler oder geschosse mehr    
 
 // ****************************************************************
 // enemy entity interface
@@ -212,7 +217,7 @@ public:
 
     // 
     inline cEnemy*   GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
-    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = std::find(m_apEnemy.begin(), m_apEnemy.end(), pEnemy) - m_apEnemy.begin(); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
+    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = m_apEnemy.index(std::find(m_apEnemy.begin(), m_apEnemy.end(), pEnemy)); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
 
     // 
     inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
@@ -292,6 +297,12 @@ public:
     ENABLE_COPY(cArrowEnemy)
     ASSIGN_ID(4, "Arrow")
 
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
+
 
 private:
     // execute own routines
@@ -324,6 +335,12 @@ public:
 
     ENABLE_COPY(cFreezerEnemy)
     ASSIGN_ID(6, "Freezer")
+
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
 
 
 private:

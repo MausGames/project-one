@@ -423,7 +423,7 @@ void cGame::StartIntro()
         // 
         m_aPlayer[i].Kill(false);
         m_aPlayer[i].Resurrect();
-        m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL); // handle combination with gameplay code
+        m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);   // TODO 1: handle combination with gameplay code
 
         // 
         const coreFloat fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
@@ -626,6 +626,7 @@ coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
     case BADGE_NORMAL: return 2000u;
     case BADGE_EASY:   return 1000u;
     }
+    // extra life or shield recharge
 }
 
 
@@ -883,22 +884,18 @@ void cGame::__HandleCollisions()
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        //if(pEnemy->GetLifeTime() < 1.0f) return;
-
-        // 
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
-            if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
-                        if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
-            {
-                // 
-                pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-            }
-
             if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
+                if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
+                {
+                    // 
+                    pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
+                }
+
                 // 
                 const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
                 pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
@@ -909,8 +906,6 @@ void cGame::__HandleCollisions()
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             }
         }
-        
-        if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST)) pPlayer->SetInterrupt(PLAYER_INTERRUPT);
     });
 
     // 
@@ -918,12 +913,6 @@ void cGame::__HandleCollisions()
     {
         // 
         m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);
-        
-        
-        const coreVector2 vDiff = pPlayer->GetPosition().xy() - pBullet->GetPosition().xy();
-        if(pBullet->GetSpeed() && coreVector2::Dot(vDiff, pBullet->GetFlyDir()) < 0.0f) return; // issues with moving "into" back of spearbullet (maybe also viewbullet), after evasion maneuver
-        // mine-bullets cause issues
-        
 
         if(bFirstHit)
         {
@@ -931,7 +920,8 @@ void cGame::__HandleCollisions()
             {
                 // 
                 pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-                pBullet->Deactivate(true, vIntersection.xy());
+                //pBullet->Deactivate(true, vIntersection.xy());
+                pBullet->AddStatus(BULLET_STATUS_GHOST);
             }
         }
     });
@@ -943,7 +933,7 @@ void cGame::__HandleCollisions()
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
+        if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
@@ -979,45 +969,10 @@ void cGame::__HandleCollisions()
                     if(!pEnemy->ReachedDeath())
                     {
                         // 
-                        pBullet->Reflect(pEnemy, vIntersection.xy(), -pBullet->GetFlyDir());// 20.0f);
+                        pBullet->Reflect(pEnemy, vIntersection.xy(), -pBullet->GetFlyDir());
                     }
                 }
             }
-        }
-    });
-
-    // 
-    if(m_pRepairEnemy) Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, m_pRepairEnemy, [](cBullet* OUTPUT pBullet, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
-    {
-        // 
-        if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
-
-        if(bFirstHit)
-        {
-
-                // 
-                const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
-
-                if(iTaken)
-                {
-                    if(pBullet->HasStatus(BULLET_STATUS_PENETRATE))
-                    {
-                        // 
-                        pBullet->SetDamage(pBullet->GetDamage() - iTaken);
-                        ASSERT(pBullet->GetDamage() >= 0)
-
-                        // 
-                        if(!pBullet->GetDamage()) pBullet->Deactivate(true, vIntersection.xy());
-                    }
-                    else
-                    {
-                        // 
-                        pBullet->Deactivate(true, vIntersection.xy());
-                    }
-
-                    // 
-                    g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
-                }
         }
     });
 
@@ -1042,7 +997,7 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_SHIELD, TYPE_BULLET_PLAYER, [](coreObject3D* OUTPUT pShield, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        pBullet->Reflect(pShield, vIntersection.xy(), 3.0f);
+        pBullet->Reflect(pShield, vIntersection.xy());
     });
 }
 

@@ -292,7 +292,7 @@ void cMuscusMission::__MoveOwnAfter()
         // 
         const coreFloat fOffset = I_TO_F(MUSCUS_PEARLS - i) * (1.0f/7.0f);
         const coreFloat fValue  = FRACT(7.0f * m_fAnimation + fOffset);
-        STATIC_ASSERT((MUSCUS_PEARLS % 7u) == 0u)
+        STATIC_ASSERT(MUSCUS_PEARLS % 7u == 0u)
 
         // 
         pPearl->SetSize     (coreVector3(2.0f,2.0f,2.0f) * pPearl->GetAlpha());

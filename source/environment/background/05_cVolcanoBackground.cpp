@@ -18,6 +18,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 , m_fSparkTime (Core::Rand->Float(10.0f))
 {
     coreBatchList* pList1;
+    coreBatchList* pList2;
 
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
@@ -34,9 +35,9 @@ cVolcanoBackground::cVolcanoBackground()noexcept
             const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
             // test for valid values
-            if((fHeight > -21.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            if((fHeight < -21.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(35.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D);
@@ -64,34 +65,167 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         m_apGroundObjectList.push_back(pList1);
     }
 
+    // 
+    pList1 = new coreBatchList(MOSS_GRAVE_RESERVE);
+    pList1->DefineProgram("object_ground_inst_program");
+    {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  ("environment_pyramid.md3");
+        oBase.DefineTexture(0u, "environment_pyramid2_diff.png");
+        oBase.DefineTexture(1u, "environment_pyramid2_norm.png");
+        oBase.DefineProgram("object_ground_program");
+
+        for(coreUintW i = 0u; i < MOSS_GRAVE_NUM/2; ++i)
+        {
+            const coreFloat fSize = Core::Rand->Bool() ? 5.0f : 3.0f;
+            // calculate position and height
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, MOSS_GRAVE_NUM/2);
+            const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(fSize,0.0f));
+            
+            const coreFloat   fHeight2   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(-fSize,0.0f));
+            const coreFloat   fHeight3   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(0.0f,fSize));
+            const coreFloat   fHeight4   = m_pOutdoor->RetrieveBackHeight(vPosition + coreVector2(0.0f,-fSize));
+
+            // test for valid values
+            if((fHeight > -15.0f) && (fHeight2 > -15.0f) && (fHeight3 > -15.0f) && (fHeight4 > -15.0f))// && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            {
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(22.0f)))
+                {
+                    // create object
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
+
+                    // set object properties
+                    pObject->SetPosition   (coreVector3(vPosition, 0.0f));
+                    pObject->SetSize       (coreVector3(1.0f,1.0f,1.0f) * fSize * 1.2f * 1.3f);
+                    pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
+                    pObject->SetDirection  (coreVector3(1.0f,1.0f,0.0f).Normalized());
+                    pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+                  //  pObject->SetTexSize    (coreVector2(2.0f,2.0f));
+
+                    // add object to the list
+                    pList1->BindObject(pObject);
+                }
+            }
+        }
+
+        // 
+        this->_StoreHeight(pList1, -2.0f);
+
+        // post-process list and add it to the ground
+        cBackground::_FillInfinite(pList1, MOSS_GRAVE_RESERVE);
+        m_apGroundObjectList.push_back(pList1);
+
+        // bind stone list to shadow map
+        m_pOutdoor->GetShadowMap()->BindList(pList1);
+    }
+
+    // 
+    pList1 = new coreBatchList(SNOW_REED_RESERVE);
+    pList1->DefineProgram("object_ground_inst_program");
+
+    pList2 = new coreBatchList(SNOW_REED_RESERVE);
+    pList2->DefineProgram("object_ground_inst_program");
+    {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineTexture(0u, "environment_plant.png");
+        //oBase.DefineTexture(0u, "environment_sea.png");
+        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineProgram("object_ground_program");
+
+        for(coreUintW i = 0u; i < SNOW_REED_NUM; ++i)
+        {
+            for(coreUintW j = 4u; j--; )   // tries
+            {
+                // calculate position and height
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SNOW_REED_NUM);
+                const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
+
+                // test for valid values
+                if((fHeight > -18.0f) && (fHeight < -15.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+                {
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(7.0f))  &&
+                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, POW2(7.0f))  &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(15.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(15.0f)))
+                    {
+                        // determine object type
+                        const coreBool bType = Core::Rand->Bool(0.7f);
+                        
+                        
+                    //const coreVector3 vNormal = m_pOutdoor->RetrieveBackNormal(vPosition);
+
+                        // create object
+                        coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
+                        pObject->DefineModel(bType ? "environment_plant_08.md3" : "environment_plant_09.md3");
+                        //pObject->DefineModel(bType ? "environment_sea_06.md3" : "environment_sea_07.md3");
+
+                        // set object properties
+                        pObject->SetPosition (coreVector3(vPosition, 0.0f));
+                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 1.1f * 1.1f * 1.5f);
+                        pObject->SetSize     (pObject->GetSize() * coreVector3(coreVector2(1.0f,1.0f) * (bType ? 1.0f : 1.3f), 1.0f));
+                        pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+                        //pObject->SetDirection(coreVector3::Cross(vNormal, coreVector3::Cross(vNormal, coreVector3(0.0f,0.0f,1.0f)).Normalized()));
+                        pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+                       // pObject->SetColor3   (LERP(coreVector3(54.0f/255.0f, 204.0f/255.0f, 255.0f/255.0f), coreVector3(1.0f,1.0f,1.0f), Core::Rand->Float(1.0f)));
+
+                        // add object to the list
+                        if(bType) pList1->BindObject(pObject);
+                             else pList2->BindObject(pObject);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 
+        this->_StoreHeight(pList1, -0.4f);
+        this->_StoreHeight(pList2,  0.0f);
+
+        // post-process lists and add them to the ground
+        cBackground::_FillInfinite(pList1, SNOW_REED_RESERVE);
+        m_apGroundObjectList.push_back(pList1);
+
+        cBackground::_FillInfinite(pList2, SNOW_REED_RESERVE);
+        m_apGroundObjectList.push_back(pList2);
+
+        // bind reed lists to shadow map
+        m_pOutdoor->GetShadowMap()->BindList(pList1);
+        m_pOutdoor->GetShadowMap()->BindList(pList2);
+    }
+
     // allocate spark list
     pList1 = new coreBatchList(VOLCANO_SPARK_RESERVE*2u);
-    pList1->DefineProgram("effect_decal_color_inst_program");
+    pList1->DefineProgram("effect_decal_single_inst_program");
     {
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
-        oBase.DefineTexture(0u, "effect_particle_32.png");
-        oBase.DefineProgram("effect_decal_color_program");
+        oBase.DefineTexture(0u, "environment_algae2.png");
+        oBase.DefineProgram("effect_decal_single_program");
 
-        for(coreUintW i = 0u; i < VOLCANO_SPARK_NUM*2u; ++i)
+        for(coreUintW i = 0u; i < VOLCANO_SPARK_NUM/4; ++i)
         {
-            for(coreUintW j = 10u; j--; )   // tries
+            for(coreUintW j = 20u; j--; )   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, VOLCANO_SPARK_NUM*2u);
-                const coreFloat   fHeight   = Core::Rand->Float(10.0f, 40.0f);
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, VOLCANO_SPARK_NUM/4);
+                const coreFloat   fHeight   = Core::Rand->Float(10.0f, 50.0f);
 
                 // test for valid values
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(17.3f)))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2((i % 2u) ? 2.0f : 15.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
-                    pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f) * 1.2f); 
-                    pObject->SetColor4  (coreVector4(COLOR_FIRE_ORANGE * (0.8f + 0.2f * fHeight/40.0f), 0.95f));
+                    pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f));
+                    //pObject->SetColor4  (coreVector4(COLOR_ENERGY_ORANGE * (0.8f + 0.2f * fHeight/40.0f), 0.95f));
+                    pObject->SetColor4  (coreVector4(LERP(COLOR_ENERGY_ORANGE, COLOR_ENERGY_YELLOW, 0.9f), 0.95f));
+                    pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * 0.6f);
+                    pObject->SetAlpha   (Core::Rand->Float(0.0f, 0.8f));
 
                     // add object to the list
                     pList1->BindObject(pObject);
@@ -122,7 +256,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
     
     
     
-#if 0
+#if 1
     // allocate cloud list
     pList1 = new coreBatchList(GRASS_CLOUD_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
@@ -147,6 +281,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
             pObject->SetColor4   (coreVector4(COLOR_FIRE_ORANGE * (0.8f + 0.2f * fHeight/60.0f), 0.85f));
+            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * (0.3f + 0.2f * fHeight/60.0f), 0.85f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
@@ -263,7 +398,7 @@ void cVolcanoBackground::__MoveOwn()
             pParticle->SetPositionRel(coreVector3::Rand(0.0f), coreVector3::Rand(1.0f) + coreVector3::Rand(-fScale, fScale) + coreVector3(0.0f,20.0f,10.0f) * 2.0f);
             pParticle->SetScaleAbs   (4.5f,                              11.5f * 2.0f);
             pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        PI*0.5f);
-            pParticle->SetColor4Abs  (coreVector4(COLOR_FIRE_ORANGE*0.926f, 1.0f),  coreVector4(COLOR_FIRE_ORANGE*0.926f, 0.0f));
+            pParticle->SetColor4Abs  (coreVector4(COLOR_FIRE_ORANGE*0.926f, 0.8f), coreVector4(COLOR_FIRE_ORANGE*0.926f, 0.0f));
             pParticle->SetSpeed      (0.2f * Core::Rand->Float(0.9f, 1.1f));
         });
     }
@@ -274,7 +409,7 @@ void cVolcanoBackground::__MoveOwn()
     // TODO 1: no smoke at all in area where we rewind, particles need to be shifted
 
     // 
-    m_fSparkTime.Update(1.0f);
+    m_fSparkTime.Update(0.25f * MAX(ABS(g_pEnvironment->GetSpeed()), 2.0f));
 
     // 
   //  coreBatchList* 

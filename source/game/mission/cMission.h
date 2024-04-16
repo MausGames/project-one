@@ -885,6 +885,8 @@ class cIntroMission final : public cMission
 {
 private:
     cProjectOneBoss m_ProjectOne;   // 
+    
+    cTurf m_Turf;                       
 
 
 public:
@@ -896,8 +898,9 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn     ()final;
-    void __MoveOwnBefore()final;
+    void __SetupOwn       ()final;             
+    void __RenderOwnBottom()final;             
+    void __MoveOwnAfter   ()final;             
 };
 
 

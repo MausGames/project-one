@@ -140,6 +140,7 @@ void cZerothBoss::__RenderOwnOver()
     // 
     for(coreUintW i = 0u; i < ZEROTH_ICES; ++i)
         m_aIce[i].DefineTexture(0u, m_aIce[i].HasStatus(ENEMY_STATUS_DEAD) ? NULL : g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture);   // TODO 1: (look at cMenu::__Reset) needs to be properly unset before engine reset, otherwise shadow texture breaks
+    // GetBackground()->GetResolvedTexture()
 }
 
 

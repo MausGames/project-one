@@ -262,6 +262,9 @@ void UpdateInput()
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
             }
+
+            // TODO 1: es gibt keinen cancel-button mehr
+            if(Core::Input->GetJoystickButton(iJoystickID, 1u, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
         }
 
         if(!oMap.vMove.IsNull())
@@ -300,7 +303,7 @@ void UpdateInput()
         if(i >= INPUT_SETS_KEYBOARD)
         {
             if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
-            if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
+            //if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
             if(HAS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
         }
     }

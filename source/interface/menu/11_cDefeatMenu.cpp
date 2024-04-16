@@ -20,7 +20,7 @@ cDefeatMenu::cDefeatMenu()noexcept
 , m_eState      (DEFEAT_INTRO)
 {
     // create menu objects
-    m_Background.DefineTexture(0u, "menu_detail_03.png");
+    m_Background.DefineTexture(0u, "menu_detail_04.png");
     m_Background.DefineTexture(1u, "menu_background_black.png");
     m_Background.DefineProgram("menu_animate_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));

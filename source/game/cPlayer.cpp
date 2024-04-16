@@ -17,6 +17,8 @@ cPlayer::cPlayer()noexcept
 , m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA))
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fSpeed          (1.0f)
+, m_fTilt           (0.0f)
+, m_fTiltOld        (0.0f)
 , m_fRollTime       (0.0f)
 , m_fFeelTime       (PLAYER_NO_FEEL)
 , m_fIgnoreTime     (PLAYER_NO_IGNORE)
@@ -82,11 +84,17 @@ cPlayer::cPlayer()noexcept
     m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     
     
+    //m_Wind2.DefineModel  ("object_sphere.md3");
+    //m_Wind2.DefineTexture(0u, "effect_energy.png");
+    //m_Wind2.DefineProgram("effect_energy_direct_program");
+    //m_Wind2.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 1.0f));
+    //m_Wind2.SetTexSize   (coreVector2(1.0f,5.0f));
+    
     m_Wind2.DefineModel  ("object_sphere.md3");
     m_Wind2.DefineTexture(0u, "effect_energy.png");
-    m_Wind2.DefineProgram("effect_energy_direct_program");
-    m_Wind2.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 1.0f));
-    m_Wind2.SetTexSize   (coreVector2(1.0f,5.0f));
+    m_Wind2.DefineProgram("effect_energy_flat_spheric_program");
+    m_Wind2.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.8f));
+    m_Wind2.SetTexSize   (coreVector2(5.0f,5.0f));
     
     g_pGlow->BindObject(&m_Wind2);
     //m_Wind2.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -348,8 +356,21 @@ void cPlayer::Move()
         m_fAnimation.UpdateMod(1.0f, 20.0f);
         this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
 
+        // 
+        const coreMatrix3 mTiltMat = coreMatrix4::RotationX(m_fTilt).m123();
+        const coreVector3 vOldDir  = this->GetDirection  ();
+        const coreVector3 vOldOri  = this->GetOrientation();
+
+        // 
+        this->SetDirection  (vOldDir * mTiltMat);
+        this->SetOrientation(vOldOri * mTiltMat);
+
         // move the 3d-object
         this->coreObject3D::Move();
+
+        // 
+        this->SetDirection  (vOldDir);
+        this->SetOrientation(vOldOri);
 
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
@@ -381,8 +402,10 @@ void cPlayer::Move()
         // 
         m_Wind2.SetPosition (this->GetPosition());
         m_Wind2.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * 1.0f);
-        m_Wind2.SetDirection(this->GetDirection() * -1.0f);
+        m_Wind2.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * 0.8f);
+        //m_Wind2.SetDirection(this->GetDirection() * -1.0f);
         m_Wind2.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.3f));
+        m_Wind2.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.1f));
         m_Wind2.Move();
 
         if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))

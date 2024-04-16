@@ -716,7 +716,7 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
-        pBullet->Reflect(pBall, vIntersection.xy(), 3.0f);
+        pBullet->Reflect(pBall, vIntersection.xy());
     });
 
     // 

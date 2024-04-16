@@ -211,7 +211,7 @@ void cScoreTable::Update()
     // 
     if(m_fCooldown)
     {
-        m_fCooldown.UpdateMax(-1.0f/3.0f, 0.0f);
+        m_fCooldown.UpdateMax(-1.0f/2.0f, 0.0f);
         if(!m_fCooldown) this->CancelCooldown();
     }
 }
@@ -303,7 +303,7 @@ void cScoreTable::TransferChain()
 
         // 
         ASSERT(STATIC_ISVALID(g_pGame))
-        //g_pGame->GetCombatText()->AddChain(iScore, m_pOwner->GetPosition());
+        g_pGame->GetCombatText()->DrawChain(iScore, m_pOwner->GetPosition());
     }
 }
 

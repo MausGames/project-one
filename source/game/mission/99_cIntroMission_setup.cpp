@@ -20,7 +20,10 @@ void cIntroMission::__SetupOwn()
         g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             pPlayer->ActivateNormalShading();
+            
+                 //pPlayer->SetTilt(0.5f*PI);
         });
+//m_Turf.Enable();
 
         STAGE_FINISH_NOW
     });
@@ -116,7 +119,7 @@ void cIntroMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("TEST", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################

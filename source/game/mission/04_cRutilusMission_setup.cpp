@@ -1318,6 +1318,7 @@ void cRutilusMission::__SetupOwn()
     // bounce zwischen meteoriten is total nicht nachvollziehbar, Ikaruga und RSG haben sowas nicht (nur bounce mit wand oder konsistente aufteilung)
     // meteoriten mit gegnern darin müssen etwas mehr aushalten um nicht unabsichtlich beim erzeugen schon zerstört zu werden
     // TODO 1: einige gegner ohne dass sie im meteor stecken (am anfang)
+    // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         constexpr coreUintW iNumMedium = 8u;

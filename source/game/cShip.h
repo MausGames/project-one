@@ -75,7 +75,7 @@ public:
     // 
     inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
-    inline void InvokeBlink ()                        {if(m_fBlink < 0.2f) m_fBlink = 1.2f;}
+    inline void InvokeBlink ()                        {if(m_fBlink < 0.4f) m_fBlink = 1.2f;}
 
     // 
     inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}

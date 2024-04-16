@@ -276,7 +276,7 @@ void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition)
     });
 
     // 
-    g_pGame->GetCombatText()->AddBadge(iBonus, vPosition);
+    g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
 }
 
 

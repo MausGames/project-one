@@ -13,6 +13,7 @@
 // constructor
 cOutdoor::cOutdoor()noexcept
 : m_aiHeight      {}
+, m_fMaxHeight    (0.0f)
 , m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
@@ -23,6 +24,7 @@ cOutdoor::cOutdoor()noexcept
 , m_afLerpAdd     {}
 , m_aiLerpRange   {}
 , m_afLerpData    {}
+, m_iToken        (0u)
 {
 }
 
@@ -56,6 +58,9 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 // destructor
 cOutdoor::~cOutdoor()
 {
+    // 
+    Core::Manager::Resource->DetachFunction(m_iToken);
+
     // free resources
     this->DefineTexture(2u, NULL);
     Core::Manager::Resource->Free(&m_pModel);
@@ -110,6 +115,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     // delete old data
     m_pModel->Unload();
     std::memset(m_aiHeight, 0, sizeof(m_aiHeight));
+    m_fMaxHeight = -FLT_MAX;
 
     // save properties
     m_iAlgorithm = iAlgorithm;
@@ -120,7 +126,9 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     switch(iAlgorithm)
     {
     default: ASSERT(false)
-    case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f);                                                                                              return r;}; break;
+    //case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f);                                                                                              return r;}; break;
+    case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI * (1.2f + 0.3f * SIN(y*0.075f*PI))) * 10.0f);                                                                                              return r;}; break;
+    //case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f + SIN(y*0.075f*PI) * 3.0f) + 0.0f;                                                                                              return r;}; break;
     case 2u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) + SIN(x*0.075f*PI)) * 8.0f - 6.0f);                                                                                                 return r;}; break;
     case 3u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.5f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 13.0f);                                                       return r;}; break;
     case 4u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(ABS(SIN(y*0.150f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 2.0f) * 20.0f - 10.0f) * SIN(y*0.150f *PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
@@ -143,7 +151,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         {
             // add randomness to the level and smooth out water-intersection-area
             coreFloat fSmoothLevel;
-            do {fSmoothLevel = CLAMP(fLevel, -fGrade*1.5f, fGrade*1.5f) + Core::Rand->Float(-0.5f, 0.5f)*fGrade;}
+            do {fSmoothLevel = CLAMP(fLevel, -fGrade*1.5f, fGrade*1.5f) + fGrade * Core::Rand->Float(-0.5f, 0.5f) * ((fLevel < 0.0f) ? 0.6f : 1.0f);}
             while(coreMath::IsNear(fSmoothLevel, 0.0f, fGrade*0.25f));
 
             // forward smooth level
@@ -155,6 +163,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
 
         // save height value
         m_aiHeight[i] = coreMath::Float32To16(fLevel);
+        m_fMaxHeight  = MAX(m_fMaxHeight, fLevel);
 
         // set vertex position
         s_aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, fLevel);
@@ -169,7 +178,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
             const coreUintW t = f + OUTDOOR_HEIGHT * OUTDOOR_WIDTH;
 
             s_aVertexData[t].vPosition.z = s_aVertexData[f].vPosition.z;
-            m_aiHeight [t]               = m_aiHeight   [f];
+            m_aiHeight   [t]             = m_aiHeight   [f];
         }
     }
 
@@ -213,8 +222,8 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         // calculate triangle sides
         const coreVector3 A1 = s_aVertexData[s_aiIndexData[i+1u]].vPosition - s_aVertexData[s_aiIndexData[i+0u]].vPosition;
         const coreVector3 A2 = s_aVertexData[s_aiIndexData[i+2u]].vPosition - s_aVertexData[s_aiIndexData[i+0u]].vPosition;
-        const coreVector2 B1 = coreVector2(0.25f, (i%2u) ? 0.0f : 0.25f);
-        const coreVector2 B2 = coreVector2((i%2u) ? 0.25f : 0.0f, 0.25f);
+        const coreVector2 B1 = coreVector2(0.25f, (i % 2u) ? 0.0f : 0.25f);
+        const coreVector2 B2 = coreVector2((i % 2u) ? 0.25f : 0.0f, 0.25f);
 
         // calculate local tangent vector parameters
         const coreFloat   R  = RCP(B1.x*B2.y - B2.x*B1.y);
@@ -300,7 +309,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     // delete sync object
     m_Sync.Delete();
 
-    Core::Manager::Resource->AttachFunction([=, this]()
+    // 
+    Core::Manager::Resource->DetachFunction(m_iToken);
+
+    m_iToken = Core::Manager::Resource->AttachFunction([=, this]()
     {
         // check for sync object status
         const coreStatus eCheck = m_Sync.Check(0u, CORE_SYNC_CHECK_FLUSHED);
@@ -341,8 +353,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
             const coreFloat xz2 = x2 * z2 + 127.5f;
             const coreFloat yz2 = y2 * z2 + 127.5f;
 
-            ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
-                   (xz2 <= 255.0f) && (yz2 <= 255.0f))
+            ASSERT((xz1 >= 0.0f) && (xz1 <= 255.0f) &&
+                   (yz1 >= 0.0f) && (yz1 <= 255.0f) &&
+                   (xz2 >= 0.0f) && (xz2 <= 255.0f) &&
+                   (yz2 >= 0.0f) && (yz2 <= 255.0f))
 
             const coreUint8 aiPixel[] = {coreUint8(xz1), coreUint8(yz1),
                                          coreUint8(xz2), coreUint8(yz2)};
@@ -446,7 +460,10 @@ FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2 vPosition)c
 FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection)const
 {
     ASSERT(vRayDirection.z < 0.0f)
-    coreVector3 vOutput = vRayPosition;
+
+    // 
+    const coreFloat fStart  = MAX(m_fMaxHeight * m_afLerpMul[0] + m_afLerpAdd[0], m_fMaxHeight * m_afLerpMul[1] + m_afLerpAdd[1]);
+    coreVector3     vOutput = vRayPosition + vRayDirection * (MIN(fStart - vRayPosition.z, 0.0f) * RCP(vRayDirection.z));
 
     // naive ray-tracing with fixed step-size
     for(coreUintW i = 100u; i--; )

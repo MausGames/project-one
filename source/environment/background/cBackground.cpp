@@ -26,7 +26,7 @@ template <const coreChar* pcString, coreUintW iLength, coreUintW iNum> struct sS
     extern const coreChar v ## __a[] = s; \
     static const sStringList<v ## __a, ARRAY_SIZE(v ## __a), n> v;
 
-__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
+__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(SEA_BUBBLE_NUM, DESERT_SAND_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
 
 
 // ****************************************************************
@@ -113,11 +113,16 @@ void cBackground::Render()
             // send shadow matrix to shader-programs
             cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
             cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
+            
+            const coreBool bForce = (this->GetID() == cVolcanoBackground::ID) ;//|| (this->GetID() == cSnowBackground::ID);   // TODO 1: change to virtual config
+            
+    if(bForce) glDepthRange(0.0f, 0.5f);
 
             // render all ground objects
             FOR_EACH(it, m_apGroundObjectList) (*it)->Render();
             FOR_EACH(it, m_apGroundAddList)    (*it)->Render();
 
+    if(bForce) glDepthRange(0.0f, 1.0f);
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
@@ -205,7 +210,7 @@ void cBackground::Move()
                 coreObject3D* pObject = (*et);
 
                 // determine visibility and compare with current status
-                const coreVector2 vScreenPos = (pObject->GetPosition().xy() - vCameraPos) * mRota;
+                const coreVector2 vScreenPos = ((pObject->GetPosition().xy() - vCameraPos) * coreVector2(1.0f,0.6f)) * mRota;
                 const coreBool    bIsVisible = ((ABS(vScreenPos.x) + ABS(vScreenPos.y)) < fRange);
                 if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
@@ -216,7 +221,7 @@ void cBackground::Move()
                     // recalculate properties when becoming visible
                     if(pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL))
                     {
-                        const coreUintW iIndex = et - (*it)->List()->begin();
+                        const coreUintW iIndex = (*it)->List()->index(et);
 
                         // retrieve height and add offset
                         if(paiBaseHeight)
@@ -246,7 +251,7 @@ void cBackground::Move()
     };
     const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotated45()).m12();
     nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE,         mRota);
-    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE - 9.0f,  mRota);
+    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE -  9.0f, mRota);
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
 
     // control and move all temporary objects
@@ -283,7 +288,7 @@ void cBackground::Move()
         }
     };
     nControlAddFunc(&m_apGroundAddList, BACKGROUND_OBJECT_RANGE);
-    nControlAddFunc(&m_apDecalAddList,  BACKGROUND_OBJECT_RANGE - 9.0f);
+    nControlAddFunc(&m_apDecalAddList,  BACKGROUND_OBJECT_RANGE -  9.0f);
     nControlAddFunc(&m_apAirAddList,    BACKGROUND_OBJECT_RANGE - 11.0f);
 
     // call individual move routine
@@ -387,7 +392,7 @@ void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDens
 // 
 void cBackground::_StoreHeight(const coreBatchList* pObjectList, const coreFloat fHeight)
 {
-    ASSERT(!m_aaiBaseHeight.count(pObjectList))
+    ASSERT(!m_aaiBaseHeight.count(pObjectList) && m_pOutdoor)
 
     // 
     m_aaiBaseHeight[pObjectList].push_back(coreMath::Float32To16(fHeight));
@@ -395,7 +400,7 @@ void cBackground::_StoreHeight(const coreBatchList* pObjectList, const coreFloat
 
 void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
 {
-    ASSERT(!m_aaiBaseHeight.count(pObjectList))
+    ASSERT(!m_aaiBaseHeight.count(pObjectList) && m_pOutdoor)
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 
@@ -410,7 +415,7 @@ void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
 // 
 void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
 {
-    ASSERT(!m_aaiBaseNormal.count(pObjectList))
+    ASSERT(!m_aaiBaseNormal.count(pObjectList) && m_pOutdoor)
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 

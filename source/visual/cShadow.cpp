@@ -117,6 +117,8 @@ void cShadow::GlobalInit()
     s_apHandle[SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW] = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_light_glow_program");
     s_apHandle[SHADOW_HANDLE_OBJECT]             = Core::Manager::Resource->Get<coreProgram>("object_ground_program");
     s_apHandle[SHADOW_HANDLE_OBJECT_INST]        = Core::Manager::Resource->Get<coreProgram>("object_ground_inst_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_WAVE]        = Core::Manager::Resource->Get<coreProgram>("object_wave_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_WAVE_INST]   = Core::Manager::Resource->Get<coreProgram>("object_wave_inst_program");
 
     // adjust shader-programs
     cShadow::Recompile();
@@ -141,9 +143,9 @@ void cShadow::GlobalUpdate()
     if(!g_CurConfig.Graphics.iShadow) return;
 
     // create orthographic projection
-    const coreMatrix4 mOrtho = coreMatrix4::Ortho(-SHADOW_RANGE_X,   SHADOW_RANGE_X,
-                                                  -SHADOW_RANGE_Y,   SHADOW_RANGE_Y,
-                                                   SHADOW_CLIP_NEAR, SHADOW_CLIP_FAR);
+    constexpr coreMatrix4 mOrtho = coreMatrix4::Ortho(-SHADOW_RANGE_X,   SHADOW_RANGE_X,
+                                                      -SHADOW_RANGE_Y,   SHADOW_RANGE_Y,
+                                                       SHADOW_CLIP_NEAR, SHADOW_CLIP_FAR);
 
     // create movement compensation for foreground objects
     const coreVector3 P = g_pEnvironment->GetCameraPos();
@@ -184,10 +186,11 @@ void cShadow::Recompile()
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
         coreProgramPtr& pHandle  = s_apHandle[i];
-        const coreChar* pcConfig = PRINT("%s%s%s%s", PRINT(SHADER_SHADOW(%u), g_CurConfig.Graphics.iShadow),
-                                                     (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING                           : "",
-                                                     (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW  : "",
-                                                     (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT : "");
+        const coreChar* pcConfig = PRINT("%s%s%s%s%s", PRINT(SHADER_SHADOW(%u), g_CurConfig.Graphics.iShadow),
+                                                       (i == SHADOW_HANDLE_OBJECT_INST)      ? CORE_SHADER_OPTION_INSTANCING                      : "",
+                                                       (i == SHADOW_HANDLE_OBJECT_WAVE_INST) ? CORE_SHADER_OPTION_INSTANCING SHADER_WAVE          : "",
+                                                       (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW  : "",
+                                                       (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT : "");
 
         // change configuration of related shaders
         for(coreUintW j = 0u, je = pHandle->GetNumShaders(); j < je; ++j)

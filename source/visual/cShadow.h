@@ -21,7 +21,7 @@
 // ****************************************************************
 // shadow definitions
 #define SHADOW_VIEW_DISTANCE (90.0f)    // distance from origin to light source
-#define SHADOW_CLIP_NEAR     (20.0f)    // near clipping plane
+#define SHADOW_CLIP_NEAR     (1.0f)     // near clipping plane
 #define SHADOW_CLIP_FAR      (145.0f)   // far clipping plane
 #define SHADOW_RANGE_X       (56.0f)    // view range of the shadow map (smaller = sharper, but more artifacts)
 #define SHADOW_RANGE_Y       (62.0f)    // same for Y
@@ -36,7 +36,9 @@
 #define SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW (3u)   // 
 #define SHADOW_HANDLE_OBJECT             (4u)   // single object handle
 #define SHADOW_HANDLE_OBJECT_INST        (5u)   // instanced object handle
-#define SHADOW_HANDLES                   (6u)   // number of handles for shader-programs for shadow-receiving objects
+#define SHADOW_HANDLE_OBJECT_WAVE        (6u)   // 
+#define SHADOW_HANDLE_OBJECT_WAVE_INST   (7u)   // 
+#define SHADOW_HANDLES                   (8u)   // number of handles for shader-programs for shadow-receiving objects
 
 
 // ****************************************************************

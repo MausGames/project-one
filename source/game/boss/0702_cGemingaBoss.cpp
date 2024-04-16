@@ -11,6 +11,7 @@
 // TODO 1: boss intro, ein anderer mächtiger boss entsteht (fledermaus, Dharuk, bumeränge sammeln sich und er entsteht aus einer energy-version), schreit, banner kommt, kampf geht los, und wird dann gefressen, nach biss lange in der mitte, musik ist weg, neues banner kommt
 // TODO 1: mund soll im offenen zustand leicht auf und ab flattern, wie bei Chol
 // pillen und pacman aussehen passen sehr gut zusammen
+// TODO 1: im inneren (der secret phase) kämpft man gegen den gefressenen boss
 
 
 // ****************************************************************

@@ -9,6 +9,7 @@
 #include "main.h"
 
 
+coreVector3 cMenu::m_vHighlightColor  = (COLOR_MENU_WHITE);
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
@@ -23,7 +24,7 @@ cMenu::cMenu()noexcept
 , m_TransitionTime   (coreTimer(1.3f, 0.0f, 1u))
 , m_iTransitionState (0u)
 , m_pTransitionMenu  (NULL)
-, m_vHighlightColor  (coreVector3(0.0f,0.0f,0.0f))
+//, m_vHighlightColor  (COLOR_MENU_WHITE)
 {
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
@@ -628,6 +629,12 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
 
     // 
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
+}
+
+void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused)
+{
+    // 
+    cMenu::UpdateButton(pButton, bFocused, LERP(m_vHighlightColor * 0.8f, COLOR_MENU_WHITE, 0.0f));
 }
 
 

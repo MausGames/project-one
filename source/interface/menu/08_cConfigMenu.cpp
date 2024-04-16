@@ -104,7 +104,7 @@ cConfigMenu::cConfigMenu()noexcept
 
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
-        m_aLine[i].DefineTexture(0u, "menu_detail_03.png");
+        m_aLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aLine[i].DefineProgram("menu_inner_program");
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aLabel[i].GetPosition().y));
@@ -287,8 +287,17 @@ cConfigMenu::cConfigMenu()noexcept
     m_MenuInput.BindShoulder(SURFACE_CONFIG_AUDIO, &m_AudioTab);
     m_MenuInput.BindShoulder(SURFACE_CONFIG_INPUT, &m_InputTab);
     m_MenuInput.BindShoulder(SURFACE_CONFIG_GAME,  &m_GameTab);
+    
+    
+
+    for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
+    {
+        m_aLine[i].SetFocusable(true);
+        m_MenuInput.BindObject(&m_aLine[i]);
+    }
 
     m_MenuInput.BindObject(&m_SaveButton);
+    m_MenuInput.BindObject(&m_DiscardButton);
 
     m_MenuInput.BindMenu(this);
     
@@ -382,6 +391,10 @@ void cConfigMenu::Move()
             // 
             if(m_Monitor.GetUserSwitch())
                 this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
+
+            // 
+            if(m_RenderQuality.GetUserSwitch())
+                this->__UpdateRenderQuality();
 
             // 
             if(m_ShadowQuality.GetUserSwitch())
@@ -656,6 +669,14 @@ void cConfigMenu::Move()
 
     // 
     if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    
+    
+    for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
+    {
+        m_aLine[i].Interact();
+        //m_aLine[i].SetAlpha(m_aLine[i].GetAlpha() * (m_aLine[i].IsFocused() ? 1.0f : 0.6f));
+        m_aLine[i].SetColor3(m_aLine[i].IsFocused() ? g_pMenu->GetHighlightColor() : coreVector3(1.0f,1.0f,1.0f));
+    }
 }
 
 
@@ -702,6 +723,7 @@ void cConfigMenu::CheckValues()
 // 
 void cConfigMenu::LoadValues()
 {
+    const coreUintW iRenderQualityIndex = m_RenderQuality.GetCurIndex();
     const coreUintW iShadowQualityIndex = m_ShadowQuality.GetCurIndex();
     const coreUintW iLanguageIndex      = m_Language     .GetCurIndex();
 
@@ -738,7 +760,7 @@ void cConfigMenu::LoadValues()
 
     // 
     const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
-    m_Language    .SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
+    m_Language    .SelectIndex(asLanguageList.index(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE))));
     m_TextSize    .SelectValue(g_CurConfig.Game.iTextSize);
     m_GameRotation.SelectValue(g_CurConfig.Game.iGameRotation);
     m_GameScale   .SelectValue(g_CurConfig.Game.iGameScale);
@@ -761,6 +783,7 @@ void cConfigMenu::LoadValues()
     // 
     if(m_SaveButton.GetOverride() >= 0)
     {
+        if(iRenderQualityIndex != m_RenderQuality.GetCurIndex()) this->__UpdateRenderQuality();
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
         if(iLanguageIndex      != m_Language     .GetCurIndex()) this->__UpdateLanguage();
         this->__UpdateVolume();
@@ -850,6 +873,15 @@ void cConfigMenu::SaveValues()
     // 
     InitDirection();
     InitFramerate();
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__UpdateRenderQuality()
+{
+    // 
+    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
 }
 
 

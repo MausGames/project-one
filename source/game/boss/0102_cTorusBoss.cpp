@@ -754,6 +754,8 @@ void cTorusBoss::__MoveOwn()
 
         m_fRotationBoss.UpdateMod(-3.0f - TORUS_BOSS_ROTATION, 2.0f*PI);   // -4.5f is realistic
 
+        // TODO 1: manchmal wird der vorbeiflug nicht erkannt (egal ob mit bewegung oder nicht) -> bin ein depp, derzeit ist der ganze rand die safe zone
+
         if(this->GetCurHealthPct() >= 0.9f)
         {
             g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -986,7 +988,7 @@ void cTorusBoss::__MoveOwn()
             // 
             for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
             {
-                 #if 0
+                #if 0
                 cCustomEnemy* pGunner = &m_aGunner[i];
                 if(!pGunner->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 

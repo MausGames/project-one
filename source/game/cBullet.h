@@ -17,11 +17,12 @@
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 3: shift spear-bullet collision like ray-bullet
-// TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this be even fixed ?)
+// TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this even be fixed ?)
 // TODO 3: bullets (ray) spawning directly in front of a hollow object fly inside
 // TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
+// TODO 1: player was taking damage when moving "into" transparent back of spearbullet (maybe also viewbullet, and more), after evasive maneuver, make sure to add own collision volume
 
 
 // ****************************************************************
@@ -82,8 +83,7 @@ public:
     void Deactivate(const coreBool bAnimated);
 
     // 
-    void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal);
-    void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreFloat   fSharpness);
+    void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
     inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); return this;}
@@ -147,9 +147,6 @@ private:
 
     // 
     inline void __SetColorRand(const coreVector3 vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}
-
-    // 
-    void __Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal, const coreFloat fSharpness);
 };
 
 
@@ -224,7 +221,7 @@ class cRayBullet final : public cBullet
 {
 private:
     coreFloat m_fScale;   // 
-
+    coreFloat m_fTilt;    // 
 
 public:
     cRayBullet()noexcept;
@@ -233,10 +230,11 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f; m_fTilt = 0.0f;}
 
     // 
     inline cRayBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
+    inline cRayBullet* ChangeTilt (const coreFloat fTilt)  {m_fTilt  = fTilt;  return this;}
 
     // change default color
     inline cRayBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
@@ -570,7 +568,7 @@ public:
     inline cTriangleBullet* MakeWhite  () {ASSERT(false)             return this;}
     inline cTriangleBullet* MakeYellow () {ASSERT(false)             return this;}
     inline cTriangleBullet* MakeOrange () {ASSERT(false)             return this;}
-    inline cTriangleBullet* MakeRed    () {this->_MakeRed    (0.9f); return this;}
+    inline cTriangleBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
     inline cTriangleBullet* MakeMagenta() {ASSERT(false)             return this;}
     inline cTriangleBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
     inline cTriangleBullet* MakeBlue   () {ASSERT(false)             return this;}

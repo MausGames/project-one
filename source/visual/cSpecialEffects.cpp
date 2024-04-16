@@ -228,7 +228,8 @@ void cSpecialEffects::Move()
         m_iShakeCount    = m_iShakeCount + 1u;
 
         // 
-        g_pPostProcessing->SetPosition(g_vHudDirection.InvertedX() * (m_fShakeStrength * 0.01f * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f)));
+        
+        g_pPostProcessing->SetPosition(((g_vHudDirection.InvertedX() * (m_fShakeStrength * 0.01f * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f))) * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
     }
 }
 

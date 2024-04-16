@@ -112,40 +112,7 @@ void cBullet::Deactivate(const coreBool bAnimated)
 // 
 void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal)
 {
-    if(coreVector2::Dot(m_vFlyDir, vForceNormal) >= 0.0f) return;
-    this->__Reflect(pObject, vIntersection, vForceNormal, 0.0f);
-}
-
-void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreFloat fSharpness)
-{
-    if(coreVector2::Dot(m_vFlyDir, this->GetPosition().xy() - vIntersection - m_vFlyDir * MAX(this->GetCollisionRadius(), m_fSpeed * TIME)) >= 0.0f) return;
-    this->__Reflect(pObject, vIntersection, coreVector2(0.0f,0.0f), fSharpness);
-}
-
-
-// ****************************************************************
-// 
-void cBullet::_EnableDepth(const coreProgramPtr& pProgram)const
-{
-    if(!pProgram.IsUsable()) return;
-
-    // 
-    pProgram->Enable();
-    pProgram->SendUniform("u_v1Depth", m_fDepth);
-}
-
-void cBullet::_EnableDepth()const
-{
-    // 
-    this->_EnableDepth(this->GetProgram());
-}
-
-
-// ****************************************************************
-// 
-void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal, const coreFloat fSharpness)
-{
-    ASSERT(pObject )//&& pObject->GetVolume()->GetNumClusters())
+    ASSERT(pObject && pObject->GetVolume()->GetNumClusters())
 
     // increase intersection precision
     coreVector2 vHit = vIntersection;
@@ -185,12 +152,12 @@ void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2 vIntersec
     const coreVector2 vPeak    = this->GetPosition().xy() + m_vFlyDir * fHitProj;
 
     // calculate reflection normal (approximation, sharp)
-    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vPeak - 0.0f*m_vFlyDir * fSharpness) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
+    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vPeak - m_vFlyDir * 3.0f) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
     if(coreVector2::Dot(m_vFlyDir, vNormal) >= 0.0f) return;
 
     // reflect bullet
     ASSERT(vNormal.IsNormalized())
-    m_vFlyDir = vNormal;//coreVector2::Reflect(m_vFlyDir, vNormal);
+    m_vFlyDir = coreVector2::Reflect(m_vFlyDir, vNormal);
 
     // set corrected position
     this->SetPosition(coreVector3(vPeak - m_vFlyDir * fHitProj, 0.0f));
@@ -200,6 +167,24 @@ void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2 vIntersec
 
     // move the 3d-object
     this->coreObject3D::Move();   // for direction (and other) changes
+}
+
+
+// ****************************************************************
+// 
+void cBullet::_EnableDepth(const coreProgramPtr& pProgram)const
+{
+    if(!pProgram.IsUsable()) return;
+
+    // 
+    pProgram->Enable();
+    pProgram->SendUniform("u_v1Depth", m_fDepth);
+}
+
+void cBullet::_EnableDepth()const
+{
+    // 
+    this->_EnableDepth(this->GetProgram());
 }
 
 
@@ -375,6 +360,7 @@ void cBulletManager::ResetOrder()
 // constructor
 cRayBullet::cRayBullet()noexcept
 : m_fScale (1.0f)
+, m_fTilt  (0.0f)
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
@@ -413,8 +399,19 @@ void cRayBullet::__ReflectOwn()
 void cRayBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
-    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+    //this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    //this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+    
+    const coreMatrix3 mTiltMat  = coreMatrix4::RotationX(m_fTilt).m123();
+    const coreVector3 vRealMove = coreVector3(this->GetFlyMove(), 0.0f) * mTiltMat;
+    coreVector3 vRealDir = coreVector3(m_vFlyDir, 0.0f) * mTiltMat;
+    vRealDir.z = ABS(vRealDir.z);
+    
+    this->SetPosition(this->GetPosition() + vRealMove);
+    this->SetDirection(vRealDir);
+    this->SetOrientation(coreVector3(0.0f, coreVector2::Direction(m_fTilt)));
+    
+    if(this->GetPosition().z < -500.0f) this->Deactivate(false);
 
     // update animation
     m_fAnimation.UpdateMod(0.4f, 1.0f);

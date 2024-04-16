@@ -68,10 +68,10 @@ void cEnemy::Move()
         this->coreObject3D::Move();
 
         // 
-        if(g_pForeground->IsVisibleObject(this) && !HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD) && g_pForeground->IsVisibleObject(this))
         {
             this->SetEnabled(HAS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
-            if(this->GetID() != cRepairEnemy::ID) this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
+            this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
         }
         else
         {
@@ -101,11 +101,13 @@ void cEnemy::Move()
 // reduce current health
 coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker)
 {
+    ASSERT(STATIC_ISVALID(g_pGame))
+
     // 
-    const coreBool bCoop = (pAttacker && STATIC_ISVALID(g_pGame) && g_pGame->GetCoop());
+    const coreBool bCoop = (pAttacker && g_pGame->GetCoop());
     m_iLastAttacker = bCoop ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
 
-    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))   // also allow children which do not forward to parent
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         // forward to parent
         if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
@@ -161,7 +163,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 
             if(!m_iCurHealth)
             {
-                if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
+                if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))   // TODO 1: some immortal enemies killed in scripts need to give score, move stuff into own "GiveScore" function or so
                 {
                     // 
                     this->Kill(true);
@@ -175,10 +177,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
                             pAttacker->GetScoreTable()->AddCombo(1u);
 
                             // 
-                            if(STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 0u))
-                                g_pGame->GetCombatText()->AddBadge(1000u, this->GetPosition());
-                            else
-                            g_pGame->GetCombatText()->AddScore(iScore, this->GetPosition(), STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 0u));
+                            g_pGame->GetCombatText()->DrawScore(iScore, this->GetPosition(), !g_pGame->GetEnemyManager()->GetNumEnemiesAlive());
                         }
                     }
                 }

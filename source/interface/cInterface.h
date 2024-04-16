@@ -12,6 +12,7 @@
 
 // TODO 1: re-position everything after resolution-change (also menu)
 // TODO 3: realtime language update (other locations as well ?), boss-titles and wave-names
+// TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 
 
 // ****************************************************************

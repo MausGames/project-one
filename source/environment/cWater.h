@@ -13,13 +13,11 @@
 // TODO 5: reduce reflection-framebuffer without reflection enabled
 // TODO 5: alpha mapping water (no distortion) for very bad hardware
 // TODO 3: water-surface clipping for refraction
-// TODO 3: flying should create strong/fast water ripples
+// TODO 5: flying should create strong/fast water ripples
 // TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)
-// TODO 3: rainwater-resolution: realtime in options-menu ?
 // TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
-// TODO 3: underwater may render reflection (not required), and render depth (not required)
-// TODO 3: glBindTexture has to reset internal texture-cache
-// TODO 3: rainwater has mipmapping disabled (provide at least a couple of levels)
+// TODO 3: do not load default water shader and texture if not required (maybe create water-interface, NormalWater, Clean, Fresh)
+// TODO 3: glBindTexture has to reset internal texture-cache (or implement method to change in texture)
 // TODO 3: stencil or early depth to not evaluate land areas
 
 
@@ -33,8 +31,7 @@
 #define RAIN_DROPS         (20u)      // 
 #define RAIN_DROP_SPEED    (1.15f)    // 
 #define RAIN_DROP_WIDTH    (0.2f)     // 
-#define RAIN_WAVE_RES_LOW  (256.0f)   // 
-#define RAIN_WAVE_RES_HIGH (512.0f)   // 
+#define RAIN_SCALE_FACTOR  (0.5f)     // frame buffer resolution factor
 
 
 // ****************************************************************

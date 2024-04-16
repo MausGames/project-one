@@ -184,8 +184,8 @@ public:
     void PushDepthLevel    (const coreUint8 iLevels);
     void PushDepthLevelShip();
     
-    void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
-    void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
+    inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
+    inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
     RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2 vPosition);

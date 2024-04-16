@@ -44,7 +44,7 @@ void cMenuInput::Move()
     }
 
 
-    Core::Input->ShowCursor(!s_bJoystick);
+    //Core::Input->ShowCursor(!s_bJoystick);
 
     //coreBool bReset = true;
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
@@ -71,7 +71,7 @@ void cMenuInput::Move()
             {
                 if((*it) == iCurSurface)
                 {
-                    coreObject2D* pTab = m_aiShoulder.at((it - m_aiShoulder.get_keylist().begin() + 1u) % m_aiShoulder.size());
+                    coreObject2D* pTab = m_aiShoulder.at((m_aiShoulder.get_keylist().index(it) + 1u) % m_aiShoulder.size());
                     m_pCurTab = pTab;
                     m_pCurObject = NULL;
 
@@ -110,11 +110,13 @@ void cMenuInput::Move()
                     FOR_EACH(it, m_apObject)
                     {
                         if((*it) == m_pCurObject) continue;
+                        if(!(*it)->GetAlpha()) continue;
 
                         const coreVector2 vScreenPosition1 = coreVector2((*it)       ->GetTransform()._31,  (*it)       ->GetTransform()._32);
                         const coreVector2 vScreenPosition2 = coreVector2(m_pCurObject->GetTransform()._31,  m_pCurObject->GetTransform()._32);
 
                         const coreVector2 vDiff  = vScreenPosition1 - vScreenPosition2;
+                        if(vDiff.IsNull()) continue;
                         const coreFloat   fDot   = coreVector2::Dot(vMove.Normalized(), vDiff.Normalized());
                         const coreFloat   fValue = vDiff.LengthSq();//(1.1f - POW3(fDot)) * vDiff.LengthSq();
 
@@ -137,6 +139,9 @@ void cMenuInput::Move()
         FOR_EACH(it, m_apObject)
             (*it)->SetFocused((*it) == m_pCurObject);
 
+        const coreVector2 vScreenPosition2 = coreVector2(m_pCurObject->GetTransform()._31,  m_pCurObject->GetTransform()._32);
+        
+        Core::Input->SetMousePosition(vScreenPosition2 / Core::System->GetResolution());
 
        // const coreVector2 vScreenPosition2 = coreVector2(m_pCurObject->GetTransform()._31,  m_pCurObject->GetTransform()._32);
 

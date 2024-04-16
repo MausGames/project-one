@@ -412,6 +412,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: maybe blocks trying to crush you get immediately attackable
     // TODO 1: create better fang model with low-detail version
     // TODO 1: allow attacking and destroying blocks
+    // TODO 1: smoke zwischen bewegenden steinen
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep = 0.44f;

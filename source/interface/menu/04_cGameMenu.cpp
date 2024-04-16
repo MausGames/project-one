@@ -85,7 +85,7 @@ cGameMenu::cGameMenu()noexcept
         m_aMissionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aMissionName[i].SetColor3   (COLOR_MENU_WHITE);
 
-        m_aMissionLine[i].DefineTexture(0u, "menu_detail_03.png");
+        m_aMissionLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aMissionLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aMissionLine[i].DefineProgram("menu_inner_program");
         m_aMissionLine[i].SetPosition  (coreVector2(0.0f, m_aMissionName[i].GetPosition().y));
@@ -151,7 +151,7 @@ cGameMenu::cGameMenu()noexcept
         m_aOptionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aOptionName[i].SetColor3   (COLOR_MENU_WHITE);
 
-        m_aOptionLine[i].DefineTexture(0u, "menu_detail_03.png");
+        m_aOptionLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aOptionLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aOptionLine[i].DefineProgram("menu_inner_program");
         m_aOptionLine[i].SetPosition  (coreVector2(0.0f, m_aOptionName[i].GetPosition().y));
@@ -385,24 +385,24 @@ void cGameMenu::Move()
                 cMenu::UpdateSwitchBox(&m_aSupport[i]);
 
                 // 
-                     if(m_aWeapon [i].GetCurEntry().tValue == 0u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
-                else if(m_aWeapon [i].GetCurEntry().tValue == 1u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-                else if(m_aWeapon [i].GetCurEntry().tValue == 2u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_PURPLE);
-                else if(m_aWeapon [i].GetCurEntry().tValue == 3u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_GREEN);
-                else if(m_aWeapon [i].GetCurEntry().tValue == 4u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
-                else if(m_aWeapon [i].GetCurEntry().tValue == 5u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_RED);
-                     if(m_aSupport[i].GetCurEntry().tValue == 0u) m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
-                else if(m_aSupport[i].GetCurEntry().tValue == 1u) m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
+                     if(m_aWeapon [i].GetCurEntry().tValue == cNoWeapon   ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
+                else if(m_aWeapon [i].GetCurEntry().tValue == cRayWeapon  ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+                else if(m_aWeapon [i].GetCurEntry().tValue == cPulseWeapon::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_PURPLE);
+                else if(m_aWeapon [i].GetCurEntry().tValue == cWaveWeapon ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                else if(m_aWeapon [i].GetCurEntry().tValue == cTeslaWeapon::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
+                else if(m_aWeapon [i].GetCurEntry().tValue == cAntiWeapon ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_RED);
+                     if(m_aSupport[i].GetCurEntry().tValue == 0u)               m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
+                else if(m_aSupport[i].GetCurEntry().tValue == 1u)               m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
 
                 // 
-                     if(m_aWeapon [i].GetCurEntry().tValue == 0u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.5f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == 1u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == 2u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == 3u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.5f, 0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == 4u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.75f,0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == 5u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.5f));
-                     if(m_aSupport[i].GetCurEntry().tValue == 0u) m_aSupportIcon[i].SetTexOffset(coreVector2(0.25f,0.5f));
-                else if(m_aSupport[i].GetCurEntry().tValue == 1u) m_aSupportIcon[i].SetTexOffset(coreVector2(0.5f, 0.5f));
+                     if(m_aWeapon [i].GetCurEntry().tValue == cNoWeapon   ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.5f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == cRayWeapon  ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == cPulseWeapon::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == cWaveWeapon ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.5f, 0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == cTeslaWeapon::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.75f,0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == cAntiWeapon ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.5f));
+                     if(m_aSupport[i].GetCurEntry().tValue == 0u)               m_aSupportIcon[i].SetTexOffset(coreVector2(0.25f,0.5f));
+                else if(m_aSupport[i].GetCurEntry().tValue == 1u)               m_aSupportIcon[i].SetTexOffset(coreVector2(0.5f, 0.5f));
 
                 // 
                 m_aWeaponIcon [i].SetColor3(m_aWeapon [i].GetCaption()->GetColor3());

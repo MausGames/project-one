@@ -19,14 +19,8 @@ cCombatText::cCombatText()noexcept
 , m_fBadgeTimer (0.0f)
 {
     // create label objects
-    for(coreUintW i = 0u; i < COMBAT_LABELS_SMALL; ++i)
-    {
-        m_aLabel[i].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    }
-    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS; ++i)
-    {
-        m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    }
+    for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
 
     // 
     m_BadgeIcon.DefineTexture(0u, "menu_star.png");
@@ -70,23 +64,20 @@ void cCombatText::Move()
 
         // update animation timer
         fTimer.UpdateMax(-1.0f, 0.0f);
-        if(!fTimer)
-        {
-            this->__RemoveOrder(&oLabel);
-        }
+        if(!fTimer) this->__RemoveOrder(&oLabel);
+
+        // 
+        const coreVector2 vPosition = coreVector2(oLabel.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - fTimer));
+        const coreVector2 vCenter   = cCombatText::__RestrictCenter(vPosition, oLabel.GetCenter());
+        const coreFloat   fAlpha    = LERPH3(0.0f, 1.0f, MIN((fTimer)        *  6.0f, 1.0f)) * MENU_INSIDE_ALPHA;
+        const coreFloat   fScale    = LERPB (0.5f, 1.0f, MIN((1.0f - fTimer) * 10.0f, 1.0f));
 
         // update label object
-        oLabel.SetPosition(coreVector2(0.0f, LERPB(0.0f, 0.05f, 1.0f - fTimer)));
-        oLabel.SetAlpha   (LERPH3(0.0f, 1.0f, MIN((fTimer)        *  6.0f, 1.0f)) * MENU_INSIDE_ALPHA);
-        oLabel.SetScale   (LERPB (0.5f, 1.0f, MIN((1.0f - fTimer) * 10.0f, 1.0f)));
-        
-        
-        
-        const coreVector4 vRange = coreVector4(-0.47f - m_aLabel[i].GetPosition().x, 0.47f - m_aLabel[i].GetPosition().x,
-                                               -0.47f - m_aLabel[i].GetPosition().y, 0.47f - m_aLabel[i].GetPosition().y);
-        m_aLabel[i].SetCenter(coreVector2(CLAMP(m_aLabel[i].GetCenter().x, vRange.x, vRange.y), CLAMP(m_aLabel[i].GetCenter().y, vRange.z, vRange.w)));
-        
-        m_aLabel[i].Move();
+        oLabel.SetPosition(vPosition);
+        oLabel.SetCenter  (vCenter);
+        oLabel.SetAlpha   (fAlpha);
+        oLabel.SetScale   (fScale);
+        oLabel.Move();
     }
 
     // 
@@ -96,99 +87,70 @@ void cCombatText::Move()
         m_fBadgeTimer.UpdateMax(-0.8f, 0.0f);
 
         // 
-        m_BadgeIcon.SetPosition(coreVector2(0.0f, LERPB(0.0f, 0.05f, 1.0f - m_fBadgeTimer)));
-        m_BadgeIcon.SetDirection(coreVector2::Direction(LERPB(0.5f*PI, 2.0f*PI, MIN((1.0f - m_fBadgeTimer) * 1.5f, 1.0f))));
-        m_BadgeIcon.SetAlpha   (LERPH3(0.0f, 1.0f, MIN(m_fBadgeTimer * 8.0f, 1.0f)) * MENU_INSIDE_ALPHA);
-        
-        
-        const coreVector4 vRange = coreVector4(-0.47f - m_BadgeIcon.GetPosition().x, 0.47f - m_BadgeIcon.GetPosition().x,
-                                               -0.47f - m_BadgeIcon.GetPosition().y, 0.47f - m_BadgeIcon.GetPosition().y);
-        m_BadgeIcon.SetCenter(coreVector2(CLAMP(m_BadgeIcon.GetCenter().x, vRange.x, vRange.y), CLAMP(m_BadgeIcon.GetCenter().y, vRange.z, vRange.w)));
-        
+        const coreVector2 vPosition  = coreVector2(m_BadgeIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fBadgeTimer));
+        const coreVector2 vDirection = coreVector2::Direction(LERPB(0.5f*PI, 2.0f*PI, MIN((1.0f - m_fBadgeTimer) * 1.5f, 1.0f)));
+        const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, m_BadgeIcon.GetCenter());
+        const coreFloat   fAlpha     = LERPH3(0.0f, 1.0f, MIN(m_fBadgeTimer * 8.0f, 1.0f)) * MENU_INSIDE_ALPHA;
+
+        // 
+        m_BadgeIcon.SetPosition (vPosition);
+        m_BadgeIcon.SetDirection(vDirection);
+        m_BadgeIcon.SetCenter   (vCenter);
+        m_BadgeIcon.SetAlpha    (fAlpha);
         m_BadgeIcon.Move();
 
         // 
         m_BadgeLabel.SetPosition(m_BadgeIcon.GetPosition());
-        m_BadgeLabel.SetCenter(m_BadgeIcon.GetCenter());
+        m_BadgeLabel.SetCenter  (m_BadgeIcon.GetCenter  ());
         m_BadgeLabel.SetAlpha   (m_BadgeIcon.GetAlpha   ());
         m_BadgeLabel.Move();
     }
-
-#if 0
-    // move overlaying label objects away from each other
-    for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
-    {
-        if(!m_afTimer[i]) continue;
-
-        for(coreUintW j = i+1u; j < COMBAT_LABELS; ++j)
-        {
-            if(!m_afTimer[j]) continue;
-
-            cGuiLabel& A = m_aLabel[i];
-            cGuiLabel& B = m_aLabel[j];
-
-            // 
-            const coreVector2 vRange = (A.GetSize()     + B.GetSize()) * 0.5f;
-            const coreVector2 vDiff  = (A.GetCenter()   - B.GetCenter()) +
-                                       (A.GetPosition() - B.GetPosition());
-
-            // 
-            if((vRange.x > ABS(vDiff.x)) &&
-               (vRange.y > ABS(vDiff.y)))
-            {
-                // 
-                const coreFloat fOffset = (vRange.y - ABS(vDiff.y)) * SIGN(vDiff.y) * 0.5f * (TIME * 15.0f);
-
-                //     if(m_iCurLabel == i) B.SetCenter(B.GetCenter() - coreVector2(0.0f, fOffset));
-                //else if(m_iCurLabel == j) A.SetCenter(A.GetCenter() + coreVector2(0.0f, fOffset));
-                //else
-                {
-                    // 
-                    A.SetCenter(A.GetCenter() + coreVector2(0.0f, fOffset));
-                    B.SetCenter(B.GetCenter() - coreVector2(0.0f, fOffset));
-                }
-            }
-        }
-    }
-#endif
 }
 
 
 // ****************************************************************
 // 
-void cCombatText::AddScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
+void cCombatText::DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
     // 
-    this->__AddLabel(PRINT("+%d", iValue), vPosition, coreVector3(1.0f,1.0f,1.0f), bBig ? 1u : 0u);
+    this->__DrawLabel(PRINT("+%d", iValue), vPosition, bBig, coreVector3(1.0f,1.0f,1.0f), 0u);
 }
 
-void cCombatText::AddExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
+void cCombatText::DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
     // 
-    this->__AddLabel(PRINT("+%d", iValue), vPosition, COLOR_MENU_YELLOW, 1u);
+    this->__DrawLabel(PRINT("+%d", iValue), vPosition, bBig, COLOR_MENU_YELLOW, 1u);
 }
 
-void cCombatText::AddChain(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
+void cCombatText::DrawChain(const coreUint32 iValue, const coreVector3 vPosition)
 {
     // 
-    this->__AddLabel(PRINT("+%d", iValue), vPosition, COLOR_MENU_BLUE, 2u);
+    this->__DrawLabel(PRINT("+%d", iValue), vPosition, true, COLOR_MENU_BLUE, 2u);
 }
 
 
 // ****************************************************************
 // 
-void cCombatText::AddBadge(const coreUint32 iValue, const coreVector3 vPosition)
+void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition)
 {
-    // TODO 1: combat text outside needs to be handled (maybe in move)
-    
+    // 
     const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection);
 
     // 
     m_BadgeIcon.SetCenter(vOnScreen);
+    m_BadgeIcon.SetAlpha (0.0f);
 
     // 
     m_BadgeLabel.SetText  (coreData::ToChars(iValue));
     m_BadgeLabel.SetCenter(vOnScreen);
+    m_BadgeLabel.SetAlpha (0.0f);
+
+    // 
+    m_BadgeLabel.RetrieveDesiredSize([this](const coreVector2 vSize)
+    {
+        const coreFloat fOffset = (vSize.x - m_BadgeIcon.GetSize().x) * -0.5f;
+        m_BadgeIcon.SetPosition(coreVector2(fOffset, 0.0f));
+    });
 
     // 
     ASSERT(!m_fBadgeTimer)
@@ -219,43 +181,39 @@ void cCombatText::Reset()
 
 // ****************************************************************
 // 
-void cCombatText::__AddLabel(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreUint8 iType)
+void cCombatText::__DrawLabel(const coreChar* pcText, const coreVector3 vPosition, const coreBool bBig, const coreVector3 vColor, const coreUint8 iType)
 {
     ASSERT(pcText)
-    
-    // TODO 1: combat text outside needs to be handled (maybe in move -> because of "away from each other")
-    
-    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection);//.Processed(CLAMP, -0.45f, 0.45f);
-    
-    const coreUintW iFrom = iType ? COMBAT_LABELS_SMALL : 0u;
-    const coreUintW iTo   = iType ? COMBAT_LABELS : COMBAT_LABELS_SMALL;
-    
-    
-    for(coreUintW i = iFrom; i < iTo; ++i)
-    {
-        cGuiLabel& oLabel = m_aLabel [i];
-        coreFlow&  fTimer = m_afTimer[i];
-        if(fTimer) continue;
-
-        // init label object
-        oLabel.SetText  (pcText);
-        oLabel.SetCenter(vOnScreen);
-        oLabel.SetColor4(coreVector4(vColor, 0.0f));
-
-        // start animation timer
-        ASSERT(!fTimer)
-        fTimer = 1.0f;
-        
-        this->__AddOrder(&oLabel);
-
-        break;
-    }
-    
 
     // 
-    //if(++m_iCurLabel >= COMBAT_LABELS) m_iCurLabel = 0u;
-    //cGuiLabel& oLabel = m_aLabel [m_iCurLabel];
-    //coreFlow&  fTimer = m_afTimer[m_iCurLabel];
+    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection);
+
+    // 
+    const coreUintW iFrom = bBig ? COMBAT_LABELS_SMALL : 0u;
+    const coreUintW iTo   = bBig ? COMBAT_LABELS       : COMBAT_LABELS_SMALL;
+
+    // 
+    for(coreUintW i = iFrom; i < iTo; ++i)
+    {
+        if(m_afTimer[i]) continue;
+
+        // init label object
+        m_aLabel[i].SetText  (pcText);
+        m_aLabel[i].SetCenter(vOnScreen);
+        m_aLabel[i].SetColor4(coreVector4(vColor, 0.0f));
+
+        // 
+        m_afTimer[i] = 1.0f;
+        m_aiType [i] = iType;
+
+        // 
+        this->__AddOrder(&m_aLabel[i]);
+
+        return;
+    }
+
+    // 
+    WARN_IF(true) {}
 }
 
 
@@ -263,9 +221,11 @@ void cCombatText::__AddLabel(const coreChar* pcText, const coreVector3 vPosition
 // 
 void cCombatText::__AddOrder(cGuiLabel* pLabel)
 {
-    ASSERT(pLabel)
+    ASSERT(pLabel && (m_iOrderNum < COMBAT_LABELS))
 
-    m_apOrder[m_iOrderNum++] = pLabel;
+    // 
+    m_apOrder[m_iOrderNum] = pLabel;
+    m_iOrderNum += 1u;
 }
 
 
@@ -273,18 +233,30 @@ void cCombatText::__AddOrder(cGuiLabel* pLabel)
 // 
 void cCombatText::__RemoveOrder(cGuiLabel* pLabel)
 {
-    ASSERT(pLabel)
+    ASSERT(pLabel && (m_iOrderNum > 0u))
 
+    // 
     for(coreUintW i = 0u, ie = m_iOrderNum; i < ie; ++i)
     {
         if(m_apOrder[i] == pLabel)
         {
-            std::memmove(m_apOrder + i, m_apOrder + i + 1u, sizeof(cGuiLabel*) * (m_iOrderNum - i - 1u));
+            // 
+            std::memmove(m_apOrder + i, m_apOrder + i + 1u, (m_iOrderNum - i - 1u) * sizeof(cGuiLabel*));
             m_iOrderNum -= 1u;
 
             return;
         }
     }
 
+    // 
     WARN_IF(true) {}
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cCombatText::__RestrictCenter(const coreVector2 vPosition, const coreVector2 vCenter)
+{
+    return coreVector2(CLAMP(vCenter.x, -COMBAT_BORDER - vPosition.x, COMBAT_BORDER - vPosition.x),
+                       CLAMP(vCenter.y, -COMBAT_BORDER - vPosition.y, COMBAT_BORDER - vPosition.y));
 }

@@ -12,9 +12,10 @@
 // ****************************************************************
 // constructor
 cCrashManager::cCrashManager()noexcept
-: m_aStatus     {}
-, m_fSmokeTimer (0.0f)
-, m_nCallback   (NULL)
+: m_aStatus        {}
+, m_fSmokeTimer    (0.0f)
+, m_iActiveObjects (0u)
+, m_nCallback      (NULL)
 {
     // 
     for(coreUintW i = 0u; i < CRASH_OBJECTS; ++i)
@@ -38,6 +39,8 @@ cCrashManager::~cCrashManager()
 // render the crash manager
 void cCrashManager::Render()
 {
+    if(!m_iActiveObjects) return;
+
     // 
     for(coreUintW i = 0u; i < CRASH_OBJECTS; ++i) m_aObject[i].Render();
     for(coreUintW i = 0u; i < CRASH_OBJECTS; ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_aObject[i]);
@@ -48,13 +51,11 @@ void cCrashManager::Render()
 // move the crash manager
 void cCrashManager::Move()
 {
+    if(!m_iActiveObjects) return;
+
     // 
     const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
-    if(!pOutdoor)
-    {
-        this->ClearCrashes(true);
-        return;
-    }
+    if(!pOutdoor || !pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->ClearCrashes(true);
 
     // 
     m_fSmokeTimer.Update(30.0f);
@@ -91,6 +92,11 @@ void cCrashManager::Move()
                 // 
                 if(m_nCallback) m_nCallback(oStatus.pData);
 
+                // 
+                const coreVector3 vDecalPos  = coreVector3(MapToAxisInv(vPos.xy(), g_pEnvironment->GetDirection()), vPos.z);
+                const coreVector2 vDecalSize = coreVector2(1.0f,1.0f) * 12.0f;
+                const coreVector2 vDecalDir  = coreVector2::Rand();
+
                 // load object resources
                 coreObject3D* pDecal = MANAGED_NEW(coreObject3D);
                 pDecal->DefineModel  (Core::Manager::Object->GetLowQuad());
@@ -98,16 +104,16 @@ void cCrashManager::Move()
                 pDecal->DefineProgram("effect_decal_single_program");
 
                 // set object properties
-                pDecal->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 12.0f);
-                pDecal->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+                pDecal->SetSize     (coreVector3(vDecalSize, 1.0f));
+                pDecal->SetDirection(coreVector3(vDecalDir,  0.0f));
                 pDecal->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
 
                 // add object to background
-                const coreVector3 vDecalPos = coreVector3(MapToAxisInv(vPos.xy(), g_pEnvironment->GetDirection()), vPos.z);
                 g_pEnvironment->GetBackground()->AddDecal(pDecal, vDecalPos, CRASH_OBJECTS, "effect_decal_single_inst_program", LIST_KEY);
 
                 // 
                 cCrashManager::__DisableObject(&oObject, true);
+                m_iActiveObjects -= 1u;
             }
         }
     }
@@ -120,7 +126,7 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
 {
     // 
     const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
-    if(!pOutdoor) return;
+    if(!pOutdoor || !pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     for(coreUintW i = 0u; i < CRASH_OBJECTS; ++i)
     {
@@ -148,6 +154,7 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
 
             // 
             cCrashManager::__EnableObject(&oObject);
+            m_iActiveObjects += 1u;
 
             return;
         }
@@ -170,6 +177,7 @@ void cCrashManager::ClearCrashes(const coreBool bAnimated)
         {
             // 
             cCrashManager::__DisableObject(&oObject, bAnimated);
+            m_iActiveObjects -= 1u;
         }
     }
 

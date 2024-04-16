@@ -16,6 +16,7 @@
 // TODO 2: transition is reset when resizing window
 // TODO 3: different background than cNoBackground on invalid ID (error background ?)
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
+// TODO 1: all background parameters (sand wind, dark dissolve, etc.) are removed on __Reset
 
 
 // ****************************************************************

@@ -18,6 +18,7 @@
 // TODO 5: boss0102, add slight explosion where rays hit the screen
 // TODO 5: boss0102, separate emitters to three objects, to make them blue
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
+// TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
 
 
 // ****************************************************************
@@ -882,6 +883,8 @@ private:
 // Eigengrau boss class
 class cEigengrauBoss final : public cBoss
 {
+private:
+    
 public:
     cEigengrauBoss()noexcept;
 
@@ -891,7 +894,9 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
 };
 
 

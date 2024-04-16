@@ -60,6 +60,7 @@ cOutline::cOutline()noexcept
     m_aOutlineStyle[OUTLINE_STYLE_FLAT_DIRECT]  .Construct("effect_outline_flat_direct_program",   "effect_outline_flat_direct_inst_program");
     m_aOutlineStyle[OUTLINE_STYLE_BULLET_FULL]  .Construct("effect_outline_bullet_program",        "effect_outline_bullet_inst_program");
     m_aOutlineStyle[OUTLINE_STYLE_BULLET_DIRECT].Construct("effect_outline_bullet_direct_program", "effect_outline_bullet_direct_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_LIGHT]        .Construct("effect_outline_light_program",         "effect_outline_light_inst_program");
 }
 
 

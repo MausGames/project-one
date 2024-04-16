@@ -153,8 +153,15 @@ void cEnvironment::Move()
     }
 
     // 
-    const coreVector3 vColor = m_pBackground->GetColor();
-    if(!vColor.IsNull()) g_pMenu->SetHighlightColor(vColor);
+    coreVector3 vColor = m_pBackground->GetColor();
+    
+    if(m_TransitionTime.GetStatus() && !m_pOldBackground->GetColor().IsNull())
+    {
+        
+        vColor = LERPH3(m_pOldBackground->GetColor(), vColor, m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_TransitionTime.GetEnd()));
+    }
+    
+    if(!vColor.IsNull()) g_pMenu->SetHighlightColor(vColor);   // TODO 1: implement transition
 }
 
 

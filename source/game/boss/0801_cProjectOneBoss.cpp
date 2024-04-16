@@ -9,6 +9,24 @@
 #include "main.h"
 
 // TODO 1: white flash on impact of white helper
+// different phases should map to the general feeling and behavior of the same-colored bosses
+// background sind weiß-schwarz-graue blöcke, und farbe ändert sich je nach phase (breitet sich wie ne welle aus)
+// TODO 1: final endboss, ship jumps into z dimension, while side blocks move away, star fox (either looping or dive animation), rotation around z
+
+// cDarkBackground:
+// - jede boss phase hat eine andere animation
+// - welle von links nach rechts
+// - welle aus mitte
+// - schachmuster (auf und ab animation)
+// - auf und ab linien, größere blöcke, diagonale
+// - boss macht bomben-angriffe die eine lokale welle erzeugen
+// - hügel bewegt sich mit etwas vom boss/spieler mit
+// - blöcke reist es weg von mitte(?) beginnend nach außen bei transition zu eigengrau
+// - TODO 1: color vignetting (per block, or in shader), maybe for all environments -> TO algorithm
+// - const coreFloat Z = (((X + (Y + iOffset)) % 2u) ? -5.0f : 5.0f) * SIN(Core::System->GetTotalTime());
+// - m_aBlockRaw[i].SetColor3(coreVector3(1.0f,1.0f,1.0f) * (0.5f + 0.5f * ABS(vPosition.Normalized().z)));
+// - colors on blocks may need *1.5 like on ship-shader
+// - return (iIndex + F_TO_UI(m_fFlyOffset / DARK_DETAIL)) % DARK_BLOCKS_Y; GetBlockShift
 
 
 // ****************************************************************

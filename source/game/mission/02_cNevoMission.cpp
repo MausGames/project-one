@@ -752,7 +752,7 @@ void cNevoMission::__MoveOwnAfter()
             if(!bFirstHit) return;
 
             // 
-            pBullet->Reflect(pContainer, vIntersection.xy(), 3.0f);
+            pBullet->Reflect(pContainer, vIntersection.xy());
         });
     }
 }

@@ -82,6 +82,8 @@ private:
 
     coreVector2 m_vForce;                                    // 
     coreFloat   m_fSpeed;                                    // 
+    coreFloat   m_fTilt;                                     // 
+    coreFloat   m_fTiltOld;                                  // 
 
     coreFlow  m_fRollTime;                                   // 
     coreFlow  m_fFeelTime;                                   // 
@@ -193,6 +195,7 @@ public:
     inline void SetArea      (const coreVector4 vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
     inline void SetForce     (const coreVector2 vForce)      {m_vForce      = vForce;}
     inline void SetSpeed     (const coreFloat   fSpeed)      {m_fSpeed      = fSpeed;}
+    inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
     inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
 
@@ -201,6 +204,7 @@ public:
     inline const coreVector4& GetArea      ()const {return m_vArea;}
     inline const coreVector2& GetForce     ()const {return m_vForce;}
     inline const coreFloat&   GetSpeed     ()const {return m_fSpeed;}
+    inline const coreFloat&   GetTilt      ()const {return m_fTilt;}
     inline const coreFloat&   GetInterrupt ()const {return m_fInterrupt;}
     inline const coreFloat&   GetDesaturate()const {return m_fDesaturate;}
 

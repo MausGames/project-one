@@ -21,7 +21,7 @@
 // TODO 3: positions in separate list (when iterating through lambda)
 // TODO 3: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
 // TODO 3: expose pool-allocator for additional objects (AddList), also WindScreen
-// TODO 3: all environment sound effects should fade in transition
+// TODO 3: all environment sound effects should fade in transition (check at end)
 // TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO 3: calls to pList->MoveNormal(); may be redundant
 // TODO 3: remove texture-sampling from lightning effect in moss
@@ -64,11 +64,16 @@
 #define SEA_ANIMAL_NUM        (1536u)
 #define SEA_ANIMAL_1_RESERVE  (192u)
 #define SEA_ANIMAL_2_RESERVE  (36u)
+#define SEA_BUBBLE_NUM        (5u)
 #define SEA_ALGAE_NUM         (2048u)
 #define SEA_ALGAE_RESERVE     (512u)
 
+#define DESERT_PILLAR_NUM     (1536u)
+#define DESERT_PILLAR_RESERVE (192u)
 #define DESERT_STONE_NUM      (1536u)
 #define DESERT_STONE_RESERVE  (192u)
+#define GRASS_SHIP_NUM        (1024u)
+#define GRASS_SHIP_RESERVE    (256u)
 #define DESERT_SAND_NUM       (7u)
 
 #define SPACE_METEOR_NUM      (1536u)
@@ -87,11 +92,20 @@
 #define SNOW_CLOUD_NUM        (128u)
 #define SNOW_CLOUD_RESERVE    (152u)   // # exact
 
+#define MOSS_TREE_NUM         (1536u)
+#define MOSS_TREE_RESERVE     (192u)
+#define MOSS_GRAVE_NUM        (1536u)
+#define MOSS_GRAVE_RESERVE    (256u)
 #define MOSS_RAIN_NUM         (6u)
 #define MOSS_CLOUD_NUM        (64u)
 #define MOSS_CLOUD_RESERVE    (76u)   // # exact
 
-#define DARK_
+#define DARK_DETAIL           (10.0f)
+#define DARK_BLOCKS_X         (12u)
+#define DARK_BLOCKS_Y         (13u)
+#define DARK_BLOCKS           (DARK_BLOCKS_X * DARK_BLOCKS_Y)
+#define DARK_HEIGHT           (WATER_HEIGHT)
+#define DARK_SPEED            (OUTDOOR_DETAIL)
 
 #define STOMACH_CLOUD_NUM     (256u)
 #define STOMACH_CLOUD_RESERVE (304u)   // # exact
@@ -105,6 +119,7 @@
 class INTERFACE cBackground
 {
 protected:
+    // background nicht neu erzeugen, sondern refresh function aufrufen hier
     coreFrameBuffer m_FrameBuffer;                   // background frame buffer (multisampled)
     coreFrameBuffer m_ResolvedTexture;               // resolved texture
 
@@ -229,6 +244,10 @@ protected:
 class cSeaBackground final : public cBackground
 {
 private:
+    coreFullscreen m_Snow;        // 
+    coreVector2    m_vSnowMove;   // 
+    coreFlow       m_fSnowWave;   // 
+
     coreFlow m_fWaveTime;         // 
 
     coreSoundPtr m_pUnderSound;   // 
@@ -244,8 +263,9 @@ public:
 
 protected:
     // execute own routines
-    void __MoveOwn  ()final;
-    void __UpdateOwn()final;
+    void __RenderOwnAfter()final;
+    void __MoveOwn       ()final;
+    void __UpdateOwn     ()final;
 };
 
 
@@ -302,7 +322,7 @@ public:
     ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
 
     // 
-    inline void SetCoverColor (const coreVector3 vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.5f));}
+    inline void SetCoverColor (const coreVector3 vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);}
     inline void SetCoverDir   (const coreVector2 vDir)   {m_vCoverDir    = vDir; ASSERT(vDir.IsNormalized())}
     inline void SetMeteorSpeed(const coreFloat   fSpeed) {m_fMeteorSpeed = fSpeed;}
 
@@ -430,11 +450,43 @@ private:
 // dark background class
 class cDarkBackground final : public cBackground
 {
+private:
+    coreBatchList m_Block;                    // 
+    coreObject3D  m_aBlockRaw[DARK_BLOCKS];   // 
+
+    coreFlow m_fFlyOffset;                    // 
+
+    coreFlow m_fDissolve;                     // 
+    coreFlow m_afFade[DARK_BLOCKS];           // 
+
+
 public:
     cDarkBackground()noexcept;
+    ~cDarkBackground()final;
 
     DISABLE_COPY(cDarkBackground)
     ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f))
+
+    // 
+    void Dissolve();
+    inline coreBool IsDissolved()const {return (m_fDissolve >= 10.0f);}
+
+    // 
+    inline void SetBlockHeight(const coreUintW iIndex, const coreFloat   fHeight) {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetPosition(coreVector3(m_aBlockRaw[iIndex].GetPosition().xy(), fHeight));}
+    inline void SetBlockColor (const coreUintW iIndex, const coreVector3 vColor)  {ASSERT(iIndex < DARK_BLOCKS) m_aBlockRaw[iIndex].SetColor3  (vColor * m_aBlockRaw[iIndex].GetAlpha());}
+
+    // 
+    inline coreVector2      GetBlockPosition(const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().xy() - cDarkBackground::__GetCameraPos();}
+    inline const coreFloat& GetBlockHeight  (const coreUintW iIndex)const {ASSERT(iIndex < DARK_BLOCKS) return m_aBlockRaw[iIndex].GetPosition().z;}
+
+
+private:
+    // execute own routines
+    void __RenderOwnBefore()final;
+    void __MoveOwn        ()final;
+
+    // 
+    static coreVector2 __GetCameraPos();
 };
 
 

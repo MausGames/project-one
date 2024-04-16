@@ -34,10 +34,10 @@ cGrassBackground::cGrassBackground()noexcept
         oBase.DefineTexture(1u, "environment_stone_norm.png");
         oBase.DefineProgram("object_ground_program");
 
-        for(coreUintW i = 0u; i < GRASS_STONE_NUM; ++i)
+        for(coreUintW i = 0u; i < GRASS_STONE_NUM*2; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_STONE_NUM);
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_STONE_NUM*2);
             const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
             // test for valid values
@@ -50,7 +50,7 @@ cGrassBackground::cGrassBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
-                    pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f));
+                    pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f) * 1.3f);
                     pObject->SetDirection  (coreVector3::Rand());
                     pObject->SetOrientation(coreVector3::Rand());
                     pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
@@ -81,8 +81,8 @@ cGrassBackground::cGrassBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineTexture(0u, "environment_reed.png");
-        oBase.DefineTexture(1u, "environment_grass_norm.png");
+        oBase.DefineTexture(0u, "environment_plant.png");
+        oBase.DefineTexture(1u, "default_normal.png");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < GRASS_REED_NUM; ++i)
@@ -101,17 +101,17 @@ cGrassBackground::cGrassBackground()noexcept
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(5.0f)))
                     {
                         // determine object type
-                        const coreBool bType = (Core::Rand->Bool(0.75f) || (fHeight >= -20.0f)) ? true : false;
+                        const coreBool bType = (Core::Rand->Bool(0.4f) || (fHeight < -21.0f));
 
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
-                        pObject->DefineModel(bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
+                        pObject->DefineModel(bType ? "environment_plant_05.md3" : "environment_plant_01.md3");
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
-                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.1f);
+                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * (bType ? 1.1f : 1.1f) * 1.1f);
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-                        pObject->SetColor3   (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.57f, 0.63f), 0.5f));
+                        pObject->SetColor3   (coreVector3(1.0f, 1.1f * Core::Rand->Float(0.57f, 0.63f), 0.5f));
 
                         // add object to the list
                         if(bType) pList1->BindObject(pObject);
@@ -123,8 +123,8 @@ cGrassBackground::cGrassBackground()noexcept
         }
 
         // 
-        this->_StoreHeight(pList1, -0.8f);
-        this->_StoreHeight(pList2, -0.8f);
+        this->_StoreHeight(pList1, 0.0f);
+        this->_StoreHeight(pList2, 0.0f);
 
         // post-process lists and add them to the ground
         cBackground::_FillInfinite(pList1, GRASS_REED_1_RESERVE);
@@ -166,7 +166,7 @@ cGrassBackground::cGrassBackground()noexcept
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
-                        pObject->SetSize     (coreVector3(coreVector2(1.0f,1.0f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
+                        pObject->SetSize     (coreVector3(coreVector2(1.0f,1.0f) * Core::Rand->Float(9.0f, 10.0f), 1.0f) * 1.3f);
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
                         pObject->SetAlpha    (0.98f);
                         pObject->SetTexSize  (coreVector2(0.5f,0.5f));
@@ -207,14 +207,14 @@ cGrassBackground::cGrassBackground()noexcept
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 40.0f);
 
                 // test for valid values
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(26.0f)))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(25.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
-                    pObject->SetSize    (coreVector3(2.4f,0.0f,1.0f));
+                    pObject->SetSize    (coreVector3(2.4f,0.0f,1.0f) * 1.3f);
                     pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * (0.75f + 0.2f * fHeight/40.0f));
                     pObject->SetTexSize (coreVector2(0.5f,0.85f));
 
@@ -304,7 +304,7 @@ cGrassBackground::~cGrassBackground()
 void cGrassBackground::__MoveOwn()
 {
     // 
-    m_fLeafTime.Update(2.0f);
+    m_fLeafTime.Update(0.5f * MAX(ABS(g_pEnvironment->GetSpeed()), 2.0f));
 
     // 
     coreBatchList* pList = m_apAirObjectList[0];

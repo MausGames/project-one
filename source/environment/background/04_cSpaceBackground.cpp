@@ -38,9 +38,9 @@ cSpaceBackground::cSpaceBackground()noexcept
         {
             // calculate position and height
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SPACE_METEOR_NUM);
-            const coreFloat   fHeight   = Core::Rand->Float(-30.0f, -20.0f);
+            const coreFloat   fHeight   = Core::Rand->Float(-30.0f, -5.0f);   // # shadow issues below -30.0f
 
-            if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(10.0f)))
+            if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(8.0f)))
             {
                 // create object
                 coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -76,7 +76,7 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
-    m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.5f));
+    m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);
 }
 
 

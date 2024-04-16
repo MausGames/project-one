@@ -389,8 +389,7 @@ void cCalorMission::__MoveOwnMiddle()
                     // 
                     Core::Manager::Object->TestCollision(TYPE_ENEMY, pStar, [&](cEnemy* OUTPUT pEnemy, const coreObject3D* pStar, const coreVector3 vIntersection, const coreBool bFirstHit)
                     {
-                        if(m_apCatchObject[i]) return;
-                        if(pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild()) return;
+                        if(m_apCatchObject[i] || pEnemy->HasStatus(ENEMY_STATUS_BOSS) || pEnemy->IsChild()) return;
 
                         if(pEnemy == m_apCatchObject[1u - i])
                         {
@@ -425,7 +424,7 @@ void cCalorMission::__MoveOwnMiddle()
                     {
                         pBullet->Deactivate(true);
                     };
-                    //Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pCopy, nBulletCollFunc);
+                    //Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pCopy, nBulletCollFunc);   // TODO 1: still required ?
                     Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  pCopy, nBulletCollFunc);
 
                     // 

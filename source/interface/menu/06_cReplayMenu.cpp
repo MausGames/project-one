@@ -39,7 +39,7 @@ cReplayMenu::cReplayMenu()noexcept
         m_aTime[i].SetAlignment(coreVector2(-1.0f,0.0f));
         m_aTime[i].SetColor3   (COLOR_MENU_WHITE);
 
-        m_aLine[i].DefineTexture(0u, "menu_detail_03.png");
+        m_aLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aLine[i].DefineProgram("menu_inner_program");
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aName[i].GetPosition().y));

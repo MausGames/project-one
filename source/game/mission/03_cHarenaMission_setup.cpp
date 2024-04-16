@@ -26,6 +26,8 @@ void cHarenaMission::__SetupOwn()
     {
         g_pEnvironment->ChangeBackground(cDesertBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         g_pEnvironment->SetTargetSpeed(4.0f);
+        
+        g_pEnvironment->SetTargetDirection(coreVector2(1.0f,-1.0f).Normalized());   // kommt gut mit den säulen          
 
         g_pGame->StartIntro();
 
@@ -1393,6 +1395,9 @@ STAGE_START_HERE
         {
             //g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
             g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
+            g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
+            g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
+            g_pEnvironment->GetBackground()->SetGroundDensity(3u, 0.0f);
             g_pEnvironment->SetTargetSpeed(4.0f);
         }
 

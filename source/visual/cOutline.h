@@ -23,7 +23,8 @@
 #define OUTLINE_STYLE_FLAT_DIRECT   (3u)   // 
 #define OUTLINE_STYLE_BULLET_FULL   (4u)   // 
 #define OUTLINE_STYLE_BULLET_DIRECT (5u)   // 
-#define OUTLINE_STYLES              (6u)   // 
+#define OUTLINE_STYLE_LIGHT         (6u)   // 
+#define OUTLINE_STYLES              (7u)   // 
 
 #define OUTLINE_THICKNESS (0.35f)
 

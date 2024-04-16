@@ -546,6 +546,7 @@ cMenuInput m_MenuInput;
 
 private:
     // 
+    void __UpdateRenderQuality();
     void __UpdateShadowQuality();
     void __UpdateVolume();
     void __UpdateLanguage();
@@ -819,7 +820,7 @@ private:
     coreUint8 m_iTransitionState;        // 
     coreMenu* m_pTransitionMenu;         // 
 
-    coreVector3 m_vHighlightColor;       // 
+    static coreVector3 m_vHighlightColor;       // 
 
 
 public:
@@ -847,13 +848,16 @@ public:
 
     // 
     void SetHighlightColor(const coreVector3 vColor);
+    
+    inline const coreVector3& GetHighlightColor()const {return m_vHighlightColor;}
 
     // 
     static void UpdateLanguageFont();
     static const coreMap<coreString, coreString>& GetLanguageList();
 
     // menu helper routines
-    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor = COLOR_MENU_WHITE);
+    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor);
+    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused);
     static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox);
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
     static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);
