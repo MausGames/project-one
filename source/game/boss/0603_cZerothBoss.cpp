@@ -31,7 +31,6 @@
 // COOP: only one player is chained to the boss
 // TODO 1: hard mode: gleiten
 // TODO 1: in finaler phase, flip-bullets und partikel sollten unter gegner sein (auch im level), aber cone-bullets drüber, kann man das im bullet-manager aufteilen ? oder eigener bullet-manager für boss (nur für cone) [[das ganze is aber ziemlich orsch, normale gegner können (derzeit) nicht TOP gemacht werden]]
-// TODO 1: boss should bounce around in the final phase if all players are dead (instead of just standing still)
 // TODO 1: chain should break on game over instead of just disappear (also in wave) (not when zero-length)
 
 

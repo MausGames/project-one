@@ -997,6 +997,7 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
     // 
     const coreUintW iMissionIndexStart = oInfo.oHeader.iMissionIndexStart;
     const coreUintW iMissionIndexEnd   = oInfo.oHeader.iMissionIndexEnd;
+    const coreUintW iNumPlayers        = oInfo.oHeader.iNumPlayers;
     const coreUintW iNumRuns           = oInfo.oHeader.iNumRuns;
 
     // 
@@ -1104,7 +1105,7 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
         // 
         coreUint32 aiRunScore[MENU_REPLAY_DETAIL_RUNS] = {};
         coreUint8  aiRunIndex[MENU_REPLAY_DETAIL_RUNS] = {}; std::memset(aiRunIndex, 0xFFu, sizeof(aiRunIndex));
-        for(coreUintW j = 0u; j < MENU_REPLAY_PLAYERS; ++j)
+        for(coreUintW j = 0u; j < iNumPlayers; ++j)
         {
             // 
             for(coreUintW k = 0u; k < iNumRuns; ++k)

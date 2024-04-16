@@ -1478,11 +1478,22 @@ void cRepairEnemy::__MoveOwn()
     const coreVector2 vNewDir = coreVector2::Direction(m_fAnimation * (8.0f*PI));
     const coreVector4 vArea   = m_pPlayer->GetArea();
 
-    // 
-         if((vNewPos.x < vArea.x) && (m_vDirection.x < 0.0f)) m_vDirection.x =  ABS(m_vDirection.x);
-    else if((vNewPos.x > vArea.z) && (m_vDirection.x > 0.0f)) m_vDirection.x = -ABS(m_vDirection.x);
-         if((vNewPos.y < vArea.y) && (m_vDirection.y < 0.0f)) m_vDirection.y =  ABS(m_vDirection.y);
-    else if((vNewPos.y > vArea.w) && (m_vDirection.y > 0.0f)) m_vDirection.y = -ABS(m_vDirection.y);
+    if(g_pGame->IsVersion(13u))
+    {
+        // 
+             if((vNewPos.x < vArea.x) && (m_vDirection.x < 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - vArea.x); m_vDirection.x =  ABS(m_vDirection.x);}
+        else if((vNewPos.x > vArea.z) && (m_vDirection.x > 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - vArea.z); m_vDirection.x = -ABS(m_vDirection.x);}
+             if((vNewPos.y < vArea.y) && (m_vDirection.y < 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y - vArea.y); m_vDirection.y =  ABS(m_vDirection.y);}
+        else if((vNewPos.y > vArea.w) && (m_vDirection.y > 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y - vArea.w); m_vDirection.y = -ABS(m_vDirection.y);}
+    }
+    else
+    {
+        // 
+             if((vNewPos.x < vArea.x) && (m_vDirection.x < 0.0f)) m_vDirection.x =  ABS(m_vDirection.x);
+        else if((vNewPos.x > vArea.z) && (m_vDirection.x > 0.0f)) m_vDirection.x = -ABS(m_vDirection.x);
+             if((vNewPos.y < vArea.y) && (m_vDirection.y < 0.0f)) m_vDirection.y =  ABS(m_vDirection.y);
+        else if((vNewPos.y > vArea.w) && (m_vDirection.y > 0.0f)) m_vDirection.y = -ABS(m_vDirection.y);
+    }
 
     // 
     if(!m_pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE))

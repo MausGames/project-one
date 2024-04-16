@@ -41,6 +41,7 @@ cCalorMission::cCalorMission()noexcept
 , m_apCatchObject   {}
 , m_avCatchPos      {}
 , m_avCatchDir      {}
+, m_avCatchEnd      {}
 , m_fCatchTransfer  (0.0f)
 , m_fStoryRangeAnim (0.0f)
 , m_fAnimation      (0.0f)
@@ -740,6 +741,7 @@ void cCalorMission::CatchObject(const coreUintW iIndex, cShip* pObject)
     m_apCatchObject[iIndex] = pObject;
     m_avCatchPos   [iIndex] = MapToAxisInv(pObject->GetPosition ().xy() - pStar->GetPosition().xy(), vDir);
     m_avCatchDir   [iIndex] = MapToAxisInv(pObject->GetDirection().xy(),                             vDir);
+    m_avCatchEnd   [iIndex] = {};
 }
 
 void cCalorMission::UncatchObject(const coreUintW iIndex)
@@ -1030,10 +1032,9 @@ void cCalorMission::__MoveOwnMiddle()
             const coreVector2 vDir  = vDiff.IsNull() ? coreVector2(0.0f,1.0f) : vDiff.Normalized();
 
             // 
-            if((pPlayer == pOwner) && !coreMath::IsNear(vDiff.LengthSq(), 0.0f))
+            if(pPlayer == pOwner)
             {
-                //if(!pPlayer->HasStatus(PLAYER_STATUS_DEAD))
-                //if(!HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
+                if(!coreMath::IsNear(vDiff.LengthSq(), 0.0f))   // # defeated game or retracted star
                 {
                     // 
                     Core::Manager::Object->TestCollision(TYPE_ENEMY, pStar, [&](cEnemy* OUTPUT pEnemy, const coreObject3D* pStar, const coreVector3 vIntersection, const coreBool bFirstHit)
@@ -1129,6 +1130,45 @@ void cCalorMission::__MoveOwnMiddle()
                                 this->UncatchObject(i);
                             }
                         });
+                    }
+                }
+                else
+                {
+                    if(m_apCatchObject[i])
+                    {
+                        const coreVector2 vCurPos = m_apCatchObject[i]->GetPosition ().xy();
+                        const coreVector2 vCurDir = m_apCatchObject[i]->GetDirection().xy();
+
+                        // 
+                        if(m_avCatchEnd[i].IsNull())
+                        {
+                            m_avCatchEnd[i].xy(coreVector2(-SIGN(vCurPos.x), -SIGN(vCurPos.y) * 2.0f).Normalized());
+                            m_avCatchEnd[i].z = vCurDir.Angle();
+                        }
+
+                        // 
+                        coreVector2& vEndDir   = r_cast<coreVector2&>(m_avCatchEnd[i]);
+                        coreFloat&   fEndAngle = m_avCatchEnd[i].z;
+
+                        // 
+                        coreVector2       vNewPos = vCurPos + vEndDir * (30.0f * TIME);
+                        const coreVector2 vNewDir = coreVector2::Direction(fEndAngle);
+
+                        // 
+                        const coreVector2 vArea = FOREGROUND_AREA * 1.2f - m_apCatchObject[i]->GetCollisionRadius();
+
+                        // 
+                             if((vNewPos.x < -vArea.x) && (vEndDir.x < 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x + vArea.x); vEndDir.x =  ABS(vEndDir.x);}
+                        else if((vNewPos.x >  vArea.x) && (vEndDir.x > 0.0f)) {vNewPos.x -= 2.0f * (vNewPos.x - vArea.x); vEndDir.x = -ABS(vEndDir.x);}
+                             if((vNewPos.y < -vArea.y) && (vEndDir.y < 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y + vArea.y); vEndDir.y =  ABS(vEndDir.y);}
+                        else if((vNewPos.y >  vArea.y) && (vEndDir.y > 0.0f)) {vNewPos.y -= 2.0f * (vNewPos.y - vArea.y); vEndDir.y = -ABS(vEndDir.y);}
+
+                        // 
+                        m_apCatchObject[i]->SetPosition (coreVector3(vNewPos, 0.0f));
+                        m_apCatchObject[i]->SetDirection(coreVector3(vNewDir, 0.0f));
+
+                        // 
+                        fEndAngle += (1.5f*PI) * TIME;
                     }
                 }
             }

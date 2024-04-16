@@ -530,10 +530,13 @@ void cGame::Move()
 
     if(SPECIAL_FROZEN)
     {
+        // make sure player input is recognized
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             m_aPlayer[i].Move();
 
-        this->__HandleDefeat();
+        // always handle defeat (to properly fade-out music (old), but prevents LUCKY)
+        if(!this->IsVersion(13u)) this->__HandleDefeat();
+
         return;
     }
     
@@ -629,7 +632,7 @@ void cGame::MoveAlways()
         if(!m_fMusicFade) g_MusicPlayer.Stop();
     }
 
-    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * g_pMenu->GetVolume() * m_fMusicVolume * MUSIC_VOLUME);
+    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * g_pMenu->GetVolume() * m_fMusicVolume * (m_bDefeatDelay ? 0.0f : 1.0f) * MUSIC_VOLUME);
 }
 
 

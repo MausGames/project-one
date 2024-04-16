@@ -190,7 +190,7 @@
 
 #define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 5u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]) && (A[3] < A[4]))}
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if((e).HasStatus(ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
-#define STAGE_WAVE(i,n,...)                    {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(i, n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(this->_UpdateWait()) STAGE_FINISH_NOW}}
+#define STAGE_WAVE(i,n,...)                    {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(i, n);} if(STAGE_CLEARED && !HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED)) {this->DeactivateWave(); if(this->_UpdateWait()) STAGE_FINISH_NOW}}
 
 #define STAGE_CLEARED                          (std::all_of(m_aSquad.begin(), m_aSquad.end(), [](const cEnemySquad& oSquad) {return oSquad.IsFinished();}))
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, __i) {if((coreIntW(__i) >= coreIntW(f)) && (coreIntW(__i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
@@ -1345,6 +1345,7 @@ private:
     cShip*      m_apCatchObject[CALOR_STARS];         // 
     coreVector2 m_avCatchPos   [CALOR_STARS];         // 
     coreVector2 m_avCatchDir   [CALOR_STARS];         // 
+    coreVector3 m_avCatchEnd   [CALOR_STARS];         // 
     coreFlow    m_fCatchTransfer;                     // 
 
     cCustomEnemy m_Boulder;                           // 

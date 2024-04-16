@@ -395,6 +395,7 @@ void cTigerBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
             PHASE_CHANGE_TO(20u)
+            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(80u)
 
             pMission->ChangeInsanity(1u);
         });
@@ -1844,6 +1845,8 @@ void cTigerBoss::__ShootWeapon()
 // 
 void cTigerBoss::__CauseBeamDamage(cPlayer* OUTPUT pTarget)
 {
+    if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED)) return;
+
     const coreVector2 vDiff = this->GetPosition().xy() - m_vBeamPos;
     if(vDiff.LengthSq() < POW2(15.0f))
     {
