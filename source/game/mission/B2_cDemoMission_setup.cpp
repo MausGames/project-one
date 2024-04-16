@@ -1039,7 +1039,7 @@ void cDemoMission::__SetupOwn()
         {
             if(!m_aTileRaw[0].IsEnabled(CORE_OBJECT_ENABLE_ALL))
             {
-                STATIC_ASSERT(NEVO_TILES == 16u)
+                //STATIC_ASSERT(NEVO_TILES == 16u)
 
                 if(m_iStageSub == 1u)
                 {

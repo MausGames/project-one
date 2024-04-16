@@ -279,7 +279,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
 
     // create vertex buffer
     coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), s_aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 1u, GL_FLOAT,    false, 0u);
+    pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT,    1u, GL_FLOAT,    false, 0u);
     pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4u, iNormFormat, false, 1u*sizeof(coreFloat));
     pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4u, iNormFormat, false, 1u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
 
@@ -294,7 +294,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
 
         // 
         pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreVector2), s_avPosition, CORE_DATABUFFER_STORAGE_STATIC);
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION, 2u, GL_FLOAT, false, 0u);
     }
 
     Core::Log->Info("Outdoor-Geometry (%u, %.1f) loaded", iAlgorithm, fGrade);
@@ -351,12 +351,12 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         // merge XY components of both normal maps (divided by Z, partial-derivative)
         for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
         {
-            const coreFloat x1 =             (coreFloat(*(pInput1 + j))      - 127.5f);
-            const coreFloat y1 =             (coreFloat(*(pInput1 + j + 1u)) - 127.5f);
-            const coreFloat z1 = 127.5f * RCP(coreFloat(*(pInput1 + j + 2u)) - 127.5f);
-            const coreFloat x2 =             (coreFloat(*(pInput2 + j))      - 127.5f);
-            const coreFloat y2 =             (coreFloat(*(pInput2 + j + 1u)) - 127.5f);
-            const coreFloat z2 = 127.5f * RCP(coreFloat(*(pInput2 + j + 2u)) - 127.5f);
+            const coreFloat x1 =             (I_TO_F(*(pInput1 + j))      - 127.5f);
+            const coreFloat y1 =             (I_TO_F(*(pInput1 + j + 1u)) - 127.5f);
+            const coreFloat z1 = 127.5f * RCP(I_TO_F(*(pInput1 + j + 2u)) - 127.5f);
+            const coreFloat x2 =             (I_TO_F(*(pInput2 + j))      - 127.5f);
+            const coreFloat y2 =             (I_TO_F(*(pInput2 + j + 1u)) - 127.5f);
+            const coreFloat z2 = 127.5f * RCP(I_TO_F(*(pInput2 + j + 2u)) - 127.5f);
 
             const coreFloat xz1 = x1 * z1 + 127.5f;
             const coreFloat yz1 = y1 * z1 + 127.5f;

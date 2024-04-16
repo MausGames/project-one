@@ -41,7 +41,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_view.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_view_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_wave_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_crystal_01.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_crystal_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("environment_desert_01.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_desert_01.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -103,7 +104,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3"); // CORE_MODEL_LOAD_NO_CLUSTERS
+    Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
@@ -920,29 +921,29 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v1Height",   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT)
+        ->BindAttribute("a_v2Position", OUTDOOR_SHADER_ATTRIBUTE_POSITION)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_glow.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v1Height",   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT)
+        ->BindAttribute("a_v2Position", OUTDOOR_SHADER_ATTRIBUTE_POSITION)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_light.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v1Height",   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT)
+        ->BindAttribute("a_v2Position", OUTDOOR_SHADER_ATTRIBUTE_POSITION)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_light_glow.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v1Height",   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT)
+        ->BindAttribute("a_v2Position", OUTDOOR_SHADER_ATTRIBUTE_POSITION)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

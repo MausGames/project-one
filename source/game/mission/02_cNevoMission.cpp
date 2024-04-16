@@ -21,7 +21,9 @@ cNevoMission::cNevoMission()noexcept
 , m_afTileTime   {}
 , m_Arrow        (NEVO_ARROWS)
 , m_apArrowOwner {}
+, m_afArrowAlpha {}
 , m_aiArrowDir   {}
+, m_iArrowActive (0u)
 , m_Block        (NEVO_BLOCKS)
 , m_BlockWave    (NEVO_BLOCKS)
 , m_apBlockOwner {}
@@ -95,8 +97,9 @@ cNevoMission::cNevoMission()noexcept
             pTile->DefineProgram("object_tile_program");
 
             // set object properties
-            pTile->SetAlpha  (0.7f);
-            pTile->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            pTile->SetAlpha    (0.7f);
+            pTile->SetTexOffset(coreVector2(0.17f,0.31f) * I_TO_F(i));
+            pTile->SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
             m_Tile.BindObject(pTile);
@@ -110,16 +113,13 @@ cNevoMission::cNevoMission()noexcept
         {
             // load object resources
             coreObject3D* pArrow = &m_aArrowRaw[i];
-            //pArrow->DefineModel  ("bullet_cone.md3");
             pArrow->DefineModel  ("object_arrow.md3");
             pArrow->DefineTexture(0u, "effect_energy.png");
             pArrow->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
-            //pArrow->SetSize   (coreVector3(1.35f,1.55f,1.35f) * 1.3f);
-            pArrow->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 1.3f * 1.0f);
+            pArrow->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
             pArrow->SetColor3 (COLOR_ENERGY_GREEN * 0.8f);
-            //pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f);
             pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.2f);
             pArrow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -305,9 +305,10 @@ void cNevoMission::EnableTile(const coreUintW iIndex, const coreUintW iDimension
     const coreVector2 vPos   = (coreVector2(I_TO_F(iIndex % iDimension), I_TO_F(iIndex / iDimension)) - 0.5f * I_TO_F(iDimension - 1u)).InvertedY() * fScale;
 
     // 
-    oTile.SetPosition(coreVector3(vPos, 0.0f));
-    oTile.SetSize    (coreVector3(0.0f, 0.0f, fScale - 1.0f));
-    oTile.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+    oTile.SetPosition (coreVector3(vPos, 0.0f));
+    oTile.SetSize     (coreVector3(0.0f, 0.0f, fScale - 1.0f));
+    oTile.SetDirection(coreVector3(0.0f, 1.0f, 0.0f));
+    oTile.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
 }
 
 
@@ -342,6 +343,7 @@ void cNevoMission::EnableArrow(const coreUintW iIndex, const cShip* pOwner, cons
     // 
     ASSERT(pOwner)
     m_apArrowOwner[iIndex] = pOwner;
+    m_afArrowAlpha[iIndex] = 0.0f;
     m_aiArrowDir  [iIndex] = PackDirection(vDirection);
 
     // 
@@ -565,6 +567,9 @@ void cNevoMission::__MoveOwnAfter()
         if(fTime >= 1.0f) this->DisableBomb (i, true);
         if(fTime >= 2.0f) this->DisableBlast(i, false);
         STATIC_ASSERT(NEVO_BOMBS == NEVO_BLASTS)
+        
+        
+        const coreFloat fOffset2 = I_TO_F(i) * (1.0f/8.0f);
 
         // 
         const coreBool  bWarn   = (fTime < 1.0f);
@@ -578,11 +583,14 @@ void cNevoMission::__MoveOwnAfter()
         pBlast->SetPosition (coreVector3(vBasePos, 0.0f));
         pBlast->SetSize     (coreVector3(2.0f,2.0f,2.0f) * fSize);
         pBlast->SetAlpha    (bWarn ? 0.0f : fAlpha);
-        pBlast->SetTexOffset(coreVector2(0.0f, FRACT(-2.5f * m_fAnimation)));
+        pBlast->SetTexOffset(coreVector2(0.0f, FRACT(-2.5f * m_fAnimation + fOffset2)));
 
         for(coreUintW j = 0u; j < NEVO_LINES; ++j)
         {
             coreObject3D* pLine = (*m_BlastLine.List())[i*NEVO_LINES + j];
+            
+            
+        const coreFloat fOffset3 = fOffset2 + I_TO_F(j) * (1.0f/32.0f);
 
             // 
             const coreVector2 vDir = MapStepRotated90(vBaseDir, j);
@@ -593,7 +601,7 @@ void cNevoMission::__MoveOwnAfter()
             pLine->SetDirection(coreVector3(vDir, 0.0f));
             pLine->SetSize     (coreVector3(fSize, pLine->GetSize().y, fSize));
             pLine->SetAlpha    (fAlpha);
-            pLine->SetTexOffset(coreVector2(1.0f,1.0f) * fOffset);
+            pLine->SetTexOffset(coreVector2(1.0f,1.0f) * (fOffset + fOffset3));
         }
     }
 
@@ -625,11 +633,19 @@ void cNevoMission::__MoveOwnAfter()
         }
 
         // 
-        oTile.SetSize(coreVector3(fScale, fScale, 1.0f) * oTile.GetSize().z);
+        const coreFloat fSize     = oTile.GetSize().z;
+        const coreFloat fModifier = ((fSize + 0.9f) * RCP(fSize));   // with leeway
+
+        // 
+        oTile.SetSize             (coreVector3(fScale, fScale, 1.0f) * fSize);
+        oTile.SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * fModifier);
     }
 
     // 
     m_Tile.MoveNormal();
+
+    // 
+    const coreFloat fArrowMove = 0.7f * SIN(m_fAnimation * (10.0f*PI));
 
     // 
     for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
@@ -643,21 +659,23 @@ void cNevoMission::__MoveOwnAfter()
         {
             const coreVector2 vDir = UnpackDirection(m_aiArrowDir[i]);
 
-            oArrow.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 3.5f, 0.0f));
+            oArrow.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * fArrowMove, 0.0f));
             oArrow.SetDirection(coreVector3(-vDir, 0.0f));
         }
 
         // 
-        if(pOwner) oArrow.SetAlpha(MIN(oArrow.GetAlpha() + 5.0f*TIME, 1.0f));
-              else oArrow.SetAlpha(MAX(oArrow.GetAlpha() - 5.0f*TIME, 0.0f));
+        if(pOwner) m_afArrowAlpha[i] = MIN(m_afArrowAlpha[i] + 5.0f*TIME, 1.0f);
+              else m_afArrowAlpha[i] = MAX(m_afArrowAlpha[i] - 5.0f*TIME, 0.0f);
 
         // 
-        if(!oArrow.GetAlpha()) this->DisableArrow(i, false);
+        if(!m_afArrowAlpha[i]) this->DisableArrow(i, false);
 
         // 
-        const coreFloat fOffset = I_TO_F(NEVO_ARROWS - i) * (1.0f/8.0f);
+        const coreFloat fActive = HAS_BIT(m_iArrowActive, m_aiArrowDir[i]) ? 1.0f : 0.5f;
+        const coreFloat fOffset = I_TO_F(i) * (1.0f/8.0f);
 
         // 
+        oArrow.SetAlpha    (m_afArrowAlpha[i] * fActive);
         oArrow.SetTexOffset(coreVector2(0.6f * m_fAnimation + fOffset, 0.0f));
     }
 
@@ -737,6 +755,7 @@ void cNevoMission::__MoveOwnAfter()
 
         if(m_bClamp)
         {
+            // TODO 1: better bounce correction (?)
             // 
                  if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; if(m_vForce.x < 0.0f) m_vImpact = coreVector2(-FOREGROUND_AREA.x * 1.1f, m_Container.GetPosition().y); m_vForce.x =  ABS(m_vForce.x);}
             else if(vNewPos.x >  FOREGROUND_AREA.x) {vNewPos.x =  FOREGROUND_AREA.x; if(m_vForce.x > 0.0f) m_vImpact = coreVector2( FOREGROUND_AREA.x * 1.1f, m_Container.GetPosition().y); m_vForce.x = -ABS(m_vForce.x);}

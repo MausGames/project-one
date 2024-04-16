@@ -88,6 +88,10 @@
 // TODO 2: d-pad is for movement, but and can also be used for button mapping
 // TODO 4: if font awesome will be used in the end, remove all unused icons in font-file
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
+// TODO 4: check if any % (modulo) can be changed to coreMath::IsAligned
+// TODO 2: fix broken pw-database printing on MacOS
+// TODO 1: fix hang in volcano background on MacOS
+// TODO 1: fix AVX generation not disabled on MacOS
 
 
 // ****************************************************************

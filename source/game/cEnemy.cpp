@@ -40,6 +40,7 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3 vColor, const 
 void cEnemy::Render()
 {
         if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM))
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP))
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
     {
         // 
@@ -210,8 +211,9 @@ void cEnemy::Resurrect()
     const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     const coreBool bBottom = HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM);
+    const coreBool bTop    = HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP);
     ASSERT(!bEnergy || (bEnergy && bSingle))   
-    ASSERT(!bBottom || (bBottom && bSingle))   
+    //ASSERT(!bBottom || (bBottom && bSingle))   
 
     // 
     m_fLifeTime       = 0.0f;
@@ -221,13 +223,13 @@ void cEnemy::Resurrect()
     {
         // add ship to glow and outline
         g_pGlow->BindObject(this);
-        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+        if(!bBottom && !bTop) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
     }
     else if(bSingle)
     {
         // add ship to global shadow and outline
         cShadow::GetGlobalContainer()->BindObject(this);
-        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+        if(!bBottom && !bTop) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
     }
 
     if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))
@@ -260,8 +262,9 @@ void cEnemy::Kill(const coreBool bAnimated)
     const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     const coreBool bBottom = HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM);
+    const coreBool bTop    = HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP);
     ASSERT(!bEnergy || (bEnergy && bSingle))
-    ASSERT(!bBottom || (bBottom && bSingle))
+    //ASSERT(!bBottom || (bBottom && bSingle))
 
     // 
     if(STATIC_ISVALID(g_pGame))
@@ -287,7 +290,8 @@ void cEnemy::Kill(const coreBool bAnimated)
         // 
         if(STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 1u))
         {
-            g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 10.0f, NULL);
+            // TODO 1: position 0.0f,0.0f
+            //g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 10.0f, NULL);
         }
     }
 
@@ -295,13 +299,13 @@ void cEnemy::Kill(const coreBool bAnimated)
     {
         // remove ship from glow and outline
         g_pGlow->UnbindObject(this);
-        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+        if(!bBottom && !bTop) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
     else if(bSingle)
     {
         // remove ship from global shadow and outline
         cShadow::GetGlobalContainer()->UnbindObject(this);
-        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+        if(!bBottom && !bTop) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
 
     // disable collision
@@ -506,31 +510,81 @@ void cEnemyManager::Render()
 void cEnemyManager::RenderBottom() {__RENDER_OWN(__RenderOwnBottom)
 
 DEPTH_PUSH
-//glDisable(GL_DEPTH_TEST);
-    FOR_EACH(it, m_apAdditional)
-    {
-        if((*it)->HasStatus(ENEMY_STATUS_DEAD))
-            continue;
-
-            if((*it)->HasStatus(ENEMY_STATUS_BOTTOM))
-        if(!(*it)->HasStatus(ENEMY_STATUS_DEAD))
+    /* */                                                            
+    const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)               
+    {                                                                
+        if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))                     
+            return;   
+        
+        if(pEnemy->HasStatus(ENEMY_STATUS_BOTTOM))
         {
-            // 
-            (*it)->_EnableBlink();
+            pEnemy->_EnableBlink();
     
             // 
-            cLodObject::RenderHighObject(*it);
-            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(*it);
+            cLodObject::RenderHighObject(pEnemy);
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(pEnemy);
         }
-    }
+    };                                                               
+                                                                     
+    /* render all additional enemies */                              
+    FOR_EACH(it, m_apAdditional)                                     
+        nRenderFunc(*it);                                            
+                                                                     
+    /* loop through all enemy sets */                                
+    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)                  
+    {                                                                
+        if(!m_apEnemySet[i]) continue;                               
+        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
+                                                                     
+        /* render all active enemies */                              
+        FOR_EACH(it, *pEnemyActive->List())                          
+            nRenderFunc(d_cast<cEnemy*>(*it));                       
+    }                                                                
     
-//glEnable(GL_DEPTH_TEST);
 
 
 }
 void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
 void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
-void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)}
+void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)
+
+DEPTH_PUSH
+
+    /* */                                                            
+    const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)               
+    {                                                                
+        if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))                     
+            return;   
+        
+        if(pEnemy->HasStatus(ENEMY_STATUS_TOP))
+        {
+            pEnemy->_EnableBlink();
+    
+            // 
+            cLodObject::RenderHighObject(pEnemy);
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(pEnemy);
+        }
+    };                                                               
+                                                                     
+    /* render all additional enemies */                              
+    FOR_EACH(it, m_apAdditional)                                     
+        nRenderFunc(*it);                                            
+                                                                     
+    /* loop through all enemy sets */                                
+    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)                  
+    {                                                                
+        if(!m_apEnemySet[i]) continue;                               
+        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
+                                                                     
+        /* render all active enemies */                              
+        FOR_EACH(it, *pEnemyActive->List())                          
+            nRenderFunc(d_cast<cEnemy*>(*it));                       
+    }                                                                
+    
+//glEnable(GL_DEPTH_TEST);
+
+
+}
 
 #undef __RENDER_OWN
 
@@ -951,7 +1005,6 @@ cRepairEnemy::cRepairEnemy()noexcept
     // 
     this->DefineModelHigh("object_sphere.md3");
     this->DefineModelLow ("object_sphere.md3");
-    this->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f * PLAYER_SIZE_FACTOR);
 
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
@@ -995,6 +1048,7 @@ void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
 
     // 
     this->SetPosition(pPlayer->GetPosition());
+    this->SetSize    (pPlayer->GetSize    ());
 
     // 
     m_Ship.DefineModelHigh(pPlayer->GetModelHigh());

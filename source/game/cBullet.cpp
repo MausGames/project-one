@@ -46,6 +46,9 @@ void cBullet::Move()
     // deactivate bullet when leaving the defined area
     if((m_fFlyTime >= 0.5f) && !HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) && !g_pForeground->IsVisibleObject(this))
         this->Deactivate(false);
+    
+    if(g_pForeground->IsVisibleObject(this)) this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+                                        else this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
 
     // move the 3d-object
     this->coreObject3D::Move();
@@ -499,6 +502,7 @@ cSurgeBullet::cSurgeBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_wave.md3");
+    this->DefineVolume ("bullet_wave_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 }
@@ -722,6 +726,7 @@ cWaveBullet::cWaveBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_wave.md3");
+    this->DefineVolume ("bullet_wave_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 

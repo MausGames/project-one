@@ -57,6 +57,7 @@ cZerothBoss::cZerothBoss()noexcept
         m_aLimb[i].DefineVolume   (sVolume);
         m_aLimb[i].SetSize        (this->GetSize());
         m_aLimb[i].Configure      (1, COLOR_SHIP_BLUE);
+        m_aLimb[i].AddStatus      (ENEMY_STATUS_BOTTOM);
         m_aLimb[i].SetParent      (this);
     }
 
@@ -66,7 +67,7 @@ cZerothBoss::cZerothBoss()noexcept
     m_Body.DefineVolume   ("ship_boss_zeroth_body_volume.md3");
     m_Body.SetSize        (this->GetSize());
     m_Body.Configure      (1, COLOR_SHIP_BLUE);
-    m_Body.AddStatus      (ENEMY_STATUS_INVINCIBLE);
+    m_Body.AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_INVINCIBLE);
     m_Body.SetParent      (this);
 
     // 
@@ -95,18 +96,22 @@ cZerothBoss::cZerothBoss()noexcept
 
 // ****************************************************************
 // 
-void cZerothBoss::__ResurrectOwn()
+void cZerothBoss::ResurrectIntro()
 {
     cCalorMission* pMission = d_cast<cCalorMission*>(g_pGame->GetCurMission());
-    //pMission->EnableStar(0u, this);
-    
-    
-    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
-    {
-        pMission->EnableStar(i, pPlayer);
-    });
 
-    pMission->StartSwing();
+    pMission->EnableStar(0u, this, coreVector2(0.0f,-8.0f));
+
+    this->Resurrect();
+
+    m_iPhase = 200u;
+}
+
+
+// ****************************************************************
+// 
+void cZerothBoss::__ResurrectOwn()
+{
 }
 
 
@@ -122,7 +127,7 @@ void cZerothBoss::__KillOwn(const coreBool bAnimated)
         m_aIce[i].Kill(bAnimated);
 
     // 
-    this->_EndBoss(bAnimated);
+    if(m_iPhase < 200u) this->_EndBoss(bAnimated);
 }
 
 
@@ -146,6 +151,9 @@ void cZerothBoss::__RenderOwnOver()
 // 
 void cZerothBoss::__MoveOwn()
 {
+    cCalorMission* pMission = d_cast<cCalorMission*>(g_pGame->GetCurMission());
+    coreObject3D*  pStar    = pMission->GetStar(0u);
+
     // 
     this->_UpdateBoss();
 
@@ -196,6 +204,131 @@ void cZerothBoss::__MoveOwn()
     }
 
     // ################################################################
+    // 
+    else if(m_iPhase == 200u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK)
+        {
+            this->DefaultMoveLerp(coreVector2(0.0f,1.5f), coreVector2(0.0f,0.7f), fTime);
+
+            const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * -8.0f;
+            const coreVector2 vPos  = vBase + coreVector2(0.0f,4.0f);
+
+            pStar->SetPosition(coreVector3(vPos, 0.0f));
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 201u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_LINEAR)
+        {
+            this->DefaultRotate(LERPBR(1.0f*PI, 5.0f*PI, fTime));
+
+            const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * -8.0f;
+            const coreVector2 vPos  = vBase - this->GetDirection().xy() * LERPBR(4.0f, 60.0f, STEP(0.2f, 1.0f, fTime));
+
+            pStar->SetPosition(coreVector3(vPos, 0.0f));
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 202u)
+    {
+        static coreFloat fCurLength = 60.0f;
+
+        cPlayer* pPlayer = this->NearestPlayerDual(0u);
+
+        const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * -8.0f;
+        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vBase;
+
+        coreBool bTurn = false;
+        const coreFloat fSpeed = 4.0f;
+        if(F_TO_SI(m_fPhaseTimeBefore * fSpeed / (2.0f*PI)) != F_TO_SI(m_fPhaseTime * fSpeed / (2.0f*PI)))
+        {
+            fCurLength = MAX(vDiff.Length(), 15.0f);
+            bTurn = true;
+        }
+
+        const coreVector2 vPos = coreVector2::Direction(m_fPhaseTime * fSpeed) * fCurLength + vBase;
+        pStar->SetPosition(coreVector3(vPos, 0.0f));
+
+        if(pMission->GetCatchObject(0u) != pPlayer)
+        {
+            const coreVector2 vCatchDiff = pPlayer->GetPosition().xy() - pStar->GetPosition().xy();
+            if(vCatchDiff.LengthSq() < POW2(4.0f))
+            {
+                pMission->CatchObject(0u, pPlayer);
+                pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+            }
+        }
+        else if(bTurn)
+        {
+            PHASE_CHANGE_INC
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 203u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
+        {
+            this->DefaultRotate(LERPB(1.0f*PI, 2.0f*PI, fTime));
+
+            const coreVector2 vPos = coreVector2(SIN(fTime * (1.0f*PI)) * -30.0f, LERP(FOREGROUND_AREA.y * 1.4f, FOREGROUND_AREA.y * -1.1f, POW2(POW3(fTime))));
+
+            pStar->SetPosition(coreVector3(vPos, 0.0f));
+            
+            //this->SetDirection(coreVector3(-(vPos - this->GetPosition().xy()).Normalized(), 0.0f));
+
+            if(PHASE_FINISHED)
+            {
+                cPlayer* pPlayer = d_cast<cPlayer*>(pMission->GetCatchObject(0u));
+
+                pMission->DisableStar(0u, false);
+                pMission->EnableStar (0u, pPlayer, coreVector2(0.0f,0.0f));
+
+                pStar->SetPosition(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3);
+
+                pMission->UncatchObject(0u);
+
+                pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
+                pPlayer->ApplyForce  (coreVector2(0.0f,50.0f));
+                pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+
+                PHASE_CHANGE_INC
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 204u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
+        {
+            this->DefaultMoveLerp  (m_vLastPosition, coreVector2(0.0f,1.5f), fTime);
+            this->DefaultRotateLerp(2.0f*PI,         3.0f*PI,                fTime);
+
+            if(PHASE_FINISHED)
+            {
+                this->Kill(false);
+            }
+        });
+    }
+
+    // ################################################################
     // ################################################################
     
     
@@ -211,8 +344,8 @@ void cZerothBoss::__MoveOwn()
 
 
     
-    this->__SetLimbValue(0u, 0.5f + 0.5f * SIN(m_fLifeTime));
-    this->__SetLimbValue(1u, 0.5f + 0.5f * SIN(m_fLifeTime));
+    //this->__SetLimbValue(0u, 0.5f + 0.5f * SIN(m_fLifeTime));
+    //this->__SetLimbValue(1u, 0.5f + 0.5f * SIN(m_fLifeTime));
     
     
     // 

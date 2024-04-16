@@ -70,8 +70,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: maybe just a circle shape in last sub-stage (or double-circle)
     // TODO 1: chess board pattern quick 1-2-1-2
     // TODO 1: sandsturm
-    // TODO 1: low FPS movement
-    // TODO 1: erste gruppe bei linie sollte oben sein und horizontal, dann normal weiter
+    // TODO 1: low FPS movement (fixed movement teleportation * * *)
+    // TODO 1: mit bewegung (kontinuierlich, im kreis, oder still beim flimmern, dann schnell nach außen), 
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -89,7 +89,7 @@ void cHarenaMission::__SetupOwn()
             pPath1->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 52u)
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 152u)                                 
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -99,17 +99,19 @@ void cHarenaMission::__SetupOwn()
             });
         });
 
-        constexpr coreUint64 iGroupA     = 0b00000000'00000000'0000'0000'0000'1111u;
-        constexpr coreUint64 iGroupB     = 0b00000000'00000000'0000'0000'1111'0000u;
-        constexpr coreUint64 iGroupC     = 0b00000000'00000000'0000'1111'0000'0000u;
-        constexpr coreUint64 iGroupD     = 0b00000000'00000000'1111'0000'0000'0000u;
-        constexpr coreUint64 iGroupE     = 0b00000000'11111111'0000'0000'0000'0000u;
-        constexpr coreUint64 iGroupF     = 0b11111111'00000000'0000'0000'0000'0000u;
+        constexpr coreUint32 iGroupA     = 0b00000000'00000000'0000'0000'0000'1111u;
+        constexpr coreUint32 iGroupB     = 0b00000000'00000000'0000'0000'1111'0000u;
+        constexpr coreUint32 iGroupC     = 0b00000000'00000000'0000'1111'0000'0000u;
+        constexpr coreUint32 iGroupD     = 0b00000000'00000000'1111'0000'0000'0000u;
+        constexpr coreUint32 iGroupE     = 0b00000000'11111111'0000'0000'0000'0000u;
+        constexpr coreUint32 iGroupF     = 0b11111111'00000000'0000'0000'0000'0000u;
+        constexpr coreUint32 iGroupG     = 0b0101010101010101u;
+        constexpr coreUint32 iGroupH     = 0b1010101010101010u;
         constexpr coreUint32 iSnakeCount = 6u;
 
-        STAGE_GET_START(9u + iSnakeCount)
-            STAGE_GET_UINT64    (iStateActive)
-            STAGE_GET_UINT64    (iStateGhost)
+        STAGE_GET_START(7u + iSnakeCount)
+            STAGE_GET_UINT      (iStateActive)
+            STAGE_GET_UINT      (iStateGhost)
             STAGE_GET_FLOAT     (fChangeTime)
             STAGE_GET_UINT      (iChangeCount)
             STAGE_GET_UINT_ARRAY(aiSnakeIndex, iSnakeCount)
@@ -120,9 +122,14 @@ void cHarenaMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 15u)
-            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
-            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 32u, 51u)
+            //     if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 15u)
+            //else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
+            //else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 32u, 51u)
+            //else 
+                if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 32u, 47u)
+
+            iStateActive = 0u;
+            iStateGhost  = 0u;
 
             fChangeTime  = 0.0f;
             iChangeCount = 0u;
@@ -143,10 +150,10 @@ void cHarenaMission::__SetupOwn()
                 switch(iChangeCount % 4u)
                 {
                 default: ASSERT(false)
-                case 0u: iStateActive &= ~iGroupC; iStateGhost = iGroupD; break;
-                case 1u: iStateActive &= ~iGroupA; iStateGhost = iGroupC; break;
-                case 2u: iStateActive &= ~iGroupB; iStateGhost = iGroupA; break;
-                case 3u: iStateActive &= ~iGroupD; iStateGhost = iGroupB; break;
+                case 0u: iStateActive &= ~iGroupA; iStateGhost = iGroupD; break;
+                case 1u: iStateActive &= ~iGroupB; iStateGhost = iGroupA; break;
+                case 2u: iStateActive &= ~iGroupC; iStateGhost = iGroupB; break;
+                case 3u: iStateActive &= ~iGroupD; iStateGhost = iGroupC; break;
                 }
             }
         }
@@ -174,9 +181,9 @@ void cHarenaMission::__SetupOwn()
 
                 if(iSnakeShift >= 2u)
                 {
-                    REMOVE_BIT(iStateActive, aiSnakeIndex[iSnakeShift - 1u])
-                    REMOVE_BIT(iStateGhost,  aiSnakeIndex[iSnakeShift - 1u])
-                    ADD_BIT   (iStateActive, aiSnakeIndex[iSnakeShift - 2u])
+                    if(aiSnakeIndex[iSnakeShift - 1u]) REMOVE_BIT(iStateActive, aiSnakeIndex[iSnakeShift - 1u] % 32u)
+                    if(aiSnakeIndex[iSnakeShift - 1u]) REMOVE_BIT(iStateGhost,  aiSnakeIndex[iSnakeShift - 1u] % 32u)
+                    if(aiSnakeIndex[iSnakeShift - 2u]) ADD_BIT   (iStateActive, aiSnakeIndex[iSnakeShift - 2u] % 32u)
 
                     const coreUint32 iNewShift = MIN(pSquad1->GetNumEnemiesAlive(), iSnakeCount);
                     if(iSnakeShift != iNewShift)
@@ -190,9 +197,9 @@ void cHarenaMission::__SetupOwn()
 
                         for(coreUintW i = 32u; i < 52u; ++i)
                         {
-                            if(!pSquad1->GetEnemy(i)->HasStatus(ENEMY_STATUS_DEAD) && !HAS_BIT(iStateGhost, i))
+                            if(!pSquad1->GetEnemy(i)->HasStatus(ENEMY_STATUS_DEAD) && !HAS_BIT(iStateGhost, i % 32u))
                             {
-                                ADD_BIT(iStateGhost, i)
+                                ADD_BIT(iStateGhost, i % 32u)
                                 aiSnakeIndex[0] = i;
 
                                 break;
@@ -206,6 +213,22 @@ void cHarenaMission::__SetupOwn()
                 }
             }
         }
+        else if(m_iStageSub == 4u)
+        {
+            if(FRACT(fChangeTime * 0.75f) < FRACT(fChangeTimePrev * 0.75f))
+            {
+                iChangeCount += 1u;
+
+                iStateActive |= iStateGhost;
+
+                switch(iChangeCount % 2u)
+                {
+                default: ASSERT(false)
+                case 0u: iStateActive &= ~iGroupG; iStateGhost = iGroupG; break;
+                case 1u: iStateActive &= ~iGroupH; iStateGhost = iGroupH; break;
+                }
+            }
+        }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -213,12 +236,7 @@ void cHarenaMission::__SetupOwn()
             {
                 if(i < 16u)
                 {
-                    const coreUintW x  = ((i / 4u) % 2u);
-                    const coreUintW y  = ((i / 4u) / 2u) % 2u;
-                    const coreUintW x2 = (i % 2u);
-                    const coreUintW y2 = (i / 2u) % 2u;
-
-                    const coreVector2 vPos = 0.75f * coreVector2(-0.5f + 1.0f * I_TO_F(x), -0.5f + 1.0f * I_TO_F(y)) + 0.25f * coreVector2(-0.5f + 1.0f * I_TO_F(x2), -0.5f + 1.0f * I_TO_F(y2));
+                    const coreVector2 vPos = (0.75f * StepRotated90X(i / 4u) + 0.25f * StepRotated90X(i % 4u)) * 0.5f * SQRT2;
 
                     pEnemy->SetPosition(coreVector3(vPos.Rotated45() * FOREGROUND_AREA, 0.0f));
                 }
@@ -235,6 +253,13 @@ void cHarenaMission::__SetupOwn()
                                  else pEnemy->SetPosition(coreVector3(fSide * FOREGROUND_AREA.x, vTarget.y, 0.0f));
                     }
                 }
+                else if(i < 48u)
+                {
+                    const coreVector2 vPos  = coreVector2(I_TO_F((i - 32u) % 4u) - 1.5f, I_TO_F((i - 32u) / 4u) - 1.5f) * 0.45f;
+                    const coreVector2 vFlip = coreVector2((((i - 32u) / 4u) % 2u) ? -1.0f : 1.0f, 1.0f);
+
+                    pEnemy->SetPosition(coreVector3(vPos * vFlip * FOREGROUND_AREA, 0.0f));
+                }
                 else
                 {
                     if(aiSnakeIndex[0] == i)
@@ -246,7 +271,7 @@ void cHarenaMission::__SetupOwn()
                     }
                 }
 
-                if(HAS_BIT(iStateActive, i))
+                if(HAS_BIT(iStateActive, i % 32u))
                 {
                     if(pEnemy->HasStatus(ENEMY_STATUS_GHOST))
                     {
@@ -273,10 +298,10 @@ void cHarenaMission::__SetupOwn()
                 }
             }
 
-            if(!HAS_BIT(iStateActive, i) && HAS_BIT(iStateGhost, i))
+            if(!HAS_BIT(iStateActive, i % 32u) && HAS_BIT(iStateGhost, i % 32u))
             {
                 pEnemy->SetDirection(coreVector3(((i < 32u) ? pEnemy->AimAtPlayerDual((i / 8u) % 2u) : pEnemy->AimAtPlayerSide()).Normalized(), 0.0f));
-                pEnemy->SetAlpha    ((FRACT(fChangeTime * 20.0f) < 0.5f) ? 0.9f : 0.4f);
+                pEnemy->SetAlpha    ((g_CurConfig.Graphics.iFlash && (FRACT(fChangeTime * 20.0f) < 0.5f)) ? 0.9f : 0.4f);
                 pEnemy->RemoveStatus(ENEMY_STATUS_HIDDEN);
             }
 
@@ -569,10 +594,10 @@ void cHarenaMission::__SetupOwn()
     // it is important that the flight start-direction can be properly identified
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
-        constexpr coreUintW iEnemies  = 40u;
-        constexpr coreFloat fDistance = 0.4f;
+        constexpr coreUintW iNumEnemies = 40u;
+        constexpr coreFloat fDistance   = 0.4f;
 
-        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, iEnemies)
+        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, iNumEnemies)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -584,11 +609,11 @@ void cHarenaMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(iEnemies * 6u)
-            STAGE_GET_VEC2_ARRAY (avMove,   iEnemies)
-            STAGE_GET_VEC2_ARRAY (avRotate, iEnemies)
-            STAGE_GET_FLOAT_ARRAY(afFall,   iEnemies)
-            STAGE_GET_FLOAT_ARRAY(afHeight, iEnemies)
+        STAGE_GET_START(iNumEnemies * 6u)
+            STAGE_GET_VEC2_ARRAY (avMove,   iNumEnemies)
+            STAGE_GET_VEC2_ARRAY (avRotate, iNumEnemies)
+            STAGE_GET_FLOAT_ARRAY(afFall,   iNumEnemies)
+            STAGE_GET_FLOAT_ARRAY(afHeight, iNumEnemies)
         STAGE_GET_END
 
         bool bClearedEarly = true;
@@ -637,7 +662,7 @@ void cHarenaMission::__SetupOwn()
 
                 vCurPos += vCurDir * (70.0f * TIME);
 
-                     if((vCurPos.x < -FOREGROUND_AREA.x * 1.0f) && (vCurDir.x < 0.0f)) vCurDir.x =  ABS(vCurDir.x);
+                     if((vCurPos.x < -FOREGROUND_AREA.x * 1.0f) && (vCurDir.x < 0.0f)) vCurDir.x =  ABS(vCurDir.x);   // TODO 1: bounce correction
                 else if((vCurPos.x >  FOREGROUND_AREA.x * 1.0f) && (vCurDir.x > 0.0f)) vCurDir.x = -ABS(vCurDir.x);
                      if((vCurPos.y < -FOREGROUND_AREA.y * 1.0f) && (vCurDir.y < 0.0f)) vCurDir.y =  ABS(vCurDir.y);
                 else if((vCurPos.y >  FOREGROUND_AREA.y * 1.0f) && (vCurDir.y > 0.0f)) vCurDir.y = -ABS(vCurDir.y);
@@ -727,6 +752,7 @@ void cHarenaMission::__SetupOwn()
     // BADGE: kill N% enemies at the start
     // BADGE: kill marked enemies on the line-wave
     // TODO 1: marked enemies are across the mission (1 per sub-stage)
+    // TODO 1: gegner mit 4-5 schichten
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumEnemies = 108u;
@@ -1118,6 +1144,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: change plate rendering
     // TODO 1: die symmetrische bewegung der stacheln in phase 3 ist schwer für die augen (2.0 -> 2.0)
     // TODO 1: maybe do a semi-transparent wave with the spike model when turning red
+    // TODO 1: make sure spike range covers the full area
+    // TODO 1: add a bit of delay when damage can be taken
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 34u)

@@ -787,8 +787,14 @@ void cGameMenu::SaveValues()
 
 // ****************************************************************
 // 
-void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo)const
+void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo)//const
 {
+    
+    // TODO 1: intro liefert m_aiCurIndex[0]==-1
+    if(m_aiCurIndex[0] == coreUintW(-1)) m_aiCurIndex[0] = 0u;
+    if(m_aiCurIndex[1] == coreUintW(-1)) m_aiCurIndex[1] = 0u;
+    if(m_aiCurIndex[2] == coreUintW(-1)) m_aiCurIndex[2] = 0u;
+    
     if(m_iCurPage == 0u)
     {
         // 

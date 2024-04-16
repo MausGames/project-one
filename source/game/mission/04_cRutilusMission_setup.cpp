@@ -322,6 +322,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: letzte 4 gruppen, spieler rammt rein bei transition, weil die position relativ ist
     // TODO 1: badge: shoot at helper
     // TODO 1: whole border gets particle effect on helper impact (delayed)
+    // TODO 1: control rotation with own movement
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1000,7 +1001,7 @@ void cRutilusMission::__SetupOwn()
                 coreVector2       vCurPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vCurDir = pEnemy->GetDirection().xy();
 
-                     if((vCurPos.x < -FOREGROUND_AREA.x * 1.2f) && (vCurDir.x < 0.0f)) vCurPos.x =  ABS(vCurPos.x);
+                     if((vCurPos.x < -FOREGROUND_AREA.x * 1.2f) && (vCurDir.x < 0.0f)) vCurPos.x =  ABS(vCurPos.x);   // TODO 1: shift correction
                 else if((vCurPos.x >  FOREGROUND_AREA.x * 1.2f) && (vCurDir.x > 0.0f)) vCurPos.x = -ABS(vCurPos.x);
                      if((vCurPos.y < -FOREGROUND_AREA.y * 1.2f) && (vCurDir.y < 0.0f)) vCurPos.y =  ABS(vCurPos.y);
                 else if((vCurPos.y >  FOREGROUND_AREA.y * 1.2f) && (vCurDir.y > 0.0f)) vCurPos.y = -ABS(vCurPos.y);
@@ -1498,7 +1499,7 @@ void cRutilusMission::__SetupOwn()
 
                     if(!bBig)
                     {
-                             if((vCurPos.x < -(FOREGROUND_AREA.x * 1.2f - fRadius)) && (vCurDir.x < 0.0f)) vCurDir.x =  ABS(vCurDir.x);
+                             if((vCurPos.x < -(FOREGROUND_AREA.x * 1.2f - fRadius)) && (vCurDir.x < 0.0f)) vCurDir.x =  ABS(vCurDir.x);   // TODO 1: bounce correction
                         else if((vCurPos.x >  (FOREGROUND_AREA.x * 1.2f - fRadius)) && (vCurDir.x > 0.0f)) vCurDir.x = -ABS(vCurDir.x);
                              if((vCurPos.y < -(FOREGROUND_AREA.y * 1.2f - fRadius)) && (vCurDir.y < 0.0f)) vCurDir.y =  ABS(vCurDir.y);
                         else if((vCurPos.y >  (FOREGROUND_AREA.y * 1.2f - fRadius)) && (vCurDir.y > 0.0f)) vCurDir.y = -ABS(vCurDir.y);
@@ -1537,7 +1538,7 @@ void cRutilusMission::__SetupOwn()
 
                     vCurPos += vCurDir * (25.0f * TIME);
 
-                         if((vCurPos.x < -FOREGROUND_AREA.x * 1.0f) && (vCurDir.x < 0.0f)) vCurDir.x =  ABS(vCurDir.x);
+                         if((vCurPos.x < -FOREGROUND_AREA.x * 1.0f) && (vCurDir.x < 0.0f)) vCurDir.x =  ABS(vCurDir.x);   // TODO 1: bounce correction
                     else if((vCurPos.x >  FOREGROUND_AREA.x * 1.0f) && (vCurDir.x > 0.0f)) vCurDir.x = -ABS(vCurDir.x);
                          if((vCurPos.y < -FOREGROUND_AREA.y * 1.0f) && (vCurDir.y < 0.0f)) vCurDir.y =  ABS(vCurDir.y);
                     else if((vCurPos.y >  FOREGROUND_AREA.y * 1.0f) && (vCurDir.y > 0.0f)) vCurDir.y = -ABS(vCurDir.y);

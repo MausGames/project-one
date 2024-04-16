@@ -55,7 +55,7 @@ cMission::~cMission()
     m_apSquad.clear();
 
     // 
-    ZERO_DELETE(m_piData)
+    ALIGNED_DELETE(m_piData)
 }
 
 
@@ -382,6 +382,11 @@ void cMission::__CloseSegment()
     g_pEnvironment->SetTargetDirectionNow(StepRotated90((++iDir) % 4u));
 
 #endif
+    
+    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->StartRolling(pPlayer->GetInput()->vMove);
+    });
 }
 
 

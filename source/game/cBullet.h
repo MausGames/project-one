@@ -86,8 +86,9 @@ public:
     void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
-    inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); return this;}
-    inline cBullet* ChangeTexSize(const coreFloat fFactor) {this->SetTexSize(this->GetTexSize() * fFactor); return this;}
+    inline cBullet* ChangeHeight (const coreFloat fValue)  {this->SetPosition(coreVector3(this->GetPosition().xy(), fValue)); return this;}
+    inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize    (this->GetSize   () * fFactor);                  return this;}
+    inline cBullet* ChangeTexSize(const coreFloat fFactor) {this->SetTexSize (this->GetTexSize() * fFactor);                  return this;}
 
     // 
     inline void     AddStatus   (const coreInt32 iStatus)      {ADD_FLAG       (m_iStatus, iStatus)}
@@ -210,8 +211,10 @@ public:
     void ResetOrder();
 
     // 
-    inline coreUintW                       GetNumBullets     ()const {coreUintW iNum = 0u; this->ForEachBullet        ([&](void*) {++iNum;}); return iNum;}
-    template <typename T> inline coreUintW GetNumBulletsTyped()const {coreUintW iNum = 0u; this->ForEachBulletTyped<T>([&](void*) {++iNum;}); return iNum;}
+    inline coreUintW                       GetNumBullets        ()const {coreUintW iNum = 0u; this->ForEachBullet        ([&](void*) {++iNum;}); return iNum;}
+    template <typename T> inline coreUintW GetNumBulletsTyped   ()const {coreUintW iNum = 0u; this->ForEachBulletTyped<T>([&](void*) {++iNum;}); return iNum;}
+    inline coreUintW                       GetNumBulletsEst     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}
+    template <typename T> inline coreUintW GetNumBulletsTypedEst()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.List()->size() : 0u;}
 };
 
 

@@ -60,27 +60,26 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // the walls are coming at you
-    // 1) erste sub-gruppe muss (schnell) still stehen, damit der spieler die wände bewegen sieht
-    // 2) weitere flache sub-gruppen um mechanik stärker begreifbar zu machen, e.g. dass alle wände betroffen sind
-    // gleich nach erste gruppe spikes erzeugen kommt schnell zum geschäft nachdem mechanik gezeigt wurde, geht gut
+    // [deprecated] 1) erste sub-gruppe muss (schnell) still stehen, damit der spieler die wände bewegen sieht
+    // [deprecated] 2) weitere flache sub-gruppen um mechanik stärker begreifbar zu machen, e.g. dass alle wände betroffen sind
+    // [deprecated] gleich nach erste gruppe spikes erzeugen kommt schnell zum geschäft nachdem mechanik gezeigt wurde, geht gut
     // gegner durch wand-verschiebung zu verstecken generiert nervige pausen, besser die gegner flugbahn mitverschieben
     // wenn 2 wände aufeinander zukommen, sollten gegner von nicht den tunnel entlang fliegen, das macht es zu leicht
     // wenn wände auf spieler zukommen müssen flache gegner-gruppen (ohne bewegung) darüber stehen, damit spieler drauf schießt und sieht, dass er sie zurückdrängen kann
     // am ende müssen wände vom spieler zurückgedrückt und eingerastet werden
-    // beim zusammendrücken sollten immer nur zwei wände betroffen sein, vier sind zu viel
+    // beim zusammendrücken sollten immer nur zwei wände betroffen sein, vier sind zu viel (außer im finale)
     // gegner sollten nicht von mehr als 2 richtungen gleichzeitig kommen (außer eck-gruppe), sonst dreht sich spieler verwirrt im kreis
-    // delay bevor wände sich zurückziehen ist schwer kontrollierbar und begreifbar
+    // [deprecated] delay bevor wände sich zurückziehen ist schwer kontrollierbar und begreifbar
     // gruppe in den ecken zeigt das enemy-anchoring sehr gut und schaut lustig aus, sub-gruppe für speed-runner die sich die wände absichtlich herziehen
     // in der finalen phase lassen profis die mauern näher kommen um durch kurze wege schneller töten zu können
+    // do not render this above water (wall-bullets and enemies reflect and pop in)
+    // erste gruppe zieht spieler an die richtige position
+    // erste box-bewegung muss abseits sein, damit eine bewegung entsteht bei egal welcher start-position
+    // enemies are ghost+hidden, to prevent them from getting shot and rendering shadow, if they start in middle but are behind wall
+    // gegner sieht man orsch unter den stacheln (müssen groß, andersfarbig und weit genug weg sein von wand)
     // TODO 1: handle pulse bullet penetration, handle wave/surge
-    // TODO 1: helfer fliegt über schirm wärend spikes erzeugt werden, oder in/entlang eine der spike-lines!
-    // TODO 1: water reflection and shadow pop in if enemies spawn in the middle, also wall-bullets reflect in air -> definitiv kein wasser, space ?
-    // TODO 1: wenn dodge zurück kommt, lass alle geschosse wegfliegen, wenn wand einrastet, ansonsten vielleicht in muster
-    // TODO 1: vielleicht eck-gruppe als zweites
     // TODO 1: handle assert in SetArea (both single and coop)
-    // TODO 1: gegner sieht man orsch unter den stacheln
-    // TODO 1: etwas mus blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
-    // TODO 1: wände fallen auf fixe positionen (links geht auf mitte, dann zurück, dann rechts auf mitte, etc.), und bewegen sich erst <>-seitig herum, dann 4-seitig, und spieler darf die wände nicht berühren
+    // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fOffMin = 0.0f;
@@ -90,15 +89,15 @@ void cGeluMission::__SetupOwn()
         {
             pPath1->Reserve(2u);
             pPath1->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
-            pPath1->AddStop(coreVector2(0.0f,0.8f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
             pPath1->Refine();
         });
 
         STAGE_ADD_PATH(pPath2)
         {
             pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(-1.3f,-1.3f), coreVector2(1.0f,1.0f).Normalized());
-            pPath2->AddStop(coreVector2(-0.8f,-0.8f), coreVector2(1.0f,1.0f).Normalized());
+            pPath2->AddNode(coreVector2(1.3f,1.3f), coreVector2(-1.0f,-1.0f).Normalized());
+            pPath2->AddStop(coreVector2(0.9f,0.9f), coreVector2(-1.0f,-1.0f).Normalized());
             pPath2->Refine();
         });
 
@@ -110,61 +109,96 @@ void cGeluMission::__SetupOwn()
             pPath3->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 65u)
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 80u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.25f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
                 pEnemy->Configure(4, COLOR_SHIP_BLUE);
+                pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
 
-        STAGE_GET_START(POST_WALLS * 2u + 2u)
+        STAGE_GET_START(POST_WALLS * 2u + 4u)
             STAGE_GET_FLOAT_ARRAY(afOffCurrent, POST_WALLS)
             STAGE_GET_FLOAT_ARRAY(afOffTarget,  POST_WALLS)
+            STAGE_GET_FLOAT      (fRotation)
+            STAGE_GET_FLOAT      (fRotationBreak)
             STAGE_GET_UINT       (iWallBullets)
             STAGE_GET_UINT       (iActive, iActive = BITLINE(POST_WALLS))
         STAGE_GET_END
 
+        const auto nFlashFunc = [](const coreUint8 iTarget)
+        {
+            g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](const cBullet* pBullet)
+            {
+                const coreUintW iWall = pBullet->GetDamage() - 1;
+                ASSERT(iWall < POST_WALLS)
+
+                if(HAS_BIT(iTarget, iWall)) g_pSpecialEffects->CreateSplashColor(pBullet->GetPosition() + pBullet->GetDirection() * 1.5f, 5.0f, 3u, COLOR_ENERGY_ORANGE);
+            });
+        };
+
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  4u)
-            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  5u, 14u)
-            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 15u, 19u)
-            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 20u, 24u)
-            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 25u, 36u)
-            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 37u, 46u)
-            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 47u, 56u)
-            //else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 57u, 57u)
-            //else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 58u, 58u)
-            //else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 59u, 59u)
-            //else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 60u, 60u)
-            //else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 61u, 61u)
-            //else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 62u, 62u)
-            //else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 63u, 63u)
-            //else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 64u, 64u)
-            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 57u, 58u)
-            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 59u, 60u)
-            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 61u, 62u)
-            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 63u, 64u)
-            else if(STAGE_SUB(16u)) STAGE_DELAY_START
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  1u,  7u)   // TODO 1: fix (+ squad size)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  9u, 17u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 18u, 24u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 25u, 27u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 28u, 30u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 31u, 33u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 34u, 36u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 37u, 39u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 40u, 42u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 43u, 43u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 44u, 53u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 54u, 63u)
+            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 64u, 64u)
+            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 65u, 65u)
+            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 66u, 66u)
+            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 67u, 67u)
+            else if(STAGE_SUB(17u)) STAGE_RESURRECT(pSquad1, 68u, 68u)
+            else if(STAGE_SUB(18u)) STAGE_RESURRECT(pSquad1, 69u, 69u)
+            else if(STAGE_SUB(19u)) STAGE_RESURRECT(pSquad1, 70u, 70u)
+            else if(STAGE_SUB(20u)) STAGE_RESURRECT(pSquad1, 71u, 71u)
+            else if(STAGE_SUB(21u)) STAGE_RESURRECT(pSquad1, 72u, 79u)
+            else if(STAGE_SUB(22u)) STAGE_DELAY_START
 
-            if((m_iStageSub == 6u) || (m_iStageSub == 8u))
+            coreUint8 iFlash = 0x00u;
+            switch(m_iStageSub)
+            {
+            case 11u: iFlash = BIT(0u) + BIT(1u); break;
+            case 13u: iFlash = BIT(2u) + BIT(3u); break;
+            case 21u: iFlash = 0xFFu;             break;
+            }
+
+            if(iFlash)
             {
                 for(coreUintW i = 0u; i < POST_WALLS; ++i) afOffTarget[i] = MAX(afOffTarget[i], fOffMin);
-
-                g_pGame->GetBulletManagerEnemy()->ForEachBullet([](const cBullet* pBullet)
-                {
-                    g_pSpecialEffects->CreateSplashColor(pBullet->GetPosition(), 5.0f, 3u, COLOR_ENERGY_ORANGE);
-                });
+                nFlashFunc(iFlash);
             }
+        }
+
+        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_ORANGE);
+
+        if(STAGE_BEGINNING)
+        {
+            pHelper->Resurrect();
+        }
+        if(STAGE_TIME_BEFORE(2.0f))
+        {
+            pHelper->SetPosition(coreVector3(m_fStageTime * 1.55f - 1.2f, 1.05f, 0.0f) * FOREGROUND_AREA3);
+        }
+        else if(STAGE_TIME_POINT(2.0f))
+        {
+            pHelper->Kill(false);
         }
 
         //   3
         // 0   1
         //   2
 
-        const coreUint8 iDefend = (m_iStageSub >= 8u) ? 2u : ((m_iStageSub >= 6u) ? 1u : 0u);
+        const coreUint8 iDefend = (m_iStageSub >= 21u) ? 3u : ((m_iStageSub >= 13u) ? 2u : ((m_iStageSub >= 11u) ? 1u : 0u));
         const coreBool  bDelay  = pSquad1->IsFinished();
 
         coreVector2 vOffFrom  = 2.2f * FOREGROUND_AREA * coreVector2(afOffCurrent[0], afOffCurrent[2]);
@@ -172,118 +206,184 @@ void cGeluMission::__SetupOwn()
         coreVector2 vAreaFrom = -FOREGROUND_AREA + vOffFrom;
         coreVector2 vAreaTo   =  FOREGROUND_AREA - vOffTo;
 
-        if(iActive) g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+        if(m_iStageSub < 11u)
         {
-            const coreVector2 vPos  = pBullet->GetPosition().xy();
-            const coreVector2 vDir  = pBullet->GetFlyDir();
-            const coreFloat   fPush = 0.002f * I_TO_F(pBullet->GetDamage()) * (iDefend ? -4.0f : 3.0f) * RCP(I_TO_F(g_pGame->GetNumPlayers()));
-
-            const auto nPushFunc = [&](const coreUintW iIndex)
+            if(m_iStageSub < 2u)
             {
-                ASSERT(iIndex < POST_WALLS)
-
-                     if(fPush < 0.0f) afOffTarget[iIndex] = MIN(afOffTarget[iIndex], fOffMax);
-                else if(fPush > 0.0f) afOffTarget[iIndex] = MAX(afOffTarget[iIndex], fOffMin);
-
-                const coreFloat fOld = afOffTarget[iIndex];
-                afOffTarget[iIndex] += fPush;
-
-                if((fPush < 0.0f) && (afOffTarget[iIndex] < 0.0f))
-                {
-                    afOffTarget[iIndex] = -1.0f;   // snap in
-                    if(fOld >= 0.0f) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                }
-            };
-
-                 if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true);}
-            else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {nPushFunc(1); pBullet->Deactivate(true);}
-                 if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {nPushFunc(2); pBullet->Deactivate(true);}
-            else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {nPushFunc(3); pBullet->Deactivate(true);}
-        });
-        
-        
-        
-        if(m_iStageSub == 1u)
-        {
-            afOffCurrent[0] = afOffTarget[0] = LERPBR(0.0f, 0.5f, CLAMP(m_fStageSubTime * 0.5f, 0.0f, 1.0f));
-
-            if(STAGE_SUBTIME_POINT(2.0f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-        }
-        else if(m_iStageSub == 2u)
-        {
-            afOffCurrent[0] = afOffTarget[0] = LERPBR(0.5f, 0.0f, CLAMP((m_fStageSubTime),               0.0f, 1.0f));
-            afOffCurrent[1] = afOffTarget[1] = LERPBR(0.0f, 0.5f, CLAMP((m_fStageSubTime - 1.0f) * 0.5f, 0.0f, 1.0f));
-
-            if(STAGE_SUBTIME_POINT(3.0f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-        }
-        else if(m_iStageSub == 3u)
-        {
-            afOffCurrent[1] = afOffTarget[1] = LERPBR(0.5f, 0.0f, CLAMP((m_fStageSubTime),               0.0f, 1.0f));
-            afOffCurrent[2] = afOffTarget[2] = LERPBR(0.0f, 0.3f, CLAMP((m_fStageSubTime - 1.0f) * 0.5f, 0.0f, 1.0f));
-            afOffCurrent[3] = afOffTarget[3] = afOffTarget[2];
-
-            if(STAGE_SUBTIME_POINT(3.0f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-        }
-        else if(m_iStageSub == 5u)
-        {
-            afOffCurrent[0] = afOffTarget[0] = LERPBR(0.0f, 0.3f, CLAMP(m_fStageSubTime * 0.5f, 0.0f, 1.0f));
-            afOffCurrent[1] = afOffTarget[1] = afOffTarget[0];
-        }
-        
-        
-        if((m_iStageSub >= 4u) && (m_iStageSub < 6u))
-        {
-            const coreFloat fOffset = 0.3f * SIN(m_fStageSubTime * 0.5f*PI) * BLENDH3(CLAMP01(m_fStageSubTime * 0.1f));
-
-            afOffCurrent[2] = afOffTarget[2] = 0.3f + fOffset;
-            afOffCurrent[3] = afOffTarget[3] = 0.3f - fOffset;
-        }
-        
-
-        for(coreUintW i = 0u; i < POST_WALLS; ++i)
-        {
-            if(!HAS_BIT(iActive, i)) continue;
-
-            if(iDefend)
+            }
+            else if(m_iStageSub == 2u)
             {
-                if(bDelay)
-                {
-                    if((afOffTarget[i] <= 0.0f) && (afOffCurrent[i] <= 0.01f))
-                    {
-                        g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
-                        {
-                            const coreUintW iWall = pBullet->GetDamage() - 1;
-                            ASSERT(iWall < POST_WALLS)
+                afOffTarget[0] = LERPBR(0.0f, 0.6f, CLAMP(m_fStageSubTime / 1.5f, 0.0f, 1.0f));
 
-                            if(iWall == i) pBullet->Deactivate(true);
-                        });
+                if(STAGE_SUBTIME_POINT(0.0f)) nFlashFunc(BIT(0u));
+                if(STAGE_SUBTIME_POINT(1.5f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            }
+            else if(m_iStageSub == 3u)
+            {
+                afOffTarget[0] = LERPBR(0.6f, 0.0f, CLAMP((m_fStageSubTime),               0.0f, 1.0f));
+                afOffTarget[1] = LERPBR(0.0f, 0.6f, CLAMP((m_fStageSubTime - 1.0f) / 1.5f, 0.0f, 1.0f));
 
-                        REMOVE_BIT(iActive, i)
-                        if(!iActive)
-                        {
-                            STAGE_DELAY_END
-                        }
+                if(STAGE_SUBTIME_POINT(1.0f)) nFlashFunc(BIT(1u));
+                if(STAGE_SUBTIME_POINT(1.0f) || STAGE_SUBTIME_POINT(2.5f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            }
+            else if(m_iStageSub == 4u)
+            {
+                afOffTarget[1] = LERPBR(0.6f, 0.0f, CLAMP((m_fStageSubTime),               0.0f, 1.0f));
+                afOffTarget[2] = LERPBR(0.0f, 0.3f, CLAMP((m_fStageSubTime - 1.0f) / 1.5f, 0.0f, 1.0f));
+                afOffTarget[3] = afOffTarget[2];
 
-                        g_pPostProcessing->SetWallOffset(i, 0.0f);
-
-                        continue;
-                    }
-                }
-
-                //if((iDefend == 1u) == (i < 2u)) afOffTarget[i] = MAX(afOffTarget[i] + 0.07f * TIME, fOffMin - 0.1f);
+                if(STAGE_SUBTIME_POINT(1.0f)) nFlashFunc(BIT(2u) + BIT(3u));
+                if(STAGE_SUBTIME_POINT(1.0f) || STAGE_SUBTIME_POINT(2.5f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             }
             else
             {
-                //afOffTarget[i] = MIN(afOffTarget[i] - 0.07f * TIME, fOffMax + 0.01f);
+                if(m_iStageSub == 10u) fRotationBreak += (1.0f/1.5f) * TIME;
+                fRotation += (1.0f - MIN1(fRotationBreak)) * TIME;
+
+                const coreFloat fOffset = LERPH3(-1.0f, 1.0f, TriangleWave(fRotation * 0.2f)) * BLENDH3(MIN1(fRotation * 0.1f));
+
+                afOffTarget[2] = 0.3f + 0.3f * fOffset;
+                afOffTarget[3] = 0.3f - 0.3f * fOffset;
+
+                if(m_iStageSub == 10u)
+                {
+                    if(STAGE_SUBTIME_POINT(1.5f)) nFlashFunc(BIT(0u) + BIT(1u));
+                    if(STAGE_SUBTIME_POINT(3.0f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+
+                    if(STAGE_SUBTIME_BEFORE(1.5f))
+                    {
+                    }
+                    else if(STAGE_SUBTIME_BEFORE(3.0f))
+                    {
+                        afOffTarget[0] = LERPBR(0.0f, 0.3f, CLAMP((m_fStageSubTime - 1.5f) / 1.5f, 0.0f, 1.0f));
+                        afOffTarget[1] = afOffTarget[0];
+                    }
+                    else if(STAGE_SUBTIME_BEFORE(10.5f))
+                    {
+                        const coreFloat fTime = m_fStageSubTime - 3.0f;
+
+                        coreVector2 vFrom, vTo;
+                        coreFloat   fLerp;
+
+                             if(fTime < 1.5f) {vFrom = coreVector2( 0.0f, fOffset * (0.3f/0.2f)); vTo = coreVector2( 1.0f, 0.0f); fLerp = STEP(0.0f, 1.5f, fTime);}
+                        else if(fTime < 3.0f) {vFrom = coreVector2( 1.0f, 0.0f);                  vTo = coreVector2(-0.5f,-1.0f); fLerp = STEP(1.5f, 3.0f, fTime);}
+                        else if(fTime < 4.5f) {vFrom = coreVector2(-0.5f,-1.0f);                  vTo = coreVector2( 0.5f, 1.0f); fLerp = STEP(3.0f, 4.5f, fTime);}
+                        else if(fTime < 6.0f) {vFrom = coreVector2( 0.5f, 1.0f);                  vTo = coreVector2(-1.0f, 0.0f); fLerp = STEP(4.5f, 6.0f, fTime);}
+                        else                  {vFrom = coreVector2(-1.0f, 0.0f);                  vTo = coreVector2( 0.0f, 0.0f); fLerp = STEP(6.0f, 7.5f, fTime);}
+
+                        const coreFloat   fNarrow = LERP(0.0f, 0.1f, STEP(0.0f, 7.5f, fTime));
+                        const coreVector2 vTarget = LERPS(vFrom, vTo, fLerp) * (0.2f + fNarrow * 0.5f);
+
+                        afOffTarget[0] = 0.3f + fNarrow + vTarget.x;
+                        afOffTarget[1] = 0.3f + fNarrow - vTarget.x;
+                        afOffTarget[2] = 0.3f + fNarrow + vTarget.y;
+                        afOffTarget[3] = 0.3f + fNarrow - vTarget.y;
+                    }
+                    else
+                    {
+                        afOffTarget[0] = LERPBR(0.4f, 0.0f, CLAMP(m_fStageSubTime - 10.5f, 0.0f, 1.0f));
+                        afOffTarget[1] = afOffTarget[0];
+                        afOffTarget[2] = afOffTarget[0];
+                        afOffTarget[3] = afOffTarget[0];
+
+                        if(STAGE_SUBTIME_POINT(11.5f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    }
+                }
             }
 
-            const coreFloat fDiff = afOffTarget[i] - afOffCurrent[i];
-            afOffCurrent[i] += SIGN(fDiff) * 0.9f * TIME * SmoothTowards(ABS(fDiff), 0.05f);
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+            {
+                const coreVector2 vPos = pBullet->GetPosition().xy();
+                const coreVector2 vDir = pBullet->GetFlyDir();
 
-            afOffTarget [i] = CLAMP(afOffTarget [i], fOffMin - 1.0f, fOffMax + 1.0f);
-            afOffCurrent[i] = CLAMP(afOffCurrent[i], fOffMin,        fOffMax);
+                if(((vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) ||
+                   ((vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) ||
+                   ((vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) ||
+                   ((vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)))
+                {
+                    pBullet->Deactivate(false);
+                }
+            });
 
-            g_pPostProcessing->SetWallOffset(i, afOffCurrent[i]);
+            for(coreUintW i = 0u; i < POST_WALLS; ++i)
+            {
+                afOffCurrent[i] = afOffTarget[i];
+                g_pPostProcessing->SetWallOffset(i, afOffCurrent[i]);
+            }
+        }
+        else
+        {
+            if(iActive) g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+            {
+                const coreVector2 vPos  = pBullet->GetPosition().xy();
+                const coreVector2 vDir  = pBullet->GetFlyDir();
+                const coreFloat   fPush = 0.002f * I_TO_F(pBullet->GetDamage()) * (iDefend ? -4.0f : 3.0f) * (bDelay ? 3.0f : 1.0f) * RCP(I_TO_F(g_pGame->GetNumPlayers()));
+
+                const auto nPushFunc = [&](const coreUintW iIndex)
+                {
+                    ASSERT(iIndex < POST_WALLS)
+
+                         if(fPush < 0.0f) afOffTarget[iIndex] = MIN(afOffTarget[iIndex], fOffMax);
+                    else if(fPush > 0.0f) afOffTarget[iIndex] = MAX(afOffTarget[iIndex], fOffMin);
+
+                    afOffTarget[iIndex] += fPush;
+
+                    if((fPush < 0.0f) && (afOffTarget[iIndex] < 0.0f)) afOffTarget[iIndex] = -1.0f;   // snap in
+                };
+
+                     if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true);}
+                else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {nPushFunc(1); pBullet->Deactivate(true);}
+                else if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {nPushFunc(2); pBullet->Deactivate(true);}
+                else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {nPushFunc(3); pBullet->Deactivate(true);}
+            });
+
+            for(coreUintW i = 0u; i < POST_WALLS; ++i)
+            {
+                if(!HAS_BIT(iActive, i)) continue;
+
+                if(iDefend)
+                {
+                    if(bDelay)
+                    {
+                        if((afOffTarget[i] <= 0.0f) && (afOffCurrent[i] <= 0.01f))
+                        {
+                            g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+                            {
+                                const coreUintW iWall = pBullet->GetDamage() - 1;
+                                ASSERT(iWall < POST_WALLS)
+
+                                if(iWall == i) pBullet->Deactivate(true);
+                            });
+
+                            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+
+                            REMOVE_BIT(iActive, i)
+                            if(!iActive)
+                            {
+                                STAGE_DELAY_END
+                            }
+
+                            g_pPostProcessing->SetWallOffset(i, 0.0f);
+
+                            continue;
+                        }
+                    }
+
+                    if((iDefend == 3u) || ((iDefend == 1u) == (i < 2u))) afOffTarget[i] = MAX(afOffTarget[i] + 0.07f * TIME, fOffMin - 0.01f);
+                }
+                else
+                {
+                    afOffTarget[i] = MIN(afOffTarget[i] - 0.07f * TIME, fOffMax + 0.01f);
+                }
+
+                const coreFloat fDiff = afOffTarget[i] - afOffCurrent[i];
+                afOffCurrent[i] += SIGN(fDiff) * 0.9f * TIME * SmoothTowards(ABS(fDiff), 0.05f);
+
+                afOffTarget [i] = CLAMP(afOffTarget [i], fOffMin - 1.0f, fOffMax + 1.0f);
+                afOffCurrent[i] = CLAMP(afOffCurrent[i], fOffMin,        fOffMax);
+
+                g_pPostProcessing->SetWallOffset(i, afOffCurrent[i]);
+            }
         }
 
         const coreVector2 vPlayerAreaFromPre = PLAYER_AREA_DEFAULT.xy() + vOffFrom;
@@ -335,7 +435,7 @@ void cGeluMission::__SetupOwn()
                            (vPos.y >= vPlayerAreaToPre  .y - CORE_MATH_PRECISION))
                         {
                             pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vPos);
-                            for(coreUintW j = 0u; j < POST_WALLS; ++j) afOffTarget[j] = -1.0f;
+                            if(m_iStageSub >= 11u) for(coreUintW j = 0u; j < POST_WALLS; ++j) afOffTarget[j] = -1.0f;
                         }
                     }
                 });
@@ -372,30 +472,30 @@ void cGeluMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.8f, (((i >= 5u && i < 15u) || (i >= 37u && i < 47u)) ? 1.6f : ((i >= 25u && i < 37u) ? 4.0f : 0.0f)) + ((i >= 15u && i < 25u) ? (0.2f * I_TO_F(i % 5u)) : 0.0f))
+            const coreFloat fAcross = (i >= 18u && i < 25u) ? 1.5f : 1.0f;
 
-            if(i >= 25u && i < 37u)
+            STAGE_LIFETIME(pEnemy, fAcross * 0.8f, fAcross * (((i < 9u) ? 2.0f : ((i < 18u) ? 1.5f : ((i < 28u) ? 2.5f : ((i == 43u) ? 9.0f : 0.0f)))) + ((i < 18u) ? (0.2f * I_TO_F(i % 9u)) : ((i < 25u) ? (0.3f * I_TO_F((i - 18u) % 7u)) : ((i < 44u) ? (0.2f * I_TO_F((i - 25u) % 3u)) : 0.0f)))))
+
+            if(i < 44u)
             {
-                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((((i - 25u) % 3u) == 1u) ? 0.3f : 0.0f, (((i - 25u) % 3u) == 2u) ? 0.3f : 0.0f);
-
-                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
-            }
-            else if(i < 57u)
-            {
-                const coreSpline2* pPath = (i < 15u || (i >= 37u && i < 57u)) ? pPath1 : pPath3;
-
-                if(pPath == pPath3) STAGE_REPEAT(pPath->GetTotalDistance())
+                STAGE_REPEAT(pPath3->GetTotalDistance())
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F(i % 5u) - 2.0f) * 0.2f, 0.0f);
+                const coreVector2 vOffset = coreVector2(((i < 9u) ? ((I_TO_F(i) - 4.0f) * 0.15f) : ((i < 18u) ? ((I_TO_F(i % 3u) - 1.0f) * 0.45f) : ((i < 25u) ? ((I_TO_F((i - 18u) % 7u) - 3.0f) * 0.24f) : ((I_TO_F((i - 25u) % 3u) - 1.0f) * 0.45f)))), 0.0f);
 
-                pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
             }
-            else
+            else if(i < 64u)
+            {
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 44u) % 5u) - 2.0f) * 0.2f - ((i < 54u) ? 0.15f : 0.0f), 0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+            }
+            else if(i < 72u)
             {
                 coreFloat fHeight;
-                switch(i - 57u)
+                switch(i - 64u)
                 {
                 default: ASSERT(false)
                 case 3u: case 1u: fHeight =  0.45f; break;
@@ -409,39 +509,48 @@ void cGeluMission::__SetupOwn()
 
                 pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
             }
+            else
+            {
+                const coreSpline2* pPath = (i % 2u) ? pPath2 : pPath1;
 
-                 if(i <  5u) {}
-            else if(i < 10u) pEnemy->Rotate270();
-            else if(i < 15u) pEnemy->Rotate90 ();
-            else if(i < 20u) {}
-            else if(i < 25u) pEnemy->Rotate180();
-            else if(i < 28u) {}
-            else if(i < 31u) pEnemy->Rotate90 ();
-            else if(i < 34u) pEnemy->Rotate180();
-            else if(i < 37u) pEnemy->Rotate270();
-            else if(i < 42u) pEnemy->Rotate270();
-            else if(i < 47u) pEnemy->Rotate90 ();
-            else if(i < 52u) {}
-            else if(i < 57u) pEnemy->Rotate180();
-            else if(i == 57u || i == 59u || i == 60u || i == 63u) pEnemy->Rotate270();
-            else if(i == 58u || i == 61u || i == 62u || i == 64u) pEnemy->Rotate270()->InvertX();
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+                pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
+            }
+
+                 if(i < 18u) {}
+            else if(i < 25u) {pEnemy->Rotate90(); if(i % 2u) pEnemy->InvertX();}
+            else if(i < 43u) {pEnemy->Rotate90(); if(i % 2u) pEnemy->InvertX(); if(((i - 25u) / 3u) % 2u) pEnemy->InvertY();}
+            else if(i < 44u) {}
+            else if(i < 49u) pEnemy->Rotate270();
+            else if(i < 54u) pEnemy->Rotate270()->InvertX();
+            else if(i < 59u) {}
+            else if(i < 64u) pEnemy->Rotate180();
+            else if(i == 64u || i == 66u || i == 67u || i == 70u) pEnemy->Rotate270();
+            else if(i == 65u || i == 68u || i == 69u || i == 71u) pEnemy->Rotate270()->InvertX();
+            else if(i < 74u) {}
+            else if(i < 76u) pEnemy->Rotate90 ();
+            else if(i < 78u) pEnemy->Rotate180();
+            else if(i < 80u) pEnemy->Rotate270();
 
             coreUintW iAnchor = 0u;
-                 if(i <  5u) iAnchor = BIT(4u);
-            else if(i < 10u) iAnchor = BIT(0u);
-            else if(i < 15u) iAnchor = BIT(1u);
-            else if(i < 20u) {}
-            else if(i < 25u) {}
-            else if(i < 28u) iAnchor = BIT(0u) + BIT(3u);
-            else if(i < 31u) iAnchor = BIT(0u) + BIT(4u);
-            else if(i < 34u) iAnchor = BIT(1u) + BIT(4u);
-            else if(i < 37u) iAnchor = BIT(1u) + BIT(3u);
-            else if(i < 42u) iAnchor = BIT(0u);
-            else if(i < 47u) iAnchor = BIT(1u);
-            else if(i < 52u) iAnchor = BIT(4u);
-            else if(i < 57u) iAnchor = BIT(3u);
-            else if(i == 57u || i == 59u || i == 60u || i == 63u) iAnchor = BIT(0u);
-            else if(i == 58u || i == 61u || i == 62u || i == 64u) iAnchor = BIT(1u);
+
+                 if(i < 44u) {}
+            else if(i < 49u) iAnchor = BIT(0u);
+            else if(i < 54u) iAnchor = BIT(1u);
+            else if(i < 59u) iAnchor = BIT(4u);
+            else if(i < 64u) iAnchor = BIT(3u);
+            else if(i == 64u || i == 66u || i == 67u || i == 70u) iAnchor = BIT(0u);
+            else if(i == 65u || i == 68u || i == 69u || i == 71u) iAnchor = BIT(1u);
+            else if(i == 72u) iAnchor = BIT(4u);
+            else if(i == 73u) iAnchor = BIT(4u) + BIT(1u);
+            else if(i == 74u) iAnchor = BIT(1u);
+            else if(i == 75u) iAnchor = BIT(1u) + BIT(3u);
+            else if(i == 76u) iAnchor = BIT(3u);
+            else if(i == 77u) iAnchor = BIT(3u) + BIT(0u);
+            else if(i == 78u) iAnchor = BIT(0u);
+            else if(i == 79u) iAnchor = BIT(0u) + BIT(4u);
 
             coreVector2 vPostFactor = (vAreaTo - vAreaFrom) / (FOREGROUND_AREA * 2.0f) + 0.3f;
             coreVector2 vPostOffset = (vAreaTo + vAreaFrom) * 0.5f;
@@ -454,6 +563,8 @@ void cGeluMission::__SetupOwn()
             else if(HAS_BIT(iAnchor, 5u)) {vPostFactor.y = 1.0f; vPostOffset.y = 0.0f;}                              // middle -
 
             pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy() * vPostFactor + vPostOffset, 0.0f));
+
+            if((fLifeTime >= 0.0f) && pEnemy->HasStatus(ENEMY_STATUS_GHOST)) pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
         });
 
         STAGE_WAVE("FÜNFUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
@@ -473,29 +584,29 @@ void cGeluMission::__SetupOwn()
             pPlayer->SetArea(PLAYER_AREA_DEFAULT);
         });
 
+        g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(false);
+
         STAGE_FINISH_NOW
     });
 
     // ################################################################
     // geometry falls together and forms safe spots
-    // gegner am anfang sollten den spieler nie in die enge treiben, den säulen auszuweichen ist anstrengend genug (TODO 1: das wird derzeit nicht gemacht)
+    // gegner am anfang sollten den spieler nie in die enge treiben, den säulen auszuweichen ist anstrengend genug -> keine flachen gruppen
     // erste säule gegenüber von erster gegnerwelle
     // kreuz-tunnel, erster gegner muss seitlich anfangen, letzter gegner oben, nach doppel-gegner nicht zurück zum vorherigen
+    // in erster phase, gegner oben und unten nutzen die blöcke als schild, nicht gleichzeitig oben und unten, war zu schwer die stampf-attacken zu sehen
+    // in kreuz-tunnel, gegner von angriffen zu entkoppeln erhöhte engagement, im zweiten teil die gegner seitlich statt im tunnel bewegen zu lassen macht es weniger einfach alle zu töten, weil man fürs ausweichen nicht ständig draufhalten kann
     // TODO 1: beim start von letzter phase wackelt einmal alles bevor es sich bewegt ?
-    // TODO 1: damage on crush, no movement between blocks, where to move when crushed ?
     // TODO 1: badge: one (single) stomp contains a special enemy to attack or item to collect like Dr Robotnik, in the 2. block to appear
-    // TODO 1: final phase should switch from 110110110 to 10101 pattern at middle
+    // TODO 1: final phase sollte unterschiedlich schnelle linien haben, um muster zu brehcne
     // TODO 1: blöcke müssen echte gegner sein, für bonus punkte und handling von pulse etc
     // TODO 1: move shake (and color management if not yet) to mission code, it's only visual
-    // TODO 1: maybe focus on tunnel fight and remove stomping part (removes Sonic-endboss badge), though the side-move part is also boring
-    // TODO 1: maybe switch each phase to making the area more smaller, and opening it up to a cross and movement
-    // TODO 1: maybe blocks trying to crush you get immediately attackable
-    // TODO 1: create better fang model with low-detail version
-    // TODO 1: allow attacking and destroying blocks (and handle blocks outside of visible area)
     // TODO 1: smoke zwischen bewegenden steinen (smoke+partikel? oder nur smoke?)
     // TODO 1: helper in one of the first rows, dragging it along and flying out of screen
-    // TODO 1: in finaler phase, blöcke bewegen sich weiter (naja, man erkennt dann nicht, dass man angreifen soll)
-    // TODO 1: bullets bursts in cross section, like radiant silvergun
+    // TODO 1: player bullets should only disappear when direction is facing block (also rotation blocks segment), oder vielleicht einfach vertikale schüsse in den letzten phasen erlauben (nicht wieder einführen)
+    // TODO 1: blöcke müssen besser explodieren, e.g. schrumpfen während explosion
+    // TODO 1: blöcke müssen besser aussehen (form und farbe) (create better fang model with low-detail version)
+    // TODO 1: in tunnel 2. teil, gegner können eh nur zerstört werden wenn man sich in die blauen wellen wagt
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep = 0.44f;
@@ -510,31 +621,60 @@ void cGeluMission::__SetupOwn()
 
         STAGE_ADD_PATH(pPath2)
         {
-            pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
-            pPath2->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
+            pPath2->Reserve(3u);
+            pPath2->AddNode(coreVector2(-0.3f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2( 0.3f, 0.0f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(-0.3f,-1.3f), coreVector2(0.0f,-1.0f));
             pPath2->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 65u)
+        STAGE_ADD_PATH(pPath3)
+        {
+            pPath3->Reserve(2u);
+            pPath3->AddNode(coreVector2(-0.3f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath3->AddNode(coreVector2( 0.3f,-1.3f), coreVector2(0.0f,-1.0f));
+            pPath3->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath4)
+        {
+            pPath4->Reserve(3u);
+            pPath4->AddNode(coreVector2(-0.5f,1.3f), coreVector2(0.0f,-1.0f));
+            pPath4->AddNode(coreVector2( 0.0f,0.6f), coreVector2(1.0f, 0.0f));
+            pPath4->AddNode(coreVector2( 0.5f,1.3f), coreVector2(0.0f, 1.0f));
+            pPath4->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath5)
+        {
+            pPath5->Reserve(2u);
+            pPath5->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
+            pPath5->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
+            pPath5->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 90u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
                 pEnemy->Configure(4, COLOR_SHIP_PURPLE);
             });
         });
 
-        STAGE_GET_START(9u)
+        STAGE_GET_START(12u)
             STAGE_GET_FLOAT(fStompTime)
             STAGE_GET_UINT (iStompCount)
             STAGE_GET_UINT (iStompTarget)
             STAGE_GET_UINT (iStompTargetNext)
+            STAGE_GET_UINT (iStompInvert)
+            STAGE_GET_UINT (iStompInvertNext)
             STAGE_GET_FLOAT(fChangeDelay)
             STAGE_GET_FLOAT(fOffsetTotal)
             STAGE_GET_UINT (iOffsetTick)
             STAGE_GET_UINT (iOffsetSpawn)
             STAGE_GET_UINT (iShakeState)
+            STAGE_GET_FLOAT(fWaveTime)
         STAGE_GET_END
 
         iShakeState = 0u;
@@ -581,22 +721,24 @@ void cGeluMission::__SetupOwn()
             else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 15u, 19u)
             else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 20u, 24u)
             else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 25u, 29u)
-            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 30u, 30u)
-            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 31u, 31u)
-            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 32u, 32u)
-            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 33u, 33u)
-            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 34u, 35u)
-            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 36u, 36u)
-            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 37u, 37u)
-            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 38u, 39u)
-            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 40u, 59u)
-            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 60u, 64u)
-            else if(STAGE_SUB(17u)) STAGE_DELAY_START_CLEAR
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 30u, 39u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 40u, 49u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 50u, 50u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 51u, 51u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 52u, 52u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 53u, 53u)
+            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 54u, 55u)
+            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 56u, 56u)
+            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 57u, 58u)
+            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 59u, 59u)
+            else if(STAGE_SUB(17u)) STAGE_RESURRECT(pSquad1, 60u, 79u)
+            else if(STAGE_SUB(18u)) STAGE_RESURRECT(pSquad1, 80u, 89u)
+            else if(STAGE_SUB(19u)) STAGE_DELAY_START_CLEAR
 
-            this->SetCrushLong(m_iStageSub >= 16u);
+            this->SetCrushLong(m_iStageSub >= 18u);
         }
 
-        this->SetCrushFree((m_iStageSub >= 7u) || STAGE_TIME_BEFORE(5.0f));
+        this->SetCrushFree((m_iStageSub >= 9u) || STAGE_TIME_BEFORE(5.0f));
 
         if(STAGE_BEGINNING)
         {
@@ -625,7 +767,7 @@ void cGeluMission::__SetupOwn()
                 pPlayer->SetArea(PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,-1.0f) * 1.95f * (m_aFangRaw[0].GetSize().x * fTime3));
             });
         }
-        else if(m_iStageSub == 7u)
+        else if(m_iStageSub == 9u)
         {
             if(fStompTime) fChangeDelay += 1.0f * TIME;
 
@@ -701,8 +843,15 @@ void cGeluMission::__SetupOwn()
                 pPlayer->SetArea(PLAYER_AREA_DEFAULT + coreVector4(0.0f,1.0f,0.0f,-1.0f) * 1.95f * (m_aFangRaw[0].GetSize().x * (1.0f - fTime3)));
             });
         }
-        else if(m_iStageSub == 15u)
+        else if(m_iStageSub == 17u)
         {
+            if(STAGE_BEGINNING2)
+            {
+                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+
+                fWaveTime = 0.0f;
+            }
+
             const coreFloat fTime = nTakeTimeFunc(1.0f, 0.0f);
 
             const coreVector2 vPos = LERPBR(coreVector2(0.0f, fStep), coreVector2(0.0f, 0.0f), fTime);
@@ -715,22 +864,34 @@ void cGeluMission::__SetupOwn()
                 nSetFangPositionFunc(i * GELU_FANGS_DIMENSION + 2u, HIDDEN_POS);
             }
         }
-        else if(m_iStageSub == 16u)
+        else if((m_iStageSub == 18u) || (m_iStageSub == 19u))
         {
-            if(STAGE_BEGINNING2)
+            if(m_iStageSub == 18u)
             {
-                for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+                if(STAGE_BEGINNING2)
                 {
-                    nSetFangPositionFunc(i, coreVector2(0.0f,0.0f));
+                    g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
-                    const coreVector2 vPos   = m_aFangRaw[i].GetPosition().xy();
-                    const coreFloat   fShift = (((i / GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f) * (vPos.x + (((i % GELU_FANGS_DIMENSION) < 2u) ? 0.0f : (fStep * FOREGROUND_AREA.x)));
+                    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+                    {
+                        nSetFangPositionFunc(i, coreVector2(0.0f,0.0f));
 
-                    m_aFangRaw[i].SetPosition(coreVector3(fShift, vPos.y, 0.0f));
+                        const coreVector2 vPos   = m_aFangRaw[i].GetPosition().xy();
+                        const coreFloat   fShift = (((i / GELU_FANGS_DIMENSION) % 2u) ? -1.0f : 1.0f) * (vPos.x + (((i % GELU_FANGS_DIMENSION) < 2u) ? 0.0f : (fStep * FOREGROUND_AREA.x)));
+
+                        m_aFangRaw[i].SetPosition(coreVector3(fShift, vPos.y, 0.0f));
+                    }
+                }
+            }
+            else
+            {
+                if(std::none_of(m_aFangRaw, m_aFangRaw + GELU_FANGS, [](const cLodObject& oFang) {return oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE);}))
+                {
+                    STAGE_DELAY_END
                 }
             }
 
-            const coreFloat fSpeed = LERP(0.0f, 0.5f, MIN(m_fStageSubTime, 1.0f)) * TIME;
+            const coreFloat fSpeed = LERP(0.0f, 0.5f, (m_iStageSub == 18u) ? MIN(m_fStageSubTime.ToFloat(), 1.0f) : 1.0f) * TIME;
 
             const coreFloat fOffsetTotalPrev = fOffsetTotal;
             fOffsetTotal += fSpeed;
@@ -751,12 +912,14 @@ void cGeluMission::__SetupOwn()
 
                     iOffsetSpawn += 1u;
                 }
-                else if((iOffsetTick % 6u) == 3u)
+                else
                 {
                     STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
                     {
-                        const coreFloat fShift  = (((i - 60u) % 2u) ? -1.0f : 1.0f) * -3.0f * fStep * FOREGROUND_AREA.x;
-                        const coreFloat fHeight = (I_TO_F(i - 60u) - 2.0f) * fStep * FOREGROUND_AREA.y;
+                        if(((iOffsetTick / 3u) % 2u != 0u) == (i < 85u)) return;
+
+                        const coreFloat fShift  = ((((i - 80u) % 5u) % 2u) ? -1.0f : 1.0f) * -3.0f * fStep * FOREGROUND_AREA.x;
+                        const coreFloat fHeight = (I_TO_F((i - 80u) % 5u) - 2.0f) * fStep * FOREGROUND_AREA.y;
 
                         pEnemy->SetPosition(coreVector3(fShift, fHeight, 0.0f));
                     });
@@ -772,41 +935,19 @@ void cGeluMission::__SetupOwn()
 
             STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
             {
-                const coreFloat fMove = (((i - 60u) % 2u) ? -1.0f : 1.0f) * fSpeed * FOREGROUND_AREA.x;
+                const coreFloat fMove = ((((i - 80u) % 5u) % 2u) ? -1.0f : 1.0f) * fSpeed * FOREGROUND_AREA.x;
 
                 pEnemy->SetPosition(pEnemy->GetPosition() + coreVector3(fMove, 0.0f, 0.0f));
             });
         }
-        else if(m_iStageSub == 17u)
-        {
-            if(STAGE_BEGINNING2)
-            {
-                for(coreUintW i = 0u; i < GELU_FANGS; ++i)
-                {
-                    if(g_pForeground->IsVisibleObject(&m_aFangRaw[i]))
-                    {
-                        m_aFangRaw[i].SetColor3(coreVector3(COLOR_SHIP_BLUE));
-                    }
-                    else
-                    {
-                        this->DisableFang(i, false);
-                    }
-                }
-            }
 
-            if(std::none_of(m_aFangRaw, m_aFangRaw + GELU_FANGS, [](const cLodObject& oFang) {return oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE);}))
-            {
-                STAGE_DELAY_END
-            }
-        }
-
-        if(m_iStageSub < 8u)
+        if(m_iStageSub < 10u)
         {
             if(STAGE_TIME_BETWEEN(4.0f, 5.0f))
             {
                 ADD_BIT(iShakeState, (4u * GELU_FANGS_DIMENSION) - GELU_FANGS_DIMENSION)
             }
-            else if(STAGE_TIME_AFTER(5.0f) && ((m_iStageSub < 7u) || fStompTime))
+            else if(STAGE_TIME_AFTER(5.0f) && ((m_iStageSub < 9u) || fStompTime))
             {
                 const coreBool bUpsideDown = (iStompCount % 2u);
 
@@ -818,13 +959,17 @@ void cGeluMission::__SetupOwn()
                     const coreFloat fSide = g_pGame->FindPlayerDual(iStompCount % 2u)->GetPosition().x / FOREGROUND_AREA.x;
 
                     iStompTargetNext = CLAMP(F_TO_UI((fSide + 1.1f) / fStep), 0u, GELU_FANGS_DIMENSION - 1u);
+                    iStompInvertNext = (iStompCount % 4u) == 0u;
 
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 }
 
                 if(fStompTime >= 0.5f)
                 {
-                    ADD_BIT(iShakeState, iStompTargetNext + (bUpsideDown ? (4u * GELU_FANGS_DIMENSION) : 0u))
+                    for(coreUintW j = 0u; j < GELU_FANGS_DIMENSION; ++j)
+                    {
+                        if((iStompInvertNext != 0u) != (j == iStompTargetNext)) ADD_BIT(iShakeState, j + (bUpsideDown ? (4u * GELU_FANGS_DIMENSION) : 0u))
+                    }
                 }
 
                 if(fStompTime >= 1.2f)
@@ -832,6 +977,7 @@ void cGeluMission::__SetupOwn()
                     fStompTime   = 0.0f;
                     iStompCount  = iStompCount + 1u;
                     iStompTarget = iStompTargetNext;
+                    iStompInvert = iStompInvertNext;
                 }
 
                 const coreVector2 vFrom = coreVector2(0.0f, 3.0f * fStep * (bUpsideDown ? -1.0f : 1.0f));
@@ -842,8 +988,12 @@ void cGeluMission::__SetupOwn()
                 {
                     const coreBool bStill = (i == (bUpsideDown ? 4u : 0u));
 
-                    nSetFangPositionFunc(iStompTargetNext + i * GELU_FANGS_DIMENSION, bStill ? vTo : vFrom);
-                    nSetFangPositionFunc(iStompTarget     + i * GELU_FANGS_DIMENSION, bStill ? vTo : vPos);
+                    for(coreUintW j = 0u; j < GELU_FANGS_DIMENSION; ++j)
+                    {
+                        const coreVector2 vOffset = bStill ? vTo : (((iStompInvert != 0u) != (j == iStompTarget)) ? vPos : vFrom);
+
+                        nSetFangPositionFunc(j + i * GELU_FANGS_DIMENSION, vOffset);
+                    }
                 }
             }
         }
@@ -860,51 +1010,101 @@ void cGeluMission::__SetupOwn()
             }
             else
             {
-                oFang.SetColor3(coreVector3(0.5f,0.5f,0.5f));
+                oFang.SetColor3((m_iStageSub == 19u) ? COLOR_SHIP_BLUE : coreVector3(0.5f,0.5f,0.5f));
             }
 
             oFang.SetPosition(coreVector3(oFang.GetPosition().xy(), -0.1f));   // make sure player can be inside
 
-            const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet, const coreObject3D* pFang, const coreVector3 vIntersection, const coreBool bFirstHit)
+            const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
             {
-                pBullet->Deactivate(true, vIntersection.xy());
+                if(InBetween(pBullet->GetPosition().xy(), FOREGROUND_AREA * -1.05f, FOREGROUND_AREA * 1.05f))
+                {
+                    const coreVector2 vDiff = pBullet->GetPosition().xy() - oFang.GetPosition().xy();
 
-                if(m_iStageSub == 17u) this->DisableFang(i, true);
+                    if(InBetween(vDiff, -oFang.GetCollisionRange().xy(), oFang.GetCollisionRange().xy()))
+                    {
+                        pBullet->Deactivate(true);
+                        if(m_iStageSub == 19u) this->DisableFang(i, true);
+                    }
+                }
             };
-            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oFang, nBulletWayCollFunc);
-            Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  &oFang, nBulletWayCollFunc);
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletFangCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
+        }
+
+        if((m_iStageSub >= 9u) && (m_iStageSub < 18u))
+        {
+            const coreFloat fWaveTimePrev = fWaveTime;
+            fWaveTime += 1.0f * TIME;
+
+            if(m_iStageSub < 17u)
+            {
+                if((fWaveTime >= 7.0f) && STAGE_TICK_EXTERN(fWaveTime, fWaveTimePrev, 1.0f, 0.0f))
+                {
+                    constexpr coreUintW A[] = {1u, 3u, 2u, 0u};
+
+                    const coreVector2 vDir = (m_iStageSub == 16u) ? coreVector2(1.0f,0.0f) : StepRotated90(A[s_iTick % 4u]);
+                    const coreVector2 vPos = vDir * FOREGROUND_AREA * -1.2f;
+
+                    for(coreUintW i = 12u; i--; )
+                    {
+                        const coreVector2 vOffset = (vDir.Rotated90() * (I_TO_F(i % 6u) - 2.5f) - vDir * I_TO_F(i / 6u)) * 3.1f;
+
+                                               g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pSquad1->GetEnemy(0u), (vPos + vOffset),         vDir)        ->ChangeSize(1.6f);
+                        if(m_iStageSub == 16u) g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pSquad1->GetEnemy(0u), (vPos + vOffset) * -1.0f, vDir * -1.0f)->ChangeSize(1.6f);
+                    }
+                }
+            }
+            else
+            {
+                if((fWaveTime >= 2.0f) && STAGE_TICK_EXTERN(fWaveTime, fWaveTimePrev, 2.2f, 0.0f))
+                {
+                    const coreFloat fShift = (I_TO_F((s_iTick % 4u) % 3u) - 1.0f) * (((s_iTick / 4u) % 2u) ? -1.0f : 1.0f) * 1.5f;
+
+                    const coreVector2 vDir = coreVector2(0.0f,-1.0f);
+                    const coreVector2 vPos = vDir * FOREGROUND_AREA * -1.2f;
+
+                    for(coreUintW i = 6u; i--; )
+                    {
+                        const coreVector2 vOffset = (vDir.Rotated90() * (I_TO_F(i % 3u) - 1.0f + fShift) - vDir * I_TO_F(i / 3u)) * 3.1f;
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.3f, pSquad1->GetEnemy(0u), vPos + vOffset, vDir)->ChangeSize(1.6f);
+                    }
+                }
+            }
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i == 30u) ? 0.4f : ((i == 31u) ? 0.6f : 0.8f), (i < 25u) ? (0.2f * I_TO_F(i % 5u) + ((i < 5u) ? 4.0f : 0.0f)) : ((i < 40u) ? ((i == 30u) ? 3.0f : 0.0f) : ((i < 60u) ? (0.4f * I_TO_F(i - 40u)) : 0.0f)))
+            STAGE_LIFETIME(pEnemy, (i == 50u) ? 0.4f : ((i == 51u) ? 0.6f : ((i < 50u) ? 1.0f : 0.8)), (i < 50u) ? (0.25f * I_TO_F(i % 5u) + ((i < 5u) ? 7.0f : 0.0f)) : ((i < 60u) ? ((i == 50u) ? 3.0f : 0.0f) : ((i < 80u) ? (0.4f * I_TO_F(i - 60u)) : 0.0f)))
 
-            const coreSpline2* pPath = (i < 10u) ? pPath2 : pPath1;
+            const coreSpline2* pPath = (i < 10u) ? pPath3 : ((i < 30u) ? pPath2 : ((i < 50u) ? pPath4 : ((i < 60u) ? pPath5 : pPath1)));
 
-            if(pPath == pPath1) STAGE_REPEAT(pPath->GetTotalDistance())
+            if(pPath != pPath5) STAGE_REPEAT(pPath->GetTotalDistance())
 
-            if(i < 30u)
+            if(i < 50u)
             {
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((i < 10u || i >= 25u) ? ((I_TO_F(i % 5u) - 2.0f) * 0.2f) : (0.5f - 0.5f * I_TO_F((i - 10u) / 5u)), 0.0f);
+                const coreVector2 vOffset = coreVector2((i < 30u) ? 0.0f : (((i / 5u) % 2u) ? 0.5f : -0.5f), 0.0f);
 
                 pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
 
-                     if(i <  5u) pEnemy->Rotate90 ();
-                else if(i < 10u) pEnemy->Rotate270();
-                else if(i < 15u) pEnemy->Rotate90 ();
-                else if(i < 20u) pEnemy->Rotate270();
-                else if(i < 25u) pEnemy->Rotate90 ();
-                else if(i < 30u) pEnemy->Rotate270();
+                     if(i <  5u) pEnemy->Rotate90();
+                else if(i < 10u) pEnemy->Rotate90()->InvertX();
+                else if(i < 15u) pEnemy->Rotate90();
+                else if(i < 20u) pEnemy->Rotate90()->InvertY();
+                else if(i < 25u) pEnemy->Rotate90()->InvertX();
+                else if(i < 30u) pEnemy->Rotate90()->InvertX()->InvertY();
+                else if(i < 40u) pEnemy->InvertX ();
+                else if(i < 50u) pEnemy->InvertX ()->Rotate180();
             }
-            else if(i < 40u)
+            else if(i < 60u)
             {
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
                 const coreVector2 vOffset = coreVector2(0.0f,0.0f);
 
                 pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
 
-                switch(i - 30u)
+                switch(i - 50u)
                 {
                 default: ASSERT(false)
                 case 0u: pEnemy->Rotate270(); break;
@@ -915,29 +1115,23 @@ void cGeluMission::__SetupOwn()
                 case 5u: pEnemy->Rotate180(); break;
                 case 6u: pEnemy->Rotate90 (); break;
                 case 7u: pEnemy->Rotate180(); break;
-                case 8u: pEnemy->Rotate90 (); break;
+                case 8u: pEnemy->Rotate270(); break;
                 case 9u:                      break;
                 }
             }
-            else if(i < 60u)
+            else if(i < 80u)
             {
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2(((i - 40u) % 2u) ? -0.18f : 0.18f, 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 60u) % 5u) - 4.0f) * 0.2f, 0.0f);
 
                 pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
+
+                pEnemy->Rotate90();
+                if(i % 2u) pEnemy->InvertX();
             }
             else
             {
-                // nothing
-            }
-
-            if((i >= 30u && i < 60u) && STAGE_TICK_LIFETIME(15.0f, 0.0f))
-            {
-                const coreVector2 vPos = pEnemy->GetPosition ().xy();
-                const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
-
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos, -vDir)->ChangeSize(1.6f);
+                pEnemy->DefaultRotate(fLifeTimeBase * 2.0f*PI);
             }
         });
 
@@ -980,27 +1174,26 @@ void cGeluMission::__SetupOwn()
     // erster gegner muss verdeckt sein um kollision zu zeigen
     // zweite gruppe muss seitlich sein um flip mechanik zu zeigen
     // dritte gruppe zwingt spieler durch blöcke durch zu fliegen
-    // line pattern should have no arrows down and only 1-turn changes, to make navigation easier in this first moving pattern
+    // [deprecated] line pattern should have no arrows down and only 1-turn changes, to make navigation easier in this first moving pattern
     // block pattern should not have same direction twice
-    // checkerboard pattern should provide a distinct path to kill enemies as fast as possible (also in coop, equal amount of enemies for each player) (also every empty field has a single arrow it points at)
+    // checkerboard pattern should provide a distinct path to kill enemies as fast as possible (also in coop, equal amount of enemies for each player) (also every empty field has a single arrow it points at) (you can shortcut by flying close to enemies, but that's fine)
     // there should be an empty line between pattern changes and every pattern starts at 0 (deterministic)
-    // TODO 1: high tide in nCreateWay
+    // collision modifier needs to be big enough, so player cannot squeeze throw 2 blocks touching their corners
+    // bei linien-welle, nicht alle 4 varianten in einer reihe, damit der spieler sich immer drehen muss, aber so dass einzige drehung sowohl links oder rechts ein loch öffnet
+    // blöcke sollen von links kommen, um von regulären side-scrollern abzuweichen (e.g. revert-part in Gradius V)
+    // in linien welle, linie sollt nicht durchgehend ausgerichtet sein weil zu leicht, gegner die separat fliegen sind interessanter, aber nicht entlang bewegungs-richtung weil zu leicht, gruppe oben drückt den spieler zurück während er sie töten will, gruppe unten setzten den spieler unter druck nicht zerquetscht zu werden
+    // in cluster gruppe, gegner müssen durch blöcke fliegen, damit sie nicht in einem zug zerstört werden können
     // TODO 1: add correction for spawning (changes slightly due to rounding) [] []  []
-    // TODO 1: breaking (speed) movement into one direction needs to align with 6-cube pattern along screen
-    // TODO 1: player should not be able to shoot and move between (neighbor-)blocks
-    // TODO 1: player should not be able to fly "through" blocks, can happen if they move against fly direction
     // TODO 1: coop: both need to be in same direction | depends on side the block is (could be confusing on left-right movement)
     // TODO 1: in coop, richtung ändert sich erst wenn beide in die selbe schauen, ansonsten bleibt sie unverändert (hmm, oder doch beide richtungen ?, is leichter zu kommunizieren)
     // TODO 1: aber was ist wenn blöcke nur auf der eigenen seite reagieren, und auch anders angeordnet sind (e.g. wenn linien von oben kommen ist link-rechts vertauscht), könnte lustig sein
-    // TODO 1: blocks pressing player against wall need to make damage
-    // TODO 1: block should not allow player to "press into", same with Fang objects in dynamic wall wave
-    // TODO 1: allow rotation already at the border of arrows
     // TODO 1: player may forget on block-wave that he can block the bullets
-    // TODO 1: enemies in the line wave and block wave need to have more variety per zone
+    // TODO 1: enemies in the block wave need to have more variety per zone
     // TODO 1: how to show player that touching blocks is harmless, energy-effect is usually perceived as bad
     // TODO 1: dance dance revolution as badge (+ extra score ?)
-    // TODO 1: maybe in line sub-stage have 2 empty lines between 1-2-1-2, and only use left and right
     // TODO 1: show an effect when you cannot rotate (on player)
+    // TODO 1: N ms delay wenn man drehen will während man geblockt ist, in dem drehung doch noch umgesetzt wird wenn man dann rausfliegt
+    // TODO 1: sollte nicht über lava sein wegen kontrast der blöcke
     // TWIST: (boss?) line of blocks fom left and right at the same time, but with different direction, can crush player
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
@@ -1010,7 +1203,7 @@ void cGeluMission::__SetupOwn()
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,1.3f), coreVector2(0.0f,-1.0f));
             pPath1->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
             pPath1->Refine();
         });
@@ -1018,20 +1211,28 @@ void cGeluMission::__SetupOwn()
         STAGE_ADD_PATH(pPath2)
         {
             pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(0.0f,  (4.0f * fStep - 0.0014f)), coreVector2(0.0f,-1.0f));
-            pPath2->AddNode(coreVector2(0.0f, -(4.0f * fStep - 0.0014f)), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
             pPath2->Refine();
         });
 
         STAGE_ADD_PATH(pPath3)
         {
             pPath3->Reserve(2u);
-            pPath3->AddNode(coreVector2(0.0f,  3.5f * fStep), coreVector2(0.0f,-1.0f));
-            pPath3->AddNode(coreVector2(0.0f, -2.5f * fStep), coreVector2(0.0f,-1.0f));
+            pPath3->AddNode(coreVector2(0.0f,  (4.0f * fStep - 0.0014f)), coreVector2(0.0f,-1.0f));
+            pPath3->AddNode(coreVector2(0.0f, -(4.0f * fStep - 0.0014f)), coreVector2(0.0f,-1.0f));
             pPath3->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 41u)
+        STAGE_ADD_PATH(pPath4)
+        {
+            pPath4->Reserve(2u);
+            pPath4->AddNode(coreVector2(0.0f,  3.5f * fStep), coreVector2(0.0f,-1.0f));
+            pPath4->AddNode(coreVector2(0.0f, -2.5f * fStep), coreVector2(0.0f,-1.0f));
+            pPath4->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 49u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -1040,23 +1241,26 @@ void cGeluMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(6u)
+        STAGE_GET_START(7u)
             STAGE_GET_VEC2 (vSpawnTime)
             STAGE_GET_FLOAT(fSpawnOffset)
             STAGE_GET_FLOAT(fCheckerBreak)
             STAGE_GET_UINT (iCheckerCount)
             STAGE_GET_UINT (iPatternCount)
+            STAGE_GET_UINT (iCreateStart)
         STAGE_GET_END
 
-        const auto nCreateWay = [this](const coreVector2 vPosition, const coreVector2 vDirection)
+        const auto nCreateWay = [&](const coreVector2 vPosition, const coreVector2 vDirection)
         {
-            for(coreUintW i = 0u; i < GELU_WAYS; ++i)
+            for(coreUintW i = iCreateStart; i < GELU_WAYS; ++i)
             {
                 const coreObject3D* pGenerate = (*m_Way.List())[i];
 
                 if(!pGenerate->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
+                    iCreateStart = i + 1u;
                     this->EnableWay(i, vPosition, vDirection);
+
                     return;
                 }
             }
@@ -1066,15 +1270,16 @@ void cGeluMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  0u)
-            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  1u,  1u)
-            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1,  2u,  3u)
-            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1,  4u,  5u)
-            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1,  6u, 10u)
-            else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 11u, 18u)
-            else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 19u, 30u)
-            else if(STAGE_SUB(8u)) STAGE_RESURRECT(pSquad1, 31u, 40u)
-            else if(STAGE_SUB(9u))
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  0u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  1u,  1u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  2u,  3u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1,  4u,  5u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1,  6u, 10u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 11u, 18u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 19u, 26u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 27u, 38u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 39u, 48u)
+            else if(STAGE_SUB(10u))
             {
                 for(coreUintW i = 0u; i < GELU_WAYS; ++i)
                     this->DisableWay(i, true);
@@ -1083,15 +1288,18 @@ void cGeluMission::__SetupOwn()
                  if(m_iStageSub == 2u) iPatternCount = (((iPatternCount + 1u) % 4u) < 2u) ? 1u : 0u;
             else if(m_iStageSub >= 5u) iPatternCount = 0u;
 
-            fSpawnOffset = 0.74f + FRACT(vSpawnTime.y * fStepDelay) * fStep;
+            fSpawnOffset = 0.74f + FRACT(vSpawnTime.arr((m_iStageSub < 7u) ? 0u : 1u) * fStepDelay) * fStep;
         }
 
-        coreVector2 vMove;
-             if(m_iStageSub < 6u) vMove = coreVector2(1.0f, 0.0f) * (TIME * 15.0f);
-        else if(m_iStageSub < 9u) vMove = coreVector2(0.0f,-1.0f) * (TIME * 25.0f);
-        else                      vMove = coreVector2(0.0f, 0.0f);
+        this->SetCrushLong(true);
+        this->SetCrushFree(true);
 
-        if(m_iStageSub == 8u)
+        coreVector2 vMove;
+             if(m_iStageSub <  7u) vMove = coreVector2(1.0f, 0.0f) * (TIME * 15.0f);
+        else if(m_iStageSub < 10u) vMove = coreVector2(0.0f,-1.0f) * (TIME * 25.0f);
+        else                       vMove = coreVector2(0.0f, 0.0f);
+
+        if(m_iStageSub == 9u)
         {
             if(iCheckerCount == 18u)
             {
@@ -1103,17 +1311,34 @@ void cGeluMission::__SetupOwn()
         const coreVector2 vSpawnTimePre = vSpawnTime;
         vSpawnTime += vMove;
 
-        if(m_iStageSub < 6u)
+        if(m_iStageSub < 7u)
         {
             if(F_TO_SI(vSpawnTimePre.x * fStepDelay) != F_TO_SI(vSpawnTime.x * fStepDelay))
             {
                 iPatternCount += 1u;
 
-                const coreUint8 iStep = iPatternCount % 4u;
+                if(m_iStageSub < 6u)
+                {
+                    const coreUint8 iTick = iPatternCount % 4u;
 
-                     if(m_iStageSub == 1u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, StepRotated90((iStep == 2u) ? 0u : iStep));
-                else if(m_iStageSub <  5u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, (iStep % 2u) ? coreVector2(1.0f,0.0f) : coreVector2(-1.0f,0.0f));
-                else if(m_iStageSub == 5u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
+                         if(m_iStageSub == 1u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, StepRotated90((iTick == 2u) ? 0u : iTick));
+                    else if(m_iStageSub <= 3u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, (iTick % 2u) ? coreVector2(1.0f,0.0f) : coreVector2(-1.0f,0.0f));
+                    else if(m_iStageSub <= 5u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
+                }
+                else
+                {
+                    if((iPatternCount >= 2u) && ((iPatternCount % 2u) == 0u))
+                    {
+                        const coreUint8 iTick = (iPatternCount / 2u) % 4u;
+
+                        for(coreUintW i = 0u; i < 6u; ++i)
+                        {
+                            if((iTick % 2u) == (i % 2u)) continue;
+
+                            nCreateWay(coreVector2(-1.3f, (I_TO_F(i) - 2.5f) * fStep) * FOREGROUND_AREA, StepRotated90(((iTick / 2u) * 2u + i) % 4u));
+                        }
+                    }
+                }
             }
         }
         else
@@ -1122,19 +1347,19 @@ void cGeluMission::__SetupOwn()
             {
                 iPatternCount += 1u;
 
-                if(m_iStageSub == 6u)
+                if(m_iStageSub == 7u)
                 {
-                    if(iPatternCount % 2u)
+                    if((iPatternCount % 2u) == 1u)
                     {
+                        const coreUint8 iTick = (iPatternCount / 2u) % 4u;
+
                         for(coreUintW i = 0u; i < 6u; ++i)
                         {
-                            const coreUint8 iStep = (iPatternCount / 2u) % 4u;
-
-                            nCreateWay(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, StepRotated90((iStep == 2u) ? 0u : iStep));
+                            nCreateWay(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, StepRotated90(((iTick + i) * 2u + iTick) % 4u));
                         }
                     }
                 }
-                else if(m_iStageSub == 7u)
+                else if(m_iStageSub == 8u)
                 {
                     if(iPatternCount >= 2u)
                     {
@@ -1146,7 +1371,7 @@ void cGeluMission::__SetupOwn()
                         }
                     }
                 }
-                else if(m_iStageSub == 8u)
+                else if(m_iStageSub == 9u)
                 {
                     if((iPatternCount >= 2u) && (iPatternCount < 8u))
                     {
@@ -1184,7 +1409,10 @@ void cGeluMission::__SetupOwn()
             pWay->SetPosition(coreVector3(vNewPos, 0.0f));
 
             if(g_pForeground->IsVisiblePoint(vOldPos, 1.3f) && !g_pForeground->IsVisiblePoint(vNewPos, 1.3f))
+            {
+                iCreateStart = MIN(iCreateStart, i);
                 this->DisableWay(i, false);
+            }
 
             if(coreVector2::Dot(g_pGame->FindPlayerSide(pWay->GetPosition().xy())->GetDirection().xy(), pWay->GetDirection().xy()) > 0.9f)
             {
@@ -1194,12 +1422,15 @@ void cGeluMission::__SetupOwn()
             {
                 ADD_BIT(m_iWayVisible, i)
 
-                const auto nBulletWayCollFunc = [](cBullet* OUTPUT pBullet, const coreObject3D* pWay, const coreVector3 vIntersection, const coreBool bFirstHit)
+                const auto nBulletWayCollFunc = [&](cBullet* OUTPUT pBullet)
                 {
-                    pBullet->Deactivate(true, vIntersection.xy());
+                    const coreVector2 vDiff = pBullet->GetPosition().xy() - pWay->GetPosition().xy();
+
+                    if(InBetween(vDiff, -pWay->GetCollisionRange().xy(), pWay->GetCollisionRange().xy()))
+                        pBullet->Deactivate(true);
                 };
-                Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pWay, nBulletWayCollFunc);
-                Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  pWay, nBulletWayCollFunc);
+                g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletWayCollFunc);
+                g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletWayCollFunc);   // TODO 1: noch immer falsch, geschosse gehen rein, weil mittelpunkt des geschosses verwendet wird
             }
         }
 
@@ -1231,7 +1462,7 @@ void cGeluMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i < 11u) ? 0.5f : (25.0f / FOREGROUND_AREA.y), ((i < 1u) ? 1.9f : ((i < 11u) ? 0.0f : ((i < 19u) ? (I_TO_F((i - 11u) / 2u) * 2.0f * fStep - 0.17f) : ((i < 31u) ? (I_TO_F((i - 19u) / 3u) * 2.0f * fStep) : 0.0f)))) + ((i < 11) ? 0.0f : fSpawnOffset))
+            STAGE_LIFETIME(pEnemy, (i < 27u) ? 0.5f : (25.0f / FOREGROUND_AREA.y), ((i < 1u) ? 1.9f : ((i < 11u) ? 0.0f : ((i < 27u) ? (I_TO_F((i - 11u) % 8u) * 0.3f + 2.0f) : ((i < 39u) ? (I_TO_F((i - 27u) / 3u) * 2.0f * fStep) : 0.0f)))) + ((i < 27) ? 0.0f : fSpawnOffset))
 
             if(i < 11u)
             {
@@ -1240,54 +1471,68 @@ void cGeluMission::__SetupOwn()
 
                 pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
 
-                     if(i < 1u) {}
-                else if(i < 2u) pEnemy->Rotate90 ();
-                else if(i < 4u) pEnemy->Rotate270();
-                else if(i < 5u) pEnemy->Rotate90 ();
-                else if(i < 6u) pEnemy->Rotate270();
+                     if(i <  1u) {}
+                else if(i <  2u) pEnemy->Rotate90 ();
+                else if(i <  4u) pEnemy->Rotate270();
+                else if(i <  5u) pEnemy->Rotate90 ();
+                else if(i <  6u) pEnemy->Rotate270();
+                else if(i < 11u) {}
             }
-            else if(i < 31u)
+            else if(i < 27u)
             {
                 STAGE_REPEAT(pPath2->GetTotalDistance())
 
-                const coreVector2 vFactor = coreVector2((i < 19u) ? COS(fLifeTime * 2.0f) : 1.0f, 1.0f);
-                const coreVector2 vOffset = coreVector2(((i < 19u) ? (((i - 11u) % 2u) ? -1.5f : 1.5f) : ((I_TO_F((i - 19u) % 3u) - 1.0f) * 2.0f)) * fStep, 0.0f);
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2(((i - 11u) % 2u) ? 0.9f : -0.9f, 0.0f);
 
                 pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+
+                     if(i < 19u) pEnemy->Rotate90();
+                else if(i < 27u) pEnemy->Rotate90()->InvertX();
+            }
+            else if(i < 39u)
+            {
+                STAGE_REPEAT(pPath3->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 27u) % 3u) - 1.0f) * 2.0f * fStep, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
             }
             else
             {
-                coreUintW X, Y;
-                switch(i - 31u)
+                coreUintW X, Y, D;
+                switch(i - 39u)
                 {
                 default: ASSERT(false)
-                case 0u: X = 1u; Y = 1u; break;
-                case 1u: X = 0u; Y = 2u; break;
-                case 2u: X = 4u; Y = 2u; break;
-                case 3u: X = 1u; Y = 3u; break;
-                case 4u: X = 3u; Y = 3u; break;
-                case 5u: X = 5u; Y = 3u; break;
-                case 6u: X = 4u; Y = 4u; break;
-                case 7u: X = 1u; Y = 5u; break;
-                case 8u: X = 3u; Y = 5u; break;
-                case 9u: X = 5u; Y = 5u; break;
+                case 0u: X = 1u; Y = 1u; D = 2u; break;
+                case 1u: X = 0u; Y = 2u; D = 3u; break;
+                case 2u: X = 4u; Y = 2u; D = 3u; break;
+                case 3u: X = 1u; Y = 3u; D = 1u; break;
+                case 4u: X = 3u; Y = 3u; D = 2u; break;
+                case 5u: X = 5u; Y = 3u; D = 1u; break;
+                case 6u: X = 4u; Y = 4u; D = 0u; break;
+                case 7u: X = 1u; Y = 5u; D = 2u; break;
+                case 8u: X = 3u; Y = 5u; D = 1u; break;
+                case 9u: X = 5u; Y = 5u; D = 2u; break;
                 }
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
                 const coreVector2 vOffset = coreVector2((I_TO_F(X) - 2.5f) * fStep, I_TO_F(Y) * fStep);
 
-                pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->DefaultMovePath(pPath4, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->SetDirection   (coreVector3(StepRotated90(D), 0.0f));
             }
 
-            if((i < 11u) && STAGE_TICK_LIFETIME(10.0f, 0.0f) && ((s_iTick % 10u) < 2u))
+            if((i < 19u) && STAGE_TICK_LIFETIME(10.0f, 0.0f) && ((s_iTick % 10u) < 2u))
             {
-                const coreUintW   iCount = (i < 6u) ? 4u : 16u;
+                const coreUintW   iCount = (i >= 6u && i < 11u) ? 30u : 6u;
                 const coreVector2 vPos   = pEnemy->GetPosition().xy();
-                const coreFloat   fBase  = ((i >= 1u && i < 6u) ? pEnemy->AimAtPlayerSideRev() : pEnemy->AimAtPlayerDual(((s_iTick % 20u) < 10u) ? 0u : 1u)).Angle();
+                const coreFloat   fBase  = ((i >= 1u && i < 6u) ? pEnemy->AimAtPlayerSideRev() : pEnemy->AimAtPlayerDual((i < 11u) ? (((s_iTick % 20u) < 10u) ? 0u : 1u) : ((vPos.y > 0.0f) ? 0u : 1u))).Angle();
 
                 for(coreUintW j = iCount; j--; )
                 {
-                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iCount - 1u) * 0.5f) * 8.0f) + fBase);
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iCount - 1u) * 0.5f) * 4.0f) + fBase);
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
                 }
@@ -1315,21 +1560,26 @@ void cGeluMission::__SetupOwn()
     // ################################################################
     // snap to grid
     // player should not be moved if his current orb gets destroyed, to not move him into possible attack without being able to know or react (but provide way to both move into desired valid orb from there, and to return to far valid node as fallback)
-    // do not reduce movement-speed while shooting, feels sluggish
+    // [deprecated] do not reduce movement-speed while shooting, feels sluggish
     // moving enemies between orbs cause waiting time and frustration, but moving on nodes causes too much pressure related to attacks (because fine evasion is not possible) -> no enemy should move, player needs to be able to kill them on his own pace
     // rotating orbs is impossible from a UX perspective
-    // attacks while moving between orbs (with sluggishness) are too hard to control precisely
+    // [deprecated] attacks while moving between orbs (with sluggishness) are too hard to control precisely
     // the spawn pattern should make sure that it is impossible for the single player to stand at a location where the next enemy might spawn
-    // moving or stretching orbs is possible (e.g. inner 4 orbs to outer), but a meaningful enemy pattern related to it might be problematic
-    // attack waves from above (guitar hero) (or any direction) while attacking enemies was ok, but cut due to time
+    // [deprecated] moving or stretching orbs is possible (e.g. inner 4 orbs to outer), but a meaningful enemy pattern related to it might be problematic
+    // lines can be used even when they blend-out, as long as the target orb is enabled
+    // moving everything statically is possible and feels nice, but does not add any depth (so it's only used to improve the rail-sequence)
+    // in rail-sequence, make sure enemies are stretched out, so player has to move all the way, and nearly touch the sides, and enemies do not die too quickly
     // TODO 1: entferne cross movement
-    // TODO 1: bullets have different distances from each other
-    // TODO 1: bullets should not disappear when causing a hit
     // TODO 1: kugerl die verschwinden sollen, aber der spieler noch belegt, sollen erst verschwinden nachdem er wegmoved (chained at corners)
     // TODO 1: orb wave special effects
-    // TODO 1: die finale welle brauch noch einen twist
-    // TODO 1: animation-offset for each gameplay object (everywhere!)
-    // TODO 1: guitar hero as badge (+ extra score ?)
+    // TODO 1: collect yellow blocks as badge (+ extra score ?)
+    // TODO 1: spieler müssen während des einflugs auf ihre plätze bewegt werden
+    // TODO 1: helfer ist in eine der spheren und fliegt weg wenn diese zerstört wird
+    // TODO 1: first bullets should start left, top, and left again
+    // TODO 1: outro animation where orbs crash together (also make sure bullet creation is correctly disabled) (moved to center of screen ?) (beware of line calculation causing div0)
+    // TODO 1: crossing lines ?
+    // TODO 1: get pushed back to old sphere when crashing into enemy
+    // TODO 1: near the end towards 2x2, the vertical middle line is not crossed that often, should be improved
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -1337,34 +1587,20 @@ void cGeluMission::__SetupOwn()
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.0f, 1.2f),           coreVector2(0.0f,-1.0f));
-            pPath1->AddStop(coreVector2(0.0f, 1.5f) * fOrbLen, coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,1.3f),           coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,1.5f) * fOrbLen, coreVector2(0.0f,-1.0f));
             pPath1->Refine();
         });
 
         STAGE_ADD_PATH(pPath2)
         {
-            pPath2->Reserve(8u);
-            pPath2->AddNode (coreVector2( 0.5f, 0.5f) * fOrbLen, coreVector2(-1.0f, 0.0f));
-            pPath2->AddNodes(coreVector2(-0.5f, 0.5f) * fOrbLen, coreVector2(-1.0f, 0.0f), coreVector2( 0.0f,-1.0f));
-            pPath2->AddNodes(coreVector2(-0.5f,-0.5f) * fOrbLen, coreVector2( 0.0f,-1.0f), coreVector2( 1.0f, 0.0f));
-            pPath2->AddNodes(coreVector2( 0.5f,-0.5f) * fOrbLen, coreVector2( 1.0f, 0.0f), coreVector2( 0.0f, 1.0f));
-            pPath2->AddNode (coreVector2( 0.5f, 0.5f) * fOrbLen, coreVector2( 0.0f, 1.0f));
+            pPath2->Reserve(2u);
+            pPath2->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
             pPath2->Refine();
         });
 
-        STAGE_ADD_PATH(pPath3)
-        {
-            pPath3->Reserve(8u);
-            pPath3->AddNode (coreVector2(-1.5f, 1.5f) * fOrbLen, coreVector2( 1.0f, 0.0f));
-            pPath3->AddNodes(coreVector2( 1.5f, 1.5f) * fOrbLen, coreVector2( 1.0f, 0.0f), coreVector2( 0.0f,-1.0f));
-            pPath3->AddNodes(coreVector2( 1.5f,-1.5f) * fOrbLen, coreVector2( 0.0f,-1.0f), coreVector2(-1.0f, 0.0f));
-            pPath3->AddNodes(coreVector2(-1.5f,-1.5f) * fOrbLen, coreVector2(-1.0f, 0.0f), coreVector2( 0.0f, 1.0f));
-            pPath3->AddNode (coreVector2(-1.5f, 1.5f) * fOrbLen, coreVector2( 0.0f, 1.0f));
-            pPath3->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 36u)
+        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 91u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -1373,11 +1609,9 @@ void cGeluMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(21u + 3u * GAME_PLAYERS)
-            STAGE_GET_UINT64_ARRAY(aiSnakePtr, 10u)
-            STAGE_GET_UINT        (iSnakeNum)
-            STAGE_GET_UINT_ARRAY  (aiTarget,  GAME_PLAYERS)
-            STAGE_GET_VEC2_ARRAY  (avOldMove, GAME_PLAYERS)
+        STAGE_GET_START(3u * GAME_PLAYERS)
+            STAGE_GET_UINT_ARRAY(aiTarget,  GAME_PLAYERS)
+            STAGE_GET_VEC2_ARRAY(avOldMove, GAME_PLAYERS)
         STAGE_GET_END
 
         // 12 13 14 15
@@ -1385,44 +1619,89 @@ void cGeluMission::__SetupOwn()
         // 04 05 06 07
         // 00 01 02 03
 
+        // ()09()10()11()
+        // 20  21  22  23
+        // ()06()07()08()
+        // 16  17  18  19
+        // ()03()04()05()
+        // 12  13  14  15
+        // ()00()01()02()
+
         const auto nPosFrom = [](const coreUintW iIndex)
         {
-            return coreVector2::Direction(I_TO_F(iIndex) / I_TO_F(GELU_ORBS - 1u) * (9.0f*PI)) * FOREGROUND_AREA * 2.0f;   // -1 looks better
+            ASSERT(iIndex < GELU_ORBS)
+            return coreVector2::Direction(I_TO_F(iIndex) / I_TO_F(GELU_ORBS - 1u) * (9.0f*PI)) * FOREGROUND_AREA * 2.0f;   // -1u looks better
         };
 
         const auto nPosTo = [](const coreUintW iIndex)
         {
+            ASSERT(iIndex < GELU_ORBS)
             return coreVector2(I_TO_F(iIndex % 4u) - 1.5f, I_TO_F(iIndex / 4u) - 1.5f) * FOREGROUND_AREA * fOrbLen;
+        };
+
+        const auto nLineIndexFunc = [](coreUintW iOrb1, coreUintW iOrb2)
+        {
+            ASSERT((iOrb1 < GELU_ORBS) && (iOrb2 < GELU_ORBS))
+
+            if(iOrb1 > iOrb2) std::swap(iOrb1, iOrb2);
+            ASSERT(iOrb1 != iOrb2)
+
+            const coreUintW iLine = (iOrb2 - iOrb1 == 4u) ? (iOrb1 + 12u) : (iOrb1 - (iOrb1 / 4u));
+            ASSERT(iLine < GELU_LINES)
+
+            return iLine;
         };
 
         if(STAGE_CLEARED)
         {
                  if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  0u)
             else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  1u,  1u)
-            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  2u,  2u)
-            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1,  3u,  3u)
-            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1,  4u,  4u)
-            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1,  5u,  5u)
-            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1,  6u,  6u)
-            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1,  7u,  7u)
-            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1,  8u,  8u)
-            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1,  9u,  9u)
-            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 10u, 10u)
-            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 11u, 11u)
-            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 12u, 12u)
-            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 13u, 13u)
-            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 14u, 14u)
-            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 15u, 15u)
-            else if(STAGE_SUB(17u)) STAGE_RESURRECT(pSquad1, 16u, 16u)
-            else if(STAGE_SUB(18u)) STAGE_RESURRECT(pSquad1, 17u, 17u)
-            else if(STAGE_SUB(19u)) STAGE_RESURRECT(pSquad1, 18u, 18u)
-            else if(STAGE_SUB(20u)) STAGE_RESURRECT(pSquad1, 19u, 19u)
-            else if(STAGE_SUB(21u)) STAGE_RESURRECT(pSquad1, 20u, 21u)
-            else if(STAGE_SUB(22u)) STAGE_RESURRECT(pSquad1, 22u, 23u)
-            else if(STAGE_SUB(23u)) STAGE_RESURRECT(pSquad1, 24u, 25u)
-            else if(STAGE_SUB(24u)) STAGE_RESURRECT(pSquad1, 26u, 27u)
-            else if(STAGE_SUB(25u)) STAGE_RESURRECT(pSquad1, 28u, 35u)
-            else if(STAGE_SUB(26u))
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  2u,  3u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1,  4u,  6u)
+
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1,  7u,  7u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1,  8u,  8u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1,  9u,  9u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 10u, 10u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 11u, 11u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 12u, 12u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 13u, 13u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 14u, 14u)
+            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 15u, 15u)
+            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 16u, 16u)
+            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 17u, 17u)
+            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 18u, 18u)
+
+            else if(STAGE_SUB(17u)) STAGE_RESURRECT(pSquad1, 19u, 19u)
+            else if(STAGE_SUB(18u)) STAGE_RESURRECT(pSquad1, 20u, 20u)
+            else if(STAGE_SUB(19u)) STAGE_RESURRECT(pSquad1, 21u, 21u)
+            else if(STAGE_SUB(20u)) STAGE_RESURRECT(pSquad1, 22u, 22u)
+            else if(STAGE_SUB(21u)) STAGE_RESURRECT(pSquad1, 23u, 23u)
+            else if(STAGE_SUB(22u)) STAGE_RESURRECT(pSquad1, 24u, 24u)
+            else if(STAGE_SUB(23u)) STAGE_RESURRECT(pSquad1, 25u, 25u)
+            else if(STAGE_SUB(24u)) STAGE_RESURRECT(pSquad1, 26u, 26u)
+            else if(STAGE_SUB(25u)) STAGE_RESURRECT(pSquad1, 27u, 27u)
+            else if(STAGE_SUB(26u)) STAGE_RESURRECT(pSquad1, 28u, 28u)
+            else if(STAGE_SUB(27u)) STAGE_RESURRECT(pSquad1, 29u, 29u)
+            else if(STAGE_SUB(28u)) STAGE_RESURRECT(pSquad1, 30u, 30u)
+
+            else if(STAGE_SUB(29u)) STAGE_RESURRECT(pSquad1, 31u, 31u)
+            else if(STAGE_SUB(30u)) STAGE_RESURRECT(pSquad1, 32u, 32u)
+            else if(STAGE_SUB(31u)) STAGE_RESURRECT(pSquad1, 33u, 33u)
+            else if(STAGE_SUB(32u)) STAGE_RESURRECT(pSquad1, 34u, 34u)
+            else if(STAGE_SUB(33u)) STAGE_RESURRECT(pSquad1, 35u, 35u)
+            else if(STAGE_SUB(34u)) STAGE_RESURRECT(pSquad1, 36u, 36u)
+            else if(STAGE_SUB(35u)) STAGE_RESURRECT(pSquad1, 37u, 37u)
+            else if(STAGE_SUB(36u)) STAGE_RESURRECT(pSquad1, 38u, 38u)
+
+            else if(STAGE_SUB(37u)) STAGE_RESURRECT(pSquad1, 39u, 46u)
+            else if(STAGE_SUB(38u)) STAGE_RESURRECT(pSquad1, 47u, 54u)
+
+            else if(STAGE_SUB(39u)) STAGE_RESURRECT(pSquad1, 55u, 63u)
+            else if(STAGE_SUB(40u)) STAGE_RESURRECT(pSquad1, 64u, 72u)
+            else if(STAGE_SUB(41u)) STAGE_RESURRECT(pSquad1, 73u, 81u)
+            else if(STAGE_SUB(42u)) STAGE_RESURRECT(pSquad1, 82u, 90u)
+            else if(STAGE_SUB(43u))
             {
                 for(coreUintW i = 0u; i < GELU_ORBS; ++i)
                     this->DisableOrb(i, true);
@@ -1433,30 +1712,87 @@ void cGeluMission::__SetupOwn()
                 });
             }
 
-                 if(m_iStageSub ==  4u) this->DisableOrb( 3u, true);
-            else if(m_iStageSub ==  6u) this->DisableOrb(15u, true);
-            else if(m_iStageSub ==  9u) this->DisableOrb( 0u, true);
-            else if(m_iStageSub == 11u) this->DisableOrb(12u, true);
-            else if(m_iStageSub == 14u) this->DisableOrb( 8u, true);
-            else if(m_iStageSub == 15u) this->DisableOrb(14u, true);
-            else if(m_iStageSub == 16u) this->DisableOrb( 1u, true);
-            else if(m_iStageSub == 17u) this->DisableOrb( 7u, true);
-            else if(m_iStageSub == 18u) this->DisableOrb(13u, true);
-            else if(m_iStageSub == 19u) this->DisableOrb( 4u, true);
-            else if(m_iStageSub == 20u) this->DisableOrb(11u, true);
-            else if(m_iStageSub == 21u) this->DisableOrb( 2u, true);
+            constexpr coreUint8 aiPattern1[] = { 0u,  1u,  2u,  3u,  4u,  6u,  7u,  8u, 10u, 13u, 18u, 19u, 20u, 22u, 23u};
+            constexpr coreUint8 aiPattern2[] = { 2u,  3u,  5u,  7u,  9u, 11u, 12u, 13u, 15u, 17u, 18u, 19u, 20u, 21u, 22u};
+            constexpr coreUint8 aiPattern3[] = { 0u,  3u,  4u,  5u,  8u,  9u, 10u, 13u, 14u, 15u, 16u, 17u, 18u, 21u, 23u};
+
+            const coreUint8* piPattern   = NULL;
+            coreUintW        iPatternNum = 0u;
+
+            switch(m_iStageSub)
+            {
+            case  5u: piPattern = aiPattern1; iPatternNum = ARRAY_SIZE(aiPattern1); break;
+            case 11u: piPattern = aiPattern2; iPatternNum = ARRAY_SIZE(aiPattern2); break;
+            case 17u: piPattern = aiPattern3; iPatternNum = ARRAY_SIZE(aiPattern3); break;
+            }
+
+            if(iPatternNum)
+            {
+                for(coreUintW i = 0u; i < GELU_LINES; ++i)
+                {
+                    if(std::memchr(piPattern, i, iPatternNum))
+                    {
+                        if(!this->IsLineEnabled(i)) this->EnableLine(i);
+                    }
+                    else
+                    {
+                        if(this->IsLineEnabled(i)) this->DisableLine(i, true);
+                    }
+                }
+            }
+
+            switch(m_iStageSub)
+            {
+            case 20u: this->DisableOrb( 3u, true); break;
+            case 22u: this->DisableOrb(15u, true); break;
+            case 25u: this->DisableOrb( 0u, true); break;
+            case 27u: this->DisableOrb(12u, true); break;
+            case 30u: this->DisableOrb( 8u, true); break;
+            case 31u: this->DisableOrb(14u, true); break;
+            case 32u: this->DisableOrb( 1u, true); break;
+            case 33u: this->DisableOrb( 7u, true); break;
+            case 34u: this->DisableOrb(13u, true); break;
+            case 35u: this->DisableOrb( 4u, true); break;
+            case 36u: this->DisableOrb(11u, true); break;
+            case 37u: this->DisableOrb( 2u, true); break;
+            }
         }
 
-#if 0
-        if(m_iStageSub == 25u)
+        if(m_iStageSub >= 37u)
         {
-            const coreUintW aiExpand[] = {5u, 6u, 9u, 10u};
-            const coreFloat fValue     = LERPS(1.0f, 3.0f, MIN(m_fStageSubTime * 0.5f, 1.0f));
+            constexpr coreUintW aiExpand[] = {5u, 6u, 9u, 10u};
 
-            for(coreUintW i = 0u; i < ARRAY_SIZE(aiExpand); ++i)
-                m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosTo(aiExpand[i]) * fValue, 0.0f));
+            const coreVector2 vOldPos = m_aOrbRaw[aiExpand[0]].GetPosition().xy();
+
+            coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+            if(m_iStageSub == 37u)
+            {
+                const coreFloat fValue = LERPS(1.0f, 4.0f, MIN(m_fStageSubTime * 0.5f, 1.0f));
+                for(coreUintW i = 0u; i < ARRAY_SIZE(aiExpand); ++i)
+                {
+                    m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosTo(aiExpand[i]) * coreVector2(fValue, 1.0f), 0.0f));
+                }
+
+                vFactor = m_aOrbRaw[aiExpand[0]].GetPosition().xy() / vOldPos;
+            }
+            else if(m_iStageSub == 39u)
+            {
+                const coreFloat fValue = LERPS(0.0f, -1.5f, MIN(m_fStageSubTime * 0.5f, 1.0f)) * fOrbLen * FOREGROUND_AREA.y;
+                for(coreUintW i = 0u; i < ARRAY_SIZE(aiExpand); ++i)
+                {
+                    m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosTo(aiExpand[i]) * coreVector2(4.0f,1.0f) + coreVector2(0.0f, fValue), 0.0f));
+                }
+
+                vOffset = m_aOrbRaw[aiExpand[0]].GetPosition().xy() - vOldPos;
+            }
+
+            STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+            {
+                pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().xy() * vFactor + vOffset, 0.0f));
+            });
         }
-#endif
 
         if(STAGE_BEGINNING)
         {
@@ -1479,20 +1815,7 @@ void cGeluMission::__SetupOwn()
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
-                coreUintW iIndex = 0u;
-                coreFloat fLenSq = FLT_MAX;
-
-                for(coreUintW j = 0u; j < GELU_ORBS; ++j)
-                {
-                    const coreFloat fCurLenSq = (m_aOrbRaw[j].GetPosition().xy() - pPlayer->GetPosition().xy()).LengthSq();
-                    if(fCurLenSq < fLenSq)
-                    {
-                        iIndex = j;
-                        fLenSq = fCurLenSq;
-                    }
-                }
-
-                aiTarget [i] = iIndex;
+                aiTarget [i] = i ? 2u : 1u;
                 avOldMove[i] = pPlayer->GetInput()->vMove;
 
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
@@ -1504,10 +1827,10 @@ void cGeluMission::__SetupOwn()
             {
                 ASSERT(iNewTarget < GELU_ORBS)
 
-                if(m_afOrbTime[iNewTarget] > 0.0f)
+                if(this->IsOrbEnabled(iNewTarget) && (!this->IsOrbEnabled(aiTarget[iIndex]) || m_aLineRaw[nLineIndexFunc(aiTarget[iIndex], iNewTarget)].IsEnabled(CORE_OBJECT_ENABLE_ALL)))
                     aiTarget[iIndex] = iNewTarget;
 
-                if(m_afOrbTime[aiTarget[iIndex]] < 0.0f)   // fallback
+                if(!this->IsOrbEnabled(aiTarget[iIndex]))   // fallback
                 {
                     const coreUint32 A = aiTarget[iIndex];
                          if((A ==  0u) || (A ==  1u) || (A ==  4u)) aiTarget[iIndex] =  5u;
@@ -1541,7 +1864,7 @@ void cGeluMission::__SetupOwn()
                 const coreVector2 vDiff = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();
                 if(!vDiff.IsNull())
                 {
-                    const coreVector2 vPos = pPlayer->GetPosition().xy() + vDiff.Normalized() * (150.0f * TIME * SmoothTowards(vDiff.Length(), 3.0f));
+                    const coreVector2 vPos = pPlayer->GetPosition().xy() + vDiff.Normalized() * (3.0f * pPlayer->CalcMoveSpeed() * TIME * SmoothTowards(vDiff.Length(), 3.0f));
                     pPlayer->SetPosition(coreVector3(vPos, 0.0f));
                 }
             });
@@ -1549,89 +1872,134 @@ void cGeluMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 1.5f, ((i < 1u) ? 7.0f : 0.0f))
+            STAGE_LIFETIME(pEnemy, 1.5f, (i < 1u) ? 7.0f : ((i < 39u) ? 0.0f : ((i < 47u) ? 2.0f : ((i < 55u) ? 3.5f : (0.2f * I_TO_F((i - 55u) % 9u) + ((i < 64u) ? 3.0f : 0.0f))))))
 
-            coreUintW iOffset, iRota;
-            switch(i)
+            if(i < 55u)
             {
-            default: ASSERT(false)
-            case  0u: iOffset = 2u; iRota = 3u; break;
-            case  1u: iOffset = 2u; iRota = 0u; break;
-            case  2u: iOffset = 0u; iRota = 2u; break;
-            case  3u: iOffset = 1u; iRota = 3u; break;
-            case  4u: iOffset = 0u; iRota = 1u; break;
-            case  5u: iOffset = 1u; iRota = 2u; break;
-            case  6u: iOffset = 1u; iRota = 0u; break;
-            case  7u: iOffset = 0u; iRota = 3u; break;
-            case  8u: iOffset = 1u; iRota = 1u; break;
-            case  9u: iOffset = 0u; iRota = 0u; break;
-            case 10u: iOffset = 2u; iRota = 2u; break;
-            case 11u: iOffset = 2u; iRota = 1u; break;
-            case 12u: iOffset = 2u; iRota = 3u; break;
-            case 13u: iOffset = 2u; iRota = 0u; break;
-            case 14u: iOffset = 2u; iRota = 2u; break;
-            case 15u: iOffset = 2u; iRota = 1u; break;
-            case 16u: iOffset = 1u; iRota = 0u; break;
-            case 17u: iOffset = 1u; iRota = 3u; break;
-            case 18u: iOffset = 1u; iRota = 1u; break;
-            case 19u: iOffset = 1u; iRota = 2u; break;
+                coreUintW iOffset, iRota;
+                switch(i)
+                {
+                default: ASSERT(false)
+                case  0u:           iOffset = 0u; iRota = 0u; break;
+                case  1u:           iOffset = 0u; iRota = 1u; break;
+                case  2u:           iOffset = 1u; iRota = 3u; break;
+                case  3u:           iOffset = 2u; iRota = 3u; break;
+                case  4u:           iOffset = 0u; iRota = 2u; break;
+                case  5u:           iOffset = 1u; iRota = 2u; break;
+                case  6u:           iOffset = 2u; iRota = 2u; break;
 
-            case 20u: iOffset = 2u; iRota = 3u; break;
-            case 21u: iOffset = 2u; iRota = 0u; break;
-            case 22u: iOffset = 2u; iRota = 2u; break;
-            case 23u: iOffset = 2u; iRota = 1u; break;
-            case 24u: iOffset = 1u; iRota = 0u; break;
-            case 25u: iOffset = 1u; iRota = 3u; break;
-            case 26u: iOffset = 1u; iRota = 1u; break;
-            case 27u: iOffset = 1u; iRota = 2u; break;
-            case 28u: iOffset = 2u; iRota = 3u; break;
-            case 29u: iOffset = 2u; iRota = 0u; break;
-            case 30u: iOffset = 2u; iRota = 2u; break;
-            case 31u: iOffset = 2u; iRota = 1u; break;
-            case 32u: iOffset = 1u; iRota = 0u; break;
-            case 33u: iOffset = 1u; iRota = 3u; break;
-            case 34u: iOffset = 1u; iRota = 1u; break;
-            case 35u: iOffset = 1u; iRota = 2u; break;
+                case  7u: case 19u: iOffset = 2u; iRota = 3u; break;
+                case  8u: case 20u: iOffset = 2u; iRota = 0u; break;
+                case  9u: case 21u: iOffset = 0u; iRota = 2u; break;
+                case 10u: case 22u: iOffset = 1u; iRota = 3u; break;
+                case 11u: case 23u: iOffset = 0u; iRota = 1u; break;
+                case 12u: case 24u: iOffset = 1u; iRota = 2u; break;
+                case 13u: case 25u: iOffset = 1u; iRota = 0u; break;
+                case 14u: case 26u: iOffset = 0u; iRota = 3u; break;
+                case 15u: case 27u: iOffset = 1u; iRota = 1u; break;
+                case 16u: case 28u: iOffset = 0u; iRota = 0u; break;
+                case 17u: case 29u: iOffset = 2u; iRota = 2u; break;
+                case 18u: case 30u: iOffset = 2u; iRota = 1u; break;
+
+                case 31u:           iOffset = 2u; iRota = 3u; break;
+                case 32u:           iOffset = 2u; iRota = 0u; break;
+                case 33u:           iOffset = 2u; iRota = 2u; break;
+                case 34u:           iOffset = 2u; iRota = 1u; break;
+                case 35u:           iOffset = 1u; iRota = 0u; break;
+                case 36u:           iOffset = 1u; iRota = 3u; break;
+                case 37u:           iOffset = 1u; iRota = 1u; break;
+                case 38u:           iOffset = 1u; iRota = 2u; break;
+
+                case 39u: case 47u: iOffset = 0u; iRota = 0u; break;
+                case 40u: case 48u: iOffset = 1u; iRota = 0u; break;
+                case 41u: case 49u: iOffset = 2u; iRota = 0u; break;
+                case 42u: case 50u: iOffset = 3u; iRota = 0u; break;
+                case 43u: case 51u: iOffset = 0u; iRota = 2u; break;
+                case 44u: case 52u: iOffset = 1u; iRota = 2u; break;
+                case 45u: case 53u: iOffset = 2u; iRota = 2u; break;
+                case 46u: case 54u: iOffset = 3u; iRota = 2u; break;
+                }
+
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(iOffset) - 1.5f) * fOrbLen, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                switch(iRota)
+                {
+                default: ASSERT(false)
+                case 0u:                      break;
+                case 1u: pEnemy->Rotate90 (); break;   // right
+                case 2u: pEnemy->Rotate180(); break;
+                case 3u: pEnemy->Rotate270(); break;   // left
+                }
             }
-
-            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-            const coreVector2 vOffset = coreVector2((I_TO_F(iOffset) - 1.5f) * fOrbLen, 0.0f);
-
-            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-
-            switch(iRota)
+            else
             {
-            default: ASSERT(false)
-            case 0u:                      break;
-            case 1u: pEnemy->Rotate90 (); break;   // right
-            case 2u: pEnemy->Rotate180(); break;
-            case 3u: pEnemy->Rotate270(); break;   // left
+                STAGE_REPEAT(pPath2->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((i < 64u) ? ((I_TO_F((i - 55u) % 3u) - 1.0f) * -0.4f) : ((i < 82u) ? (((I_TO_F(((i - 64u) / 3u) % 3u) - 1.0f) * 0.4f) + ((i < 64u) ? 0.0f : -0.3f)) : ((I_TO_F(i - 82u) - 4.0f) * 0.17f)), 0.0f);
+
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+
+                if(i >= 73u && i < 82u) pEnemy->InvertX();
             }
         });
 
-        if((iSnakeNum < 8u) && STAGE_SUBTIME_AFTER(3.5f) && STAGE_TICK_FREE(9.0f, 0.0f))
+        if(STAGE_TIME_AFTER(3.5f))
         {
-            const coreVector2 vPos = m_aOrbRaw[3].GetPosition().xy();
-            const coreVector2 vDir = coreVector2(1.0f,0.0f);
+            if(STAGE_TICK_FREE(9.0f/4.0f, 0.0f))
+            {
+                const auto nShootFunc = [&](const coreVector2 vPos, const coreVector2 vDir)
+                {
+                    for(coreUintW i = 0u; i < 4u; ++i)
+                    {
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, pSquad1->GetEnemy(0u), vPos - vDir * (I_TO_F(i) * 3.0f), vDir)->ChangeSize(2.2f);
+                    }
+                };
 
-            aiSnakePtr[iSnakeNum++] = P_TO_UI(g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, pSquad1->GetEnemy(0u), vPos, vDir)->ChangeSize(1.7f));
+                if(m_iStageSub < 17u)
+                {
+                    if(s_iTick % 2u)
+                    {
+                        constexpr coreUintW A[] = {0u, 2u, 1u, 3u};
+
+                        const coreVector2 vDir = coreVector2(0.0f,-1.0f);
+                        const coreVector2 vPos = coreVector2(nPosTo(A[(s_iTick / 2u) % 4u]).x, 1.2f * FOREGROUND_AREA.y);
+
+                        nShootFunc(vPos, vDir);
+                    }
+                }
+                else if(m_iStageSub < 29u)
+                {
+                    if(s_iTick % 2u)
+                    {
+                        const coreVector2 vDir = coreVector2(((s_iTick / 2u) % 2u) ? -1.0f : 1.0f, 0.0f);
+                        const coreVector2 vPos = coreVector2(vDir.x * (-1.2f * FOREGROUND_AREA.x), nPosTo((3u - (s_iTick / 2u) % 4u) * 4u).y);
+
+                        nShootFunc(vPos, vDir);
+                    }
+                }
+                else if(m_iStageSub < 38u)
+                {
+                    if(s_iTick % 2u)
+                    {
+                        const coreVector2 vDir = coreVector2(0.0f,-1.0f);
+                        const coreVector2 vPos = vDir * (-1.2f * FOREGROUND_AREA);
+
+                        nShootFunc(vPos, vDir);
+                    }
+                }
+                else if((m_iStageSub > 38u) || STAGE_SUBTIME_AFTER(1.0f))
+                {
+                    const coreVector2 vDir = coreVector2(0.0f,-1.0f);
+                    const coreVector2 vPos = coreVector2(fOrbLen * ((s_iTick % 2u) ? -2.0f : 2.0f), 1.2f) * FOREGROUND_AREA;
+
+                    nShootFunc(vPos, vDir);
+                }
+            }
         }
-
-        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cWaveBullet>([&](cWaveBullet* OUTPUT pBullet)
-        {
-            const coreUintW i = std::find(aiSnakePtr, aiSnakePtr + iSnakeNum, P_TO_UI(pBullet)) - aiSnakePtr;
-            if(i >= iSnakeNum) return;
-
-            const coreSpline2* pPath = (i < 4u) ? pPath2 : pPath3;
-            const coreFloat    fTime = FMOD(pBullet->GetFlyTime() * 0.9f, pPath->GetTotalDistance());
-
-            coreVector2 vPosition;
-            coreVector2 vDirection;
-            pPath->CalcPosDir(CLAMP(fTime, 0.0f, pPath->GetTotalDistance()), &vPosition, &vDirection);
-
-            pBullet->SetPosition(coreVector3(vPosition * FOREGROUND_AREA, 0.0f));
-            pBullet->SetFlyDir  (vDirection);
-        });
 
         STAGE_WAVE("ACHTUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
@@ -1682,13 +2050,19 @@ void cGeluMission::__SetupOwn()
     // TODO 1: remove bend ?
     // TODO 1: fixed fields where enemies bend (gradius mines)
     // TODO 1: damagable state stays longer, or until teleport
+    // TODO 1: linie (entlang) (die aufeinander prallt)
+    // TODO 1: schwachen kreis anzeigen, in dem gegner angreifbar sind (berührung), kreis kann kleiner werden, (gegner auf anderer seite werden aktiv)
+    // TODO 1: gegner die nur aus der ferne angreifbar sind (und von nah-gegnern beschützt werden) (schauen anders aus ?)
+    // TODO 1: ringelspiel (ikaruga), bienen-waben blöcke (mit invert in mitte, und umgekehrt), checkerboard
+    // TODO 1: SCHAU ob man eine andere mechanik von der liste rein-mergen kann ####################################################
+    // TODO 1: fixe position, wie minenfeld, ferne gegner greifen an
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.3f,1.3f,1.3f));
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
                 pEnemy->Configure(4, COLOR_SHIP_GREY);
 
                 d_cast<cStarEnemy*>(pEnemy)->SetAngle(I_TO_F(i) * 2.0f/5.0f * PI);
@@ -1742,7 +2116,7 @@ void cGeluMission::__SetupOwn()
             if(vEnemyPos.y < vWrap.y) vWrap.y = vWrap.y - 2.4f * FOREGROUND_AREA.y;
 
             pEnemy->SetBaseColor(COLOR_SHIP_GREY);
-            pEnemy->AddStatus   (ENEMY_STATUS_INVINCIBLE);
+            if(i % 2u) pEnemy->AddStatus   (ENEMY_STATUS_INVINCIBLE); else pEnemy->RemoveStatus   (ENEMY_STATUS_INVINCIBLE);
 
             STAGE_FOREACH_PLAYER(pPlayer, j)
             {
@@ -1754,15 +2128,15 @@ void cGeluMission::__SetupOwn()
                 const coreFloat   fStr  = MAX(24.0f - fLen, 0.0f) / 24.0f;
                 const coreFloat   fDot  = vEnemyMove.IsNull() ? 0.5f : MAX(coreVector2::Dot(vDir, -vEnemyMove.Normalized()), 0.0f);
 
-                const coreVector2 vRealTarget = LERP(vWrap, vEnemyPos + vDir * 35.0f, fStr);
+                const coreVector2 vRealTarget = LERP(vWrap, vEnemyPos + vDir * 35.0f, fStr*0.0f);
                 const coreVector2 vChange     = vRealTarget - vEnemyPos;
 
-                pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy() + (vChange * ((fStr * fDot * 9.0f + 2.0f) * TIME)) * mTransform, 0.0f));
+                pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy() + (vChange * ((fStr*0.0f * fDot * 9.0f + 2.0f) * TIME)) * mTransform, 0.0f));
 
                 if(fStr)
                 {
                     pEnemy->SetBaseColor(COLOR_SHIP_RED);
-                    pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+            if(i % 2u) pEnemy->RemoveStatus   (ENEMY_STATUS_INVINCIBLE); else pEnemy->AddStatus   (ENEMY_STATUS_INVINCIBLE);
                 }
             });
 
@@ -1789,8 +2163,8 @@ void cGeluMission::__SetupOwn()
 
             coreVector2 vCurPos = pEnemy->GetPosition().xy() * mTransformRev;
 
-                                 vCurPos.x = CLAMP(vCurPos.x, -1.08f * FOREGROUND_AREA.x, 1.08f * FOREGROUND_AREA.x);
-            if(vCurPos.y < 0.0f) vCurPos.y = FmodRange(vCurPos.y, -1.2f * FOREGROUND_AREA.y, 1.2f * FOREGROUND_AREA.y);
+                                 vCurPos.x =     CLAMP(vCurPos.x, -1.08f * FOREGROUND_AREA.x, 1.08f * FOREGROUND_AREA.x);
+            if(vCurPos.y < 0.0f) vCurPos.y = FmodRange(vCurPos.y, -1.2f  * FOREGROUND_AREA.y, 1.2f  * FOREGROUND_AREA.y);
 
             pEnemy->SetPosition(coreVector3(vCurPos * mTransform, 0.0f));
 
@@ -1814,28 +2188,87 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // push
-    // bullets fly fast to give visual waves with space inbetween (but should not be shot too often to compensate) 
-    // in 4 player should not be able to pass when enemies are axis aligned 
-    // in 3 only five enemies / half the circle should peek out 
-    // in 2 lines should move over the center 
-    // in 1 enemies should not reach bottom 
-    // in 1 and 2 back of enemies should not be reachable without shooting at them first 
+    // bullets fly fast to give visual waves with space inbetween (but should not be shot too often to compensate)
+    // in mill, player should not be able to pass when enemies are axis aligned
+    // in 3 only five enemies / half the circle should peek out
+    // in 2 lines should move over the center
+    // in 1 enemies should not reach bottom
+    // in 1 and 2 back of enemies should not be reachable without shooting at them first
+    // TODO 1: only one enemy per block should give score, control with WORTHLESS
+    // TODO 1: spieler sollte im dungeon links und rechts nicht vorbeifliegen können
+    // TODO 1: spieler sollte nicht unabsichtlich durch 2 nebeneinander stehende hindurch schießen
+    // TODO 1: helfer fliegt mit dungeon an seite oder zwischen gegnern vorbei (wo man ihn schlecht sieht)
+    // TODO 1: hidden badge, bestimmten gegner im dungeon abschießen (kann auch neu hinzugefügt werden)
+    // TODO 1: force sollte durch absoluten wert verändert werden, der von den schiffen smooth angesteuert wird, wird mit start-position + initial-push initialisert
+    // TODO 1: pEnemy->AimAtPlayerDual((i < 16u || (i >= 80u && i < 96u)) ? ((i / 4u) % 2u) : ((i < 32u || (i >= 40u && i < 72u)) ? ((i / 8u) % 2u) : (i % 2u))).Normalized();
+    // TODO 1: what about SetAngle, especially for dungeon ?
+    // TODO 1: SQRT2 not necessary ? (both cases) (oh wait, 0.7071 on corner)
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
+        constexpr coreFloat fDungeonFactor  = 0.095f;
+        constexpr coreFloat fDungeonMax     = 660.0f;
+        constexpr coreUintW iDungeonEnemies = 32u;
+
+        STATIC_ASSERT(iDungeonEnemies == 32u)
+
+        constexpr coreUint8 aiDungeon[] =
+        {
+            0u,
+            0b1111'1111u,
+            0u, 0u, 0u, 0u, 0u, 0u,
+            // TODO 1
+            // 0b1101'1011u,
+            // 0b1101'1011u,
+            0b0101'0101u,
+            0u,
+            0b1010'1010u,
+            0u, 0u, 0u, 0u, 0u, 0u,
+            0b0001'1000u,
+            0u,
+            0b1110'0111u,
+            0u, 0u, 0u, 0u, 0u, 0u,
+            0b0100'0000u,
+            0b0010'0000u,
+            0b0001'0000u,
+            0b0000'1000u,
+            0b0000'0100u,
+            0b0000'0010u,
+            0b0000'0001u,
+            0u, 0u, 0u,
+            0b1111'1000u,
+            0u, 0u, 0u,
+            0b0001'1111u,
+            0u, 0u, 0u,
+            0b1000'0000u,
+            0b1000'0000u,
+            0b1000'0000u,
+            0b0000'0001u,
+            0b0000'0001u,
+            0b0000'0001u,
+            0b1000'0000u,
+            0b1000'0000u,
+            0b1000'0000u,
+            0b0000'0001u,
+            0b0000'0001u,
+            0b0000'0001u,
+            0u, 0u,
+            0b0001'1000u,
+        };
+
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(-1.2f,0.0f), coreVector2(1.0f,0.0f));
+            pPath1->AddNode(coreVector2(-1.3f,0.0f), coreVector2(1.0f,0.0f));
             pPath1->AddStop(coreVector2( 0.0f,0.0f), coreVector2(1.0f,0.0f));
             pPath1->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cCinderEnemy, 48u)
+        STAGE_ADD_SQUAD(pSquad1, cCinderEnemy, 96u + iDungeonEnemies)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->SetSize  (coreVector3(1.27f,1.27f,1.27f));
-                pEnemy->Configure((i < 32u) ? 50 : 200, COLOR_SHIP_ORANGE);
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.45f);
+                pEnemy->Configure((i < 32u) ? 50 : ((i >= 40u && i < 72u) ? 120 : ((i < 96u) ? 200 : 1000)), COLOR_SHIP_ORANGE);
 
                 d_cast<cCinderEnemy*>(pEnemy)->SetAngle(I_TO_F(i));
 
@@ -1850,39 +2283,78 @@ void cGeluMission::__SetupOwn()
                          if(i >= 16u && i < 24u) pEnemy->Rotate270();
                     else if(i >= 24u && i < 32u) pEnemy->Rotate90();
                 }
+                else if(i < 72u)
+                {
+                    coreFloat fOffset;
+                    switch((i - 40u) / 8u)
+                    {
+                    default: ASSERT(false)
+                    case 0u: fOffset =  0.5f; break;
+                    case 1u: fOffset = -0.5f; break;
+                    case 2u: fOffset =  0.5f; break;
+                    case 3u: fOffset =  0.0f; break;
+                    }
+
+                    const coreVector2 vDir = StepRotated90((i - 40u) / 8u);
+                    const coreVector2 vPos = vDir.Rotated90() * fOffset - vDir * (I_TO_F((i - 40u) % 8u) * 0.24f + 1.54f);
+
+                    pEnemy->SetPosition (coreVector3(vPos * FOREGROUND_AREA, 0.0f));
+                    pEnemy->SetDirection(coreVector3(vDir,                   0.0f));
+                }
+                else if(i < 80u)
+                {
+                    const coreVector2 vDir = coreVector2::Direction(I_TO_F(i - 72u) * (0.25f*PI) + (0.125f*PI));
+                    const coreVector2 vPos = vDir * -1.2f * SQRT2;
+
+                    pEnemy->SetPosition (coreVector3(vPos * FOREGROUND_AREA, 0.0f));
+                    pEnemy->SetDirection(coreVector3(vDir,                   0.0f));
+                }
             });
         });
 
-        STAGE_GET_START(82u)
-            STAGE_GET_VEC2_ARRAY(avForce, 40u, for(coreUintW i = 0u; i < 40u; ++i) avForce[i] = 85.0f * pSquad1->GetEnemy(i)->GetDirection().xy();)
+        STAGE_GET_START(174u)
+            STAGE_GET_VEC2_ARRAY(avForce,     80u, for(coreUintW i = 0u; i < 80u; ++i) avForce[i] = ((i < 72u) ? 85.0f : 100.0f) * pSquad1->GetEnemy(i)->GetDirection().xy();)
+            STAGE_GET_VEC2_ARRAY(avBouncePos, 2u,  avBouncePos[0] = 1.2f * SQRT2 * FOREGROUND_AREA;        avBouncePos[1] = avBouncePos[0].InvertedX();)
+            STAGE_GET_VEC2_ARRAY(avBounceDir, 2u,  avBounceDir[0] = coreVector2(-1.5f,-1.0f).Normalized(); avBounceDir[1] = coreVector2(1.0f,-1.5f).Normalized();)
+            STAGE_GET_FLOAT     (fBounceForce,     fBounceForce   = 200.0f;)
+            STAGE_GET_FLOAT     (fMillAngle,       fMillAngle     = 0.5f*PI)
             STAGE_GET_FLOAT     (fMillForce)
-            STAGE_GET_FLOAT     (fMillAngle, fMillAngle = 0.5f*PI)
+            STAGE_GET_UINT      (iDragActive)
+            STAGE_GET_FLOAT     (fDragOffset)
+            STAGE_GET_FLOAT     (fDragForce,       fDragForce     = 100.0f;)
         STAGE_GET_END
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_VAL(pSquad1), COLL_VAL(avForce), COLL_REF(fMillForce))
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_VAL(pSquad1), COLL_VAL(avForce), COLL_REF(fBounceForce), COLL_REF(fMillForce), COLL_REF(fDragForce))
         {
             if(!bFirstHit) return;
 
             const coreUintW i = pSquad1->GetIndex(pEnemy);
 
-            coreUint8 iGroupNum;
+            coreUint8 iGroupNum = 0u;
                  if(i < 16u) iGroupNum = 2u;
             else if(i < 32u) iGroupNum = 4u;
-            else             iGroupNum = 8u;
+            else if(i < 96u) iGroupNum = 8u;
+            else             iGroupNum = 32u;
 
             const coreFloat fPower = I_TO_F(pBullet->GetDamage()) * RCP(I_TO_F(g_pGame->GetNumPlayers()));
 
-            coreVector2 vForceDir;
-                 if(i < 16u) vForceDir   = fPower * 6.0f * coreVector2( 0.0f,-1.0f);
-            else if(i < 24u) vForceDir   = fPower * 6.0f * coreVector2( 1.0f, 0.0f);
-            else if(i < 32u) vForceDir   = fPower * 6.0f * coreVector2(-1.0f, 0.0f);
-            else if(i < 40u) vForceDir   = fPower * 6.0f * AlongCrossNormal(-pBullet->GetFlyDir());
-            else             fMillForce -= fPower * 0.4f;
+            coreVector2 vForceDir = coreVector2(0.0f,0.0f);
+                 if(i < 16u) vForceDir     = fPower * 6.0f * coreVector2( 0.0f,-1.0f);
+            else if(i < 24u) vForceDir     = fPower * 6.0f * coreVector2( 1.0f, 0.0f);
+            else if(i < 32u) vForceDir     = fPower * 6.0f * coreVector2(-1.0f, 0.0f);
+            else if(i < 40u) vForceDir     = fPower * 6.0f * AlongCrossNormal(-pBullet->GetFlyDir());
+            else if(i < 72u) vForceDir     = fPower * 6.0f * StepRotated90((i - 40u) / 8u);
+            else if(i < 80u) vForceDir.x   = fPower * 2.5f;
+            else if(i < 88u) fBounceForce += fPower * 8.0f;
+            else if(i < 96u) fMillForce   -= fPower * 0.4f;
+            else             fDragForce   += fPower * 6.0f;
 
             for(coreUintW j = coreMath::FloorAlign(i, iGroupNum), je = coreMath::CeilAlign(i + 1u, iGroupNum); j < je; ++j)
             {
-                if(i < 40u) avForce[j] += vForceDir;
-                if(i != j)  pSquad1->GetEnemy(j)->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
+                     if(i < 72u) avForce[j] += vForceDir;
+                else if(i < 80u) avForce[j] += vForceDir.x * coreVector2::Direction(I_TO_F(j - 72u) * (0.25f*PI));
+
+                if(i != j) pSquad1->GetEnemy(j)->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
             }
         });
 
@@ -1891,13 +2363,66 @@ void cGeluMission::__SetupOwn()
                  if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 15u)
             else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
             else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 32u, 39u)
-            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 40u, 47u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 40u, 71u)
+            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 72u, 79u)
+            else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 88u, 95u)   // #
+            else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 80u, 87u)   // #
+            else if(STAGE_SUB(8u)) STAGE_RESURRECT(pSquad1, 96u, 96u + iDungeonEnemies - 1u)
         }
 
-        if(fMillForce)
+        if((m_iStageSub == 7u) && fBounceForce)
+        {
+            for(coreUintW i = 0u; i < 2u; ++i)
+            {
+                coreVector2& vPos = avBouncePos[i];
+                coreVector2& vDir = avBounceDir[i];
+
+                vPos += vDir * (fBounceForce * TIME);
+
+                     if((vPos.x < -FOREGROUND_AREA.x * 0.88f) && (vDir.x < 0.0f)) {vPos.x -= 2.0f * (vPos.x + FOREGROUND_AREA.x * 0.88f); vDir.x =  ABS(vDir.x);}
+                else if((vPos.x >  FOREGROUND_AREA.x * 0.88f) && (vDir.x > 0.0f)) {vPos.x -= 2.0f * (vPos.x - FOREGROUND_AREA.x * 0.88f); vDir.x = -ABS(vDir.x);}
+                     if((vPos.y < -FOREGROUND_AREA.y * 0.88f) && (vDir.y < 0.0f)) {vPos.y -= 2.0f * (vPos.y + FOREGROUND_AREA.y * 0.88f); vDir.y =  ABS(vDir.y);}
+                else if((vPos.y >  FOREGROUND_AREA.y * 0.88f) && (vDir.y > 0.0f)) {vPos.y -= 2.0f * (vPos.y - FOREGROUND_AREA.y * 0.88f); vDir.y = -ABS(vDir.y);}
+            }
+
+            fBounceForce *= FrictionFactor(3.0f);
+        }
+        else if((m_iStageSub == 6u) && fMillForce)
         {
             fMillAngle += fMillForce * TIME;
             fMillForce *= FrictionFactor(6.0f);
+        }
+        else if((m_iStageSub == 8u) && fDragForce)
+        {
+            const coreFloat fOldOffset = fDragOffset;
+
+            fDragOffset += fDragForce * TIME;
+            fDragForce  *= FrictionFactor(4.0f);
+
+            const coreUintW iFrom = F_TO_UI(fOldOffset  * fDungeonFactor);
+            const coreUintW iTo   = F_TO_UI(fDragOffset * fDungeonFactor);
+
+            for(coreUintW i = iFrom; i < iTo; ++i)
+            {
+                const coreUint8 iLevel = aiDungeon[ARRAY_SIZE(aiDungeon) - 1u - MIN(i, ARRAY_SIZE(aiDungeon) - 1u)];
+
+                for(coreUintW j = 0u; j < 8u; ++j)
+                {
+                    if(HAS_BIT(iLevel, j))
+                    {
+                        const coreUintW iIndex = coreMath::BitScanFwd(~coreUint64(iDragActive));
+                        ASSERT(iIndex < iDungeonEnemies)
+
+                        cEnemy* pEnemy = pSquad1->GetEnemy(96u + iIndex);
+                        ADD_BIT(iDragActive, iIndex)
+
+                        const coreVector2 vPos  = coreVector2((I_TO_F(j) - 3.5f) * -0.27f, 1.3f);
+                        const coreVector2 vCorr = coreVector2(0.0f, I_TO_F(i - iFrom) / fDungeonFactor);   // TODO 1: + offset correction ?
+
+                        pEnemy->SetPosition(coreVector3(vPos * FOREGROUND_AREA + vCorr, 0.0f));
+                    }
+                }
+            }
         }
 
         const coreVector2 vMillDir = coreVector2::Direction(fMillAngle);
@@ -1906,7 +2431,7 @@ void cGeluMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.4f, 0.0f)
 
-            if(i < 40u)
+            if(i < 80u)
             {
                 coreVector2 vNewPos = pEnemy->GetPosition().xy();
 
@@ -1918,20 +2443,47 @@ void cGeluMission::__SetupOwn()
 
                 pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
             }
-            else
+            else if(i < 88u)
             {
-                const coreFloat   fOffset = (fLifeTime < pPath1->GetTotalDistance()) ? (pPath1->CalcPosition(fLifeTime).x * ((i < 44u) ? 1.0f : -1.0f)) : 0.0f;
-                const coreVector2 vNewPos = vMillDir * ((I_TO_F(i % 8u) - 3.5f) * 0.26f + fOffset) * FOREGROUND_AREA;
+                const coreVector2 vNewPos = avBouncePos[(i < 84u) ? 0u : 1u] + StepRotated90X((i - 80u) % 4u) * 0.17f * FOREGROUND_AREA;
 
                 pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
             }
-
-            if(STAGE_TICK_LIFETIME(20.0f * (0.8f / fLifeSpeed), 0.0f) && ((s_iTick % 20u) >= 18u))
+            else if(i < 96u)
             {
-                const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayerDual((i < 16u || i >= 40u) ? ((i / 4u) % 2u) : ((i < 32u) ? ((i / 8u) % 2u) : (i % 2u))).Normalized();
+                const coreFloat   fOffset = (fLifeTime < pPath1->GetTotalDistance()) ? (pPath1->CalcPosition(fLifeTime).x * ((i < 92u) ? 1.0f : -1.0f)) : 0.0f;
+                const coreVector2 vNewPos = vMillDir * ((I_TO_F((i - 88u) % 8u) - 3.5f) * 0.26f + fOffset) * FOREGROUND_AREA;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.25f);
+                pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
+            }
+            else if(i < 96u + iDungeonEnemies)
+            {
+                if(HAS_BIT(iDragActive, i - 96u))
+                {
+                    coreVector2 vNewPos = pEnemy->GetPosition().xy() + coreVector2(0.0f, -fDragForce * TIME);
+
+                    if(fDragOffset >= fDungeonMax)
+                    {
+                        vNewPos.y = MAX(vNewPos.y, 0.0f);
+                    }
+                    if(vNewPos.y < -1.3f * FOREGROUND_AREA.y)
+                    {
+                        REMOVE_BIT(iDragActive, i - 96u)
+                    }
+
+                    pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
+                }
+            }
+
+            if(STAGE_TICK_LIFETIME(15.0f * (0.8f / fLifeSpeed), 0.0f) && ((s_iTick % 20u) >= 18u))
+            {
+                if(!((i >= 40u && i < 72u) || (i >= 96u)) || g_pForeground->IsVisiblePoint(pEnemy->GetPosition().xy(), 1.25f))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = pEnemy->AimAtPlayerDual((s_iTick / 20u + m_iStageSub) % 2u).Normalized();
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                }
             }
         });
 

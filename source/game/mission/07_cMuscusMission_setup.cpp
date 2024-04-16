@@ -251,7 +251,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: badge
     // TODO 1: alles nur von oben kommen lassen, mit seiten gegnern
     // TODO 1: spawn of rotation-blocks too dangerous, can easily hit player
-    // TODO 1: high tide in nCreateGenerate
+    // TODO 1: crossing lines with one hole
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep        = 0.275f;
@@ -283,7 +283,7 @@ void cMuscusMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(iTypeMapSize + MUSCUS_GENERATES * 3u + 5u)
+        STAGE_GET_START(iTypeMapSize + MUSCUS_GENERATES * 3u + 6u)
             STAGE_GET_UINT_ARRAY (aiGenerateTypeMap, iTypeMapSize)
             STAGE_GET_VEC2_ARRAY (avGenerateData,    MUSCUS_GENERATES)
             STAGE_GET_FLOAT_ARRAY(afGenerateTime,    MUSCUS_GENERATES)
@@ -292,18 +292,20 @@ void cMuscusMission::__SetupOwn()
             STAGE_GET_UINT       (iSpawnTick)
             STAGE_GET_UINT       (iSpawnCount)
             STAGE_GET_FLOAT      (fSpawnOffset)
+            STAGE_GET_UINT       (iCreateStart)
         STAGE_GET_END
 
         coreUint8* aiGenerateType = r_cast<coreUint8*>(aiGenerateTypeMap);
 
         const auto nCreateGenerate = [&](const coreUint8 iType, const coreFloat fFactor, const coreFloat fOffset, const coreFloat fDelay)
         {
-            for(coreUintW i = 0u; i < MUSCUS_GENERATES; ++i)
+            for(coreUintW i = iCreateStart; i < MUSCUS_GENERATES; ++i)
             {
                 coreObject3D* pGenerate = (*m_Generate.List())[i];
 
                 if(!pGenerate->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
+                    iCreateStart = i + 1u;
                     this->EnableGenerate(i);
 
                     aiGenerateType[i] = iType;
@@ -569,8 +571,15 @@ void cMuscusMission::__SetupOwn()
                 case 3u: pGenerate->SetPosition(-pGenerate->GetPosition().RotatedZ90()); break;
                 }
 
-                if(fTime <  0.5f)                       this->ShowGenerate   (i, 0.1f);
-                if(fTime >= pPath1->GetTotalDistance()) this->DisableGenerate(i, false);
+                if(fTime < 0.5f)
+                {
+                    this->ShowGenerate(i, 0.1f);
+                }
+                else if(fTime >= pPath1->GetTotalDistance())
+                {
+                    iCreateStart = MIN(iCreateStart, i);
+                    this->DisableGenerate(i, false);
+                }
             }
             else if((aiGenerateType[i] == 4u) && (m_iStageSub < 9u))
             {
@@ -1342,6 +1351,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: similar to zelda water boss https://youtu.be/HRQXOCU8OWA?t=1005
     // TODO 1: tunnel to follow
     // TODO 1: create particle effect (interpolated) on the side first, to make the player move away into the center
+    // TODO 1: kern des kerns bleibt am leben (ghost), und bekommt dann noch super-angriffe ? kugel-ring ?
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)

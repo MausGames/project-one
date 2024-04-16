@@ -758,6 +758,9 @@ public:
     DISABLE_COPY(cZerothBoss)
     ASSIGN_ID_EX(603, "???", COLOR_MENU_BLUE)
 
+    // 
+    void ResurrectIntro();
+
 
 private:
     // execute own routines

@@ -157,7 +157,7 @@ void cErrorMission::__SetupOwn()
             const coreVector2 vFactor = coreVector2(1.0f,1.0f);
             const coreVector2 vOffset = coreVector2((I_TO_F(i % 6u) - 2.5f) * 0.2f + ((i < 12u || i >= 36u) ? 0.0f : 0.25f), (((i % 12u) < 6u) && (i < 36u)) ? 0.0f : 0.22f);
 
-            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset, fLifeTime);
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset, fLifeTime);   // TODO 1: vOffset * vFactor (or # no factor multiplication)
 
             if(i == 4u || i == 11u || i == 16u || i == 21u || i == 28u || i == 33u || i == 23u || i == 35u) pEnemy->SetDirection(coreVector3( 1.0f,0.0f,0.0f));
             if(i == 1u || i == 6u  || i == 13u || i == 20u || i == 25u || i == 32u || i == 18u || i == 30u) pEnemy->SetDirection(coreVector3(-1.0f,0.0f,0.0f));
@@ -386,7 +386,7 @@ void cErrorMission::__SetupOwn()
                 coreVector2 vNewPos = pEnemy->GetPosition().xy() + vDir * (fSpeed * TIME);
 
 
-                     if(vNewPos.x < -FOREGROUND_AREA.x * 1.05f) {vNewPos.x = -FOREGROUND_AREA.x * 1.05f; avFlyDir[i].x =  ABS(avFlyDir[i].x);}
+                     if(vNewPos.x < -FOREGROUND_AREA.x * 1.05f) {vNewPos.x = -FOREGROUND_AREA.x * 1.05f; avFlyDir[i].x =  ABS(avFlyDir[i].x);}   // TODO 1: bounce correction
                 else if(vNewPos.x >  FOREGROUND_AREA.x * 1.05f) {vNewPos.x =  FOREGROUND_AREA.x * 1.05f; avFlyDir[i].x = -ABS(avFlyDir[i].x);}
                      if(vNewPos.y < -FOREGROUND_AREA.y * 1.05f) {vNewPos.y = -FOREGROUND_AREA.y * 1.05f; avFlyDir[i].y =  ABS(avFlyDir[i].y);}
                 else if(vNewPos.y >  FOREGROUND_AREA.y * 1.05f) {vNewPos.y =  FOREGROUND_AREA.y * 1.05f; avFlyDir[i].y = -ABS(avFlyDir[i].y);}
@@ -646,7 +646,7 @@ void cErrorMission::__SetupOwn()
             }
 
             
-                 if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; vForce.x =  ABS(vForce.x);}
+                 if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; vForce.x =  ABS(vForce.x);}   // TODO 1: bounce correction
             else if(vNewPos.x >  FOREGROUND_AREA.x) {vNewPos.x =  FOREGROUND_AREA.x; vForce.x = -ABS(vForce.x);}
                  if(vNewPos.y < -FOREGROUND_AREA.y) {vNewPos.y = -FOREGROUND_AREA.y; vForce.y =  ABS(vForce.y);}
             else if(vNewPos.y >  FOREGROUND_AREA.y) {vNewPos.y =  FOREGROUND_AREA.y; vForce.y = -ABS(vForce.y);}
@@ -706,7 +706,7 @@ void cErrorMission::__SetupOwn()
             const coreVector2 vFactor = coreVector2(((i % 12u) < 6u) ? 1.0f : -1.0f, (i < 6u || i >= 12u) ? ((i < 24u) ? 1.0f : 0.0f) : -1.0f);
             const coreVector2 vOffset = coreVector2(0.0f, (i < 24u) ? 0.0f : ((i < 30u) ? -0.1f : 0.1f));
 
-            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);
+            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);   // TODO 1: vOffset * vFactor (or # no factor multiplication)
 
 
             if(i % 2u)
@@ -1487,6 +1487,7 @@ void cErrorMission::__SetupOwn()
                     
                     coreBool bBounce = false;
 
+                    // TODO 1: bounce correction ???
                     if(IsHorizontal(vGravity))
                     {
                              if((vCurPos.y < -FOREGROUND_AREA.y * 1.1f) && (fDir < 0.0f)) {bBounce = true; avJumpData[i].x -= (avJumpData[i].x - -FOREGROUND_AREA.y * 1.1f) * 2.0f; avJumpData[i].y -= (avJumpData[i].y - -FOREGROUND_AREA.y * 1.1f) * 2.0f;}
@@ -1631,6 +1632,7 @@ void UnusedWaves()
             coreVector2       vCurPos = pEnemy->GetPosition ().xy();
             const coreVector2 vCurDir = pEnemy->GetDirection().xy();
 
+           // TODO 1: shift correction
                  if((vCurPos.x < -FOREGROUND_AREA.x * 1.2f) && (vCurDir.x < 0.0f)) {nShootFunc(vCurPos, coreVector2( 1.0f, 0.0f)); vCurPos.x =  ABS(vCurPos.x); nShootFunc(vCurPos, coreVector2(-1.0f, 0.0f));}
             else if((vCurPos.x >  FOREGROUND_AREA.x * 1.2f) && (vCurDir.x > 0.0f)) {nShootFunc(vCurPos, coreVector2(-1.0f, 0.0f)); vCurPos.x = -ABS(vCurPos.x); nShootFunc(vCurPos, coreVector2( 1.0f, 0.0f));}
                  if((vCurPos.y < -FOREGROUND_AREA.y * 1.2f) && (vCurDir.y < 0.0f)) {nShootFunc(vCurPos, coreVector2( 0.0f, 1.0f)); vCurPos.y =  ABS(vCurPos.y); nShootFunc(vCurPos, coreVector2( 0.0f,-1.0f));}
@@ -1672,6 +1674,7 @@ void UnusedWaves()
             coreVector2       vCurPos = pEnemy->GetPosition ().xy();
             const coreVector2 vCurDir = pEnemy->GetDirection().xy();
 
+           // TODO 1: shift correction
                  if((vCurPos.x < -FOREGROUND_AREA.x * 1.2f) && (vCurDir.x < 0.0f)) vCurPos.x =  ABS(vCurPos.x);
             else if((vCurPos.x >  FOREGROUND_AREA.x * 1.2f) && (vCurDir.x > 0.0f)) vCurPos.x = -ABS(vCurPos.x);
                  if((vCurPos.y < -FOREGROUND_AREA.y * 1.2f) && (vCurDir.y < 0.0f)) vCurPos.y =  ABS(vCurPos.y);
@@ -2281,7 +2284,7 @@ void UnusedWaves()
             const coreVector2 vFactor = coreVector2(((i % 12u) < 6u) ? 1.0f : -1.0f, (i >= 6u && i < 12u) ? -1.0f : ((i < 24u) ? 1.0f : 0.0f));
             const coreVector2 vOffset = coreVector2(0.0f, (i >= 6u && i < 12u) ? -0.1f : ((i < 24u) ? 0.0f : ((i < 30u) ? 0.8f : 0.9f)));
 
-            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);   // TODO 1: vOffset * vFactor
+            pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);   // TODO 1: vOffset * vFactor (or # no factor multiplication)
 
             if((i < 24u) || STAGE_LIFETIME_BEFORE(1.2f))
             {
@@ -2490,6 +2493,41 @@ void UnusedWaves()
             });
         });
 #endif
+#if 0
+        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cOrbBullet>([](cOrbBullet* OUTPUT pBullet)
+        {
+            const coreFloat fNewSize = MIN(pBullet->GetSize().x + (7.0f * TIME), 15.0f);
+
+            pBullet->SetSize(coreVector3(1.0f,1.0f,1.0f) * fNewSize);
+        });
+
+        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([](cFlipBullet* OUTPUT pBullet)
+        {
+            const coreFloat fNewSize = MAX(pBullet->GetSize().x - (7.0f * TIME), 5.0f);
+
+            pBullet->SetSize(coreVector3(1.0f,0.35f,1.0f) * fNewSize);
+        });
+
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pPlayerBullet, cBullet* OUTPUT pEnemyBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
+        {
+            if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+            if(bFirstHit)
+            {
+                if(pEnemyBullet->GetID() == cOrbBullet::ID)
+                {
+                    pEnemyBullet->SetSize(coreVector3(1.0f,1.0f,1.0f) * (pEnemyBullet->GetSize().x * POW(0.9f, I_TO_F(pPlayerBullet->GetDamage()))));
+                }
+                else
+                {
+                    const coreFloat fFactor = (20.0f - pEnemyBullet->GetSize().x) * 0.1f;
+                    pEnemyBullet->SetSize(coreVector3(1.0f,0.35f,1.0f) * (pEnemyBullet->GetSize().x + fFactor));
+                }
+
+                pPlayerBullet->Deactivate(true);
+            }
+        });
+#endif
         STAGE_WAVE("SECHSUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
@@ -2677,4 +2715,59 @@ void UnusedWaves()
 
         STAGE_FINISH_NOW
     });
+    
+    // direct homing-worm attack
+    #if 0
+            if(false && (iSnakeNum < 8u) && STAGE_TICK_FREE(9.0f, 0.0f))
+            {
+                const coreVector2 vPos = coreVector2(0.0f,0.0f);
+                const coreVector2 vDir = coreVector2(1.0f,0.0f);
+
+                cBullet* pBullet = g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f*0.0f, pSquad1->GetEnemy(0u), vPos, vDir)->ChangeSize(2.2f);
+                pBullet->AddStatus(BULLET_STATUS_IMMORTAL);
+
+                aiSnakePtr[iSnakeNum++] = P_TO_UI(pBullet);
+                // beware of pointer reallocation
+            }
+
+            g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cWaveBullet>([&](cWaveBullet* OUTPUT pBullet)
+            {
+                const coreUintW i = std::find(aiSnakePtr, aiSnakePtr + iSnakeNum, P_TO_UI(pBullet)) - aiSnakePtr;
+                if(i >= iSnakeNum) return;
+
+                const coreSpline2* pPath = (i < 4u) ? pPath2 : pPath3;
+                const coreFloat    fTime = FMOD(pBullet->GetFlyTime() * 0.9f, pPath->GetTotalDistance());
+
+                coreVector2 vPosition;
+                coreVector2 vDirection;
+                pPath->CalcPosDir(CLAMP(fTime, 0.0f, pPath->GetTotalDistance()), &vPosition, &vDirection);
+
+                pBullet->SetPosition(coreVector3(vPosition * FOREGROUND_AREA, 0.0f));
+                pBullet->SetFlyDir  (vDirection);
+            });
+
+            g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cWaveBullet>([&](cWaveBullet* OUTPUT pBullet)
+            {
+                const coreUintW i = std::find(aiSnakePtr, aiSnakePtr + iSnakeNum, P_TO_UI(pBullet)) - aiSnakePtr;
+                if(i >= iSnakeNum) return;
+                
+                const coreFloat fSpeedTurn = i ? 15.0f : 3.0f;
+                const coreFloat fSpeedMove = 40.0f;
+                
+                const coreObject3D* pTarget = i ? s_cast<const coreObject3D*>(I_TO_P(aiSnakePtr[i - 1u])) : g_pGame->FindPlayerDual(i % 2u);
+
+                const coreVector2 vDiff = pTarget->GetPosition().xy() - pBullet->GetPosition().xy();
+                if(vDiff.IsNull()) return;
+    
+                // 
+                const coreVector2 vAim = vDiff.Normalized();
+                const coreVector2 vDir = SmoothAim(pBullet->GetDirection().xy(), vAim, fSpeedTurn);
+                const coreVector2 vPos = pBullet->GetPosition().xy() + vDir * (fSpeedMove * TIME);
+            
+                // 
+                pBullet->SetPosition (coreVector3(vPos, 0.0f));
+                pBullet->SetDirection(coreVector3(vDir, 0.0f));
+                pBullet->SetFlyDir   (vDir);
+            });
+    #endif
 */

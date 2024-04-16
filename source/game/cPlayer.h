@@ -24,24 +24,24 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_EQUIP_WEAPONS      (EQUIP_WEAPONS)   // number of weapons a player can carry
-#define PLAYER_EQUIP_SUPPORTS     (EQUIP_SUPPORTS)  // 
-#define PLAYER_LIVES              (LIVES)           // 
-#define PLAYER_SHIELD             (SHIELD)          // 
-#define PLAYER_COLLISION_MIN      (0.15f)           // 
-#define PLAYER_SIZE_FACTOR        (1.15f)           // 
-#define PLAYER_AREA_FACTOR        (1.06f)           // 
-#define PLAYER_RANGE_SIZE         (1.04f)           // 
-#define PLAYER_WIND_SIZE          (4.5f)            // 
-#define PLAYER_BUBBLE_SIZE        (4.8f)            // 
-#define PLAYER_ROLL_SPEED         (1.0f)            // 
-#define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)   // (ship is vulnerable for a single frame) 
-#define PLAYER_FEEL_TIME          (3.0f)            // 
-#define PLAYER_FEEL_TIME_CONTINUE (5.0f)            // 
-#define PLAYER_FEEL_TIME_REPAIR   (5.0f)            // 
-#define PLAYER_FEEL_TIME_SHIELD   (10.0f)           // 
-#define PLAYER_INTERRUPT          (0.3f)            // 
-#define PLAYER_DESATURATE         (1.2f)            // 
+#define PLAYER_EQUIP_WEAPONS      (EQUIP_WEAPONS)      // number of weapons a player can carry
+#define PLAYER_EQUIP_SUPPORTS     (EQUIP_SUPPORTS)     // 
+#define PLAYER_LIVES              (LIVES)              // 
+#define PLAYER_SHIELD             (SHIELD)             // 
+#define PLAYER_COLLISION_MIN      (0.15f)              // 
+#define PLAYER_SIZE_FACTOR        (1.15f * m_fScale)   // 
+#define PLAYER_AREA_FACTOR        (1.06f)              // 
+#define PLAYER_RANGE_SIZE         (1.04f)              // 
+#define PLAYER_WIND_SIZE          (4.5f)               // 
+#define PLAYER_BUBBLE_SIZE        (4.8f)               // 
+#define PLAYER_ROLL_SPEED         (0.5f)               // 
+#define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)      // (ship is vulnerable for a single frame) 
+#define PLAYER_FEEL_TIME          (3.0f)               // 
+#define PLAYER_FEEL_TIME_CONTINUE (5.0f)               // 
+#define PLAYER_FEEL_TIME_REPAIR   (5.0f)               // 
+#define PLAYER_FEEL_TIME_SHIELD   (10.0f)              // 
+#define PLAYER_INTERRUPT          (0.3f)               // 
+#define PLAYER_DESATURATE         (1.2f)               // 
 
 #define PLAYER_SHIP_ATK  (0u)        // 
 #define PLAYER_SHIP_DEF  (1u)        // 
@@ -62,7 +62,8 @@ enum ePlayerStatus : coreUint8
     PLAYER_STATUS_NO_INPUT_SHOOT = 0x08u,   // disable player weapons
     PLAYER_STATUS_NO_INPUT_ROLL  = 0x10u,   // 
     PLAYER_STATUS_NO_INPUT_TURN  = 0x20u,   // 
-    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
+    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN,
+    PLAYER_STATUS_GHOST          = 0x40u
 };
 
 enum ePlayerTest : coreUint8
@@ -81,6 +82,16 @@ ENABLE_BITWISE(ePlayerTest)
 class cPlayer final : public cShip
 {
 private:
+    // 
+    struct sRayData final
+    {
+        coreUint32  iFrame;   // 
+        coreVector2 vPos;     // 
+        coreVector2 vDir;     // 
+    };
+
+
+private:
     cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];               // main weapon objects (bullet factories, should never be NULL)
 
     const sGameInput* m_pInput;                              // pointer to associated input set (should never be NULL)
@@ -88,6 +99,7 @@ private:
 
     coreVector2 m_vForce;                                    // 
     coreFloat   m_fSpeed;                                    // 
+    coreFloat   m_fScale;                                    // 
     coreFloat   m_fTilt;                                     // 
 
     coreFlow  m_fRollTime;                                   // 
@@ -127,6 +139,7 @@ private:
     coreObject3D m_Exhaust;                                  // 
 
     coreMap<const coreObject3D*, coreUint32> m_aCollision;   // 
+    coreMap<const coreObject3D*, sRayData>   m_aRayData;     // 
     
     
             coreVector2 vTest;
@@ -200,9 +213,11 @@ public:
 
     // 
     coreBool TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);
+    coreBool TestCollisionPrecise(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, coreFloat* OUTPUT pfHitDistance, coreUint8* OUTPUT piHitCount, coreBool* OUTPUT pbFirstHit);
 
     // 
     inline void ApplyForce     (const coreVector2 vForce) {m_vForce += vForce; this->SetPosition(coreVector3(m_vOldPos, 0.0f));}
+    inline void ApplyForceRaw  (const coreVector2 vForce) {m_vForce += vForce;}
     inline void ApplyForceTimed(const coreVector2 vForce) {m_vForce += vForce * TIME;}
 
     // 
@@ -219,6 +234,7 @@ public:
     inline void SetArea      (const coreVector4 vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
     inline void SetForce     (const coreVector2 vForce)      {m_vForce      = vForce;}
     inline void SetSpeed     (const coreFloat   fSpeed)      {m_fSpeed      = fSpeed;}
+    inline void SetScale     (const coreFloat   fScale)      {m_fScale      = fScale;}
     inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
     inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
@@ -229,6 +245,7 @@ public:
     inline const coreVector4& GetArea        ()const {return m_vArea;}
     inline const coreVector2& GetForce       ()const {return m_vForce;}
     inline const coreFloat&   GetSpeed       ()const {return m_fSpeed;}
+    inline const coreFloat&   GetScale       ()const {return m_fScale;}
     inline const coreFloat&   GetTilt        ()const {return m_fTilt;}
     inline const coreFloat&   GetInterrupt   ()const {return m_fInterrupt;}
     inline const coreFloat&   GetDesaturate  ()const {return m_fDesaturate;}
@@ -237,9 +254,9 @@ public:
     inline       coreFloat    GetCurShieldPct()const {return I_TO_F(m_iCurShield) * RCP(I_TO_F(m_iMaxShield));}
 
     // 
-    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
-
+    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,                                                          F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject,                                                   F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount,     const coreBool bFirstHit) -> void
     
 
     void SetPosition(const coreVector3 vPosition)
@@ -273,6 +290,8 @@ private:
     // 
     coreBool __NewCollision(const coreObject3D* pObject);
     void     __UpdateCollisions();
+    
+    coreVector4 __NewRayData(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef);
 };
 
 
@@ -314,6 +333,29 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
             }
         }
     });
+}
+
+template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, F&& nCallback)
+{
+    // 
+    //Core::Manager::Object->TestCollision(TYPE_PLAYER, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), [&](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount, const coreBool bFirstHit)
+    FOR_EACH(it, Core::Manager::Object->GetObjectList(TYPE_PLAYER))
+    {
+        cPlayer* pPlayer = d_cast<cPlayer*>(*it);
+
+        // 
+        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        {
+            // 
+            coreFloat fNewHitDistance = 0.0f;
+            coreUint8 iNewHitCount    = 1u;
+            coreBool  bNewFirstHit;
+            if(pPlayer->TestCollisionPrecise(vRayPos, vRayDir, pRef, &fNewHitDistance, &iNewHitCount, &bNewFirstHit))
+            {
+                nCallback(pPlayer, &fNewHitDistance, iNewHitCount, bNewFirstHit);
+            }
+        }
+    }//);
 }
 
 

@@ -24,6 +24,7 @@
 // TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
 // TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
 // TODO 1: morningstar sticks to boss and throws player around instead
+// TODO 1: check if all allocated enemy numbers are correct
 
 
 // ****************************************************************
@@ -53,22 +54,22 @@
 #define VIRIDO_BALLS                (2u)                                              // 
 #define VIRIDO_BALLS_RAWS           (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))             // 
 #define VIRIDO_PADDLES              (3u)                                              // 
-#define VIRIDO_BARRIERS             (15u)                                             // 
+#define VIRIDO_BARRIERS             (24u)                                             // 
 #define VIRIDO_BARRIERS_RAWS        (VIRIDO_BARRIERS)                                 // 
-#define VIRIDO_LASERS               (4u)                                              // 
+#define VIRIDO_LASERS               (8u)                                              // 
 #define VIRIDO_LASERS_RAWS          (VIRIDO_LASERS * 2u)                              // 
-#define VIRIDO_SHADOWS              (16u)                                             // 
+#define VIRIDO_SHADOWS              (20u)                                             // 
 #define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
 #define VIRIDO_BALL_SPEED           (1.5f)                                            // 
 
-#define NEVO_BOMBS                  (6u)                                              // 
+#define NEVO_BOMBS                  (24u)                                             // 
 #define NEVO_BOMBS_RAWS             (NEVO_BOMBS)                                      // 
 #define NEVO_LINES                  (4u)                                              // 
 #define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
 #define NEVO_TILES                  (16u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
-#define NEVO_ARROWS                 (21u)                                             // 
+#define NEVO_ARROWS                 (38u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
 #define NEVO_BLOCKS                 (12u)                                             // 
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
@@ -98,10 +99,11 @@
 
 #define CALOR_LOADS                 (12u)                                             // 
 #define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
-#define CALOR_CHAINS                (16u)                                             // 
+#define CALOR_CHAINS                (28u)                                             // 
 #define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
 #define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
-#define CALOR_CHAIN_CONSTRAINT      (46.0f)                                           // 
+#define CALOR_CHAIN_CONSTRAINT1     (20.0f)                                           // 
+#define CALOR_CHAIN_CONSTRAINT2     (46.0f)                                           // 
 
 #define MUSCUS_GENERATES            (24u)                                             // 
 #define MUSCUS_GENERATES_RAWS       (MUSCUS_GENERATES * 2u)                           // 
@@ -125,7 +127,7 @@
 #define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
-#define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreIntW(i) >= coreIntW(f)) && (coreIntW(i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
+#define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, __i) {if((coreIntW(__i) >= coreIntW(f)) && (coreIntW(__i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
@@ -147,7 +149,7 @@
 #define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 #define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 
-#define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
+#define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ALIGNED_DELETE(m_piData) STATIC_ASSERT((c) <= 0xFFu) m_iDataSize = (c); m_piData = ALIGNED_NEW(coreUint32, m_iDataSize, ALIGNMENT_CACHE); std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
 #define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
 #define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
@@ -176,10 +178,11 @@
 #define STAGE_BRANCH(x,y)                      ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
 
-#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) &&             ((s_iTick = F_TO_UI(m_fStageTime  * (c) - (o)) - 1u) != coreUint16(F_TO_UI(m_fStageTimeBefore  * (c) - (o)) - 1u)))
+#define STAGE_TICK_EXTERN(a,b,c,o)             ((s_iTick = F_TO_UI((a) * (c) - (o)) - 1u) != coreUint16(F_TO_UI((b) * (c) - (o)) - 1u))
+#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageTime,  m_fStageTimeBefore,  c, o))
 #define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && STAGE_TICK_FREE(c, o))
-#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBefore     * (c) - (o)) - 1u)))
-#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBeforeBase * (c) - (o)) - 1u)))
+#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTime,     fLifeTimeBefore,     c, o))
+#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTimeBase, fLifeTimeBeforeBase, c, o))
 
 #define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)                   (m_fStageTime <  (t))
@@ -389,6 +392,7 @@ private:
     coreObject3D  m_aBarrierRaw   [VIRIDO_BARRIERS_RAWS];   // 
     const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
     coreUint8     m_aiBarrierDir  [VIRIDO_BARRIERS];        // 
+    coreInt8      m_aiBarrierRota [VIRIDO_BARRIERS];        // 
 
     coreBatchList m_Laser;                                  // 
     coreBatchList m_LaserWave;                              // 
@@ -422,7 +426,7 @@ public:
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection, const coreFloat fSize);
+    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection, const coreInt8 iRotation, const coreFloat fSize);
     void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -485,7 +489,9 @@ private:
     coreBatchList m_Arrow;                            // 
     coreObject3D  m_aArrowRaw   [NEVO_ARROWS_RAWS];   // 
     const cShip*  m_apArrowOwner[NEVO_ARROWS];        // 
+    coreFloat     m_afArrowAlpha[NEVO_ARROWS];        // 
     coreUint8     m_aiArrowDir  [NEVO_ARROWS];        // 
+    coreUint8     m_iArrowActive;                     // 
 
     coreBatchList m_Block;                            // 
     coreBatchList m_BlockWave;                        // 
@@ -532,6 +538,9 @@ public:
     // 
     void EnableContainer (const coreVector2 vPosition);
     void DisableContainer(const coreBool bAnimated);
+
+    // 
+    inline void SetArrowActive(const coreUint8 iActive) {m_iArrowActive = iActive;}
 
     // 
     inline void SetContainerForce   (const coreVector2 vForce)    {m_vForce    = vForce;}
@@ -681,7 +690,7 @@ private:
 
     coreBatchList m_Fang;                          // 
     cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
-    coreVector2 m_avFangOldPos[GELU_FANGS];
+    coreVector2 m_avOldPos[MAX(GELU_FANGS, GELU_WAYS)];
 
     coreBatchList m_Way;                           // 
     coreBatchList m_WayArrow;                      // 
@@ -727,6 +736,10 @@ public:
     void DisableLine(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    inline coreBool IsOrbEnabled (const coreUintW iIndex)const {ASSERT(iIndex < GELU_ORBS)  return (m_afOrbTime [iIndex] > 0.0f);}
+    inline coreBool IsLineEnabled(const coreUintW iIndex)const {ASSERT(iIndex < GELU_LINES) return (m_afLineTime[iIndex] > 0.0f);}
+
+    // 
     inline void SetCrushFree(const coreBool bCrushFree) {SET_BIT(m_iCrushState, 0u, bCrushFree)}   // move through blocks after crush
     inline void SetCrushLong(const coreBool bCrushLong) {SET_BIT(m_iCrushState, 1u, bCrushLong)}   // move in-and-out of blocks after crush
 
@@ -745,33 +758,34 @@ private:
 class cCalorMission final : public cMission
 {
 private:
-    cZerothBoss m_Zeroth;                            // 
+    cZerothBoss m_Zeroth;                             // 
 
-    cSnow m_Snow;                                    // 
+    cSnow m_Snow;                                     // 
 
-    coreBatchList m_Load;                            // 
-    coreObject3D  m_aLoadRaw[CALOR_LOADS_RAWS];      // 
-    coreObject3D  m_LoadCopy;                        // 
-    const cShip*  m_pLoadOwner;                      // 
-    coreFlow      m_afLoadPower[3];                  // (0 = current | 1 = previous | 2 = bump) 
+    coreBatchList m_Load;                             // 
+    coreObject3D  m_aLoadRaw[CALOR_LOADS_RAWS];       // 
+    coreObject3D  m_LoadCopy;                         // 
+    const cShip*  m_pLoadOwner;                       // 
+    coreFlow      m_afLoadPower[3];                   // (0 = current | 1 = previous | 2 = bump) 
 
-    coreBatchList m_Star;                            // 
-    coreBatchList m_StarChain;                       // 
-    coreObject3D  m_aStarRaw   [CALOR_STARS_RAWS];   // 
-    const cShip*  m_apStarOwner[CALOR_STARS];        // 
-    coreUint8     m_iStarState;                      // 
+    coreBatchList m_Star;                             // 
+    coreBatchList m_StarChain;                        // 
+    coreObject3D  m_aStarRaw    [CALOR_STARS_RAWS];   // 
+    const cShip*  m_apStarOwner [CALOR_STARS];        // 
+    coreVector2   m_avStarOffset[CALOR_STARS];        // 
+    coreUint8     m_iStarState;                       // 
 
-    coreFlow m_fSwingStart;                          // 
-    coreFlow m_fSwingValue;                          // 
+    coreFlow m_fSwingStart;                           // 
+    coreFlow m_afSwingValue[CALOR_STARS];             // 
 
-    cEnemy*     m_apCatchObject[CALOR_STARS];        // 
-    coreVector2 m_avCatchPos   [CALOR_STARS];        // 
-    coreVector2 m_avCatchDir   [CALOR_STARS];        // 
-    coreFlow    m_fCatchTransfer;                    // 
+    cShip*      m_apCatchObject[CALOR_STARS];         // 
+    coreVector2 m_avCatchPos   [CALOR_STARS];         // 
+    coreVector2 m_avCatchDir   [CALOR_STARS];         // 
+    coreFlow    m_fCatchTransfer;                     // 
 
-    cCustomEnemy m_Boulder;                          // 
+    cCustomEnemy m_Boulder;                           // 
 
-    coreFlow m_fAnimation;                           // animation value
+    coreFlow m_fAnimation;                            // animation value
 
 
 public:
@@ -786,21 +800,22 @@ public:
     void DisableLoad(const coreBool bAnimated);
 
     // 
-    void EnableStar (const coreUintW iIndex, const cShip* pOwner);
+    void EnableStar (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vOffset);
     void DisableStar(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     inline void BumpLoad(const coreFloat fValue) {ASSERT(fValue > 0.0f) m_afLoadPower[0] = MIN(m_afLoadPower[0] + fValue, I_TO_F(CALOR_LOADS)); m_afLoadPower[2] = 1.0f;}
 
     // 
-    inline void StartSwing() {m_iStarState = BITLINE(CALOR_STARS); m_fSwingStart = 0.0f; m_fSwingValue = 0.0f;}
+    void StartSwing();
 
     // 
-    void CatchObject  (const coreUintW iIndex, cEnemy* pObject);
+    void CatchObject  (const coreUintW iIndex, cShip* pObject);
     void UncatchObject(const coreUintW iIndex);
 
     // 
-    inline cEnemy* GetCatchObject(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return m_apCatchObject[iIndex];}
+    inline coreObject3D* GetStar       (const coreUintW iIndex)      {ASSERT(iIndex < CALOR_STARS) return &m_aStarRaw    [iIndex * (CALOR_CHAINS + 1u)];}
+    inline cShip*        GetCatchObject(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return m_apCatchObject[iIndex];}
 
 
 private:

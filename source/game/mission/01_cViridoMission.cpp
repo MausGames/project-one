@@ -18,6 +18,7 @@ cViridoMission::cViridoMission()noexcept
 , m_Barrier        (VIRIDO_BARRIERS)
 , m_apBarrierOwner {}
 , m_aiBarrierDir   {}
+, m_aiBarrierRota  {}
 , m_Laser          (VIRIDO_LASERS)
 , m_LaserWave      (VIRIDO_LASERS)
 , m_apLaserOwner   {}
@@ -274,7 +275,7 @@ void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnima
 
 // ****************************************************************
 // 
-void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection, const coreFloat fSize)
+void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection, const coreInt8 iRotation, const coreFloat fSize)
 {
     ASSERT(iIndex < VIRIDO_BARRIERS)
     coreObject3D& oBarrier = m_aBarrierRaw[iIndex];
@@ -287,6 +288,7 @@ void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, 
     ASSERT(pOwner)
     m_apBarrierOwner[iIndex] = pOwner;
     m_aiBarrierDir  [iIndex] = PackDirection(vDirection);
+    m_aiBarrierRota [iIndex] = iRotation;
 
     // 
     oBarrier.SetSize   (coreVector3(7.5f * fSize, 2.5f, 2.5f));
@@ -473,7 +475,7 @@ void cViridoMission::__MoveOwnBefore()
         coreVector2       vNewDir = pBall->GetDirection().xy();
         const coreVector2 vNewPos = pBall->GetPosition ().xy() + vNewDir * FOREGROUND_AREA * (HAS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
 
-        // restrict movement to the foreground area
+        // restrict movement to the foreground area (# no position correction)
              if((vNewPos.x < -FOREGROUND_AREA.x) && (vNewDir.x < 0.0f)) {cViridoMission::__BounceEffect(vNewPos + coreVector2(-vSize.x, 0.0f)); vNewDir.x =  ABS(vNewDir.x); if(!i) ADD_BIT(m_iBounceState, 7u)}
         else if((vNewPos.x >  FOREGROUND_AREA.x) && (vNewDir.x > 0.0f)) {cViridoMission::__BounceEffect(vNewPos + coreVector2( vSize.x, 0.0f)); vNewDir.x = -ABS(vNewDir.x); if(!i) ADD_BIT(m_iBounceState, 7u)}
              if((vNewPos.y < -FOREGROUND_AREA.y) && (vNewDir.y < 0.0f)) {cViridoMission::__BounceEffect(vNewPos + coreVector2( 0.0f,-vSize.y)); vNewDir.y =  ABS(vNewDir.y); if(!i) ADD_BIT(m_iBounceState, 7u)}
@@ -543,7 +545,7 @@ void cViridoMission::__MoveOwnAfter()
         if(!oPaddle.GetAlpha()) this->DisablePaddle(i, false);
 
         // 
-        oPaddle.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+        oPaddle.SetTexOffset(coreVector2(0.0f, 0.5f * m_fAnimation));
         oPaddle.Move();
 
         // 
@@ -558,10 +560,15 @@ void cViridoMission::__MoveOwnAfter()
         if(!oBarrier.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        const cShip* pOwner = m_apBarrierOwner[i];
+        const cEnemy* pOwner = d_cast<const cEnemy*>(m_apBarrierOwner[i]);
         if(pOwner)
         {
-            const coreVector2 vDir = UnpackDirection(m_aiBarrierDir[i]);
+            coreVector2 vDir = UnpackDirection(m_aiBarrierDir[i]);
+            if(m_aiBarrierRota[i])
+            {
+                const coreVector2 vRota = (m_aiBarrierRota[i] == INT8_MAX) ? pOwner->GetPosition().xy().Normalized() : coreVector2::Direction(pOwner->GetLifeTime() * (0.1f*PI) * I_TO_F(m_aiBarrierRota[i]));
+                vDir = MapToAxis(vDir, vRota);
+            }
 
             oBarrier.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 7.0f, 0.0f));
             oBarrier.SetDirection(coreVector3(vDir, 0.0f));
@@ -575,7 +582,10 @@ void cViridoMission::__MoveOwnAfter()
         if(!oBarrier.GetAlpha()) this->DisableBarrier(i, false);
 
         // 
-        oBarrier.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+        const coreFloat fOffset = 0.0f;// I_TO_F(i) * (1.0f/7.0f);   TODO 1: eigentlich schaut es besser aus, wenn es symmetrisch ist, bei anderen auch ?
+
+        // 
+        oBarrier.SetTexOffset(coreVector2(0.0f, FRACT(0.5f * m_fAnimation + fOffset)));
     }
 
     // 
@@ -589,10 +599,11 @@ void cViridoMission::__MoveOwnAfter()
         if(!pLaser->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        const coreFloat fValue = FRACT(10.0f * m_fAnimation);
+        const coreFloat fValue  = FRACT(10.0f * m_fAnimation);
+        const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);
 
         // 
-        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * FRACT(0.8f * m_fAnimation));
+        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * FRACT(0.8f * m_fAnimation + fOffset));
 
         // 
         pWave->SetPosition (pLaser->GetPosition ());
@@ -600,6 +611,32 @@ void cViridoMission::__MoveOwnAfter()
         pWave->SetDirection(pLaser->GetDirection());
         pWave->SetAlpha    (1.0f - fValue);
         pWave->SetTexOffset(pLaser->GetTexOffset());
+
+        // 
+        const coreVector2 vRayDir = pLaser->GetDirection().xy();
+        const coreVector2 vRayPos = pLaser->GetPosition ().xy() - vRayDir * pLaser->GetSize().y;
+
+        // (here due to ordering, to prevent player from flying through laser)
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, vRayPos, vRayDir, pLaser, [&](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount, const coreBool bFirstHit)
+        {
+            // 
+            const coreVector2 vDiff = pPlayer->GetPosition().xy() - pLaser->GetPosition().xy();
+            const coreVector2 vNorm = pLaser->GetDirection().xy().Rotated90();
+            const coreFloat   fSide = coreVector2::Dot(vDiff, -vNorm);
+
+            // 
+            coreVector2 vNewPos = pPlayer->GetPosition().xy() + vNorm * (fSide * 1.1f);
+            vNewPos.x = CLAMP(vNewPos.x, pPlayer->GetArea().x, pPlayer->GetArea().z);
+            vNewPos.y = CLAMP(vNewPos.y, pPlayer->GetArea().y, pPlayer->GetArea().w);
+
+            // 
+            pPlayer->SetPosition  (coreVector3(vNewPos, 0.0f));
+            pPlayer->ApplyForceRaw(vNorm * (SIGN(fSide) * 70.0f));
+
+            // 
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vRayPos + vRayDir * pfHitDistance[0], 0.0f), 5.0f, 3u, COLOR_ENERGY_PURPLE);
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
+        });
     }
 
     // 
@@ -616,7 +653,7 @@ void cViridoMission::__MoveOwnAfter()
         const cShip* pOwner = m_apShadowOwner[i];
         if(pOwner)
         {
-            oShadow.SetSize(coreVector3(1.0f,1.0f,1.0f) * 0.25f * pOwner->GetPosition().z);
+            oShadow.SetSize(coreVector3(1.0f,1.0f,1.0f) * 0.25f * pOwner->GetPosition().z * pOwner->GetSize().z / 1.4f);
         }
 
         // 
@@ -637,7 +674,7 @@ void cViridoMission::__MoveOwnAfter()
     if(!HAS_BIT(m_iStickyState, 1u))
     {
         // 
-        Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](const coreObject3D* pPaddle, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             // 
             if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
@@ -699,7 +736,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_VIRIDO_BALL, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_VIRIDO_BALL, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -711,7 +748,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BALL, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BALL, [](cBullet* OUTPUT pBullet, const coreObject3D* pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -720,7 +757,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_BARRIER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBarrier, const coreVector3 vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_BARRIER, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pBarrier, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -733,31 +770,12 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BARRIER, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBarrier, const coreVector3 vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BARRIER, [](cBullet* OUTPUT pBullet, const coreObject3D* pBarrier, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
         // 
         pBullet->Reflect(pBarrier, vIntersection.xy(), pBarrier->GetDirection().xy());
-        // TODO 1: add small offset from the owner-position, to create more visible reflection
-    });
-
-    // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3 vIntersection, const coreBool bFirstHit)
-    {
-        if(!bFirstHit) return;
-
-        // 
-        const coreVector2 vDiff  = pPlayer->GetOldPos() - pLaser->GetPosition().xy();
-        const coreVector2 vHit   = coreVector2::Dot(vDiff, pLaser->GetDirection().xy()) * pLaser->GetDirection().xy() + pLaser->GetPosition().xy();
-        const coreVector2 vForce = pPlayer->GetOldPos() - vHit;
-
-        // 
-        pPlayer->ApplyForce(vForce.Normalized() * 100.0f);
-
-        // 
-        g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_PURPLE);
-        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
     });
 
     // 

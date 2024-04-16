@@ -36,12 +36,13 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_SINGLE      = 0x0020u,   // 
     ENEMY_STATUS_ENERGY      = 0x0040u,   // 
     ENEMY_STATUS_BOTTOM      = 0x0080u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x0100u,   // 
-    ENEMY_STATUS_DAMAGING    = 0x0200u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x0400u,   // 
-    ENEMY_STATUS_GHOST       = 0x0800u,   // 
-    ENEMY_STATUS_HIDDEN      = 0x1000u,   // 
-    ENEMY_STATUS_WORTHLESS   = 0x2000u    // 
+    ENEMY_STATUS_TOP         = 0x0100u,   //       
+    ENEMY_STATUS_INVINCIBLE  = 0x0200u,   // 
+    ENEMY_STATUS_DAMAGING    = 0x0400u,   // 
+    ENEMY_STATUS_IMMORTAL    = 0x0800u,   // 
+    ENEMY_STATUS_GHOST       = 0x1000u,   // 
+    ENEMY_STATUS_HIDDEN      = 0x2000u,   // 
+    ENEMY_STATUS_WORTHLESS   = 0x4000u    // TODO 1: should be changed to explicit score value ?
 };
 
     //ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### geschosse werden reflektiert (bubble)  

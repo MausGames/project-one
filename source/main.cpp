@@ -595,7 +595,8 @@ static void DebugGame()
         {
             g_pGame->GetEnemyManager()->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
             {
-                pEnemy->TakeDamage(pEnemy->HasStatus(ENEMY_STATUS_BOSS) ? 500 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+                pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+                pEnemy->TakeDamage(pEnemy->HasStatus(ENEMY_STATUS_BOSS) ? 200 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
             });
         }
     }

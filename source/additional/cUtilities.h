@@ -62,6 +62,15 @@ inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, cons
 
 
 // ****************************************************************
+// 
+inline FUNC_CONST coreFloat TriangleWave(const coreFloat x)
+{
+    const coreFloat A = FRACT(x);
+    return MIN(A, 1.0f - A) * 2.0f;
+}
+
+
+// ****************************************************************
 // angle difference helper-function
 inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 {

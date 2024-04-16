@@ -856,7 +856,7 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
+            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
                 if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
                 {
@@ -884,12 +884,12 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(!pBullet->HasStatus(BULLET_STATUS_GHOST))
+            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
             {
                 // 
                 pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
                 //pBullet->Deactivate(true, vIntersection.xy());
-                pBullet->AddStatus(BULLET_STATUS_GHOST);
+                //pBullet->AddStatus(BULLET_STATUS_GHOST);
             }
         }
     });

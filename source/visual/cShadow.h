@@ -15,6 +15,7 @@
 // TODO 5: poisson sampling
 // TODO 3: make sure no textures are changed when rendering shadow or outline
 // TODO 3: check if projected texture-sampling-offsets in shader are correct (and check if shadow of stings on stings in snow-background can be fixed)
+// TODO 3: use conservative rasterization for low-resolution test area (NV_conservative_raster, INTEL_conservative_rasterization) (only on high setting ?)
 
 // NOTE: shadow map binds local objects (per frame buffer) and global objects (on all frame buffers, for transitions)
 // NOTE: all global objects are on the foreground

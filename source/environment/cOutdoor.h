@@ -39,7 +39,10 @@
 
 #define OUTDOOR_SCALE_FACTOR   (SCALE_FACTOR)                                             // frame buffer resolution factor
 
-STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && (OUTDOOR_WIDTH % 2u))
+#define OUTDOOR_SHADER_ATTRIBUTE_HEIGHT   (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)   // 0, aliased mit falschem typ
+#define OUTDOOR_SHADER_ATTRIBUTE_POSITION (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 2u)   // 1
+
+STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && !coreMath::IsAligned(OUTDOOR_WIDTH, 2u))
 
 
 // ****************************************************************

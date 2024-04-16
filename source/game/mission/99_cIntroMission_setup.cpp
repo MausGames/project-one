@@ -101,7 +101,7 @@ void cIntroMission::__SetupOwn()
             else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 30u, 35u)
         }
 
-        if(g_pGame->GetBulletManagerPlayer()->GetNumBullets())
+        if(g_pGame->GetBulletManagerPlayer()->GetNumBulletsEst())
         {
             iBulletShot = 1u;
         }

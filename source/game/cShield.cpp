@@ -18,7 +18,7 @@ cShieldEffect::cShieldEffect()noexcept
 {
 #if !defined(_P1_VIDEO_)
     // 
-    g_pGlow->BindList(&m_ShieldList);
+    //g_pGlow->BindList(&m_ShieldList);
 #endif
 }
 
@@ -29,7 +29,7 @@ cShieldEffect::~cShieldEffect()
 {
 #if !defined(_P1_VIDEO_)
     // 
-    g_pGlow->UnbindList(&m_ShieldList);
+    //g_pGlow->UnbindList(&m_ShieldList);
 #endif
 }
 
@@ -46,7 +46,7 @@ void cShieldEffect::Construct(const coreHashString& sProgramSingleName, const co
         m_aShield[i].DefineProgram(sProgramSingleName);
         m_aShield[i].SetColor3    (vColor);
         m_aShield[i].SetAlpha     (0.0f);
-        m_aShield[i].SetTexSize   (coreVector2(4.0f,4.0f));
+        m_aShield[i].SetTexSize   (coreVector2(3.0f,3.0f));
     }
 
     // 
@@ -59,7 +59,7 @@ void cShieldEffect::Construct(const coreHashString& sProgramSingleName, const co
 void cShieldEffect::Render()
 {
     // 
-    m_ShieldList.Render();
+    //m_ShieldList.Render();
 }
 
 
@@ -70,7 +70,7 @@ void cShieldEffect::Move()
     if(m_ShieldList.List()->empty()) return;
 
     // 
-    m_fAnimation.Update(1.0f);
+    m_fAnimation.UpdateMod(1.0f, 10.0f);
 
     // 
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
@@ -90,7 +90,7 @@ void cShieldEffect::Move()
 
         // 
         oShield.SetAlpha    (1.0f);
-        oShield.SetTexOffset(coreVector2(m_fAnimation * 0.3f, 0.0f));
+        oShield.SetTexOffset(coreVector2(FRACT(m_fAnimation * 0.1f), 0.0f));
     }
 
     // 

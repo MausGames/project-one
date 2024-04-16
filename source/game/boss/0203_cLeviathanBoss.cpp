@@ -11,6 +11,8 @@
 // TODO 1: there could be a wave-mechanik while boss is circling
 // TODO 1: strahlen-spuren am boden bei einigen gruppen davor (foreshadowing)
 
+// NOTE: never ever use exactly 4 rays, the resulting laser+fire pattern does NOT look good
+
 
 // ****************************************************************
 // counter identifier

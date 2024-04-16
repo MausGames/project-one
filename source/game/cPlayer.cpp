@@ -17,6 +17,7 @@ cPlayer::cPlayer()noexcept
 , m_vArea           (PLAYER_AREA_DEFAULT)
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fSpeed          (1.0f)
+, m_fScale          (1.0f)
 , m_fTilt           (0.0f)
 , m_fRollTime       (0.0f)
 , m_fFeelTime       (PLAYER_NO_FEEL)
@@ -43,7 +44,6 @@ cPlayer::cPlayer()noexcept
     this->DefineTexture(1u, "menu_background_black.png");
 
     // set object properties
-    this->SetSize             (coreVector3(1.0f,1.0f,1.0f) * PLAYER_SIZE_FACTOR);
     this->coreObject3D::SetDirection        (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation      (coreVector3(0.0f,0.0f,1.0f));
     this->SetCollisionModifier(coreVector3(0.0f,0.0f,0.0f));
@@ -87,7 +87,6 @@ cPlayer::cPlayer()noexcept
     m_Arrow.DefineModel  ("bullet_cone.md3");
     m_Arrow.DefineTexture(0u, "effect_energy.png");
     m_Arrow.DefineProgram("effect_energy_flat_invert_program");
-    m_Arrow.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 1.3f * PLAYER_SIZE_FACTOR);
     m_Arrow.SetAlpha     (0.0f);
     m_Arrow.SetTexSize   (coreVector2(4.0f,1.0f) * 0.2f);
     m_Arrow.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -113,7 +112,6 @@ cPlayer::cPlayer()noexcept
         m_aShield[i].DefineModel  ("effect_shield.md3");
         m_aShield[i].DefineTexture(0u, "effect_shield.png");
         m_aShield[i].DefineProgram("effect_shield_program");
-        m_aShield[i].SetSize      (coreVector3(4.7f,4.7f,4.7f) * (i ? -1.0f : 1.0f) * PLAYER_SIZE_FACTOR);
         m_aShield[i].SetAlpha     (0.0f);
         m_aShield[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     }
@@ -378,15 +376,18 @@ void cPlayer::Move()
             // 
             if(this->IsRolling())
             {
-                const coreFloat fAngle = LERPB(0.0f, 4.0f*PI, m_fRollTime);
+                const coreFloat fAngle = LERPB(0.0f, 8.0f*PI, m_fRollTime);
                 const coreFloat fSide  = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), UnpackDirection(m_iRollDir)));
                 vNewOri *= coreMatrix4::RotationAxis(fAngle * fSide, this->GetDirection()).m123();
             }
 
             // set new position and orientation
-            this->coreObject3D::SetPosition   (coreVector3(vNewPos, 0.0f));
+            this->coreObject3D::SetPosition   (coreVector3(vNewPos, this->GetPosition().z));
             this->SetOrientation(vNewOri);
         }
+        
+        
+        this->SetSize(coreVector3(1.0f,1.0f,1.0f) * PLAYER_SIZE_FACTOR);
 
         // normalize collision size
         if(this->GetVolume().IsUsable())
@@ -418,7 +419,7 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (!this->IsRolling() && !HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot);
         }
 
@@ -474,6 +475,7 @@ void cPlayer::Move()
 
             // 
             m_Arrow.SetPosition (this->GetPosition () + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR);
+            m_Arrow.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.3f * PLAYER_SIZE_FACTOR);
             m_Arrow.SetDirection(this->GetDirection());
             m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
             m_Arrow.SetAlpha    (LERPH3(0.0f, 1.0f, m_fArrowValue));
@@ -483,11 +485,11 @@ void cPlayer::Move()
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            m_Wind.SetAlpha((m_Wind.GetAlpha() < 0.0f) ? 0.5f : COS((0.5f*PI) * m_fRollTime));
+            m_Wind.SetAlpha((m_Wind.GetAlpha() < 0.0f) ? 0.5f : COS((0.5f*PI) * m_fRollTime*0.0f));
 
             // 
             m_Wind.SetPosition (this->GetPosition());
-            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * PLAYER_SIZE_FACTOR * LERP(1.0f, 1.5f, POW3(m_fRollTime)));
+            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * PLAYER_SIZE_FACTOR * LERP(1.0f, 1.5f, POW3(m_fRollTime*0.0f)));
             m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.3f));
             m_Wind.Move();
         }
@@ -530,6 +532,7 @@ void cPlayer::Move()
 
             // 
             m_aShield[0].SetPosition   (this->GetPosition());
+            m_aShield[0].SetSize       (coreVector3(4.7f,4.7f,4.7f) * PLAYER_SIZE_FACTOR);
             m_aShield[0].SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
             m_aShield[0].SetTexOffset  (coreVector2(fBounce, 0.0f));
             m_aShield[0].SetAlpha      (LERPH3(0.0f, 1.0f, MIN(m_fIgnoreTime * 1.4f, 1.0f)));
@@ -537,6 +540,7 @@ void cPlayer::Move()
 
             // 
             m_aShield[1].SetPosition   (m_aShield[0].GetPosition   ());
+            m_aShield[1].SetSize       (coreVector3(4.7f,4.7f,4.7f) * -PLAYER_SIZE_FACTOR);
             m_aShield[1].SetOrientation(m_aShield[0].GetOrientation() * -1.0f);
             m_aShield[1].SetTexOffset  (m_aShield[0].GetTexOffset  ());
             m_aShield[1].SetAlpha      (m_aShield[0].GetAlpha      ());
@@ -741,7 +745,7 @@ void cPlayer::StartRolling(const coreVector2 vDirection)
     m_iRollDir  = PackDirection(vDirection);
 
     // 
-    this->EnableWind(vDirection);
+    //this->EnableWind(vDirection);
 }
 
 
@@ -756,7 +760,7 @@ void cPlayer::EndRolling()
     m_iRollDir  = PLAYER_NO_ROLL;
 
     // 
-    this->DisableWind();
+    //this->DisableWind();
 }
 
 
@@ -1091,6 +1095,33 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
 
 // ****************************************************************
 // 
+coreBool cPlayer::TestCollisionPrecise(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, coreFloat* OUTPUT pfHitDistance, coreUint8* OUTPUT piHitCount, coreBool* OUTPUT pbFirstHit)
+{
+    ASSERT(vRayDir.IsNormalized() && pRef && pfHitDistance && piHitCount && pbFirstHit)
+    
+    
+    const coreVector4 vOldRay = this->__NewRayData(vRayPos, vRayDir, pRef);
+    
+    const coreVector2 vDiff = this->GetPosition().xy() - vRayPos;
+    const coreFloat   fDot  = coreVector2::Dot(vDiff, vRayDir.Rotated90());
+
+    const coreVector2 vDiff2 = this->GetOldPos() - vOldRay.xy();
+    const coreFloat   fDot2  = coreVector2::Dot(vDiff2, vOldRay.zw().Rotated90());
+    
+    if((ABS(fDot) < 5.0f) && (ABS(fDot2) < 5.0f) && (SIGN(fDot) != SIGN(fDot2)))
+    {
+        (*pfHitDistance) = coreVector2::Dot(vDiff, vRayDir);
+        (*piHitCount)    = 1u;
+        (*pbFirstHit)    = this->__NewCollision(pRef);
+        return true;
+    }
+    
+    return false;
+}
+
+
+// ****************************************************************
+// 
 coreVector2 cPlayer::CalcMove()const
 {
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
@@ -1120,7 +1151,8 @@ coreFloat cPlayer::CalcMoveSpeed()const
     else s_fBoost = MAX(s_fBoost - 10.0f * TIME, 0.0f);
 
     // 
-    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost));
+    //const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost));
+    const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost);
     return m_fSpeed * fModifier;
 }
 
@@ -1168,4 +1200,35 @@ void cPlayer::__UpdateCollisions()
         if((*it) == iCurFrame) DYN_KEEP  (it)
                           else DYN_REMOVE(it, m_aCollision)
     }
+    
+    
+    FOR_EACH_DYN(it, m_aRayData)
+    {
+        // check for old entries and remove them
+        if(it->iFrame == iCurFrame) DYN_KEEP  (it)
+                          else DYN_REMOVE(it, m_aRayData)
+    }
+}
+
+
+
+coreVector4 cPlayer::__NewRayData(const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef)
+{
+    sRayData oData;
+    oData.iFrame = Core::System->GetCurFrame();
+    oData.vPos   = vRayPos;
+    oData.vDir   = vRayDir;
+    
+    // find existing collision
+    if(m_aRayData.count(pRef))
+    {
+        const sRayData oOldData = m_aRayData.at(pRef);
+        // update frame number
+        m_aRayData.at(pRef) = oData;
+        return coreVector4(oOldData.vPos, oOldData.vDir);
+    }
+
+    // add collision to list
+    m_aRayData.emplace(pRef, oData);
+    return coreVector4(vRayPos, vRayDir);
 }

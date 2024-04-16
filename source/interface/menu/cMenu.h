@@ -428,7 +428,7 @@ public:
     void SaveValues();
 
     // 
-    void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo)const;
+    void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo);//const;
 
     // 
     inline const coreUint8& GetSelectedType      ()const                       {return m_Type      .GetCurValue();}

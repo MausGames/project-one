@@ -84,6 +84,7 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
     // 
     const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());
     const coreFloat   fRadius       = pObject->GetVisualRadius();
+    //const coreVector3 vRotaRange = pObject->GetRotation().QuatApply(pObject->GetVisualRange());  blödsinn, müssen alle 3 achsen rotiert werden ?
 
     // 
     return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRadius) &&

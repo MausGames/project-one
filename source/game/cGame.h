@@ -14,6 +14,7 @@
 // TODO 2: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
+// TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow
 
 
 // ****************************************************************
