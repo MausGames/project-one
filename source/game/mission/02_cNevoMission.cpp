@@ -22,6 +22,9 @@ cNevoMission::cNevoMission()noexcept
 , m_Arrow        (NEVO_ARROWS)
 , m_apArrowOwner {}
 , m_aiArrowDir   {}
+, m_Block        (NEVO_BLOCKS)
+, m_BlockWave    (NEVO_BLOCKS)
+, m_apBlockOwner {}
 , m_vForce       (coreVector2(0.0f,0.0f))
 , m_vImpact      (coreVector2(0.0f,0.0f))
 , m_bClamp       (false)
@@ -138,6 +141,32 @@ cNevoMission::cNevoMission()noexcept
     //m_BeamShelter.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
+    m_Block    .DefineProgram("effect_energy_flat_spheric_inst_program");
+    m_BlockWave.DefineProgram("effect_energy_flat_spheric_inst_program");
+    {
+        for(coreUintW i = 0u; i < NEVO_BLOCKS_RAWS; ++i)
+        {
+            // determine object type
+            const coreUintW iType = i % 2u;
+
+            // load object resources
+            coreObject3D* pBlock = &m_aBlockRaw[i];
+            pBlock->DefineModel  ("object_tetra_top.md3");
+            pBlock->DefineTexture(0u, "effect_energy.png");
+            pBlock->DefineProgram("effect_energy_flat_spheric_program");
+
+            // set object properties
+            pBlock->SetColor3 (COLOR_ENERGY_ORANGE);
+            pBlock->SetTexSize(coreVector2(3.0f,1.2f) * 0.55f);
+            pBlock->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            if(iType) m_BlockWave.BindObject(pBlock);
+                 else m_Block    .BindObject(pBlock);
+        }
+    }
+
+    // 
     m_Container.DefineModelHigh("object_container_high.md3");
     m_Container.DefineModelLow ("object_container_low.md3");
     m_Container.DefineTexture  (0u, "ship_enemy.png");
@@ -151,6 +180,8 @@ cNevoMission::cNevoMission()noexcept
     g_pGlow->BindList(&m_Blast);
     g_pGlow->BindList(&m_BlastLine);
     g_pGlow->BindList(&m_Arrow);
+    g_pGlow->BindList(&m_Block);
+    g_pGlow->BindList(&m_BlockWave);
     
     
     m_Beam       .SetPosition(coreVector3(0.0f,0.0f,0.0f));
@@ -170,12 +201,15 @@ cNevoMission::~cNevoMission()
     g_pGlow->UnbindList(&m_Blast);
     g_pGlow->UnbindList(&m_BlastLine);
     g_pGlow->UnbindList(&m_Arrow);
+    g_pGlow->UnbindList(&m_Block);
+    g_pGlow->UnbindList(&m_BlockWave);
 
     // 
     for(coreUintW i = 0u; i < NEVO_BOMBS;  ++i) this->DisableBomb (i, false);
     for(coreUintW i = 0u; i < NEVO_BLASTS; ++i) this->DisableBlast(i, false);
     for(coreUintW i = 0u; i < NEVO_TILES;  ++i) this->DisableTile (i, false);
     for(coreUintW i = 0u; i < NEVO_ARROWS; ++i) this->DisableArrow(i, false);
+    for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i) this->DisableBlock(i, false);
     this->DisableContainer(false);
 }
 
@@ -351,6 +385,54 @@ void cNevoMission::DisableArrow(const coreUintW iIndex, const coreBool bAnimated
 
 // ****************************************************************
 // 
+void cNevoMission::EnableBlock(const coreUintW iIndex, const cShip* pOwner, const coreFloat fScale)
+{
+    ASSERT(iIndex < NEVO_BLOCKS)
+    coreObject3D* pBlock = (*m_Block    .List())[iIndex];
+    coreObject3D* pWave  = (*m_BlockWave.List())[iIndex];
+
+    // 
+    WARN_IF(pBlock->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    pBlock->ChangeType(TYPE_NEVO_BLOCK);
+
+    // 
+    ASSERT(pOwner)
+    m_apBlockOwner[iIndex] = pOwner;
+    m_afBlockScale[iIndex] = fScale;
+
+    // 
+    pBlock->SetSize   (coreVector3(0.0f,0.0f,0.0f));
+    pBlock->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    pWave ->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::DisableBlock(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < NEVO_BLOCKS)
+    coreObject3D* pBlock = (*m_Block    .List())[iIndex];
+    coreObject3D* pWave  = (*m_BlockWave.List())[iIndex];
+
+    // 
+    if(!pBlock->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    pBlock->ChangeType(0);
+
+    // 
+    m_apBlockOwner[iIndex] = NULL;
+
+    // 
+    if(!bAnimated)
+    {
+        pBlock->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        pWave ->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
+}
+
+
+// ****************************************************************
+// 
 void cNevoMission::EnableContainer(const coreVector2& vPosition)
 {
     // 
@@ -398,6 +480,26 @@ void cNevoMission::__RenderOwnBottom()
 
 // ****************************************************************
 // 
+void cNevoMission::__RenderOwnUnder()
+{
+    DEPTH_PUSH
+    DEPTH_PUSH   // TODO: first push causes outline-overdraw artifacts, precision too low on the first level, can it be handled on outline(-shader) ?
+
+    glDepthMask(false);
+    {
+        // 
+        m_BlockWave.Render();
+    }
+    glDepthMask(true);
+
+    // 
+    m_Block.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Block);
+}
+
+
+// ****************************************************************
+// 
 void cNevoMission::__RenderOwnOver()
 {
     DEPTH_PUSH
@@ -428,9 +530,9 @@ void cNevoMission::__RenderOwnOver()
     
     // 
     glColorMask(false, false, false, false);
-    m_BeamShelter.Render();
+    //m_BeamShelter.Render();
     glColorMask(true, true, true, true);
-    m_Beam.Render();         
+    //m_Beam.Render();         
     
     
 
@@ -587,6 +689,65 @@ void cNevoMission::__MoveOwnAfter()
     // 
     m_Beam.Move();         
     m_BeamShelter.Move();
+    
+    
+
+    // 
+    for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i)
+    {
+        coreObject3D* pBlock = (*m_Block    .List())[i];
+        coreObject3D* pWave  = (*m_BlockWave.List())[i];
+        if(!pBlock->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const cShip* pOwner = m_apBlockOwner[i];
+        if(pOwner)
+        {
+            pBlock->SetPosition(coreVector3(pOwner->GetPosition().xy(), 0.0f));
+        }
+
+        // 
+        coreFloat fFade;
+        if(pOwner) fFade = MIN(pBlock->GetSize().z + 1.0f * TIME, 1.0f);
+              else fFade = MIN(pBlock->GetSize().z + 3.0f * TIME, 2.0f);
+
+        // 
+        if(fFade >= 2.0f) this->DisableBlock(i, false);
+
+        // 
+        const coreFloat   fValue = FRACT(5.0f * m_fAnimation);
+        const coreFloat   fSize  = ABS(m_afBlockScale[i]) * (LERPB(0.0f, 1.0f, MIN(fFade, 1.0f)) + LERPB(0.0f, 1.0f, MAX(fFade - 1.0f, 0.0f)));
+        const coreVector2 vDir   = coreVector2::Direction(m_fAnimation * ((m_afBlockScale[i] < 0.0f) ? (-2.0f*PI) : (1.0f*PI)));
+
+        // 
+        pBlock->SetSize     (coreVector3(fSize, fSize, fFade));
+        pBlock->SetDirection(coreVector3(vDir, 0.0f));
+        pBlock->SetAlpha    (MIN(2.0f - fFade, 1.0f));
+        pBlock->SetTexOffset(coreVector2(0.0f, FRACT(0.8f * m_fAnimation + 0.15f * I_TO_F(i))));
+
+        // 
+        pWave->SetPosition (pBlock->GetPosition ());
+        pWave->SetSize     (pBlock->GetSize     () * LERPB(0.0f, 1.0f, fValue));
+        pWave->SetDirection(pBlock->GetDirection());
+        pWave->SetAlpha    (pBlock->GetAlpha    () * LERPB(0.0f, 1.0f, 1.0f - fValue));
+        pWave->SetTexOffset(pBlock->GetTexOffset());
+    }
+
+    // 
+    m_Block    .MoveNormal();
+    m_BlockWave.MoveNormal();
+
+    // 
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBlock, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        if(!bFirstHit) return;
+
+        // 
+        pPlayer->TakeDamage(10, ELEMENT_ORANGE, vIntersection.xy());
+
+        // 
+        g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_ORANGE);
+    });
 
     if(m_Container.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {

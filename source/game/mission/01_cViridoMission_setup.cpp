@@ -59,7 +59,12 @@ void cViridoMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-
+            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
+            g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
+            g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
+            g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
+            g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
         }
 
         STAGE_FINISH_PLAY
@@ -536,6 +541,7 @@ void cViridoMission::__SetupOwn()
     // - all: arrows spawn with offset, to reduce accidental killing them before getting visible
     // TODO: too similar to meteor wave
     // TODO: spawn small enemies from all sides
+    // TODO: create a lot more containers (3 each side ?)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1596,7 +1602,7 @@ void cViridoMission::__SetupOwn()
                 vTarget.y = vTarget.y - 1.4f * fLifeTime + 2.4f;
             }
 
-            if(STAGE_TAKEOFF) pEnemy->SetPosition(coreVector3((vTarget * FOREGROUND_AREA) * mTransform, 0.0f));
+            if(STAGE_TAKEOFF) pEnemy->SetPosition(coreVector3((vTarget * FOREGROUND_AREA + coreVector2(0.0f,1.0f)) * mTransform, 0.0f));   // make sure to add offset due to imprecision
 
             const coreVector2 vEnemyPos  = pEnemy->GetPosition().xy() * mTransformRev;
             const coreVector2 vEnemyMove = pEnemy->GetMove()          * mTransformRev;

@@ -162,8 +162,8 @@ cTorusBoss::cTorusBoss()noexcept
     // 
     for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
     {
-        m_aTurret[i].DefineModelHigh("object_cube.md3");
-        m_aTurret[i].DefineModelLow ("object_cube.md3");
+        m_aTurret[i].DefineModelHigh("object_cube_rota.md3");
+        m_aTurret[i].DefineModelLow ("object_cube_rota.md3");
         m_aTurret[i].DefineTexture  (0u, "effect_energy.png");
         m_aTurret[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aTurret[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.85f);
@@ -179,7 +179,7 @@ cTorusBoss::cTorusBoss()noexcept
         {
             // load object resources
             coreObject3D* pTurret = &m_aTurretHullRaw[i];
-            pTurret->DefineModel  ("object_cube.md3");
+            pTurret->DefineModel  ("object_cube_rota.md3");
             pTurret->DefineTexture(0u, "effect_energy.png");
             pTurret->DefineProgram("effect_energy_invert_program");
 
@@ -197,8 +197,8 @@ cTorusBoss::cTorusBoss()noexcept
     // 
     for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
     {
-        m_aGunner[i].DefineModelHigh("object_tetra.md3");
-        m_aGunner[i].DefineModelLow ("object_tetra.md3");
+        m_aGunner[i].DefineModelHigh("object_tetra_rota.md3");
+        m_aGunner[i].DefineModelLow ("object_tetra_rota.md3");
         m_aGunner[i].DefineTexture  (0u, "effect_energy.png");
         m_aGunner[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aGunner[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
@@ -214,7 +214,7 @@ cTorusBoss::cTorusBoss()noexcept
         {
             // load object resources
             coreObject3D* pGunner = &m_aGunnerHullRaw[i];
-            pGunner->DefineModel  ("object_tetra.md3");
+            pGunner->DefineModel  ("object_tetra_rota.md3");
             pGunner->DefineTexture(0u, "effect_energy.png");
             pGunner->DefineProgram("effect_energy_invert_program");
 

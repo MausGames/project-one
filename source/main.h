@@ -75,6 +75,8 @@
 // TODO: use only 6 (or 8) pixel texture with nearest filtering for enemies
 // TODO: indicator when controls are enabled again (blinking und peeping sound)
 // TODO: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
+// TODO: re-export all models which are still in the old MD3 format (24.01.18 21:19) (+ update default)
+// TODO: search and remove unused resources from application.cpp (+ folder)
 
 
 // ****************************************************************
@@ -171,7 +173,7 @@
 #define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
-#define SHADER_BLINK         "#define _P1_BLINK_      (1) \n"        // energy, object_ship
+#define SHADER_BLINK         "#define _P1_BLINK_      (1) \n"        // energy, object_ship, object_meteor
 #define SHADER_FLAT          "#define _P1_FLAT_       (1) \n"        // outline, energy
 #define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // outline, energy
 #define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"        // decal, energy
@@ -200,6 +202,7 @@ enum eType : coreInt32
     TYPE_VIRIDO_BARRIER,
     TYPE_VIRIDO_LASER,
     TYPE_NEVO_BOMB,
+    TYPE_NEVO_BLOCK,
     TYPE_NEVO_CONTAINER,
     TYPE_RUTILUS_TELEPORTER,
 

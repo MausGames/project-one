@@ -240,64 +240,7 @@ cGameMenu::cGameMenu()noexcept
     
     //m_TrainingTab.SetOverride(-1);   // TODO
     
-    m_aShipInput[0] = {};
-    m_aShipInput[1] = {};
-
-    /*
-    m_apShip[0] = new cPlayer();
-    m_apShip[0]->Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED);
-    m_apShip[0]->EquipWeapon(0u, cRayWeapon::ID);
-    //m_apShip[0]->Resurrect();
-    m_apShip[0]->ActivateNormalShading();
-    m_apShip[0]->SetInput(&m_aShipInput[0]);
-    
-    m_apShip[1] = new cPlayer();
-    m_apShip[1]->Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
-    m_apShip[1]->EquipWeapon(0u, cRayWeapon::ID);
-    //m_apShip[1]->Resurrect();
-    m_apShip[1]->ActivateNormalShading();
-    m_apShip[1]->SetInput(&m_aShipInput[1]);
-
-
-    m_apShip[0]->SetPosition(coreVector3(coreVector2(-0.5f,-0.65f) * FOREGROUND_AREA, 0.0f));
-    m_apShip[1]->SetPosition(coreVector3(coreVector2( 0.5f,-0.65f) * FOREGROUND_AREA, 0.0f));
-
-     */
-    //cBulletManager* P = g_pGame->GetBulletManagerPlayer();
-    //CALL_CONSTRUCTOR(P, TYPE_BULLET_PLAYER)
-
-
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i) m_MenuInput.BindObject(&m_aOptionLine[i]);
-}
-
-
-
-cGameMenu::~cGameMenu()
-{
-    /*
-    SAFE_DELETE(m_apShip[0])
-    SAFE_DELETE(m_apShip[1])
-     */
-}
-
-
-// ****************************************************************
-// 
-void cGameMenu::Render()
-{
-    this->coreMenu::Render();
-
-
-    /*
-    glEnable(GL_DEPTH_TEST);
-    m_apShip[0]->Render();
-    m_apShip[1]->Render();
-
-    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(m_apShip[0]);
-    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(m_apShip[1]);
-
-    glDisable(GL_DEPTH_TEST);
-     */
 }
 
 
@@ -305,11 +248,6 @@ void cGameMenu::Render()
 // move the game menu
 void cGameMenu::Move()
 {
-    /*
-    m_apShip[0]->Move();
-    m_apShip[1]->Move();
-     */
-
     // move the menu
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);

@@ -29,6 +29,7 @@
 // TODO: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
 // TODO: every object in menu needs outline: weapon icons
 // TODO: custom resolution should be stored when switching monitors
+// TODO: show target FPS in config menu (speed x update rate)
 
 
 // ****************************************************************
@@ -352,22 +353,14 @@ private:
     cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];   // 
     cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
     cGuiObject    m_aSupportIcon[MENU_GAME_PLAYERS];   // 
-
-
-    //cPlayer* m_apShip[2];
-    sGameInput m_aShipInput[2];
-
-    cMenuInput m_MenuInput;  
-
+    
+    cMenuInput m_MenuInput;
 
 
 public:
     cGameMenu()noexcept;
-    ~cGameMenu()final;
 
     DISABLE_COPY(cGameMenu)
-
-        void Render()final;
 
     // move the game menu
     void Move()final;

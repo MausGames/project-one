@@ -13,6 +13,7 @@
 // TODO: don't update shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
 // TODO: support box mode (4 walls), for scaling
 // TODO: don't render wallpapers on 1:1
+// TODO: also clamp fullscreen distortion similar to water distortion ?
 
 
 // ****************************************************************

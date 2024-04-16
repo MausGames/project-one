@@ -851,10 +851,10 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
         coreFloat   fHitDistance = 0.0f;
         coreVector3 vHitNormal   = coreVector3(0.0f,0.0f,0.0f);
         coreUint8   iHitCount    = 1u;
-        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &vHitNormal, &iHitCount) && ((iHitCount & 0x01u) || POW2(fHitDistance) < vMove.LengthSq()))
+        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &vHitNormal, &iHitCount) && ((iHitCount & 0x01u) || (POW2(fHitDistance) < vMove.LengthSq())))
         {
             // 
-            (*pvIntersection) = vRayPos + vRayDir * fHitDistance;
+            (*pvIntersection) = vRayPos + vRayDir * MIN(fHitDistance, vMove.Length());
             (*pbFirstHit)     = this->__NewCollision(pObject);
             return true;
         }

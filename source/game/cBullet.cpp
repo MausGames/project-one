@@ -425,7 +425,7 @@ void cRayBullet::__MoveOwn()
 
     // update fade
     m_fFade.Update(1.5f);
-    this->SetSize (coreVector3(3.7f, 3.7f * MIN(12.0f * m_fFade, 1.0f), 3.7f) * 0.5f * m_fScale);
+    this->SetSize (coreVector3(3.7f, 3.7f * MIN(12.0f * m_fFade, 1.0f)     * (m_fSpeed / (6.0f*BULLET_SPEED_FACTOR)), 3.7f) * 0.5f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 
@@ -486,7 +486,7 @@ void cPulseBullet::__MoveOwn()
 
     // update fade
     m_fFade.Update(1.0f);
-    this->SetSize (coreVector3(1.0f, 2.5f * MIN(12.0f * m_fFade, 1.0f), 1.0f) * 1.3f * m_fScale);
+    this->SetSize (coreVector3(1.0f, 2.5f * MIN(12.0f * m_fFade, 1.0f)     * (m_fSpeed / (3.0f*BULLET_SPEED_FACTOR)), 1.0f) * 1.3f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 

@@ -56,8 +56,8 @@ cSpecialEffects::cSpecialEffects()noexcept
         m_aBlast[i].SetAlpha     (0.0f);
     }
     m_apBlastModel[0] = Core::Manager::Resource->Get<coreModel>("object_sphere.md3");
-    m_apBlastModel[1] = Core::Manager::Resource->Get<coreModel>("object_quad.md3");
-    m_apBlastModel[2] = Core::Manager::Resource->Get<coreModel>("object_triangle.md3");
+    m_apBlastModel[1] = Core::Manager::Resource->Get<coreModel>("object_cube_top.md3");
+    m_apBlastModel[2] = Core::Manager::Resource->Get<coreModel>("object_tetra_top.md3");
 
     // 
     const auto nLoadSoundFunc = [this](const eSoundEffect eSoundIndex, const coreChar* pcName)
@@ -581,7 +581,7 @@ void cSpecialEffects::CreateBlastSphere(const coreVector3& vPosition, const core
     oBlast.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
 }
 
-void cSpecialEffects::CreateBlastQuad(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -599,7 +599,7 @@ void cSpecialEffects::CreateBlastQuad(const coreVector3& vPosition, const coreVe
     oBlast.SetCollisionModifier(coreVector3(fScale * 0.77f, fSpeed, 0.0f));
 }
 
-void cSpecialEffects::CreateBlastTriangle(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;

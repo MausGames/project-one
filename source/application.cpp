@@ -40,7 +40,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("environment_seashell.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_seashell.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("meteor.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", false);
@@ -53,17 +52,16 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_chroma.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_chroma.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3"); // TODO ###
-    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3"); // TODO ###
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_quad.md3"); // TODO ###
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_teleporter.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_teleporter.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_tetra.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra.md3"); // TODO ###
-    Core::Manager::Resource->Load<coreModel>  ("object_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_triangle.md3"); // TODO ###
+    Core::Manager::Resource->Load<coreModel>  ("object_tetra_rota.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_rota.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_open.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_open.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);
@@ -72,6 +70,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_low.md3");
+        Core::Manager::Resource->Load<coreModel>  ("object_chroma.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_chroma.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_high.md3", false);
@@ -109,6 +108,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_helper_07.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_07.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_helper_08.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_08.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_helper_09.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_09.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_meteor.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3", false);
@@ -326,7 +326,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
     Core::Manager::Resource->Load<coreShader> ("object_chroma_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_chroma.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_ship_inst.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_meteor_blink_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
@@ -925,24 +924,20 @@ void CoreApp::Setup()
         ->AttachShader("object_meteor_blink.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_chroma_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("object_inst.vert")
-        ->AttachShader("object_chroma_inst.frag")
-        ->Finish();
-
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_ground_inst.frag")
         ->Finish();
 
+// one further up 
+        d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_chroma_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+            ->AttachShader("object_inst.vert")
+            ->AttachShader("object_chroma_inst.frag")
+            ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_wave_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object_wave_inst.vert")
         ->AttachShader("object_ground_inst.frag")
-        ->Finish();
-
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("object_inst.vert")
-        ->AttachShader("object_ship_inst.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

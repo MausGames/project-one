@@ -244,7 +244,7 @@ void cRutilusMission::__MoveOwnAfter()
 
         // 
         //m_afWaveTime[i].Update(0.7f * fSign);
-        m_afWaveTime[i].Update(0.4f * fSign);
+        m_afWaveTime[i].Update(0.5f * fSign);
         if((m_afWaveTime[i] < 0.0f) || (m_afWaveTime[i] > 1.0f))
         {
             // 
@@ -257,7 +257,7 @@ void cRutilusMission::__MoveOwnAfter()
 
         // 
         oWave.SetPosition(m_aWaveRaw[0].GetPosition());
-        //oWave.SetSize    (coreVector3(10.0f * m_afWaveTime[i], 80.0f, 1.0f));
+        //oWave.SetSize    (coreVector3(15.0f * m_afWaveTime[i], 80.0f, 1.0f));
         oWave.SetSize    (coreVector3(1.0f,1.0f,1.0f) * 30.0f * m_afWaveTime[i]);
         oWave.SetAlpha   (MIN(1.0f - m_afWaveTime[i], 6.0f * m_afWaveTime[i], 1.0f) * (CONTAINS_BIT(m_iWaveActive, i) ? 1.0f : 0.0f));
     }

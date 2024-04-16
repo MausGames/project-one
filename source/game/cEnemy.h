@@ -91,7 +91,7 @@ public:
     inline const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
 
     // enemy configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}
 
 
 protected:

@@ -540,6 +540,7 @@ void cNevoMission::__SetupOwn()
     // maximal 2 spieler-rotation pro angreifbarer ausrichtung
     // erste 3 gegner sind tutorial
     // TODO: 2 gegner pro seite, rotating arrow, start mit oben, gegen uhrzeigersinn
+    // TODO: vertical enemies offset so players have to work together
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -753,7 +754,7 @@ void cNevoMission::__SetupOwn()
 
         STAGE_WAVE("EINUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-STAGE_START_HERE
+
     // ################################################################
     // hide from super laser
     // blöcke die von einer seite schützen, und geschosse aufhalten (spieler, gegner)
@@ -829,10 +830,134 @@ STAGE_START_HERE
     });
 
     // ################################################################
-    // <REPLACE>                                                       
+    // occupy areas with energy
+    // rotation der großen dreiecke entgegen der flug-drehrichtung (auch gruppe 1)
+    // flug-rotation um bewegung gefährlicher zu machen und gegen safe-spots
+    // erste welle so aufbauen um dreiecke möglichst gleichmäßig zu verteilen, spieler kann trotzdem überlappen, könnte aber zeit kosten
+    // hohe geschwindigkeit erhöht intensity und aufmerksamkeit
+    // wenn flug-drehrichtung anfängt, zweite welle von der seite kommen, von wo die großen dreiecke kommen werden
+    // TODO: helfer spawnt und fliegt in Ntem teleportiertem dreieck, verschwindet nach nächster teleportation, kleiner funken-effekt bei kill (falls doch noch sichtbar)
+    // TODO: something after the last wave (changing the triangles (size, movement), or the number, or ...), or start ? hmmm, no I want to start up quick
     STAGE_MAIN({TAKE_ALWAYS, 8u})
     {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 24u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(4, COLOR_SHIP_ORANGE);
+            });
+        });
+
+        STAGE_GET_START(2u)
+            STAGE_GET_FLOAT(fMoveSpeed)
+            STAGE_GET_FLOAT(fMoveAngle)
+        STAGE_GET_END
+
+        constexpr coreUintW iNumBig = 4u;
+
+        for(coreUintW i = iNumBig; i < NEVO_BLOCKS; ++i)
+        {
+            if(m_apBlockOwner[i] && CONTAINS_FLAG(m_apBlockOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+                this->DisableBlock(i, true);
+        }
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB( 1u)) STAGE_RESSURECT(pSquad1,  0u,  0u)
+            else if(STAGE_SUB( 2u)) STAGE_RESSURECT(pSquad1,  1u,  1u)
+            else if(STAGE_SUB( 3u)) STAGE_RESSURECT(pSquad1,  2u,  2u)
+            else if(STAGE_SUB( 4u)) STAGE_RESSURECT(pSquad1,  3u,  3u)
+            else if(STAGE_SUB( 5u)) STAGE_RESSURECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB( 6u)) STAGE_RESSURECT(pSquad1,  8u, 11u)
+            else if(STAGE_SUB( 7u)) STAGE_RESSURECT(pSquad1, 12u, 15u)
+            else if(STAGE_SUB( 8u)) STAGE_RESSURECT(pSquad1, 16u, 19u)
+            else if(STAGE_SUB( 9u)) STAGE_RESSURECT(pSquad1, 20u, 23u)
+
+            STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+            {
+                if(!pEnemy->ReachedDeath()) this->EnableBlock((i < iNumBig) ? i : ((i % (NEVO_BLOCKS - iNumBig)) + iNumBig), pEnemy, (i < iNumBig) ? 10.0f : -5.0f);
+            });
+
+            if(STAGE_CLEARED)
+            {
+                for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i)
+                    this->DisableBlock(i, true);
+
+                g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(true);
+            }
+        }
+
+        if(m_iStageSub >= 5u)
+        {
+            fMoveSpeed = MIN(fMoveSpeed + 0.5f * TIME, 1.0f);
+            fMoveAngle = fMoveAngle - 0.2f * TIME;
+
+            const coreVector2 vMove = coreVector2::Direction(fMoveAngle) * (55.0f * TIME * fMoveSpeed);
+
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                if(i >= iNumBig) return;
+
+                coreVector2 vNewPos = pEnemy->GetPosition().xy() + vMove;
+
+                     if(vNewPos.x < -FOREGROUND_AREA.x * 1.45f) vNewPos.x =  ABS(vNewPos.x);
+                else if(vNewPos.x >  FOREGROUND_AREA.x * 1.45f) vNewPos.x = -ABS(vNewPos.x);
+                     if(vNewPos.y < -FOREGROUND_AREA.y * 1.45f) vNewPos.y =  ABS(vNewPos.y);
+                else if(vNewPos.y >  FOREGROUND_AREA.y * 1.45f) vNewPos.y = -ABS(vNewPos.y);
+
+                pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
+            });
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            if(i < 4u || i >= 12u)
+            {
+                STAGE_LIFETIME(pEnemy, 0.8f, 0.0f)
+
+                const coreFloat   fSide = ((i / 4u) % 2u) ? 1.0f : -1.0f;
+                const coreFloat   fVal  = fLifeTime * 1.8f;
+                const coreVector2 vDir  = coreVector2::Direction((fVal - I_TO_F(i % 4u) * (0.5f*PI)) * fSide);
+                const coreFloat   fLen  = LERPB(FOREGROUND_AREA.x * 1.2f, 0.0f, MIN(fVal * 0.1f, 1.0f));
+
+                pEnemy->SetPosition (coreVector3(vDir * fLen,               0.0f));
+                pEnemy->SetDirection(coreVector3(vDir.Rotated90() * -fSide, 0.0f));
+            }
+            else
+            {
+                STAGE_LIFETIME(pEnemy, 0.8f, 0.5f * I_TO_F(i % 4u) + ((i < 8u) ? 3.0f : 0.0f))
+
+                STAGE_REPEAT(pPath1->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f, (i < 8u) ? 1.0f : -1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(i % 4u) - 1.5f) * -0.3f, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+                pEnemy->Rotate270();
+            }
+        });
+
         STAGE_WAVE("DREIUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // reset all blocks
+    STAGE_MAIN({TAKE_ALWAYS, 8u})
+    {
+        for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i)
+            this->DisableBlock(i, false);
+
+        g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(false);
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################

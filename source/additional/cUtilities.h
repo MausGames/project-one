@@ -105,7 +105,7 @@ inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 
 // ****************************************************************
 // 
-inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
+inline FUNC_PURE coreVector2 SmoothAim(const coreVector2& vOldDir, const coreVector2& vNewDir, const coreFloat fStrength)
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
 

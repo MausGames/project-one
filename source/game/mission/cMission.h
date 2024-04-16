@@ -66,6 +66,8 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_ARROWS                 (21u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
+#define NEVO_BLOCKS                 (12u)                                             // 
+#define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
@@ -156,6 +158,7 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define STAGE_SUBTIME_BEFORE(t)                (m_fStageSubTime <  (t))
 #define STAGE_SUBTIME_AFTER(t)                 (m_fStageSubTime >= (t))
 #define STAGE_SUBTIME_BETWEEN(t,u)             (InBetween(m_fStageSubTime, (t), (u)))
+#define STAGE_BEGINNING2                       (STAGE_SUBTIME_POINT(0.0f))
 
 #define STAGE_LIFETIME_POINT(t)                (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
 #define STAGE_LIFETIME_BEFORE(t)               (fLifeTime     <  (t) && fLifeTime     >= 0.0f)
@@ -452,6 +455,12 @@ private:
     coreObject3D m_Beam;                              // 
     coreObject3D m_BeamShelter;                       // 
 
+    coreBatchList m_Block;                            // 
+    coreBatchList m_BlockWave;                        // 
+    coreObject3D  m_aBlockRaw   [NEVO_BLOCKS_RAWS];   // 
+    const cShip*  m_apBlockOwner[NEVO_BLOCKS];        // 
+    coreFloat     m_afBlockScale[NEVO_BLOCKS];        // 
+
     cLodObject  m_Container;                          // 
     coreVector2 m_vForce;                             // 
     coreVector2 m_vImpact;                            // 
@@ -485,6 +494,10 @@ public:
     void DisableArrow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableBlock (const coreUintW iIndex, const cShip* pOwner, const coreFloat fScale);
+    void DisableBlock(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableContainer (const coreVector2& vPosition);
     void DisableContainer(const coreBool bAnimated);
 
@@ -506,6 +519,7 @@ private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __MoveOwnAfter   ()final;
 };
