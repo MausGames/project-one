@@ -24,6 +24,7 @@ cViridoMission::cViridoMission()noexcept
 , m_bBarrierSlow    (false)
 , m_bBarrierClamp   (true)
 , m_bBarrierReflect (true)
+, m_bBarrierIgnore  (true)
 , m_iBarrierBounce  (0u)
 , m_Laser           (VIRIDO_LASERS)
 , m_LaserWave       (VIRIDO_LASERS)
@@ -50,7 +51,7 @@ cViridoMission::cViridoMission()noexcept
 , m_iStickyState    (0u)
 , m_iBounceState    (0u)
 , m_fAnimation      (0.0f)
-, m_bStory          (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_VIRIDO))
+, m_bStory          (!HAS_BIT_EX(REPLAY_WRAP_PROGRESS_STATE, STATE_STORY_VIRIDO) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 {
     // 
     m_apBoss[0] = &m_Torus;
@@ -227,7 +228,7 @@ cViridoMission::cViridoMission()noexcept
     m_Globe.DefineTexture  (0u, "effect_energy.png");
     m_Globe.DefineProgram  ("effect_energy_flat_invert_program");
     m_Globe.SetTexSize     (coreVector2(1.0f,1.0f) * 0.4f);
-    m_Globe.Configure      (1000, 0u, COLOR_ENERGY_PURPLE * 0.9f);
+    m_Globe.Configure      (1000, COLOR_ENERGY_PURPLE * 0.9f);
     m_Globe.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
 
     // 
@@ -1070,11 +1071,9 @@ void cViridoMission::__MoveOwnAfter()
                 }
                 const coreBool bAlways = (pBullet->GetFlyTime() < 0.1f) && !bBehind;
                 
-                const coreFloat fSlant = 0.0f;// (1.0f + coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy())) * (bBehind ? 0.0f : 1.0f);      
-                
                 const coreFloat   fRadius = pBullet->GetCollisionRange().xy().Max();       
                 const coreVector2 vNewPos = pBullet->GetPosition().xy() + pBullet->GetFlyDir() * fRadius;
-                const coreVector2 vOldPos = pBullet->GetPosition().xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * BULLET_SPEED_FACTOR * TIME * (1.0f + 10.0f * fSlant));
+                const coreVector2 vOldPos = pBullet->GetPosition().xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * BULLET_SPEED_FACTOR * TIME);
                 
                 
                 const coreVector2 vOldRayPos = m_avBarrierPos[i] + m_avBarrierDir[i] * oBarrier.GetCollisionRange().y;
@@ -1095,15 +1094,15 @@ void cViridoMission::__MoveOwnAfter()
                 const coreFloat fRealRange = ABS(coreVector2::Dot(pBullet->GetDirection().xy().Rotated90() * pBullet->GetCollisionRange().x, vRayDir));
                 
                 // 
-                if(((SIGN(fDot) != SIGN(fDotOld)) || (bAlways && (fDot > 0.0f)))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&   // to handle teleportation
-                    (/*ABS(coreVector2::Dot(vDiff,    vRayDir))*/vRealDiff.LengthSq()    < POW2(oBarrier.GetCollisionRange().x + fRealRange)))
+                if(((SIGN(fDot) != SIGN(fDotOld)) || (bAlways && (fDot > 0.0f))) &&   // to handle teleportation
+                    (vRealDiff.LengthSq() < POW2(oBarrier.GetCollisionRange().x + fRealRange)))
                 {
                     const coreVector2 vIntersection = vRayPos + vRayDir * coreVector2::Dot(vDiff, vRayDir);
 
                     // 
-                    if(!g_pForeground->IsVisiblePoint(vIntersection))
+                    if(m_bBarrierIgnore && !g_pForeground->IsVisiblePoint(vIntersection))
                     {
-                        pBullet->AddStatus(BULLET_STATUS_GHOST);
+                        pBullet->Ignore();
                         return;
                     }
     

@@ -16,7 +16,6 @@ cEnemy::cEnemy()noexcept
 , m_fLifeTimeBefore  (0.0f)
 , m_iLastAttacker    (0u)
 , m_bWasDamaged      (false)
-, m_iScore           (0u)
 , m_iExtraDamage     (0)
 , m_iDamageForwarded (0)
 {
@@ -26,22 +25,16 @@ cEnemy::cEnemy()noexcept
 
     // reset base properties
     this->ResetProperties();
-    
-    
-    this->DefineTexture(1u, "menu_background_black.png");
 }
 
 
 // ****************************************************************
 // configure the enemy
-void cEnemy::Configure(const coreInt32 iHealth, const coreUint16 iScore, const coreVector3 vColor, const coreBool bInverted, const coreBool bIgnored, const coreBool bWhite)
+void cEnemy::Configure(const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted, const coreBool bIgnored, const coreBool bWhite)
 {
     // set health and color
     this->SetMaxHealth(iHealth);
     this->SetBaseColor(vColor, bInverted, bIgnored, bWhite);
-
-    // 
-    m_iScore = iScore;
 }
 
 
@@ -150,7 +143,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
             // 
             const coreInt32 iPower = (bMulti || bNeutral || (this->GetCurHealth() == 1)) ? 1 : GAME_PLAYERS;
             
-            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 110 : 100) * ((g_pGame->IsMulti() && !bNeutral) ? 110 : 100);
+            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * (bNeutral ? 10000 : ((g_pGame->IsEasy() ? 110 : 101) * (g_pGame->IsMulti() ? 110 : 100)));
             
             const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 10000, iElement, vImpact) / iPower);
             ASSERT(coreMath::IsAligned(this->GetMaxHealth(), iPower))   // ???
@@ -372,11 +365,11 @@ void cEnemy::ApplyScore(cPlayer* pPlayer)
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
     {
         // 
-        const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(g_pGame->RaiseValue(this->GetRealScore()), true);
+        const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(g_pGame->RaiseValue(10u * m_iMaxHealth), true);
         pPlayer->GetScoreTable()->AddCombo(1u);
 
         // 
-        g_pGame->GetCombatText()->DrawScore(iScore, this->GetPosition(), false);//!g_pGame->GetEnemyManager()->GetNumEnemiesAlive());   // TODO 1: bBig is not correct
+        g_pGame->GetCombatText()->DrawScore(iScore, this->GetPosition(), false);
 
         // 
         this->TrackEnemy();
@@ -1347,7 +1340,7 @@ cRepairEnemy::cRepairEnemy()noexcept
 , m_fAnimation (0.0f)
 {
     // 
-    this->Configure(50, 0u, COLOR_SHIP_GREY);
+    this->Configure(50, COLOR_SHIP_GREY);
     this->AddStatus(ENEMY_STATUS_SINGLE);
     this->AddStatus(ENEMY_STATUS_IMMORTAL);
     this->AddStatus(ENEMY_STATUS_GHOST_PLAYER);

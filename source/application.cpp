@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.2.7";
+const coreChar* const CoreApp::Settings::Version                       = "1.3.0";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -26,9 +26,12 @@ const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID[3] = {"2914e
 const coreChar* const CoreApp::Settings::Platform::EpicClientID        = "";
 const coreChar* const CoreApp::Settings::Platform::EpicClientSecret    = "";
 
-//const coreUint32      CoreApp::Settings::Platform::SteamDemoAppID       = 2089690u;       CoreApp::IsDemo();
-//const coreChar* const CoreApp::Settings::Platform::EpicDemoClientID     = "";
-//const coreChar* const CoreApp::Settings::Platform::EpicDemoClientSecret = "";
+
+// ****************************************************************
+// compile-time settings
+STATIC_ASSERT(DEFINED(_CORE_PRECISE_))
+
+// TODO: textures, lights etc.
 
 
 // ****************************************************************
@@ -250,7 +253,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("effect_headlight_point.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_headlight_point.png");
     Core::Manager::Resource->Load<coreTexture>("effect_headlight_spot.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_headlight_spot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_lightning.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_lightning.png");
-    Core::Manager::Resource->Load<coreTexture>("effect_particle.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
+    Core::Manager::Resource->Load<coreTexture>("effect_particle.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle.png", CORE_TEXTURE_LOAD_RG);
     Core::Manager::Resource->Load<coreTexture>("effect_rain.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_rain.png");
     Core::Manager::Resource->Load<coreTexture>("effect_sand.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_sand.png");
     Core::Manager::Resource->Load<coreTexture>("effect_shield.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_shield.png");
@@ -259,7 +262,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_track.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_track.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
-    Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
+    Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", CORE_TEXTURE_LOAD_RG);
     Core::Manager::Resource->Load<coreTexture>("environment_animal_diff.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_animal_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_animal_norm.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_animal_norm.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("environment_block_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_block_diff.png");
@@ -325,8 +328,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_08.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_08.png");
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_09.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_09.png");
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_plate.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_plate.png");
-    Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
-    Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
+    Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("game_logo_kana.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_kana.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_luna.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_luna.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps3.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps3.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
@@ -509,6 +512,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_free.vert",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_free.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_free.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_free.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_grey.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_grey_vignette.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag", SHADER_VIGNETTE);
     Core::Manager::Resource->Load<coreShader> ("menu_helper.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_helper.vert");
     Core::Manager::Resource->Load<coreShader> ("menu_helper.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_helper.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
@@ -1230,6 +1234,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_grey_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("default_2d.vert")
         ->AttachShader("menu_grey.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_grey_vignette_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("menu_grey_vignette.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_helper_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

@@ -35,6 +35,7 @@ cBackground::cBackground(const coreBool bEmpty)noexcept
 : m_pOutdoor (NULL)
 , m_pWater   (NULL)
 , m_bEmpty   (bEmpty)
+, m_bFresh   (true)
 {
     if(!bEmpty)
     {
@@ -196,6 +197,9 @@ void cBackground::Render()
 // move the background
 void cBackground::Move()
 {
+    // 
+    m_bFresh = false;
+
     // move the outdoor-surface
     if(m_pOutdoor)
     {
@@ -238,7 +242,7 @@ void cBackground::Move()
                 const coreVector2 vScreenDiff = pObject->GetPosition().xy() - vCameraPos;
 
                 // determine logical visibility (and handle infinity)
-                const coreVector2 vScreenPosWrap = coreVector2(vScreenDiff.x, FMOD(ABS(vScreenDiff.y) + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL) - I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL) * mRota + vShift;
+                const coreVector2 vScreenPosWrap = coreVector2(vScreenDiff.x, FmodRange(vScreenDiff.y, -I_TO_F(OUTDOOR_VIEW / 2) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT - OUTDOOR_VIEW / 2) * OUTDOOR_DETAIL)) * mRota + vShift;
                 const coreBool    bIsVisibleWrap = ((ABS(vScreenPosWrap.x) + ABS(vScreenPosWrap.y)) < fRange);
                 if(bIsVisibleWrap != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
@@ -415,19 +419,23 @@ void cBackground::ClearAdds()
 
 // ****************************************************************
 // 
-#define __SET_DENSITY(x)                                                                    \
-{                                                                                           \
-    ASSERT((iIndex < (x).size()) && (fDensity >= 0.0f) && (fDensity <= 1.0f))               \
-                                                                                            \
-    coreSet<coreObject3D*>* pContent = (x)[iIndex]->List();                                 \
-                                                                                            \
-    /*  */                                                                                  \
-    coreObject3D* pBase = pContent->front();                                                \
-    pBase->SetCollisionModifier(coreVector3(fDensity, pBase->GetCollisionModifier().yz())); \
-                                                                                            \
-    /*  */                                                                                  \
-    if(bForce) FOR_EACH(et, *pContent) (*et)->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);       \
-} 
+#define __SET_DENSITY(m)                                                                      \
+{                                                                                             \
+    ASSERT((iIndex < (m).size()) && (fDensity >= 0.0f) && (fDensity <= 1.0f))                 \
+                                                                                              \
+    coreSet<coreObject3D*>* pContent = (m)[iIndex]->List();                                   \
+    coreObject3D*           pBase    = pContent->front();                                     \
+                                                                                              \
+    /*  */                                                                                    \
+    const coreBool bGentle = (!pBase->GetCollisionModifier().x && fDensity && !m_bFresh);     \
+                                                                                              \
+    /*  */                                                                                    \
+    pBase->SetCollisionModifier(coreVector3(fDensity, pBase->GetCollisionModifier().yz()));   \
+                                                                                              \
+    /*  */                                                                                    \
+         if(bForce)  {FOR_EACH(et, *pContent) (*et)->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);} \
+    else if(bGentle) {FOR_EACH(et, *pContent) (*et)->SetEnabled(CORE_OBJECT_ENABLE_MOVE);}    \
+}
 
 void cBackground::SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce) {__SET_DENSITY(m_apGroundObjectList)}
 void cBackground::SetDecalDensity (const coreUintW iIndex, const coreFloat fDensity, const coreBool bForce) {__SET_DENSITY(m_apDecalObjectList)}

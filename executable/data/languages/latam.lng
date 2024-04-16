@@ -32,13 +32,16 @@ $AGAIN = OTRA VEZ
 $START = COMENZAR
 $ENTER = ENTRAR
 $WATCH = MIRAR
+$LISTEN = ESCUCHAR
 
 $UNLOCKED = DESBLOQUEADO
+$BEGINNING = COMENZAR
 $NEW = NUEVO
 $UNKNOWN = ???
 
 $LOADING = CARGANDO ...
 $SAVING = GUARDANDO ...
+$DOWNLOADING = DESCARGANDO...
 
 $PLAYER = JUGADOR
 $MISSION = Área
@@ -57,6 +60,8 @@ $CONFIG_VIDEO_ANTIALIASING = Suavizado espacial
 $CONFIG_VIDEO_TEXTUREFILTER = Filtro de texturas
 $CONFIG_VIDEO_RENDERQUALITY = Calidad de renderizado
 $CONFIG_VIDEO_SHADOWQUALITY = Calidad de las sombras
+$CONFIG_VIDEO_WATERQUALITY = Calidad del agua
+$CONFIG_VIDEO_PARTICLEEFFECTS = Efectos de partículas
 $CONFIG_VIDEO_SHAKEEFFECTS = Efectos de vibración
 $CONFIG_VIDEO_FLASHEFFECTS = Efectos de destellos
 $CONFIG_VIDEO_HITSTOPEFFECTS = Efectos de detención al golpear
@@ -97,7 +102,7 @@ $CONFIG_GAME_BACKROTATION = Rotación del fondo
 $CONFIG_GAME_BACKSPEED = Velocidad del fondo
 $CONFIG_GAME_UPDATEFREQ = Frecuencia de actualización
 $CONFIG_GAME_PUREMODE = Modo estándar
-$CONFIG_GAME_LEADERBOARD = Marcadores en línea
+$CONFIG_GAME_LEADERBOARD = Tabla de marcadores en línea
 $CONFIG_GAME_VERSION = Versión
 
 $CONFIG_VIDEO_MONITOR_DESC = #
@@ -108,6 +113,8 @@ $CONFIG_VIDEO_ANTIALIASING_DESC = #
 $CONFIG_VIDEO_TEXTUREFILTER_DESC = #
 $CONFIG_VIDEO_RENDERQUALITY_DESC = Calidad de las texturas y frecuencia del sombreador
 $CONFIG_VIDEO_SHADOWQUALITY_DESC = Tamaño del mapeo de sombras y suavidad de las sombras
+$CONFIG_VIDEO_WATERQUALITY_DESC = Refracción y reflejos del agua
+$CONFIG_VIDEO_PARTICLEEFFECTS_DESC = Densidad y frecuencia de las partículas
 $CONFIG_VIDEO_SHAKEEFFECTS_DESC = Efectos: moverán el juego hacia arriba y hacia abajo
 $CONFIG_VIDEO_FLASHEFFECTS_DESC = Efectos: destellos rápidos de objetos o la pantalla
 $CONFIG_VIDEO_HITSTOPEFFECTS_DESC = Efectos: congelan el tiempo al recibir daño
@@ -147,8 +154,8 @@ $CONFIG_GAME_COMBATTEXT_DESC = #
 $CONFIG_GAME_BACKROTATION_DESC = #
 $CONFIG_GAME_BACKSPEED_DESC = #
 $CONFIG_GAME_UPDATEFREQ_DESC = Actualizaciones por segundo del juego
-$CONFIG_GAME_PUREMODE_DESC = #
-$CONFIG_GAME_LEADERBOARD_DESC = #
+$CONFIG_GAME_PUREMODE_DESC = Jugar solo con la configuración estándar
+$CONFIG_GAME_LEADERBOARD_DESC = Activar participación en la tabla de marcadores en línea
 $CONFIG_GAME_VERSION_DESC = #
 
 $GAME_TYPE = Tipo de juego
@@ -168,6 +175,8 @@ $GAME_WEAPON_NOTHING = NADA
 $GAME_WEAPON_RAY = LÁSER
 $GAME_WEAPON_PULSE = PULSO
 $GAME_WEAPON_WAVE = ONDA
+$GAME_WEAPON_TESLA = TESLA   // TODO
+$GAME_WEAPON_ANTI = ANTI   // TODO
 
 $EXTRA_TROPHY = TROFEOS
 $EXTRA_STATS = ESTADÍSTICAS
@@ -175,10 +184,11 @@ $EXTRA_OTHER = OTRO
 $EXTRA_PROGRESS = Progreso
 $EXTRA_PASSWORD = Contraseña
 $EXTRA_CREDITS = Créditos
+$EXTRA_MUSIC = Rocola
 
 $FILTER_ALL = TODO
 $FILTER_COMPLETE = COMPLETO
-$FILTER_ANY = CADA CONFIGURACIÓN
+$FILTER_ANY = CUALQUIER CONFIGURACIÓN
 $FILTER_PURE = CONFIGURACIÓN ESTÁNDAR
 $FILTER_GLOBAL = GLOBAL
 
@@ -216,10 +226,13 @@ $STAT_MAX_CHAIN = Mejor encadenamiento
 $STAT_COUNT_START = Veces comenzado
 $STAT_COUNT_END = Veces completado
 
-$LEADERBOARD_SCORE = SCORE      
-$LEADERBOARD_TIME = TIME        
-$LEADERBOARD_GLOBAL = Global        
-$LEADERBOARD_FRIENDS = Friends Only     
+$LEADERBOARD_SCORE = PUNTUACIÓN
+$LEADERBOARD_TIME = TIEMPO
+$LEADERBOARD_GLOBAL = Global
+$LEADERBOARD_FRIENDS = Solo amigos
+
+$REPLAY_SLOT = RANURA
+$REPLAY_WATERMARK = REPETICIÓN
 
 $VALUE_OFF = Apagado
 $VALUE_ON = Encendido
@@ -256,12 +269,21 @@ $VERSION_LATEST = Última
 $INPUT_KEYBOARD = Teclado
 $INPUT_JOYSTICK = Control
 
+$INFORMATION_REPLAY_CORRUPT = La repetición está corrupta
+$INFORMATION_REPLAY_FAILED = Fallo en la descarga
 $INFORMATION_RESTART = El juego se reiniciará ahora.
 $QUESTION_CONFIG_SAVE = ¿Guardar cambios?
+$QUESTION_REPLAY_SAVE = ¿Guardar repetición?
+$QUESTION_REPLAY_LOAD = ¿Cargar repetición?
+$QUESTION_REPLAY_DOWNLOAD = ¿Descargar repetición?
+$QUESTION_REPLAY_RENAME = ¿Cambiar el nombre a la repetición [{NAME}]?
+$QUESTION_REPLAY_DELETE = ¿Borrar la repetición [{NAME}]?
+$QUESTION_REPLAY_OVERWRITE = ¿Sobrescribir la repetición [{NAME}]?
 $QUESTION_IMPORT = ¿Importar datos de demo guardados?
 $QUESTION_RESTART = ¿Reiniciar el juego?
-$QUESTION_EXIT_GAME = ¿Salir del juego?
+$QUESTION_EXIT = ¿Salir del juego?
 $QUESTION_READY = ¿Todo listo?
+$QUESTION_SURE = ¿Realmente deseas hacerlo?
 $QUESTION_ERROR_SAVE = Fallo al guardar. ¿Volver a intentar?
 $MAPPING = Nueva tecla/botón
 $MAPPING_SWITCH = Nuevo botón
@@ -289,6 +311,7 @@ $GAME_SCORE = Mejor puntuación
 $GAME_TIME = Mejor tiempo
 
 $ENTER_NAME = INGRESA TU NOMBRE
+$ENTER_RENAME = INGRESA UN NUEVO NOMBRE
 $ENTER_PASSWORD = INGRESA TU CONTRASEÑA
 
 $BONUS_TIME = Bonificación de tiempo
@@ -475,14 +498,16 @@ $UNLOCK_02_NAME = SUPERVELOCIDAD
 $UNLOCK_02_DESC = Aumenta la velocidad del juego un 200 %
 $UNLOCK_03_NAME = ESCUDO DE PODER
 $UNLOCK_03_DESC = Equipa un escudo más poderoso#(si lo deseas)
+$UNLOCK_04_NAME = ROCOLA
+$UNLOCK_04_DESC = Descansa y escucha algo de música
 $UNLOCK_11_NAME = CAÑÓN DE PULSO
 $UNLOCK_11_DESC = Arma poderosa, aunque lenta,#con un ataque de carga
 $UNLOCK_12_NAME = MORTERO DE ONDA
 $UNLOCK_12_DESC = Un arma que puede disparar en#múltiples direcciones al mismo tiempo
-$UNLOCK_13_NAME = TESLA #
-$UNLOCK_13_DESC = #
-$UNLOCK_14_NAME = ANTI #
-$UNLOCK_14_DESC = #
+$UNLOCK_13_NAME = TESLA #   // TODO
+$UNLOCK_13_DESC = #   // TODO
+$UNLOCK_14_NAME = ANTI #   // TODO
+$UNLOCK_14_DESC = #   // TODO
 
 $BOSS_TITLE_0101 = El soñador infinito
 $BOSS_TITLE_0102 = La puerta de la creación

@@ -15,9 +15,9 @@ sGameInput g_TotalInput              = {};
 coreUint8  g_iTotalType              = INPUT_SETS_KEYBOARD;   // # always start with joystick
 sMenuInput g_MenuInput               = {};
 
-static coreBool  s_abFireToggle[INPUT_TYPES + 1u] = {};
-static coreBool  s_abFireSpeed [INPUT_TYPES + 1u] = {};
-static coreUint8 s_aiTwinState [INPUT_TYPES + 1u] = {};
+static coreBool  s_abFireToggle[INPUT_TYPES + 1u] = {};   // 
+static coreBool  s_abFireSpeed [INPUT_TYPES + 1u] = {};   // 
+static coreUint8 s_aiTwinState [INPUT_TYPES + 1u] = {};   // 
 
 static coreList<coreVector2> s_avOldStick = {};
 
@@ -75,6 +75,14 @@ static void UpgradeConfig()
                 Core::Config->SetInt(CORE_CONFIG_INPUT_JOYSTICKDEAD);
             }
         }
+
+        if(__UPGRADE(4))
+        {
+            for(coreUintW i = 0u; i < INPUT_SETS; ++i)
+            {
+                Core::Config->SetInt(CONFIG_INPUT_ACTION(i, 9u), DEFAULT_ACTION(i, 9u));
+            }
+        }
     }
     #undef __UPGRADE
 
@@ -89,13 +97,13 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
 #if defined(CONFIG_FORCE)
 
     // force specific settings
-    //g_OldConfig.Graphics.iReflection = 1u;
     g_OldConfig.Graphics.iGlow       = 1u;
-    //g_OldConfig.Graphics.iDistortion = 1u;
+    g_OldConfig.Graphics.iDistortion = 1u;
 
 #endif
 
     // clamp input set selections
+    coreUint8 iReset = 0u;
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);
@@ -103,9 +111,8 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
         //           without available device               
         if((pConfig->Input.aiType[i] >= INPUT_SETS_KEYBOARD) && (pConfig->Input.aiType[i] - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
         {
-            pConfig->Input.aiType[i] = i;
+            pConfig->Input.aiType[i] = iReset++;
         }
-        // TODO 1: vielleicht zum ersten ungenutzten keyboard set wechseln
     }
 
     // loop trough input sets
@@ -124,7 +131,7 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
         // clamp action keys
         for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
         {
-            oSet.aiAction[j] = CLAMP(oSet.aiAction[j], iFrom, iTo);
+            if(oSet.aiAction[j] != INPUT_KEY_INVALID) oSet.aiAction[j] = CLAMP(oSet.aiAction[j], iFrom, iTo);
         }
     }
 
@@ -136,11 +143,11 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
             WARN_IF(pConfig->Input.aiType[i] == pConfig->Input.aiType[j])
             {
                 // reset all selections to default values
+                iReset = 0u;
                 for(coreUintW k = 0u; k < INPUT_TYPES; ++k)
                 {
-                    pConfig->Input.aiType[k] = k;
+                    pConfig->Input.aiType[k] = (Core::Input->GetJoystickNum() > k) ? (k + INPUT_SETS_KEYBOARD) : (iReset++);
                 }
-        // TODO 1: vielleicht erst zu joystick zurücksetzen wenn möglich
 
                 // leave all loops
                 i = j = INPUT_TYPES;
@@ -189,6 +196,7 @@ void LoadConfig()
     g_OldConfig.Graphics.iReflection = Core::Config->GetInt(CONFIG_GRAPHICS_REFLECTION);
     g_OldConfig.Graphics.iGlow       = Core::Config->GetInt(CONFIG_GRAPHICS_GLOW);
     g_OldConfig.Graphics.iDistortion = Core::Config->GetInt(CONFIG_GRAPHICS_DISTORTION);
+    g_OldConfig.Graphics.iParticle   = Core::Config->GetInt(CONFIG_GRAPHICS_PARTICLE);
     g_OldConfig.Graphics.iShake      = Core::Config->GetInt(CONFIG_GRAPHICS_SHAKE);
     g_OldConfig.Graphics.iFlash      = Core::Config->GetInt(CONFIG_GRAPHICS_FLASH);
     g_OldConfig.Graphics.iHitStop    = Core::Config->GetInt(CONFIG_GRAPHICS_HIT_STOP);
@@ -237,6 +245,7 @@ void LoadConfig()
 
     // 
     g_OldConfig.Legacy.iRotationTurn = Core::Config->GetInt(CONFIG_LEGACY_ROTATION_TURN);
+    g_OldConfig.Legacy.iPriorityMove = Core::Config->GetInt(CONFIG_LEGACY_PRIORITY_MOVE);
 
     // check configuration for valid values
     CheckConfig(&g_OldConfig);
@@ -265,6 +274,7 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_REFLECTION, g_OldConfig.Graphics.iReflection);
     Core::Config->SetInt(CONFIG_GRAPHICS_GLOW,       g_OldConfig.Graphics.iGlow);
     Core::Config->SetInt(CONFIG_GRAPHICS_DISTORTION, g_OldConfig.Graphics.iDistortion);
+    Core::Config->SetInt(CONFIG_GRAPHICS_PARTICLE,   g_OldConfig.Graphics.iParticle);
     Core::Config->SetInt(CONFIG_GRAPHICS_SHAKE,      g_OldConfig.Graphics.iShake);
     Core::Config->SetInt(CONFIG_GRAPHICS_FLASH,      g_OldConfig.Graphics.iFlash);
     Core::Config->SetInt(CONFIG_GRAPHICS_HIT_STOP,   g_OldConfig.Graphics.iHitStop);
@@ -313,6 +323,7 @@ void SaveConfig()
 
     // 
     Core::Config->SetInt(CONFIG_LEGACY_ROTATION_TURN, g_OldConfig.Legacy.iRotationTurn);
+    Core::Config->SetInt(CONFIG_LEGACY_PRIORITY_MOVE, g_OldConfig.Legacy.iPriorityMove);
 
     // 
     Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,          g_OldConfig.Graphics.iRender);
@@ -342,6 +353,9 @@ void UpdateInput()
     std::memset(&g_TotalInput, 0, sizeof(g_TotalInput));
     std::memset(&g_MenuInput,  0, sizeof(g_MenuInput));
 
+    // 
+    const coreBool bLegacyMove = g_CurConfig.Legacy.iPriorityMove;   // # no replay check required
+
     // loop trough input sets
     for(coreUintW i = DEFINED(_CORE_SWITCH_) ? INPUT_SETS_KEYBOARD : 0u; i < INPUT_SETS; ++i)
     {
@@ -357,15 +371,28 @@ void UpdateInput()
                          else return Core::Input->GetKeyboardButton(coreInputKey( iKey), eType);
             };
 
-            // map movement input
-                 if(nCheckKeyFunc(oSet.iMoveLeft,  CORE_INPUT_HOLD)) oMap.vMove.x = -1.0f;
-            else if(nCheckKeyFunc(oSet.iMoveRight, CORE_INPUT_HOLD)) oMap.vMove.x =  1.0f;
-                 if(nCheckKeyFunc(oSet.iMoveDown,  CORE_INPUT_HOLD)) oMap.vMove.y = -1.0f;
-            else if(nCheckKeyFunc(oSet.iMoveUp,    CORE_INPUT_HOLD)) oMap.vMove.y =  1.0f;
+            if(bLegacyMove)
+            {
+                // map movement input (priority)
+                     if(nCheckKeyFunc(oSet.iMoveLeft,  CORE_INPUT_HOLD)) oMap.vMove.x = -1.0f;
+                else if(nCheckKeyFunc(oSet.iMoveRight, CORE_INPUT_HOLD)) oMap.vMove.x =  1.0f;
+                     if(nCheckKeyFunc(oSet.iMoveDown,  CORE_INPUT_HOLD)) oMap.vMove.y = -1.0f;
+                else if(nCheckKeyFunc(oSet.iMoveUp,    CORE_INPUT_HOLD)) oMap.vMove.y =  1.0f;
+            }
+            else
+            {
+                // map movement input (cancelling)
+                if(nCheckKeyFunc(oSet.iMoveLeft,  CORE_INPUT_HOLD)) oMap.vMove.x -= 1.0f;
+                if(nCheckKeyFunc(oSet.iMoveRight, CORE_INPUT_HOLD)) oMap.vMove.x += 1.0f;
+                if(nCheckKeyFunc(oSet.iMoveDown,  CORE_INPUT_HOLD)) oMap.vMove.y -= 1.0f;
+                if(nCheckKeyFunc(oSet.iMoveUp,    CORE_INPUT_HOLD)) oMap.vMove.y += 1.0f;
+            }
 
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
             {
+                if(oSet.aiAction[j] == INPUT_KEY_INVALID) continue;
+
                 if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j)
                 if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
                 if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
@@ -384,6 +411,8 @@ void UpdateInput()
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
             {
+                if(oSet.aiAction[j] == INPUT_KEY_INVALID) continue;
+
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j)
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
@@ -430,11 +459,11 @@ void UpdateInput()
                         const coreBool bNewState = (!vNewStick.IsNull() && (coreVector2::Dot(vNewStick, vBase) >= (bOldState ? 0.01f : (vOldStick.IsNull() ? (1.0f / SQRT2) : 0.8f))) && (bOldState || bValid));
                         
                         if(!bOldState &&  bNewState) 
-                            ADD_BIT(oMap.iActionPress,   3u + j)
+                            ADD_BIT(oMap.iActionPress,   PLAYER_ACTION_SHOOT_UP + j)
                         if( bOldState && !bNewState) 
-                            ADD_BIT(oMap.iActionRelease, 3u + j)
+                            ADD_BIT(oMap.iActionRelease, PLAYER_ACTION_SHOOT_UP + j)
                         if( bNewState)               
-                            ADD_BIT(oMap.iActionHold,    3u + j)
+                            ADD_BIT(oMap.iActionHold,    PLAYER_ACTION_SHOOT_UP + j)
                         
                         
                         if(!bOldState && bNewState) s_avOldStick[iJoystickID] = AlongCrossNormal(vNewStick);
@@ -485,35 +514,69 @@ void UpdateInput()
     }
 
     // 
-    const auto nDirectionFunc = [](sGameInput* OUTPUT pInput)
+    const coreVector2 vFinal = CalcFinalDirection();
+    const coreVector2 vFinal2 = MapToAxisInv(vFinal, g_pPostProcessing->GetDirectionGame() * coreVector2((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f, 1.0f));
+    const coreUint8   iShift = PackDirection(vFinal2) / 2u;
+
+    // 
+    const auto nDirectionFunc = [&](sGameInput* OUTPUT pInput)
     {
+        pInput->iMoveStep = 8u;
         if(!pInput->vMove.IsNull())
         {
             // 
-            const coreVector2 vFinal = CalcFinalDirection();
-
-            // 
-            pInput->vMove = MapToAxis(pInput->vMove, vFinal);
-            pInput->vMove = pInput->vMove.NormalizedUnsafe();
+            pInput->iMoveStep = PackDirection(MapToAxis(pInput->vMove, vFinal2));
+            pInput->vMove     = MapToAxis(UnpackDirection(pInput->iMoveStep), g_pPostProcessing->GetDirectionGame());   // make sure the lookup and calculation is identical to the replay
         }
+
+        // 
+        const auto nRotaShotFunc = [&](coreUint16* OUTPUT piAction)
+        {
+            const coreBool bBit1 = HAS_BIT(*piAction, PLAYER_ACTION_SHOOT_UP);
+            const coreBool bBit2 = HAS_BIT(*piAction, PLAYER_ACTION_SHOOT_LEFT);
+            const coreBool bBit3 = HAS_BIT(*piAction, PLAYER_ACTION_SHOOT_DOWN);
+            const coreBool bBit4 = HAS_BIT(*piAction, PLAYER_ACTION_SHOOT_RIGHT);
+
+            SET_BIT(*piAction, PLAYER_ACTION_SHOOT_UP + (0u + iShift) % 4u, bBit1)
+            SET_BIT(*piAction, PLAYER_ACTION_SHOOT_UP + (1u + iShift) % 4u, bBit2)
+            SET_BIT(*piAction, PLAYER_ACTION_SHOOT_UP + (2u + iShift) % 4u, bBit3)
+            SET_BIT(*piAction, PLAYER_ACTION_SHOOT_UP + (3u + iShift) % 4u, bBit4)
+        };
+        nRotaShotFunc(&pInput->iActionPress);
+        nRotaShotFunc(&pInput->iActionRelease);
+        nRotaShotFunc(&pInput->iActionHold);
 
         if(g_CurConfig.Game.iMirrorMode == 1u)
         {
             // 
-            pInput->vMove = pInput->vMove.InvertedX();
+            pInput->vMove     = pInput->vMove.InvertedX();
+            pInput->iMoveStep = StepInvertedX(pInput->iMoveStep);
 
             // 
             const auto nFlipTurnFunc = [](coreUint16* OUTPUT piAction)
             {
-                const coreBool bBit1 = HAS_BIT(*piAction, 1u);
-                const coreBool bBit2 = HAS_BIT(*piAction, 2u);
+                const coreBool bBit1 = HAS_BIT(*piAction, PLAYER_ACTION_TURN_LEFT);
+                const coreBool bBit2 = HAS_BIT(*piAction, PLAYER_ACTION_TURN_RIGHT);
 
-                SET_BIT(*piAction, 1u, bBit2)
-                SET_BIT(*piAction, 2u, bBit1)
+                SET_BIT(*piAction, PLAYER_ACTION_TURN_LEFT,  bBit2)
+                SET_BIT(*piAction, PLAYER_ACTION_TURN_RIGHT, bBit1)
             };
             nFlipTurnFunc(&pInput->iActionPress);
             nFlipTurnFunc(&pInput->iActionRelease);
             nFlipTurnFunc(&pInput->iActionHold);
+
+            // 
+            const auto nFlipShotFunc = [](coreUint16* OUTPUT piAction)
+            {
+                const coreBool bBit1 = HAS_BIT(*piAction, PLAYER_ACTION_SHOOT_LEFT);
+                const coreBool bBit2 = HAS_BIT(*piAction, PLAYER_ACTION_SHOOT_RIGHT);
+
+                SET_BIT(*piAction, PLAYER_ACTION_SHOOT_LEFT,  bBit2)
+                SET_BIT(*piAction, PLAYER_ACTION_SHOOT_RIGHT, bBit1)
+            };
+            nFlipShotFunc(&pInput->iActionPress);
+            nFlipShotFunc(&pInput->iActionRelease);
+            nFlipShotFunc(&pInput->iActionHold);
         }
     };
     nDirectionFunc(&g_aGameInput[0]);
@@ -521,68 +584,77 @@ void UpdateInput()
     nDirectionFunc(&g_TotalInput);
 
     // 
-    const auto nControlModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iStateIndex)
+    const auto nControlModeFunc = [&](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iStateIndex)
     {
-        constexpr coreUint16 iTurnBits   = BIT(1u) | BIT(2u);
-        constexpr coreUint16 iShootBits1 = BIT(3u) | BIT(4u) | BIT(5u) | BIT(6u);
-        constexpr coreUint16 iShootBits2 = iShootBits1 | BIT(0u) | BIT(8u);
+        constexpr coreUint16 iTurnBits   = BIT(PLAYER_ACTION_TURN_LEFT) | BIT(PLAYER_ACTION_TURN_RIGHT);
+        constexpr coreUint16 iShootBits1 = BIT(PLAYER_ACTION_SHOOT_UP) | BIT(PLAYER_ACTION_SHOOT_LEFT) | BIT(PLAYER_ACTION_SHOOT_DOWN) | BIT(PLAYER_ACTION_SHOOT_RIGHT);
+        constexpr coreUint16 iShootBits2 = iShootBits1 | BIT(PLAYER_ACTION_SHOOT_0);
 
         const coreUint8 iControlMode = g_CurConfig.Input.aiControlMode[iModeIndex];
         if((iControlMode == 1u) || (iControlMode == 2u))
         {
             
-            coreBool bAllow = true;
-            const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
-            if((iFireMode == 2u) && s_abFireToggle[iStateIndex] && STATIC_ISVALID(g_pGame))
+            coreBool bAllowShoot  = true;
+            coreBool bAllowToggle = false;
+            coreBool bCurRapid    = false;
+            if(STATIC_ISVALID(g_pGame))
             {
-                const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-                const coreVector2 vFinal = CalcFinalDirection();// * coreVector2(fSide, 1.0f);
+                const cPlayer* pPlayer = g_pGame->GetPlayer(iModeIndex);
 
-                const coreVector2 vFlip = coreVector2(fSide, 1.0f);
-
-                const cPlayer*    pPlayer = g_pGame->GetPlayer(iModeIndex);
-                const coreVector2 vDir    = MapToAxis(pPlayer->GetDirection().xy(), vFinal);
-                
-                if((SameDirection90(vDir, coreVector2( 0.0f, 1.0f) * vFlip) && !HAS_BIT(pInput->iActionPress, 3u)) ||
-                   (SameDirection90(vDir, coreVector2(-1.0f, 0.0f) * vFlip) && !HAS_BIT(pInput->iActionPress, 4u)) ||
-                   (SameDirection90(vDir, coreVector2( 0.0f,-1.0f) * vFlip) && !HAS_BIT(pInput->iActionPress, 5u)) ||
-                   (SameDirection90(vDir, coreVector2( 1.0f, 0.0f) * vFlip) && !HAS_BIT(pInput->iActionPress, 6u)))
+                const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
+                if((iFireMode == 2u) && s_abFireToggle[iStateIndex] && !pPlayer->GetTilt())
                 {
-                    bAllow = false;
+                    const coreVector2 vDir = MapToAxis(pPlayer->GetDirection().xy(), g_pPostProcessing->GetDirectionGame());
+
+                    if((SameDirection90(vDir, coreVector2( 0.0f, 1.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))   ||
+                       (SameDirection90(vDir, coreVector2(-1.0f, 0.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)) ||
+                       (SameDirection90(vDir, coreVector2( 0.0f,-1.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)) ||
+                       (SameDirection90(vDir, coreVector2( 1.0f, 0.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)))
+                    {
+                        bAllowShoot = false;
+                    }
                 }
+
+                bAllowToggle = !pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_RAPID);
+                bCurRapid    =  pPlayer->HasStatus(PLAYER_STATUS_RAPID_FIRE);
             }
             
             
             // 
-            SET_BIT(pInput->iActionPress,   0u, (pInput->iActionPress   & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)) && !HAS_BIT(s_aiTwinState[iStateIndex], 1u) && bAllow)
-            SET_BIT(pInput->iActionHold,    0u, (pInput->iActionHold    & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)))
-            SET_BIT(pInput->iActionRelease, 0u, (pInput->iActionRelease & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)) && !HAS_BIT(pInput->iActionHold, 0u))
+            SET_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0, (pInput->iActionPress   & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)) && !HAS_BIT(s_aiTwinState[iStateIndex], 1u) && bAllowShoot)
+            SET_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0, (pInput->iActionHold    & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)))
+            SET_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0, (pInput->iActionRelease & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)) && !HAS_BIT(pInput->iActionHold, PLAYER_ACTION_SHOOT_0))
 
             // 
             if(iControlMode == 1u)
             {
-                REMOVE_FLAG(pInput->iActionPress,   iTurnBits | BIT(8u))
-                REMOVE_FLAG(pInput->iActionHold,    iTurnBits | BIT(8u))
-                REMOVE_FLAG(pInput->iActionRelease, iTurnBits | BIT(8u))
+                REMOVE_FLAG(pInput->iActionPress,   iTurnBits | BIT(PLAYER_ACTION_RAPID_FIRE))
+                REMOVE_FLAG(pInput->iActionHold,    iTurnBits | BIT(PLAYER_ACTION_RAPID_FIRE))
+                REMOVE_FLAG(pInput->iActionRelease, iTurnBits | BIT(PLAYER_ACTION_RAPID_FIRE))
             }
 
             // 
-            SET_BIT(s_aiTwinState[iStateIndex], 1u, HAS_BIT(pInput->iActionHold, 0u))
+            SET_BIT(s_aiTwinState[iStateIndex], 1u, HAS_BIT(pInput->iActionHold, PLAYER_ACTION_SHOOT_0))
             
             
-            //if(HAS_BIT(pInput->iActionPress, 9u) && !g_pMenu->IsPaused())
-            //{
-            //    SET_BIT(s_aiTwinState[iStateIndex], 2u, !HAS_BIT(s_aiTwinState[iStateIndex], 2u))
-            //    s_abFireSpeed[iStateIndex] = !s_abFireSpeed[iStateIndex];
-            //}
+            if(HAS_BIT(s_aiTwinState[iStateIndex], 2u) != bCurRapid)
+            {
+                SET_BIT(s_aiTwinState[iStateIndex], 2u, bCurRapid)
+                s_abFireSpeed[iStateIndex] = bCurRapid;
+            }
+            if(HAS_BIT(pInput->iActionPress, PLAYER_ACTION_CHANGE_SPEED) && !g_pMenu->IsPaused() && bAllowToggle)
+            {
+                SET_BIT(s_aiTwinState[iStateIndex], 2u, !bCurRapid)
+                s_abFireSpeed[iStateIndex] = !bCurRapid;
+            }
             if(HAS_BIT(s_aiTwinState[iStateIndex], 2u))
             {
-                SET_BIT(pInput->iActionPress,   8u, HAS_BIT(pInput->iActionPress,   0u))
-                SET_BIT(pInput->iActionRelease, 8u, HAS_BIT(pInput->iActionRelease, 0u))
-                SET_BIT(pInput->iActionHold,    8u, HAS_BIT(pInput->iActionHold,    0u))
-                SET_BIT(pInput->iActionPress,   0u, false)
-                SET_BIT(pInput->iActionRelease, 0u, false)
-                SET_BIT(pInput->iActionHold,    0u, false)
+                SET_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE, HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE))
+                SET_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE, HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE))
+                SET_BIT(pInput->iActionHold,    PLAYER_ACTION_RAPID_FIRE, HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_RAPID_FIRE))
+                SET_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0,    false)
+                SET_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0,    false)
+                SET_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0,    false)
             }
         }
         else if(iControlMode == 3u)
@@ -603,9 +675,6 @@ void UpdateInput()
         // 
         if(((iControlMode == 0u) || (iControlMode == 3u)) || !STATIC_ISVALID(g_pGame))
             s_aiTwinState[iStateIndex] = 0u;
-
-        // 
-        SET_BIT(pInput->iStatus, 2u, HAS_BIT(s_aiTwinState[iStateIndex], 2u))
     };
     nControlModeFunc(&g_aGameInput[0], 0u, 0u);
     nControlModeFunc(&g_aGameInput[1], 1u, 1u);
@@ -614,20 +683,20 @@ void UpdateInput()
     // 
     const auto nFireModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iToggleIndex)
     {
-        const coreBool bFireA = HAS_BIT(pInput->iActionPress, 0u);
-        const coreBool bFireB = HAS_BIT(pInput->iActionPress, 8u);
+        const coreBool bFireA = HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_0);
+        const coreBool bFireB = HAS_BIT(pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
 
         const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
         if(iFireMode == 1u)
         {
             // 
-            const coreBool bPress   = HAS_BIT(pInput->iActionPress,   0u) || HAS_BIT(pInput->iActionPress,   8u);
-            const coreBool bRelease = HAS_BIT(pInput->iActionRelease, 0u) || HAS_BIT(pInput->iActionRelease, 8u);
-            const coreBool bHold    = HAS_BIT(pInput->iActionHold,    0u) || HAS_BIT(pInput->iActionHold,    8u);
+            const coreBool bPress   = HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE);
+            const coreBool bRelease = HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE);
+            const coreBool bHold    = HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_RAPID_FIRE);
 
-            SET_BIT(pInput->iActionPress,   0u,  bRelease)
-            SET_BIT(pInput->iActionRelease, 0u,  bPress)
-            SET_BIT(pInput->iActionHold,    0u, !bHold)
+            SET_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0,  bRelease)
+            SET_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0,  bPress)
+            SET_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0, !bHold)
         }
         else if(iFireMode == 2u)
         {
@@ -635,11 +704,9 @@ void UpdateInput()
             const coreBool bPress = s_abFireToggle[iToggleIndex] ? (s_abFireSpeed[iToggleIndex] ? bFireB : bFireA) : (bFireA || bFireB);
             if(bPress) s_abFireToggle[iToggleIndex] = !s_abFireToggle[iToggleIndex];
 
-            SET_BIT(pInput->iStatus, 1u, HAS_BIT(pInput->iActionHold, 0u))
-
-            SET_BIT(pInput->iActionPress,   0u,  s_abFireToggle[iToggleIndex] && bPress)
-            SET_BIT(pInput->iActionRelease, 0u, !s_abFireToggle[iToggleIndex] && bPress)
-            SET_BIT(pInput->iActionHold,    0u,  s_abFireToggle[iToggleIndex])
+            SET_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0,  s_abFireToggle[iToggleIndex] && bPress)
+            SET_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0, !s_abFireToggle[iToggleIndex] && bPress)
+            SET_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0,  s_abFireToggle[iToggleIndex])
         }
 
         if((iFireMode == 1u) || (iFireMode == 2u))
@@ -647,9 +714,23 @@ void UpdateInput()
                  if(bFireA) s_abFireSpeed[iToggleIndex] = false;
             else if(bFireB) s_abFireSpeed[iToggleIndex] = true;
 
-            SET_BIT(pInput->iActionPress,   8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionPress,   0u)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionPress,   0u)
-            SET_BIT(pInput->iActionRelease, 8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionRelease, 0u)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionRelease, 0u)
-            SET_BIT(pInput->iActionHold,    8u,  s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionHold,    0u)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionHold,    0u)
+            SET_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE, s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0)
+            SET_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE, s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0)
+            SET_BIT(pInput->iActionHold,    PLAYER_ACTION_RAPID_FIRE, s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0)
+        }
+        
+        if(STATIC_ISVALID(g_pGame))
+        {
+            const cPlayer* pPlayer = g_pGame->GetPlayer(iModeIndex);
+            if(pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_RAPID))
+            {
+                SET_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0,    HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE))
+                SET_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0,    HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE))
+                SET_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0,    HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_RAPID_FIRE))
+                SET_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE, false)
+                SET_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE, false)
+                SET_BIT(pInput->iActionHold,    PLAYER_ACTION_RAPID_FIRE, false)
+            }
         }
 
         // 
@@ -659,10 +740,6 @@ void UpdateInput()
         // 
         if(((iFireMode != 1u) && (iFireMode != 2u)) || !STATIC_ISVALID(g_pGame))
             s_abFireSpeed[iToggleIndex] = false;
-
-        // 
-        SET_BIT(pInput->iStatus, 0u, s_abFireToggle[iToggleIndex])
-        SET_BIT(pInput->iStatus, 1u, s_abFireSpeed [iToggleIndex])
     };
     nFireModeFunc(&g_aGameInput[0], 0u, 0u);
     nFireModeFunc(&g_aGameInput[1], 1u, 1u);

@@ -237,10 +237,21 @@ cExtraMenu::cExtraMenu()noexcept
     m_Credits.SetAlignment(m_Password.GetAlignment());
     m_Credits.GetCaption()->SetTextLanguage("WATCH");
 
+    m_Music.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_Music.SetPosition (coreVector2(-1.00f,1.00f) * m_aOtherName[2].GetPosition());
+    m_Music.SetSize     (m_Password.GetSize());
+    m_Music.SetAlignment(m_Password.GetAlignment());
+
     m_PasswordHeader.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
-    m_PasswordHeader.SetPosition    (coreVector2(0.0f,0.3f));
+    m_PasswordHeader.SetPosition    (coreVector2(0.0f,0.35f));
     m_PasswordHeader.SetColor3      (COLOR_MENU_WHITE);
     m_PasswordHeader.SetTextLanguage("ENTER_PASSWORD");
+
+    m_OtherNew.SetPosition(m_OtherTab.GetPosition() + m_OtherTab.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,0.06f));
+    m_OtherNew.SetIndex   (NEW_EXTRA_OTHER);
+
+    m_MusicBoxNew.SetPosition(m_Music.GetPosition() + coreVector2(0.045f,0.0f));
+    m_MusicBoxNew.SetIndex   (NEW_EXTRA_MUSICBOX);
 
     // 
     m_FilterSegment   .AddEntry        ("",                       255u);   // dummy
@@ -274,13 +285,14 @@ cExtraMenu::cExtraMenu()noexcept
     }
 
     m_Navigator.BindObject(&m_Password, &m_OtherTab, NULL, &m_Credits,    NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
-    m_Navigator.BindObject(&m_Credits,  &m_Password, NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Credits,  &m_Password, NULL, &m_Music,      NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Music,    &m_Credits,  NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
 
-    m_Navigator.BindObject(&m_BackButton, &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, &m_FilterMission, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_BackButton, &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, NULL, NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.BindSurface(&m_TrophyTab, SURFACE_EXTRA_TROPHY, &m_aTrophyLine[MENU_EXTRA_TROPHIES - 1u], NULL, &m_aTrophyLine[0], NULL);
     m_Navigator.BindSurface(&m_StatsTab,  SURFACE_EXTRA_STATS,  &m_aStatsLine [MENU_EXTRA_STATS    - 1u], NULL, &m_FilterMission,  NULL);
-    m_Navigator.BindSurface(&m_OtherTab,  SURFACE_EXTRA_OTHER,  &m_Credits,                               NULL, &m_Password,       NULL);
+    m_Navigator.BindSurface(&m_OtherTab,  SURFACE_EXTRA_OTHER,  &m_Music,                                 NULL, &m_Password,       NULL);
 
     m_Navigator.BindScroll(&m_TrophyBox);
     m_Navigator.BindScroll(&m_StatsBox);
@@ -288,6 +300,19 @@ cExtraMenu::cExtraMenu()noexcept
     m_Navigator.AssignFirst(&m_FilterMission);
     m_Navigator.AssignBack (&m_BackButton);
     m_Navigator.AssignMenu (this);
+
+    const auto nTabFunc = [this](coreObject2D* pObject, const coreUint8 iPack)
+    {
+        if(iPack != 4u) return;
+        switch(this->GetCurSurface())
+        {
+        default: UNREACHABLE
+        case SURFACE_EXTRA_TROPHY: m_Navigator.RebindDown(pObject, &m_TrophyTab); break;
+        case SURFACE_EXTRA_STATS:  m_Navigator.RebindDown(pObject, &m_StatsTab);  break;
+        case SURFACE_EXTRA_OTHER:  m_Navigator.RebindDown(pObject, &m_OtherTab);  break;
+        }
+    };
+    m_Navigator.BindDynamic(&m_BackButton, nTabFunc);
 
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_EXTRA_PASSWORD; ++i)
@@ -303,6 +328,8 @@ cExtraMenu::cExtraMenu()noexcept
         if(i == SURFACE_EXTRA_OTHER)  this->BindObject(i, &m_OtherTab);
 
         this->BindObject(i, &m_BackButton);
+
+        this->BindObject(i, &m_OtherNew);
     }
 
     this->BindObject(SURFACE_EXTRA_TROPHY, &m_SummaryLine);
@@ -324,6 +351,8 @@ cExtraMenu::cExtraMenu()noexcept
 
     this->BindObject(SURFACE_EXTRA_OTHER, &m_Password);
     this->BindObject(SURFACE_EXTRA_OTHER, &m_Credits);
+    this->BindObject(SURFACE_EXTRA_OTHER, &m_Music);
+    this->BindObject(SURFACE_EXTRA_OTHER, &m_MusicBoxNew);
 
     for(coreUintW i = 0u; i < SURFACE_EXTRA_PASSWORD; ++i) this->BindObject(i, &m_Navigator);
 
@@ -331,6 +360,8 @@ cExtraMenu::cExtraMenu()noexcept
     this->BindObject(SURFACE_EXTRA_PASSWORD, &m_PasswordHeader);
 
     this->BindObject(SURFACE_EXTRA_CREDITS, g_pMenu->GetCreditRoll());
+
+    this->BindObject(SURFACE_EXTRA_MUSIC, g_pMenu->GetMusicBox());
 }
 
 
@@ -340,9 +371,10 @@ void cExtraMenu::Move()
 {
     cArcadeInput* pArcadeInput = g_pMenu->GetArcadeInput();
     cCreditRoll*  pCreditRoll  = g_pMenu->GetCreditRoll ();
+    cMusicBox*    pMusicBox    = g_pMenu->GetMusicBox   ();
 
     // 
-    m_Navigator.Update();
+    if(this->GetCurSurface() < SURFACE_EXTRA_PASSWORD) m_Navigator.Update();
 
     // move the menu
     this->coreMenu::Move();
@@ -446,10 +478,23 @@ void cExtraMenu::Move()
                 // 
                 g_pMenu->ShiftSurface(this, SURFACE_EXTRA_CREDITS, 3.0f, 1u);
             }
+            else if(m_Music.IsClicked())
+            {
+                // 
+                pMusicBox->ResetNavigator();
+
+                // 
+                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_MUSIC, 3.0f, 1u);
+
+                // 
+                m_OtherNew   .Resolve();
+                m_MusicBoxNew.Resolve();
+            }
 
             // 
             cMenu::UpdateButton(&m_Password, &m_Navigator, m_Password.IsFocused());
             cMenu::UpdateButton(&m_Credits,  &m_Navigator, m_Credits .IsFocused());
+            cMenu::UpdateButton(&m_Music,    &m_Navigator, m_Music   .IsFocused());
 
             // 
             for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true, true, g_pMenu->GetButtonColor(), !cMenuNavigator::IsUsingJoystick());
@@ -502,6 +547,16 @@ void cExtraMenu::Move()
                 // 
                 pCreditRoll->End();
 
+                // 
+                g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f, 2u);
+            }
+        }
+        break;
+
+    case SURFACE_EXTRA_MUSIC:
+        {
+            if(pMusicBox->GetFinished() || g_MenuInput.bCancel)
+            {
                 // 
                 g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f, 2u);
             }
@@ -596,7 +651,7 @@ void cExtraMenu::LoadTrophies()
             {
                 constexpr coreUint8 aiSwitch[] = {0u};
 
-                const coreBool bHasSwitch = DEFINED(_CORE_SWITCH) && std::memchr(aiSwitch, i, ARRAY_SIZE(aiSwitch));
+                const coreBool bHasSwitch = DEFINED(_CORE_SWITCH_) && std::memchr(aiSwitch, i, ARRAY_SIZE(aiSwitch));
                 ASSERT(i <= 0xFFu)
 
                 const coreChar* pcString = Core::Language->GetString(PRINT("ACHIEVEMENT_STAGE_%02d_%02zu_DESC%s", g_aMissionData[i / 6u].iID, (i % 6u) + 1u, bHasSwitch ? "_SWITCH" : ""));
@@ -674,6 +729,14 @@ void cExtraMenu::LoadMissions()
     this->__UpdateStats();
     m_StatsBox.SetCurOffset(0.0f);
     m_aiCurFilter.clear();
+    
+    
+    
+    const coreBool bMusicBox = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MUSICBOX);
+    
+    m_aOtherName[2].SetTextLanguage(bMusicBox ? "EXTRA_MUSIC" : "UNKNOWN");
+    m_Music.GetCaption()->SetTextLanguage(bMusicBox ? "LISTEN" : "UNKNOWN");
+    m_Music.SetOverride(bMusicBox ? 0 : -1);
 }
 
 
@@ -832,8 +895,8 @@ void cExtraMenu::__UpdateStats()
         const auto&     oStats      = this->__PrepareStats(iTypeValue, iModeValue, iDifficultyValue, iSegmentValue, 255u);
         const coreInt32 iBestShift  = coreInt32(oStats.iTimeBestShiftBad)  - coreInt32(oStats.iTimeBestShiftGood);
         const coreInt32 iWorstShift = coreInt32(oStats.iTimeWorstShiftBad) - coreInt32(oStats.iTimeWorstShiftGood);
-        const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  10.0f);
-        const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), 10.0f);
+        const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  GAME_GOAL_FACTOR);
+        const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), GAME_GOAL_FACTOR);
 
         nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
         nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
@@ -841,10 +904,10 @@ void cExtraMenu::__UpdateStats()
         nSetStatFunc("STAT_SCORE_WORST",            "%'u",      oStats.iScoreWorst);
         nSetStatFunc("STAT_SCORE_TOTAL",            "%'llu",    oStats.iScoreTotal);
         nSetStatFunc("STAT_TIME_BEST_SHIFTED",      "%.1f %+d", fBestTime, iBestShift);
-        nSetStatFunc("STAT_TIME_BEST_RAW",          "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBest),  10.0f));
+        nSetStatFunc("STAT_TIME_BEST_RAW",          "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBest),  GAME_GOAL_FACTOR));
         nSetStatFunc("STAT_TIME_WORST_SHIFTED",     "%.1f %+d", fWorstTime, iWorstShift);
-        nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), 10.0f));
-        nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), 10.0f));
+        nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), GAME_GOAL_FACTOR));
+        nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), GAME_GOAL_FACTOR));
         nSetStatFunc("STAT_DAMAGE_GIVEN",           "%'llu",    oStats.iDamageGiven);
         nSetStatFunc("STAT_DAMAGE_TAKEN",           "%'u",      oStats.iDamageTaken);
         nSetStatFunc("STAT_CONTINUES_USED",         "%'u",      oStats.iContinuesUsed);
@@ -870,8 +933,8 @@ void cExtraMenu::__UpdateStats()
         const auto&     oStats      = this->__PrepareStats(iTypeValue, iModeValue, iDifficultyValue, iMissionValue, iSegmentValue);
         const coreInt32 iBestShift  = coreInt32(oStats.iTimeBestShiftBad)  - coreInt32(oStats.iTimeBestShiftGood);
         const coreInt32 iWorstShift = coreInt32(oStats.iTimeWorstShiftBad) - coreInt32(oStats.iTimeWorstShiftGood);
-        const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  10.0f);
-        const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), 10.0f);
+        const coreFloat fBestTime   = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted)  - I_TO_F(iBestShift),  GAME_GOAL_FACTOR);
+        const coreFloat fWorstTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorstShifted) - I_TO_F(iWorstShift), GAME_GOAL_FACTOR);
 
         nSetStatFunc("STAT_COUNT_START",            "%'u",      oStats.iCountStart);
         nSetStatFunc("STAT_COUNT_END",              "%'u",      oStats.iCountEnd);
@@ -879,10 +942,10 @@ void cExtraMenu::__UpdateStats()
         nSetStatFunc("STAT_SCORE_WORST",            "%'u",      oStats.iScoreWorst);
         nSetStatFunc("STAT_SCORE_TOTAL",            "%'llu",    oStats.iScoreTotal);
         nSetStatFunc("STAT_TIME_BEST_SHIFTED",      "%.1f %+d", fBestTime, iBestShift);
-        nSetStatFunc("STAT_TIME_BEST_RAW",          "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBest),  10.0f));
+        nSetStatFunc("STAT_TIME_BEST_RAW",          "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBest),  GAME_GOAL_FACTOR));
         nSetStatFunc("STAT_TIME_WORST_SHIFTED",     "%.1f %+d", fWorstTime, iWorstShift);
-        nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), 10.0f));
-        nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), 10.0f));
+        nSetStatFunc("STAT_TIME_WORST_RAW",         "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeWorst), GAME_GOAL_FACTOR));
+        nSetStatFunc("STAT_TIME_TOTAL",             "%.1f",     FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeTotal), GAME_GOAL_FACTOR));
         if(bBoss)
         {
             nSetStatFunc("STAT_MAX_CHAIN", "%'u", oStats.iMaxSeries);

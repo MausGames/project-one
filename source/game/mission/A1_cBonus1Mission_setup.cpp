@@ -145,7 +145,7 @@ void cBonus1Mission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(4, 0u, cIntroMission::RetrieveEnemyColor(i));
+                pEnemy->Configure(4, cIntroMission::RetrieveEnemyColor(i));
             });
         });
 
@@ -238,13 +238,14 @@ void cBonus1Mission::__SetupOwn()
 
                 // 
                 const coreVector2 vDiff = pPlayer->GetOldPos() - pShelter->GetPosition().xy();
-                pPlayer->ApplyForceRaw(vDiff.Normalized() * 20.0f);
+                pPlayer->ApplyForce(vDiff.Normalized() * 20.0f);   // TODO 1: replace with proper move logic oder verursach schaden
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             });
 
+            // TODO 1: MoveAfter collision required!    
             Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oShelter, [](cBullet* OUTPUT pBullet, const coreObject3D* pShelter, const coreVector3& vIntersection, const coreBool bFirstHit)
             {
                 if(!bFirstHit) return;

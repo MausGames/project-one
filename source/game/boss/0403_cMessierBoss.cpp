@@ -72,11 +72,11 @@ cMessierBoss::cMessierBoss()noexcept
     this->SetOrientation(coreVector3(1.0f,1.0f,0.0f).Normalized());
 
     // configure the boss
-    this->Configure(6300, 0u, COLOR_SHIP_MAGENTA);
+    this->Configure(6300, COLOR_SHIP_MAGENTA);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_BOTTOM);
 
     // 
-    PHASE_HEALTH_GOAL({6300})
+    PHASE_HEALTH_GOAL({6300, 4700, 3500, 0})
 
     // 
     for(coreUintW i = 0u; i < MESSIER_SHELLS; ++i)
@@ -85,7 +85,7 @@ cMessierBoss::cMessierBoss()noexcept
         m_aShell[i].DefineModelLow (i ? "ship_boss_messier_inside_low.md3"    : "ship_boss_messier_outside_low.md3");
         m_aShell[i].DefineVolume   (i ? "ship_boss_messier_inside_volume.md3" : "ship_boss_messier_outside_volume.md3");
         m_aShell[i].SetSize        (this->GetSize() * 1.08f * (i ? 1.0f : 1.1f));
-        m_aShell[i].Configure      (1, 0u, COLOR_SHIP_MAGENTA);
+        m_aShell[i].Configure      (1, COLOR_SHIP_MAGENTA);
         m_aShell[i].AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
         m_aShell[i].SetParent      (this);
     }
@@ -503,7 +503,7 @@ void cMessierBoss::__MoveOwn()
             m_avVector[METEOR_MOVE].zw(m_avVector[METEOR_MOVE].xy());
         });
 
-        if(this->GetCurHealth() < 6000)
+        if(this->GetCurHealth() <= 6000)
         {
             PHASE_CHANGE_INC
         }
@@ -528,7 +528,7 @@ void cMessierBoss::__MoveOwn()
             m_avVector[METEOR_MOVE].zw(m_avVector[METEOR_MOVE].xy());
         });
 
-        if(this->GetCurHealth() < 5400)
+        if(this->GetCurHealth() <= 5400)
         {
             PHASE_CHANGE_INC
 
@@ -573,7 +573,7 @@ void cMessierBoss::__MoveOwn()
             m_avVector[METEOR_MOVE].zw(LERP(coreVector2(-1.0f, m_avVector[METEOR_DATA].x), coreVector2(-0.2f, 1.0f), fTime));
         });
 
-        if(this->GetCurHealth() < 4700)
+        if(this->GetCurHealth() <= 4700)
         {
             PHASE_CHANGE_INC
 
@@ -588,6 +588,8 @@ void cMessierBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(40u)
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(0u));
         });
     }
 
@@ -614,7 +616,7 @@ void cMessierBoss::__MoveOwn()
 
         PHASE_CONTROL_TICKER(1u, 0u, g_pGame->IsEasy() ? 0.7f : 1.3f, LERP_LINEAR)
         {
-            const coreFloat fAngle = ((((iTick % 3u) == 2u) || (this->GetCurHealth() < 4000)) ? 0.05f : 0.7f) * 24.0f;
+            const coreFloat fAngle = ((((iTick % 3u) == 2u) || (this->GetCurHealth() <= 4000)) ? 0.05f : 0.7f) * 24.0f;
 
             const coreVector2 vPos  = this->GetPosition().xy();
             const coreFloat   fBase = this->AimAtPlayerDual((iTick / 2u) % 2u).Angle();
@@ -636,7 +638,7 @@ void cMessierBoss::__MoveOwn()
             g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
-        if(this->GetCurHealth() < 3500)
+        if(this->GetCurHealth() <= 3500)
         {
             PHASE_CHANGE_INC
 
@@ -654,6 +656,8 @@ void cMessierBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.5f)
         {
             PHASE_CHANGE_TO(50u)
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(1u));
         });
     }
 
@@ -746,8 +750,13 @@ void cMessierBoss::__MoveOwn()
 
                     this->SetCurHealth(1700 * 2 - this->GetCurHealth());
 
+                    //PHASE_HEALTH_GOAL({3500, 0})
+                    m_iMaxHealthGoal = 3500;
+
                     this->__EnableClock();
                     this->__EnableBubble(COLOR_ENERGY_PURPLE * 1.0f);
+
+                    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(2u));
                 }
 
                 m_iTimeRevert = 1u;
@@ -768,6 +777,8 @@ void cMessierBoss::__MoveOwn()
             g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_PURPLE);
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_06);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(3u));
         }
     }
 
@@ -941,6 +952,16 @@ void cMessierBoss::__MoveOwn()
                 }
             }
         }
+
+        if(this->ReachedHealth(2000))
+        {
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(4u));
+        }
+
+        if(this->ReachedHealth(1000))
+        {
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(5u));
+        }
     }
 
     // ################################################################
@@ -1035,7 +1056,7 @@ void cMessierBoss::__MoveOwn()
             {
                 pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x + BLENDBR(fTime) * (3.0f*PI)));
 
-                g_pPostProcessing->SetDirectionGame(coreVector2::Direction(LERPBR(m_avVector[COVER_ROTATION].y, m_avVector[COVER_ROTATION].z, fTime)));
+                g_pPostProcessing->SetDirectionGame(PHASE_FINISHED ? coreVector2(0.0f,1.0f) : coreVector2::Direction(LERPBR(m_avVector[COVER_ROTATION].y, m_avVector[COVER_ROTATION].z, fTime)));
             }
 
             pBackground->SetCoverScale(1.0f - STEPBR(0.1f, 1.0f, fTime));

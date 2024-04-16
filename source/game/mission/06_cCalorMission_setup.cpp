@@ -97,13 +97,13 @@ void cCalorMission::__SetupOwn()
     // next groups need to spawn (source, target) where player would not attack from/into the previous group
     // uhrzeiger-gruppen haben die selbe winkel-geschwindigkeit, um sie leichter zu steuern
     // in sternen-gruppe hat jeder seinen eigenen pfad, geht nur mit ungerader anzahl gegner
+    // enemies move smooth, flakes move flat
     // TASK: collect all moving flakes
     // TASK: intercept every move by the jumping enemies
     // ACHIEVEMENT: destroy all enemies while your partner needs repair
     // TODO 1: hardmode: enemies return after some time
     // TODO 1: hardmode: enemy splits up, the original location attacks, the other keeps moving
     // TODO 1: implement own task-objects instead of re-using hails, also adjust count again (CALOR_HAILS) (name: flake?)
-    // TODO 1: enemies move smooth, flakes move flat
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumData  = 16u;
@@ -151,7 +151,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.7f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
         });
@@ -442,7 +442,7 @@ void cCalorMission::__SetupOwn()
                     STAGE_FOREACH_PLAYER(pPlayer, j)
                     {
                         const coreVector2 vDiff = pEnemy->GetPosition().xy() - pPlayer->GetPosition().xy();
-                        if(vDiff.LengthSq() < POW2(7.0f))
+                        if(vDiff.LengthSq() < POW2(9.0f))
                         {
                             ADD_BIT(iIntercept, iTrail)
                             const coreUint32 iCount = coreMath::PopCount(iIntercept);
@@ -583,7 +583,7 @@ void cCalorMission::__SetupOwn()
                 STAGE_FOREACH_PLAYER(pPlayer, j)
                 {
                     const coreVector2 vDiff = pHail->GetPosition().xy() - pPlayer->GetPosition().xy();
-                    if(vDiff.LengthSq() < POW2(5.0f))
+                    if(vDiff.LengthSq() < POW2(6.0f))
                     {
                         this->DisableHail(i, true);
 
@@ -676,7 +676,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: hardmode: player is slipping
     // TODO 1: hardmode: snow can freeze player
     // TODO 1: hardmode: snow is created all the time (snowing, avalanche)
-    // TODO 1: adjust (and fix!) snow for all weapons
+    // TODO 1: adjust (and fix!) snow for all weapons [RP]
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -692,7 +692,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.1f);
-                pEnemy->Configure(10, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(10, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -701,7 +701,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.1f);
-                pEnemy->Configure(10, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(10, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
             });
 
@@ -1177,7 +1177,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(4, COLOR_SHIP_PURPLE);
             });
         });
 
@@ -1920,7 +1920,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.55f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(30, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING);
             });
         });
@@ -1930,7 +1930,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(3.0f,1.0f,1.0f));
-                pEnemy->Configure(30 + 10, 0u, COLOR_SHIP_BLACK, false, true);
+                pEnemy->Configure(30 + 10, COLOR_SHIP_BLACK, false, true);
                 pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -2370,7 +2370,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(4, COLOR_SHIP_MAGENTA);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -2380,7 +2380,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(30, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -2518,8 +2518,8 @@ void cCalorMission::__SetupOwn()
 
         if(!m_Zeroth.HasStatus(ENEMY_STATUS_DEAD))
         {
-            const coreFloat fPercent    = I_TO_F(m_Zeroth.GetLostHealth   ()) / 600.0f;
-            const coreFloat fPrePercent = I_TO_F(m_Zeroth.GetPreLostHealth()) / 600.0f;
+            const coreFloat fPercent    = I_TO_F(m_Zeroth.GetLostHealth   ()) / 590.0f;   // -10
+            const coreFloat fPrePercent = I_TO_F(m_Zeroth.GetPreLostHealth()) / 590.0f;
 
             for(coreUintW i = 1u; i < 5u; ++i)
             {
@@ -2721,7 +2721,7 @@ void cCalorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.8f);
-                pEnemy->Configure(200, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(200, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();
@@ -2732,7 +2732,7 @@ void cCalorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(10, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(10, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -2925,7 +2925,7 @@ void cCalorMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Zeroth, {160.0f, 240.0f, 320.0, 400.0f, 800.0f})   // + 5
+        STAGE_BOSS(m_Zeroth, {160.0f, 240.0f, 320.0, 400.0f, 800.0f})   // +5
     },
     STAGE_PRE()
     {

@@ -46,7 +46,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_aiRegisterID      {}
 , m_afRegisterSpeed   {}
 , m_fAnimation        (0.0f)
-, m_bStory            (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_RUTILUS))
+, m_bStory            (!HAS_BIT_EX(REPLAY_WRAP_PROGRESS_STATE, STATE_STORY_RUTILUS) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 {
     // 
     m_apBoss[0] = &m_Messier;
@@ -731,7 +731,7 @@ void cRutilusMission::__MoveOwnBefore()
     // 
     g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
     {
-        sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput());
+        sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput()); wtf
 
         // 
         if(pInput->vMove.IsNull()) m_aiMoveFlip[i] = 0u;
@@ -824,35 +824,31 @@ void cRutilusMission::__MoveOwnAfter()
 
                     if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
                     {
-                        const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-                        const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
-
-                        const coreVector2 vFlip    = coreVector2(fSide, 1.0f);//(vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f)).Processed(SIGN);
-                        const coreVector2 vRealDir = MapToAxisInv(pPlayer->GetDirection().xy(), vFinal);
+                        const coreVector2 vRealDir = pPlayer->GetDirection().xy();
 
                         // 
                         coreUint8 iNewWarnDir = 0u;
                         coreBool  bNewWarn    = false;
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_UP))    {iNewWarnDir = 1u; if(!SameDirection90(vRealDir, coreVector2( 0.0f, 1.0f) * vFlip)) bNewWarn = true;}
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  {iNewWarnDir = 2u; if(!SameDirection90(vRealDir, coreVector2(-1.0f, 0.0f) * vFlip)) bNewWarn = true;}
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  {iNewWarnDir = 3u; if(!SameDirection90(vRealDir, coreVector2( 0.0f,-1.0f) * vFlip)) bNewWarn = true;}
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) {iNewWarnDir = 4u; if(!SameDirection90(vRealDir, coreVector2( 1.0f, 0.0f) * vFlip)) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_UP))    {iNewWarnDir = 1u; if(!SameDirection90(vRealDir, coreVector2( 0.0f, 1.0f))) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  {iNewWarnDir = 2u; if(!SameDirection90(vRealDir, coreVector2(-1.0f, 0.0f))) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  {iNewWarnDir = 3u; if(!SameDirection90(vRealDir, coreVector2( 0.0f,-1.0f))) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) {iNewWarnDir = 4u; if(!SameDirection90(vRealDir, coreVector2( 1.0f, 0.0f))) bNewWarn = true;}
 
                         // 
-                        if(g_CurConfig.Input.aiControlMode[i] == 3u)
+                        if(REPLAY_WRAP_CONFIG_CONTROL_MODE[i] == 3u)
                         {
-                            const coreBool bPressA = HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT(0u, 0u));
+                            const coreBool bPressA = HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_0);
                             const coreBool bPressB = HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_RAPID_FIRE);
-                            const coreBool bHoldA  = HAS_BIT(pPlayer->GetInput()->iActionHold,  PLAYER_ACTION_SHOOT(0u, 0u));
+                            const coreBool bHoldA  = HAS_BIT(pPlayer->GetInput()->iActionHold,  PLAYER_ACTION_SHOOT_0);
                             const coreBool bHoldB  = HAS_BIT(pPlayer->GetInput()->iActionHold,  PLAYER_ACTION_RAPID_FIRE);
                             if(((bPressA && !bHoldB) || (bPressB && !bHoldA) || (bPressA && bPressB)) && !pPlayer->GetInput()->vMove.IsNull())
                             {
-                                const coreUint8 iHold = PackDirection(MapToAxisInv(pPlayer->GetInput()->vMove, vFinal) * vFlip);
+                                const coreUint8 iHold = PackDirection(pPlayer->GetInput()->vMove);
 
-                                     if(iHold == 0u) {iNewWarnDir = 1u; if(!SameDirection90(vRealDir, coreVector2( 0.0f, 1.0f) * vFlip)) bNewWarn = true;}
-                                else if(iHold == 2u) {iNewWarnDir = 2u; if(!SameDirection90(vRealDir, coreVector2(-1.0f, 0.0f) * vFlip)) bNewWarn = true;}
-                                else if(iHold == 4u) {iNewWarnDir = 3u; if(!SameDirection90(vRealDir, coreVector2( 0.0f,-1.0f) * vFlip)) bNewWarn = true;}
-                                else if(iHold == 6u) {iNewWarnDir = 4u; if(!SameDirection90(vRealDir, coreVector2( 1.0f, 0.0f) * vFlip)) bNewWarn = true;}
+                                     if(iHold == 0u) {iNewWarnDir = 1u; if(!SameDirection90(vRealDir, coreVector2( 0.0f, 1.0f))) bNewWarn = true;}
+                                else if(iHold == 2u) {iNewWarnDir = 2u; if(!SameDirection90(vRealDir, coreVector2(-1.0f, 0.0f))) bNewWarn = true;}
+                                else if(iHold == 4u) {iNewWarnDir = 3u; if(!SameDirection90(vRealDir, coreVector2( 0.0f,-1.0f))) bNewWarn = true;}
+                                else if(iHold == 6u) {iNewWarnDir = 4u; if(!SameDirection90(vRealDir, coreVector2( 1.0f, 0.0f))) bNewWarn = true;}
                             }
                         }
 
@@ -1023,9 +1019,11 @@ void cRutilusMission::__MoveOwnAfter()
         fLimit = 1.3f;
         g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cPulseBullet>(nGravityFunc);
 
-        fPower = m_fWavePower * 7.2f;//6.2f;//3.2f;
+        fPower = m_fWavePower * 7.2f;
         fLimit = 1.3f;
         g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cSurgeBullet>(nGravityFunc);
+
+        // TODO 1: [TESLA]
 
         fPower = m_iWaveType ? (this->GetWavePull() ? 0.15f : 0.1f) : 0.3f;
         fLimit = 6.0f;
@@ -1094,6 +1092,7 @@ void cRutilusMission::__MoveOwnAfter()
                 bActive = true;
             }
         });
+        // TODO 1: [TESLA]
         
         if(bActive) m_afSlapValue[i].UpdateMin( 10.0f, 1.05f);
                else m_afSlapValue[i].UpdateMax(-10.0f, 0.0f);
@@ -1235,7 +1234,7 @@ void cRutilusMission::__MoveOwnAfter()
         // 
         g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput());
+            sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput()); wtf
 
             // 
             if(pPlayer->IsRolling()) return;

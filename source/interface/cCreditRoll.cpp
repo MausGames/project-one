@@ -28,7 +28,6 @@ cCreditRoll::cCreditRoll()noexcept
     m_GameLogo.DefineProgram("default_2d_program");
     m_GameLogo.SetPosition  (coreVector2(0.0f,-0.7f));
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.7f);
-    m_GameLogo.SetColor3    (COLOR_MENU_INSIDE);
     m_GameLogo.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     m_ViewBox.BindObject(&m_GameLogo);
@@ -38,7 +37,6 @@ cCreditRoll::cCreditRoll()noexcept
     m_GameLogoDemo.DefineProgram("default_2d_program");
     m_GameLogoDemo.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f) * (0.7f/0.8f));
     m_GameLogoDemo.SetSize      (coreVector2(1.0f,0.25f) * 0.3f * (0.7f/0.8f));
-    m_GameLogoDemo.SetColor3    (COLOR_MENU_INSIDE);
     m_GameLogoDemo.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
@@ -46,7 +44,6 @@ cCreditRoll::cCreditRoll()noexcept
     m_GameLogoKana.DefineProgram("default_2d_program");
     m_GameLogoKana.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f) * (0.7f/0.8f));
     m_GameLogoKana.SetSize      (coreVector2(2.0f,0.25f) * 0.3f * (0.7f/0.8f));
-    m_GameLogoKana.SetColor3    (COLOR_MENU_INSIDE);
     m_GameLogoKana.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     m_ViewBox.BindObject(g_bDemoVersion ? &m_GameLogoDemo : &m_GameLogoKana);
@@ -197,7 +194,14 @@ void cCreditRoll::Move()
     for(coreUintW i = 0u; i < CREDIT_HEADERS; ++i) m_aOtherHeader[i].SetColor3(vColor);
 
     // 
-    const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || HAS_BIT(g_TotalInput.iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) || (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? 6.0f : 1.0f;
+    coreBool bButtonA = false;
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
+        bButtonA = bButtonA || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_HOLD);
+    }
+
+    // 
+    const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || bButtonA || (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? ((m_fOffset < m_fMaxOffset) ? 6.0f : 2.0f) : 1.0f;
     m_fOffset.Update(CREDIT_SPEED * fSpeed);
 
     // 

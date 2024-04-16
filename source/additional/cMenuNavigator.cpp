@@ -23,6 +23,7 @@ cMenuNavigator::cMenuNavigator()noexcept
 , m_iBack          (MENUNAVIGATOR_INVALID)
 , m_bPressed       (false)
 , m_bGrabbed       (false)
+, m_dPressTime     (0.0)
 , m_fGrabTime      (1.0f)
 , m_vGrabColor     (coreVector3(0.0f,0.0f,0.0f))
 , m_vMouseOffset   (coreVector2(0.0f,0.0f))
@@ -136,25 +137,29 @@ void cMenuNavigator::Move()
             const coreVector2 vDiff = vNewPos - m_vCurPos;
             if(!vDiff.IsNull())
             {
-                m_vCurPos = m_vCurPos + vDiff.Normalized() * (10.0f * TIME * SmoothTowards(vDiff.Length(), 0.5f));
-            }
+                const coreVector2 vOldPos = m_vCurPos;
+                const coreFloat   fLen    = vDiff.Length();
 
-            const coreVector2 vDiff2 = vNewSize - m_vCurSize;
-            if(!vDiff2.IsNull())
+                m_vCurPos  = m_vCurPos  + vDiff.Normalized() * (10.0f * TIME * SmoothTowards(fLen, 0.5f));
+                m_vCurSize = m_vCurSize + (vNewSize - m_vCurSize) * ((vOldPos - m_vCurPos).Length() * RCP(fLen));
+            }
+            else
             {
-                m_vCurSize = m_vCurSize + vDiff2.Normalized() * (10.0f * TIME * SmoothTowards(vDiff2.Length(), 0.5f));
+                m_vCurSize = vNewSize;
             }
         }
 
         const coreVector2 vOffset = coreVector2(m_vCurSize.x * -0.5f - 0.03f, 0.0f);
 
         this->SetPosition (m_vCurPos + vOffset);
-        this->SetDirection(coreVector2::Direction(1.2f * coreFloat(Core::System->GetTotalTime()))); // TODO 1: should go faster when confirming something
+        this->SetDirection(coreVector2::Direction(1.2f * Core::System->GetTotalTimeFloat(20.0f*PI) - BLENDBR(MAX0(coreFloat(m_dPressTime - Core::System->GetTotalTime()))) * (2.0f*PI) * 0.0f));
 
         // 
+        const coreFloat fMove = LERP(0.002f, 0.005f, (0.5f + 0.5f * SIN(Core::System->GetTotalTimeFloat(1.0) * (2.0f*PI)))) * m_fGrabTime;
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
         {
-            m_aCursor[i].SetPosition(m_vCurPos + (m_vCurSize * 0.5f + LERP(0.002f, 0.005f, (0.5f + 0.5f * SIN(coreFloat(Core::System->GetTotalTime()) * (2.0f*PI)))) * m_fGrabTime) * StepRotated90X(i) * SQRT2);
+            const coreVector2 vStep  = StepRotated90X(i) * SQRT2;
+            m_aCursor[i].SetPosition(m_vCurPos + (m_vCurSize * 0.5f + fMove) * vStep);
         }
 
         if(TIME)
@@ -374,31 +379,34 @@ void cMenuNavigator::Update()
 
             const sMenuEntry& oEntry = m_aObject.at(m_pCurObject);
 
-            if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS))
+            if(m_pCurObject && cMenuNavigator::IsValid(m_pCurObject))   // TODO 1: für alles im loop ?
             {
-                coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
-
-                const coreBool bOldGrabbed = m_bGrabbed;
-
-                if(bButtonA && (pSwitchBox->GetOverride() >= 0))
+                if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS))
                 {
-                    m_bGrabbed = !m_bGrabbed;
+                    coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
+
+                    const coreBool bOldGrabbed = m_bGrabbed;
+
+                    if(bButtonA && (pSwitchBox->GetOverride() >= 0))
+                    {
+                        m_bGrabbed = !m_bGrabbed;
+                    }
+                    if(bButtonB && m_bGrabbed)
+                    {
+                        g_MenuInput.bCancel = false;
+                        m_bGrabbed = false;
+                    }
+
+                    if(bOldGrabbed != m_bGrabbed) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
                 }
-                if(bButtonB && m_bGrabbed)
+
+                if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_MOVE) || (HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS) && m_bGrabbed))
                 {
-                    g_MenuInput.bCancel = false;
-                    m_bGrabbed = false;
+                    coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
+
+                         if(iPack == 2u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
+                    else if(iPack == 6u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
                 }
-
-                if(bOldGrabbed != m_bGrabbed) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
-            }
-
-            if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_MOVE) || (HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS) && m_bGrabbed))
-            {
-                coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
-
-                     if(iPack == 2u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
-                else if(iPack == 6u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
             }
 
             if((iPack != m_aiLastPack[i]) || (iPack == 8u) || m_bGrabbed)
@@ -415,6 +423,7 @@ void cMenuNavigator::Update()
 
                 // TODO 1: erlaub schräge eingabe hier, für arcade input
 
+                if(m_aDynamic.count(m_pCurObject)) m_aDynamic.at(m_pCurObject)(m_pCurObject, iPack);
                 switch(iPack)
                 {
                 default: UNREACHABLE
@@ -458,6 +467,7 @@ void cMenuNavigator::Update()
                     
                     if(!A || A == m_pCurObject)
                     {
+                        if(m_aDynamic.count(pNewObject)) m_aDynamic.at(pNewObject)(pNewObject, iPack);
                         switch(iPack)
                         {
                         default: UNREACHABLE
@@ -560,12 +570,13 @@ void cMenuNavigator::Update()
             vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - vSize.y * 0.5f, vPos.y + vSize.y * 0.5f);
         }
         Core::Input->SetMousePosition(vNewTarget);   // for focus and click
+
+        if((m_pCurObject->GetAlpha() >= 1.0f) && bNewPressed) m_dPressTime = Core::System->GetTotalTime() + 1.0;
     }
     else if(s_bJoystick)
     {
         Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
     }
-    
     
     if(m_bPressed && !bNewPressed)
     {
@@ -580,11 +591,12 @@ void cMenuNavigator::Update()
 void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, coreObject2D* pFallback, const eMenuType eType, const coreUint8 iSurface)
 {
     // 
-    if(!m_aObject.count(pUp))      m_aObject.emplace(pUp);
-    if(!m_aObject.count(pLeft))    m_aObject.emplace(pLeft);
-    if(!m_aObject.count(pDown))    m_aObject.emplace(pDown);
-    if(!m_aObject.count(pRight))   m_aObject.emplace(pRight);
+    if(!m_aObject.count(pUp))       m_aObject.emplace(pUp);
+    if(!m_aObject.count(pLeft))     m_aObject.emplace(pLeft);
+    if(!m_aObject.count(pDown))     m_aObject.emplace(pDown);
+    if(!m_aObject.count(pRight))    m_aObject.emplace(pRight);
     if(!m_aObject.count(pFallback)) m_aObject.emplace(pFallback);
+    ASSERT(m_aObject.size() <= 0xFFu)
 
     // 
     sMenuEntry oEntry;

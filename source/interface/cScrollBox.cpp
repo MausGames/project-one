@@ -17,6 +17,7 @@ cScrollBox::cScrollBox()noexcept
 , m_bDrag      (false)
 , m_fDragValue (0.0f)
 , m_fSpeed     (0.0f)
+, m_bInverted  (false)
 , m_Automatic  (coreTimer(1.0f, 10.0f, 0u))
 {
     // 
@@ -43,6 +44,9 @@ cScrollBox::cScrollBox()noexcept
 // 
 void cScrollBox::Render()
 {
+    // 
+    this->coreViewBox::Render();
+
     if(m_fMaxOffset > 0.0f)
     {
         // 
@@ -56,9 +60,6 @@ void cScrollBox::Render()
         m_Cursor.SetAlpha(this->GetAlpha());
         m_Cursor.Render();
     }
-
-    // 
-    this->coreViewBox::Render();
 }
 
 
@@ -78,10 +79,11 @@ void cScrollBox::Move()
 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i)
         {
-            const coreFloat fSide = i ? -0.5f : 0.5f;
+            const coreFloat fSide = i           ? -0.5f : 0.5f;
+            const coreFloat fFlip = m_bInverted ? -0.5f : 0.5f;
 
             // 
-            m_aArrow[i].SetPosition(this->GetPosition() + this->GetSize() * coreVector2(0.5f, fSide) + SCROLL_WIDTH * coreVector2(0.5f, -fSide));
+            m_aArrow[i].SetPosition(this->GetPosition() + this->GetSize() * coreVector2(0.5f, fSide) + SCROLL_WIDTH * coreVector2(fFlip, -fSide));
             m_aArrow[i].Move();
 
             // 

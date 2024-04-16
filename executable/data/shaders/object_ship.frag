@@ -36,7 +36,7 @@ void FragmentMain()
 
     // 
     float v1TexDetail = coreTexture2D(1, v_av2TexCoord[1]).r * 16.0 - 1.0;
-    float v1Shift     = 1.0 + v1TexDetail * 0.1;
+    float v1Shift     = 1.0 + v1TexDetail * 0.2;
 
 #else
 

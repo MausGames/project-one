@@ -40,8 +40,6 @@
 #define SPECIAL_DEPTH(x)         (((x).z < -1.0f) ? 1u : 0u)
 #define SPECIAL_DEEP             (-1.1f)
 
-#define SPECIAL_QUALITY(x)       (x)
-
 #define SPECIAL_SPLASH_TINY      (25.0f), (13u)
 #define SPECIAL_SPLASH_SMALL     (50.0f), (25u)
 #define SPECIAL_SPLASH_BIG      (100.0f), (50u)
@@ -225,6 +223,7 @@ private:
     coreUint32 m_iEffectFrame;                              // 
     coreUint8  m_iEffectCount;                              // 
     coreUint8  m_iBreakupCount;                             // 
+    coreUint8  m_aiParticleFract[5];                        // 
 
     coreBool m_bActive;                                     // 
 
@@ -245,7 +244,7 @@ public:
 
     // 
     inline const coreBool& IsActive()const {return m_bActive;}
-    // EXPOSE particle classes for own effects at certain locations
+    // TODO 1: EXPOSE particle classes for own effects at certain locations
 
     // create centered particle splash
     void CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor, const coreBool bDeep = false, const coreBool bLock = false, const coreFloat fSize = 1.0f, const coreFloat fSpeed = 1.0f);
@@ -343,6 +342,9 @@ private:
     // 
     coreFloat   __GetEffectBase (const coreBool bLock);
     coreVector2 __GetBreakupSide();
+
+    // 
+    coreUintW __CalcParticleNum(const coreUintW iValue, const coreUintW iIndex);
 };
 
 

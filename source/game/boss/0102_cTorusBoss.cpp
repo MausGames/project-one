@@ -81,7 +81,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 2.0f);
 
     // configure the boss
-    this->Configure(7500, 0u, COLOR_SHIP_GREY);
+    this->Configure(7500, COLOR_SHIP_GREY);
     this->AddStatus(ENEMY_STATUS_SECRET);
 
     // 
@@ -123,7 +123,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aTurret[i].DefineProgram  ("effect_energy_blink_flat_invert_program");
         m_aTurret[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 3.2f);
         m_aTurret[i].SetTexSize     (coreVector2(0.4f,0.4f));
-        m_aTurret[i].Configure      (10, 0u, COLOR_ENERGY_CYAN * 0.7f);
+        m_aTurret[i].Configure      (10, COLOR_ENERGY_CYAN * 0.7f);
         m_aTurret[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT | ENEMY_STATUS_SECRET);
     }
 
@@ -159,7 +159,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aGunner[i].DefineProgram  ("effect_energy_blink_flat_invert_program");
         m_aGunner[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
         m_aGunner[i].SetTexSize     (coreVector2(0.4f,0.4f));
-        m_aGunner[i].Configure      (10, 0u, COLOR_ENERGY_RED * 0.8f);
+        m_aGunner[i].Configure      (10, COLOR_ENERGY_RED * 0.8f);
         m_aGunner[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT | ENEMY_STATUS_SECRET);
     }
 
@@ -194,7 +194,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aCharger[i].DefineProgram  ("effect_energy_blink_flat_invert_program");
         m_aCharger[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.7f);
         m_aCharger[i].SetTexSize     (coreVector2(0.5f,0.2f) * 2.0f);
-        m_aCharger[i].Configure      (10, 0u, COLOR_ENERGY_ORANGE * 1.0f);
+        m_aCharger[i].Configure      (10, COLOR_ENERGY_ORANGE * 1.0f);
         m_aCharger[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_TOP | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_BULLET | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT | ENEMY_STATUS_SECRET);
     }
 
@@ -229,7 +229,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aDriver[i].DefineProgram  ("effect_energy_blink_flat_invert_program");
         m_aDriver[i].SetSize        (coreVector3(2.6f,2.0f,2.6f) * 2.2f);
         m_aDriver[i].SetTexSize     (coreVector2(0.4f,0.2f) * 2.0f);
-        m_aDriver[i].Configure      (10, 0u, COLOR_ENERGY_PURPLE * 1.0f);
+        m_aDriver[i].Configure      (10, COLOR_ENERGY_PURPLE * 1.0f);
         m_aDriver[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT | ENEMY_STATUS_SECRET);
     }
 
@@ -264,7 +264,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aWaver[i].DefineProgram  ("effect_energy_blink_flat_invert_program");
         m_aWaver[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 3.1f);
         m_aWaver[i].SetTexSize     (coreVector2(4.5f,4.5f));
-        m_aWaver[i].Configure      (10, 0u, COLOR_ENERGY_GREEN * 0.8f);
+        m_aWaver[i].Configure      (10, COLOR_ENERGY_GREEN * 0.8f);
         m_aWaver[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT | ENEMY_STATUS_SECRET);
     }
 
@@ -648,7 +648,7 @@ void cTorusBoss::__MoveOwn()
             g_pSpecialEffects->ExternSetSource(m_pRumbleSound, this->GetPosition());
         }
 
-        if(this->GetCurHealth() >= 4200)
+        if(this->GetCurHealth() > 4200)
         {
             g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
             {
@@ -689,6 +689,8 @@ void cTorusBoss::__MoveOwn()
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 1.4f, 1.0f, SOUND_EFFECT_DUST);
 
                 if(m_pRumbleSound->EnableRef(this)) m_pRumbleSound->Stop();
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(2u));
             }
         }
     }
@@ -766,7 +768,7 @@ void cTorusBoss::__MoveOwn()
                 }
             }
 
-            if(this->GetCurHealth() < 3500)
+            if(this->GetCurHealth() <= 3500)
             {
                 PHASE_CHANGE_INC
 
@@ -774,6 +776,8 @@ void cTorusBoss::__MoveOwn()
 
                 m_avVector[GRIND_VALUE].z = FMOD (m_avVector[GRIND_VALUE].x, 4.0f);
                 m_avVector[GRIND_VALUE].x = FRACT(m_avVector[GRIND_VALUE].x);
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(3u));
             }
         }
     }
@@ -807,13 +811,15 @@ void cTorusBoss::__MoveOwn()
             g_pSpecialEffects->PlaySound(this->GetPosition(), 0.5f, 1.5f, SOUND_EFFECT_SHAKE_01);
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
-            if(this->GetCurHealth() < 2800)
+            if(this->GetCurHealth() <= 2800)
             {
                 PHASE_CHANGE_TO(100u)
 
                 this->__ChangeColor(1u);
 
                 m_avVector[GRIND_VALUE].x = cTorusBoss::__PositionToGrind(this->GetPosition().xy());
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(4u));
             }
         }
     }
@@ -906,7 +912,7 @@ void cTorusBoss::__MoveOwn()
             this->_ResurrectHelper(ELEMENT_YELLOW, false);
         }
 
-        if(this->GetCurHealth() < 1400)
+        if(this->GetCurHealth() <= 1400)
         {
             PHASE_CHANGE_TO(140u)
 
@@ -920,6 +926,8 @@ void cTorusBoss::__MoveOwn()
             pMission->SetBarrierSlow (false);
             pMission->SetBarrierClamp(true);
             pMission->SetBarrierRange(1.0f);
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(5u));
         }
     }
 
@@ -981,13 +989,15 @@ void cTorusBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                if(this->GetCurHealth() < 6300)
+                if(this->GetCurHealth() <= 6300)
                 {
                     PHASE_CHANGE_TO(120u)
 
                     m_avVector[JUMP_TARGET].xy(coreVector2(0.0f,0.0f));
 
                     this->__ChangeColor(8u);
+
+                    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(0u));
                 }
                 else
                 {
@@ -1043,6 +1053,8 @@ void cTorusBoss::__MoveOwn()
                     PHASE_CHANGE_TO(130u)
 
                     this->__ChangeColor(2u);
+
+                    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(1u));
                 }
                 else
                 {
@@ -1084,7 +1096,7 @@ void cTorusBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                if(this->GetCurHealth() < 5600)
+                if(this->GetCurHealth() <= 5600)
                 {
                     m_avVector[JUMP_TARGET].xy(coreVector2(0.0f,0.0f));
                     m_avVector[JUMP_TARGET].z = -1.0f;

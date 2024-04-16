@@ -70,7 +70,7 @@ void cNewIndicator::Move()
     if(this->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         // 
-        const coreFloat fScale = 1.0f + 0.1f * SIN(coreFloat(Core::System->GetTotalTime()) * (2.0f*PI));
+        const coreFloat fScale = 1.0f + 0.1f * SIN(Core::System->GetTotalTimeFloat(1.0) * (2.0f*PI));
 
         // 
         m_Text.SetPosition (this->GetPosition () + 0.5f * this->GetSize() * this->GetAlignment());

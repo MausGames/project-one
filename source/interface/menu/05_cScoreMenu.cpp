@@ -20,6 +20,8 @@ cScoreMenu::cScoreMenu()noexcept
 , m_iWorkUpload    (0u)
 , m_iWorkDownload1 (0u)
 , m_iWorkDownload2 (0u)
+, m_iCurRequest    (0u)
+, m_aiFileHandle   {}
 , m_bLimitRequest  (false)
 , m_fLimitCooldown (0.0f)
 {
@@ -87,18 +89,23 @@ cScoreMenu::cScoreMenu()noexcept
         m_aRank[i].SetText     (coreData::ToChars(i + 1u));
 
         m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aName[i].SetPosition (coreVector2(1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(0.08f,0.0f));
+        m_aName[i].SetPosition (coreVector2(1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(0.12f,0.0f));
         m_aName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aName[i].SetColor3   (COLOR_MENU_WHITE);
 
-        m_aTime[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-        m_aTime[i].SetPosition (coreVector2(0.0f,1.0f) * m_aRank[i].GetPosition());
-        m_aTime[i].SetColor3   (COLOR_MENU_WHITE);
+        m_aTime[i].Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aTime[i].SetPosition(coreVector2(0.0f,1.0f) * m_aRank[i].GetPosition());
+        m_aTime[i].SetColor3  (COLOR_MENU_WHITE);
 
         m_aScore[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
         m_aScore[i].SetPosition (coreVector2(-1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(-0.105f,0.0f));
         m_aScore[i].SetAlignment(coreVector2(-1.0f,0.0f));
         m_aScore[i].SetColor3   (COLOR_MENU_WHITE);
+
+        m_aFile[i].Construct  (MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
+        m_aFile[i].SetPosition(coreVector2(1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(0.1f,0.0f));
+        m_aFile[i].SetText    (ICON_FILE_ARROW_DOWN);
+        m_aFile[i].SetRectify (false);
 
         m_aIcon[i].DefineTexture(0u, "menu_weapon.png");
         m_aIcon[i].DefineProgram("default_2d_program");
@@ -129,6 +136,7 @@ cScoreMenu::cScoreMenu()noexcept
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aName [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aTime [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aScore[i]);
+    for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aFile [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aIcon [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aMedal[i]);
 
@@ -138,7 +146,7 @@ cScoreMenu::cScoreMenu()noexcept
     m_PlayerRank.SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
 
     m_PlayerName.Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_PlayerName.SetPosition (coreVector2(1.0f,1.0f) * m_PlayerRank.GetPosition() + coreVector2(0.08f,0.0f));
+    m_PlayerName.SetPosition (coreVector2(1.0f,1.0f) * m_PlayerRank.GetPosition() + coreVector2(0.12f,0.0f));
     m_PlayerName.SetAlignment(coreVector2(1.0f,0.0f));
     m_PlayerName.SetColor3   (COLOR_MENU_WHITE);
 
@@ -174,12 +182,11 @@ cScoreMenu::cScoreMenu()noexcept
     m_PlayerLine.SetFocusable (true);
 
     m_PageSelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
-    m_PageSelection.SetPosition(m_FilterDifficulty.GetPosition() - coreVector2(0.0f,0.0725f));
+    m_PageSelection.SetPosition(m_FilterDifficulty.GetPosition() + coreVector2(0.0f,-0.0725f));
     m_PageSelection.SetSize    (coreVector2(0.73f,0.065f));
     m_PageSelection.SetEndless (true);
     m_PageSelection.GetArrow(0u)->DefineProgram("menu_border_program");
     m_PageSelection.GetArrow(1u)->DefineProgram("menu_border_program");
-    
     m_PageSelection.AddEntry("", 0u);
     m_PageSelection.AddEntry("", 1u);
 
@@ -283,6 +290,57 @@ void cScoreMenu::Move()
     {
     case SURFACE_SCORE_DEFAULT:
         {
+            if(!m_iWorkDownload1)
+            {
+                for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
+                {
+                    if(m_aLine[i].IsClicked() && m_aiFileHandle[i])
+                    {
+                        // 
+                        g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_DOWNLOAD"), [=, this](const coreInt32 iAnswer)
+                        {
+                            if(iAnswer == MSGBOX_ANSWER_YES)
+                            {
+                                // 
+                                g_pMenu->GetMsgBox()->StartDownload(m_aiFileHandle[i]);
+
+                                // 
+                                Core::Platform->DownloadFile(m_aiFileHandle[i], [=, this](const coreFileHandle iHandle, const coreByte* pData, const coreUint32 iDataSize, const void* pResult)
+                                {
+                                    // 
+                                    g_pMenu->GetMsgBox()->EndDownload();
+
+                                    if(iHandle && pData && iDataSize)
+                                    {
+                                        if(g_pReplay->LoadData(pData, iDataSize) && g_pReplay->HasData())
+                                        {
+                                            // 
+                                            g_pReplay->SetName(coreData::StrToUpperUTF8(m_aName[i].GetText()));
+
+                                            // 
+                                            m_iStatus = 101;
+                                        }
+                                        else
+                                        {
+                                            // 
+                                            g_pMenu->GetMsgBox()->ShowInformation(Core::Language->GetString("INFORMATION_REPLAY_CORRUPT"), MSGBOX_NO_CALLBACK);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // 
+                                        g_pMenu->GetMsgBox()->ShowInformation(Core::Language->GetString("INFORMATION_REPLAY_FAILED"), MSGBOX_NO_CALLBACK);
+                                    }
+                                });
+                            }
+                        });
+
+                        // 
+                        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
+                    }
+                }
+            }
+
             // 
             if(m_FilterMission.GetUserSwitch())
                 this->LoadSegments(m_FilterMission.GetCurValue());
@@ -291,7 +349,7 @@ void cScoreMenu::Move()
             if(m_FilterMission.GetUserSwitch() || m_FilterSegment.GetUserSwitch() || m_FilterPure.GetUserSwitch() || m_FilterDifficulty.GetUserSwitch())
             {
                 m_iPageOffset = 0u;
-                this->__UpdateScores();
+                this->__UpdateScores(true);
             }
 
             // 
@@ -304,6 +362,20 @@ void cScoreMenu::Move()
             for(coreUintW i = 0u; i < MENU_SCORE_FILTERS; ++i) cMenu::UpdateLine(&m_aFilterLine[i], true);
             for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) cMenu::UpdateLine(&m_aLine      [i], false);
             cMenu::UpdateLine(&m_PlayerLine, false);
+
+            for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
+            {
+                if(m_aLine[i].IsFocused())
+                {
+                    m_aFile[i].SetColor3(g_pMenu->GetHighlightColor() * MENU_LIGHT_IDLE);
+                    m_aFile[i].SetScale (coreVector2(1.0f,1.0f) * 1.1f);
+                }
+                else
+                {
+                    m_aFile[i].SetColor3(COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+                    m_aFile[i].SetScale (coreVector2(1.0f,1.0f) * 0.95f);
+                }
+            }
 
             // 
             m_FilterMission.GetCaption()->SetColor3((m_FilterMission.GetCurValue() < ARRAY_SIZE(g_aMissionData)) ? g_aMissionData[m_FilterMission.GetCurValue()].vColor : COLOR_MENU_WHITE);
@@ -322,7 +394,7 @@ void cScoreMenu::Move()
             const coreBool bLeft  = (bNavEnabled && !m_bPageChanged && (g_MenuInput.iMove == 2u));
             const coreBool bRight = (bNavEnabled && !m_bPageChanged && (g_MenuInput.iMove == 4u));
             
-            if(!g_MenuInput.iMove) m_bPageChanged = false;
+            if(!g_MenuInput.iMove && TIME) m_bPageChanged = false;
             
             // 
                  if((m_PageSelection.GetUserSwitch() < 0) || bLeft  || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) {m_bPageChanged = true; if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateScores(false); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
@@ -341,7 +413,7 @@ void cScoreMenu::Move()
     if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
     {
         // 
-        m_iStatus = 1;
+        m_iStatus = 2;
     }
 
     // 
@@ -377,12 +449,12 @@ void cScoreMenu::Move()
     });
     if(m_iWorkUpload && !bNewWorkUpload2 && !m_iWorkDownload1)
     {
-        this->__UpdateScores();
+        this->__UpdateScores(true);
     }
     m_iWorkUpload = bNewWorkUpload2;
 
     // 
-    const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTime());
+    const coreFloat   fRotation  = Core::System->GetTotalTimeFloat(4.0);
     const coreVector2 vDirection = coreVector2::Direction(fRotation * (0.5f*PI));
 
     m_Loading      .SetDirection(vDirection);
@@ -401,6 +473,7 @@ void cScoreMenu::Move()
             m_aName [i].SetAlpha(m_aName [i].GetAlpha() * 0.5f);
             m_aTime [i].SetAlpha(m_aTime [i].GetAlpha() * 0.5f);
             m_aScore[i].SetAlpha(m_aScore[i].GetAlpha() * 0.5f);
+            m_aFile [i].SetAlpha(m_aScore[i].GetAlpha() * 0.5f);
             m_aIcon [i].SetAlpha(m_aIcon [i].GetAlpha() * 0.5f);
             m_aMedal[i].SetAlpha(m_aMedal[i].GetAlpha() * 0.5f);
         }
@@ -419,7 +492,7 @@ void cScoreMenu::Move()
     m_fLimitCooldown.UpdateMax(-1.0f, 0.0f);
     if(m_bLimitRequest)
     {
-        this->__UpdateScores();
+        this->__UpdateScores(true);
     }
 }
 
@@ -450,7 +523,7 @@ void cScoreMenu::LoadMissions()
     m_FilterPure.SelectValue(g_CurConfig.Game.iPureMode ? 255u : 254u);
     
     this->__ResetScores();
-    this->__UpdateScores();
+    this->__UpdateScores(true);
     m_ScoreBox.SetCurOffset(0.0f);
     m_ScoreBox.SetMaxOffset(0.0f);
     m_aiCurFilter.clear();
@@ -532,10 +605,16 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
     const coreChar* pcPure        = (iPureValue == 255u) ? "_pure"  : "";
     const coreChar* pcLeaderboard = bSegment ? PRINT("stage_score_solo_%s_%02u_%02u%s", pcDifficulty, iMissionValue, iSegmentValue + 1u, pcPure) : PRINT("arcade_score_solo_%s%s", pcDifficulty, pcPure);
 
+    m_iCurRequest += 1u;
+
     m_iWorkDownload1 += 1u;
-    Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_GLOBAL, iStart + 1u, iStart + MENU_SCORE_ENTRIES, [=, this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
+    Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_GLOBAL, iStart + 1u, iStart + MENU_SCORE_ENTRIES, [=, this, iThisRequest = m_iCurRequest](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
     {
         m_iWorkDownload1 -= 1u;
+
+        if(iThisRequest != m_iCurRequest) return;
+
+        std::memset(m_aiFileHandle, 0u, sizeof(m_aiFileHandle));
 
         const coreUint32 iRealNum = MIN(iNum, MENU_SCORE_ENTRIES);
 
@@ -548,7 +627,7 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
             for(coreUintW j = 0u, je = (bSegment || bMission) ? 1u : SCORE_MISSIONS; j < je; ++j)
             {
                 iShift += coreInt32(pData->aiShiftBadMission[j]) - coreInt32(pData->aiShiftGoodMission[j]);
-                fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), 10.0f);
+                fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), GAME_GOAL_FACTOR);
             }
 
             m_aRank [i].SetText(PRINT("%u.", pScore[i].iRank));
@@ -562,9 +641,12 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
             else if(bMission) cScoreMenu::__SetMedalIcon      (&m_aMedal[i], pData->aaiMedalSegment[0][0], MEDAL_TYPE_MISSION);
             else              cScoreMenu::__SetMedalIconArcade(&m_aMedal[i], pData->aaiMedalSegment);
 
+            m_aiFileHandle[i] = pScore[i].iFileHandle;
+
             m_aRank [i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
             m_aName [i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
             m_aScore[i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+            m_aFile [i].SetEnabled  (m_aiFileHandle[i] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             m_aIcon [i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
             m_aMedal[i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
             m_aLine [i].SetEnabled  (CORE_OBJECT_ENABLE_ALL);
@@ -575,6 +657,7 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
             m_aRank [i].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
             m_aName [i].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
             m_aScore[i].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
+            m_aFile [i].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
             m_aIcon [i].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
             m_aMedal[i].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
             m_aLine [i].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
@@ -587,6 +670,7 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
 
         m_ScoreBox.SetCurOffset(0.0f);
         m_ScoreBox.SetMaxOffset(0.05f * I_TO_F(iRealNum) - m_ScoreBox.GetSize().y - CORE_MATH_PRECISION);
+
         if(m_Navigator.GetCurScroll() == &m_ScoreBox)
         {
             m_Navigator.OverrideCurrent(&m_aLine[0]);
@@ -596,9 +680,11 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
     if(bPlayer)
     {
         m_iWorkDownload2 += 1u;
-        Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_USER, 0, 0, [=, this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
+        Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_USER, 0, 0, [=, this, iThisRequest = m_iCurRequest](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
         {
             m_iWorkDownload2 -= 1u;
+
+            if(iThisRequest != m_iCurRequest) return;
 
             if(iNum)
             {
@@ -609,7 +695,7 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
                 for(coreUintW j = 0u, je = (bSegment || bMission) ? 1u : SCORE_MISSIONS; j < je; ++j)
                 {
                     iShift += coreInt32(pData->aiShiftBadMission[j]) - coreInt32(pData->aiShiftGoodMission[j]);
-                    fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), 10.0f);
+                    fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), GAME_GOAL_FACTOR);
                 }
 
                 m_PlayerRank .SetText(PRINT("%u.", pScore->iRank));
@@ -657,6 +743,7 @@ void cScoreMenu::__ResetScores()
         m_aName [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aTime [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aScore[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aFile [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aIcon [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aMedal[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aLine [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -694,6 +781,8 @@ void cScoreMenu::__SetWeaponIcon(cGuiObject* OUTPUT pObject, const coreUint8 iWe
     case 1u: vColor = COLOR_MENU_YELLOW; vTexOffset = coreVector2(0.0f, 0.0f); break;
     case 2u: vColor = COLOR_MENU_PURPLE; vTexOffset = coreVector2(0.25f,0.0f); break;
     case 3u: vColor = COLOR_MENU_GREEN;  vTexOffset = coreVector2(0.5f, 0.0f); break;
+    case 4u: vColor = COLOR_MENU_BLUE;   vTexOffset = coreVector2(0.75f,0.0f); break;
+    case 5u: vColor = COLOR_MENU_RED;    vTexOffset = coreVector2(0.0f, 0.5f); break;
     }
 
     pObject->SetColor3   (vColor);
@@ -738,5 +827,5 @@ void cScoreMenu::__SetMedalIconArcade(cGuiObject* OUTPUT pObject, const coreUint
     const coreUint8 iMedal = iMedalCount ? MIN<coreUint8>((iMedalTotal + MEDAL_MARGIN_ARCADE) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;
 
     // 
-    cMenu::ApplyMedalTexture(pObject, iMedal, MEDAL_TYPE_ARCADE, true);
+    cMenu::ApplyMedalTexture(pObject, iMedal, MEDAL_TYPE_ARCADE, false);
 }

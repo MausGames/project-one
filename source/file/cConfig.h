@@ -19,8 +19,7 @@
 // TODO 3: last-used input type might get disconnected, without reset
 // TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized to 0, but gets set to the set with the mouse-button when navigating menu with mouse
 // TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
-// TODO 3: on very first startup, lowest resampler is selected, even when high sound quality is default
-// TODO 1: [MF] [HIGH] new options (need loca): particle effects (%)
+// TODO 3: on very first startup, lowest resampler is selected, even when high sound quality is default (also do for quality settings, currently default value is just identical)
 
 
 // ****************************************************************
@@ -34,11 +33,11 @@
 #define CONFIG_GRAPHICS_REFLECTION   "Graphics", "Reflection",                           (1)
 #define CONFIG_GRAPHICS_GLOW         "Graphics", "Glow",                                 (1)
 #define CONFIG_GRAPHICS_DISTORTION   "Graphics", "Distortion",                           (1)
+#define CONFIG_GRAPHICS_PARTICLE     "Graphics", "Particle",                             (100)
 #define CONFIG_GRAPHICS_SHAKE        "Graphics", "Shake",                                (100)
 #define CONFIG_GRAPHICS_FLASH        "Graphics", "Flash",                                (1)
 #define CONFIG_GRAPHICS_HIT_STOP     "Graphics", "HitStop",                              (1)
 #define CONFIG_GRAPHICS_CHROMA       "Graphics", "Chroma",                               (1)
-#define CONFIG_GRAPHICS_DYNAMICRES   "Graphics", "DynamicRes",                           (70)
 
 #define CONFIG_AUDIO_EFFECT_VOLUME   "Audio",    "EffectVolume",                         (CONFIG_DEFAULT_VOLUME)
 #define CONFIG_AUDIO_AMBIENT_VOLUME  "Audio",    "AmbientVolume",                        (CONFIG_DEFAULT_VOLUME)
@@ -54,7 +53,7 @@
 #define CONFIG_INPUT_MOVE_LEFT(s)    "Input",    PRINT("S%zu_MoveLeft",    (s))
 #define CONFIG_INPUT_MOVE_DOWN(s)    "Input",    PRINT("S%zu_MoveDown",    (s))
 #define CONFIG_INPUT_MOVE_RIGHT(s)   "Input",    PRINT("S%zu_MoveRight",   (s))
-#define CONFIG_INPUT_ACTION(s,n)     "Input",    PRINT("S%zu_Action%zu",   (s), (n) + 1u)
+#define CONFIG_INPUT_ACTION(s,n)     "Input",    PRINT("S%zu_Action%u",    (s), coreUint32((n) + 1u))
 
 #define CONFIG_GAME_GAME_DIRECTION   "Game",     "GameDirection",                        (0)
 #define CONFIG_GAME_GAME_SPEED       "Game",     "GameSpeed",                            (100)
@@ -70,6 +69,7 @@
 #define CONFIG_GAME_VERSION          "Game",     "Version",                              (0)
 
 #define CONFIG_LEGACY_ROTATION_TURN  "Legacy",   "RotationTurn",                         (0)
+#define CONFIG_LEGACY_PRIORITY_MOVE  "Legacy",   "PriorityMove",                         (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_KEYS_MOVE     (4u)                                          // number of move keys per set (left, right, down, up)
@@ -79,6 +79,8 @@
 #define INPUT_SETS_JOYSTICK (4u)                                          // number of joystick/gamepad sets
 #define INPUT_SETS          (INPUT_SETS_KEYBOARD + INPUT_SETS_JOYSTICK)   // total number of sets
 
+#define INPUT_KEY_INVALID (INT16_MIN)
+
 STATIC_ASSERT(INPUT_TYPES       <= INPUT_SETS)
 STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint16)*8u)
 
@@ -86,22 +88,22 @@ STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint16)*8u)
 #define DEFAULT_KEYBOARD_1_MOVE_LEFT  (CORE_INPUT_KEY(A))
 #define DEFAULT_KEYBOARD_1_MOVE_DOWN  (CORE_INPUT_KEY(S))
 #define DEFAULT_KEYBOARD_1_MOVE_RIGHT (CORE_INPUT_KEY(D))
-#define DEFAULT_KEYBOARD_1_ACTION(n)  (((n) == 0u) ? -CORE_INPUT_LEFT : ((n) == 1u) ? CORE_INPUT_KEY(Q) : ((n) == 2u) ? CORE_INPUT_KEY(E) : ((n) == 3u) ? CORE_INPUT_KEY(I) : ((n) == 4u) ? CORE_INPUT_KEY(J) : ((n) == 5u) ? CORE_INPUT_KEY(K) : ((n) == 6u) ? CORE_INPUT_KEY(L) : ((n) == 7u) ? 0 : ((n) == 8u) ? -CORE_INPUT_RIGHT : CORE_INPUT_KEY(LSHIFT))
+#define DEFAULT_KEYBOARD_1_ACTION(n)  (((n) == 0u) ? -CORE_INPUT_LEFT : ((n) == 1u) ? CORE_INPUT_KEY(Q) : ((n) == 2u) ? CORE_INPUT_KEY(E) : ((n) == 3u) ? CORE_INPUT_KEY(I) : ((n) == 4u) ? CORE_INPUT_KEY(J) : ((n) == 5u) ? CORE_INPUT_KEY(K) : ((n) == 6u) ? CORE_INPUT_KEY(L) : ((n) == 7u) ? 0 : ((n) == 8u) ? -CORE_INPUT_RIGHT : INPUT_KEY_INVALID)
 
 #define DEFAULT_KEYBOARD_2_MOVE_UP    (CORE_INPUT_KEY(UP))
 #define DEFAULT_KEYBOARD_2_MOVE_LEFT  (CORE_INPUT_KEY(LEFT))
 #define DEFAULT_KEYBOARD_2_MOVE_DOWN  (CORE_INPUT_KEY(DOWN))
 #define DEFAULT_KEYBOARD_2_MOVE_RIGHT (CORE_INPUT_KEY(RIGHT))
-#define DEFAULT_KEYBOARD_2_ACTION(n)  (((n) == 0u) ? CORE_INPUT_KEY(SPACE) : ((n) == 1u) ? CORE_INPUT_KEY(Z) : ((n) == 2u) ? CORE_INPUT_KEY(X) : ((n) == 3u) ? CORE_INPUT_KEY(KP_8) : ((n) == 4u) ? CORE_INPUT_KEY(KP_4) : ((n) == 5u) ? CORE_INPUT_KEY(KP_2) : ((n) == 6u) ? CORE_INPUT_KEY(KP_6) : ((n) == 7u) ? 0 : ((n) == 8u) ? CORE_INPUT_KEY(C) : CORE_INPUT_KEY(KP_0))
+#define DEFAULT_KEYBOARD_2_ACTION(n)  (((n) == 0u) ? CORE_INPUT_KEY(SPACE) : ((n) == 1u) ? CORE_INPUT_KEY(Z) : ((n) == 2u) ? CORE_INPUT_KEY(X) : ((n) == 3u) ? CORE_INPUT_KEY(KP_8) : ((n) == 4u) ? CORE_INPUT_KEY(KP_4) : ((n) == 5u) ? CORE_INPUT_KEY(KP_2) : ((n) == 6u) ? CORE_INPUT_KEY(KP_6) : ((n) == 7u) ? 0 : ((n) == 8u) ? CORE_INPUT_KEY(C) : INPUT_KEY_INVALID)
 
 #define DEFAULT_JOYSTICK_MOVE_UP      (0)
 #define DEFAULT_JOYSTICK_MOVE_LEFT    (0)
 #define DEFAULT_JOYSTICK_MOVE_DOWN    (0)
 #define DEFAULT_JOYSTICK_MOVE_RIGHT   (0)
 #if defined(_CORE_SWITCH_)
-#define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)))
+#define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : INPUT_KEY_INVALID)))
 #else
-#define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)))
+#define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : INPUT_KEY_INVALID)))
 #endif
 
 #define DEFAULT_MOVE_UP(x)            (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_UP    : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_UP    : DEFAULT_JOYSTICK_MOVE_UP)
@@ -124,6 +126,7 @@ struct sConfig final
         coreUint8 iReflection;   // water reflection level
         coreUint8 iGlow;         // fullscreen glow level
         coreUint8 iDistortion;   // fullscreen distortion level
+        coreUint8 iParticle;     // 
         coreUint8 iShake;        // 
         coreUint8 iFlash;        // 
         coreUint8 iHitStop;      // 
@@ -179,6 +182,7 @@ struct sConfig final
     struct
     {
         coreUint8 iRotationTurn;   // 
+        coreUint8 iPriorityMove;   // 
     }
     Legacy;
 };
@@ -189,7 +193,8 @@ struct sGameInput final
     coreUint16  iActionPress;     // action press (bitfields)
     coreUint16  iActionRelease;   // action release
     coreUint16  iActionHold;      // action hold
-    coreUint8   iStatus;          // 
+
+    coreUint8   iMoveStep;        // 
 };
 
 struct sMenuInput final

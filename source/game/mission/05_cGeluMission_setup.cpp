@@ -7,7 +7,6 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
-#include <numeric>   // std::accumulate
 
 
 // ****************************************************************
@@ -188,7 +187,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.45f);
-                pEnemy->Configure((i < 32u) ? 50 : ((i < 40u) ? 220 : ((i < 72u) ? 120 : ((i < 80u) ? 200 : ((i < 88u) ? 220 : ((i < 96u) ? 200 : 1000))))), 0u, COLOR_SHIP_RED);
+                pEnemy->Configure((i < 32u) ? 50 : ((i < 40u) ? 220 : ((i < 72u) ? 120 : ((i < 80u) ? 200 : ((i < 88u) ? 220 : ((i < 96u) ? 200 : 1000))))), COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
 
                 pEnemy->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
@@ -290,12 +289,15 @@ void cGeluMission::__SetupOwn()
             }
 
             pBullet->Deactivate(true, vIntersection.xy());
-            pBullet->AddStatus(BULLET_STATUS_GHOST);
-            g_pGame->PlayHitSound(vIntersection);
+            pBullet->Ignore();
 
             if(pEnemy->ReachedDeath())
             {
                 this->AddExtraScore(pEnemy->LastAttacker(), 100u * iGroupNum, pEnemy->GetPosition());
+            }
+            else
+            {
+                g_pGame->PlayHitSound(vIntersection);
             }
 
             if(!HAS_BIT(iHitField, i % (sizeof(iHitField)*8u)))
@@ -706,7 +708,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREEN);
+                pEnemy->Configure(4, COLOR_SHIP_GREEN);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
@@ -716,7 +718,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -1457,7 +1459,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -1466,7 +1468,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -2155,7 +2157,7 @@ void cGeluMission::__SetupOwn()
     // ACHIEVEMENT: be on top of an orb which does not exist anymore
     // TODO 1: hardmode: crossing lines ?
     // TODO 1: hardmode: a bug trying to follow and bite you
-    // TODO 1: add input-cache du allow quick movement, e.g. right up up right down
+    // TODO 3: add input-cache to allow quicker movement, e.g. right up up right down (# affects replay)
     // TODO 5: badge: collect yellow blocks as badge (+ extra score ?)
     // TODO 5: badge: move along a marked line after another
     // TODO 5: badge: guitar hero
@@ -2191,7 +2193,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.8f);
-                pEnemy->Configure((i < 55u) ? 4 : 8, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure((i < 55u) ? 4 : 8, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -2874,7 +2876,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(10, 0u, COLOR_SHIP_BLUE);
+                pEnemy->Configure(10, COLOR_SHIP_BLUE);
             });
         });
 
@@ -3377,7 +3379,7 @@ void cGeluMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
 
                 d_cast<cStarEnemy*>(pEnemy)->SetAngle(I_TO_F(i) * 2.0f/5.0f * PI);
             });

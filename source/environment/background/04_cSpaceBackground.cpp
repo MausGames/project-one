@@ -85,7 +85,7 @@ cSpaceBackground::cSpaceBackground()noexcept
 
     // 
     m_Cover.DefineTexture(0u, "environment_space_inside.png");
-    m_Cover.DefineProgram("menu_grey_program");
+    m_Cover.DefineProgram("menu_grey_vignette_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);
 

@@ -46,18 +46,18 @@ cIntroBoss::cIntroBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.5f);
 
     // configure the boss
-    this->Configure(4400, 0u, COLOR_SHIP_PURPLE);
+    this->Configure(4400, COLOR_SHIP_PURPLE);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
-    PHASE_HEALTH_GOAL({4400})
+    PHASE_HEALTH_GOAL({4400, 2100, 1500, 600, 0})
 
     // 
     m_Blade.DefineModelHigh("ship_boss_intro_sword_blade_high.md3");
     m_Blade.DefineModelLow ("ship_boss_intro_sword_blade_low.md3");
     m_Blade.DefineVolume   ("ship_boss_intro_sword_blade_volume.md3");
     m_Blade.SetSize        (this->GetSize());
-    m_Blade.Configure      (1, 0u, COLOR_SHIP_PURPLE);
+    m_Blade.Configure      (1, COLOR_SHIP_PURPLE);
     m_Blade.AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
     m_Blade.SetParent      (this);
 
@@ -66,7 +66,7 @@ cIntroBoss::cIntroBoss()noexcept
     m_Hilt.DefineModelLow ("ship_boss_intro_sword_hilt_low.md3");
     m_Hilt.DefineVolume   ("ship_boss_intro_sword_hilt_volume.md3");
     m_Hilt.SetSize        (this->GetSize());
-    m_Hilt.Configure      (1, 0u, COLOR_SHIP_PURPLE);
+    m_Hilt.Configure      (1, COLOR_SHIP_PURPLE);
     m_Hilt.AddStatus      (ENEMY_STATUS_BOTTOM);
     m_Hilt.SetParent      (this);
 
@@ -74,9 +74,15 @@ cIntroBoss::cIntroBoss()noexcept
     //m_Shield.DefineModelHigh("ship_boss_intro_shield_high.md3");
     //m_Shield.DefineModelLow ("ship_boss_intro_shield_low.md3");
     //m_Shield.SetSize        (this->GetSize());
-    //m_Shield.Configure      (1, 0u, COLOR_SHIP_PURPLE);
+    //m_Shield.Configure      (1, COLOR_SHIP_PURPLE);
     //m_Shield.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
     //m_Shield.SetParent      (this);
+
+    // 
+    m_Dummy.DefineModelHigh("ship_enemy_warrior_high.md3");
+    m_Dummy.DefineModelLow ("ship_enemy_warrior_low.md3");
+    m_Dummy.DefineVolume   ("ship_enemy_warrior_volume.md3");
+    m_Dummy.AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST);
 }
 
 
@@ -127,6 +133,9 @@ void cIntroBoss::__ResurrectOwn()
 void cIntroBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
+    m_Dummy.Kill(bAnimated);
+
+    // 
     m_iPhase = 0u;
 }
 
@@ -150,7 +159,10 @@ void cIntroBoss::__MoveOwn()
             if(PHASE_BEGINNING)
             {
                 pSkewer->Resurrect();
-                pSkewer->ChangeToBottom();
+
+                m_Dummy.SetSize  (pSkewer->GetSize());
+                m_Dummy.Configure(1, pSkewer->GetBaseColor());
+                m_Dummy.Resurrect();
             }
 
             const coreFloat fHeight = LERP(-2.2f, 2.2f, fTime) * FOREGROUND_AREA.y;
@@ -164,7 +176,7 @@ void cIntroBoss::__MoveOwn()
             {
                 PHASE_CHANGE_INC
 
-                pSkewer->ChangeToNormal();
+                m_Dummy.Kill(false);
             }
         });
     }
@@ -435,7 +447,7 @@ void cIntroBoss::__MoveOwn()
             g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_EFFECT_DUST);
         }
 
-        if(this->GetCurHealth() < 600)
+        if(this->GetCurHealth() <= 600)
         {
             PHASE_CHANGE_TO(60u)
 
@@ -444,6 +456,8 @@ void cIntroBoss::__MoveOwn()
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
 
             this->__ResurrectHelperIntro(ELEMENT_YELLOW, false);
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(2u));
         }
     }
 
@@ -453,7 +467,7 @@ void cIntroBoss::__MoveOwn()
     {
         coreVector4& vCircleData = m_avVector[CIRCLE_DATA];
 
-        if(this->GetCurHealth() < 2100)
+        if(this->GetCurHealth() <= 2100)
         {
             vCircleData.x = MAX0(vCircleData.x - 1.0f * TIME);
             vCircleData.z += 1.0f * TIME;
@@ -508,6 +522,8 @@ void cIntroBoss::__MoveOwn()
                 pSkewer->Kill(false);
                 g_pGame->GetCurMission()->GiveBadge(3u, BADGE_ACHIEVEMENT, pSkewer->GetPosition());
             }
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(0u));
         }
     }
 
@@ -525,26 +541,22 @@ void cIntroBoss::__MoveOwn()
             const coreFloat   fValue = COS(fTime * (2.0f*PI));
             const coreVector2 vBase  = StepRotated90(m_aiCounter[SWING_SIDE] % 4);
             const coreVector2 vDir   = MapToAxis(coreVector2(fValue, LERP(-0.5f, 0.0f, ABS(fValue))).Normalized(), vBase);
-            const coreVector2 vPos   = vBase * (1.25f - 0.15f * BLENDB(MIN(fTime, 1.0f - fTime, 0.2f) * 5.0f)) + vDir * 0.19f;   // TODO 1: [MF] check and adjust distance
+            const coreVector2 vPos   = vBase * (1.25f - 0.15f * BLENDB(MIN(fTime, 1.0f - fTime, 0.2f) * 5.0f)) + vDir * 0.19f;
 
             this->SetPosition (coreVector3(vPos, 0.0f) * FOREGROUND_AREA3);
             this->SetDirection(coreVector3(vDir, 0.0f));
 
-            if(this->ReachedHealth(1500))
-            {
-                g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_GREEN);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
-            }
-
             if(PHASE_FINISHED)
             {
-                if(this->GetCurHealth() < 1500)
+                if(this->GetCurHealth() <= 1500)
                 {
                     PHASE_CHANGE_TO(30u)
+
+                    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(1u));
                 }
                 else
                 {
-                    PHASE_RESET(0u)
+                    PHASE_AGAIN(0u)
 
                     m_aiCounter[SWING_SIDE] += 1;
 
@@ -566,6 +578,12 @@ void cIntroBoss::__MoveOwn()
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_GREEN);
             g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
+
+        if(this->ReachedHealth(1500))
+        {
+            g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_GREEN);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+        }
     }
 
     // ################################################################
@@ -792,11 +810,13 @@ void cIntroBoss::__MoveOwn()
         // 
         if(!pSkewer->HasStatus(ENEMY_STATUS_DEAD))
         {
+            cEnemy* pTarget = m_Dummy.HasStatus(ENEMY_STATUS_DEAD) ? pSkewer : &m_Dummy;
+
             const coreMatrix3 mRota = coreMatrix4::RotationAxis(this->GetOrientation().xz().InvertedX().Angle(), this->GetDirection()).m123();
 
-            pSkewer->SetPosition   ( this->GetPosition   () + this->GetDirection() * 12.0f);
-            pSkewer->SetDirection  ((this->GetDirection  ().RotatedZ45() * mRota).Normalized());
-            pSkewer->SetOrientation( this->GetOrientation());
+            pTarget->SetPosition   ( this->GetPosition   () + this->GetDirection() * 12.0f);
+            pTarget->SetDirection  ((this->GetDirection  ().RotatedZ45() * mRota).Normalized());
+            pTarget->SetOrientation( this->GetOrientation());
         }
         else g_pGame->GetCurMission()->FailTrophy();
     }

@@ -78,11 +78,11 @@ cTigerBoss::cTigerBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.5f);
 
     // configure the boss
-    this->Configure(TIGER_DAMAGE * 117, 0u, COLOR_SHIP_YELLOW);
+    this->Configure(TIGER_DAMAGE * 117, COLOR_SHIP_YELLOW);
     this->AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
 
     // 
-    PHASE_HEALTH_GOAL({TIGER_DAMAGE * 117, TIGER_DAMAGE * 83, TIGER_DAMAGE * 77, TIGER_DAMAGE * 61, TIGER_DAMAGE * 21, TIGER_DAMAGE * 5, 0})
+    PHASE_HEALTH_GOAL({TIGER_DAMAGE * 117, TIGER_DAMAGE * 83, TIGER_DAMAGE * 77, TIGER_DAMAGE * 61, TIGER_DAMAGE * 21, /*TIGER_DAMAGE * 5,*/ 0})
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrack); ++i)
     {
@@ -93,7 +93,7 @@ cTigerBoss::cTigerBoss()noexcept
         m_aTrack[i].DefineProgram  ("effect_track_program");
         m_aTrack[i].SetSize        (this->GetSize());
         m_aTrack[i].SetTexSize     (coreVector2(1.0f,2.0f));
-        m_aTrack[i].Configure      (1, 0u, coreVector3(1.0f,1.0f,1.0f));
+        m_aTrack[i].Configure      (1, coreVector3(1.0f,1.0f,1.0f));
         m_aTrack[i].AddStatus      (ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST);
         m_aTrack[i].SetParent      (this);
     }
@@ -101,7 +101,7 @@ cTigerBoss::cTigerBoss()noexcept
     for(coreUintW i = 0u; i < TIGER_SUBS; ++i)
     {
         // 
-        m_aWeapon[i].Configure(1, 0u, COLOR_SHIP_YELLOW);
+        m_aWeapon[i].Configure(1, COLOR_SHIP_YELLOW);
         m_aWeapon[i].AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST);
         m_aWeapon[i].SetParent(this);
     }
@@ -109,7 +109,7 @@ cTigerBoss::cTigerBoss()noexcept
     for(coreUintW i = 0u; i < TIGER_SUBS; ++i)
     {
         // 
-        m_aWeaponOld[i].Configure(1, 0u, COLOR_SHIP_YELLOW);
+        m_aWeaponOld[i].Configure(1, COLOR_SHIP_YELLOW);
         m_aWeaponOld[i].AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST);
         m_aWeaponOld[i].SetParent(this);
     }
@@ -394,9 +394,9 @@ void cTigerBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
-            pMission->ChangeInsanity(1u);
-
             PHASE_CHANGE_TO(20u)
+
+            pMission->ChangeInsanity(1u);
         });
     }
 
@@ -453,9 +453,11 @@ void cTigerBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
+            PHASE_CHANGE_TO(30u)
+
             pMission->ChangeInsanity(2u);
 
-            PHASE_CHANGE_TO(30u)
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(0u));
         });
     }
 
@@ -512,9 +514,11 @@ void cTigerBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
+            PHASE_CHANGE_TO(40u)
+
             pMission->ChangeInsanity(3u);
 
-            PHASE_CHANGE_TO(40u)
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(1u));
         });
     }
 
@@ -560,13 +564,6 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 43u)
     {
-        //PHASE_CONTROL_PAUSE(0u, 0.5f)
-        //{
-        //    this->__SwitchWeapon(1u);
-//
-        //    PHASE_CHANGE_INC
-        //});
-
         PHASE_CONTROL_TIMER(0u, 0.25f, LERP_SMOOTH)
         {
             m_avVector[POS_OFFSET].y = LERP(0.0f, -40.0f, fTime);
@@ -587,9 +584,11 @@ void cTigerBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
+            PHASE_CHANGE_TO(50u)
+
             pMission->ChangeInsanity(4u);
 
-            PHASE_CHANGE_TO(50u)
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(2u));
         });
     }
 
@@ -605,13 +604,6 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 51u)
     {
-        //PHASE_CONTROL_PAUSE(0u, 0.4f)   // longer
-        //{
-        //    this->__SwitchWeapon(4u);
-//
-        //    PHASE_CHANGE_INC
-        //});
-
         PHASE_CONTROL_TIMER(0u, 0.25f, LERP_SMOOTH)
         {
             m_avVector[POS_OFFSET].y = LERP(-40.0f, 0.0f, fTime);
@@ -632,11 +624,13 @@ void cTigerBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.3f)
         {
+            PHASE_CHANGE_TO(60u)
+
             pMission->ChangeInsanity(5u);
 
             this->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
 
-            PHASE_CHANGE_TO(60u)
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(3u));
         });
     }
 
@@ -657,7 +651,11 @@ void cTigerBoss::__MoveOwn()
         }
 
         if(this->GetCurHealth() <= TIGER_DAMAGE * 5)
+        {
             PHASE_CHANGE_TO(80u)
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(4u));
+        }
     }
 
     // ################################################################
@@ -1007,7 +1005,7 @@ void cTigerBoss::__MoveOwn()
                 if(PHASE_FINISHED)
                 {
                     this->__ShootWeapon();
-                    PHASE_RESET(3u)
+                    PHASE_RESET(3u)   // not again, because of aiming
                 }
             });
         }
@@ -1048,7 +1046,7 @@ void cTigerBoss::__MoveOwn()
                         m_avVector[RECOIL_TIME].x = 1.0f;
                     }
 
-                    PHASE_RESET(3u)
+                    PHASE_RESET(3u)   // not again, to be consistent with other weapons
                 }
             });
         }

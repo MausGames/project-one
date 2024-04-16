@@ -20,6 +20,7 @@
 // TODO 4: check if ForEachBullet or ForEachBulletTypes is faster, and adjust all use-cases accordingly (also FindBullet* and GetNumBullets*)
 // TODO 4: grow bullet code could be moved out of NevoMission to a GlobalMove function
 // TODO 3: implement reserve-function, called before large bullet-requests >=100 (same for enemies, for every squad?)
+// TODO 3: player bullets in der luft überlagern sich komisch (transparenz von alten geschossen überdecken neue geschosse) und eigene outlines werden manchmal drüber gerendert
 
 
 // ****************************************************************
@@ -37,9 +38,10 @@ enum eBulletStatus : coreUint8
     BULLET_STATUS_READY     = 0x01u,   // bullet is ready to be created
     BULLET_STATUS_ACTIVE    = 0x02u,   // bullet is currently flying around, doing stuff (no checking required, is managed)
     BULLET_STATUS_REFLECTED = 0x04u,   // 
-    BULLET_STATUS_PENETRATE = 0x08u,   // 
+    BULLET_STATUS_PENETRATE = 0x08u,   // TODO 1: remove    
     BULLET_STATUS_IMMORTAL  = 0x10u,   // 
-    BULLET_STATUS_GHOST     = 0x20u    // 
+    BULLET_STATUS_GHOST     = 0x20u,   // 
+    BULLET_STATUS_FRESH     = 0x40u    // 
 };
 
 
@@ -85,6 +87,9 @@ public:
 
     // 
     void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal = coreVector2(0.0f,0.0f));
+
+    // 
+    void Ignore();
 
     // 
     inline cBullet* ChangeHeight           (const coreFloat   fValue)  {this->SetPosition         (coreVector3(this->GetPosition().xy(), fValue)); return this;}   // not related to tilting
@@ -415,7 +420,7 @@ public:
     static constexpr coreBool        ConfigShadow              () {return false;}
     static constexpr coreBool        ConfigGlow                () {return true;}
     static constexpr coreUintW       ConfigReserve             () {return 32u;}
-    static constexpr coreFloat       ConfigSpeed               () {return 3.0f;}
+    static constexpr coreFloat       ConfigSpeed               () {return 4.0f;}
 
 
 private:
@@ -1124,6 +1129,12 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     const coreUintW iBefore = P_TO_UI(pSet->aBulletPool.data());
 
+    // 
+    FOR_EACH(it, *pSet->oBulletActive.List())
+    {
+        (*it)->ChangeType(0);
+    }
+
     // increase list and pool size by 100%
     pSet->oBulletActive.Reallocate(iSize * 2u);
     pSet->aBulletPool  .resize    (iSize * 2u);
@@ -1134,6 +1145,8 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     FOR_EACH(it, *pSet->oBulletActive.List())
     {
         (*it) = s_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
+
+        if(HAS_FLAG((*it)->GetStatus(), BULLET_STATUS_ACTIVE)) (*it)->ChangeType(m_iType);
     }
 
     // execute again with first new bullet
@@ -1222,7 +1235,7 @@ template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2 vPosi
 template <typename F> FORCE_INLINE void cBulletManager::ForEachBullet(F&& nFunction)const
 {
     // 
-    const coreList<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
+    const coreList<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);   // TODO 1: is shared between normal and top player
     FOR_EACH(it, oBulletList)
     {
         cBullet* pBullet = d_cast<cBullet*>(*it);

@@ -19,6 +19,7 @@ cCalorMission::cCalorMission()noexcept
 , m_afLoadPower     {}
 , m_Hail            (CALOR_HAILS)
 , m_HailWave        (CALOR_HAILS)
+, m_fHailTime       (0.0f)
 , m_Chest           (CALOR_HAILS)
 , m_ChestWave       (CALOR_HAILS)
 , m_afChestTime     {}
@@ -43,7 +44,7 @@ cCalorMission::cCalorMission()noexcept
 , m_fCatchTransfer  (0.0f)
 , m_fStoryRangeAnim (0.0f)
 , m_fAnimation      (0.0f)
-, m_bStory          (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_CALOR))
+, m_bStory          (!HAS_BIT_EX(REPLAY_WRAP_PROGRESS_STATE, STATE_STORY_CALOR) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 {
     // 
     m_apBoss[0] = &m_Zeroth;
@@ -95,7 +96,7 @@ cCalorMission::cCalorMission()noexcept
             pHail->DefineProgram("effect_energy_flat_program");
 
             // set object properties
-            pHail->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 2.6f : 2.2f));
+            pHail->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 2.6f : 2.2f) * 1.05f);
             pHail->SetColor3 (COLOR_ENERGY_YELLOW * 0.7f);
             pHail->SetAlpha  (iType ? 1.0f : 0.7f);
             pHail->SetTexSize(coreVector2(1.0f,1.0f) * 0.3f);
@@ -162,7 +163,7 @@ cCalorMission::cCalorMission()noexcept
     m_Bull.DefineProgram  ("effect_energy_flat_invert_program");
     m_Bull.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
     m_Bull.SetTexSize     (coreVector2(1.0f,1.0f) * 0.4f);
-    m_Bull.Configure      (1000, 0u, COLOR_ENERGY_ORANGE * 0.8f);
+    m_Bull.Configure      (1000, COLOR_ENERGY_ORANGE * 0.8f);
     m_Bull.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
 
     // 
@@ -203,14 +204,15 @@ cCalorMission::cCalorMission()noexcept
     }
 
     // 
-    m_Boulder.DefineModelHigh("ship_meteor.md3");
-    m_Boulder.DefineModelLow ("ship_meteor.md3");
-    m_Boulder.DefineTexture  (0u, "environment_stone_diff.png");
-    m_Boulder.DefineTexture  (1u, "environment_stone_norm.png");
-    m_Boulder.DefineProgram  ("object_meteor_blink_program");
-    m_Boulder.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
-    m_Boulder.Configure      (50, 0u, coreVector3(1.0f,1.0f,1.0f));
-    m_Boulder.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET | ENEMY_STATUS_KEEPVOLUME);
+    m_Boulder.DefineModelHigh     ("ship_meteor.md3");
+    m_Boulder.DefineModelLow      ("ship_meteor.md3");
+    m_Boulder.DefineTexture       (0u, "environment_stone_diff.png");
+    m_Boulder.DefineTexture       (1u, "environment_stone_norm.png");
+    m_Boulder.DefineProgram       ("object_meteor_blink_program");
+    m_Boulder.SetSize             (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
+    m_Boulder.SetCollisionModifier(coreVector3(1.0f,1.0f,0.1f));
+    m_Boulder.Configure           (50, coreVector3(1.0f,1.0f,1.0f));
+    m_Boulder.AddStatus           (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET | ENEMY_STATUS_KEEPVOLUME);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryRange); ++i)
@@ -896,13 +898,13 @@ void cCalorMission::__MoveOwnBefore()
             coreFloat fDistance = 0.0f;
             m_Snow.TestCollision(vRayPos, vRayDir, &fDistance);   // # before draw
 
-            if(nHitFunc(pBullet->GetPosition().xy(),                                4.5f) +
-               nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 3.5f))
+            if(nHitFunc(pBullet->GetPosition().xy(),                                5.0f) +
+               nHitFunc(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 4.0f))
             {
-                nHitFunc(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 4.5f);
+                nHitFunc(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 5.0f);
 
-                const coreVector2 vHit = vRayPos + vRayDir * MIN(fDistance, 4.5f);
-                nHitFunc(vHit, 4.5f);
+                const coreVector2 vHit = vRayPos + vRayDir * MIN(fDistance, 5.0f);
+                nHitFunc(vHit, 5.0f);
 
                 pBullet->Deactivate(true);
             }
@@ -932,6 +934,8 @@ void cCalorMission::__MoveOwnBefore()
                 pBullet->Deactivate(true);
             }
         });
+
+        // TODO 1: [TESLA]
 
         g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
@@ -1040,14 +1044,14 @@ void cCalorMission::__MoveOwnMiddle()
                         if(pEnemy == m_apCatchObject[1u - i])
                         {
                             // 
-                            if(false) if(!m_fCatchTransfer)
-                            {
-                                m_fCatchTransfer = 0.5f;
-
-                                // 
-                                this->UncatchObject(1u - i);
-                                this->CatchObject(i, pEnemy);
-                            }
+                            //if(false) if(!m_fCatchTransfer)
+                            //{
+                            //    m_fCatchTransfer = 0.5f;
+                            //
+                            //    // 
+                            //    this->UncatchObject(1u - i);
+                            //    this->CatchObject(i, pEnemy);
+                            //}
                         }
                         else
                         {
@@ -1277,6 +1281,11 @@ void cCalorMission::__MoveOwnAfter()
 #endif
 
     // 
+    m_fHailTime.Update(15.0f);
+    const coreBool bTick = (m_fHailTime >= 1.0f);
+    m_fHailTime = FRACT(m_fHailTime);
+
+    // 
     for(coreUintW i = 0u; i < CALOR_HAILS; ++i)
     {
         coreObject3D* pHail = (*m_Hail    .List())[i];
@@ -1295,6 +1304,9 @@ void cCalorMission::__MoveOwnAfter()
         pWave->SetPosition (pHail->GetPosition ());
         pWave->SetDirection(pHail->GetDirection() * -1.0f);
         pWave->SetTexOffset(pHail->GetTexOffset());
+
+        // 
+        if(bTick) g_pSpecialEffects->CreateSplashColor(coreVector3(pHail->GetPosition().xy(), SPECIAL_DEEP), 0.0f, 1u, COLOR_ENERGY_YELLOW);
     }
 
     // 

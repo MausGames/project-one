@@ -81,11 +81,11 @@ cZerothBoss::cZerothBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.0f);
 
     // configure the boss
-    this->Configure(19000, 0u, COLOR_SHIP_BLUE);
+    this->Configure(19000, COLOR_SHIP_BLUE);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
-    PHASE_HEALTH_GOAL({19000})
+    PHASE_HEALTH_GOAL({19000, 2100, 0})
 
     // 
     for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i)
@@ -101,7 +101,7 @@ cZerothBoss::cZerothBoss()noexcept
         m_aLimb[i].DefineModelLow (sModelLow);
         m_aLimb[i].DefineVolume   (sVolume);
         m_aLimb[i].SetSize        (this->GetSize());
-        m_aLimb[i].Configure      (1, 0u, COLOR_SHIP_BLUE);
+        m_aLimb[i].Configure      (1, COLOR_SHIP_BLUE);
         m_aLimb[i].SetParent      (this);
     }
 
@@ -110,7 +110,7 @@ cZerothBoss::cZerothBoss()noexcept
     m_Body.DefineModelLow ("ship_boss_zeroth_body_low.md3");
     m_Body.DefineVolume   ("ship_boss_zeroth_body_volume.md3");
     m_Body.SetSize        (this->GetSize());
-    m_Body.Configure      (1, 0u, COLOR_SHIP_BLUE);
+    m_Body.Configure      (1, COLOR_SHIP_BLUE);
     m_Body.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
     m_Body.SetParent      (this);
 
@@ -148,7 +148,7 @@ cZerothBoss::cZerothBoss()noexcept
         m_aIce[i].DefineProgram  ("object_ice_program");
         m_aIce[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
         m_aIce[i].SetTexSize     (coreVector2(0.25f,0.25f));
-        m_aIce[i].Configure      (3500, 0u, coreVector3(1.0f,1.0f,1.0f));
+        m_aIce[i].Configure      (3500, coreVector3(1.0f,1.0f,1.0f));
         m_aIce[i].AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST_BULLET | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET | ENEMY_STATUS_NODELAY);
 
         ASSERT(coreMath::IsAligned(m_aIce[i].GetMaxHealth(), GAME_PLAYERS))
@@ -546,7 +546,11 @@ void cZerothBoss::__MoveOwn()
             this->__SetIndicator(1.0f - fTime);
 
             if(PHASE_FINISHED)
+            {
                 PHASE_CHANGE_TO(61u)
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(0u));
+            }
         });
     }
 
@@ -587,7 +591,7 @@ void cZerothBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                PHASE_RESET(0u)
+                PHASE_AGAIN(0u)
             }
         });
 
@@ -650,11 +654,11 @@ void cZerothBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                PHASE_RESET(2u)
+                PHASE_AGAIN(2u)
             }
         });
 
-        if((fCurHealthPct < 0.95f) && m_aLimb[ZEROTH_LIMB_TAIL].HasStatus(ENEMY_STATUS_HIDDEN))
+        if((fCurHealthPct <= 0.95f) && m_aLimb[ZEROTH_LIMB_TAIL].HasStatus(ENEMY_STATUS_HIDDEN))
         {
             PHASE_CHANGE_INC
 
@@ -681,6 +685,8 @@ void cZerothBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(62u)
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(1u));
         });
     }
 
@@ -810,6 +816,8 @@ void cZerothBoss::__MoveOwn()
             g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
             this->__SetIndicator(0.0f);
+
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(2u));
         }
 
         if(iFinished >= 4u)
@@ -908,6 +916,8 @@ void cZerothBoss::__MoveOwn()
                         }
 
                         this->__SetIndicator(1.0f, COLOR_ENERGY_YELLOW * 0.9f);
+
+                        g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(3u));
                     }
                     else if(m_aiCounter[SLAP_COUNT] >= 3)
                     {
@@ -988,7 +998,7 @@ void cZerothBoss::__MoveOwn()
                 pMission->StartSwing(0.3f);
                 pMission->SetStarLength(iIndex, m_avVector[STAR_LENGTH].x);
 
-                this->SetCollisionModifier(m_Body.GetCollisionRange() * 0.7f);
+                this->SetCollisionModifier(m_Body.GetCollisionRange() * 0.7f);   // low-quad collision
 
                 for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i)
                 {
@@ -1238,6 +1248,8 @@ void cZerothBoss::__MoveOwn()
 
                     g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_05);
                     g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
+
+                    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(4u));
                 }
                 else
                 {
@@ -1826,7 +1838,7 @@ void cZerothBoss::__MoveOwn()
 
                 for(coreUintW i = 0u; i < iNum; ++i)
                 {
-                    const coreVector2 vFinalDir = coreVector2::Direction(fFrom + fDiff * (I_TO_F(i) / I_TO_F(iNum)));   // # current direction will be used in the next iteration
+                    const coreVector2 vFinalDir = coreVector2::Direction(fFrom + fDiff * (I_TO_F(i) * RCP(I_TO_F(iNum))));   // # current direction will be used in the next iteration
 
                     for(coreUintW j = 0u; j < 2u; ++j)
                     {

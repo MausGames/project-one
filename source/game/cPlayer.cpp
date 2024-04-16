@@ -19,7 +19,6 @@ cPlayer::cPlayer()noexcept
 , m_fScale          (1.0f)
 , m_fThrust         (0.0f)
 , m_fTilt           (0.0f)
-, m_bRainbow        (false)
 , m_fMoveSpeed      (1.0f)
 , m_fShootSpeed     (1.0f)
 , m_fAnimSpeed      (1.0f)
@@ -41,7 +40,7 @@ cPlayer::cPlayer()noexcept
 , m_fRangeScale     (1.0f)
 , m_vMenuColor      (coreVector3(1.0f,1.0f,1.0f))
 , m_vLedColor       (coreVector3(1.0f,1.0f,1.0f))
-, m_vOldDir         (coreVector2(0.0f,1.0f))
+, m_vOldDir         (coreVector2(0.0f,0.0f))
 , m_vSmoothOri      (coreVector2(0.0f,0.0f))
 , m_fSmoothThrust   (0.0f)
 , m_fSmoothTilt     (0.0f)
@@ -49,6 +48,7 @@ cPlayer::cPlayer()noexcept
 , m_fArrowValue     (0.0f)
 , m_fBubbleValue    (0.0f)
 , m_fCircleValue    (0.0f)
+, m_fFlashValue     (0.0f)
 , m_fBoost          (0.0f)
 , m_iLastMove       (8u)
 , m_iLastHold       (8u)
@@ -143,6 +143,11 @@ cPlayer::cPlayer()noexcept
     m_Circle.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
+    m_Flash.DefineTexture(0u, "default_white.png");
+    m_Flash.DefineProgram("effect_energy_spheric_program");
+    m_Flash.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     m_Exhaust.DefineModel  ("object_tube.md3");
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
@@ -190,6 +195,7 @@ void cPlayer::Configure(const coreUintW iShipType)
     // 
     m_Range .DefineModel(sGeometry);
     m_Bubble.DefineModel(sGeometry);
+    m_Flash .DefineModel(sModelLow);
 
     // 
     m_Range     .SetColor3(vEnergy);
@@ -201,7 +207,7 @@ void cPlayer::Configure(const coreUintW iShipType)
 
     // 
     SET_BITVALUE(m_iLook, 4u, 0u, iShipType)
-    SET_BITVALUE(m_iLook, 8u, 4u, m_iBaseColor)
+    //SET_BITVALUE(m_iLook, 8u, 4u, m_iBaseColor)
 }
 
 
@@ -331,6 +337,9 @@ void cPlayer::RenderMiddle()
 
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        // 
+        m_Flash.Render();
+
         glDepthMask(false);
         {
             // 
@@ -392,28 +401,27 @@ void cPlayer::Move()
         coreVector3 vNewOri = coreVector3(0.0f,0.0f,1.0f);
 
         // 
-        const coreUint8 iMode = g_CurConfig.Input.aiControlMode[g_pGame->GetPlayerIndex(this)];
+        const coreUint8 iMode = REPLAY_WRAP_CONFIG_CONTROL_MODE[g_pGame->GetPlayerIndex(this)];
         if(iMode == 3u)
         {
             const coreUint8 iLastHold = PackDirection(m_pInput->vMove);
             if(m_iLastMove != iLastHold)
             {
-                const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-                const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+                const coreVector2 vDirGame = g_pPostProcessing->GetDirectionGame();
 
-                const coreVector2 vFlip = coreVector2(fSide, 1.0f);
+                const coreBool bArrange = HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE);
 
-                switch(PackDirection(MapToAxisInv(m_pInput->vMove, vFinal) * vFlip))
+                switch(PackDirection(MapToAxisInv(m_pInput->vMove, vDirGame)))
                 {
                 default: UNREACHABLE
                 case 0u: m_iLastHold = 0u; break;
-                case 1u: m_iLastHold = (m_iLastHold == 0u) ? 2u : 0u; break;
+                case 1u: m_iLastHold = bArrange ? 1u : (m_iLastHold == 0u) ? 2u : 0u; break;
                 case 2u: m_iLastHold = 2u; break;
-                case 3u: m_iLastHold = (m_iLastHold == 2u) ? 4u : 2u; break;
+                case 3u: m_iLastHold = bArrange ? 3u : (m_iLastHold == 2u) ? 4u : 2u; break;
                 case 4u: m_iLastHold = 4u; break;
-                case 5u: m_iLastHold = (m_iLastHold == 4u) ? 6u : 4u; break;
+                case 5u: m_iLastHold = bArrange ? 5u : (m_iLastHold == 4u) ? 6u : 4u; break;
                 case 6u: m_iLastHold = 6u; break;
-                case 7u: m_iLastHold = (m_iLastHold == 6u) ? 0u : 6u; break;
+                case 7u: m_iLastHold = bArrange ? 7u : (m_iLastHold == 6u) ? 0u : 6u; break;
                 case 8u: m_iLastHold = 8u; break;
                 }
             }
@@ -421,6 +429,17 @@ void cPlayer::Move()
         else
         {
             m_iLastHold = 8u;
+        }
+        
+        const coreFloat fTimeCorrection = RCP(MAX(TIME * FRAMERATE_MIN, CORE_MATH_PRECISION));
+        
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_RAPID))
+        {
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_CHANGE_SPEED))
+            {
+                TOGGLE_FLAG(m_iStatus, PLAYER_STATUS_RAPID_FIRE)
+                this->ShowFlash(HAS_FLAG(m_iStatus, PLAYER_STATUS_RAPID_FIRE) ? 1u : 0u);
+            }
         }
 
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
@@ -433,56 +452,49 @@ void cPlayer::Move()
             if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))  vNewDir = -vNewDir.Rotated90();
             if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT)) vNewDir =  vNewDir.Rotated90();
 
-            
-            
+
             // 
-            const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-            const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
+            const coreVector2 vDirGame     = g_pPostProcessing->GetDirectionGame();
+            const coreVector2 vOldDirCross = AlongCrossNormal(MapToAxisInv(vOldDir, vDirGame));
             
-            const coreVector2 vFlip = coreVector2(fSide, 1.0f);//(g_vHudDirection.Processed(ABS) + g_vHudDirection.yx().Processed(ABS) * fSide).Processed(SIGN);
+            const coreBool bLegacyRota = REPLAY_WRAP_CONFIG_ROTATION_TURN;
             
-            const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
-            
-            if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !g_CurConfig.Legacy.iRotationTurn)
+            if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !bLegacyRota)
             {
                 // 
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))    vNewDir = MapToAxis(coreVector2( 0.0f, 1.0f) * vFlip, vFinal);
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  vNewDir = MapToAxis(coreVector2(-1.0f, 0.0f) * vFlip, vFinal);
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  vNewDir = MapToAxis(coreVector2( 0.0f,-1.0f) * vFlip, vFinal);
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) vNewDir = MapToAxis(coreVector2( 1.0f, 0.0f) * vFlip, vFinal);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))    vNewDir = MapToAxis(coreVector2( 0.0f, 1.0f), vDirGame);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  vNewDir = MapToAxis(coreVector2(-1.0f, 0.0f), vDirGame);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  vNewDir = MapToAxis(coreVector2( 0.0f,-1.0f), vDirGame);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) vNewDir = MapToAxis(coreVector2( 1.0f, 0.0f), vDirGame);
             }
             else
             {
                 // 
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f), vOldDirCross)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f), vOldDirCross));
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f), vOldDirCross)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f), vOldDirCross));
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f), vOldDirCross)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f), vOldDirCross));
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f), vOldDirCross)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f), vOldDirCross));
             }
             
             
             if(iMode == 3u)
             {
-                const coreBool bPressA = HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT(0u, 0u));
+                const coreBool bPressA = HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_0);
                 const coreBool bPressB = HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
-                const coreBool bHoldA  = HAS_BIT(m_pInput->iActionHold,  PLAYER_ACTION_SHOOT(0u, 0u));
+                const coreBool bHoldA  = HAS_BIT(m_pInput->iActionHold,  PLAYER_ACTION_SHOOT_0);
                 const coreBool bHoldB  = HAS_BIT(m_pInput->iActionHold,  PLAYER_ACTION_RAPID_FIRE);
 
-                if(((bPressA && !bHoldB) || (bPressB && !bHoldA) || (bPressA && bPressB)) && !m_pInput->vMove.IsNull())
+                if(((bPressA && !bHoldB) || (bPressB && !bHoldA) || (bPressA && bPressB)) && !m_pInput->vMove.IsNull() && (m_iLastHold < 8u))
                 {
-                    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !g_CurConfig.Legacy.iRotationTurn)
+                    const coreVector2 vStepDir = StepRotated45(m_iLastHold);
+
+                    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !bLegacyRota)
                     {
-                             if(m_iLastHold == 0u) vNewDir = MapToAxis(coreVector2( 0.0f, 1.0f) * vFlip, vFinal);
-                        else if(m_iLastHold == 2u) vNewDir = MapToAxis(coreVector2(-1.0f, 0.0f) * vFlip, vFinal);
-                        else if(m_iLastHold == 4u) vNewDir = MapToAxis(coreVector2( 0.0f,-1.0f) * vFlip, vFinal);
-                        else if(m_iLastHold == 6u) vNewDir = MapToAxis(coreVector2( 1.0f, 0.0f) * vFlip, vFinal);
+                        vNewDir = MapToAxis(vStepDir, vDirGame);
                     }
                     else
                     {
-                             if((m_iLastHold == 0u) && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
-                        else if((m_iLastHold == 2u) && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
-                        else if((m_iLastHold == 4u) && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
-                        else if((m_iLastHold == 6u) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
+                        if(!SameDirection90(vStepDir, vOldDirCross)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(vStepDir, vOldDirCross));
                     }
                 }
             }
@@ -525,7 +537,7 @@ void cPlayer::Move()
             vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
 
             // 
-            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(MAX(TIME * FRAMERATE_MIN, CORE_MATH_PRECISION));
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * fTimeCorrection;
             const coreVector2 vTarget = vDiff - m_vSmoothOri;
             if(!vTarget.IsNull()) m_vSmoothOri = m_vSmoothOri + vTarget.Normalized() * (30.0f * TIME * SmoothTowards(vTarget.Length(), 1.0f));
             vNewOri = coreVector3(CLAMP(m_vSmoothOri.x, -0.8f, 0.8f), CLAMP(m_vSmoothOri.y, -0.8f, 0.8f), 1.0f).NormalizedUnsafe();
@@ -612,7 +624,8 @@ void cPlayer::Move()
         
         if(m_fTilt)
         {
-            const coreFloat fTarget = this->GetMove().y * 0.5f - m_fSmoothTilt;
+            const coreFloat fDiff   = this->GetMove().y * 0.5f * fTimeCorrection;
+            const coreFloat fTarget = fDiff - m_fSmoothTilt;
             m_fSmoothTilt = m_fSmoothTilt + SIGN(fTarget) * (30.0f * TIME * SmoothTowards(ABS(fTarget), 1.0f));
         }
         else m_fSmoothTilt = 0.0f;
@@ -820,6 +833,23 @@ void cPlayer::Move()
             m_Circle.Move();
         }
 
+        if(m_Flash.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            m_fFlashValue.Update(-2.0f * m_fAnimSpeed);
+
+            // 
+            if(m_fFlashValue <= 0.0f) this->DisableFlash();
+
+            // 
+            m_Flash.SetPosition   (this->GetPosition   ());
+            m_Flash.SetSize       (this->GetSize       ());
+            m_Flash.SetDirection  (this->GetDirection  ());
+            m_Flash.SetOrientation(this->GetOrientation());
+            m_Flash.SetAlpha      (BLENDBR(m_fFlashValue));
+            m_Flash.Move();
+        }
+
         if(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL))
         {
             // 
@@ -859,8 +889,6 @@ void cPlayer::Move()
 
         // 
         REMOVE_FLAG(m_iStatus, PLAYER_STATUS_REPAIRED)
-        
-        m_bWasDamaged = (m_iPreHealth > m_iCurHealth) || (m_iPreShield > m_iCurShield);
     
         if(m_bGiveUp)
         {
@@ -873,51 +901,26 @@ void cPlayer::Move()
             g_pDistortion->CreateEraser(this->GetPosition(), 1.0f);
         }
     }
-    
-    
-    if(m_bRainbow)
-    {
-        coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vLedColor;
-        cProjectOneBoss::CalcColorLerp(FMOD(g_pGame->GetTimeTable()->GetTimeTotal() / 20.0f * 24.0f, 8.0f), &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vLedColor);
-        
-        m_Range     .SetColor3(vEnergyColor);
-        m_Arrow     .SetColor3(vEnergyColor * (0.9f/1.1f));
-        m_Wind      .SetColor3(vEnergyColor * (1.6f/1.1f));
-        m_aShield[0].SetColor3(vEnergyColor * (1.0f/1.1f));
-        m_aShield[1].SetColor3(vEnergyColor * (1.0f/1.1f));
-        m_Exhaust   .SetColor3(vEnergyColor);
-        
-        m_Bubble   .SetColor3(vEnergyColor);
-        
-        m_vMenuColor = vLevelColor;
-        m_vLedColor  = vLedColor;
-    
-        //if(g_pGame->GetPlayerIndex(this) == 0u)
-        {
-            if(g_pEnvironment->GetBackground()->GetID() == cDarkBackground::ID)
-            {
-                d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vLevelColor);
-            }
-        }
-    }
-        
+
     if(!SPECIAL_FROZEN)
     {
-    m_iPreShield = m_iCurShield;
+        m_bWasDamaged = (m_iPreHealth > m_iCurHealth) || (m_iPreShield > m_iCurShield);
+        
+        m_iPreShield = m_iCurShield;
 
-    // 
-    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
-        m_apWeapon[i]->Move();
+        // 
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+            m_apWeapon[i]->Move();
 
-    // 
-    m_DataTable .Update();
-    m_ScoreTable.Update();
+        // 
+        m_DataTable .Update();
+        m_ScoreTable.Update();
 
-    // 
-    this->__UpdateCollisions();
+        // 
+        this->__UpdateCollisions();
 
-    // 
-    this->_UpdateAlwaysAfter();
+        // 
+        this->_UpdateAlwaysAfter();
     }
 }
 
@@ -971,7 +974,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
         if(!m_iCurHealth && HAS_FLAG(m_iStatus, PLAYER_STATUS_INVINCIBLE_2))
         {
             m_iCurHealth = m_iMaxHealth;
-            if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(1.5f);
+            if(REPLAY_WRAP_CONFIG_HIT_STOP) g_pSpecialEffects->FreezeScreen(1.5f);
 
             REMOVE_FLAG(m_iStatus, PLAYER_STATUS_INVINCIBLE_2)
             ADD_FLAG   (m_iStatus, PLAYER_STATUS_INVINCIBLE)
@@ -987,7 +990,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
                 this->StartIgnoring(m_iCurShield ? 0u : 1u);
 
                 // 
-                if(g_CurConfig.Graphics.iHitStop && g_pGame->IsAlone()) g_pSpecialEffects->FreezeScreen(0.1f);
+                if(REPLAY_WRAP_CONFIG_HIT_STOP && g_pGame->IsAlone()) g_pSpecialEffects->FreezeScreen(0.1f);
                 g_pSpecialEffects->RumblePlayer(this, m_iCurShield ? SPECIAL_RUMBLE_SMALL : SPECIAL_RUMBLE_BIG, 250u);
             }
             else
@@ -997,7 +1000,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
                 this->StartFeeling (PLAYER_FEEL_TIME, 0u);
 
                 // 
-                if(g_CurConfig.Graphics.iHitStop && g_pGame->IsAlone()) g_pSpecialEffects->FreezeScreen(0.2f);
+                if(REPLAY_WRAP_CONFIG_HIT_STOP && g_pGame->IsAlone()) g_pSpecialEffects->FreezeScreen(0.2f);
                 g_pSpecialEffects->RumblePlayer(this, SPECIAL_RUMBLE_BIG, 250u);
             }
 
@@ -1010,7 +1013,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             this->Kill(true);
 
             // 
-            if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(1.5f);
+            if(REPLAY_WRAP_CONFIG_HIT_STOP) g_pSpecialEffects->FreezeScreen(1.5f);
             g_pSpecialEffects->RumblePlayer(this, SPECIAL_RUMBLE_BIG, 500u);
         }
 
@@ -1064,6 +1067,9 @@ void cPlayer::Resurrect()
     m_iCurShield = m_iMaxShield;
     m_iPreShield = m_iMaxShield;
 
+    // 
+    m_vOldDir = this->GetDirection().xy();
+
     // add ship to global shadow and outline
     cShadow::GetGlobalContainer()->BindObject(this);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
@@ -1104,9 +1110,10 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->DisableBubble();
     this->DisableShield();
     this->DisableCircle();
+    this->DisableFlash();
     this->DisableExhaust();
 
-    // (currently do not reset: m_fScale, m_fTilt, m_bRainbow) 
+    // (currently do not reset: m_fScale, m_fTilt) 
     m_vArea   = PLAYER_AREA_DEFAULT;
     m_vForce  = coreVector2(0.0f,0.0f);
     m_fThrust = 0.0f;
@@ -1122,7 +1129,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fLightningAngle = 0.0f;
 
     // 
-    m_vOldDir       = coreVector2(0.0f,1.0f);
+    m_vOldDir       = coreVector2(0.0f,0.0f);
     m_vSmoothOri    = coreVector2(0.0f,0.0f);
     m_fSmoothThrust = 0.0f;
     m_fSmoothTilt   = 0.0f;
@@ -1130,6 +1137,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fArrowValue   = 0.0f;
     m_fBubbleValue  = 0.0f;
     m_fCircleValue  = 0.0f;
+    m_fFlashValue   = 0.0f;
     m_fBoost        = 0.0f;
     m_iLastMove     = 8u;
     m_iLastHold     = 8u;
@@ -1175,6 +1183,24 @@ void cPlayer::ShowCircle()
     // 
     if(m_fCircleValue <= 0.0f) this->EnableCircle();
     m_fCircleValue = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::ShowFlash(const coreUint8 iType)
+{
+    if(this->HasStatus(PLAYER_STATUS_DEAD)) return;
+
+    // 
+    if(!g_CurConfig.Graphics.iFlash) return;
+
+    // 
+    m_Flash.SetColor4(coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
+
+    // 
+    if(m_fFlashValue <= 0.0f) this->EnableFlash();
+    m_fFlashValue = 1.0f;
 }
 
 
@@ -1514,6 +1540,33 @@ void cPlayer::DisableCircle()
 
 // ****************************************************************
 // 
+void cPlayer::EnableFlash()
+{
+    WARN_IF(m_Flash.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableFlash();
+
+    // 
+    m_Flash.SetAlpha(0.0f);
+
+    // 
+    m_Flash.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Flash);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableFlash()
+{
+    if(!m_Flash.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Flash.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Flash);
+}
+
+
+// ****************************************************************
+// 
 void cPlayer::EnableExhaust()
 {
     WARN_IF(m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableExhaust();
@@ -1533,6 +1586,24 @@ void cPlayer::DisableExhaust()
     // 
     m_Exhaust.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     g_pGlow->UnbindObject(&m_Exhaust);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::OverrideColor(const coreVector3 vEnergyColor, const coreVector3 vMenuColor, const coreVector3 vLedColor)
+{
+    m_Range     .SetColor3(vEnergyColor);
+    m_Arrow     .SetColor3(vEnergyColor * (0.9f/1.1f));
+    m_Wind      .SetColor3(vEnergyColor * (1.6f/1.1f));
+    m_aShield[0].SetColor3(vEnergyColor * (1.0f/1.1f));
+    m_aShield[1].SetColor3(vEnergyColor * (1.0f/1.1f));
+    m_Exhaust   .SetColor3(vEnergyColor);
+    
+    m_Bubble   .SetColor3(vEnergyColor);
+    
+    m_vMenuColor = vMenuColor;
+    m_vLedColor  = vLedColor;
 }
 
 
@@ -1651,7 +1722,7 @@ coreVector2 cPlayer::CalcMove()const
 coreFloat cPlayer::CalcMoveSpeed()const
 {
     // 
-    const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_fBoost) ? 20.0f : 50.0f;
+    const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT_0) && !m_fBoost) ? 20.0f : 50.0f;
     return m_fMoveSpeed * fModifier;
 }
 
@@ -1660,6 +1731,8 @@ coreFloat cPlayer::CalcMoveSpeed()const
 // 
 void cPlayer::SetPosition(const coreVector3 vPosition)
 {
+    const coreVector3 vMove = vPosition - this->GetPosition();
+    
     this->coreObject3D::SetPosition(vPosition);
 
     m_Dot       .SetPosition(vPosition);
@@ -1677,6 +1750,15 @@ void cPlayer::SetPosition(const coreVector3 vPosition)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
             m_apWeapon[i]->Move();
     });
+    
+    const auto nBulletUpdateFunc = [&](cBullet* OUTPUT pBullet)
+    {
+        if((pBullet->GetOwner() == this) && pBullet->HasStatus(BULLET_STATUS_FRESH))
+        {
+            pBullet->SetPosition(pBullet->GetPosition() + vMove);
+        }
+    };
+    g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletUpdateFunc);   // only once because ForEachBullet was using Core::Manager::Object->GetObjectList
 }
 
 void cPlayer::SetDirection(const coreVector3 vDirection)
@@ -1705,12 +1787,12 @@ coreBool cPlayer::__NewCollision(const coreObject3D* pObject)
     if(m_aiCollision.count(pObject))
     {
         // update frame number
-        m_aiCollision.at(pObject) = g_pGame->GetTimeTable()->GetTimeMonoRaw();//Core::System->GetCurFrame();
+        m_aiCollision.at(pObject) = g_pGame->GetTimeTable()->GetTimeMonoRaw();
         return false;
     }
 
     // add collision to list
-    m_aiCollision.emplace(pObject, g_pGame->GetTimeTable()->GetTimeMonoRaw());//Core::System->GetCurFrame());
+    m_aiCollision.emplace(pObject, g_pGame->GetTimeTable()->GetTimeMonoRaw());
     return true;
 }
 
@@ -1721,7 +1803,7 @@ cPlayer::sRayData cPlayer::__NewRayData(const coreVector2 vRayPos, const coreVec
 {
     // 
     sRayData oData;
-    oData.iFrame     = g_pGame->GetTimeTable()->GetTimeMonoRaw();//Core::System->GetCurFrame();
+    oData.iFrame     = g_pGame->GetTimeTable()->GetTimeMonoRaw();
     oData.vPosition  = vRayPos;
     oData.vDirection = vRayDir;
 
@@ -1745,7 +1827,7 @@ cPlayer::sRayData cPlayer::__NewRayData(const coreVector2 vRayPos, const coreVec
 // 
 void cPlayer::__UpdateCollisions()
 {
-    const coreUint32 iCurFrame = g_pGame->GetTimeTable()->GetTimeMonoRaw() - 1u;//Core::System->GetCurFrame() - 1u;
+    const coreUint32 iCurFrame = g_pGame->GetTimeTable()->GetTimeMonoRaw() - 1u;
 
     // loop through all collisions
     FOR_EACH_DYN(it, m_aiCollision)

@@ -29,7 +29,7 @@ cPhalarisBoss::cPhalarisBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f)); 
 
     // configure the boss
-    this->Configure(10000, 0u, COLOR_SHIP_GREY); 
+    this->Configure(10000, COLOR_SHIP_GREY); 
 }
 
 

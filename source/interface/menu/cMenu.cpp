@@ -45,7 +45,7 @@ cMenu::cMenu()noexcept
 {
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
-    m_PauseLayer.DefineProgram("menu_grey_program");
+    m_PauseLayer.DefineProgram("menu_grey_vignette_program");
     m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
     m_PauseLayer.SetStyle     (CORE_OBJECT2D_STYLE_VIEWDIR);
@@ -347,11 +347,9 @@ void cMenu::Move()
                 {
                     if(g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK)
                     {
-                        const coreUint8 iCurContinue = g_pGame->GetContinuesMax() - g_pGame->GetContinuesLeft();
-
                         // 
-                        if(iCurContinue < g_pReplay->GetHeader().aiDataContinuesUsed[0]) m_DefeatMenu.ShowReplay();
-                                                                                    else m_DefeatMenu.ShowGameOver();
+                        if(g_pGame->GetContinuesCur() < g_pReplay->GetHeader().aiDataContinuesUsed[0]) m_DefeatMenu.ShowReplay();
+                                                                                                  else m_DefeatMenu.ShowGameOver();
                     }
                     else
                     {
@@ -449,7 +447,7 @@ void cMenu::Move()
                 m_GameMenu.ResetNavigator();
 
                 // switch to game menu
-                this->ShiftSurface(this, SURFACE_GAME, 3.0f, 1u, false, true);
+                this->ShiftSurface(this, SURFACE_GAME, 3.0f, 1u);
             }
             else if(m_MainMenu.GetStatus() == 2)
             {
@@ -465,6 +463,7 @@ void cMenu::Move()
                 // 
                 m_ReplayMenu.ChangeSurface(SURFACE_REPLAY_OVERVIEW, 0.0f);
                 m_ReplayMenu.LoadOverview();
+                m_ReplayMenu.ResetNavigator();
 
                 // switch to replay menu
                 this->ShiftSurface(this, SURFACE_REPLAY, 3.0f, 1u);
@@ -527,7 +526,7 @@ void cMenu::Move()
             else if(m_GameMenu.GetStatus() == 2)
             {
                 // return to previous menu          
-                this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 2u, true, false);
+                this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 2u);
             }
             else if(m_GameMenu.GetStatus() == 3)
             {
@@ -537,17 +536,27 @@ void cMenu::Move()
                 m_ExtraMenu.SetSelectedTrophy(iMissionIndex, iSegmentIndex);
 
                 // return to previous menu            
-                this->ShiftSurface(this, SURFACE_EXTRA, 3.0f, 2u, true, false);
+                this->ShiftSurface(this, SURFACE_EXTRA, 3.0f, 2u);
             }
         }
         break;
 
     case SURFACE_SCORE:
         {
-            if(m_ScoreMenu.GetStatus())
+            if(m_ScoreMenu.GetStatus() == 1)
             {
-                // return to previous menu
-                this->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u);
+                // 
+                m_ReplayMenu.ChangeSurface(SURFACE_REPLAY_DETAILS, 0.0f);
+                m_ReplayMenu.LoadDownload();
+                m_ReplayMenu.ResetNavigator();
+
+                // switch to replay menu
+                this->ShiftSurface(this, SURFACE_REPLAY, 3.0f, 1u);
+            }
+            else if(m_ScoreMenu.GetStatus() == 2)
+            {
+                // return to previous menu          
+                this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 2u);
             }
         }
         break;
@@ -729,6 +738,7 @@ void cMenu::Move()
                 // 
                 m_ReplayMenu.ChangeSurface(SURFACE_REPLAY_SLOTS, 0.0f);
                 m_ReplayMenu.LoadOverview();
+                m_ReplayMenu.ResetNavigator();
 
                 // 
                 this->ShiftSurface(this, SURFACE_REPLAY, 3.0f, 1u);
@@ -918,7 +928,7 @@ void cMenu::Move()
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
     {
         //m_PauseLayer.SetAlpha    (0.25f);
-        m_PauseLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
+        m_PauseLayer.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
         //m_PauseLayer.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
     }
     else
@@ -947,7 +957,7 @@ void cMenu::Move()
     
     //if(m_fNoticeSaveTime) m_NoticeSave.RetrieveDesiredSize([this](const coreVector2 vSize)
     //{
-    //    const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTime());
+    //    const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTimeFloat());
     //    const coreVector2 vDirection = coreVector2::Direction(fRotation * (0.5f*PI));
 //
     //    m_NoticeSaveIcon.SetPosition (m_NoticeSave.GetPosition() + coreVector2(vSize.x * -1.0f - 0.005f, 0.0f));
@@ -1054,16 +1064,18 @@ coreBool cMenu::IsPausedWithStep()
 // 
 coreBool cMenu::NeedsCursor()const
 {
-    return (this->GetCurSurface() != SURFACE_EMPTY)  &&
-           (this->GetCurSurface() != SURFACE_SUMMARY || (this->GetCurSurface() == SURFACE_SUMMARY && (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO || m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP))) &&
-           (this->GetCurSurface() != SURFACE_DEFEAT) &&
-           (this->GetCurSurface() != SURFACE_BRIDGE);
+    return ((this->GetCurSurface() != SURFACE_EMPTY)  &&
+            (this->GetCurSurface() != SURFACE_SUMMARY || (this->GetCurSurface() == SURFACE_SUMMARY && (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO || m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP))) &&
+            (this->GetCurSurface() != SURFACE_DEFEAT) &&
+            (this->GetCurSurface() != SURFACE_BRIDGE) &&
+            (this->GetCurSurface() != SURFACE_CREDITS || (this->GetCurSurface() == SURFACE_CREDITS && !STATIC_ISVALID(g_pGame)))) ||
+           (m_MsgBox.IsVisible());
 }
 
 
 // ****************************************************************
 // 
-void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreUint8 iSound, const coreBool bUpdateFrom, const coreBool bUpdateTo)
+void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreUint8 iSound)
 {
     ASSERT(pMenu && fSpeed)
     
@@ -1071,8 +1083,21 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
 
     if(pMenu->ChangeSurface(iNewSurface, 1.0e06f))
     {
-        //iForceA = bUpdateFrom ? pMenu->GetCurSurface() : 0xFFu;
-        //iForceB = bUpdateTo   ? iNewSurface            : 0xFFu;
+        const sMenuInput oSave = g_MenuInput;
+        const coreBool   bSave = Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
+
+        g_MenuInput = {};
+        Core::Input->ClearMouseButton(CORE_INPUT_LEFT);
+
+        Timeless([&]()
+        {
+            coreSet<coreObject2D*>* pObjectSet = pMenu->GetObjectSet(iNewSurface);
+            FOR_EACH(it, *pObjectSet) (*it)->Move();
+        });
+
+        g_MenuInput = oSave;
+        Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, bSave);
+
         iForceA = ((pMenu != this) || iCurSurface != SURFACE_INTRO) ? iCurSurface : 0xFFu;
         iForceB = ((pMenu != this) || iCurSurface != SURFACE_INTRO) ? iNewSurface : 0xFFu;
 
@@ -1383,13 +1408,13 @@ void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const cor
 
 // ****************************************************************
 // 
-void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSound)
+void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSound, const coreBool bStatic)
 {
     ASSERT(pSwitchBox)
 
     const auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEndIndex)
     {
-        const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEndIndex);
+        const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEndIndex) || bStatic;
 
         // 
         const coreFloat fAlpha = bEnd ? 0.25f           : (pArrow->IsFocused() ? 1.0f              : 0.75f);
@@ -1402,7 +1427,7 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSo
     };
 
     // 
-    if(pSwitchBox->GetOverride() < 0) pSwitchBox->SetAlpha(pSwitchBox->GetAlpha() * 0.5f);
+    if((pSwitchBox->GetOverride() < 0) && !bStatic) pSwitchBox->SetAlpha(pSwitchBox->GetAlpha() * 0.5f);
 
     // 
     UpdateArrowFunc(pSwitchBox->GetArrow(0u), pSwitchBox->GetEndless() ? ~0u : 0u);
@@ -1488,7 +1513,7 @@ void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal
     pObject->SetTexOffset(coreVector2(I_TO_F(iIndex % 4u), I_TO_F(iIndex / 4u)) * 0.25f);
 
     // 
-    pObject->SetEnabled((bValid || !bHide || DEFINED(_CORE_DEBUG_)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    pObject->SetEnabled((bValid || !bHide /*|| DEFINED(_CORE_DEBUG_)*/) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     pObject->SetColor3 (coreVector3(1.0f,1.0f,1.0f) * (bValid ? 1.0f : 0.5f));
 }
 
@@ -1569,13 +1594,11 @@ void cMenu::__StartGame()
 
     if(iKind == GAME_KIND_ALL)
     {
-#if defined(_CORE_DEBUG_)   // [RP]
         // 
-        if(!g_bDemoVersion && !DEFINED(_CORE_SWITCH_))
+        if(!g_bDemoVersion)
         {
             g_pReplay->StartRecording();
         }
-#endif
 
         // 
         g_pSave->EditLocalStatsArcade()->iCountStart += 1u;
@@ -1601,7 +1624,7 @@ void cMenu::__EndGame()
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_SCORE)
-            //ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_REPLAY)   // [RP]
+            ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_REPLAY)
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
         }
 

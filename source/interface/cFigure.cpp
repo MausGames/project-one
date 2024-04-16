@@ -66,7 +66,13 @@ void cFigure::Move()
         else
         {
             const coreChar* pcText;
-            if(m_iBase == FIGURE_BASE_KEYBOARD)
+            if(m_iKey == INPUT_KEY_INVALID)
+            {
+                pcText = "-";
+
+                this->SetTexOffset(coreVector2(1.0f,1.0f) - this->GetTexSize());
+            }
+            else if(m_iBase == FIGURE_BASE_KEYBOARD)
             {
                 pcText = (m_iKey <= 0) ? coreData::ToChars(-m_iKey) : SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(m_iKey)));
 
@@ -198,6 +204,11 @@ coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
 // 
 coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 iKey)
 {
+    if(iKey == INPUT_KEY_INVALID)
+    {
+        return FIGURE_INVALID;
+    }
+
     if(iBase == FIGURE_BASE_KEYBOARD)
     {
         if(iKey <= 0)

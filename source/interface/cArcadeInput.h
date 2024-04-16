@@ -22,6 +22,7 @@
 #define ARCADE_GLYPHS        (ARRAY_SIZE(g_acArcadeGlyph))                   // 
 #define ARCADE_COLUMNS       (9u)                                            // 
 #define ARCADE_ROWS          (ARCADE_GLYPHS / ARCADE_COLUMNS)                // 
+#define ARCADE_TEXTS         (1u)                                            // 
 
 #define ARCADE_IS_COMMAND(x) (std::iscntrl(coreUint8(g_acArcadeGlyph[x])))   // 
 #define ARCADE_COMMAND_DEL   (CORE_INPUT_CHAR(BACKSPACE))                    // 
@@ -34,7 +35,8 @@ alignas(ALIGNMENT_CACHE) static constexpr coreChar g_acArcadeGlyph[] =
     'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
     'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0',
     '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '.', '!', '?', '+', '-', '=', '&',
+    '!', '?', '+', '-', '*', '/', '=', '&', '#',
+    '.', ':', ',', ';', '(', ')', ' ',
     ARCADE_COMMAND_DEL,
     ARCADE_COMMAND_END
 };
@@ -52,18 +54,19 @@ private:
     cGuiObject m_aButton[ARCADE_GLYPHS];   // 
     cGuiLabel  m_aGlyph [ARCADE_GLYPHS];   // 
 
-    cGuiLabel  m_Text;                     // 
+    cGuiLabel  m_aText[ARCADE_TEXTS];      // 
     coreString m_sTextValue;               // 
     coreString m_sTextTemplate;            // 
     coreUint8  m_iTextLength;              // 
 
-    coreUint8 m_iCurGlyph;                 // 
-
-    cMenuNavigator m_Navigator;            // 
+    cGuiLabel m_State;                     // 
 
     coreFlow m_fFlashTime;                 // 
 
-    coreBool m_bFinished;                  // 
+    coreUint8 m_iCurGlyph;                 // 
+    coreBool  m_bFinished;                 // 
+
+    cMenuNavigator m_Navigator;            // 
 
 
 public:
@@ -93,6 +96,9 @@ public:
 private:
     // 
     void __MoveCursor(const coreUintW iNewGylph);
+
+    // 
+    void __SetText(const coreChar* pcText);
 
     // 
     static constexpr coreUintW __RetrieveGlyphIndex(const coreChar cGlyph);

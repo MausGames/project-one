@@ -15,6 +15,7 @@
 // TODO 3: X character is off some pixels (font problem)
 // TODO 4: why do I use coreInt32+coreInt32 for the internal callback ?
 // TODO 3: do not react to input for a very short time, when opening a non-mapping msg-box
+// TODO 1: cleanup m_aDownloadText
 
 
 // ****************************************************************
@@ -24,6 +25,7 @@
 #define MSGBOX_TYPE_INFORMATION (1u)                       // 
 #define MSGBOX_TYPE_QUESTION    (2u)                       // 
 #define MSGBOX_TYPE_MAPPING     (3u)                       // 
+#define MSGBOX_TYPE_DOWNLOAD    (4u)                       // 
 
 #define MSGBOX_ANSWER_YES       (1)                        // 
 #define MSGBOX_ANSWER_NO        (2)                        // 
@@ -41,8 +43,14 @@ class cMsgBox final : public coreFullscreen
 private:
     cGuiObject m_Box;                                        // 
     cGuiLabel  m_Msg;                                        // 
+    cGuiButton m_Delete;                                     // 
     cGuiButton m_Yes;                                        // 
     cGuiButton m_No;                                         // 
+
+    cGuiObject     m_aDownloadBar [3];                       // (0 = background, 1 = foreground, 2 = empty) 
+    cGuiLabel      m_aDownloadText[2];                       // (0 = status, 1 = percent)
+    coreFileHandle m_iDownloadHandle;                        // 
+    coreFloat      m_fDownloadValue;                         // 
 
     std::function<void(coreInt32, coreInt32)> m_nCallback;   // 
     coreVector2 m_vCurMouse;                                 // 
@@ -71,6 +79,10 @@ public:
     template <typename F> void ShowMapping    (const coreChar* pcText, const coreUint8 iInputType, F&& nCallback);   // [](const corInt32 iAnswer, const coreInt16 iKey) -> void
 
     // 
+    void StartDownload(const coreFileHandle iHandle);
+    void EndDownload();
+
+    // 
     inline coreBool IsVisible()const {return (m_nCallback != NULL);}
 
     // 
@@ -91,8 +103,9 @@ private:
 template <typename F> void cMsgBox::ShowInformation(const coreChar* pcText, F&& nCallback)
 {
     // 
-    m_Yes.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    m_No .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_Delete.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_Yes   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_No    .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_iMsgType = MSGBOX_TYPE_INFORMATION;
@@ -105,8 +118,9 @@ template <typename F> void cMsgBox::ShowInformation(const coreChar* pcText, F&& 
 template <typename F> void cMsgBox::ShowQuestion(const coreChar* pcText, F&& nCallback)
 {
     // 
-    m_Yes.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    m_No .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_Delete.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_Yes   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_No    .SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
     //m_Navigator.AssignBack(&m_No);
@@ -125,8 +139,9 @@ template <typename F> void cMsgBox::ShowMapping(const coreChar* pcText, const co
     m_iInputType = iInputType;
 
     // 
-    m_Yes.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    m_No .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_Delete.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_Yes   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_No    .SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
     //m_Navigator.AssignBack(NULL);
@@ -142,25 +157,46 @@ template <typename F> void cMsgBox::ShowMapping(const coreChar* pcText, const co
 template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nCallback)
 {
     // 
+    ASSERT(pcText)
     m_Msg.SetText(pcText);
 
     // 
-    m_vBoxSize = coreVector2(0.0f,0.0f);
-    m_Msg.RetrieveDesiredSize([this](const coreVector2 vSize)
+    if(pcText[0])
     {
-        m_vBoxSize = coreVector2(MAX(vSize.x + 0.1f, 0.55f), 0.25f);
-    });
+        m_vBoxSize = coreVector2(0.0f,0.0f);
+        m_Msg.RetrieveDesiredSize([this](const coreVector2 vSize)
+        {
+            m_vBoxSize = coreVector2(MAX(vSize.x + 0.1f, 0.55f), 0.25f);
+        });
+    }
 
     // 
-    if(m_Yes.IsEnabled(CORE_OBJECT_ENABLE_MOVE) && m_No.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    if(m_No.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
-        m_Yes.SetPosition(m_Box.GetPosition() + coreVector2(-0.085f,-0.05f));
-        m_No .SetPosition(m_Box.GetPosition() + coreVector2( 0.085f,-0.05f));
+        m_Delete.SetPosition(m_Box.GetPosition() + coreVector2(-0.085f,-0.045f));
+        m_Yes   .SetPosition(m_Box.GetPosition() + coreVector2(-0.085f,-0.045f));
+        m_No    .SetPosition(m_Box.GetPosition() + coreVector2( 0.085f,-0.045f));
+
+        m_Navigator.BindObject(NULL, NULL, &m_Yes, NULL, &m_No, MENU_TYPE_DEFAULT);
     }
     else
     {
-        m_Yes.SetPosition(m_Box.GetPosition() + coreVector2(0.0f,-0.05f));
-        m_No .SetPosition(m_Box.GetPosition() + coreVector2(0.0f,-0.05f));
+        m_Delete.SetPosition(m_Box.GetPosition() + coreVector2(0.0f,-0.045f));
+        m_Yes   .SetPosition(m_Box.GetPosition() + coreVector2(0.0f,-0.045f));
+        m_No    .SetPosition(m_Box.GetPosition() + coreVector2(0.0f,-0.045f));
+
+        m_Navigator.BindObject(NULL, &m_Yes, &m_Yes, &m_Yes, &m_Yes, MENU_TYPE_DEFAULT);
+    }
+
+    // 
+    const coreObjectEnable eEnabled = (m_iMsgType == MSGBOX_TYPE_DOWNLOAD) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDownloadBar); ++i)
+    {
+        m_aDownloadBar[i].SetEnabled(eEnabled);
+    }
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDownloadText); ++i)
+    {
+        m_aDownloadText[i].SetEnabled(eEnabled);
     }
 
     // 

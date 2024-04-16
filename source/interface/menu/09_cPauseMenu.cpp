@@ -99,7 +99,7 @@ void cPauseMenu::Move()
             else if(m_ExitButton.IsClicked())
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [this](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT"), [this](const coreInt32 iAnswer)
                 {
                     if(iAnswer == MSGBOX_ANSWER_YES)
                         m_iStatus = 104;

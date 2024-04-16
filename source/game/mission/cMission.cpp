@@ -273,6 +273,7 @@ void cMission::SkipStage()
     m_nCollPlayerEnemy  = NULL;
     m_nCollPlayerBullet = NULL;
     m_nCollEnemyBullet  = NULL;
+    m_nCollBulletBullet = NULL;
 
     // 
     m_bDelay = false;
@@ -499,9 +500,13 @@ void cMission::__OpenSegment()
 {
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    const coreUint8 iCurContinue  = g_pGame->GetContinuesCur();
 
     // 
-    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_START(iMissionIndex, m_iCurSegmentIndex));
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_START(iCurContinue, iMissionIndex, m_iCurSegmentIndex));
+
+    // 
+    g_pReplay->ProcessEnvSegment();
 
     // 
     g_pSave->EditLocalStatsSegment()->iCountStart += 1u;
@@ -524,12 +529,13 @@ void cMission::__CloseSegment()
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    const coreUint8 iCurContinue  = g_pGame->GetContinuesCur();
     ASSERT(iMissionIndex      < SAVE_MISSIONS)
     ASSERT(m_iCurSegmentIndex < SAVE_SEGMENTS)
 
     // 
     const coreFloat  fTime        = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
-    const coreFloat  fTimeShifted = g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe();
+    const coreFloat  fTimeShifted = MAX0(g_pGame->GetTimeTable()->GetTimeShiftedSegmentSafe());
     const coreUint32 iBonus       = g_pGame->RaiseValue(cGame::CalcBonusTime(fTimeShifted, m_pfMedalGoal));
 
     // 
@@ -562,7 +568,7 @@ void cMission::__CloseSegment()
     // 
     const coreUint8 iShowMedal     = iMedal;
     const coreUint8 iShowMedalType = MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE;
-    g_pGame->GetInterface()->ShowScore(iBonus, iShowMedal, iShowMedalType);
+    g_pGame->GetInterface()->ShowScore(iBonus, iShowMedal, iShowMedalType, cGame::CalcMedalMiss(fTimeShifted, m_pfMedalGoal));
 
     // 
     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SPECIAL_SOUND_MEDAL(iMedal));
@@ -575,7 +581,7 @@ void cMission::__CloseSegment()
     });
 
     // 
-    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_END(iMissionIndex, m_iCurSegmentIndex));
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_END(iCurContinue, iMissionIndex, m_iCurSegmentIndex));
 
     // 
     SET_BIT(m_iRecordBroken, 0u, (iScoreFull     > g_pSave->EditLocalStatsSegment()->iScoreBest))

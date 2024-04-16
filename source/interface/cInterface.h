@@ -23,6 +23,7 @@
 #define INTERFACE_FRAGMENTS               (FRAGMENTS)      // 
 #define INTERFACE_BADGES                  (BADGES  - 4u)   // 
 #define INTERFACE_HELPERS                 (HELPERS - 1u)   // 
+#define INTERFACE_MARKERS                 (6u)             // 
 #define INTERFACE_BOSS_DELAY              (1.5f)           // 
 #define INTERFACE_DIALOGS                 (2u)             // 
 #define INTERFACE_INVALID_START           (-3600.0f)       // 
@@ -87,6 +88,7 @@ private:
     cGuiObject m_aBossHealthBar[3];                 // boss health bar (0 = background, 1 = foreground, 2 = empty)
     cGuiLabel  m_BossHealthValue;                   // boss health value
     cGuiLabel  m_aBossTime[3];                      // boss time (0 = seconds, 1 = deci-seconds, 2 = shift)
+    cGuiObject m_aaBossMarker[INTERFACE_MARKERS][2];   //            
     coreFlow   m_fBossSpin;                         // 
 
     cGuiLabel m_aWaveTime[3];                       // wave time (0 = seconds, 1 = deci-seconds, 2 = shift)
@@ -104,6 +106,9 @@ private:
     coreFlow   m_fGoalBump;                         // 
     coreUint8  m_iGoalOld;                          // 
 
+    cGuiObject m_MissMedal;                         // 
+    cGuiLabel  m_MissTime;                          // 
+
     cGuiObject m_aHelper     [INTERFACE_HELPERS];   // 
     cGuiObject m_aHelperWave [INTERFACE_HELPERS];   // 
     coreFlow   m_afHelperBump[INTERFACE_HELPERS];   // 
@@ -118,7 +123,6 @@ private:
     cGuiLabel  m_TrophyMark;                        // 
     cGuiObject m_TrophyWave;                        // 
     coreFlow   m_fTrophyBump;                       // 
-    coreUint8  m_iTrophySegment;                    // 
     coreBool   m_bTrophyState;                      // 
 
     cGuiObject m_BannerBar;                         // banner background
@@ -140,6 +144,8 @@ private:
 
     cGuiLabel m_aDialogText[INTERFACE_DIALOGS];     // 
 
+    cGuiLabel m_ReplayWatermark;                    // 
+
     cGuiObject m_aFragment[INTERFACE_FRAGMENTS];    // 
     cGuiObject m_aFragmentTable[2];                 // 
     cGuiObject m_FragmentShadow;                    // 
@@ -156,20 +162,22 @@ private:
     coreFlow m_fAnimation;                          // 
     coreFlow m_fRotation;                           // 
     coreFlow m_fShake;                              // 
+    coreFlow m_fMove;                               // 
 
-    coreBool  m_bVisible;                            // visibility status
-    coreFloat m_fVisibleSpeed;                       // 
-    coreFlow  m_fAlphaAll;                           // overall alpha value (except for banner)
-    coreFlow  m_fAlphaBoss;                          // boss alpha value
-    coreFlow  m_fAlphaWave;                          // 
-    coreFlow  m_fAlphaSegment;                       // 
-    coreFlow  m_fAlphaTurf;                          // 
-    coreFlow  m_fAlphaGoal;                          // 
-    coreFlow  m_fAlphaBadge;                         // 
-    coreFlow  m_fAlphaFragment;                      // 
+    coreBool  m_bVisible;                           // visibility status
+    coreFloat m_fVisibleSpeed;                      // 
+    coreFlow  m_fAlphaAll;                          // overall alpha value (except for banner)
+    coreFlow  m_fAlphaBoss;                         // boss alpha value
+    coreFlow  m_fAlphaWave;                         // 
+    coreFlow  m_fAlphaSegment;                      // 
+    coreFlow  m_fAlphaTurf;                         // 
+    coreFlow  m_fAlphaGoal;                         // 
+    coreFlow  m_fAlphaMiss;                         // 
+    coreFlow  m_fAlphaBadge;                        // 
+    coreFlow  m_fAlphaFragment;                     // 
 
-    coreUint8 m_iFakeEnd;                            // 
-    coreBool  m_bBossChange;                         // 
+    coreUint8 m_iFakeEnd;                           // 
+    coreBool  m_bBossChange;                        // 
     
     coreMap<const coreObject2D*, coreFlow> m_afCoverMap;   // 
 
@@ -190,8 +198,8 @@ public:
     void ShowBoss   (const coreChar*  pcMain, const coreChar* pcSub, const coreChar* pcExtra);
     void ShowBoss   (const cBoss*     pBoss, const coreBool bSilent = false);
     void ShowWave   (const coreChar*  pcName);
-    void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);
-    void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);
+    void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType, const coreFloat fGoalMiss);
+    void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType, const coreFloat fGoalMiss);
     void ShowAlert  ();
     void OverrideBanner(const coreChar* pcMain, const coreUint8 iMedal, const coreUint8 iMedalType);
     coreBool IsBannerActive()const;
@@ -233,6 +241,8 @@ public:
 
     // 
     inline cGuiLabel* GetDialogText(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_DIALOGS) return &m_aDialogText[iIndex];}
+    
+    inline const coreUint8& GetFakeEnd()const {return m_iFakeEnd;}
 
 
 private:

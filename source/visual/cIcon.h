@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_ICON_H_
 #define _P1_GUARD_ICON_H_
 
-// TODO 1: optimize this, it uses quite a lot of CPU (OpenGL), even in release (e.g. separat list for outline and/or no batch for normal rendering) (eigener super-dicker outline shader)
+// TODO 1: optimize this (maybe remove batch-list), it uses quite a lot of CPU (OpenGL), even in release (e.g. separat list for outline and/or no batch for normal rendering) (eigener super-dicker outline shader)
 
 
 // ****************************************************************

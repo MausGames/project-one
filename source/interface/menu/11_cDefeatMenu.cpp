@@ -250,8 +250,9 @@ void cDefeatMenu::Move()
         for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i) m_aContinueImage[i].SetAlpha(m_aContinueImage[i].GetAlpha() * fVisibility);
     }
     
+    const coreFloat fRotation = Core::System->GetTotalTimeFloat(2.0f*PI);
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
-        m_aContinueImage[i].SetDirection(coreVector2::Direction(coreFloat(Core::System->GetTotalTime()) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_DEFEAT_CONTINUES))));
+        m_aContinueImage[i].SetDirection(coreVector2::Direction(fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_DEFEAT_CONTINUES))));
 
     // 
     g_pPostProcessing->SetSaturationAll(MIN1(m_fOutroTimer * MENU_DEFEAT_BANNER_SPEED));

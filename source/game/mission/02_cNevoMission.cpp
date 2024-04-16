@@ -41,7 +41,7 @@ cNevoMission::cNevoMission()noexcept
 , m_bOverdraw       (false)
 , m_fStoryRangeAnim (0.0f)
 , m_fAnimation      (0.0f)
-, m_bStory          (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_NEVO))
+, m_bStory          (!HAS_BIT_EX(REPLAY_WRAP_PROGRESS_STATE, STATE_STORY_NEVO) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 {
     // 
     m_apBoss[0] = &m_Leviathan;
@@ -1282,7 +1282,7 @@ void cNevoMission::__MoveOwnAfter()
 
             // 
             const coreVector2 vDiff = pPlayer->GetOldPos() - pContainer->GetPosition().xy();
-            pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
+            pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);   // TODO 1: vermutlich broken, sollte mit korrekter kollision ersetzt werden
 
             // 
             g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE * 0.8f);
@@ -1370,6 +1370,7 @@ void cNevoMission::__MoveOwnAfter()
             if(pBulletEnemy->GetID() != cGrowBullet::ID) return;
             if(!bFirstHit || !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
+            // TODO 1: [TESLA]
             const coreBool  bBadge   = (pBulletEnemy->GetDamage() >  5);
             const coreBool  bSpecial = (pBulletEnemy->GetDamage() == 1) && (pBulletPlayer->GetID() == cPulseBullet::ID);
             const coreFloat fPower   = I_TO_F(pBulletPlayer->GetDamage()) * RCP(I_TO_F(g_pGame->GetNumPlayers())) * (bBadge ? 0.5f : 1.0f) * (bSpecial ? 1.3f : 1.0f);

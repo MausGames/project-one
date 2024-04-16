@@ -25,7 +25,8 @@
 #define TABLE_TIME_TO_UINT(x)   (F_TO_UI  (coreDouble(x) * 1000.0))
 #define TABLE_TIME_TO_FLOAT(x)  (coreFloat(coreDouble(x) / 1000.0))
 
-#define __TABLE_TIME_CONVERT(x) (coreFloat(coreDouble(I_TO_F(x)) * m_dFrameTime))
+#define __TABLE_TIME_CONVERT_LOGICAL(x)  (coreFloat(coreDouble(I_TO_F(x)) * m_dLogicalTime))
+#define __TABLE_TIME_CONVERT_PHYSICAL(x) (coreFloat(coreDouble(I_TO_F(x)) * m_dPhysicalTime))
 
 
 // ****************************************************************
@@ -232,7 +233,8 @@ private:
     coreProtect<coreUint16> m_aiShiftBadMission  [TABLE_MISSIONS];                   // 
     coreProtect<coreUint16> m_aaiShiftBadSegment [TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
-    coreDouble m_dFrameTime;                                                         // 
+    coreDouble m_dLogicalTime;                                                       // 
+    coreDouble m_dPhysicalTime;                                                      // 
 
 
 public:
@@ -276,10 +278,10 @@ public:
     inline coreUint32 GetTimeTotalRaw      ()const                                                             {return m_iTimeTotal;}
     inline coreUint32 GetTimeMissionRaw    (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiTimeMission [iMissionIndex];}
     inline coreUint32 GetTimeSegmentRaw    (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiTimeSegment[iMissionIndex][iSegmentIndex];}
-    inline coreFloat  GetTimeEvent         ()const                                                             {return __TABLE_TIME_CONVERT(this->GetTimeEventRaw  ());}
-    inline coreFloat  GetTimeTotal         ()const                                                             {return __TABLE_TIME_CONVERT(this->GetTimeTotalRaw  ());}
-    inline coreFloat  GetTimeMission       (const coreUintW iMissionIndex)const                                {return __TABLE_TIME_CONVERT(this->GetTimeMissionRaw(iMissionIndex));}
-    inline coreFloat  GetTimeSegment       (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {return __TABLE_TIME_CONVERT(this->GetTimeSegmentRaw(iMissionIndex, iSegmentIndex));}
+    inline coreFloat  GetTimeEvent         ()const                                                             {return __TABLE_TIME_CONVERT_PHYSICAL(this->GetTimeEventRaw  ());}
+    inline coreFloat  GetTimeTotal         ()const                                                             {return __TABLE_TIME_CONVERT_LOGICAL (this->GetTimeTotalRaw  ());}
+    inline coreFloat  GetTimeMission       (const coreUintW iMissionIndex)const                                {return __TABLE_TIME_CONVERT_LOGICAL (this->GetTimeMissionRaw(iMissionIndex));}
+    inline coreFloat  GetTimeSegment       (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {return __TABLE_TIME_CONVERT_LOGICAL (this->GetTimeSegmentRaw(iMissionIndex, iSegmentIndex));}
     inline coreUint16 GetShiftGoodMission  (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiShiftGoodMission [iMissionIndex];}
     inline coreUint16 GetShiftGoodSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex];}
     inline coreUint16 GetShiftBadMission   (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiShiftBadMission  [iMissionIndex];}

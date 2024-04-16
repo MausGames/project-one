@@ -35,6 +35,7 @@ private:
     coreFloat m_fDragValue;   // 
 
     coreFlow m_fSpeed;        // 
+    coreBool m_bInverted;     // 
 
     coreTimer m_Automatic;    // 
 
@@ -52,8 +53,12 @@ public:
     void ScrollToObject(const coreObject2D* pObject, const coreBool bNow);
 
     // 
+    inline coreBool IsBarFocused()const {return (m_aArrow[0].IsFocused() || m_aArrow[1].IsFocused() || m_Cursor.IsFocused());}
+
+    // 
     inline void SetCurOffset(const coreFloat fCurOffset) {m_fCurOffset = fCurOffset; this->SetOffset(coreVector2(0.0f, m_fCurOffset));}
     inline void SetMaxOffset(const coreFloat fMaxOffset) {m_fMaxOffset = fMaxOffset;}
+    inline void SetInverted (const coreBool  bInverted)  {m_bInverted  = bInverted;}
 };
 
 

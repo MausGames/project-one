@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.2.7 (https://www.maus-games.at)                             |//
+//| Project One v1.3.0 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -39,46 +39,35 @@
 // TODO 3: reduce number of shader-lights with static_assert, change something like that into static config
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
 // TODO 3: make sure everything with at least 4 instances uses batch-lists
-// TODO 4: replace / with RCP where possible
 // TODO 4: ENABLE_BITWISE when ?
 // TODO 2: reshape causes some batch-list to be initialized twice
 // TODO 5: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
 // TODO 3: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
-// TODO 1: indicator when controls are enabled again (blinking und peeping sound)
 // TODO 5: convert bigger sound-effects (ambient) to music ?
-// TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
-// TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
-// TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types, blender decimate tool factor ~0.1)
 // TODO 1: all sounds need IsUsable checks
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
 // TODO 3: for uneven resolutions, some objects need g_vGameResolution.AspectRatio() (on both axes, with max(1.0f)): menu transition, postprocessing
 // TODO 4: change arrays of structs to structs of arrays where possible (also in engine)
 // TODO 2: prevent shaking of center-aligned rectified animated text (did I mean something like seconds?)
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
-// TODO 2: fix broken pw-database printing on MacOS (maybe put TODO into engine) (maybe related to geteuid<>getuid) (# replaced geteuid with getuid, which seems to be correct'er, just need to check if that was the issue on macos)
-// TODO 1: look if enemies with health 10 should be changed to 4
-// TODO 1: make frequency rounding corrections: boss ticker, player weapon
 // TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
-// TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
-// TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 // TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
 // TODO 3: sphere model kann ungenau sein (visual), vor allem bei der area-bubble bei P1 magenta phase
 // TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
 // TODO 1: [MF] [HIGH] [ULTRA] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
-// TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select (shoot speed, shoot damage, move speed, score multiplier, player size, player bullet size, enemy size, enemy bullet size, enemy bullet/attack speed, enemy speed, side-modifier (more damage to the right), extra/minus life, extra/minus shield, 
-// TODO 1: [MF] [HIGH] [ULTRA] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
-// TODO 3: GetCollisionRange().xy().Length() inefficient in some places (bullets), hab aber teils wieder auf GetCollisionRadius() geswechselt, weils richtiger is
+// TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select (shoot speed, shoot damage, move speed, score multiplier, player size, player bullet size, enemy size, enemy bullet size, enemy bullet/attack speed, enemy speed, side-modifier (more damage to the right), extra/minus life, extra/minus shield, ...)
+// TODO 4: cleanup badge difficulty and index mixup
+// TODO 1: design sweep über alle stages, boss und P1 [RP]
 
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
 // TODO 5: plant movement
-// TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (maybe with separation of active-list), eine liste für shadow
+// TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (HANDLE EXHAUST) (maybe with separation of active-list), eine liste für shadow
 // TODO 3: improve big boss explosion: Sakurai https://www.youtube.com/watch?v=ZDopYzDX-Jg   https://youtu.be/D-4RsUI3ZNI?t=246   energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
-// TODO 1: [MF] fixup update frequency (allow less than 60?, how to communicate increases? (on low speed))
 // TODO 1: [MF] praise the player ! https://www.youtube.com/watch?v=fryDyXROp8A
 
 // Public Feedback and Suggestions:
@@ -89,7 +78,7 @@
 // Merged List:
 // TODO 3: add more details to cloud background (transparent enemy ships far in the back ? like Ikagura and RSG)
 // TODO 3: einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
-// TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?)
+// TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?) multiplicative blending
 
 // Cleanup Task List:
 // TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet
@@ -100,6 +89,7 @@
 // ****************************************************************
 // engine headers
 #include "Core.h"
+#include <numeric>   // std::accumulate
 
 #if defined(_CORE_MSVC_)
     #pragma warning(disable : 4189)   // local variable is initialized but not referenced
@@ -113,9 +103,6 @@
 #endif
 
 #if !defined(_CORE_DEBUG_)
-    #if defined(_CORE_SSE_) || defined(_CORE_NEON_)
-        #pragma message("Warning: Precision reduced!")
-    #endif
     #if defined(_P1_DEBUG_INPUT_)
         #pragma message("Warning: Debug input enabled!")
     #endif
@@ -238,6 +225,7 @@
 #define SHADER_DIRECT        "#define _P1_DIRECT_"      " (1) \n"        // outline, energy, distortion, menu_border
 #define SHADER_WAVE          "#define _P1_WAVE_"        " (1) \n"        // object
 #define SHADER_GREY          "#define _P1_GREY_"        " (1) \n"        // vignette
+#define SHADER_VIGNETTE      "#define _P1_VIGNETTE_"    " (1) \n"        // grey
 #define SHADER_ROTATED       "#define _P1_ROTATED_"     " (1) \n"        // energy
 
 
@@ -256,7 +244,8 @@ constexpr sVersion g_aVersion[] =
     {"1.2.4", 5u},
     {"1.2.5", 6u},
     {"1.2.6", 7u},
-    {"1.2.7", 8u}
+    {"1.2.7", 8u},
+    {"1.3.0", 9u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 
@@ -357,7 +346,7 @@ class cMission;
 // ****************************************************************
 // game headers
 extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 
-extern coreFloat       g_fGameRate;         // 
+extern coreDouble      g_adGameTime[2];     // 
 extern coreVector2     g_vHudDirection;     // 
 extern coreBool        g_bTiltMode;         // 
 extern coreFloat       g_fShiftMode;        // 
@@ -417,6 +406,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "interface/cMsgBox.h"
 #include "interface/cScrollBox.h"
 #include "interface/cTooltip.h"
+#include "interface/cMusicBox.h"
 #include "interface/menu/cMenu.h"
 #include "game/cTable.h"
 #include "game/cBullet.h"

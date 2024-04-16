@@ -28,6 +28,9 @@ void FragmentMain()
 
 #endif
 
+    //float fFactor = 200.0;
+    //vec2 v2TexCoord2 = round(v2TexCoord * fFactor) / fFactor; // [PX]
+
 #if defined(_P1_DISTORTION_)
 
     // lookup distortion map
@@ -47,9 +50,13 @@ void FragmentMain()
 #endif
 
     // lookup textures
-    vec4 v4Foreground  = coreTextureBase2D(0, v2TexCoord);
+    vec4 v4Foreground  = coreTextureBase2D(0, v2TexCoord); // [PX]
     vec3 v3Environment = coreTextureBase2D(1, v2TexCoord).rgb;
     vec3 v3Glow        = coreTextureBase2D(2, v2TexCoord).rgb;   // # low-res
+    
+    
+   
+  //  v4Foreground.rgb *= mix(1.05, 0.85, max(fract(v2TexCoord.x * fFactor + 0.5), 1.0 - fract(v2TexCoord.y * fFactor + 0.5))); // [PX]
 
 #if !defined(_P1_GLOW_)
 

@@ -26,7 +26,7 @@
 #define SAVE_FILE_FOLDER    ""                       // 
 #define SAVE_FILE_EXTENSION "p1sv"                   // 
 #define SAVE_FILE_MAGIC     (UINT_LITERAL("P1SV"))   // 
-#define SAVE_FILE_VERSION   (0x00000004u)            //    // [RP]
+#define SAVE_FILE_VERSION   (0x00000005u)            // 
 
 #define SAVE_NAME_LENGTH    (32u)                    // 
 #define SAVE_PLAYERS        (PLAYERS)                // 
@@ -62,6 +62,7 @@ enum eSaveUnlock : coreUint8   // # never change bits after release
     UNLOCK_MIRRORMODE   = 0u,
     UNLOCK_GAMESPEEDUP  = 1u,
     UNLOCK_POWERSHIELD  = 2u,
+    UNLOCK_MUSICBOX     = 3u,
     UNLOCK_WEAPON_PULSE = 10u,
     UNLOCK_WEAPON_WAVE  = 11u,
     UNLOCK_WEAPON_TESLA = 12u,
@@ -75,6 +76,8 @@ enum eSaveNew : coreUint8   // # never change bits after release
     NEW_MAIN_REPLAY       = 4u,
     NEW_MAIN_EXTRA        = 1u,
     NEW_MAIN_CONFIG       = 2u,
+    NEW_EXTRA_OTHER       = 30u,
+    NEW_EXTRA_MUSICBOX    = 31u,
     NEW_CONFIG_GAME       = 10u,
     NEW_CONFIG_MIRRORMODE = 11u,
     NEW_ARMORY_GAMESPEED  = 20u,
@@ -95,7 +98,8 @@ enum eSaveState : coreUint8   // # never change bits after release
     STATE_STORY_ATER    = 8u,
     STATE_STORY_BONUS1  = 9u,
     STATE_STORY_BONUS2  = 10u,
-    STATE_DEMO_IMPORTED = 11u
+    STATE_DEMO_IMPORTED = 11u,
+    STATE_FULL_ACCESS   = 12u
 };
 
 
@@ -231,7 +235,9 @@ public:
 
         coreUint64   iSaveTimestamp;   // 
         coreUint32   iSaveCount;       // 
-        coreUint32   iReplayCount;     // 
+
+        coreUint16   iReplayFileNum;   // 
+        coreUint16   iReplayDataNum;   // 
 
         sGlobalStats oGlobalStats;     // 
         sLocalStats  aaaLocalStatsArcade   [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES];                                 // 
@@ -255,19 +261,28 @@ public:
         sScoreData oData;
     };
 
+    // 
+    struct sReplayPack final
+    {
+        coreUint16 iID;
+        coreUint32 iSize;
+        coreByte*  pData;
+    };
+
 
 private:
-    sHeader    m_Header;                   // 
-    coreString m_sPath;                    // 
-    coreString m_sPathDemo;                // 
+    sHeader    m_Header;                     // 
+    coreString m_sPath;                      // 
+    coreString m_sPathDemo;                  // 
 
-    coreUint32 m_iToken;                   // 
-    coreBool   m_bIgnore;                  // 
+    coreUint32 m_iToken;                     // 
+    coreBool   m_bIgnore;                    // 
 
-    coreSet<sScorePack*> m_apScoreQueue;   // 
+    coreSet<sScorePack*>  m_apScoreQueue;    // 
+    coreSet<sReplayPack*> m_apReplayQueue;   // 
 
-    coreAtomic<eSaveStatus> m_eStatus;     // 
-    coreAtomic<coreUint8>   m_iActive;     // 
+    coreAtomic<eSaveStatus> m_eStatus;       // 
+    coreAtomic<coreUint8>   m_iActive;       // 
 
 
 public:
@@ -300,7 +315,8 @@ public:
     coreBool CanImportDemo()const;
 
     // 
-    coreUint32 NextReplayNum();
+    coreUint16 NextReplayFileNum();
+    coreUint16 NextReplayDataNum();
 
     // 
     inline void ResetStatus() {m_eStatus = SAVE_STATUS_OK;}
@@ -310,7 +326,8 @@ public:
     inline void SetIgnore(const coreBool bIgnore) {m_bIgnore = bIgnore;}
 
     // 
-    inline coreSet<sScorePack*>* GetScoreQueue() {return &m_apScoreQueue;}
+    inline coreSet<sScorePack*>*  GetScoreQueue () {return &m_apScoreQueue;}
+    inline coreSet<sReplayPack*>* GetReplayQueue() {return &m_apReplayQueue;}
 
     // 
     inline const sHeader& GetHeader()const {return m_Header;}
@@ -320,13 +337,17 @@ public:
 
 private:
     // 
-    static coreBool __LoadHeader   (sHeader* OUTPUT pHeader, coreSet<sScorePack*>* OUTPUT pQueue, const coreChar* pcPath);
+    static coreBool __LoadHeader   (sHeader* OUTPUT pHeader, coreSet<sScorePack*>* OUTPUT pScoreQueue, coreSet<sReplayPack*>* OUTPUT pReplayQueue, const coreChar* pcPath);
     static void     __UpgradeHeader(sHeader* OUTPUT pHeader);
     static void     __CheckHeader  (sHeader* OUTPUT pHeader);
 
     // 
-    static void     __CreateQueueData (const coreSet<sScorePack*>&  apQueue, coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize);
-    static coreBool __RestoreQueueData(coreSet<sScorePack*>* OUTPUT pQueue,  const coreByte*   pData,  const coreUint32   iSize);
+    static void     __CreateScoreQueueData (const coreSet<sScorePack*>&  apQueue, coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize);
+    static coreBool __RestoreScoreQueueData(coreSet<sScorePack*>* OUTPUT pQueue,  const coreByte*   pData,  const coreUint32   iSize);
+
+    // 
+    static void     __CreateReplayQueueData (const coreSet<sReplayPack*>&  apQueue, coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize);
+    static coreBool __RestoreReplayQueueData(coreSet<sReplayPack*>* OUTPUT pQueue,  const coreByte*   pData,  const coreUint32   iSize);
 
     // 
     static coreUint64 __GenerateChecksum(const sHeader& oHeader);

@@ -10,16 +10,12 @@
 #ifndef _P1_GUARD_PLAYER_H_
 #define _P1_GUARD_PLAYER_H_
 
-// TODO 3: add all weapons to player directly in class
+// TODO 4: add constant for default direction (intro, outro)
 // TODO 3: all parts of player-rendering should be batched for multiplayer
 // TODO 3: render wind, bubble, etc. in group for multiplayer
-// TODO 1: check which operations have to be done outside of dead-check
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
-// TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
-// TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 // TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
-// TODO 3: m_vOldDir (direction) sollte bei resurrection/repair zurückgesetzt werden
 
 
 // ****************************************************************
@@ -54,6 +50,7 @@
 #define PLAYER_NO_IGNORE (-100.0f)   // 
 
 #define PLAYER_ACTION_SHOOT(i,j)   ((i) * WEAPON_MODES + (j))
+#define PLAYER_ACTION_SHOOT_0      (PLAYER_ACTION_SHOOT(0u, 0u))
 #define PLAYER_ACTION_TURN_LEFT    (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
 #define PLAYER_ACTION_TURN_RIGHT   (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
 #define PLAYER_ACTION_ROLL         (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
@@ -68,7 +65,7 @@
 
 //STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
 
-enum ePlayerStatus : coreUint16
+enum ePlayerStatus : coreUint32
 {
     PLAYER_STATUS_DEAD           = 0x0001u,   // completely removed from the game
     PLAYER_STATUS_SHIELDED       = 0x0002u,   // 
@@ -82,11 +79,13 @@ enum ePlayerStatus : coreUint16
     PLAYER_STATUS_ARRANGE        = 0x0200u,   // 
     PLAYER_STATUS_WEAK_BACK      = 0x0400u,   // 
     PLAYER_STATUS_REPAIRED       = 0x0800u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x1000u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x2000u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x4000u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x8000u,   // 
-    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
+    PLAYER_STATUS_RAPID_FIRE     = 0x1000u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x2000u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x4000u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x8000u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x10000u,   // 
+    PLAYER_STATUS_NO_INPUT_RAPID = 0x20000u,   // 
+    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN | PLAYER_STATUS_NO_INPUT_RAPID
 };
 
 enum ePlayerTest : coreUint8
@@ -124,7 +123,6 @@ private:
     coreFloat   m_fScale;                                     // 
     coreFloat   m_fThrust;                                    // 
     coreFloat   m_fTilt;                                      // 
-    coreBool    m_bRainbow;                                   // 
 
     coreProtect<coreFloat> m_fMoveSpeed;                      // 
     coreProtect<coreFloat> m_fShootSpeed;                     // 
@@ -166,6 +164,7 @@ private:
     coreFlow    m_fArrowValue;                                // 
     coreFlow    m_fBubbleValue;                               // 
     coreFlow    m_fCircleValue;                               // 
+    coreFlow    m_fFlashValue;                                // 
     coreFlow    m_fBoost;                                     // 
     coreUint8   m_iLastMove;                                  // 
     coreUint8   m_iLastHold;                                  // 
@@ -178,6 +177,7 @@ private:
     coreObject3D m_Bubble;                                    // 
     coreObject3D m_aShield[2];                                // 
     coreObject3D m_Circle;                                    // 
+    coreObject3D m_Flash;                                     // 
     coreObject3D m_Exhaust;                                   // 
 
     coreMap<const coreObject3D*, coreUint32> m_aiCollision;   // 
@@ -218,8 +218,9 @@ public:
     void Kill     (const coreBool bAnimated);
 
     // 
-    void ShowArrow(const coreUint8 iType);
+    void ShowArrow (const coreUint8 iType);
     void ShowCircle();
+    void ShowFlash (const coreUint8 iType);
 
     // 
     void StartRolling (const coreVector2 vDirection);
@@ -245,7 +246,6 @@ public:
     inline coreBool IsFeeling    ()const {return (m_fFeelTime   >  PLAYER_NO_FEEL);}
     inline coreBool IsIgnoring   ()const {return (m_fIgnoreTime >  PLAYER_NO_IGNORE);}
     inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
-    inline coreBool IsRainbow    ()const {return (m_bRainbow);}
     inline coreBool IsEnemyLook  ()const {return (m_apWeapon[0]->GetID() == cEnemyWeapon::ID);}
 
     // 
@@ -261,8 +261,13 @@ public:
     void DisableShield ();
     void EnableCircle  ();
     void DisableCircle ();
+    void EnableFlash   ();
+    void DisableFlash  ();
     void EnableExhaust ();
     void DisableExhaust();
+
+    // 
+    void OverrideColor(const coreVector3 vEnergyColor, const coreVector3 vMenuColor, const coreVector3 vLedColor);
 
     // 
     inline const coreModelPtr& GetRangeModel ()const {return m_Range.GetModel();}
@@ -277,7 +282,6 @@ public:
 
     // 
     inline void ApplyForce     (const coreVector2 vForce) {m_vForce += vForce; this->SetPosition(coreVector3(m_vOldPos, 0.0f));}
-    inline void ApplyForceRaw  (const coreVector2 vForce) {m_vForce += vForce;}
     inline void ApplyForceTimed(const coreVector2 vForce) {m_vForce += vForce * TIME;}
 
     // 
@@ -296,7 +300,6 @@ public:
     inline void SetScale       (const coreFloat   fScale)        {m_fScale      = fScale;}
     inline void SetThrust      (const coreFloat   fThrust)       {m_fThrust     = fThrust;}
     inline void SetTilt        (const coreFloat   fTilt)         {m_fTilt       = fTilt;}
-    inline void SetRainbow     (const coreBool    bRainbow)      {m_bRainbow    = bRainbow;}
     inline void SetMoveSpeed   (const coreFloat   fMoveSpeed)    {m_fMoveSpeed  = fMoveSpeed;}
     inline void SetShootSpeed  (const coreFloat   fShootSpeed)   {m_fShootSpeed = fShootSpeed;}
     inline void SetAnimSpeed   (const coreFloat   fAnimSpeed)    {m_fAnimSpeed  = fAnimSpeed;}

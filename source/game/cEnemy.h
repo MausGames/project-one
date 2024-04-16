@@ -12,14 +12,10 @@
 
 // TODO 4: manager: Find, ForEach, ForEachAll -> typed
 // TODO 3: implement own enemy-types for custom-enemies which would require instancing
-// TODO 3: add score-value to cEnemy class, either for base, or for extra score
-// TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 // TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
 // TODO 4: move parent-child system to custom-enemy or boss-enemy, if not elsewhere required
 // TODO 3: scripted enemy rotation should use DefaultRotate/DefaultOrientate instead of manually using coreVector2::Direction + SetDirection/SetOrientation, to utilize the rota cache
 // TODO 1: completely remove PlayerSide aiming (for coop)
-// TODO 3: normale gruppen-gegner mit TOP haben doppelte outline (einmal im batch, und einmal durch TOP)
-// TODO 3: warrior model eiert etwas beim drehen um die Z-achse (siehe secret enemies bei mimic-wave)
 
 
 // ****************************************************************
@@ -39,13 +35,13 @@ enum eEnemyStatus : coreUint32
     ENEMY_STATUS_BOTTOM       = 0x0080u,   // 
     ENEMY_STATUS_TOP          = 0x0100u,   //       
     ENEMY_STATUS_INVINCIBLE   = 0x0200u,   // 
-    ENEMY_STATUS_DAMAGING     = 0x0400u,   // 
+    ENEMY_STATUS_DAMAGING     = 0x0400u,   // TODO 1: not required anymore ? + damaging effect    maybe keep for marking but remove SECRET
     ENEMY_STATUS_IMMORTAL     = 0x0800u,   // 
     ENEMY_STATUS_GHOST_PLAYER = 0x1000u,   // 
     ENEMY_STATUS_GHOST_BULLET = 0x2000u,   // 
     ENEMY_STATUS_GHOST        = ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_GHOST_BULLET,
     ENEMY_STATUS_HIDDEN       = 0x4000u,   // 
-    ENEMY_STATUS_WORTHLESS    = 0x8000u,   // TODO 1: should be changed to explicit score value in configure (boss?) + setter ?
+    ENEMY_STATUS_WORTHLESS    = 0x8000u,   // 
     
     ENEMY_STATUS_LIGHT         = 0x00010000u,
     ENEMY_STATUS_FLAT          = 0x00020000u,
@@ -75,7 +71,6 @@ protected:
 
     coreUint8 m_iLastAttacker;     // 
     coreBool  m_bWasDamaged;       // 
-    coreUint16 m_iScore;
     coreInt16  m_iExtraDamage;
     coreInt32 m_iDamageForwarded;   // 
 
@@ -91,7 +86,7 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure(const coreInt32 iHealth, const coreUint16 iScore, const coreVector3 vColor, const coreBool bInverted = false, const coreBool bIgnored = false, const coreBool bWhite = false);
+    void Configure(const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted = false, const coreBool bIgnored = false, const coreBool bWhite = false);
 
     // render and move the enemy
     void Render()final;
@@ -131,8 +126,9 @@ public:
     inline void ResetDamageForwarded() {m_iDamageForwarded = 0;}
 
     // 
-    inline coreBool IsParent()const {return !m_apMember.empty() && !HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
-    inline coreBool IsChild ()const {return !m_apMember.empty() &&  HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsParent ()const {return !m_apMember.empty() && !HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsChild  ()const {return !m_apMember.empty() &&  HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline cEnemy*  GetParent()      {ASSERT(this->IsChild()) return m_apMember.front();}
 
     //
     void ChangeToBottom();
@@ -152,12 +148,10 @@ public:
     coreVector2 AimAtPlayerDual     (const coreUintW iIndex)const;
 
     // get object properties
-    inline  const coreFloat&  GetLifeTime      ()const {return m_fLifeTime;}
-    inline  const coreFloat&  GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
-    inline  const coreUint16& GetScore         ()const {return m_iScore;}
-    inline        coreUint16  GetRealScore     ()const {return m_iScore ? m_iScore : (10u * m_iMaxHealth);}
-    virtual eSoundEffect      GetExplosionSound()const {return SOUND_ENEMY_EXPLOSION_09;}
-    virtual coreFloat         GetExplosionPitch()const {return 1.0f;}
+    inline  const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
+    inline  const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
+    virtual eSoundEffect     GetExplosionSound()const {return SOUND_ENEMY_EXPLOSION_09;}
+    virtual coreFloat        GetExplosionPitch()const {return 1.0f;}
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}

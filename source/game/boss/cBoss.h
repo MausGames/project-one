@@ -19,19 +19,20 @@
 // TODO 5: boss0102, separate emitters to three objects, to make them blue
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
-// TODO 1: [MF] [HIGH] check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
 // TODO 4: remove counters and vectors (first remove usage)
 // TODO 1: remove leviathan demo code + in-mission
 
 
 // ****************************************************************
 // boss definitions
-#define BOSS_TIMERS   (8u)    // 
-#define BOSS_COUNTERS (16u)   // 
-#define BOSS_VECTORS  (12u)   // 
+#define BOSS_TIMERS    (8u)                      // 
+#define BOSS_COUNTERS  (16u)                     // 
+#define BOSS_VECTORS   (12u)                     // 
 
-#define BOSS_PLAYERS  (PLAYERS)        // 
-#define BOSS_HELPERS  (HELPERS - 1u)   // 
+#define BOSS_PLAYERS   (PLAYERS)                 // 
+#define BOSS_HELPERS   (HELPERS - 1u)            // 
+
+#define BOSS_HEALTH(x) (this->_RoundHealth(x))   // 
 
 
 // ****************************************************************
@@ -133,7 +134,7 @@
 #define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)   // NOLINT
 #define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b, LERP_LINEAR)
 
-#define PHASE_HEALTH_GOAL(...)          {static constexpr coreInt32 A[] = __VA_ARGS__; m_piHealthGoal = A; /*for(coreUintW i = 0u; i < ARRAY_SIZE(A) - 1u; ++i) ASSERT(A[i] > A[i + 1u])*/}
+#define PHASE_HEALTH_GOAL(...)          {static constexpr coreInt32 A[] = __VA_ARGS__; m_piHealthGoal = A; STATIC_ASSERT(!A[ARRAY_SIZE(A) - 1u])}
 
 #define PHASE_TIME_POINT(t)             (InBetween((t), fTimeBefore, fTime))
 #define PHASE_TIME_BEFORE(t)            (fTime <  (t))
@@ -156,7 +157,7 @@
 #define PHASE_CHANGE_TO(i)              {this->ChangePhase(i);}
 #define PHASE_CHANGE_INC                {this->ChangePhase(m_iPhase + 1u);}
 #define PHASE_RESET(i)                  {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
-#define PHASE_AGAIN                     {m_bControlAgain = true;}
+#define PHASE_AGAIN(i)                  {m_aTimer[i].SetValue(fTimeBefore - 1.0f); m_bControlAgain = true;}
 #define PHASE_FINISHED                  (__bEnd)
 
 
@@ -187,10 +188,13 @@ protected:
     coreVector3 m_vLastOrientation;           // 
 
     const coreInt32* m_piHealthGoal;          // 
+    coreInt32        m_iMaxHealthGoal;        // 
 
     coreUint8 m_iPhase;                       // 
     coreFlow  m_fPhaseTime;                   // 
     coreFloat m_fPhaseTimeBefore;             // 
+
+    coreFlow m_fStartup;                      // 
 
     coreBool m_bControlAgain;                 // 
 
@@ -221,12 +225,20 @@ public:
     void StoreRotation();
 
     // 
+    coreFloat CalcHealthGoal()const;
+
+    // 
+    inline coreBool HasStartup()const {return (m_fStartup != 0.0f) && !m_bForeshadow;}
+
+    // 
     inline coreBool HasAllHelpers()const {return (m_iHelperHit == BITLINE(BOSS_HELPERS));}
 
     // get object properties
-    inline  const coreUint8& GetPhase    ()const {return m_iPhase;}
-    inline  const coreUint8& GetHelperHit()const {return m_iHelperHit;}
-    virtual const coreChar*  GetMusicName()const {return "";}
+    inline  const coreInt32* GetHealthGoal   ()const {return m_piHealthGoal;}
+    inline  const coreInt32& GetMaxHealthGoal()const {return m_iMaxHealthGoal;}
+    inline  const coreUint8& GetPhase        ()const {return m_iPhase;}
+    inline  const coreUint8& GetHelperHit    ()const {return m_iHelperHit;}
+    virtual const coreChar*  GetMusicName    ()const {return "";}
 
 
 protected:
@@ -247,6 +259,9 @@ protected:
     // 
     void _CreateFragment(const coreUint8 iType, const coreVector2 vPosition);
     void _CreateFragment(const coreUint8 iType);
+
+    // 
+    coreInt32 _RoundHealth(const coreInt32 iHealth)const;
 
     // 
     template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
@@ -1220,7 +1235,7 @@ private:
     coreFlow  m_fPatternValue;                        // 
     coreFlow  m_fPatternStrength;                     // 
     coreUint8 m_iPatternType;                         // 
-    
+
     coreSoundPtr m_pNightmareSound;                   // 
 
     coreBool m_bDead;                                 // 
@@ -1272,8 +1287,8 @@ public:
     inline const coreChar* GetMusicName()const final {return "boss_08_intro.ogg";}
 
     // 
-    static void CalcColor    (const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvLedColor);
-    static void CalcColorLerp(const coreFloat fValue, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvLedColor);
+    static void CalcColor    (const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvBackColor2, coreVector3* OUTPUT pvLedColor);
+    static void CalcColorLerp(const coreFloat fValue, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvBackColor2, coreVector3* OUTPUT pvLedColor);
 
 
 private:
@@ -1435,7 +1450,8 @@ class cIntroBoss final : public cBoss
 private:
     cCustomEnemy m_Blade;    // 
     cCustomEnemy m_Hilt;     // 
-    cCustomEnemy m_Shield;   // 
+    //cCustomEnemy m_Shield;   // 
+    cCustomEnemy m_Dummy;    // 
 
 
 public:
@@ -1484,17 +1500,25 @@ template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimer
             iTimerLine = iCodeLine;
 
             // 
+            oTimer.SetEnd(2.0f);
             oTimer.SetMaxLoops(1u);
             oTimer.Play(CORE_TIMER_PLAY_RESET);
         }
 
         // 
-        const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+        const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, CLAMP01(oTimer.GetValue(CORE_TIMER_GET_NORMAL)));
         oTimer.Update(fSpeed);
-        const coreFloat fTimeAfter  = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+        const coreFloat fTimeAfter  = nLerpFunc(0.0f, 1.0f, CLAMP01(oTimer.GetValue(CORE_TIMER_GET_NORMAL)));
 
         // 
-        nUpdateFunc(fTimeAfter, fTimeBefore, !oTimer.GetStatus());
+        nUpdateFunc(fTimeAfter, fTimeBefore, (oTimer.GetValue(CORE_TIMER_GET_NORMAL) >= 1.0f));
+
+        // 
+        if(oTimer.GetValue(CORE_TIMER_GET_NORMAL) >= 1.0f)
+        {
+            oTimer.SetValue(1.0f);
+            oTimer.Pause();
+        }
     }
     while(m_bControlAgain);
 }
@@ -1520,6 +1544,7 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
             iTimerLine = iCodeLine;
 
             // 
+            oTimer.SetEnd(iTicks ? 2.0f : 1.0f);
             oTimer.SetMaxLoops(iTicks ? 1u : 0u);
             oTimer.Play(CORE_TIMER_PLAY_RESET);
         }
@@ -1527,12 +1552,19 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
         if(iTicks)
         {
             // 
-            const coreUint16 iTicksBefore = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
-            oTimer.Update(RoundFreq(fRate) * RCP(I_TO_F(iTicks)));
-            const coreUint16 iTicksAfter  = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
+            const coreUint16 iTicksBefore = F_TO_UI(nLerpFunc(0.0f, 1.0f, CLAMP01(oTimer.GetValue(CORE_TIMER_GET_NORMAL))) * I_TO_F(iTicks));
+            oTimer.Update((RoundFreq(fRate) + CORE_MATH_PRECISION) * RCP(I_TO_F(iTicks)));
+            const coreUint16 iTicksAfter  = F_TO_UI(nLerpFunc(0.0f, 1.0f, CLAMP01(oTimer.GetValue(CORE_TIMER_GET_NORMAL))) * I_TO_F(iTicks));
 
             // 
             if(iTicksBefore != iTicksAfter) nUpdateFunc(iTicksAfter - 1u, (iTicksAfter == iTicks));
+
+            // 
+            if(oTimer.GetValue(CORE_TIMER_GET_NORMAL) >= 1.0f)
+            {
+                oTimer.SetValue(1.0f);
+                oTimer.Pause();
+            }
         }
         else
         {
@@ -1540,7 +1572,7 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
             ASSERT(fRate <= FRAMERATE_MIN)
 
             // 
-            if(oTimer.Update(RoundFreq(fRate))) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
+            if(oTimer.Update(RoundFreq(fRate) + CORE_MATH_PRECISION)) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
         }
     }
     while(m_bControlAgain);

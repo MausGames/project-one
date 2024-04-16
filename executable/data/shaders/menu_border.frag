@@ -9,16 +9,16 @@
 
 
 // shader input
-varying      vec4  v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
-flat varying vec4  v_v4Border;     // border distance values (xy = inner, zw = outer)
-varying      float v_v1Factor;     // 
+varying      vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
+flat varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
+varying      vec2 v_v2Factor;     // 
 
 
 void FragmentMain()
 {
     // 
 #if defined(_P1_DIRECT_)
-    bool bBorder = (v_v1Factor > 0.5);
+    bool bBorder = (v_v2Factor.x > 0.5);
 #else
     const bool bBorder = true;
 #endif
@@ -32,15 +32,16 @@ void FragmentMain()
     }
     else
     {
-        // 
-    #if defined(_P1_DIRECT_)
-        float v1Factor = max(v_v1Factor, 0.0);
-    #else
-        const float v1Factor = 1.0;
-    #endif
-
         // lookup texture
         float v1Detail = coreTexture2D(0, v_av2TexCoord[0]).r;
+
+        // 
+    #if defined(_P1_DIRECT_)
+        float v1Factor = max(v_v2Factor.x, 0.0) * (1.0 - abs(v_v2Factor.y));
+    #else
+        vec2  v2ScreenCoord = (gl_FragCoord.xy - u_v4Resolution.xy * 0.5) * max(u_v4Resolution.z, u_v4Resolution.w);
+        float v1Factor      = 1.1 - coreLengthSq(v2ScreenCoord) * 0.85;
+    #endif
 
         // draw interior with detail map
         gl_FragColor = vec4(vec3((v1Detail + c_v1Black) * v1Factor), u_v4Color.a);

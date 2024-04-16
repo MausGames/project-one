@@ -23,7 +23,6 @@
 // TODO 1: (remove turf from base classes)
 // TODO 1: hard mode: add another mechanic to each sub-stage, spieler muss in der letzten phase doch angreifen
 // TODO 1: hard mode: turf
-// TODO 1: how to handle death on boss ? maybe keep finished helpers disabled and skip intro !
 
 // yellow:
 // spikes sollten so lang aktiv sein, dass es für den spieler wichtig ist seine position dem auf-und-ab der spikes anzupassen
@@ -181,7 +180,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * PROJECTONE_COLL_SCALE);
 
     // configure the boss
-    this->Configure(1, 0u, COLOR_SHIP_GREY);
+    this->Configure(1, COLOR_SHIP_GREY);
     this->AddStatus(ENEMY_STATUS_SECRET);
 
     // 
@@ -206,7 +205,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
         m_aShield[i].DefineTexture  (0u, "effect_energy.png");
         m_aShield[i].DefineProgram  ("effect_energy_blink_flat_spheric_program");
         m_aShield[i].SetTexSize     (coreVector2(1.0f,1.0f) * 4.0f);
-        m_aShield[i].Configure      (1000, 0u, avColor[i]);
+        m_aShield[i].Configure      (1000, avColor[i]);
         m_aShield[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_FLAT);
     }
 
@@ -215,10 +214,11 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     {
         m_aClone[i].DefineModelHigh     (this->GetModelHigh());
         m_aClone[i].DefineModelLow      (this->GetModelLow ());
+        m_aClone[i].DefineVolume        (this->GetVolume   ());
         m_aClone[i].DefineTexture       (0u, this->GetTexture(0u));
         m_aClone[i].SetSize             (this->GetSize());
         m_aClone[i].SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 5.0f);
-        m_aClone[i].Configure           (1, 0u, COLOR_SHIP_GREY);
+        m_aClone[i].Configure           (1, COLOR_SHIP_GREY);
         m_aClone[i].AddStatus           (ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS);
     }
 
@@ -322,47 +322,48 @@ cProjectOneBoss::~cProjectOneBoss()
 
 // ****************************************************************
 // 
-void cProjectOneBoss::CalcColor(const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvLedColor)
+void cProjectOneBoss::CalcColor(const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvBackColor2, coreVector3* OUTPUT pvLedColor)
 {
-    ASSERT(pvEnergyColor && pvBlockColor && pvLevelColor && pvBackColor && pvLedColor)
+    ASSERT(pvEnergyColor && pvBlockColor && pvLevelColor && pvBackColor && pvBackColor2 && pvLedColor)
 
     switch(iIndex)
     {
     default: UNREACHABLE
-    case 0u: (*pvEnergyColor) = COLOR_PLAYER_YELLOW;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_YELLOW,  1.0f); (*pvLevelColor) = COLOR_MENU_YELLOW;  (*pvBackColor) = cDesertBackground ::Color; (*pvLedColor) = COLOR_LED_YELLOW;  break;
-    case 1u: (*pvEnergyColor) = COLOR_PLAYER_ORANGE;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_ORANGE,  1.0f); (*pvLevelColor) = COLOR_MENU_ORANGE;  (*pvBackColor) = cVolcanoBackground::Color; (*pvLedColor) = COLOR_LED_ORANGE;  break;
-    case 2u: (*pvEnergyColor) = COLOR_PLAYER_RED;     (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_RED,     0.9f); (*pvLevelColor) = COLOR_MENU_RED;     (*pvBackColor) = cMossBackground   ::Color; (*pvLedColor) = COLOR_LED_RED;     break;
-    case 3u: (*pvEnergyColor) = COLOR_PLAYER_MAGENTA; (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_MAGENTA, 0.9f); (*pvLevelColor) = COLOR_MENU_MAGENTA; (*pvBackColor) = cSpaceBackground  ::Color; (*pvLedColor) = COLOR_LED_MAGENTA; break;
-    case 4u: (*pvEnergyColor) = COLOR_PLAYER_PURPLE;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_PURPLE,  1.0f); (*pvLevelColor) = COLOR_MENU_PURPLE;  (*pvBackColor) = cCloudBackground  ::Color; (*pvLedColor) = COLOR_LED_PURPLE;  break;
-    case 5u: (*pvEnergyColor) = COLOR_PLAYER_BLUE;    (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_BLUE,    1.0f); (*pvLevelColor) = COLOR_MENU_BLUE;    (*pvBackColor) = cSnowBackground   ::Color; (*pvLedColor) = COLOR_LED_BLUE;    break;
-    case 6u: (*pvEnergyColor) = COLOR_PLAYER_CYAN;    (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_CYAN,    1.0f); (*pvLevelColor) = COLOR_MENU_CYAN;    (*pvBackColor) = cSeaBackground    ::Color; (*pvLedColor) = COLOR_LED_CYAN;    break;
-    case 7u: (*pvEnergyColor) = COLOR_PLAYER_GREEN;   (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_GREEN,   1.0f); (*pvLevelColor) = COLOR_MENU_GREEN;   (*pvBackColor) = cGrassBackground  ::Color; (*pvLedColor) = COLOR_LED_GREEN;   break;
-    case 8u: (*pvEnergyColor) = COLOR_PLAYER_WHITE;   (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   (*pvBackColor) = cDarkBackground   ::Color; (*pvLedColor) = COLOR_LED_WHITE;   break;
-    case 9u: (*pvEnergyColor) = COLOR_PLAYER_WHITE;   (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   (*pvBackColor) = cDarkBackground   ::Color; (*pvLedColor) = COLOR_LED_WHITE;   break;
+    case 0u: (*pvEnergyColor) = COLOR_PLAYER_YELLOW;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_YELLOW,  1.0f); (*pvLevelColor) = COLOR_MENU_YELLOW;  (*pvBackColor) = cDesertBackground ::Color; (*pvBackColor2) = cDesertBackground ::Color2; (*pvLedColor) = COLOR_LED_YELLOW;  break;
+    case 1u: (*pvEnergyColor) = COLOR_PLAYER_ORANGE;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_ORANGE,  1.0f); (*pvLevelColor) = COLOR_MENU_ORANGE;  (*pvBackColor) = cVolcanoBackground::Color; (*pvBackColor2) = cVolcanoBackground::Color2; (*pvLedColor) = COLOR_LED_ORANGE;  break;
+    case 2u: (*pvEnergyColor) = COLOR_PLAYER_RED;     (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_RED,     0.9f); (*pvLevelColor) = COLOR_MENU_RED;     (*pvBackColor) = cMossBackground   ::Color; (*pvBackColor2) = cMossBackground   ::Color2; (*pvLedColor) = COLOR_LED_RED;     break;
+    case 3u: (*pvEnergyColor) = COLOR_PLAYER_MAGENTA; (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_MAGENTA, 0.9f); (*pvLevelColor) = COLOR_MENU_MAGENTA; (*pvBackColor) = cSpaceBackground  ::Color; (*pvBackColor2) = cSpaceBackground  ::Color2; (*pvLedColor) = COLOR_LED_MAGENTA; break;
+    case 4u: (*pvEnergyColor) = COLOR_PLAYER_PURPLE;  (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_PURPLE,  1.0f); (*pvLevelColor) = COLOR_MENU_PURPLE;  (*pvBackColor) = cCloudBackground  ::Color; (*pvBackColor2) = cCloudBackground  ::Color2; (*pvLedColor) = COLOR_LED_PURPLE;  break;
+    case 5u: (*pvEnergyColor) = COLOR_PLAYER_BLUE;    (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_BLUE,    1.0f); (*pvLevelColor) = COLOR_MENU_BLUE;    (*pvBackColor) = cSnowBackground   ::Color; (*pvBackColor2) = cSnowBackground   ::Color2; (*pvLedColor) = COLOR_LED_BLUE;    break;
+    case 6u: (*pvEnergyColor) = COLOR_PLAYER_CYAN;    (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_CYAN,    1.0f); (*pvLevelColor) = COLOR_MENU_CYAN;    (*pvBackColor) = cSeaBackground    ::Color; (*pvBackColor2) = cSeaBackground    ::Color2; (*pvLedColor) = COLOR_LED_CYAN;    break;
+    case 7u: (*pvEnergyColor) = COLOR_PLAYER_GREEN;   (*pvBlockColor) = LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_MENU_GREEN,   1.0f); (*pvLevelColor) = COLOR_MENU_GREEN;   (*pvBackColor) = cGrassBackground  ::Color; (*pvBackColor2) = cGrassBackground  ::Color2; (*pvLedColor) = COLOR_LED_GREEN;   break;
+    case 8u: (*pvEnergyColor) = COLOR_PLAYER_WHITE;   (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   (*pvBackColor) = cDarkBackground   ::Color; (*pvBackColor2) = cDarkBackground   ::Color2; (*pvLedColor) = COLOR_LED_WHITE;   break;
+    case 9u: (*pvEnergyColor) = COLOR_PLAYER_WHITE;   (*pvBlockColor) = DARK_COLOR_DEFAULT;                                          (*pvLevelColor) = COLOR_MENU_WHITE;   (*pvBackColor) = cDarkBackground   ::Color; (*pvBackColor2) = cDarkBackground   ::Color2; (*pvLedColor) = COLOR_LED_WHITE;   break;
     }
 }
 
 
 // ****************************************************************
 // 
-void cProjectOneBoss::CalcColorLerp(const coreFloat fValue, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvLedColor)
+void cProjectOneBoss::CalcColorLerp(const coreFloat fValue, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvBackColor2, coreVector3* OUTPUT pvLedColor)
 {
     ASSERT(fValue >= 0.0f)
 
     const coreUintW iFrom = (F_TO_UI(fValue))      % 8u;
     const coreUintW iTo   = (F_TO_UI(fValue) + 1u) % 8u;
 
-    coreVector3 vEnergyColor1, vBlockColor1, vLevelColor1, vBackColor1, vLedColor1;
-    cProjectOneBoss::CalcColor(iFrom, &vEnergyColor1, &vBlockColor1, &vLevelColor1, &vBackColor1, &vLedColor1);
+    coreVector3 vEnergyColorA, vBlockColorA, vLevelColorA, vBackColorA, vBackColor2A, vLedColorA;
+    cProjectOneBoss::CalcColor(iFrom, &vEnergyColorA, &vBlockColorA, &vLevelColorA, &vBackColorA, &vBackColor2A, &vLedColorA);
 
-    coreVector3 vEnergyColor2, vBlockColor2, vLevelColor2, vBackColor2, vLedColor2;
-    cProjectOneBoss::CalcColor(iTo, &vEnergyColor2, &vBlockColor2, &vLevelColor2, &vBackColor2, &vLedColor2);
+    coreVector3 vEnergyColorB, vBlockColorB, vLevelColorB, vBackColorB, vBackColor2B, vLedColorB;
+    cProjectOneBoss::CalcColor(iTo, &vEnergyColorB, &vBlockColorB, &vLevelColorB, &vBackColorB, &vBackColor2B, &vLedColorB);
 
-    (*pvEnergyColor) = LERP(vEnergyColor1, vEnergyColor2, FRACT(fValue));
-    (*pvBlockColor)  = LERP(vBlockColor1,  vBlockColor2,  FRACT(fValue));
-    (*pvLevelColor)  = LERP(vLevelColor1,  vLevelColor2,  FRACT(fValue));
-    (*pvBackColor)   = LERP(vBackColor1,   vBackColor2,   FRACT(fValue));
-    (*pvLedColor)    = LERP(vLedColor1,    vLedColor2,    FRACT(fValue));
+    (*pvEnergyColor) = LERP(vEnergyColorA, vEnergyColorB, FRACT(fValue));
+    (*pvBlockColor)  = LERP(vBlockColorA,  vBlockColorB,  FRACT(fValue));
+    (*pvLevelColor)  = LERP(vLevelColorA,  vLevelColorB,  FRACT(fValue));
+    (*pvBackColor)   = LERP(vBackColorA,   vBackColorB,   FRACT(fValue));
+    (*pvBackColor2)  = LERP(vBackColor2A,  vBackColor2B,  FRACT(fValue));
+    (*pvLedColor)    = LERP(vLedColorA,    vLedColorB,    FRACT(fValue));
 }
 
 
@@ -381,8 +382,15 @@ void cProjectOneBoss::__ResurrectOwn()
     g_pGame->GetCurMission()->SetDelay(true);
 
     // 
-    const coreUint8* piFragment = g_pSave->GetHeader().oProgress.aiFragment;
-    m_aiCounter[FRAGMENT_PHASE] = std::all_of(piFragment, piFragment + PROJECTONE_FRAGMENTS, [](const coreUint8 A) {return A;}) ? 1 : 0;
+    const cDataTable* pTable         = g_pGame->GetPlayer(0u)->GetDataTable();
+    const coreBool    bFromBeginning = pTable->GetMedalSegment(MISSION_INTRO, 0u) != MEDAL_NONE;
+    const coreUint16  iContinuesUsed = pTable->GetCounterTotal().iContinuesUsed;
+    const coreUint8*  piShield       = g_pGame->GetOptions().aiShield;
+    const coreBool    bOneColorClear = bFromBeginning && !iContinuesUsed && std::all_of(piShield, piShield + g_pGame->GetNumPlayers(), [](const coreUint8 A) {return !A;});
+
+    // 
+    const coreUint8* piFragment = REPLAY_WRAP_PROGRESS_FRAGMENT;
+    m_aiCounter[FRAGMENT_PHASE] = (std::all_of(piFragment, piFragment + PROJECTONE_FRAGMENTS, [](const coreUint8 A) {return A;}) || bOneColorClear) ? 1 : 0;
 
     for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i)
     {
@@ -605,7 +613,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
+            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 
@@ -1256,7 +1264,8 @@ void cProjectOneBoss::__MoveOwn()
                 const coreVector2 vDiff = pPlayer->GetPosition().xy() - this->GetPosition().xy();
 
                 pPlayer->ApplyForce(vDiff.Normalized() * 300.0f);
-                pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_SHOOT);
+                pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_RAPID);
+                pPlayer->RemoveStatus(PLAYER_STATUS_RAPID_FIRE);
 
                 if(m_aiCounter[FRAGMENT_PHASE])
                 {
@@ -1705,6 +1714,7 @@ void cProjectOneBoss::__MoveYellow()
 
                     if(PHASE_MAINTIME_AFTER(1.2f))
                     {
+                        // # delay by one frame
                         Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_aClone[i], [&](const cBullet* pBullet, const coreObject3D* pClone, const coreVector3 vIntersection, const coreBool bFirstHit)
                         {
                             if(!HAS_BIT(m_aiCounter[GHOST_ACTIVE], i)) return;
@@ -1871,6 +1881,7 @@ void cProjectOneBoss::__MoveOrange()
             }
 
             pGelu->SetLineMode(0u);
+            pGelu->SetWaySpooky(true);
         }
 
         g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
@@ -2285,6 +2296,8 @@ void cProjectOneBoss::__MoveOrange()
 
             g_pGame->GetBulletManagerEnemy()->ClearBulletsTyped<cQuadBullet>(true);
 
+            pAter->ResetCollEnemyBullet();
+
             this->__EndExplosion(false);
         }
     }
@@ -2691,9 +2704,9 @@ void cProjectOneBoss::__MoveRed()
            this->ReachedHealth(90)               ||
            bFinished)
         {
-            const auto nTeleportFunc = [](cEnemy* OUTPUT pEnemy)
+            const auto nTeleportFunc = [&](cEnemy* OUTPUT pEnemy)
             {
-                cPlayer* pPlayer = pEnemy->LastAttacker();
+                cPlayer* pPlayer = pEnemy->NearestPlayerDual(iTeleport % 2u);
 
                 const coreVector3 vOldPos = pPlayer->GetPosition();
                 const coreVector3 vNewPos = pEnemy ->GetPosition();
@@ -3036,7 +3049,7 @@ void cProjectOneBoss::__MoveMagenta()
         {
             PHASE_CONTROL_TIMER(2u, 0.5f, LERP_LINEAR)
             {
-                const coreVector2 vNewAxis = coreVector2::Direction(AngleLerp(m_fGameAngle, 0.0f, BLENDB(fTime)));
+                const coreVector2 vNewAxis = PHASE_FINISHED ? coreVector2(0.0f,1.0f) : coreVector2::Direction(AngleLerp(m_fGameAngle, 0.0f, BLENDB(fTime)));
 
                 g_pPostProcessing->SetDirectionGame(vNewAxis);
             });
@@ -3161,8 +3174,7 @@ void cProjectOneBoss::__MovePurple()
 
             if(PHASE_FINISHED)
             {
-                PHASE_RESET(0u)
-                PHASE_AGAIN
+                PHASE_AGAIN(0u)
 
                 m_aiCounter[PATH_COUNT] += 1;
 
@@ -3536,6 +3548,8 @@ void cProjectOneBoss::__MoveBlue()
             {
                 PHASE_CHANGE_INC
 
+                this->AddStatus(ENEMY_STATUS_GHOST);
+
                 pCalor->EnableSnow();
 
                 const coreVector2 vPos = m_vGlobalDir * FOREGROUND_AREA * 1.25f;
@@ -3553,6 +3567,8 @@ void cProjectOneBoss::__MoveBlue()
         PHASE_CONTROL_PAUSE(0u, 0.4f)
         {
             PHASE_CHANGE_INC
+
+            this->RemoveStatus(ENEMY_STATUS_GHOST);
         });
     }
 
@@ -3827,6 +3843,8 @@ void cProjectOneBoss::__MoveBlue()
         if(m_iPhase == 101u) m_avVector[CALOR_ROTA].z = MIN(m_avVector[CALOR_ROTA].z + 0.2f * TIME,  1.0f);
                         else m_avVector[CALOR_ROTA].z = MAX(m_avVector[CALOR_ROTA].z - 0.3f * TIME, -3.0f);
 
+        this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
+
         if(m_avVector[CALOR_ROTA].z > 0.0f)
         {
             m_avVector[CALOR_ROTA].w += -0.4f * TIME * m_avVector[CALOR_ROTA].z;   // prev: -0.8f
@@ -3845,6 +3863,8 @@ void cProjectOneBoss::__MoveBlue()
             {
                 this->SetPosition (coreVector3(vEnvDir * fDistance, 0.0f) * FOREGROUND_AREA3);
                 this->SetDirection(coreVector3(vEnvDir * -1.0f,     0.0f));
+
+                this->DefaultOrientate(m_avVector[CALOR_ROTA].w * -20.0f);
             }
 
             g_pSpecialEffects->CreateGust(m_avVector[CALOR_ROTA].z, m_avVector[CALOR_ROTA].w);
@@ -4023,7 +4043,7 @@ void cProjectOneBoss::__MoveCyan()
                     }
                     else
                     {
-                        PHASE_RESET(4u)
+                        PHASE_AGAIN(4u)
 
                         m_aiCounter[RUSH_COUNT] += 1;
                     }
@@ -4185,8 +4205,17 @@ void cProjectOneBoss::__MoveCyan()
             if(iPack != pNevo->GetArrowDir(0u))
             {
                 pBullet->Deactivate(true, vIntersection.xy());
-                pBullet->AddStatus(BULLET_STATUS_GHOST);
+                pBullet->Ignore();
             }
+        });
+
+        pAter->SetCollBulletBullet([](const cBullet* pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)   // on base mission
+        {
+            if(pBulletEnemy->GetID() != cFlipBullet::ID) return;
+
+            pBulletEnemy->Deactivate(true, vIntersection.xy(), pBulletPlayer->GetFlyDir());
+
+            g_pGame->PlayVanishSound(pBulletEnemy->GetPosition());
         });
 
         if(this->ReachedDeath())
@@ -4197,6 +4226,7 @@ void cProjectOneBoss::__MoveCyan()
                 pNevo->DisableArrow(i, true);
 
             pAter->ResetCollEnemyBullet();
+            pAter->ResetCollBulletBullet();
 
             this->__EndExplosion(true);
         }
@@ -4263,15 +4293,6 @@ void cProjectOneBoss::__MoveCyan()
         pBullet->SetPosition(coreVector3(vNewPos, 0.0f));
 
         if(pBullet->GetFlyTime() >= 10.0f) pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
-    });
-
-    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](const cBullet* pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
-    {
-        if(pBulletEnemy->GetID() != cFlipBullet::ID) return;
-
-        pBulletEnemy->Deactivate(true, vIntersection.xy(), pBulletPlayer->GetFlyDir());
-
-        g_pGame->PlayVanishSound(pBulletEnemy->GetPosition());
     });
 }
 
@@ -4683,8 +4704,8 @@ void cProjectOneBoss::__MoveWhite()
 {
     ASSERT((m_iPhase >= 140u) && (m_iPhase <= 149u))
 
-    coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vLedColor;
-    cProjectOneBoss::CalcColorLerp(m_fLifeTime, &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vLedColor);
+    coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vBackColor2, vLedColor;
+    cProjectOneBoss::CalcColorLerp(m_fLifeTime, &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vBackColor2, &vLedColor);
 
     this->__SetEnergyColor(vEnergyColor);
 
@@ -4693,7 +4714,7 @@ void cProjectOneBoss::__MoveWhite()
     m_vColorTo    = vBlockColor;
     m_vLevelColor = vLevelColor;
 
-    d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vLevelColor);
+    d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vBackColor2);
 
     // ################################################################
     // 
@@ -4899,7 +4920,7 @@ void cProjectOneBoss::__MoveWhite()
 
                 g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
                 {
-                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_SHOOT);
+                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_RAPID);
                 });
             }
         }
@@ -5311,17 +5332,17 @@ void cProjectOneBoss::__SwitchHealth(const coreUintW iIndex)
     switch(iIndex)
     {
     default: UNREACHABLE
-    case 0u:  iHealth = 2000;                    break;   // yellow
-    case 1u:  iHealth = 1800;                    break;   // orange
-    case 2u:  iHealth = 2200 + 90 * 6 + 850 * 4; break;   // red
-    case 3u:  iHealth = 3300;                    break;   // magenta
-    case 4u:  iHealth = 4400;                    break;   // purple
-    case 5u:  iHealth = 2800;                    break;   // blue
-    case 6u:  iHealth = 1800;                    break;   // cyan
-    case 7u:  iHealth = 3000;                    break;   // green
-    case 8u:  iHealth = 10000;                   break;   // white
-    case 9u:  iHealth = 600;                     break;   // intro
-    case 10u: iHealth = 1000;                    break;   // final transition
+    case 0u:  iHealth = 2000;                    PHASE_HEALTH_GOAL({2000, 1200, 0})                        break;   // yellow
+    case 1u:  iHealth = 1800;                    PHASE_HEALTH_GOAL({0})                                    break;   // orange
+    case 2u:  iHealth = 2200 + 90 * 6 + 850 * 4; PHASE_HEALTH_GOAL({6140, 3940, 3090, 2240, 1390, 540, 0}) break;   // red
+    case 3u:  iHealth = 3300;                    PHASE_HEALTH_GOAL({3300, 1800, 800, 0})                   break;   // magenta
+    case 4u:  iHealth = 4400;                    PHASE_HEALTH_GOAL({4400, 2900, 1900, 1200, 0})            break;   // purple
+    case 5u:  iHealth = 2800;                    PHASE_HEALTH_GOAL({2800, 1700, 0})                        break;   // blue
+    case 6u:  iHealth = 1800;                    PHASE_HEALTH_GOAL({0})                                    break;   // cyan
+    case 7u:  iHealth = 3000;                    PHASE_HEALTH_GOAL({3000, 1450, 0})                        break;   // green
+    case 8u:  iHealth = 10000;                   PHASE_HEALTH_GOAL({0})                                    break;   // white
+    case 9u:  iHealth = 600;                     PHASE_HEALTH_GOAL({0})                                    break;   // intro
+    case 10u: iHealth = 1000;                    PHASE_HEALTH_GOAL({0})                                    break;   // final transition
     }
 
     // 
@@ -5337,12 +5358,11 @@ void cProjectOneBoss::__SwitchHealth(const coreUintW iIndex)
 // 
 void cProjectOneBoss::__SwitchColor(const coreUintW iIndex, const coreBool bWave, const coreBool bMenu)
 {
-    coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vLedColor;
-    cProjectOneBoss::CalcColor(iIndex, &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vLedColor);
+    coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vBackColor2, vLedColor;
+    cProjectOneBoss::CalcColor(iIndex, &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vBackColor2, &vLedColor);
 
     // 
     this->__SetEnergyColor(vEnergyColor);
-
 
     // 
     if(bWave)
@@ -5361,7 +5381,7 @@ void cProjectOneBoss::__SwitchColor(const coreUintW iIndex, const coreBool bWave
     {
         m_vLevelColor = vLevelColor;
 
-        d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vLevelColor);
+        d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vBackColor2);
     }
 }
 
@@ -5395,6 +5415,9 @@ void cProjectOneBoss::__RequestMission(const coreUintW iIndex)
 void cProjectOneBoss::__StartMission(const coreUintW iIndex)
 {
     // 
+    const coreUint8 iCurContinue = g_pGame->GetContinuesCur();
+
+    // 
     switch(iIndex)
     {
     default: UNREACHABLE
@@ -5412,6 +5435,9 @@ void cProjectOneBoss::__StartMission(const coreUintW iIndex)
 
     // 
     g_pGame->GetCurMission()->SetDelay(false);
+
+    // 
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_PROJECTONE(iCurContinue, iIndex * 100u));
 }
 
 
@@ -5507,6 +5533,7 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
 
     // 
     pAter->ResetCollEnemyBullet();   // on base mission
+    pAter->ResetCollBulletBullet();
 
     // 
     pAter->GetEnemySquad(0u)->ClearEnemies(bAnimated);

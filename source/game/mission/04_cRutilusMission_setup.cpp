@@ -128,7 +128,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -137,7 +137,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -628,7 +628,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(4, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);   // due to tight spawning
             });
         });
@@ -638,7 +638,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(4, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -866,7 +866,7 @@ void cRutilusMission::__SetupOwn()
             g_pGame->GetBulletManagerPlayer()->ForEachBullet([](cBullet* OUTPUT pBullet)
             {
                 pBullet->AddStatus(BULLET_STATUS_IMMORTAL);
-                if(pBullet->GetFlyTime() >= 3.0f) pBullet->Deactivate(true);
+                if(pBullet->GetFlyTime() >= 3.0f) pBullet->Deactivate(false);
             });
         }
         else if(m_iStageSub == 22u)
@@ -899,6 +899,7 @@ void cRutilusMission::__SetupOwn()
 
             if(fCapsDelay < fCapsAnimation)
             {
+                // # delay by one frame
                 Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Capsule, [&](cBullet* OUTPUT pBullet, const coreObject3D* pCapsule, const coreVector3 vIntersection, const coreBool bFirstHit)
                 {
                     if(fCapsDelay < fCapsAnimation)
@@ -927,7 +928,7 @@ void cRutilusMission::__SetupOwn()
         }
 
         fRotationValue = FmodRange(fRotationValue + fRotationSpeed * TIME * fBackSpeed, 0.0f*PI, 2.0f*PI);
-        const coreVector2 vDirection = coreVector2::Direction(fRotationValue);
+        const coreVector2 vDirection = STAGE_CLEARED ? coreVector2(0.0f,1.0f) : coreVector2::Direction(fRotationValue);
 
         g_pPostProcessing->SetDirectionGame(vDirection);
 
@@ -1232,7 +1233,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(30, COLOR_SHIP_PURPLE);
 
                 if(i < 4u)
                 {
@@ -1266,7 +1267,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -1746,7 +1747,7 @@ void cRutilusMission::__SetupOwn()
     // TASK: fly multiple times around the helper
     // ACHIEVEMENT: never hit yourself
     // TODO 1: hardmode: gravitation also influences player (and enemies ?)
-    // TODO 1: gravitation should work equally with all bullet types (basis-speed verwenden, von cWeapon, oder eher bullet, muss ich eh speichern für längen-veränderung)
+    // TODO 1: gravitation should work equally with all bullet types (basis-speed verwenden, von cWeapon, oder eher bullet, muss ich eh speichern für längen-veränderung) [RP]
     // TODO 1: distortion for waves ?
     // TODO 1: improve player bullet curve shape, with special vertex shader and different bullet entities
     STAGE_MAIN({TAKE_ALWAYS, 3u})
@@ -1775,7 +1776,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(4, COLOR_SHIP_ORANGE);
             });
         });
 
@@ -1784,7 +1785,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(4, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -2239,7 +2240,6 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: hard mode: indestructible meteors
     // TODO 1: hard mode: meteor bounce
     // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
-    // TODO 1: manchmal fliegt das erste orb-geschoss "anders", is das wirklich wegen der reflektion ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -2252,7 +2252,7 @@ void cRutilusMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(1, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(1, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
 
                 if(g_pGame->IsEasy()) pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
@@ -2264,7 +2264,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(50, 0u, COLOR_SHIP_BLUE);
+                pEnemy->Configure(50, COLOR_SHIP_BLUE);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
         });
@@ -2274,7 +2274,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad3, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(1, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(1, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
         });
@@ -2284,7 +2284,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad4, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * MESSIER_SCALE);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             });
         });
@@ -2915,6 +2915,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: !!!! vielleicht teleportation mit rechenfehler (InvertedX wieder entfernen)
     // TODO 1: !!!! gegner sollten sich nicht bewegen, sie spawnen aus portalen (unsichtbar, bis erswter teleportation)
     // TODO 1: !!!! wenn portale als hindernisse wahrgenommen werden, sollten sie auch als solche funktionieren
+    // TODO 5: kontinuierlicher angriff in ein portal rein, und aus dem anderen raus während sich das portal rotiert und bewegt
     // TODO 1: links und rechts teleporter, meteoriten kommen raus in unendlichkeit, sind manchmal so arranged (seitlich und von oben-schräg), dass man durch teleporter durch muss
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 5u})
@@ -2932,7 +2933,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(30, COLOR_SHIP_YELLOW);
 
                 if(i < 14u)
                 {
@@ -3457,7 +3458,7 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(50 + 50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
+                pEnemy->Configure(50 + 50, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_BOTTOM | ENEMY_STATUS_SECRET);
             });
         });
@@ -3467,12 +3468,12 @@ void cRutilusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 5.0f * fBaseScale);
-                pEnemy->Configure(50 * 50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
+                pEnemy->Configure(50 * 50, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
 
-        STAGE_BOSS(m_Messier, {165.0f, 245.0f, 330.0, 410.0f, 820.0f})   // + 5
+        STAGE_BOSS(m_Messier, {165.0f, 245.0f, 330.0, 410.0f, 820.0f})   // +5
     },
     STAGE_PRE()
     {

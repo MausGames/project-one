@@ -121,7 +121,8 @@ private:
 
 public:
     cOutdoor()noexcept;
-    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreBool bLight, const coreUint64 iSeed = CORE_RAND_SEED)noexcept;
+    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreBool bLight)noexcept;
+    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreBool bLight, const coreUint64 iSeed)noexcept;
     ~cOutdoor()final;
 
     DISABLE_COPY(cOutdoor)
@@ -164,6 +165,7 @@ public:
     inline const coreUint32& GetVertexOffset()const {return m_iVertexOffset;}
     inline const coreUint32& GetIndexOffset ()const {return m_iIndexOffset;}
     inline const coreFloat&  GetFlyOffset   ()const {return m_fFlyOffset;}
+    inline const coreUint64& GetSeed        ()const {return m_iSeed;}
 
 
 private:

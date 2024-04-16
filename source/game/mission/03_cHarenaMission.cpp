@@ -26,7 +26,7 @@ cHarenaMission::cHarenaMission()noexcept
 , m_Flummi       (HARENA_FLUMMIS)
 , m_iInsanity    (0u)
 , m_fAnimation   (0.0f)
-, m_bStory       (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_HARENA))
+, m_bStory       (!HAS_BIT_EX(REPLAY_WRAP_PROGRESS_STATE, STATE_STORY_HARENA) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 {
     // 
     m_apBoss[0] = &m_Tiger;

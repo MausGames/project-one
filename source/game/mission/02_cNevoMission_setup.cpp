@@ -96,7 +96,6 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hard-mode: bullets get bigger with time
     // TODO 1: hard-mode: bullets are bigger in general
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top) (die finalen wellen könnten sonst verwirren)
-    // TODO 1: bullet-bullet collision has a 1 frame delay, maybe other bullet-any collisions as well
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;
@@ -106,7 +105,7 @@ void cNevoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(30, COLOR_SHIP_YELLOW);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_DAMAGING);
             });
 
@@ -275,6 +274,7 @@ void cNevoMission::__SetupOwn()
                     this->DisableScrap(i, false);
                 }
 
+                // # delay by one frame
                 Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oScrap, [&](const cBullet* pBullet, const coreObject3D* pScrap, const coreVector3 vIntersection, const coreBool bFirstHit)
                 {
                     if((i < 2u) && !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
@@ -465,7 +465,7 @@ void cNevoMission::__SetupOwn()
             }
         }
 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [&](const cBullet* pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
+        STAGE_COLL_BULLET_BULLET(pBulletPlayer, pBulletEnemy, vIntersection, bFirstHit, COLL_REF(iCleanupCount))
         {
             if(g_pGame->IsCoop())
             {
@@ -501,7 +501,7 @@ void cNevoMission::__SetupOwn()
 
         if(g_pGame->IsTask() && !STAGE_CLEARED)
         {
-            const coreFloat fPercent = I_TO_F(iCleanupCount) * (1.0f / (g_pGame->IsEasy() ? 1500.0f : 1700.0f));
+            const coreFloat fPercent = I_TO_F(iCleanupCount) * (1.0f / (g_pGame->IsEasy() ? 1350.0f : 1550.0f));
 
                  if(fPercent >= 1.0f)  STAGE_BADGE(0u, BADGE_EASY, coreVector3(0.0f,0.0f,0.0f))
             else if(fPercent >= 0.01f) g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fPercent * 100.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE, true);
@@ -584,7 +584,7 @@ void cNevoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -1106,7 +1106,7 @@ void cNevoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(50, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(50, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_GHOST_PLAYER);
             });
         });
@@ -1523,7 +1523,7 @@ void cNevoMission::__SetupOwn()
 
         g_pEnvironment->SetTargetDirection(coreVector2::Direction(fRota), 1.0f);
 
-        STAGE_WAVE(2u, "2-3", {45.0f, 65.0f, 90.0f, 110.0f, 220.0f})   // NEUN
+        STAGE_WAVE(2u, "2-3", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // NEUN +5
     },
     STAGE_PRE()
     {
@@ -1611,7 +1611,7 @@ void cNevoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREEN);
+                pEnemy->Configure(4, COLOR_SHIP_GREEN);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
             });
         });
@@ -2047,7 +2047,7 @@ void cNevoMission::__SetupOwn()
             }
 
             pBullet->Deactivate(true, vIntersection.xy());
-            pBullet->AddStatus(BULLET_STATUS_GHOST);
+            pBullet->Ignore();
         });
 
         cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
@@ -2171,7 +2171,7 @@ void cNevoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(50, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(50, COLOR_SHIP_PURPLE);
             });
         });
 
@@ -2636,7 +2636,7 @@ void cNevoMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(4, COLOR_SHIP_ORANGE);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP);
             });
         });

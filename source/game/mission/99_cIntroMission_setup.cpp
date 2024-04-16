@@ -36,7 +36,7 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        if(m_bFirstPlay)
+        if(m_bFirstPlay && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
         {
             STAGE_FINISH_AFTER(MISSION_WAIT_INTRO + 3.0f)
         }
@@ -57,9 +57,12 @@ void cIntroMission::__SetupOwn()
     // start
     STAGE_MAIN({TAKE_ALWAYS})
     {
-        if(m_bFirstPlay)
+        if(m_bFirstPlay && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
         {
-            ASSERT(g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID)
+            if(g_pEnvironment->GetBackground()->GetID() != cCloudBackground::ID)
+            {
+                g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+            }
 
             g_pEnvironment->SetTargetSpeedNow(LERP(ENVIRONMENT_DEFAULT_SPEED, 4.0f, MIN1(m_fStageTime * 0.12f)));
 
@@ -144,7 +147,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, cIntroMission::RetrieveEnemyColor(i));
+                pEnemy->Configure(4, cIntroMission::RetrieveEnemyColor(i));
             });
         });
 
@@ -153,7 +156,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
+                pEnemy->Configure(4, COLOR_SHIP_BLACK);
             });
         });
 
@@ -218,7 +221,7 @@ void cIntroMission::__SetupOwn()
                 ADD_BIT(iInputState, 0u)
                 fInputDelay = 0.0f;
             }
-            else if(!HAS_BIT(iInputState, 1u) && (pPlayer->GetWeapon(0u)->GetCooldown() && (pPlayer->GetDirection().y > 0.0f)))
+            else if(!HAS_BIT(iInputState, 1u) && pPlayer->GetWeapon(0u)->GetCooldown())
             {
                 ADD_BIT(iInputState, 1u)
             }
@@ -292,7 +295,7 @@ void cIntroMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(0u, "0-1", {4.0f, 6.0f + 5.0f, 8.0f + 5.0f, 10.0f + 5.0f, 20.0f + 5.0f})
+        STAGE_WAVE(0u, "0-1", {4.0f, 6.0f + 4.0f, 8.0f + 8.0f, 10.0f + 12.0f, 20.0f + 12.0f})
     },
     STAGE_PRE()
     {
@@ -330,7 +333,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, cIntroMission::RetrieveEnemyColor((i % 4u) + (i / 12u) * 4u));
+                pEnemy->Configure(4, cIntroMission::RetrieveEnemyColor((i % 4u) + (i / 12u) * 4u));
             });
         });
 
@@ -512,7 +515,7 @@ void cIntroMission::__SetupOwn()
             g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,1.0f).Normalized(), 10.0f);
         }
 
-        STAGE_WAVE(1u, "0-2", {8.0f, 12.0f + 5.0f, 16.0f + 5.0f, 20.0f + 5.0f, 40.0f + 5.0f})
+        STAGE_WAVE(1u, "0-2", {8.0f, 12.0f + 4.0f, 16.0f + 8.0f, 20.0f + 12.0f, 40.0f + 12.0f})
     },
     STAGE_PRE()
     {
@@ -572,7 +575,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, cIntroMission::RetrieveEnemyColor(i));
+                pEnemy->Configure(4, cIntroMission::RetrieveEnemyColor(i));
 
                 if(i >= 24u) pEnemy->AddStatus(ENEMY_STATUS_TOP);
             });
@@ -598,7 +601,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_BLACK);
+                pEnemy->Configure(4, COLOR_SHIP_BLACK);
             });
         });
 
@@ -772,7 +775,7 @@ void cIntroMission::__SetupOwn()
             g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,0.0f), 10.0f);
         }
 
-        STAGE_WAVE(2u, "0-3", {11.0f, 16.0f + 5.0f, 22.0f + 5.0f, 27.0f + 5.0f, 54.0f + 5.0f})
+        STAGE_WAVE(2u, "0-3", {12.0f, 18.0f + 4.0f, 24.0f + 8.0f, 30.0f + 12.0f, 60.0f + 12.0f})   // +1
     },
     STAGE_PRE()
     {
@@ -835,7 +838,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(120, 0u, cIntroMission::RetrieveEnemyColor(i + 4u));
+                pEnemy->Configure(120, cIntroMission::RetrieveEnemyColor(i + 4u));
             });
 
             pSquad1->GetEnemy(0u)->AddStatus(ENEMY_STATUS_IMMORTAL);
@@ -992,7 +995,7 @@ void cIntroMission::__SetupOwn()
             g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,-1.0f).Normalized(), 10.0f);
         }
 
-        if(!bPostpone) STAGE_WAVE(3u, "0-4", {7.0f, 10.0f + 5.0f, 14.0f + 5.0f, 17.0f + 5.0f, 34.0f + 5.0f})
+        if(!bPostpone) STAGE_WAVE(3u, "0-4", {7.0f, 10.0f + 4.0f, 14.0f + 8.0f, 17.0f + 12.0f, 34.0f + 12.0f})
     },
     STAGE_PRE()
     {
@@ -1044,7 +1047,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(30, 0u, cIntroMission::RetrieveEnemyColor(i - (i >= 4u) - (i >= 6u)));
+                pEnemy->Configure(30, cIntroMission::RetrieveEnemyColor(i - (i >= 4u) - (i >= 6u)));
             });
         });
 
@@ -1232,7 +1235,7 @@ void cIntroMission::__SetupOwn()
             g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,-1.0f), 10.0f);
         }
 
-        if(!bPostpone) STAGE_WAVE(4u, "0-5", {19.0f, 28.0f + 5.0f, 38.0f + 5.0f, 47.0f + 5.0f, 94.0f + 5.0f})
+        if(!bPostpone) STAGE_WAVE(4u, "0-5", {19.0f, 28.0f + 4.0f, 38.0f + 8.0f, 47.0f + 12.0f, 94.0f + 12.0f})
     },
     STAGE_PRE()
     {
@@ -1266,7 +1269,7 @@ void cIntroMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(120, 0u, m_vSkewerColor);
+                pEnemy->Configure(120, m_vSkewerColor);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -1319,7 +1322,7 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(m_bFirstPlay)
+        if(m_bFirstPlay && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
         {
             if(STAGE_BEGINNING)
             {

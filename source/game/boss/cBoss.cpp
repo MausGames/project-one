@@ -21,9 +21,11 @@ cBoss::cBoss()noexcept
 , m_vLastDirection   (coreVector3(0.0f,0.0f,0.0f))
 , m_vLastOrientation (coreVector3(0.0f,0.0f,0.0f))
 , m_piHealthGoal     (NULL)
+, m_iMaxHealthGoal   (INT32_MAX)
 , m_iPhase           (0u)
 , m_fPhaseTime       (0.0f)
 , m_fPhaseTimeBefore (0.0f)
+, m_fStartup         (-1.0f)
 , m_bControlAgain    (false)
 , m_iHelperSpawn     (0u)
 , m_iHelperHit       (0u)
@@ -103,6 +105,31 @@ void cBoss::StoreRotation()
 
 // ****************************************************************
 // 
+coreFloat cBoss::CalcHealthGoal()const
+{
+    const coreInt32* piGoal = m_piHealthGoal;
+    if(piGoal && (*piGoal))
+    {
+        const coreInt32 iCurHealth = MIN(this->GetCurHealth(), m_iMaxHealthGoal);
+        do
+        {
+            const coreInt32 iHigh = (*(piGoal));
+            const coreInt32 iLow  = (*(piGoal + 1u));
+
+            if(iCurHealth > iLow)
+            {
+                return STEP(I_TO_F(iLow), I_TO_F(iHigh), I_TO_F(iCurHealth));
+            }
+        }
+        while(*(++piGoal));
+    }
+
+    return this->GetCurHealthPct();
+}
+
+
+// ****************************************************************
+// 
 void cBoss::_StartBoss()
 {
     // 
@@ -110,6 +137,9 @@ void cBoss::_StartBoss()
 
     // 
     g_pGame->GetInterface()->ShowBoss(this);
+
+    // 
+    m_fStartup = INTERFACE_BANNER_DURATION_BOSS;
 }
 
 
@@ -144,6 +174,9 @@ void cBoss::_UpdateBoss()
     m_fPhaseTimeBefore = m_fPhaseTime;
     m_fPhaseTime.Update(1.0f);
 
+    // 
+    if(m_fStartup > 0.0f) m_fStartup.UpdateMax(-1.0f, 0.0f);
+
     if(m_bActive && !m_bForeshadow)
     {
         // 
@@ -151,7 +184,8 @@ void cBoss::_UpdateBoss()
         {
             pPlayer->GetScoreTable()->SetOverride(1.0f - this->GetCurHealthPct());
         });
-        
+
+        // 
         if(InBetween(INTERFACE_BANNER_DURATION_ALERT, m_fLifeTimeBefore, m_fLifeTime))
         {
             const coreChar* pcName = this->GetMusicName();
@@ -163,25 +197,18 @@ void cBoss::_UpdateBoss()
                 g_MusicPlayer.Play();
             }
         }
-        
-        ////if(g_pGame->IsEasy() && (InBetween(this->GetCurHealthPct() > 0.01f))
-        //{
-        //    if(FRACT(m_fLifeTime * 1.0f) < FRACT(m_fLifeTimeBefore * 1.0f))
-        //    {
-        //        this->TakeDamage(F_TO_SI(I_TO_F(this->GetMaxHealth()) * 0.001f), ELEMENT_NEUTRAL, this->GetPosition().xy(), NULL);
-        //    }
-        //}
-    
-    
+
         for(coreUintW i = 0u; i < BOSS_HELPERS; ++i)
         {
             cHelper*      pHelper = g_pGame->GetHelper(ELEMENT_YELLOW + i);
             coreObject3D* pShield = pHelper->GetShield();
             if(pHelper->HasStatus(HELPER_STATUS_DEAD)) continue;
-    
+
             if(pShield)
             {
                 coreBool bHit = false;
+
+                // # delay by one frame
                 Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pShield, [&](cBullet* OUTPUT pBullet, const coreObject3D* pShield, const coreVector3 vIntersection, const coreBool bFirstHit)
                 {
                     if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
@@ -189,20 +216,20 @@ void cBoss::_UpdateBoss()
                     if(!bHit)
                     {
                         bHit = true;
-    
+
                         pBullet->Deactivate(true, vIntersection.xy());
-    
+
                         d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->RefreshCooldown();
                         d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->AddChain(100);
                     }
                 });
-    
+
                 if(bHit)
                 {
                     ADD_BIT(m_iHelperHit, i)
-    
+
                     pHelper->Kill(true);
-    
+
                     g_pGame->GetCombatText()->DrawText(Core::Language->GetString("UNKNOWN"), pHelper->GetPosition(), COLOR_MENU_INSIDE);
 
                     g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_HELPER);
@@ -296,7 +323,7 @@ void cBoss::_CreateFragment(const coreUint8 iType, const coreVector2 vPosition)
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
     const coreUintW iBossIndex    = 0u;
 
-    if(!HAS_BIT(g_pSave->GetHeader().oProgress.aiFragment[iMissionIndex], iBossIndex) || (iType == 8u))
+    if(!HAS_BIT(REPLAY_WRAP_PROGRESS_FRAGMENT[iMissionIndex], iBossIndex) || (iType == 8u) || ((iType == 0u) && REPLAY_WRAP_PROGRESS_FIRSTPLAY))
     {
         g_pGame->GetItemManager()->AddItem<cFragmentItem>(vPosition, iType, iMissionIndex, iBossIndex);
     }
@@ -306,6 +333,19 @@ void cBoss::_CreateFragment(const coreUint8 iType)
 {
     // 
     this->_CreateFragment(iType, this->GetPosition().xy());
+}
+
+
+// ****************************************************************
+// 
+coreInt32 cBoss::_RoundHealth(const coreInt32 iHealth)const
+{
+    const coreFloat fMaxHealth = I_TO_F(this->GetMaxHealth());
+    const coreFloat fPercent   = I_TO_F(iHealth) / fMaxHealth;   // # normal division
+    const coreFloat fLerp      = ROUND(LERP(1.0f, 100.0f, fPercent));
+    const coreFloat fStep      = STEP(1.0f, 100.0f, fLerp);
+
+    return F_TO_SI(fMaxHealth * fStep);
 }
 
 

@@ -21,19 +21,16 @@ cTitleMenu::cTitleMenu()noexcept
     m_GameLogo.DefineProgram("default_2d_program");
     m_GameLogo.SetPosition  (coreVector2(0.0f,0.14f));
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.8f);
-    m_GameLogo.SetColor3    (COLOR_MENU_INSIDE);
 
     m_GameLogoDemo.DefineTexture(0u, "game_logo_demo.png");
     m_GameLogoDemo.DefineProgram("default_2d_program");
     m_GameLogoDemo.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f));
     m_GameLogoDemo.SetSize      (coreVector2(1.0f,0.25f) * 0.3f);
-    m_GameLogoDemo.SetColor3    (COLOR_MENU_INSIDE);
 
     m_GameLogoKana.DefineTexture(0u, "game_logo_kana.png");
     m_GameLogoKana.DefineProgram("default_2d_program");
     m_GameLogoKana.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f));
     m_GameLogoKana.SetSize      (coreVector2(2.0f,0.25f) * 0.3f);
-    m_GameLogoKana.SetColor3    (COLOR_MENU_INSIDE);
 
     m_Shadow.DefineTexture(0u, "effect_headlight_point.png");
     m_Shadow.DefineProgram("menu_single_program");

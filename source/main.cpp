@@ -10,7 +10,7 @@
 #include "additional/switch/main.cpp"
 
 coreVector2     g_vGameResolution = coreVector2(0.0f,0.0f);
-coreFloat       g_fGameRate       = 0.0f;
+coreDouble      g_adGameTime[2]   = {};
 coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
 coreBool        g_bTiltMode       = false;
 coreFloat       g_fShiftMode      = 0.0f;
@@ -34,18 +34,18 @@ STATIC_MEMORY(cEnvironment,    g_pEnvironment)
 STATIC_MEMORY(cMenu,           g_pMenu)
 STATIC_MEMORY(cGame,           g_pGame)
 
-static coreProtect<coreUint64> s_iOldPerfTime  = 0u;     // last measured high-precision time value
-static coreProtect<coreFloat>  s_fLogicalRate  = 0.0f;   // logical frame rate
-static coreProtect<coreFloat>  s_fLogicalTime  = 0.0f;   // logical frame time (simulation rate)
-static coreProtect<coreDouble> s_dPhysicalTime = 0.0;    // physical frame time (display rate)
-static coreUint8               s_iSkipMax      = 0u;     // 
-static coreUint8               s_iSkipFrame    = 0u;     // 
+static coreProtect<coreUint64> s_iOldPerfTime  = 0u;      // last measured high-precision time value
+static coreProtect<coreFloat>  s_fLogicalRate  = 0.0f;    // logical frame rate
+static coreProtect<coreFloat>  s_fLogicalTime  = 0.0f;    // logical frame time (simulation rate)
+static coreProtect<coreDouble> s_dPhysicalTime = 0.0;     // physical frame time (display rate)
+static coreBool                s_bUseLogical   = false;   // 
+static coreBool                s_bMenuMusic    = false;   // 
 
-static void LockFramerate();                             // lock frame rate
-static void ForceFramerate(const coreBool bFull);        // override frame time
-static void UpdateListener();                            // 
-static void ReshapeGame();                               // reshape and resize game
-static void DebugGame();                                 // debug and test game
+static void LockFramerate();                              // lock frame rate
+static void ForceFramerate(const coreBool bFull, const coreBool bUpdate);         // override frame time
+static void UpdateListener();                             // 
+static void ReshapeGame();                                // reshape and resize game
+static void DebugGame();                                  // debug and test game
 
 
 // ****************************************************************
@@ -74,10 +74,7 @@ void CoreApp::Init()
     InitAchievements();
     InitLeaderboards();
 
-    // load available music files
-    //g_MusicPlayer.AddMusicFolder ("data/music",              "*.ogg");
-    //g_MusicPlayer.AddMusicArchive("data/archives/pack1.cfa", "data/music/*.ogg");
-    //g_MusicPlayer.AddMusicArchive("data/archives/pack2.cfa", "data/music/*.ogg");
+    // load available music files (manually ordered)
     g_MusicPlayer.AddMusicFile("data/music/boss_00.ogg");
     g_MusicPlayer.AddMusicFile("data/music/boss_01.ogg");
     g_MusicPlayer.AddMusicFile("data/music/boss_02.ogg");
@@ -172,6 +169,12 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
+    if(!g_pMenu->IsPaused() && Core::Graphics->IsFrameSkipped())
+    {
+        ForceFramerate(false, false);
+        return;
+    }
+    
     Core::Debug->MeasureStart("Update Always");
     {
         const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
@@ -186,10 +189,7 @@ void CoreApp::Render()
     }
     Core::Debug->MeasureEnd("Update Always");
 
-    // 
-    if(++s_iSkipFrame >= s_iSkipMax) s_iSkipFrame = 0u;
-
-    if(!g_pMenu->IsPausedWithStep() && !s_iSkipFrame)
+    if(!g_pMenu->IsPausedWithStep())
     {
         Core::Debug->MeasureStart("Update");
         {
@@ -293,8 +293,8 @@ void CoreApp::Render()
     }
     glEnable(GL_DEPTH_TEST);
 
-    // override frame time (again)
-    ForceFramerate(false);
+    // override frame time (again, because of freeze)
+    ForceFramerate(false, false);
 }
 
 
@@ -304,10 +304,16 @@ void CoreApp::Move()
 {
     // reshape and resize game
     if(Core::System->GetWinSizeChanged()) ReshapeGame();
+    
+    s_bUseLogical = STATIC_ISVALID(g_pGame) &&
+                    !HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED) &&
+                    (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT) &&
+                    (!g_pGame->GetCurMission()->GetCurBoss() || !g_pGame->GetCurMission()->GetCurBoss()->HasStartup()) &&
+                    !g_pGame->GetInterface()->GetFakeEnd();
 
     // lock frame rate and override frame time
     LockFramerate();
-    ForceFramerate(true);
+    ForceFramerate(true, false);
 
     
     static coreFlow fBorder = 0.0f;
@@ -318,22 +324,21 @@ void CoreApp::Move()
 
     Core::Debug->MeasureStart("Move");
     {
-        const coreBool bWasPaused = g_pMenu->IsPaused();
-        
         // update input interface
         UpdateInput();
 
         // move the menu
         g_pMenu->Move();
-        
+
+        // 
+        Core::Manager::Object->SetUpdateCollision(!g_pMenu->IsPaused());
+
         if(!g_pMenu->IsPaused())
         {
-            if(bWasPaused) ForceFramerate(true);
+            // 
+            ForceFramerate(true, true);
             
                 g_pDistortion->Move();
-            
-            // 
-            g_pReplay->Update();
 
             // move the environment
             g_pEnvironment->Move();
@@ -363,13 +368,18 @@ void CoreApp::Move()
         g_pPostProcessing->Move();   // TODO 1: splitscreen value should not be updated outside of pause, but rest should
         
         
-    if(!STATIC_ISVALID(g_pGame) && !g_pSave->GetHeader().oProgress.bFirstPlay)
-    {
-        g_MusicPlayer.SelectName("menu.ogg");
-        
-        g_MusicPlayer.SetVolume(1.0f * MUSIC_VOLUME);
-        g_MusicPlayer.Play();
-    }
+        if(!STATIC_ISVALID(g_pGame) && !g_pSave->GetHeader().oProgress.bFirstPlay)
+        {
+            if(!s_bMenuMusic)
+            {
+                g_MusicPlayer.SelectName("menu.ogg");
+                s_bMenuMusic = true;
+            }
+            
+            g_MusicPlayer.SetVolume(1.0f * MUSIC_VOLUME);
+            g_MusicPlayer.Play();
+        }
+        else s_bMenuMusic = false;
 
         // update the music-player
         g_MusicPlayer.Update();
@@ -474,6 +484,10 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
     SDL_DisplayMode oMode = {};
     SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
+#if defined(_CORE_EMSCRIPTEN_)
+    if(!oMode.refresh_rate) oMode.refresh_rate = 60;
+#endif
+
     // 
     const coreUint32 iRefreshRate = (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
 
@@ -490,15 +504,16 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
         s_fLogicalTime  = coreFloat(1.0 / dFixedRate);
         s_dPhysicalTime = 1.0 / (dFixedRate * dGameSpeed);
 
-        s_iSkipMax   = oMode.refresh_rate ? (F_TO_UI(dFixedRate * dGameSpeed) / oMode.refresh_rate) : 0u;
-        s_iSkipFrame = s_iSkipMax;   // trigger render
+        const coreUint8 iSkip = oMode.refresh_rate ? (F_TO_UI(dFixedRate * dGameSpeed) / oMode.refresh_rate) : 0u;
+        Core::Graphics->SetSkipFrame(iSkip ? (iSkip - 1u) : 0u);
 
-        g_fGameRate = s_fLogicalRate;
+        g_adGameTime[0] = 1.0 / dFixedRate;
+        g_adGameTime[1] = s_dPhysicalTime;
     }
 
     // override vertical synchronization
     ASSERT(s_dPhysicalTime)
-    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC) && (oMode.refresh_rate == F_TO_SI(1.0 / s_dPhysicalTime)))
+    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC) && (oMode.refresh_rate * (1 + Core::Graphics->GetSkipFrame()) == F_TO_SI(1.0 / s_dPhysicalTime)))
     {
         SDL_GL_SetSwapInterval(1);
     }
@@ -519,7 +534,7 @@ FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq)
     ASSERT((fFreq > 0.0f) && (fFreq <= FRAMERATE_MIN))
 
     const coreFloat fLocal = s_fLogicalRate;
-    return RCP(ROUND(RCP(fFreq) * fLocal)) * fLocal;
+    return fLocal / ROUND(fLocal / fFreq);   // # normal division
 }
 
 
@@ -580,12 +595,12 @@ static void LockFramerate()
 
 // ****************************************************************
 // override frame time
-static void ForceFramerate(const coreBool bFull)
+static void ForceFramerate(const coreBool bFull, const coreBool bUpdate)
 {
     if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
     {
         // 
-        if(TIME) c_cast<coreFloat&>(TIME) = s_fLogicalTime;
+        if(!DEFINED(_CORE_DEBUG_) || TIME) c_cast<coreFloat&>(TIME) = s_bUseLogical ? coreFloat(s_fLogicalTime) : coreFloat(s_dPhysicalTime);
 
         if(bFull)
         {
@@ -593,7 +608,7 @@ static void ForceFramerate(const coreBool bFull)
             coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
             if(fFreezeTime)
             {
-                fFreezeTime = MAX0(fFreezeTime - TIME);
+                if(bUpdate) fFreezeTime = MAX0(fFreezeTime - TIME);
                 c_cast<coreFloat&>(TIME) *= 0.001f;
             }
 
@@ -602,8 +617,8 @@ static void ForceFramerate(const coreBool bFull)
             coreFloat& fSlowStrength = c_cast<coreFloat&>(g_pSpecialEffects->GetSlowStrength());
             if(fSlowTime || fSlowStrength)
             {
-                fSlowTime     = MAX0(fSlowTime - TIME);
-                fSlowStrength = fSlowTime ? 1.0f : MAX0(fSlowStrength - 0.3f * TIME);
+                if(bUpdate) fSlowTime     = MAX0(fSlowTime - TIME);
+                if(bUpdate) fSlowStrength = fSlowTime ? 1.0f : MAX0(fSlowStrength - 0.3f * TIME);
                 c_cast<coreFloat&>(TIME) *= LERPH3(1.0f, 0.1f, fSlowStrength);
             }
         }
@@ -662,6 +677,7 @@ static void ReshapeGame()
     {
         g_pDistortion->Update();
     });
+    coreFrameBuffer::EndDraw();
     }
     
 
@@ -690,12 +706,14 @@ static void DebugGame()
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;
-                oOptions.aaiWeapon [i][0] = cTeslaWeapon::ID;
+                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
                 oOptions.aaiSupport[i][0] = 0u;
             }
 
             const coreInt32* piMissionList = g_bDemoVersion ?            GAME_MISSION_LIST_DEMO  :            GAME_MISSION_LIST_MAIN;
             const coreUintW  iNumMissions  = g_bDemoVersion ? ARRAY_SIZE(GAME_MISSION_LIST_DEMO) : ARRAY_SIZE(GAME_MISSION_LIST_MAIN);
+
+            InitFramerate(GetCurUpdateFreq(), GetCurGameSpeed());
 
             #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, piMissionList, iNumMissions) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->Activate(); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
@@ -746,7 +764,7 @@ static void DebugGame()
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cSnowBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cMossBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cDarkBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cStomachBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(cNoBackground     ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
     }
 
     // set background movement
@@ -886,12 +904,9 @@ static void DebugGame()
         g_bDebugOutput = !g_bDebugOutput;
     }
 
-#endif
-
     // keep noise low
     if(SDL_GL_GetSwapInterval())
         SDL_Delay(1u);
-
 
     if(STATIC_ISVALID(g_pGame))
     {
@@ -909,6 +924,12 @@ static void DebugGame()
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))
     {
+        if(STATIC_ISVALID(g_pGame))
+        {
+            g_pGame->GetPlayer(0u)->SetMaxHealth(1);
+            g_pGame->GetPlayer(0u)->TakeDamage(1, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f));
+        }
+        
         //if(g_pEnvironment->GetBackground()->GetID() == cDarkBackground::ID)
         //{
         //    d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->Dissolve();
@@ -916,21 +937,27 @@ static void DebugGame()
         
         //if(STATIC_ISVALID(g_pGame)) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
         
+        //static coreBool bDense = false;
+        //if(g_pEnvironment->GetBackground()->GetID() == cSpaceBackground::ID)
+        //{
+        //    g_pEnvironment->GetBackground()->SetGroundDensity(0u, bDense ? 1.0f : 0.3f);
+        //    bDense = !bDense;
+        //}
         
-        if(STATIC_ISVALID(g_pGame))
-        {
-            static coreUint32 iScore = 0u;
-            iScore += 1u;
-            
-            static coreUint32 iTime = 100'000u;
-            ASSERT(iTime)
-            iTime -= 1'000u;
-            
-            //UploadLeaderboardsArcade(iScore, iTime);
-            
-            Core::Debug->InspectValue("Score", iScore);
-            Core::Debug->InspectValue("Time",  iTime);
-        }
+        //if(STATIC_ISVALID(g_pGame))
+        //{
+        //    static coreUint32 iScore = 0u;
+        //    iScore += 1u;
+        //    
+        //    static coreUint32 iTime = 100'000u;
+        //    ASSERT(iTime)
+        //    iTime -= 1'000u;
+        //    
+        //    //UploadLeaderboardsArcade(iScore, iTime);
+        //    
+        //    Core::Debug->InspectValue("Score", iScore);
+        //    Core::Debug->InspectValue("Time",  iTime);
+        //}
         
         //if(STATIC_ISVALID(g_pGame) && g_pGame->GetCurMission()->GetCurBoss())
         //{
@@ -946,4 +973,6 @@ static void DebugGame()
     Core::Debug->InspectValue("Queue", coreUint32(g_pSave->GetScoreQueue()->size()));
     
     Core::Debug->InspectValue("Fly Offset", g_pEnvironment->GetFlyOffset());
+
+#endif
 }

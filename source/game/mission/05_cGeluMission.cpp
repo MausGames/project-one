@@ -20,6 +20,7 @@ cGeluMission::cGeluMission()noexcept
 , m_iWayVisible    (0u)
 , m_iWayGhost      (0u)
 , m_iWayFree       (0u)
+, m_bWaySpooky     (false)
 , m_Orb            (GELU_ORBS)
 , m_afOrbTime      {}
 , m_Line           (GELU_LINES)
@@ -41,7 +42,7 @@ cGeluMission::cGeluMission()noexcept
 , m_abCrushInside  {}
 , m_iCrushState    (0u)
 , m_fAnimation     (0.0f)
-, m_bStory         (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_GELU))
+, m_bStory         (!HAS_BIT_EX(REPLAY_WRAP_PROGRESS_STATE, STATE_STORY_GELU) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 {
     // 
     m_apBoss[0] = &m_Chol;
@@ -219,7 +220,7 @@ cGeluMission::cGeluMission()noexcept
     m_Surfer.DefineProgram  ("effect_energy_flat_invert_program");
     m_Surfer.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.5f);
     m_Surfer.SetTexSize     (coreVector2(1.0f,1.0f) * 0.4f);
-    m_Surfer.Configure      (1000, 0u, COLOR_ENERGY_YELLOW * 0.8f);
+    m_Surfer.Configure      (1000, COLOR_ENERGY_YELLOW * 0.8f);
     m_Surfer.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_TOP | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
 
     // 
@@ -726,9 +727,9 @@ void cGeluMission::__MoveOwnAfter()
         m_avOldPos[i] = oFang.GetPosition().xy();   // old frozen
 
         // 
-        const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
+        if(oFang.GetAlpha() && g_pForeground->IsVisibleObject(&oFang))
         {
-            if(g_pForeground->IsVisiblePoint(pBullet->GetPosition().xy(), 1.05f) && oFang.GetAlpha())
+            const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
             {
                 const coreVector2 vDiff = pBullet->GetPosition().xy() - oFang.GetPosition().xy();
 
@@ -745,9 +746,9 @@ void cGeluMission::__MoveOwnAfter()
                         g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
                     }
                 }
-            }
-        };
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletFangCollFunc);
+            };
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletFangCollFunc);
+        }
     }
 
     // 
@@ -793,8 +794,8 @@ void cGeluMission::__MoveOwnAfter()
 
         // 
         const coreFloat fOffset  = I_TO_F(i) * (1.0f/7.0f);
-        const coreBool  bVisible = HAS_BIT(m_iWayVisible, i);
-        const coreBool  bGhost   = HAS_BIT(m_iWayGhost,   i);
+        const coreBool  bVisible = HAS_BIT(m_iWayVisible, i) || (m_bWaySpooky &&  HAS_BIT(m_iWayActive,  i));
+        const coreBool  bGhost   = HAS_BIT(m_iWayGhost,   i) || (m_bWaySpooky && !HAS_BIT(m_iWayVisible, i));
         const coreBool  bFree    = HAS_BIT(m_iWayFree,    i);
 
         // 

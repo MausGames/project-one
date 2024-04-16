@@ -28,8 +28,8 @@ cCombatText::cCombatText()noexcept
 , m_fAlpha        (0.0f)
 {
     // create label objects
-    for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) {m_aLabel[i].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL); m_aLabel[i].PregenerateTexture("00000");}
-    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) {m_aLabel[i].Construct(MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL); m_aLabel[i].PregenerateTexture("00000");}
+    for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    for(coreUintW i = COMBAT_LABELS_SMALL; i < COMBAT_LABELS;       ++i) m_aLabel[i].Construct(MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
 
     for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
     {

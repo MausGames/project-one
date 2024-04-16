@@ -11,7 +11,6 @@
 #define _P1_GUARD_WEAPON_H_
 
 // TODO 3: weapons may have to share their cooldown (not relevant on single-weapon setup)
-// TODO 4: remove render functions if not required
 // TODO 1: sound and visual effect for charging pulse
 
 
@@ -19,7 +18,7 @@
 // weapon definitions
 #define WEAPON_MODES         (1u)     // 
 #define WEAPON_PULSE_CHARGE  (4.0f)   // 
-#define WEAPON_TESLA_TARGETS (3u)     // 
+#define WEAPON_TESLA_TARGETS (1u)     // 
 
 
 // ****************************************************************
@@ -54,7 +53,8 @@ public:
     void Prefetch();
 
     // set object properties
-    inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
+    inline void SetCooldownTime(const coreFloat fTime) {m_CooldownTimer.SetValue(fTime);}
+    inline void SetOwner       (cPlayer* pOwner)       {m_pOwner = pOwner;}
 
     // get object properties
     inline  coreBool         GetCooldown     ()const {return m_CooldownTimer.GetStatus();}
@@ -233,6 +233,7 @@ public:
 private:
     // execute own routines
     void __TriggerOwn (const coreUint8 iMode)final;
+    void __ReleaseOwn (const coreUint8 iMode)final;
     void __ShootOwn   ()final;
     void __PrefetchOwn()final;
 };

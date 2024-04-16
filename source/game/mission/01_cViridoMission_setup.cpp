@@ -99,9 +99,7 @@ void cViridoMission::__SetupOwn()
     // TASK: kill enemy with reflected bullet
     // ACHIEVEMENT: reflect a single bullet at least 20 times
     // TODO 1: hard mode: reflektierte geschosse verursachen schaden
-    // TODO 1: man kann durch große rotierende schilde schießen wenn man ganz am rand ist
     // TODO 1: drum shield needs blink!
-    // TODO 1: it's still possible to shoot very flat bullets through the shield while grinding it (e.g. pulse blast)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fWidth       = 0.38f;
@@ -137,7 +135,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(10, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(10, COLOR_SHIP_CYAN);
             });
         });
 
@@ -262,6 +260,8 @@ void cViridoMission::__SetupOwn()
                 this->EnableBarrier( 7u, pSquad1->GetEnemy(37u), coreVector2( 0.0f, 1.0f), 4.0f);
                 this->EnableBarrier( 8u, pSquad1->GetEnemy(38u), coreVector2( 0.0f, 1.0f), 4.0f);
                 this->EnableBarrier( 9u, pSquad1->GetEnemy(39u), coreVector2( 0.0f, 1.0f), 4.0f);
+
+                this->SetBarrierIgnore(false);
             }
             else if(STAGE_SUB(10u))
             {
@@ -300,7 +300,8 @@ void cViridoMission::__SetupOwn()
                     this->DisableBarrier(20u, false);
                 }
 
-                this->SetBarrierRange(1.3f);
+                this->SetBarrierRange (1.3f);
+                this->SetBarrierIgnore(true);
             }
         }
 
@@ -482,7 +483,7 @@ void cViridoMission::__SetupOwn()
             {
                 const coreFloat   fSide = (i < 36u) ? 1.0f : -1.0f;
                 const coreVector2 vDir  = coreVector2::Direction((fLifeTime * (g_pGame->IsEasy() ? 1.5f : 2.0f) - I_TO_F((i - 32u) % 4u) * ((i < 36u) ? (0.25f*PI) : (0.5f*PI))) * fSide);
-                const coreFloat   fLen  = LERPB(1.7f, 0.6f, MIN1(fLifeTime * 0.5f)) * FOREGROUND_AREA.x;
+                const coreFloat   fLen  = LERPB(1.85f, 0.6f, MIN1(fLifeTime * 0.5f)) * FOREGROUND_AREA.x;
 
                 pEnemy->SetPosition (coreVector3(vDir * fLen,  0.0f));
                 pEnemy->SetDirection(coreVector3(vDir * -1.0f, 0.0f));
@@ -581,7 +582,7 @@ void cViridoMission::__SetupOwn()
                         if(bEffectTick)
                         {
                             const coreVector2 vPos = oBarrier.GetPosition().xy() + oBarrier.GetDirection().xy().Rotated90() * (I_TO_F((s_iTick * 4u) % 15u) - 7.0f);
-                            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 0.0f, 1u, COLOR_ENERGY_RED);
+                            if(g_pForeground->IsVisiblePoint(vPos)) g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 0.0f, 1u, COLOR_ENERGY_RED);
                         }
                     }
                 }
@@ -603,6 +604,7 @@ void cViridoMission::__SetupOwn()
                 case cRayBullet  ::ID: iSize = sizeof(cRayBullet);   break;
                 case cPulseBullet::ID: iSize = sizeof(cPulseBullet); break;
                 case cSurgeBullet::ID: iSize = sizeof(cSurgeBullet); break;
+                case cTeslaBullet::ID: iSize = sizeof(cTeslaBullet); break;
                 }
 
                 const coreUintW iIndex = (P_TO_UI(pBullet) / iSize) % iReflectWrap;
@@ -662,7 +664,8 @@ void cViridoMission::__SetupOwn()
         for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
             this->DisableBarrier(i, false);
 
-        this->SetBarrierRange(1.0f);
+        this->SetBarrierRange (1.0f);
+        this->SetBarrierIgnore(true);
 
         STAGE_FINISH_NOW
     });
@@ -722,7 +725,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(30, COLOR_SHIP_PURPLE);
             });
         });
 
@@ -1244,9 +1247,9 @@ void cViridoMission::__SetupOwn()
     // TASK: fly over marked shadows
     // TASK: jump over big enemy
     // TASK EXTRA: kill all single-jumpers
+    // ACHIEVEMENT: do not move while enemies are in the air
     // TODO 1: hardmode: enemies attack from the air
     // TODO 1: wave bullets sollten sich schön überlagern bei 2x2
-    // TODO 1: spieler geschosse sollten über gegner geschosse gezeichnet werden, wenn er in der luft ist
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData   = 12u;
@@ -1262,12 +1265,12 @@ void cViridoMission::__SetupOwn()
                 if(i == iBigIndex)
                 {
                     pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.8f);
-                    pEnemy->Configure(200 + 100, 0u, COLOR_SHIP_ORANGE);
+                    pEnemy->Configure(200 + 100, COLOR_SHIP_ORANGE);
                 }
                 else
                 {
                     pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                    pEnemy->Configure(10, 0u, COLOR_SHIP_ORANGE);
+                    pEnemy->Configure(10, COLOR_SHIP_ORANGE);
                 }
 
                 pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_GHOST_PLAYER);
@@ -1519,13 +1522,11 @@ void cViridoMission::__SetupOwn()
             const coreBool bHop    = (i >= 53u && i < 67u);
             const coreBool bSingle = (i >= 20u && i < 25u);
 
-            
-            if(i == iBigIndex)   // TODO 1
+            if(i == iBigIndex)
             {
                 const coreBool bPillar = ((fWait < (fWaitSpeed * fEasySpeed)) && !pEnemy->ReachedDeath());
 
-                pEnemy->DefineVolume        (bPillar ? "object_sphere.md3" : "ship_enemy_scout_volume.md3");
-                pEnemy->SetCollisionModifier(bPillar ? coreVector3(3.0f,3.0f,40.0f) : coreVector3(1.0f,1.0f,1.0f));
+                pEnemy->SetCollisionModifier(bPillar ? coreVector3(2.0f,2.0f,40.0f) : coreVector3(1.0f,1.0f,1.0f));
 
                 if(pEnemy->ReachedDeath())
                 {
@@ -1547,7 +1548,6 @@ void cViridoMission::__SetupOwn()
                     }
                 }
             }
-            
 
             if(STAGE_LIFETIME_AFTER(0.0f) && !pEnemy->ReachedDeath())
             {
@@ -1830,7 +1830,6 @@ void cViridoMission::__SetupOwn()
 
                             if(!vDiff1.IsNull() && !vDiff2.IsNull() && (coreVector2::Dot(vDiff1, vDiff2) > 0.0f))
                             {
-                                pBig->DefineVolume        ("ship_enemy_scout_volume.md3");   // TODO 1
                                 pBig->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 0.9f);
 
                                 const coreVector3 vRayPos = coreVector3(avPlayerPos[i],      0.0f);
@@ -1971,7 +1970,7 @@ void cViridoMission::__SetupOwn()
                 const coreBool bStuck = nIsStuckFunc(i);
 
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * ((i == iBounceIndex) ? 2.5f : 1.7f));
-                pEnemy->Configure((i == iBounceIndex) ? 200 : 10, 0u, bStuck ? COLOR_SHIP_BLACK : COLOR_SHIP_YELLOW, false, bStuck);
+                pEnemy->Configure((i == iBounceIndex) ? 200 : 10, bStuck ? COLOR_SHIP_BLACK : COLOR_SHIP_YELLOW, false, bStuck);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_IMMORTAL);
             });
         });
@@ -2419,7 +2418,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(30, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
             });
         });
@@ -2429,7 +2428,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -2715,12 +2714,12 @@ void cViridoMission::__SetupOwn()
             case 2u: vNewPos = vNewPos * coreVector2( 1.0f,1.0f) + coreVector2(-1.0f, 0.0f) * 1.9f; vNewRefPos = coreVector2(-1.0f, 0.0f) * 3.0f; break;
             }
 
-            vNewPos = LERPB(vNewRefPos, vNewPos, MIN1(fLifeTime * 0.5f));
+            vNewPos = LERPB(vNewRefPos, vNewPos, MIN1(fLifeTime * 0.7f));
 
             const coreVector2 vNewDir = coreVector2::Direction(fLifeTime * (2.0f*PI));
 
-            pEnemy->SetPosition (coreVector3(vNewPos * FOREGROUND_AREA, 0.0f));
-            pEnemy->SetDirection(coreVector3(vNewDir,                   0.0f));
+            pEnemy->SetPosition (coreVector3(vNewPos * FOREGROUND_AREA + vNewDir * 0.5f, 0.0f));   // # to remove the wobbling here, but should not be fixed in general
+            pEnemy->SetDirection(coreVector3(vNewDir,                                    0.0f));
 
             if(pEnemy->ReachedDeath())
             {
@@ -2796,7 +2795,7 @@ void cViridoMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(50, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(50, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
 
                 pEnemy->Resurrect();
@@ -2942,7 +2941,7 @@ void cViridoMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Torus, {145.0f, 215.0f, 290.0, 360.0f, 720.0f})   // + 5
+        STAGE_BOSS(m_Torus, {145.0f, 215.0f, 290.0, 360.0f, 720.0f})   // +5
     },
     STAGE_PRE()
     {

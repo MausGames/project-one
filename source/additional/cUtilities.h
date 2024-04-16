@@ -247,7 +247,7 @@ template <typename T, typename S, typename R> inline FUNC_LOCAL T ParaLerp(const
 // 
 inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 {
-    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);   // TODO 1: trotzdem noch issue mit step-size, bräuchte man kurven-inkrement, aber an der stelle wo man den wert verwendet
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);   // TODO 1: trotzdem noch issue mit step-size, bräuchte man kurven-inkrement, aber an der stelle wo man den wert verwendet [RP]
 }
 
 
@@ -262,8 +262,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
     return coreVector2::Direction(SmoothAimAngle(vOldDir.Angle(), vNewDir.Angle(), fStrength));
-}
-// gegen ende der kurve isses so langsam, dass es nie sein ziel trifft
+} // TODO 1: gegen ende der kurve isses so langsam, dass es nie sein ziel trifft
 
 
 // ****************************************************************
@@ -271,7 +270,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 constexpr FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
     ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
-    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));   // TODO 1: nicht framerate unabhängig (innerhalb des thresholds), je höher die FPS, desto langsamer (sanfter) ist die bewegung innerhalb des thresholds
+    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));   // TODO 1: nicht framerate unabhängig (innerhalb des thresholds), je höher die FPS, desto langsamer (sanfter) ist die bewegung innerhalb des thresholds [RP]
 }
 
 
@@ -299,6 +298,29 @@ constexpr FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
     case 6u: return coreVector2( 1.0f, 0.0f);
     case 7u: return coreVector2( 1.0f, 1.0f) * (1.0f/SQRT2);
     case 8u: return coreVector2( 0.0f, 0.0f);
+    }
+}
+
+
+// ****************************************************************
+// 
+constexpr FUNC_CONST coreUint8 StepInvertedX(const coreUint8 iPack)
+{
+    // 7 0 1
+    // 6 8 2
+    // 5 4 3
+    switch(iPack)
+    {
+    default: UNREACHABLE
+    case 0u: return 0u;
+    case 1u: return 7u;
+    case 2u: return 6u;
+    case 3u: return 5u;
+    case 4u: return 4u;
+    case 5u: return 3u;
+    case 6u: return 2u;
+    case 7u: return 1u;
+    case 8u: return 8u;
     }
 }
 
@@ -526,7 +548,7 @@ constexpr FUNC_CONST coreFloat MaxAspectRatio(const coreVector2 vVector)
 // 
 inline FUNC_LOCAL coreVector2 GetTranslation(const coreObject2D& oObject)
 {
-    return coreVector2(oObject.GetTransform()._31, oObject.GetTransform()._32);
+    return oObject.GetScreenPosition();
 }
 
 inline FUNC_PURE coreVector2 GetTranslationArea(const coreObject2D& oObject)

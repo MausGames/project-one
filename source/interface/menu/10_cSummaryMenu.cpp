@@ -21,6 +21,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 , m_iOtherShift      (0)
 , m_iOtherNumMission (0u)
 , m_iOtherNumMedal   (0u)
+, m_iOtherStart      (0xFFu)
 , m_iSelection       (0u)
 , m_afSignalTime     {}
 , m_iSignalActive    (0u)
@@ -29,6 +30,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 , m_fTimeShift       (0.0f)
 , m_fFinalSpinOld    (0.0f)
 , m_eState           (SUMMARY_INTRO)
+, m_bHasReplay       (false)
 {
     // create menu objects
     m_BackgroundMain.DefineTexture(0u, "menu_detail_04.png");
@@ -74,7 +76,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     
     
     m_ArcadeLayer.DefineTexture(0u, "menu_background_black.png");
-    m_ArcadeLayer.DefineProgram("menu_grey_program");
+    m_ArcadeLayer.DefineProgram("menu_grey_vignette_program");
     m_ArcadeLayer.SetColor3    (coreVector3(0.6f,0.6f,0.6f));
     m_ArcadeLayer.SetSize      (coreVector2(1.0f,1.0f));
     m_ArcadeLayer.SetTexSize   (coreVector2(1.2f,1.2f));
@@ -357,7 +359,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     
 
     // 
-    m_Navigator.BindObject(NULL,           &m_NextButton,  NULL, &m_ExitButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(NULL,           &m_NextButton,  NULL, &m_NextButton,  NULL, MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_NextButton,  &m_ExitButton,  NULL, &m_AgainButton, NULL, MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_AgainButton, &m_NextButton,  NULL, &m_ExitButton,  NULL, MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_ExitButton,  &m_AgainButton, NULL, &m_NextButton,  NULL, MENU_TYPE_DEFAULT);
@@ -518,9 +520,19 @@ void cSummaryMenu::Move()
         {
             constexpr coreFloat fSpinFrom = 1.0f;
             
+            cReplayMenu::HandleSaveError([this](const coreUint8 iAnswer)
+            {
+                if(iAnswer == MSGBOX_ANSWER_YES)
+                {
+                    if(!g_pReplay->SaveFile(0u)) return;
+                }
+
+                g_pReplay->ResetStatus();
+                m_eState = SUMMARY_OUTRO;
+            });
             
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= fSpinFrom + 0.1f * I_TO_F(m_iOtherNumMission) + 0.05f * I_TO_F(m_iOtherNumMedal) + 1.45f + 1.0f) && (m_eState != SUMMARY_OUTRO) && g_MenuInput.bAny)
+            if((m_fIntroTimer >= fSpinFrom + 0.1f * I_TO_F(m_iOtherNumMission) + 0.05f * I_TO_F(m_iOtherNumMedal) + 1.45f + 1.0f) && (m_eState != SUMMARY_OUTRO) && (m_eState != SUMMARY_WAIT) && g_MenuInput.bAny)
             {
                 if(!this->GetTransition().GetStatus())
                 {
@@ -538,8 +550,30 @@ void cSummaryMenu::Move()
                         }
                         else
                         {
-                            m_eState = SUMMARY_OUTRO;
-                            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_YES);
+                            if(m_bHasReplay)
+                            {
+                                m_eState = SUMMARY_WAIT;
+                                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_SAVE"), [this](const coreInt32 iAnswer)
+                                {
+                                    if(iAnswer == MSGBOX_ANSWER_YES)
+                                    {
+                                    #if defined(REPLAY_SLOTSYSTEM)
+                                        m_iStatus = 106;
+                                        return;
+                                    #else
+                                        g_pReplay->SetNameDefault();
+                                        if(!g_pReplay->SaveFile(0u)) return;
+                                    #endif
+                                    }
+
+                                    m_eState = SUMMARY_OUTRO;
+                                });
+                            }
+                            else
+                            {
+                                m_eState = SUMMARY_OUTRO;
+                                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_YES);
+                            }
                         }
                     }
                 }
@@ -609,12 +643,16 @@ void cSummaryMenu::Move()
                 const coreUintW iAterOffset  = (i == MISSION_ATER) ? 5u : 0u;   // ignore segment medals
                 const coreUintW iAterOffset2 = (i == MISSION_ATER) ? 1u : 0u;   // ignore mission medal
 
-                const coreFloat fThreshold = (i * (MENU_SUMMARY_MEDALS + 1u) + MENU_SUMMARY_MEDALS - iAterOffset < m_iOtherNumMedal) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(MENU_SUMMARY_MEDALS + i * (MENU_SUMMARY_MEDALS + 1u) - iAterOffset)) : 1000.0f;
+                const coreUintW iFirst = i * (MENU_SUMMARY_MEDALS + 1u);
+
+                const coreUint8 iIndex     = iFirst + MENU_SUMMARY_MEDALS - iAterOffset;
+                const coreFloat fThreshold = ((iIndex < m_iOtherStart + m_iOtherNumMedal) && (iIndex >= m_iOtherStart)) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(MENU_SUMMARY_MEDALS + iFirst - m_iOtherStart - iAterOffset)) : 10000.0f;
                 nBlendMedalFunc(&m_aArcadeMedalMission[i], 0.07f, fThreshold, SOUND_SUMMARY_MEDAL);
 
                 for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j)
                 {
-                    const coreFloat fThreshold2 = (i * (MENU_SUMMARY_MEDALS + 1u) + j + iAterOffset2 < m_iOtherNumMedal) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(j + i * (MENU_SUMMARY_MEDALS + 1u))) : 1000.0f;
+                    const coreUint8 iIndex2     = iFirst + j + iAterOffset2;
+                    const coreFloat fThreshold2 = ((iIndex2 < m_iOtherStart + m_iOtherNumMedal) && (iIndex2 >= m_iOtherStart)) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(j + iFirst - m_iOtherStart)) : 10000.0f;
                     nBlendMedalFunc(&m_aaArcadeMedalSegment[i][j], 0.05f, fThreshold2, SOUND_SUMMARY_MEDAL);
                 }
             }
@@ -666,24 +704,25 @@ void cSummaryMenu::Move()
             nBlendMedalFunc(&m_ArcadeTotalMedal, 0.13f, fThreshold3, SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]));
 
             // 
-            m_ArcadeLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
+            m_ArcadeLayer.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
             
             
             
-            const coreFloat fRotation = coreFloat(Core::System->GetTotalTime());
+            const coreFloat fRotation1 = Core::System->GetTotalTimeFloat(20.0);
+            const coreFloat fRotation2 = Core::System->GetTotalTimeFloat(2.0f*PI);
 
             for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
             {
-                m_aArcadeIcon    [i].SetDirection(coreVector2::Direction(fRotation *  (0.2f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
+                m_aArcadeIcon    [i].SetDirection(coreVector2::Direction(fRotation1 *  (0.2f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
                 m_aArcadeIcon    [i].Move();
-                m_aArcadeIconBack[i].SetDirection(coreVector2::Direction(fRotation * (-0.1f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
+                m_aArcadeIconBack[i].SetDirection(coreVector2::Direction(fRotation1 * (-0.1f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
                 m_aArcadeIconBack[i].Move();
             }
             
     
             for(coreUintW i = 0u; i < MENU_SUMMARY_RUNS; ++i)
             {
-                m_aContinueImage[i].SetDirection(coreVector2::Direction(coreFloat(Core::System->GetTotalTime()) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_RUNS))));
+                m_aContinueImage[i].SetDirection(coreVector2::Direction(fRotation2 + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_RUNS))));
                 m_aContinueImage[i].SetAlpha    (m_aContinueImage[i].GetAlpha() * fBlendOut);
             }
         }
@@ -1056,7 +1095,7 @@ void cSummaryMenu::Move()
             cMenu::UpdateButton(&m_AgainButton, &m_Navigator, m_AgainButton.IsFocused());
             cMenu::UpdateButton(&m_ExitButton,  &m_Navigator, m_ExitButton .IsFocused());
             
-            const coreFloat fRotation = coreFloat(Core::System->GetTotalTime());
+            const coreFloat fRotation = Core::System->GetTotalTimeFloat(2.0f*PI);
 
             for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i)
             {
@@ -1203,7 +1242,7 @@ void cSummaryMenu::Move()
     }
 
     // 
-    const coreFloat fScale = 1.0f + 0.1f * SIN(coreFloat(Core::System->GetTotalTime()) * (2.0f*PI));
+    const coreFloat fScale = 1.0f + 0.1f * SIN(Core::System->GetTotalTimeFloat(1.0) * (2.0f*PI));
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRecord); ++i) m_aRecord[i].SetScale(coreVector2(1.0f,1.0f) * fScale);
 }
 
@@ -1218,7 +1257,9 @@ void cSummaryMenu::ShowArcade()
     this->__ResetState();
 
     // 
-    const coreUint16 iContinuesUsed = g_pGame->GetPlayer(0u)->GetDataTable()->GetCounterTotal().iContinuesUsed;
+    const cDataTable* pTable         = g_pGame->GetPlayer(0u)->GetDataTable();
+    const coreUint16  iContinuesUsed = pTable->GetCounterTotal().iContinuesUsed;
+    ASSERT(iContinuesUsed < MENU_SUMMARY_RUNS)
 
     // 
     coreUint32 aiScoreFull[MENU_SUMMARY_RUNS] = {};
@@ -1247,7 +1288,10 @@ void cSummaryMenu::ShowArcade()
 
         // 
         const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftMission(i);
-        const coreFloat fTime  = g_pGame->GetTimeTable()->GetTimeMission (i);
+        const coreFloat fTime  = FloorFactor(g_pGame->GetTimeTable()->GetTimeMission(i), GAME_GOAL_FACTOR);
+
+        // 
+        const coreBool bValid = (fTime || (i == g_pGame->GetCurMissionIndex()));
 
         // 
         for(coreUintW j = 0u; j < MENU_SUMMARY_RUNS; ++j)
@@ -1260,14 +1304,14 @@ void cSummaryMenu::ShowArcade()
         }
 
         // 
-        m_aArcadeTime[i].SetText(PRINT("%.1f %+d", fTime, iShift));
+        m_aArcadeTime[i].SetText(bValid ? PRINT("%.1f %+d", fTime, iShift) : "");
 
         // 
         m_fOtherTime  += fTime;
         m_iOtherShift += iShift;
 
         // 
-        const coreUint8 iMedalMission = DEFINED(_CORE_DEBUG_) ? MEDAL_BRONZE : g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalMission(i);
+        const coreUint8 iMedalMission = pTable->GetMedalMission(i);
 
         // 
         cMenu::ApplyMedalTexture(&m_aArcadeMedalMission[i], iMedalMission, MEDAL_TYPE_MISSION, true);
@@ -1280,11 +1324,14 @@ void cSummaryMenu::ShowArcade()
         {
             // 
             const coreUintW iIndex        = j + (bAter ? 5u : 0u);
-            const coreUint8 iMedalSegment = DEFINED(_CORE_DEBUG_) ? MEDAL_BRONZE : g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(i, iIndex);
+            const coreUint8 iMedalSegment = pTable->GetMedalSegment(i, iIndex);
 
             // 
             cMenu::ApplyMedalTexture(&m_aaArcadeMedalSegment[i][j], iMedalSegment, MISSION_SEGMENT_IS_BOSS(iIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
             if(iMedalSegment) m_iOtherNumMedal += 1u;
+
+            // 
+            if((m_iOtherStart == 0xFFu) && iMedalSegment) m_iOtherStart = iMedalCount + i;
 
             // 
             iMedalTotal += MAX(iMedalSegment, MEDAL_BRONZE);
@@ -1296,7 +1343,7 @@ void cSummaryMenu::ShowArcade()
         iShiftBad  += g_pGame->GetTimeTable()->GetShiftBadMission (i);
 
         // 
-        if(fTime || DEFINED(_CORE_DEBUG_)) m_iOtherNumMission += 1u;
+        if(bValid) m_iOtherNumMission = MAX(m_iOtherNumMission, i + 1u);
     }
 
     // 
@@ -1330,33 +1377,31 @@ void cSummaryMenu::ShowArcade()
     }
 
     // 
-    const coreUint8 iMedal = iMedalCount ? (iMedalTotal / iMedalCount) : MEDAL_NONE;
+    const coreUint8 iMedal = iMedalCount ? MIN<coreUint8>((iMedalTotal + MEDAL_MARGIN_ARCADE) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;
 
     // 
-    cMenu::ApplyMedalTexture(&m_ArcadeTotalMedal, iMedal, MEDAL_TYPE_ARCADE, true);
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetDataTable()->GiveMedalArade(iMedal);
+    });
+
+    // 
+    cMenu::ApplyMedalTexture(&m_ArcadeTotalMedal, iMedal, MEDAL_TYPE_ARCADE, false);
     m_aiApplyMedal[0] = iMedal;
 
     // 
-    g_pSave->EditGlobalStats     ()->aiMedalsEarned[iMedal] += 1u;
-    g_pSave->EditLocalStatsArcade()->aiMedalsEarned[iMedal] += 1u;
-
-    // 
-    coreUint8& iMedalArcade = g_pSave->EditProgress()->aaaiMedalArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
-    iMedalArcade = MAX(iMedalArcade, iMedal);
-
-    // 
-    const coreBool bComplete     = (g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(MISSION_ATER, 6u) != MEDAL_NONE);
-    const coreBool bNearComplete = (g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(MISSION_ATER, 5u) != MEDAL_NONE);
+    const coreBool bComplete     = (pTable->GetMedalSegment(MISSION_INTRO, 0u) != MEDAL_NONE) && (pTable->GetMedalSegment(MISSION_ATER, 6u) != MEDAL_NONE);
+    const coreBool bNearComplete = (pTable->GetMedalSegment(MISSION_INTRO, 0u) != MEDAL_NONE) && (pTable->GetMedalSegment(MISSION_ATER, 5u) != MEDAL_NONE);
 
     // 
     const auto&      oStats     = g_pSave->GetHeader().aaaLocalStatsArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
     const coreUint32 iBestScore = oStats.iScoreBest;
     const coreInt32  iBestShift = coreInt32(oStats.iTimeBestShiftBad) - coreInt32(oStats.iTimeBestShiftGood);
-    const coreFloat  fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), 10.0f);
+    const coreFloat  fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), GAME_GOAL_FACTOR);
 
     // 
-    m_aArcadeTotalBest[0].SetText(coreData::ToChars(MAX(m_iFinalValue, iBestScore)));
-    m_aArcadeTotalBest[1].SetText(bComplete ? PRINT("%.1f %+d", m_fOtherTime, m_iOtherShift) : "");
+    m_aArcadeTotalBest[0].SetText(coreData::ToChars((g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK) ? MAX(m_iFinalValue, iBestScore) : iBestScore));
+    m_aArcadeTotalBest[1].SetText(bComplete ? PRINT("%.1f %+d", fBestTime, iBestShift) : "");
 
     // 
     const coreUint8* piShield       = g_pGame->GetOptions().aiShield;
@@ -1377,7 +1422,7 @@ void cSummaryMenu::ShowArcade()
     m_ArcadeOptions.SetText(pcOption);
 
     // 
-    SET_BIT(m_iSignalActive, 6u, (m_iFinalValue > iBestScore))
+    SET_BIT(m_iSignalActive, 6u, (m_iFinalValue > iBestScore) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
     SET_BIT(m_iSignalActive, 7u, (false))
 
     // 
@@ -1398,9 +1443,9 @@ void cSummaryMenu::ShowArcade()
         const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(m_fOtherTime + I_TO_F(iShiftBad) - I_TO_F(iShiftGood));
         if(iTimeShiftedUint - 1u < g_pSave->EditLocalStatsArcade()->iTimeBestShifted - 1u)
         {
-            m_aArcadeTotalBest[1].SetText(PRINT("%.1f %+d", fBestTime, iBestShift));
+            if(g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK) m_aArcadeTotalBest[1].SetText(PRINT("%.1f %+d", m_fOtherTime, m_iOtherShift));
 
-            ADD_BIT(m_iSignalActive, 7u)
+            SET_BIT(m_iSignalActive, 7u, (true) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 
             g_pSave->EditLocalStatsArcade()->iTimeBestShifted   = iTimeShiftedUint;
             g_pSave->EditLocalStatsArcade()->iTimeBestShiftGood = iShiftGood;
@@ -1429,8 +1474,24 @@ void cSummaryMenu::ShowArcade()
         }
     }
 
-    // 
-    UploadLeaderboardsArcade(m_iFinalValue, bComplete ? (TABLE_TIME_TO_UINT(m_fOtherTime + I_TO_F(iShiftBad) - I_TO_F(iShiftGood))) : 0u);
+    if(DEFINED(_CORE_DEBUG_) || m_iOtherNumMedal)
+    {
+        coreByte*  pReplayData = NULL;
+        coreUint32 iReplaySize = 0u;
+
+        // 
+        if((g_pReplay->GetMode() == REPLAY_MODE_RECORDING) && g_pReplay->HasData())
+        {
+            g_pReplay->EndRecording();
+            g_pReplay->SaveData(&pReplayData, &iReplaySize);
+
+            m_bHasReplay = true;
+        }
+
+        // 
+        UploadLeaderboardsArcade(m_iFinalValue, bComplete ? (TABLE_TIME_TO_UINT(m_fOtherTime + I_TO_F(iShiftBad) - I_TO_F(iShiftGood))) : 0u, &pReplayData, iReplaySize);
+        SAFE_DELETE_ARRAY(pReplayData)
+    }
 
     // 
     g_pSave->SaveFile();
@@ -1454,6 +1515,7 @@ void cSummaryMenu::ShowMission()
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    const coreBool  bAter         = (iMissionIndex == MISSION_ATER);
 
     // 
     m_aHeader[0].SetText(PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetMissionLetters(iMissionIndex)));
@@ -1467,14 +1529,15 @@ void cSummaryMenu::ShowMission()
     coreUint32 iBonusMedal = 0u;
     coreUint16 iMedalTotal = 0u;
     coreUint8  iMedalCount = 0u;
-    for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i)
+    for(coreUintW i = 0u, ie = bAter ? 2u : MENU_SUMMARY_MEDALS; i < ie; ++i)
     {
-        const coreUint8 iMedalSegment = g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(iMissionIndex, i);
+        const coreUintW iIndex        = i + (bAter ? 5u : 0u);
+        const coreUint8 iMedalSegment = g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(iMissionIndex, iIndex);
 
         // 
         iBonusMedal += cGame::CalcBonusMedal(iMedalSegment);
         iMedalTotal += iMedalSegment;
-        iMedalCount += iMedalSegment ? 1u : 0u;
+        iMedalCount += 1u;
 
         // 
         this->__SetMedalSegment(i, iMedalSegment);
@@ -1505,7 +1568,7 @@ void cSummaryMenu::ShowMission()
     iBonusSurvive /= iModifier;
 
     // 
-    const coreUint8 iMedalMission = iMedalCount ? (iMedalTotal / iMedalCount) : MEDAL_NONE;
+    const coreUint8 iMedalMission = iMedalCount ? MIN<coreUint8>((iMedalTotal + (bAter ? MEDAL_MARGIN_MISSION_ATER : MEDAL_MARGIN_MISSION)) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;
     this->__SetMedalMission(iMedalMission);
 
     // 
@@ -1531,16 +1594,16 @@ void cSummaryMenu::ShowMission()
 
     // 
     const coreUint32 iBestScore = g_pSave->GetHeader().aaaaLocalStatsMission[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex].iScoreBest;
-    m_TotalBest.SetText(coreData::ToChars(MAX(m_iFinalValue, iBestScore)));
+    m_TotalBest.SetText(coreData::ToChars((g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK) ? MAX(m_iFinalValue, iBestScore) : iBestScore));
 
     // 
     const coreUint8 iRaise = g_pGame->GetRaise();
     m_Raise.SetText(PRINT("+%u%%", iRaise));
 
     // 
-    SET_BIT(m_iSignalActive, 0u, (iMedalMission == MEDAL_DARK))
+    SET_BIT(m_iSignalActive, 0u, (iMedalTotal == iMedalCount * MEDAL_DARK))
     SET_BIT(m_iSignalActive, 1u, (bPerfectSurvive))
-    SET_BIT(m_iSignalActive, 5u, (m_iFinalValue > iBestScore))
+    SET_BIT(m_iSignalActive, 5u, (m_iFinalValue > iBestScore) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 
     // 
     this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_MISSION_COOP : SURFACE_SUMMARY_MISSION_SOLO, 0.0f);
@@ -1601,7 +1664,7 @@ void cSummaryMenu::ShowSegment()
     // 
     const auto&     oStats     = g_pSave->GetHeader().aaaaaLocalStatsSegment[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex][iSegmentIndex];
     const coreInt32 iBestShift = coreInt32(oStats.iTimeBestShiftBad) - coreInt32(oStats.iTimeBestShiftGood);
-    const coreFloat fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), 10.0f);
+    const coreFloat fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), GAME_GOAL_FACTOR);
 
     // 
     m_aaSegmentValue[0][1].SetText(coreData::ToChars(oStats.iScoreBest));
@@ -1635,7 +1698,7 @@ void cSummaryMenu::ShowSegment()
     m_SegmentRaise.SetText(PRINT("+%u%%", iRaise));
 
     // 
-    const coreUint8 iRecordBroken = g_pGame->GetCurMission()->GetRecordBroken();
+    const coreUint8 iRecordBroken = (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK) ? g_pGame->GetCurMission()->GetRecordBroken() : 0u;
     SET_BIT(m_iSignalActive, 2u, HAS_BIT(iRecordBroken, 0u))
     SET_BIT(m_iSignalActive, 3u, HAS_BIT(iRecordBroken, 1u))
 
@@ -1660,6 +1723,7 @@ void cSummaryMenu::ShowBeginning()
 
     // (hidden bonus and medal) 
     this->ShowMission();
+    ASSERT(g_pGame->GetKind() != GAME_KIND_SEGMENT)
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_BEGINNING, 0.0f);
@@ -1672,8 +1736,16 @@ void cSummaryMenu::ShowEndingNormal()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
-    // (hidden bonus and medal) 
-    this->ShowMission();
+    if(g_pGame->GetKind() == GAME_KIND_SEGMENT)
+    {
+        // 
+        this->__ResetState();
+    }
+    else
+    {
+        // (hidden bonus and medal) 
+        this->ShowMission();
+    }
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_ENDING_NORMAL, 0.0f);
@@ -1686,8 +1758,16 @@ void cSummaryMenu::ShowEndingSecret()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
-    // (hidden bonus and medal) 
-    this->ShowMission();
+    if(g_pGame->GetKind() == GAME_KIND_SEGMENT)
+    {
+        // 
+        this->__ResetState();
+    }
+    else
+    {
+        // (hidden bonus and medal) 
+        this->ShowMission();
+    }
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_ENDING_SECRET, 0.0f);
@@ -1763,11 +1843,13 @@ void cSummaryMenu::__ResetState()
     m_iOtherShift      = 0;
     m_iOtherNumMission = 0u;
     m_iOtherNumMedal   = 0u;
+    m_iOtherStart      = 0xFFu;
     m_fIntroTimer      = 0.0f;
     m_fOutroTimer      = 0.0f;
     m_fTimeShift       = 0.0f;
     m_fFinalSpinOld    = 0.0f;
     m_eState           = SUMMARY_INTRO;
+    m_bHasReplay       = false;
 
     // 
     m_BackgroundMain.SetSize(coreVector2(0.0f,0.0f));

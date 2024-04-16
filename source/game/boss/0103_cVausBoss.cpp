@@ -36,10 +36,10 @@ cVausBoss::cVausBoss()noexcept
     this->SetSize(coreVector3(2.5f,2.5f,2.5f));
 
     // configure the boss
-    this->Configure(10000, 0u, COLOR_SHIP_YELLOW);
+    this->Configure(10000, COLOR_SHIP_YELLOW);
 
     // 
-    PHASE_HEALTH_GOAL({10000, 0})
+    PHASE_HEALTH_GOAL({0})
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCompanion); ++i)
@@ -48,7 +48,7 @@ cVausBoss::cVausBoss()noexcept
         m_aCompanion[i].DefineModelLow ("ship_boss_vaus_companion_low.md3");
         m_aCompanion[i].DefineVolume   ("ship_boss_vaus_companion_volume.md3");
         m_aCompanion[i].SetSize        (coreVector3(2.2f,2.2f,2.2f));
-        m_aCompanion[i].Configure      (1, 0u, COLOR_SHIP_YELLOW);
+        m_aCompanion[i].Configure      (1, COLOR_SHIP_YELLOW);
     }
 }
 
@@ -158,8 +158,8 @@ void cVausBoss::__MoveOwn()
 
                 if(PHASE_FINISHED)
                 {
-                    //PHASE_RESET(0u)
                     PHASE_CHANGE_INC
+                    //PHASE_RESET(0u)
 
                     m_aiCounter[IGNORE_BALL]   = 0;
                     m_aiCounter[SUB_PHASE]    += 1;

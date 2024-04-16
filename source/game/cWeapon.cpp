@@ -44,6 +44,12 @@ Wave
 3+2 = 5
 26.67dps
 
+Tesla
+
+16x
+3
+48dps
+
 */
 
 
@@ -137,7 +143,7 @@ coreBool cWeapon::_IsOwnerDarkShading()const
 // 
 coreBool cWeapon::_IsOwnerRainbow()const
 {
-    return m_pOwner->IsRainbow();
+    return g_pGame->GetRainbow();
 }
 
 
@@ -720,7 +726,7 @@ cTeslaWeapon::cTeslaWeapon()noexcept
 , m_fStrikeOffset (0.0f)
 {
     // set base fire-rate
-    m_CooldownTimer.SetSpeed(4.0f);
+    m_CooldownTimer.SetSpeed(16.0f);
 }
 
 
@@ -728,7 +734,7 @@ cTeslaWeapon::cTeslaWeapon()noexcept
 // 
 void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
 {
-    if(iMode != 1u) return;
+    //if(iMode != 1u) return;
 
     const coreObject3D* apStrikeEmitter[WEAPON_TESLA_TARGETS];
     cEnemy*             apStrikeTarget [WEAPON_TESLA_TARGETS];
@@ -768,7 +774,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
             }
 
             // 
-            if((pEnemy->GetPosition().xy() - pObject->GetPosition().xy()).LengthSq() < POW2(40.0f))
+          //  if((pEnemy->GetPosition().xy() - pObject->GetPosition().xy()).LengthSq() < POW2(40.0f))
             {
                 apStrikeEmitter[iNum] = pObject;
                 apStrikeTarget [iNum] = pEnemy;
@@ -826,12 +832,23 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
 
             // 
             pTarget->TakeDamage(6 * iSign, ELEMENT_BLUE, vPosTo, m_pOwner, false);
-            g_pSpecialEffects->MacroExplosionColorSmall(pTarget->GetPosition(), COLOR_ENERGY_BLUE);
+            //g_pSpecialEffects->MacroExplosionColorSmall(pTarget->GetPosition(), COLOR_ENERGY_WHITE);
         }
     }
 
     // 
-    g_pSpecialEffects->CreateSplashColor(m_pOwner->GetPosition(), 5.0f, 3u, COLOR_ENERGY_BLUE);
+    g_pSpecialEffects->CreateSplashColor(m_pOwner->GetPosition(), 5.0f, 3u, COLOR_ENERGY_WHITE);
+}
+
+
+// ****************************************************************
+// 
+void cTeslaWeapon::__ReleaseOwn(const coreUint8 iMode)
+{
+    if(m_iBurst == 1u) m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+    
+    // 
+    m_iBurst = 0u;
 }
 
 
@@ -839,6 +856,21 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
 // shoot with the tesla weapon
 void cTeslaWeapon::__ShootOwn()
 {
+    return;
+    coreUintW iCount = 0u;
+    
+    const auto nCountFunc = [&](const cTeslaBullet* pBullet)
+    {
+        if((pBullet->GetOwner() == m_pOwner) && g_pForeground->IsVisibleObject(pBullet))
+            iCount += 1u;
+    };
+    g_pGame->GetBulletManagerPlayer   ()->ForEachBulletTyped<cTeslaBullet>(nCountFunc);
+    g_pGame->GetBulletManagerPlayerTop()->ForEachBulletTyped<cTeslaBullet>(nCountFunc);
+    
+    // TODO 1: reset cooldown
+    if(iCount >= 3u) return;
+    
+    
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
@@ -851,9 +883,23 @@ void cTeslaWeapon::__ShootOwn()
     
     const coreVector2 vOffset = vDir * (cTeslaBullet::ConfigSpeed() * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
 
+    if(!m_iBurst)
+    {
+        m_iBurst = 1u;
 
-    // 
-    this->_MakeWhite(pManager->AddBullet<cTeslaBullet>(6 * iSign, cTeslaBullet::ConfigSpeed(), m_pOwner, vPos + vOffset, vDir))->ChangeScale(1.0f)->ChangeHeight(m_pOwner->GetPosition().z);
+        // 
+        this->_MakeWhite(pManager->AddBullet<cTeslaBullet>(3 * iSign, cTeslaBullet::ConfigSpeed(), m_pOwner, vPos + vOffset, vDir))->ChangeScale(1.0f)->ChangeHeight(m_pOwner->GetPosition().z);
+
+        // 
+       // m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+    }
+    else
+    {
+        m_iBurst = 2u;
+
+        // 
+        this->_MakeWhite(pManager->AddBullet<cTeslaBullet>(3 * iSign, cTeslaBullet::ConfigSpeed(), m_pOwner, vPos + vOffset, vDir))->ChangeScale(1.0f)->ChangeHeight(m_pOwner->GetPosition().z);
+    }
 
     // play bullet sound-effect
     g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);

@@ -104,7 +104,6 @@ void cHarenaMission::__SetupOwn()
     // ACHIEVEMENT: follow the head of the snake group for at least 10 seconds
     // TODO 1: hardmode: bad visibility (sand storm) in einer der missionen hier, muss vielleicht sinus-förmig (oder anders) ganz verschwinden, auch geschosse wegen pressure
     // TODO 1: hardmode: enemies also shoot when getting invisible
-    // TODO 1: die 4 quick zielen nicht alle auf spieler auf easy
     m_aInsanityStage[0] = [this]()
     {
         STAGE_ADD_PATH(pPath1)
@@ -143,7 +142,7 @@ void cHarenaMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.4f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
@@ -855,8 +854,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: hardmode: big can change, like in tiger boss, just (iBig << 1u), maybe not on the first 1-2 hits
     // TODO 5: coop: ein gegner muss innerhalb des zeitlimits von beiden erwischt werden
     // TODO 5: idea: gegner die eng zusammen gehen
+    // TODO 5: idea: eggs are layed when hitting an enemy, and stay in final phase? (will the last egg be hidden?)
     // TODO 5: badge: ride the wave
-    // TODO 1: eggs are layed when hitting an enemy, and stay in final phase? (will the last egg be hidden?)
     m_aInsanityStage[1] = [this]()
     {
         constexpr coreUintW iNumEnemies = 8u;
@@ -867,7 +866,7 @@ void cHarenaMission::__SetupOwn()
             {
                 pEnemy->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
 
-                pEnemy->Configure(1000, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(1000, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
                 pEnemy->Resurrect();
@@ -1319,7 +1318,7 @@ void cHarenaMission::__SetupOwn()
                 g_pEnvironment->SetTargetDirectionLerp(coreVector2(1.0f,0.0f), 30.0f);
             }
 
-            STAGE_WAVE(1u, "3-2", {45.0f, 65.0f, 90.0f, 110.0f, 220.0f})   // VIERZEHN
+            STAGE_WAVE(1u, "3-2", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // VIERZEHN +5
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 1u})
@@ -1390,7 +1389,6 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: hardmode: every enemy attacks, or explodes into bullets
     // TODO 1: hardmode: N infinity enemies or bullets
     // TODO 5: coop: abwechselnd gegner treffen
-    // TODO 1: moving tower sollte nicht in seine (exakte) flug-richtung schießen
     m_aInsanityStage[2] = [this]()
     {
         constexpr coreUintW iNumEnemies = 61u;
@@ -1420,10 +1418,11 @@ void cHarenaMission::__SetupOwn()
                 const coreBool bBig     = (i == iBigIndex);
 
                 pEnemy->SetAlpha (0.0f);
-                pEnemy->Configure((bEnabler || bMover) ? 1 : (bBig ? 400 : (nIsTargetFunc(i) ? 30 : 1000)), bBig ? 0u : 100u, COLOR_SHIP_BLACK);
-                pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+                pEnemy->Configure((bEnabler || bMover) ? 1 : (bBig ? 400 : (nIsTargetFunc(i) ? 30 : 1000)), COLOR_SHIP_BLACK);
+                pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN | ENEMY_STATUS_WORTHLESS);
 
                 if(bEnabler || bMover || bBig || nIsTargetFunc(i)) pEnemy->RemoveStatus(ENEMY_STATUS_IMMORTAL);
+                if(bBig)                                           pEnemy->RemoveStatus(ENEMY_STATUS_WORTHLESS);
             });
         });
 
@@ -1577,6 +1576,8 @@ void cHarenaMission::__SetupOwn()
 
             if(nIsTargetFunc(i) && pEnemy->ReachedDeath())   // killed by player
             {
+                this->AddExtraScore(pEnemy->LastAttacker(), 100u, pEnemy->GetPosition());
+
                 if(++iKillCount == ARRAY_SIZE(aiTarget))
                 {
                     STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
@@ -1665,7 +1666,7 @@ void cHarenaMission::__SetupOwn()
 
                     if(!m_iInsanity)
                     {
-                        pEnemy->ApplyScore();
+                        this->AddExtraScore(pEnemy->LastAttacker(), 100u, pEnemy->GetPosition());
 
                         if(i == iHelperIndex)
                         {
@@ -1888,7 +1889,7 @@ void cHarenaMission::__SetupOwn()
                 g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,-1.0f), 30.0f);
             }
 
-            STAGE_WAVE(2u, "3-3", {40.0f, 60.0f, 80.0f, 100.0f, 200.0f})   // FÜNFZEHN
+            STAGE_WAVE(2u, "3-3", {45.0f, 65.0f, 90.0f, 110.0f, 220.0f})   // FÜNFZEHN +5
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 2u})
@@ -2000,7 +2001,7 @@ void cHarenaMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(50 + 20, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(50 + 20, COLOR_SHIP_ORANGE);
             });
         });
 
@@ -2009,7 +2010,7 @@ void cHarenaMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.15f);
-                pEnemy->Configure(g_pGame->IsEasy() ? 6 : 10, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(g_pGame->IsEasy() ? 6 : 10, COLOR_SHIP_MAGENTA);
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_NODELAY);
             });
         });
@@ -2643,11 +2644,11 @@ void cHarenaMission::__SetupOwn()
             {
                 if(i == iChampion)
                 {
-                    pEnemy->Configure(400, 0u, COLOR_SHIP_CYAN);
+                    pEnemy->Configure(400, COLOR_SHIP_CYAN);
                 }
                 else
                 {
-                    pEnemy->Configure(10, 0u, COLOR_SHIP_CYAN);
+                    pEnemy->Configure(10, COLOR_SHIP_CYAN);
                     pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
                 }
 
@@ -3201,8 +3202,8 @@ void cHarenaMission::__SetupOwn()
                 //if(i == 8u) pEnemy->SetSize(coreVector3(1.3f,1.3f,1.3f));
 
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                //pEnemy->Configure((i == 8u) ? 200 : 50, 0u, COLOR_SHIP_GREY);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                //pEnemy->Configure((i == 8u) ? 200 : 50, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -3361,7 +3362,7 @@ void cHarenaMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Tiger, {140.0f, 210.0f, 280.0, 350.0f, 700.0f})
+        STAGE_BOSS(m_Tiger, {145.0f, 215.0f, 290.0, 360.0f, 720.0f})   // +5
     },
     STAGE_PRE()
     {

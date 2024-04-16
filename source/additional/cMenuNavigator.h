@@ -65,6 +65,7 @@ private:
 
     // 
     using uShoulderType = std::function<void()>;
+    using uDynamicType  = std::function<void(coreObject2D*, const coreUint8)>;
 
 
 private:
@@ -79,6 +80,7 @@ private:
 
     coreBool    m_bPressed;                          // 
     coreBool    m_bGrabbed;                          // 
+    coreDouble  m_dPressTime;                        // 
     coreFlow    m_fGrabTime;                         // 
     coreVector3 m_vGrabColor;                        // 
 
@@ -99,6 +101,8 @@ private:
     uShoulderType m_nShoulderLeft;                   // 
     uShoulderType m_nShoulderRight;                  // 
     coreBool      m_bShoulder;                       // 
+
+    coreMap<coreObject2D*, uDynamicType> m_aDynamic;   // 
 
     cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];        // 
 
@@ -125,7 +129,7 @@ public:
 
     // 
     void BindObject (coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, coreObject2D* pFallback, const eMenuType eType, const coreUint8 iSurface = 0u);
-    void BindObject (coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, const eMenuType eType, const coreUint8 iSurface = 0u);
+    void BindObject (coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight,                          const eMenuType eType, const coreUint8 iSurface = 0u);
     void BindSurface(coreObject2D* pTab, const coreUint8 iSurface, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight);
     void BindScroll (coreObject2D* pScroll);
 
@@ -139,6 +143,13 @@ public:
     template <typename F> inline void UseShoulderLeft (F&& nShoulderFunc) {ASSERT(!m_nShoulderLeft)  m_nShoulderLeft  = nShoulderFunc;}   // [](void) -> void
     template <typename F> inline void UseShoulderRight(F&& nShoulderFunc) {ASSERT(!m_nShoulderRight) m_nShoulderRight = nShoulderFunc;}   // [](void) -> void
     inline void SetShoulder(const coreBool bShoulder) {m_bShoulder = bShoulder;}
+
+    // 
+    template <typename F> inline void BindDynamic(coreObject2D* pObject, F&& nDynamicFunc) {m_aDynamic.emplace(pObject, nDynamicFunc);}   // [](coreObject2D*, const coreUint8) -> void
+    inline void RebindUp   (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveUp    = this->__ToIndex(pNew);}
+    inline void RebindLeft (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveLeft  = this->__ToIndex(pNew);}
+    inline void RebindDown (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveDown  = this->__ToIndex(pNew);}
+    inline void RebindRight(coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveRight = this->__ToIndex(pNew);}
 
     // 
     const coreObject2D* GetCurScroll()const;

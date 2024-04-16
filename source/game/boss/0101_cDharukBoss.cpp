@@ -48,7 +48,7 @@ cDharukBoss::cDharukBoss()noexcept
     this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.4f);
 
     // configure the boss
-    this->Configure(3100, 0u, COLOR_SHIP_RED);
+    this->Configure(3100, COLOR_SHIP_RED);
     this->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_SECRET);
 
     // 
@@ -61,7 +61,7 @@ cDharukBoss::cDharukBoss()noexcept
     m_Duplicate.DefineTexture  (0u, "effect_energy.png");
     m_Duplicate.DefineProgram  ("effect_energy_blink_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
-    m_Duplicate.Configure      (1, 0u, COLOR_ENERGY_RED * 0.8f);
+    m_Duplicate.Configure      (1, COLOR_ENERGY_RED * 0.8f);
     m_Duplicate.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_GHOST_BULLET | ENEMY_STATUS_SECRET);
 
     // create duplicate trail list
@@ -388,22 +388,15 @@ void cDharukBoss::__MoveOwn()
 
             this->ToAxis(StepRotated90(m_aiCounter[TELEPORT_COUNT] % 4));
 
-            if(this->ReachedHealth(2400))
-            {
-                g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_MAGENTA);
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
-            }
-
             if(PHASE_FINISHED)
             {
-                if(!m_aiCounter[CURRENT_ITERATION] && (this->GetCurHealth() < 2400))
+                if(!m_aiCounter[CURRENT_ITERATION] && (this->GetCurHealth() <= 2400))
                 {
                     PHASE_CHANGE_INC
                 }
                 else
                 {
-                    PHASE_RESET(0u)
-                    PHASE_AGAIN
+                    PHASE_AGAIN(0u)
 
                     m_aiCounter[TELEPORT_COUNT] += 1;
 
@@ -431,6 +424,12 @@ void cDharukBoss::__MoveOwn()
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_MAGENTA);
             g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
+
+        if(this->ReachedHealth(2400))
+        {
+            g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_MAGENTA);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+        }
     }
 
     // ################################################################
@@ -471,7 +470,7 @@ void cDharukBoss::__MoveOwn()
     {
         m_avVector[STILL_MOVE].y = MIN1(m_avVector[STILL_MOVE].y + 0.2f * TIME);
 
-        if(this->GetCurHealth() < 1000)
+        if(this->GetCurHealth() <= 1000)
         {
             PHASE_CHANGE_INC
 

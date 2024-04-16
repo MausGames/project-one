@@ -37,7 +37,8 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_iDepthDebug         (0u)
 , m_iOutroType          (GAME_OUTRO_MISSION)
 , m_iOutroSub           (0u)
-, m_bVisibleCheck       (false)
+, m_bRainbow            (false)
+, m_bVisibleCheck       (true)
 , m_iRepairMove         (0xFFu)
 , m_Options             (oOptions)
 , m_iVersion            (g_Version.iNumber)
@@ -55,7 +56,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 #endif
 
     // 
-    const coreUint32 iContinue = (g_bDemoVersion || !g_pSave->GetHeader().oProgress.bFirstPlay) ? GAME_CONTINUES : 0u;
+    const coreUint32 iContinue = (g_bDemoVersion || !REPLAY_WRAP_PROGRESS_FIRSTPLAY) ? GAME_CONTINUES : 0u;
     m_iContinuesLeft = iContinue;
     m_iContinuesMax  = iContinue;
 
@@ -104,6 +105,9 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
     const coreUint8 iRaiseShield2 = cGame::CalcRaiseShield(oOptions.aiShield[1]);
     const coreUint8 iRaiseShield  = (oOptions.iType != GAME_TYPE_SOLO) ? ((iRaiseShield1 + iRaiseShield2) / 2u) : iRaiseShield1;
     m_iRaise = iRaiseSpeed + iRaiseShield;
+
+    // 
+    g_pMenu->GetMusicBox()->ResetSelection();
 
     // 
     g_pSave->SaveFile();
@@ -367,26 +371,6 @@ void cGame::Render()
     }
     else
     {
-/*
-        coreVector3 vShift = coreVector3(0.0f,0.0f,0.0f);
-        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
-        {
-            vShift += m_aPlayer[i].GetPosition();
-        }
-        vShift /= I_TO_F(this->GetNumPlayers());
-
-        Core::Graphics->SetCamera(CAMERA_POSITION + vShift * 0.02f, CAMERA_DIRECTION, CAMERA_ORIENTATION);
-
-        coreVector2 vTarget = coreVector2(0.0f,0.0f);
-        g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
-        {
-            vTarget += pPlayer->GetPosition().xy();
-        });
-
-        g_pEnvironment->SetTargetSide(vTarget * (0.05f * BLENDH3(MIN1(g_pGame->GetTimeTable()->GetTimeEvent() * 0.5f)) * RCP(I_TO_F(g_pGame->GetNumPlayers()))), 10.0f);
-        //g_pEnvironment->SetTargetSideNow(vTarget * (0.1f * BLENDH3(MIN1(g_pGame->GetTimeTable()->GetTimeEvent() * 0.5f)) * RCP(I_TO_F(g_pGame->GetNumPlayers()))));
-*/
-        
         __DEPTH_GROUP_BOTTOM
         {
             // 
@@ -497,7 +481,8 @@ void cGame::Render()
             
             if(m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cRayBullet>  () ||
                m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cPulseBullet>() ||
-               m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cSurgeBullet>())
+               m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cSurgeBullet>() ||
+               m_BulletManagerPlayerTop.GetNumBulletsTypedEst<cTeslaBullet>())
             {
                 DEPTH_PUSH
                 m_BulletManagerPlayerTop.Render();
@@ -536,6 +521,9 @@ void cGame::Move()
     // handle intro and outro animation
     if(!this->__HandleIntro()) return;
     if(!this->__HandleOutro()) return;
+     
+    // 
+    g_pReplay->Update();
 
     // 
     m_pCurMission->MoveAlways();
@@ -543,12 +531,13 @@ void cGame::Move()
     if(SPECIAL_FROZEN)
     {
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-            //m_aPlayer[i].MoveFrozen();
             m_aPlayer[i].Move();
-        
+
         this->__HandleDefeat();
         return;
     }
+    
+    this->__HandleRainbow();
 
     // 
     m_TimeTable.Update();
@@ -599,15 +588,13 @@ void cGame::Move()
     m_ExhaustManager.Move();
 
     // handle default object collisions
-    this->__HandleCollisions();   // TODO 1: do all collisions here (virtual funcs), for consistency, e.g. bullet collisions are done before move when handled in mission/boss 
+    this->__HandleCollisions();
 
     // 
     this->__HandleDefeat();
     
     m_fHitDelay   .UpdateMax(-20.0f, 0.0f);
     m_fVanishDelay.UpdateMax(-20.0f, 0.0f);
-    
-    //if(HAS_FLAG(m_iStatus, GAME_STATUS_PLAY)) g_pEnvironment->SetTargetSide(m_aPlayer[0].GetPosition().xy() * 0.03f, 10.0f);
 }
 
 
@@ -822,7 +809,7 @@ void cGame::StartOutro(const coreUint8 iType, const coreUint8 iSub)
     m_CombatText.SetVisible(false);
 
     // 
-    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_END(m_pCurMission->GetID()));
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_END(this->GetContinuesCur(), m_iCurMissionIndex));
 
     // 
     if((m_iOutroSub >= 1u) && (m_iOutroSub < 10u))
@@ -907,7 +894,7 @@ void cGame::UseContinue()
 
     const coreUintW iMissionIndex = m_iCurMissionIndex;
     const coreUintW iSegmentIndex = m_pCurMission->GetCurSegmentIndex();
-    const coreUint8 iCurContinue  = m_iContinuesMax - m_iContinuesLeft;
+    const coreUint8 iCurContinue  = this->GetContinuesCur();
 
     // 
     this->LoadMissionID(m_pCurMission->GetID(), iSegmentIndex, m_pCurMission->GetTakeTo());
@@ -1163,11 +1150,14 @@ coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreFloat* pfMedalGoal)
     ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]) && (pfMedalGoal[3] < pfMedalGoal[4]))
 
     // 
-         if(fTime <= pfMedalGoal[0]) return MEDAL_DARK;
-    else if(fTime <= pfMedalGoal[1]) return MEDAL_PLATINUM;
-    else if(fTime <= pfMedalGoal[2]) return MEDAL_GOLD;
-    else if(fTime <= pfMedalGoal[3]) return MEDAL_SILVER;
-    else                             return MEDAL_BRONZE;
+    const coreFloat fFloor = FloorFactor(fTime, GAME_GOAL_FACTOR) - CORE_MATH_PRECISION;
+
+    // 
+         if(fFloor <= pfMedalGoal[0]) return MEDAL_DARK;
+    else if(fFloor <= pfMedalGoal[1]) return MEDAL_PLATINUM;
+    else if(fFloor <= pfMedalGoal[2]) return MEDAL_GOLD;
+    else if(fFloor <= pfMedalGoal[3]) return MEDAL_SILVER;
+    else                              return MEDAL_BRONZE;
 }
 
 
@@ -1178,11 +1168,32 @@ coreFloat cGame::CalcMedalTime(const coreFloat fTime, const coreFloat* pfMedalGo
     ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]) && (pfMedalGoal[3] < pfMedalGoal[4]))
 
     // 
-         if(fTime <= pfMedalGoal[0]) return pfMedalGoal[0] - fTime;
-    else if(fTime <= pfMedalGoal[1]) return pfMedalGoal[1] - fTime;
-    else if(fTime <= pfMedalGoal[2]) return pfMedalGoal[2] - fTime;
-    else if(fTime <= pfMedalGoal[3]) return pfMedalGoal[3] - fTime;
-    else                             return 0.0f;
+    const coreFloat fFloor = FloorFactor(fTime, GAME_GOAL_FACTOR) - CORE_MATH_PRECISION;
+
+    // 
+         if(fFloor <= pfMedalGoal[0]) return MAX(pfMedalGoal[0] - fFloor - GAME_GOAL_MARGIN, GAME_GOAL_MARGIN);
+    else if(fFloor <= pfMedalGoal[1]) return MAX(pfMedalGoal[1] - fFloor - GAME_GOAL_MARGIN, GAME_GOAL_MARGIN);
+    else if(fFloor <= pfMedalGoal[2]) return MAX(pfMedalGoal[2] - fFloor - GAME_GOAL_MARGIN, GAME_GOAL_MARGIN);
+    else if(fFloor <= pfMedalGoal[3]) return MAX(pfMedalGoal[3] - fFloor - GAME_GOAL_MARGIN, GAME_GOAL_MARGIN);
+    else                              return 0.0f;
+}
+
+
+// ****************************************************************
+// 
+coreFloat cGame::CalcMedalMiss(const coreFloat fTime, const coreFloat* pfMedalGoal)
+{
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]) && (pfMedalGoal[3] < pfMedalGoal[4]))
+
+    // 
+    const coreFloat fFloor = FloorFactor(fTime, GAME_GOAL_FACTOR) - CORE_MATH_PRECISION;
+
+    // 
+         if(fFloor <= pfMedalGoal[0]) return 0.0f;
+    else if(fFloor <= pfMedalGoal[1]) return pfMedalGoal[0] - fFloor;
+    else if(fFloor <= pfMedalGoal[2]) return pfMedalGoal[1] - fFloor;
+    else if(fFloor <= pfMedalGoal[3]) return pfMedalGoal[2] - fFloor;
+    else                              return pfMedalGoal[3] - fFloor;
 }
 
 
@@ -1295,7 +1306,11 @@ coreBool cGame::__HandleIntro()
 
     if(HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
+        // 
         if(Core::Manager::Resource->IsLoading()) return false;   // background
+
+        // 
+        g_pReplay->ProcessEnvMission();
 
         // 
         const coreFloat fOldTime = m_fTimeInOut;
@@ -1318,7 +1333,7 @@ coreBool cGame::__HandleIntro()
             m_CombatText.SetVisible(true);
 
             // 
-            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_START(m_pCurMission->GetID()));
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_START(this->GetContinuesCur(), m_iCurMissionIndex));
         }
         else
         {
@@ -1590,7 +1605,7 @@ void cGame::__HandleCollisions()
         Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pShield, [this](cBullet* OUTPUT pBullet, const coreObject3D* pShield, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             // 
-            if(m_bVisibleCheck && !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+            if(m_bVisibleCheck && !g_pForeground->IsVisibleObject(pShield)) return;
 
             if(bFirstHit)
             {
@@ -1612,7 +1627,7 @@ void cGame::__HandleCollisions()
     cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
+        if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
@@ -1620,24 +1635,10 @@ void cGame::__HandleCollisions()
             {
                 if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST_PLAYER))
                 {
-                    if(true || pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
+                    if((pEnemy->GetLifeTime() >= 1.0f) || pEnemy->HasStatus(ENEMY_STATUS_NODELAY))
                     {
-                        if(pEnemy->GetLifeTime() >= 1.0f || pEnemy->HasStatus(ENEMY_STATUS_NODELAY))   // TODO 1: modifiers are not applied (vielleicht egal, weil es eher wichtig für den anfang einer sub-gruppe is ?)
-
                         // 
                         pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-                    }
-                    else
-                    {
-                        // 
-                        const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-                        pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
-                        pPlayer->SetInterrupt(PLAYER_INTERRUPT);
-
-                        // 
-                        g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
-                        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                        g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_EFFECT_DUST);
                     }
                 }
             }
@@ -1658,8 +1659,6 @@ void cGame::__HandleCollisions()
                 {
                     // 
                     pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-                    //pBullet->Deactivate(true, vIntersection.xy());
-                    //pBullet->AddStatus(BULLET_STATUS_GHOST);
                 }
             }
         }
@@ -1669,12 +1668,10 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(m_bVisibleCheck && !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+        if(m_bVisibleCheck && !g_pForeground->IsVisibleObject(pEnemy)) return;
 
         // 
         if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
-        
-        // TODO 1: fix all cases where bullet is made ghost in collision-callback (e.g. handle penetration, rumble, sound, ...)
 
         if(bFirstHit)
         {
@@ -1701,14 +1698,13 @@ void cGame::__HandleCollisions()
                     }
 
                     // 
-                    if(!pEnemy->ReachedDeath() && (pBullet->GetID() != cFinalBullet::ID)) this->PlayHitSound(vIntersection);   // TODO 1: alle anderen stellen, wo PlayHitSound aufgerufen wird, ignorieren ReachedDeath
+                    if(!pEnemy->ReachedDeath() && (pBullet->GetID() != cFinalBullet::ID)) this->PlayHitSound(vIntersection);
                 }
 
                 if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
                 {
                     // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
-                    // TODO 1: this does not work for boss body-parts (e.g. messier rings, zeroth any)
-                    if(!pEnemy->ReachedDeath())
+                    if(pEnemy->IsChild() ? !pEnemy->GetParent()->ReachedDeath() : !pEnemy->ReachedDeath())
                     {
                         if(pEnemy->HasStatus(ENEMY_STATUS_DEACTIVATE))
                         {
@@ -1730,11 +1726,21 @@ void cGame::__HandleCollisions()
         }
     });
 
+    if(m_pCurMission->HasCollBulletBullet())
+    {
+        // 
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [this](cBullet* OUTPUT pPlayerBullet, cBullet* OUTPUT pEnemyBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
+        {
+            // 
+            m_pCurMission->CollBulletBullet(pPlayerBullet, pEnemyBullet, vIntersection, bFirstHit);
+        });
+    }
+
     // 
     Core::Manager::Object->TestCollision(TYPE_ITEM, TYPE_BULLET_PLAYER, [this](const cItem* pItem, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(m_bVisibleCheck && !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+        if(m_bVisibleCheck && !g_pForeground->IsVisibleObject(pItem)) return;
 
         if(bFirstHit)
         {
@@ -1757,6 +1763,32 @@ void cGame::__HandleCollisions()
         // 
         pItem->Collect(pPlayer);
     });
+}
+
+
+// ****************************************************************
+// 
+void cGame::__HandleRainbow()
+{
+    if(!m_bRainbow) return;
+
+    coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vBackColor2, vLedColor;
+    cProjectOneBoss::CalcColorLerp(FMOD(m_TimeTable.GetTimeTotal() / 20.0f * 24.0f, 8.0f), &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vBackColor2, &vLedColor);
+
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
+    {
+        m_aPlayer[i].OverrideColor(vEnergyColor, vLevelColor, vLedColor);
+    }
+
+    cBackground* pBackground = g_pEnvironment->GetBackground();
+    if(pBackground->GetID() == cDarkBackground::ID)
+    {
+        d_cast<cDarkBackground*>(pBackground)->SetColor(vBackColor, vBackColor2);
+    }
+    else if(pBackground->GetID() == cNoBackground::ID)
+    {
+        d_cast<cNoBackground*>(pBackground)->SetColor(vBackColor, vBackColor2);
+    }
 }
 
 

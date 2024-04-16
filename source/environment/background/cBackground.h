@@ -171,6 +171,7 @@ protected:
     uDataMap<coreUint32> m_aaiBaseNormal;            // 
 
     coreBool m_bEmpty;                               // 
+    coreBool m_bFresh;
 
     static coreMemoryPool s_MemoryPool;              // 
 
@@ -251,10 +252,30 @@ private:
 class cNoBackground final : public cBackground
 {
 public:
-    cNoBackground()noexcept : cBackground (true) {}
+    // 
+    static constexpr const coreVector3 Color  = coreVector3(0.5f,0.5f,0.5f);
+    static constexpr const coreVector3 Color2 = coreVector3(0.4f,0.4f,0.4f);
+    static constexpr const coreVector2 Icon   = coreVector2(-1.0f,-1.0f);
+
+
+private:
+    coreVector3 m_vColor;    // 
+    coreVector3 m_vColor2;   // 
+
+
+public:
+    cNoBackground()noexcept : cBackground (true), m_vColor (Color), m_vColor2 (Color2) {}
 
     DISABLE_COPY(cNoBackground)
-    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f), coreVector3(0.8f,0.8f,0.8f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_ID(0, "Nothing")
+
+    // 
+    inline void SetColor(const coreVector3 vColor, const coreVector3 vColor2) {m_vColor = vColor; m_vColor2 = vColor2;}
+
+    // 
+    inline coreVector3 GetColor ()const final {return m_vColor;}
+    inline coreVector3 GetColor2()const final {return m_vColor2;}
+    inline coreVector2 GetIcon  ()const final {return Icon;}
 };
 
 

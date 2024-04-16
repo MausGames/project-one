@@ -13,8 +13,8 @@
 // constructor
 cArcadeInput::cArcadeInput()noexcept
 : m_iTextLength (0u)
-, m_iCurGlyph   (0u)
 , m_fFlashTime  (0.0f)
+, m_iCurGlyph   (0u)
 , m_bFinished   (false)
 {
     // 
@@ -22,7 +22,7 @@ cArcadeInput::cArcadeInput()noexcept
 
     // 
     m_Background.DefineTexture(0u, "menu_background_black.png");
-    m_Background.DefineProgram("menu_grey_program");
+    m_Background.DefineProgram("menu_grey_vignette_program");
     m_Background.SetSize      (coreVector2(1.0f,1.0f));
     m_Background.SetTexSize   (coreVector2(1.2f,1.2f));
 
@@ -36,7 +36,7 @@ cArcadeInput::cArcadeInput()noexcept
         const coreFloat Y = I_TO_F(iRow) * -1.0f;
 
         m_aButton[i].DefineProgram   ("menu_color_program");
-        m_aButton[i].SetPosition     (coreVector2(X, Y)      *  0.08f);
+        m_aButton[i].SetPosition     (coreVector2(X, Y)      *  0.08f + coreVector2(0.0f,0.05f));
         m_aButton[i].SetSize         (coreVector2(1.0f,1.0f) *  0.07f);
         m_aButton[i].SetColor3       (COLOR_MENU_BLACK);
         m_aButton[i].SetFocusModifier(coreVector2(1.0f,1.0f) * (0.08f/0.07f));
@@ -77,9 +77,17 @@ cArcadeInput::cArcadeInput()noexcept
     }
 
     // 
-    m_Text.Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
-    m_Text.SetPosition(coreVector2(0.0f,0.2f));
-    m_Text.SetColor3  (COLOR_MENU_WHITE);
+    for(coreUintW i = 0u; i < ARCADE_TEXTS; ++i)
+    {
+        m_aText[i].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+        m_aText[i].SetPosition(coreVector2(0.0f, 0.25f - 0.07f * I_TO_F(i)));
+        m_aText[i].SetColor3  (COLOR_MENU_WHITE);
+    }
+
+    // 
+    m_State.Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+    m_State.SetPosition(coreVector2(0.0f,0.12f));
+    m_State.SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
 }
 
 
@@ -106,8 +114,15 @@ void cArcadeInput::Render()
     }
 
     // 
-    m_Text.SetAlpha(this->GetAlpha());
-    m_Text.Render();
+    for(coreUintW i = 0u; i < ARCADE_TEXTS; ++i)
+    {
+        m_aText[i].SetAlpha(this->GetAlpha());
+        m_aText[i].Render();
+    }
+
+    // 
+    m_State.SetAlpha(this->GetAlpha());
+    m_State.Render();
 
     // 
     m_Navigator.Render();
@@ -132,7 +147,7 @@ void cArcadeInput::Move()
     {
         // 
         if(!m_sTextValue.empty()) {m_sTextValue.pop_back(); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);}
-        m_Text.SetText(m_sTextValue.c_str());
+        this->__SetText(m_sTextValue.c_str());
     }
     
 
@@ -144,7 +159,7 @@ void cArcadeInput::Move()
         m_aButton[i].Interact();
 
         // 
-        if(m_aButton[i].IsClicked() || (g_MenuInput.bAccept && (m_iCurGlyph == i)) || (g_acArcadeGlyph[i] == cChar))
+        if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || (g_MenuInput.bAccept && (m_iCurGlyph == i)) || (g_acArcadeGlyph[i] == cChar)))
         {
             // 
             if(cChar) this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cChar));
@@ -153,7 +168,7 @@ void cArcadeInput::Move()
             {
                 // 
                 if(!m_sTextValue.empty()) m_sTextValue.pop_back();
-                m_Text.SetText(m_sTextValue.c_str());
+                this->__SetText(m_sTextValue.c_str());
             }
             else if(g_acArcadeGlyph[i] == ARCADE_COMMAND_END)
             {
@@ -164,7 +179,7 @@ void cArcadeInput::Move()
             {
                 // 
                 m_sTextValue += g_acArcadeGlyph[i];
-                m_Text.SetText(m_sTextValue.c_str());
+                this->__SetText(m_sTextValue.c_str());
 
                 // 
                 if(g_MenuInput.bAccept && m_sTextTemplate.starts_with(m_sTextValue))
@@ -190,7 +205,7 @@ void cArcadeInput::Move()
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
     {
-        const coreFloat   fLight = ((g_acArcadeGlyph[i] == ARCADE_COMMAND_DEL) ? m_sTextValue.empty() : (m_sTextValue.length() >= m_iTextLength)) ? MENU_LIGHT_IDLE : MENU_LIGHT_ACTIVE;
+        const coreFloat   fLight = ((g_acArcadeGlyph[i] != ARCADE_COMMAND_END) && ((g_acArcadeGlyph[i] == ARCADE_COMMAND_DEL) ? m_sTextValue.empty() : (m_sTextValue.length() >= m_iTextLength))) ? MENU_LIGHT_IDLE : MENU_LIGHT_ACTIVE;
         const coreVector3 vColor = (m_iCurGlyph == i) ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE;
 
         m_aGlyph[i].SetColor3(vColor * fLight);
@@ -202,14 +217,18 @@ void cArcadeInput::Move()
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].Move();
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aGlyph [i].Move();
-    m_Text.Move();
+    for(coreUintW i = 0u; i < ARCADE_TEXTS;  ++i) m_aText  [i].Move();
+
+    // 
+    m_State.SetText(PRINT("%zu / %u", m_sTextValue.length(), m_iTextLength));
+    m_State.Move();
 
     // 
     m_fFlashTime.UpdateMax(-1.0f, 0.0f);
 
     // 
     m_Background.SetColor3   (coreVector3(1.0f,1.0f,1.0f) * LERPH3(1.0f, 3.0f, m_fFlashTime));
-    m_Background.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
+    m_Background.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
     m_Background.Move();
 
     // 
@@ -225,13 +244,18 @@ void cArcadeInput::Start(const coreChar* pcTemplate, const coreUint8 iLength)
     ASSERT(pcTemplate && iLength)
 
     // 
-    m_Text.SetColor3(g_pMenu->GetHighlightColor());
-    m_Text.SetText  ("");
+    for(coreUintW i = 0u; i < ARCADE_TEXTS;  ++i)
+    {
+        m_aText[i].SetColor3(g_pMenu->GetHighlightColor());
+    }
 
     // 
     m_sTextValue    = "";
     m_sTextTemplate = coreData::StrToUpper(pcTemplate);
     m_iTextLength   = iLength;
+
+    // 
+    this->__SetText("");
 
     // 
     m_iCurGlyph = m_sTextTemplate.empty() ? 0u : cArcadeInput::__RetrieveGlyphIndex(m_sTextTemplate[0]);
@@ -246,10 +270,10 @@ void cArcadeInput::Start(const coreChar* pcTemplate, const coreUint8 iLength)
 void cArcadeInput::Clear()
 {
     // 
-    m_Text.SetText("");
+    m_sTextValue = "";
 
     // 
-    m_sTextValue = "";
+    this->__SetText("");
 }
 
 
@@ -258,10 +282,10 @@ void cArcadeInput::Clear()
 void cArcadeInput::OverrideText(const coreChar* pcText)
 {
     // 
-    m_Text.SetText(pcText);
+    m_sTextValue = pcText;
 
     // 
-    m_sTextValue = pcText;
+    this->__SetText(pcText);
 }
 
 
@@ -279,4 +303,16 @@ void cArcadeInput::__MoveCursor(const coreUintW iNewGylph)
 
     // 
     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
+}
+
+
+// ****************************************************************
+// 
+void cArcadeInput::__SetText(const coreChar* pcText)
+{
+    // 
+    const coreUintW iLen = std::strlen(pcText);
+
+    // 
+    m_aText[0].SetText((iLen < m_iTextLength) ? PRINT("%s|", pcText) : pcText);
 }

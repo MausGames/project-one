@@ -120,7 +120,7 @@ void cIntroMenu::Move()
         else
         {
             // 
-            if(!g_pMenu->GetMsgBox()->IsVisible()) g_pMenu->GetMsgBox()->ShowQuestion(PRINT("%s", Core::Language->GetString("QUESTION_IMPORT")), [this](const coreInt32 iAnswer)
+            if(!g_pMenu->GetMsgBox()->IsVisible()) g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_IMPORT"), [this](const coreInt32 iAnswer)
             {
                 if(iAnswer == MSGBOX_ANSWER_YES)
                 {

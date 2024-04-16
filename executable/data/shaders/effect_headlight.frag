@@ -11,9 +11,8 @@
 void FragmentMain()
 {
     // 
-    float v1Value     = coreTextureBase2D(0, v_av2TexCoord[0]).r;
-    float v1Intensity = (1.0 - coreLengthSq(v_av2TexCoord[1])) * 0.0;   // TODO 1: remove ?
+    float v1Value = coreTextureBase2D(0, v_av2TexCoord[0]).r;
 
     // 
-    gl_FragColor  = vec4(vec3(0.0), mix(1.0, 0.0, max(v1Value, v1Intensity)) * u_v4Color.a);
+    gl_FragColor  = vec4(vec3(0.0), (1.0 - v1Value) * u_v4Color.a);
 }

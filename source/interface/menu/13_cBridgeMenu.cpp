@@ -147,6 +147,8 @@ void cBridgeMenu::Move()
 
     case SURFACE_BRIDGE_INPUT:
         {
+            ASSERT(false)           
+
             if(pArcadeInput->GetFinished())
             {
                 if(!pArcadeInput->GetText()[0])
@@ -514,11 +516,15 @@ coreBool cBridgeMenu::HasUnlocks()
         }
     };
 
-         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)   && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))                            return true;
-    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3] && !DEFINED(_CORE_SWITCH_);})) return true;
-    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_AFTER_FIRST))            return true;
-    else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))                            return true;
-    else if(nApplyUnlockFunc(UNLOCK_WEAPON_WAVE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][6];}))                            return true;
+         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)   && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))                 return true;
+    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))                 return true;
+    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_AFTER_FIRST)) return true;
+    else if(nApplyUnlockFunc(UNLOCK_MUSICBOX)     && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][6];}))                 return true;   // #
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))                 return true;
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_WAVE)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][6];}))                 return true;   // #
+#if defined(_CORE_DEBUG_)
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_TESLA) && HAS_BIT(g_iChallengeUnlocked, 3u))                                     return true;
+#endif
 
     return false;
 }
@@ -548,6 +554,12 @@ void cBridgeMenu::ApplyUnlocks()
     case UNLOCK_POWERSHIELD:
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_SHIELD)
+        break;
+
+    case UNLOCK_MUSICBOX:
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_EXTRA_OTHER)
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_EXTRA_MUSICBOX)
         break;
 
     case UNLOCK_WEAPON_PULSE:

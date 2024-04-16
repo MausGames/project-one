@@ -28,6 +28,8 @@ coreBool ApplyPassword(const coreChar* pcText)
     case 18123262277673915876u:
         {
             for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i) g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 7u);
+
+            ADD_BIT_EX(g_pSave->EditProgress()->aiState, STATE_FULL_ACCESS)
         }
         break;
 
@@ -69,8 +71,6 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
-#if !defined(_CORE_SWITCH_)
-
     // FUCHSIN pink
     case 17376649531488240964u:
         {
@@ -83,8 +83,6 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
-#endif
-
     // GAMBOGE yellow
     case 14976658933825851731u:
         {
@@ -94,6 +92,17 @@ coreBool ApplyPassword(const coreChar* pcText)
                 ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_SHIELD)
             }
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD)
+        }
+        break;
+
+    // ISABELLINE white
+    case 9718367774700741137u:
+        {
+            if(!HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MUSICBOX))
+            {
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_EXTRA_MUSICBOX)   // # only
+            }
+            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MUSICBOX)
         }
         break;
 
@@ -118,6 +127,15 @@ coreBool ApplyPassword(const coreChar* pcText)
                 ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_WEAPON)
             }
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_WAVE)
+        }
+        break;
+
+    // OBSIDIAN black
+    case 4726416556452842970u:
+        {
+            std::memset(g_pSave->EditProgress()->aiUnlock, 0, sizeof(g_pSave->EditProgress()->aiUnlock));
+
+            bRestart = true;
         }
         break;
 

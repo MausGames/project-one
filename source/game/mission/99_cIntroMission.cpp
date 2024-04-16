@@ -14,7 +14,7 @@
 cIntroMission::cIntroMission()noexcept
 : m_aafManualTime {}
 , m_vSkewerColor  (COLOR_SHIP_PURPLE)
-, m_bFirstPlay    (g_pSave->GetHeader().oProgress.bFirstPlay)
+, m_bFirstPlay    (REPLAY_WRAP_PROGRESS_FIRSTPLAY)
 {
     // 
     m_apBoss[0] = &m_Intro;
@@ -81,7 +81,7 @@ void cIntroMission::__MoveOwnAfter()
 
         const coreUint8 iType = g_pGame->IsMulti() ? g_CurConfig.Input.aiType[i] : g_iTotalType;
         const auto&     oSet  = g_CurConfig.Input.aSet[iType];
-        const coreUint8 iMode = g_CurConfig.Input.aiControlMode[i];
+        const coreUint8 iMode = REPLAY_WRAP_CONFIG_CONTROL_MODE[i];
 
         // 
         cConfigMenu::PrintFigure(&m_aaManual[i][0],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveUp    : SDL_CONTROLLER_BUTTON_DPAD_UP);
@@ -105,6 +105,9 @@ void cIntroMission::__MoveOwnAfter()
         ASSERT(vFinal.IsNormalized())
         
         const coreUintW iShift = PackDirection(vFinal)  / 2u;
+        
+        const coreUintW iSwapX = (!IsHorizontal(vFinal) && (g_CurConfig.Game.iMirrorMode == 1u)) ? 2u : 0u;
+        const coreUintW iSwapY = ( IsHorizontal(vFinal) && (g_CurConfig.Game.iMirrorMode == 1u)) ? 2u : 0u;
 
         
         const coreVector2 vFlip  = vHud  .Processed(ABS) + vHud  .yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f);
@@ -145,14 +148,14 @@ void cIntroMission::__MoveOwnAfter()
             abBaseMove[(2u + iShift) % 4u],
             abBaseMove[(2u + iShift) % 4u],
             abBaseMove[(3u + iShift) % 4u],
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_LEFT)),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_RIGHT)),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_UP)),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_LEFT)),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_DOWN)),
-            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_RIGHT))
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_0)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_0)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, (g_CurConfig.Game.iMirrorMode == 1u) ? PLAYER_ACTION_TURN_RIGHT : PLAYER_ACTION_TURN_LEFT)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, (g_CurConfig.Game.iMirrorMode == 1u) ? PLAYER_ACTION_TURN_LEFT : PLAYER_ACTION_TURN_RIGHT)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_UP + (0u + iShift + iSwapY) % 4u)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_UP + (1u + iShift + iSwapX) % 4u)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_UP + (2u + iShift + iSwapY) % 4u)),
+            (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT_UP + (3u + iShift + iSwapX) % 4u))
         };
         STATIC_ASSERT(ARRAY_SIZE(m_aaManual[0]) == ARRAY_SIZE(abPress))
 

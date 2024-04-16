@@ -34,7 +34,7 @@ cMuscusMission::cMuscusMission()noexcept
 , m_iStrikeState   (0u)
 , m_fStrikeTicker  (0.0f)
 , m_fAnimation     (0.0f)
-, m_bStory         (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_MUSCUS))
+, m_bStory         (!HAS_BIT_EX(REPLAY_WRAP_PROGRESS_STATE, STATE_STORY_MUSCUS) && (g_pReplay->GetMode() != REPLAY_MODE_PLAYBACK))
 {
     // 
     m_apBoss[0] = &m_Geminga;
@@ -357,7 +357,7 @@ void cMuscusMission::DisableSun(const coreBool bAnimated)
 // 
 void cMuscusMission::StartDiamond(const coreUintW iIndex)
 {
-    WARN_IF(m_iDiamondIndex != UINT8_MAX) return;
+    WARN_IF(m_iDiamondIndex != UINT8_MAX) this->EndDiamond(false);
 
     ASSERT(iIndex < MUSCUS_GENERATES)
     coreObject3D* pGenerate = (*m_Generate    .List())[iIndex];

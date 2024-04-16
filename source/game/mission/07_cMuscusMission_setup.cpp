@@ -141,7 +141,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * ((i == 23u || i == 27u) ? 2.3f : 1.6f));
-                pEnemy->Configure((i == 27u) ? 240 : (i == 23u) ? 120 : 10, 0u, COLOR_SHIP_GREEN);
+                pEnemy->Configure((i == 27u) ? 240 : (i == 23u) ? 120 : 10, COLOR_SHIP_GREEN);
                 pEnemy->AddStatus(ENEMY_STATUS_TOP | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
             });
         });
@@ -151,7 +151,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_HIDDEN | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -736,7 +736,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(10, 0u, COLOR_SHIP_BLUE);
+                pEnemy->Configure(10, COLOR_SHIP_BLUE);
             });
         });
 
@@ -812,7 +812,10 @@ void cMuscusMission::__SetupOwn()
             {
                 if(bAll || (this->GetGenerate(i)->GetAlpha() < 0.1f))
                 {
-                    this->TestGenerate(i, bTest);
+                    if(!this->IsGenerateDiamond(i))
+                    {
+                        this->TestGenerate(i, bTest);
+                    }
                 }
             }
         };
@@ -1365,7 +1368,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.6f);
-                pEnemy->Configure(400, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(400, COLOR_SHIP_YELLOW);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_IMMORTAL);
 
                 pEnemy->Resurrect();
@@ -2037,7 +2040,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure((i < 96u) ? 4 : 8, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure((i < 96u) ? 4 : 8, COLOR_SHIP_PURPLE);
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
             });
 
@@ -2092,7 +2095,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure(30, 0u, COLOR_SHIP_MAGENTA);
+                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
             });
         });
 
@@ -2182,6 +2185,9 @@ void cMuscusMission::__SetupOwn()
                         pPlayer->TurnIntoEnemy();
                         pPlayer->SetDirection(pEnemy->GetDirection());
 
+                        pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_RAPID);
+                        pPlayer->RemoveStatus(PLAYER_STATUS_RAPID_FIRE);
+
                         g_pSpecialEffects->MacroExplosionColorBig(vNewPos, COLOR_ENERGY_MAGENTA);
                         g_pSpecialEffects->PlaySound(vNewPos, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
                         g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_BIG, 250u);
@@ -2229,6 +2235,8 @@ void cMuscusMission::__SetupOwn()
                 if(pPlayer->IsEnemyLook())
                 {
                     pPlayer->TurnIntoPlayer();
+
+                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_RAPID);
 
                     g_pSpecialEffects->MacroExplosionDarkBig(pPlayer->GetPosition());
                 }
@@ -2589,6 +2597,8 @@ void cMuscusMission::__SetupOwn()
             if(pPlayer->IsEnemyLook())
             {
                 pPlayer->TurnIntoPlayer();
+
+                pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_RAPID);
             }
         });
 
@@ -2676,7 +2686,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(4, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
             });
         });
@@ -3274,7 +3284,7 @@ void cMuscusMission::__SetupOwn()
             m_Geminga.SetAlpha(fAlpha * 0.3f);
         }
 
-        STAGE_WAVE(4u, "7-5", {85.0f, 125.0f, 170.0f, 210.0f, 420.0f})   // EINUNDVIERZIG
+        STAGE_WAVE(4u, "7-5", {90.0f, 135.0f, 180.0f, 225.0f, 450.0f})   // EINUNDVIERZIG +5
     },
     STAGE_PRE()
     {
@@ -3344,7 +3354,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-                pEnemy->Configure(1, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(1, COLOR_SHIP_RED);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
             });
         });
@@ -3353,7 +3363,7 @@ void cMuscusMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(50, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(50, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -3530,7 +3540,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 0.0f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(4, COLOR_SHIP_PURPLE);
                 pEnemy->AddStatus(ENEMY_STATUS_BOTTOM | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS);
             });
         });
@@ -3540,7 +3550,7 @@ void cMuscusMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(4, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS);
             });
         });

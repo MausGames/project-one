@@ -26,7 +26,6 @@
 // TODO 1: lebenspunkte des inneren bosses sollten sichtbar werden (entweder zweiter bar, der separat gesteuert werden kann, oder ausblenden boss life 1, einblenden boss life 2 (mit hoch-animieren), oder shared life, anpassen der health-grenzen und anwenden auf geminga)
 // TODO 1: player bullets shot into mouth should be on the same visual height
 // TODO 1: repair-enemy wird beim einsaugen und ausspucken über boss gezeichnet, boss kann aber nicht TOP gesetzt werden, wegen partikel-effekte, repair-enemy muss angepasst werden (render-order oder size)
-// TODO 1: da is noch immer ein safe-spot im seitlichen mund
 
 
 // ****************************************************************
@@ -48,6 +47,7 @@
 #define SUCK_ANGLE      (6u)
 #define ENV_ROTATION    (7u)
 #define HELPER_DATA     (8u)
+#define PUNISH_TIME     (9u)
 
 
 // ****************************************************************
@@ -65,17 +65,17 @@ cGemingaBoss::cGemingaBoss()noexcept
     this->SetOrientation(coreVector3(-1.0f,0.0f,0.0f));
 
     // configure the boss
-    this->Configure(8600, 0u, COLOR_SHIP_RED);
+    this->Configure(8600, COLOR_SHIP_RED);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
-    PHASE_HEALTH_GOAL({8600})
+    PHASE_HEALTH_GOAL({8600, 7400, 3100, 2100, 0})
 
     // 
     m_Sphere.DefineModelHigh("object_sphere.md3");
     m_Sphere.DefineModelLow ("object_sphere.md3");
     m_Sphere.SetSize        (this->GetSize() * 4.0f);
-    m_Sphere.Configure      (1, 0u, COLOR_SHIP_RED);
+    m_Sphere.Configure      (1, COLOR_SHIP_RED);
     m_Sphere.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_HIDDEN | ENEMY_STATUS_SECRET);
     m_Sphere.SetParent      (this);
 
@@ -83,7 +83,7 @@ cGemingaBoss::cGemingaBoss()noexcept
     m_InsideTop.DefineModelHigh("ship_boss_amemasu_top_inside.md3");
     m_InsideTop.DefineModelLow ("ship_boss_amemasu_top_inside.md3");
     m_InsideTop.SetSize        (this->GetSize());
-    m_InsideTop.Configure      (1, 0u, COLOR_SHIP_RED);
+    m_InsideTop.Configure      (1, COLOR_SHIP_RED);
     m_InsideTop.AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_HIDDEN | ENEMY_STATUS_SECRET);
     m_InsideTop.SetParent      (this);
 
@@ -91,7 +91,7 @@ cGemingaBoss::cGemingaBoss()noexcept
     m_InsideBottom.DefineModelHigh("ship_boss_amemasu_bottom_inside.md3");
     m_InsideBottom.DefineModelLow ("ship_boss_amemasu_bottom_inside.md3");
     m_InsideBottom.SetSize        (this->GetSize());
-    m_InsideBottom.Configure      (1, 0u, COLOR_SHIP_RED);
+    m_InsideBottom.Configure      (1, COLOR_SHIP_RED);
     m_InsideBottom.AddStatus      (ENEMY_STATUS_DAMAGING | ENEMY_STATUS_HIDDEN | ENEMY_STATUS_SECRET);
     m_InsideBottom.SetParent      (this);
 
@@ -100,7 +100,7 @@ cGemingaBoss::cGemingaBoss()noexcept
     m_Top.DefineModelLow ("ship_boss_amemasu_top_low.md3");
     m_Top.DefineVolume   ("ship_boss_amemasu_top_volume.md3");
     m_Top.SetSize        (this->GetSize());
-    m_Top.Configure      (1, 0u, COLOR_SHIP_RED);
+    m_Top.Configure      (1, COLOR_SHIP_RED);
     m_Top.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
     m_Top.SetParent      (this);
 
@@ -109,7 +109,7 @@ cGemingaBoss::cGemingaBoss()noexcept
     m_Bottom.DefineModelLow ("ship_boss_amemasu_bottom_low.md3");
     m_Bottom.DefineVolume   ("ship_boss_amemasu_bottom_volume.md3");
     m_Bottom.SetSize        (this->GetSize());
-    m_Bottom.Configure      (1, 0u, COLOR_SHIP_RED);
+    m_Bottom.Configure      (1, COLOR_SHIP_RED);
     m_Bottom.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_SECRET);
     m_Bottom.SetParent      (this);
 
@@ -430,6 +430,12 @@ void cGemingaBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.4f)
         {
             PHASE_CHANGE_TO(50u)
+            if(DEFINED(_CORE_DEBUG_))
+            {
+                //PHASE_CHANGE_TO(100u)
+                //m_aiCounter[CONNECTED_MOUTH] = 0u;
+                //PHASE_CHANGE_TO(80u)
+            }
 
             cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
             pBackground->SetEnableLightning(true);
@@ -543,6 +549,8 @@ void cGemingaBoss::__MoveOwn()
                 {
                     pPlayer->RemoveStatus(PLAYER_STATUS_GHOST | PLAYER_STATUS_NO_INPUT_ALL);
                 });
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(2u));
             }
         });
     }
@@ -670,6 +678,8 @@ void cGemingaBoss::__MoveOwn()
                 {
                     pPlayer->RemoveStatus(PLAYER_STATUS_GHOST | PLAYER_STATUS_NO_INPUT_ALL);
                 });
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(3u));
             }
         });
     }
@@ -731,8 +741,7 @@ void cGemingaBoss::__MoveOwn()
                     else
                     {
                         PHASE_CHANGE_INC
-                        //PHASE_RESET(0u)
-                        //PHASE_AGAIN
+                        //PHASE_AGAIN(0u)
 
                         //this->StorePosition();
 
@@ -956,11 +965,13 @@ void cGemingaBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                PHASE_CHANGE_TO((m_iPhase == 47u) ? 100u : 30u)
+                PHASE_CHANGE_TO(bSecond ? 100u : 30u)
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(bSecond ? 5u : 4u));
             }
         });
     }
@@ -1021,6 +1032,8 @@ void cGemingaBoss::__MoveOwn()
             if(!g_pForeground->IsVisiblePoint(this->GetPosition().xy(), 1.5f))
             {
                 PHASE_CHANGE_TO(70u)
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(0u));
             }
         }
 
@@ -1297,6 +1310,41 @@ void cGemingaBoss::__MoveOwn()
         //    m_pVacuumSound->SetPitch (LERP(0.5f, 0.8f, fSuck));
         //}
 
+        // TODO 1: too problematic if user wants to use wave weapon
+        #if 0
+        m_avVector[PUNISH_TIME].x = MAX0(m_avVector[PUNISH_TIME].x - 1.0f * TIME);
+        if(!m_avVector[PUNISH_TIME].x)
+        {
+            coreBool bNear = false;
+            g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+            {
+               // if(pPlayer->IsNormal())
+                {
+                    const coreVector2 vDiff1 = pPlayer->GetPosition().xy() - this->GetPosition().xy();
+                    const coreVector2 vDiff2 = pPlayer->GetPosition().xy() - vPoint;
+                    if((vDiff1.LengthSq() < POW2(17.0f)) && (vDiff2.Normalized().y < 0.75f)) bNear = true;
+                }
+            });
+
+            if(bNear)
+            {
+                for(coreUintW i = 0u; i < 32u; ++i)
+                {
+                    const coreVector2 vTarget = coreVector2((I_TO_F(i) - 15.5f) / 15.5f * 1.6f, 1.0f);
+                    const coreVector2 vRange  = vTarget - vPoint / (FOREGROUND_AREA * 1.2f);
+
+                    const coreVector2 vPos   = vTarget * FOREGROUND_AREA * 1.2f;
+                    const coreVector2 vDir   = vRange.Normalized() * -1.0f;
+                    const coreFloat   fSpeed = 1.2f;
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, fSpeed, this, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                }
+
+                m_avVector[PUNISH_TIME].x = 1.0f;
+            }
+        }
+        #endif
+
         if(iLostHealth < 3700)
         {
             PHASE_CONTROL_TICKER(1u, 0u, 1.0f * (g_pGame->IsEasy() ? 0.7f : 1.0f), LERP_LINEAR)
@@ -1527,7 +1575,11 @@ void cGemingaBoss::__MoveOwn()
             g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(LERP(m_avVector[BOUNCE_FORCE].w, 0.0f*PI, fTime)));
 
             if(PHASE_FINISHED)
+            {
                 PHASE_CHANGE_TO(80u)
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(1u));
+            }
         });
     }
 
@@ -1576,8 +1628,7 @@ void cGemingaBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                PHASE_RESET(0u)
-                PHASE_AGAIN
+                PHASE_AGAIN(0u)
 
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE_01);
@@ -1853,7 +1904,7 @@ void cGemingaBoss::__MoveOwn()
         if(pBullet->HasStatus(BULLET_STATUS_REFLECTED))
         {
             pBullet->Deactivate(true);
-            pBullet->AddStatus(BULLET_STATUS_GHOST);
+            pBullet->Ignore();
         }
         else
         {
@@ -1864,7 +1915,7 @@ void cGemingaBoss::__MoveOwn()
             if(fDot < CORE_MATH_PRECISION)
             {
                 pBullet->Deactivate(true);
-                pBullet->AddStatus(BULLET_STATUS_GHOST);
+                pBullet->Ignore();
             }
         }
     });

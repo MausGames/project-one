@@ -13,7 +13,6 @@
 // TODO 3: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO 3: assertion for "active boss should be alive"
 // TODO 3: STAGE_FLYPAST with dot-product or simpler per-axis
-// TODO 2: [MF] [HIGH] there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO 3: wrap m_piData in function with RETURN_RESTRICT
 // TODO 3: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
 // TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory), or create 2 max-size blocks (old, cur), also in Ater mission ?
@@ -32,7 +31,6 @@
 // TODO 3: hail should only use one batchlist, both can be merged
 // TODO 3: manual/tutorial might react strange on inverted and toggled firing mode, because iActionHold is inspected
 // TODO 1: [MF] add 3 different pearl-collect-pitch tracks (wave, boss, p1) and reset state properly
-// TODO 3: flash-teleportation (mission, boss, p1) should be by the player doing the most damage, not the last attacker
 // TODO 4: there are multiple "Aim" objects (mission + boss)
 // TODO 3: also wrap all object-iterations in g_pGame->IsTask()
 // TODO 3: display sticks in manual
@@ -199,7 +197,7 @@
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 #define STAGE_FAILTROPHY                       {this->FailTrophy();}
 
-#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, 0u, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect(); this->SetDelay(true);});}
+#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect(); this->SetDelay(true);});}
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
 #define STAGE_DELAY_END                        {if(this->GetDelay()) m_aSquad.back().GetEnemy(0u)->Kill(false); this->SetDelay(false);}
 
@@ -213,6 +211,7 @@
 #define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_BULLET_BULLET(a,b,i,f,...)  if(!m_nCollBulletBullet) m_nCollBulletBullet = ([__VA_ARGS__](cBullet* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_THIS                              this
@@ -251,13 +250,13 @@
 #define STAGE_BRANCH(x,y)                      ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
 
-#define STAGE_TICK_EXTERN(a,b,c,o)             ((s_iTick = F_TO_UI((a) * (c) - (o)) - 1u) != coreUint16(F_TO_UI((b) * (c) - (o)) - 1u))   // wrap into function, to only calc c and o once
+#define STAGE_TICK_EXTERN(a,b,c,o)             (cMission::_Tick(a, b, c, o))
 #define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore    >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageTime,    m_fStageTimeBefore,    RoundFreq(c), o))
 #define STAGE_TICK_FREE2(c,o)                  ((m_fStageSubTimeBefore >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageSubTime, m_fStageSubTimeBefore, RoundFreq(c), o))
 #define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_FREE (c, o))
 #define STAGE_TICK_TIME2(c,o)                  ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_FREE2(c, o))
-#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTime,       fLifeTimeBefore,       c, o))   // RoundFreq((c) * fLifeSpeed) / fLifeSpeed
-#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTimeBase,   fLifeTimeBeforeBase,   c, o))
+#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTime,       fLifeTimeBefore,       RoundFreq((c) * fLifeSpeed) / fLifeSpeed, o))   // # normal division
+#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTimeBase,   fLifeTimeBeforeBase,   RoundFreq((c) * fLifeSpeed) / fLifeSpeed, o))
 
 #define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)                   (m_fStageTime <  (t))
@@ -277,7 +276,7 @@
 #define STAGE_LIFETIME_AFTER(t)                (fLifeTime     >= (t))
 #define STAGE_LIFETIME_AFTER_BASE(t)           (fLifeTimeBase >= (t))
 #define STAGE_LIFETIME_BETWEEN(t,u)            (InBetween(fLifeTime, (t), (u)))
-#define STAGE_TAKEOFF                          ((InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) && (fLifeTimeBeforeBase != 0.0f)) || (fLifeTimeBase == 0.0f))   // TODO 1: negative fLifeOffset can break this (will never be true)
+#define STAGE_TAKEOFF                          ([&]() {ASSERT(fLifeOffset >= 0.0f)}(), (InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) && (fLifeTimeBeforeBase != 0.0f)) || (fLifeTimeBase == 0.0f))
 
 #define STAGE_HEALTHPCT_POINT(e,t)             ((e)->ReachedHealthPct(t) && [&]() {s_fHealthPctPoint = (t); return true;}())
 #define STAGE_HEALTHPCT_BEFORE(e,t)            ((e)->GetCurHealthPct() <  (t))
@@ -309,6 +308,7 @@ private:
     using uCollPlayerEnemyType  = std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3, const coreBool)>;
     using uCollPlayerBulletType = std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3, const coreBool)>;
     using uCollEnemyBulletType  = std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3, const coreBool)>;
+    using uCollBulletBulletType = std::function<void(cBullet* OUTPUT, cBullet* OUTPUT, const coreVector3, const coreBool)>;
 
 
 protected:
@@ -345,6 +345,7 @@ protected:
     uCollPlayerEnemyType  m_nCollPlayerEnemy;               // 
     uCollPlayerBulletType m_nCollPlayerBullet;              // 
     uCollEnemyBulletType  m_nCollEnemyBullet;               // 
+    uCollBulletBulletType m_nCollBulletBullet;              // 
 
     coreUint8 m_iTakeFrom;                                  // 
     coreUint8 m_iTakeTo;                                    // 
@@ -415,19 +416,25 @@ public:
     inline void SetDelay(const coreBool bDelay) {m_bDelay = bDelay;}
 
     // 
-    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
-    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
-    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
+    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer,       cEnemy*  OUTPUT pEnemy,       const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer,       pEnemy,       vIntersection, bFirstHit);}
+    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer,       cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer,       pBullet,      vIntersection, bFirstHit);}
+    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,        cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,        pBullet,      vIntersection, bFirstHit);}
+    inline void CollBulletBullet(cBullet* OUTPUT pPlayerBullet, cBullet* OUTPUT pEnemyBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollBulletBullet) m_nCollBulletBullet(pPlayerBullet, pEnemyBullet, vIntersection, bFirstHit);}
 
     // 
-    template <typename F> inline void SetCollPlayerEnemy (F&& nCollFunc) {if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> inline void SetCollPlayerBullet(F&& nCollFunc) {if(!m_nCollPlayerBullet) m_nCollPlayerBullet = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> inline void SetCollEnemyBullet (F&& nCollFunc) {if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = nCollFunc;}   // [](cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollPlayerEnemy (F&& nCollFunc) {if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer,       cEnemy*  OUTPUT pEnemy,       const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollPlayerBullet(F&& nCollFunc) {if(!m_nCollPlayerBullet) m_nCollPlayerBullet = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer,       cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollEnemyBullet (F&& nCollFunc) {if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = nCollFunc;}   // [](cEnemy*  OUTPUT pEnemy,        cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollBulletBullet(F&& nCollFunc) {if(!m_nCollBulletBullet) m_nCollBulletBullet = nCollFunc;}   // [](cBullet* OUTPUT pPlayerBullet, cBullet* OUTPUT pEnemyBullet, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
 
     // 
     inline void ResetCollPlayerEnemy () {m_nCollPlayerEnemy  = NULL;}
     inline void ResetCollPlayerBullet() {m_nCollPlayerBullet = NULL;}
     inline void ResetCollEnemyBullet () {m_nCollEnemyBullet  = NULL;}
+    inline void ResetCollBulletBullet() {m_nCollBulletBullet = NULL;}
+
+    // 
+    inline coreBool HasCollBulletBullet()const {return (m_nCollBulletBullet != NULL);}
 
     // access mission objects
     inline cBoss*           GetBoss            (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
@@ -460,6 +467,9 @@ protected:
 
     // 
     inline coreBool _UpdateWait() {m_fStageWait.UpdateMax(-1.0f, 0.0f); return !m_fStageWait;}
+
+    // 
+    static inline coreBool _Tick(const coreFloat fTime, const coreFloat fTimeOld, const coreFloat fFactor, const coreFloat fOffset) {return (s_iTick = F_TO_UI(fTime * (fFactor + CORE_MATH_PRECISION) - fOffset) - 1u) != coreUint16(F_TO_UI(fTimeOld * (fFactor + CORE_MATH_PRECISION) - fOffset) - 1u);}
 
     // 
     static constexpr FUNC_LOCAL coreBool _TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize);
@@ -521,6 +531,7 @@ private:
     coreBool      m_bBarrierSlow;                           // 
     coreBool      m_bBarrierClamp;                          // 
     coreBool      m_bBarrierReflect;                        // 
+    coreBool      m_bBarrierIgnore;                         // 
     coreUint8     m_iBarrierBounce;                         // 
 
     coreBatchList m_Laser;                                  // 
@@ -627,6 +638,7 @@ public:
     inline void SetBarrierSlow   (const coreBool  bSlow)    {m_bBarrierSlow    = bSlow;}
     inline void SetBarrierClamp  (const coreBool  bClamp)   {m_bBarrierClamp   = bClamp;}
     inline void SetBarrierReflect(const coreBool  bReflect) {m_bBarrierReflect = bReflect;}
+    inline void SetBarrierIgnore (const coreBool  bIgnore)  {m_bBarrierIgnore  = bIgnore;}
 
     // 
     inline void SetLaserIgnore(const coreUint8 iIgnore) {m_iLaserIgnore = iIgnore;}
@@ -1139,6 +1151,7 @@ private:
     coreUint32    m_iWayVisible;                     // 
     coreUint32    m_iWayGhost;                       // 
     coreUint32    m_iWayFree;                        // 
+    coreBool      m_bWaySpooky;                      // 
 
     coreBatchList m_Orb;                             // 
     coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];       // 
@@ -1234,7 +1247,8 @@ public:
     inline void SetLineMode(const coreUint8 iMode) {m_iLineMode = iMode;}
 
     // 
-    inline void SetWayFree(const coreUintW iIndex, const coreBool bFree) {ASSERT(iIndex < GELU_WAYS) SET_BIT(m_iWayFree, iIndex, bFree)}
+    inline void SetWayFree  (const coreUintW iIndex, const coreBool bFree) {ASSERT(iIndex < GELU_WAYS) SET_BIT(m_iWayFree, iIndex, bFree)}
+    inline void SetWaySpooky(const coreBool bSpooky)                       {m_bWaySpooky = bSpooky;}
 
     // 
     inline coreVector2 ConsumeFreezeMove(const coreUintW iIndex) {ASSERT(iIndex < MISSION_PLAYERS) const coreVector2 A = m_avFreezeMove[iIndex]; m_avFreezeMove[iIndex] = coreVector2(0.0f,0.0f); return A;}
@@ -1297,6 +1311,7 @@ private:
     coreBatchList m_Hail;                             // 
     coreBatchList m_HailWave;                         // 
     coreObject3D  m_aHailRaw[CALOR_HAILS_RAWS];       // 
+    coreFlow      m_fHailTime;                        // 
 
     coreBatchList m_Chest;                            // 
     coreBatchList m_ChestWave;                        // 
@@ -1603,6 +1618,7 @@ private:
     void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __RenderOwnTop   ()final;
+    void __MoveOwnAlways  ()final;
     void __MoveOwnBefore  ()final;
     void __MoveOwnMiddle  ()final;
     void __MoveOwnAfter   ()final;

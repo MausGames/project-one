@@ -90,7 +90,7 @@ void cAterMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(50 * 50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
+                pEnemy->Configure(50 * 50, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
                 pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
@@ -100,13 +100,13 @@ void cAterMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(4, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS);
             });
         });
 
         if(g_pGame->IsEasy()) STAGE_BOSS(m_ProjectOne, {300.0f, 450.0f, 600.0,  750.0f, 1500.0f})
-                         else STAGE_BOSS(m_ProjectOne, {450.0f, 675.0f, 900.0, 1125.0f, 2250.0f})
+                         else STAGE_BOSS(m_ProjectOne, {460.0f, 690.0f, 920.0, 1150.0f, 2300.0f})   // +10
     },
     STAGE_PRE()
     {

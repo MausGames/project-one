@@ -61,7 +61,7 @@ cMainMenu::cMainMenu()noexcept
         m_Navigator.BindObject(&m_CreditsButton, &m_SteamButton,   NULL, &m_ExitButton,    NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExitButton,    &m_CreditsButton, NULL, &m_StartButton,   NULL, MENU_TYPE_DEFAULT);
     }
-    else if(DEFINED(_CORE_DEBUG_))
+    else if(g_bLeaderboards || DEFINED(_CORE_DEBUG_))
     {
         m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, MENU_TYPE_DEFAULT);
@@ -70,18 +70,11 @@ cMainMenu::cMainMenu()noexcept
         m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
     }
-    else if(g_bLeaderboards)
-    {
-        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ExtraButton,  &m_ScoreButton,  NULL, &m_ConfigButton, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
-    }
     else
     {
-        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ExtraButton,  &m_StartButton,  NULL, &m_ConfigButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ReplayButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ReplayButton, &m_StartButton,  NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
     }
@@ -98,21 +91,16 @@ cMainMenu::cMainMenu()noexcept
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_SteamButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_CreditsButton);
     }
-    else if(DEFINED(_CORE_DEBUG_))
+    else if(g_bLeaderboards || DEFINED(_CORE_DEBUG_))
     {
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
-        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);   // [RP] bei den anderen
-        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
-        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
-    }
-    else if(g_bLeaderboards)
-    {
-        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     }
     else
     {
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     }
@@ -227,7 +215,7 @@ void cMainMenu::Move()
             else if(m_ExitButton.IsClicked())
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT"), [](const coreInt32 iAnswer)
                 {
                     if(iAnswer == MSGBOX_ANSWER_YES)
                         Core::System->Quit();
@@ -235,7 +223,10 @@ void cMainMenu::Move()
             }
 
             // 
-            m_ScoreButton.SetOverride(g_CurConfig.Game.iLeaderboard ? 0 : -1);
+            const coreBool bConnected = DEFINED(_CORE_SWITCH_) || Core::Platform->HasConnection();
+
+            // 
+            m_ScoreButton.SetOverride((g_CurConfig.Game.iLeaderboard && bConnected) ? m_ExtraButton.GetOverride() : -1);
             if(!g_CurConfig.Game.iLeaderboard) m_ScoreNew.SetAlpha(0.0f);
 
             // 

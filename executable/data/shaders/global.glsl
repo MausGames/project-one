@@ -12,7 +12,6 @@
 // #version                         (#)   // shader version
 // #define _CORE_*_SHADER_          (1)   // shader type (vertex, fragment, ...)
 // #define _CORE_OPTION_*_          (1)   // multiple preprocessor options
-// #define _CORE_TARGET_*_          (1)   // multiple target adjustments
 // #define _CORE_QUALITY_           (#)   // quality level
 // #define CORE_NUM_TEXTURES_2D     (#)   // number of 2d texture units
 // #define CORE_NUM_TEXTURES_SHADOW (#)   // number of shadow texture units

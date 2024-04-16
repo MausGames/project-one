@@ -108,6 +108,7 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_VIDEO_TEXTUREFILTER);
         aiSkip.insert(ENTRY_VIDEO_RENDERQUALITY);
         aiSkip.insert(ENTRY_VIDEO_SHADOWQUALITY);
+        aiSkip.insert(ENTRY_VIDEO_WATERQUALITY);
         aiSkip.insert(ENTRY_AUDIO_QUALITY);
         aiSkip.insert(ENTRY_INPUT_TYPE);
         aiSkip.insert(ENTRY_GAME_UPDATEFREQ);
@@ -115,7 +116,6 @@ cConfigMenu::cConfigMenu()noexcept
     #if !defined(_CORE_DEBUG_)
         aiSkip.insert(ENTRY_GAME_VERSION);
     #endif
-    aiSkip.insert(ENTRY_INPUT_ACTION10);
     if(!g_bLeaderboards && !DEFINED(_CORE_DEBUG_))
     {
         aiSkip.insert(ENTRY_GAME_LEADERBOARD);
@@ -130,31 +130,31 @@ cConfigMenu::cConfigMenu()noexcept
 #if defined(_CORE_SWITCH_)
         if(i == ENTRY_INPUT_RUMBLE) iOffset = 0u;
 #endif
-        if(i == ENTRY_VIDEO_ANTIALIASING)  ++iOffset;   // # new paragraph
-        if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
+        if(i == ENTRY_VIDEO_ANTIALIASING)    ++iOffset;   // # new paragraph
+        if(i == ENTRY_VIDEO_RENDERQUALITY)   ++iOffset;
 #if !defined(_CORE_SWITCH_)
-        if(i == ENTRY_VIDEO_SHAKEEFFECTS)  ++iOffset;
+        if(i == ENTRY_VIDEO_PARTICLEEFFECTS) ++iOffset;
 #endif
-        if(i == ENTRY_AUDIO_MUSICVOLUME)   ++iOffset;
-        if(i == ENTRY_AUDIO_QUALITY)       ++iOffset;
+        if(i == ENTRY_AUDIO_MUSICVOLUME)     ++iOffset;
+        if(i == ENTRY_AUDIO_QUALITY)         ++iOffset;
 #if defined(_CORE_SWITCH_)
-        if(i == ENTRY_AUDIO_MODE)       ++iOffset;
+        if(i == ENTRY_AUDIO_MODE)            ++iOffset;
 #endif
-        if(i == ENTRY_AUDIO_3DSOUND)       ++iOffset;
+        if(i == ENTRY_AUDIO_3DSOUND)         ++iOffset;
 #if !defined(_CORE_SWITCH_)
-        if(i == ENTRY_INPUT_RUMBLE)        ++iOffset;
+        if(i == ENTRY_INPUT_RUMBLE)          ++iOffset;
 #endif
-        if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
-        if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
-        if(i == ENTRY_INPUT_ACTION4)       ++iOffset;
-        if(i == ENTRY_INPUT_ACTION8)       ++iOffset;
-        if(i == ENTRY_GAME_GAMEDIRECTION)  ++iOffset;
-        if(i == ENTRY_GAME_HUDDIRECTION)   ++iOffset;
-        if(i == ENTRY_GAME_BACKROTATION)   ++iOffset;
+        if(i == ENTRY_INPUT_MOVEUP)          ++iOffset;
+        if(i == ENTRY_INPUT_ACTION1)         ++iOffset;
+        if(i == ENTRY_INPUT_ACTION4)         ++iOffset;
+        if(i == ENTRY_INPUT_ACTION8)         ++iOffset;
+        if(i == ENTRY_GAME_GAMEDIRECTION)    ++iOffset;
+        if(i == ENTRY_GAME_HUDDIRECTION)     ++iOffset;
+        if(i == ENTRY_GAME_BACKROTATION)     ++iOffset;
 #if defined(_CORE_SWITCH_)
-        if(i == ENTRY_GAME_PUREMODE)     ++iOffset;
+        if(i == ENTRY_GAME_PUREMODE)         ++iOffset;
 #else
-        if(i == ENTRY_GAME_UPDATEFREQ)     ++iOffset;
+        if(i == ENTRY_GAME_UPDATEFREQ)       ++iOffset;
 #endif
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
@@ -200,7 +200,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_aCueInput[1] .SetText     (ICON_BURN);
     m_aCueInput[2] .SetText     (ICON_BURN);
     m_aCueInput[3] .SetText     (ICON_BURN);
-    //m_aCueInput[4] .SetText     (ICON_FORWARD);
+    m_aCueInput[4] .SetText     (ICON_FORWARD);
     m_aCueInput[5] .SetText     (ICON_FIRE_ALT);
     m_aCueInput[6] .SetText     (ICON_BOLT);
     m_aCueInput[7] .SetText     (ICON_UNDO_ALT);
@@ -233,9 +233,8 @@ cConfigMenu::cConfigMenu()noexcept
 #else
     m_aCueLock[2].SetPosition(m_aLabel[ENTRY_GAME_UPDATEFREQ]  .GetPosition() + coreVector2(0.472f,0.0f));
 #endif
-    m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_PUREMODE]  .GetPosition() + coreVector2(0.472f,0.0f));
-    //m_aCueLock[4].SetPosition(m_aLabel[ENTRY_GAME_VERSION]     .GetPosition() + coreVector2(0.472f,0.0f));
-    m_aCueLock[4].SetPosition(HIDDEN_POS);
+    m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_PUREMODE]    .GetPosition() + coreVector2(0.472f,0.0f));
+    m_aCueLock[4].SetPosition(HIDDEN_POS);   // ENTRY_GAME_VERSION
 
     m_Description.Construct  (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_Description.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f,0.045f));
@@ -258,75 +257,79 @@ cConfigMenu::cConfigMenu()noexcept
         if(aiSkip.count(ENTRY_ ## n)) x.SetStatus(1);                            \
     }
     {
-        __SET_OPTION(m_Monitor,         VIDEO_MONITOR,        0.31f)
-        __SET_OPTION(m_Resolution,      VIDEO_RESOLUTION,     0.31f)
-        __SET_OPTION(m_DisplayMode,     VIDEO_DISPLAYMODE,    0.31f)
-        __SET_OPTION(m_Vsync,           VIDEO_VSYNC,          0.31f)
-        __SET_OPTION(m_AntiAliasing,    VIDEO_ANTIALIASING,   0.31f)
-        __SET_OPTION(m_TextureFilter,   VIDEO_TEXTUREFILTER,  0.31f)
-        __SET_OPTION(m_RenderQuality,   VIDEO_RENDERQUALITY,  0.31f)
-        __SET_OPTION(m_ShadowQuality,   VIDEO_SHADOWQUALITY,  0.31f)
-        __SET_OPTION(m_ShakeEffects,    VIDEO_SHAKEEFFECTS,   0.31f)
-        __SET_OPTION(m_FlashEffects,    VIDEO_FLASHEFFECTS,   0.31f)
-        __SET_OPTION(m_HitStopEffects,  VIDEO_HITSTOPEFFECTS, 0.31f)
-        __SET_OPTION(m_ChromaEffects,   VIDEO_CHROMAEFFECTS,  0.31f)
-        __SET_OPTION(m_GlobalVolume,    AUDIO_GLOBALVOLUME,   0.31f)
-        __SET_OPTION(m_MusicVolume,     AUDIO_MUSICVOLUME,    0.31f)
-        __SET_OPTION(m_EffectVolume,    AUDIO_EFFECTVOLUME,   0.31f)
-        __SET_OPTION(m_AmbientVolume,   AUDIO_AMBIENTVOLUME,  0.31f)
-        __SET_OPTION(m_MenuVolume,      AUDIO_MENUVOLUME,     0.31f)
-        __SET_OPTION(m_AudioQuality,    AUDIO_QUALITY,        0.31f)
-        __SET_OPTION(m_AudioMode,       AUDIO_MODE,           0.31f)
-        __SET_OPTION(m_3DSound,         AUDIO_3DSOUND,        0.31f)
-        __SET_OPTION(m_Language,        GAME_LANGUAGE,        0.39f)   // #
-        __SET_OPTION(m_GameDirection,   GAME_GAMEDIRECTION,   0.31f)
-        __SET_OPTION(m_MirrorMode,      GAME_MIRRORMODE,      0.31f)
-        __SET_OPTION(m_HudDirection,    GAME_HUDDIRECTION,    0.31f)
-        __SET_OPTION(m_HudType,         GAME_HUDTYPE,         0.31f)
-        __SET_OPTION(m_CombatText,      GAME_COMBATTEXT,      0.31f)
-        __SET_OPTION(m_BackRotation,    GAME_BACKROTATION,    0.31f)
-        __SET_OPTION(m_BackSpeed,       GAME_BACKSPEED,       0.31f)
-        __SET_OPTION(m_UpdateFreq,      GAME_UPDATEFREQ,      0.31f)
-        __SET_OPTION(m_PureMode,        GAME_PUREMODE,        0.31f)
-        __SET_OPTION(m_Leaderboard,     GAME_LEADERBOARD,     0.31f)
-        __SET_OPTION(m_Version,         GAME_VERSION,         0.31f)
-
+        __SET_OPTION(m_Monitor,         VIDEO_MONITOR,         0.31f)
+        __SET_OPTION(m_Resolution,      VIDEO_RESOLUTION,      0.31f)
+        __SET_OPTION(m_DisplayMode,     VIDEO_DISPLAYMODE,     0.31f)
+        __SET_OPTION(m_Vsync,           VIDEO_VSYNC,           0.31f)
+        __SET_OPTION(m_AntiAliasing,    VIDEO_ANTIALIASING,    0.31f)
+        __SET_OPTION(m_TextureFilter,   VIDEO_TEXTUREFILTER,   0.31f)
+        __SET_OPTION(m_RenderQuality,   VIDEO_RENDERQUALITY,   0.31f)
+        __SET_OPTION(m_ShadowQuality,   VIDEO_SHADOWQUALITY,   0.31f)
+        __SET_OPTION(m_WaterQuality,    VIDEO_WATERQUALITY,    0.31f)
+        __SET_OPTION(m_ParticleEffects, VIDEO_PARTICLEEFFECTS, 0.31f)
+        __SET_OPTION(m_ShakeEffects,    VIDEO_SHAKEEFFECTS,    0.31f)
+        __SET_OPTION(m_FlashEffects,    VIDEO_FLASHEFFECTS,    0.31f)
+        __SET_OPTION(m_HitStopEffects,  VIDEO_HITSTOPEFFECTS,  0.31f)
+        __SET_OPTION(m_ChromaEffects,   VIDEO_CHROMAEFFECTS,   0.31f)
+        __SET_OPTION(m_GlobalVolume,    AUDIO_GLOBALVOLUME,    0.31f)
+        __SET_OPTION(m_MusicVolume,     AUDIO_MUSICVOLUME,     0.31f)
+        __SET_OPTION(m_EffectVolume,    AUDIO_EFFECTVOLUME,    0.31f)
+        __SET_OPTION(m_AmbientVolume,   AUDIO_AMBIENTVOLUME,   0.31f)
+        __SET_OPTION(m_MenuVolume,      AUDIO_MENUVOLUME,      0.31f)
+        __SET_OPTION(m_AudioQuality,    AUDIO_QUALITY,         0.31f)
+        __SET_OPTION(m_AudioMode,       AUDIO_MODE,            0.31f)
+        __SET_OPTION(m_3DSound,         AUDIO_3DSOUND,         0.31f)
+        __SET_OPTION(m_Language,        GAME_LANGUAGE,         0.39f)   // #
+        __SET_OPTION(m_GameDirection,   GAME_GAMEDIRECTION,    0.31f)
+        __SET_OPTION(m_MirrorMode,      GAME_MIRRORMODE,       0.31f)
+        __SET_OPTION(m_HudDirection,    GAME_HUDDIRECTION,     0.31f)
+        __SET_OPTION(m_HudType,         GAME_HUDTYPE,          0.31f)
+        __SET_OPTION(m_CombatText,      GAME_COMBATTEXT,       0.31f)
+        __SET_OPTION(m_BackRotation,    GAME_BACKROTATION,     0.31f)
+        __SET_OPTION(m_BackSpeed,       GAME_BACKSPEED,        0.31f)
+        __SET_OPTION(m_UpdateFreq,      GAME_UPDATEFREQ,       0.31f)
+        __SET_OPTION(m_PureMode,        GAME_PUREMODE,         0.31f)
+        __SET_OPTION(m_Leaderboard,     GAME_LEADERBOARD,      0.31f)
+        __SET_OPTION(m_Version,         GAME_VERSION,          0.31f)
+ 
         m_Language     .SetEndless(true);
         m_GameDirection.SetEndless(true);
         m_HudDirection .SetEndless(true);
 
-        m_Navigator.BindObject(&m_Monitor,         &m_VideoTab,       NULL, &m_Resolution,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_Resolution,      &m_Monitor,        NULL, &m_DisplayMode,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_DisplayMode,     &m_Resolution,     NULL, &m_Vsync,           NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_Vsync,           &m_DisplayMode,    NULL, &m_AntiAliasing,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_AntiAliasing,    &m_Vsync,          NULL, &m_TextureFilter,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_TextureFilter,   &m_AntiAliasing,   NULL, &m_RenderQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_RenderQuality,   &m_TextureFilter,  NULL, &m_ShadowQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_ShadowQuality,   &m_RenderQuality,  NULL, &m_ShakeEffects,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_ShakeEffects,    &m_ShadowQuality,  NULL, &m_FlashEffects,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_FlashEffects,    &m_ShakeEffects,   NULL, &m_HitStopEffects,  NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_HitStopEffects,  &m_FlashEffects,   NULL, &m_ChromaEffects,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_ChromaEffects,   &m_HitStopEffects, NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_GlobalVolume,    &m_AudioTab,       NULL, &m_MusicVolume,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_MusicVolume,     &m_GlobalVolume,   NULL, &m_EffectVolume,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_EffectVolume,    &m_MusicVolume,    NULL, &m_AmbientVolume,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_AmbientVolume,   &m_EffectVolume,   NULL, &m_MenuVolume,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_MenuVolume,      &m_AmbientVolume,  NULL, &m_AudioQuality,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_AudioQuality,    &m_MenuVolume,     NULL, &m_AudioMode,       NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_AudioMode,       &m_AudioQuality,   NULL, &m_3DSound,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_3DSound,         &m_AudioMode,      NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
-        m_Navigator.BindObject(&m_Language,        &m_GameTab,        NULL, &m_GameDirection,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_GameDirection,   &m_Language,       NULL, &m_MirrorMode,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_MirrorMode,      &m_GameDirection,  NULL, &m_HudDirection,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_HudDirection,    &m_MirrorMode,     NULL, &m_HudType,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_HudType,         &m_HudDirection,   NULL, &m_CombatText,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_CombatText,      &m_HudType,        NULL, &m_BackRotation,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_BackRotation,    &m_CombatText,     NULL, &m_BackSpeed,       NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_BackSpeed,       &m_BackRotation,   NULL, &m_UpdateFreq,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_UpdateFreq,      &m_BackSpeed,      NULL, &m_PureMode,        NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_PureMode,        &m_UpdateFreq,     NULL, &m_Leaderboard,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_Leaderboard,     &m_PureMode,       NULL, &m_Version,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
-        m_Navigator.BindObject(&m_Version,         &m_Leaderboard,    NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_Monitor,         &m_VideoTab,        NULL, &m_Resolution,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_Resolution,      &m_Monitor,         NULL, &m_DisplayMode,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_DisplayMode,     &m_Resolution,      NULL, &m_Vsync,           NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_Vsync,           &m_DisplayMode,     NULL, &m_AntiAliasing,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_AntiAliasing,    &m_Vsync,           NULL, &m_TextureFilter,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_TextureFilter,   &m_AntiAliasing,    NULL, &m_RenderQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_RenderQuality,   &m_TextureFilter,   NULL, &m_ShadowQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_ShadowQuality,   &m_RenderQuality,   NULL, &m_WaterQuality,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_WaterQuality,    &m_ShadowQuality,   NULL, &m_ParticleEffects, NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_ParticleEffects, &m_WaterQuality,    NULL, &m_ShakeEffects,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_ShakeEffects,    &m_ParticleEffects, NULL, &m_FlashEffects,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_FlashEffects,    &m_ShakeEffects,    NULL, &m_HitStopEffects,  NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_HitStopEffects,  &m_FlashEffects,    NULL, &m_ChromaEffects,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_ChromaEffects,   &m_HitStopEffects,  NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_GlobalVolume,    &m_AudioTab,        NULL, &m_MusicVolume,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_MusicVolume,     &m_GlobalVolume,    NULL, &m_EffectVolume,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_EffectVolume,    &m_MusicVolume,     NULL, &m_AmbientVolume,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_AmbientVolume,   &m_EffectVolume,    NULL, &m_MenuVolume,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_MenuVolume,      &m_AmbientVolume,   NULL, &m_AudioQuality,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_AudioQuality,    &m_MenuVolume,      NULL, &m_AudioMode,       NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_AudioMode,       &m_AudioQuality,    NULL, &m_3DSound,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_3DSound,         &m_AudioMode,       NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_AUDIO);
+        m_Navigator.BindObject(&m_Language,        &m_GameTab,         NULL, &m_GameDirection,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_GameDirection,   &m_Language,        NULL, &m_MirrorMode,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_MirrorMode,      &m_GameDirection,   NULL, &m_HudDirection,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_HudDirection,    &m_MirrorMode,      NULL, &m_HudType,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_HudType,         &m_HudDirection,    NULL, &m_CombatText,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_CombatText,      &m_HudType,         NULL, &m_BackRotation,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_BackRotation,    &m_CombatText,      NULL, &m_BackSpeed,       NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_BackSpeed,       &m_BackRotation,    NULL, &m_UpdateFreq,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_UpdateFreq,      &m_BackSpeed,       NULL, &m_PureMode,        NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_PureMode,        &m_UpdateFreq,      NULL, &m_Leaderboard,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_Leaderboard,     &m_PureMode,        NULL, &m_Version,         NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
+        m_Navigator.BindObject(&m_Version,         &m_Leaderboard,     NULL, &m_SaveButton,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_GAME);
     }
     #undef __SET_OPTION
 
@@ -404,11 +407,9 @@ cConfigMenu::cConfigMenu()noexcept
             m_Navigator.BindObject(&m_aInput[i].aAction[3],   &m_aInput[i].oControlMode, &m_aInput[1u - i].aAction[3],   &m_aInput[i].aAction[4],   &m_aInput[1u - i].aAction[3],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[4],   &m_aInput[i].aAction[3],   &m_aInput[1u - i].aAction[4],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[4],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[5],   &m_aInput[i].aAction[4],   &m_aInput[1u - i].aAction[5],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[5],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-                //m_Navigator.BindObject(&m_aInput[i].aAction[6],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[6],   &m_aInput[i].aAction[9],   &m_aInput[1u - i].aAction[6],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-                //m_Navigator.BindObject(&m_aInput[i].aAction[9],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[9],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[9],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-                //m_Navigator.BindObject(&m_aInput[i].aAction[0],   &m_aInput[i].aAction[9],   &m_aInput[1u - i].aAction[0],   &m_aInput[i].aAction[8],   &m_aInput[1u - i].aAction[0],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-                m_Navigator.BindObject(&m_aInput[i].aAction[6],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[6],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[6],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
-                m_Navigator.BindObject(&m_aInput[i].aAction[0],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[0],   &m_aInput[i].aAction[8],   &m_aInput[1u - i].aAction[0],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+            m_Navigator.BindObject(&m_aInput[i].aAction[6],   &m_aInput[i].aAction[5],   &m_aInput[1u - i].aAction[6],   &m_aInput[i].aAction[9],   &m_aInput[1u - i].aAction[6],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+            m_Navigator.BindObject(&m_aInput[i].aAction[9],   &m_aInput[i].aAction[6],   &m_aInput[1u - i].aAction[9],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[9],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
+            m_Navigator.BindObject(&m_aInput[i].aAction[0],   &m_aInput[i].aAction[9],   &m_aInput[1u - i].aAction[0],   &m_aInput[i].aAction[8],   &m_aInput[1u - i].aAction[0],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[8],   &m_aInput[i].aAction[0],   &m_aInput[1u - i].aAction[8],   &m_aInput[i].aAction[1],   &m_aInput[1u - i].aAction[8],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[1],   &m_aInput[i].aAction[8],   &m_aInput[1u - i].aAction[1],   &m_aInput[i].aAction[2],   &m_aInput[1u - i].aAction[1],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
             m_Navigator.BindObject(&m_aInput[i].aAction[2],   &m_aInput[i].aAction[1],   &m_aInput[1u - i].aAction[2],   &m_aInput[i].aAction[7],   &m_aInput[1u - i].aAction[2],   MENU_TYPE_TAB_NODE,                          SURFACE_CONFIG_INPUT);
@@ -438,7 +439,7 @@ cConfigMenu::cConfigMenu()noexcept
     }
     
     
-
+    
     m_SwapInput.Construct  (MENU_SWITCHBOX, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
     m_SwapInput.SetPosition(LERP(m_aInput[0].oHeader.GetPosition(), m_aInput[1].oHeader.GetPosition(), 0.5f));
     m_SwapInput.SetSize    (coreVector2(0.06f,0.03f));
@@ -448,29 +449,31 @@ cConfigMenu::cConfigMenu()noexcept
     m_VideoBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
     m_VideoBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
 #if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
-    m_VideoBox.SetMaxOffset(0.05f * 13.5f - m_VideoBox.GetSize().y);
+    m_VideoBox.SetMaxOffset(0.05f * 15.5f - m_VideoBox.GetSize().y);
 #endif
     for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLine [i]);}
     for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLabel[i]);}
-    if(!m_Monitor       .GetStatus()) m_VideoBox.BindObject(&m_Monitor);
-    if(!m_Resolution    .GetStatus()) m_VideoBox.BindObject(&m_Resolution);
-    if(!m_DisplayMode   .GetStatus()) m_VideoBox.BindObject(&m_DisplayMode);
-    if(!m_Vsync         .GetStatus()) m_VideoBox.BindObject(&m_Vsync);
-    if(!m_AntiAliasing  .GetStatus()) m_VideoBox.BindObject(&m_AntiAliasing);
-    if(!m_TextureFilter .GetStatus()) m_VideoBox.BindObject(&m_TextureFilter);
-    if(!m_RenderQuality .GetStatus()) m_VideoBox.BindObject(&m_RenderQuality);
-    if(!m_ShadowQuality .GetStatus()) m_VideoBox.BindObject(&m_ShadowQuality);
-    if(!m_ShakeEffects  .GetStatus()) m_VideoBox.BindObject(&m_ShakeEffects);
-    if(!m_FlashEffects  .GetStatus()) m_VideoBox.BindObject(&m_FlashEffects);
-    if(!m_HitStopEffects.GetStatus()) m_VideoBox.BindObject(&m_HitStopEffects);
-    if(!m_ChromaEffects .GetStatus()) m_VideoBox.BindObject(&m_ChromaEffects);
+    if(!m_Monitor        .GetStatus()) m_VideoBox.BindObject(&m_Monitor);
+    if(!m_Resolution     .GetStatus()) m_VideoBox.BindObject(&m_Resolution);
+    if(!m_DisplayMode    .GetStatus()) m_VideoBox.BindObject(&m_DisplayMode);
+    if(!m_Vsync          .GetStatus()) m_VideoBox.BindObject(&m_Vsync);
+    if(!m_AntiAliasing   .GetStatus()) m_VideoBox.BindObject(&m_AntiAliasing);
+    if(!m_TextureFilter  .GetStatus()) m_VideoBox.BindObject(&m_TextureFilter);
+    if(!m_RenderQuality  .GetStatus()) m_VideoBox.BindObject(&m_RenderQuality);
+    if(!m_ShadowQuality  .GetStatus()) m_VideoBox.BindObject(&m_ShadowQuality);
+    if(!m_WaterQuality   .GetStatus()) m_VideoBox.BindObject(&m_WaterQuality);
+    if(!m_ParticleEffects.GetStatus()) m_VideoBox.BindObject(&m_ParticleEffects);
+    if(!m_ShakeEffects   .GetStatus()) m_VideoBox.BindObject(&m_ShakeEffects);
+    if(!m_FlashEffects   .GetStatus()) m_VideoBox.BindObject(&m_FlashEffects);
+    if(!m_HitStopEffects .GetStatus()) m_VideoBox.BindObject(&m_HitStopEffects);
+    if(!m_ChromaEffects  .GetStatus()) m_VideoBox.BindObject(&m_ChromaEffects);
 
     m_InputBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
     m_InputBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
 #if defined(_CORE_SWITCH_)
-    m_InputBox.SetMaxOffset(0.05f * 18.0f - m_InputBox.GetSize().y);
+    m_InputBox.SetMaxOffset(0.05f * 19.0f - m_InputBox.GetSize().y);
 #else
-    m_InputBox.SetMaxOffset(0.05f * 19.5f - m_InputBox.GetSize().y);
+    m_InputBox.SetMaxOffset(0.05f * 20.5f - m_InputBox.GetSize().y);
 #endif
     for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLine [i]);}
     for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLabel[i]);}
@@ -525,18 +528,21 @@ cConfigMenu::cConfigMenu()noexcept
     {
         m_ShadowQuality.AddEntryLanguage("VALUE_OFF", 1u);
     }
-    for(coreUintW i = 0u; i <= 200u; i += 5u) m_ShakeEffects .AddEntry(PRINT("%zu%%", i), i);
+    m_WaterQuality   .AddEntryLanguage("VALUE_LOW",              0u);
+    m_WaterQuality   .AddEntryLanguage("VALUE_HIGH",             1u);
+    for(coreUintW i = 0u; i <= 200u; i += 5u) m_ParticleEffects.AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 200u; i += 5u) m_ShakeEffects   .AddEntry(PRINT("%zu%%", i), i);
     m_FlashEffects   .AddEntryLanguage("VALUE_OFF",              0u);
     m_FlashEffects   .AddEntryLanguage("VALUE_ON",               1u);
     m_HitStopEffects .AddEntryLanguage("VALUE_OFF",              0u);
     m_HitStopEffects .AddEntryLanguage("VALUE_ON",               1u);
     m_ChromaEffects  .AddEntryLanguage("VALUE_OFF",              0u);
     m_ChromaEffects  .AddEntryLanguage("VALUE_ON",               1u);
-    for(coreUintW i = 0u; i <= 100u; i += 5u) m_GlobalVolume .AddEntry(PRINT("%zu%%", i), i);
-    for(coreUintW i = 0u; i <= 100u; i += 5u) m_MusicVolume  .AddEntry(PRINT("%zu%%", i), i);
-    for(coreUintW i = 0u; i <= 100u; i += 5u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
-    for(coreUintW i = 0u; i <= 100u; i += 5u) m_AmbientVolume.AddEntry(PRINT("%zu%%", i), i);
-    for(coreUintW i = 0u; i <= 100u; i += 5u) m_MenuVolume   .AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 5u) m_GlobalVolume   .AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 5u) m_MusicVolume    .AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 5u) m_EffectVolume   .AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 5u) m_AmbientVolume  .AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 5u) m_MenuVolume     .AddEntry(PRINT("%zu%%", i), i);
     m_AudioQuality   .AddEntryLanguage("VALUE_LOW",              0u);
     m_AudioQuality   .AddEntryLanguage("VALUE_HIGH",             1u);
     m_AudioMode      .AddEntryLanguage("VALUE_AUTO",             CORE_AUDIO_MODE_AUTO);
@@ -583,10 +589,10 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindObject(&m_InputTab, &m_SaveButton, &m_AudioTab, &m_Monitor, &m_GameTab,  MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
     m_Navigator.BindObject(&m_GameTab,  &m_SaveButton, &m_InputTab, &m_Monitor, &m_VideoTab, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
 
-    m_Navigator.BindObject(&m_SaveButton,    &m_Version, &m_BackButton,    &m_Monitor, &m_DiscardButton, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_DiscardButton, &m_Version, &m_SaveButton,    &m_Monitor, &m_InputButton,   MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_InputButton,   &m_Version, &m_DiscardButton, &m_Monitor, &m_BackButton,    MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_BackButton,    &m_Version, &m_InputButton,   &m_Monitor, &m_SaveButton,    MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_SaveButton,    &m_Version, &m_BackButton,   NULL, &m_DiscardButton, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_DiscardButton, &m_Version, &m_SaveButton,   NULL, &m_InputButton,   MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_InputButton,   &m_Version, &m_DiscardButton,NULL, &m_BackButton,    MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_BackButton,    &m_Version, &m_InputButton,  NULL, &m_SaveButton,    MENU_TYPE_DEFAULT);
 
     m_Navigator.BindSurface(&m_VideoTab, SURFACE_CONFIG_VIDEO, &m_ChromaEffects, NULL, &m_Monitor,         NULL);
     m_Navigator.BindSurface(&m_AudioTab, SURFACE_CONFIG_AUDIO, &m_3DSound,       NULL, &m_GlobalVolume,    NULL);
@@ -596,9 +602,26 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindScroll(&m_VideoBox);
     m_Navigator.BindScroll(&m_InputBox);
 
-    m_Navigator.AssignFirst(DEFINED(_CORE_EMSCRIPTEN_) ? &m_TextureFilter : (DEFINED(_CORE_SWITCH_) ? &m_ShakeEffects : &m_Monitor));
+    m_Navigator.AssignFirst(DEFINED(_CORE_EMSCRIPTEN_) ? &m_TextureFilter : (DEFINED(_CORE_SWITCH_) ? &m_ParticleEffects : &m_Monitor));
     m_Navigator.AssignBack (&m_BackButton);
     m_Navigator.AssignMenu (this);
+
+    const auto nTabFunc = [this](coreObject2D* pObject, const coreUint8 iPack)
+    {
+        if(iPack != 4u) return;
+        switch(this->GetCurSurface())
+        {
+        default: UNREACHABLE
+        case SURFACE_CONFIG_VIDEO: m_Navigator.RebindDown(pObject, &m_VideoTab); break;
+        case SURFACE_CONFIG_AUDIO: m_Navigator.RebindDown(pObject, &m_AudioTab); break;
+        case SURFACE_CONFIG_INPUT: m_Navigator.RebindDown(pObject, &m_InputTab); break;
+        case SURFACE_CONFIG_GAME:  m_Navigator.RebindDown(pObject, &m_GameTab);  break;
+        }
+    };
+    m_Navigator.BindDynamic(&m_SaveButton,    nTabFunc);
+    m_Navigator.BindDynamic(&m_DiscardButton, nTabFunc);
+    m_Navigator.BindDynamic(&m_InputButton,   nTabFunc);
+    m_Navigator.BindDynamic(&m_BackButton,    nTabFunc);
 
     // bind menu objects
     for(coreUintW i = 0u; i < SURFACE_CONFIG_MAX; ++i)
@@ -712,6 +735,10 @@ void cConfigMenu::Move()
                 this->__UpdateShadowQuality();
 
             // 
+            if(m_WaterQuality.GetUserSwitch())
+                this->__UpdateWaterQuality();
+
+            // 
             cMenu::UpdateSwitchBox(&m_Monitor);
             cMenu::UpdateSwitchBox(&m_Resolution);
             cMenu::UpdateSwitchBox(&m_DisplayMode);
@@ -720,6 +747,8 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_TextureFilter);
             cMenu::UpdateSwitchBox(&m_RenderQuality);
             cMenu::UpdateSwitchBox(&m_ShadowQuality);
+            cMenu::UpdateSwitchBox(&m_WaterQuality);
+            cMenu::UpdateSwitchBox(&m_ParticleEffects);
             cMenu::UpdateSwitchBox(&m_ShakeEffects);
             cMenu::UpdateSwitchBox(&m_FlashEffects);
             cMenu::UpdateSwitchBox(&m_HitStopEffects);
@@ -730,6 +759,8 @@ void cConfigMenu::Move()
             else if(m_RenderQuality.GetCurValue() == 1u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
                  if(m_ShadowQuality.GetCurValue() == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
             else if(m_ShadowQuality.GetCurValue() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_WaterQuality .GetCurValue() == 0u) m_WaterQuality .GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_WaterQuality .GetCurValue() == 1u) m_WaterQuality .GetCaption()->SetColor3(COLOR_MENU_GREEN);
         }
         break;
 
@@ -757,12 +788,12 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_3DSound);
 
             // 
-            const auto nColorFunc = [](const coreFloat fValue) {return TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, fValue);};
-            m_GlobalVolume .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_GlobalVolume .GetCurValue()) * 0.01f));
-            m_MusicVolume  .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_MusicVolume  .GetCurValue()) * 0.01f));
-            m_EffectVolume .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_EffectVolume .GetCurValue()) * 0.01f));
-            m_AmbientVolume.GetCaption()->SetColor3(nColorFunc(I_TO_F(m_AmbientVolume.GetCurValue()) * 0.01f));
-            m_MenuVolume   .GetCaption()->SetColor3(nColorFunc(I_TO_F(m_MenuVolume   .GetCurValue()) * 0.01f));
+            const auto nColorFunc = [](const coreUint8 iValue) {return TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, cConfigMenu::__VolumeToFloat(iValue));};
+            m_GlobalVolume .GetCaption()->SetColor3(nColorFunc(m_GlobalVolume .GetCurValue()));
+            m_MusicVolume  .GetCaption()->SetColor3(nColorFunc(m_MusicVolume  .GetCurValue()));
+            m_EffectVolume .GetCaption()->SetColor3(nColorFunc(m_EffectVolume .GetCurValue()));
+            m_AmbientVolume.GetCaption()->SetColor3(nColorFunc(m_AmbientVolume.GetCurValue()));
+            m_MenuVolume   .GetCaption()->SetColor3(nColorFunc(m_MenuVolume   .GetCurValue()));
 
             // 
                  if(m_AudioQuality.GetCurValue() == 0u) m_AudioQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
@@ -831,6 +862,13 @@ void cConfigMenu::Move()
                 }
 
                 // 
+                if(oInput.oType.IsFocused() && (oInput.oType.GetCurValue() >= INPUT_SETS_KEYBOARD))
+                {
+                    // TODO 1: show gamepad name somehow
+                    // Core::Input->GetJoystickName(oInput.oType.GetCurValue() - INPUT_SETS_KEYBOARD)
+                }
+
+                // 
                 if(oInput.oRumble     .GetUserSwitch()) g_CurConfig.Input.aiRumble     [i] = oInput.oRumble     .GetCurValue();
                 if(oInput.oFireMode   .GetUserSwitch()) g_CurConfig.Input.aiFireMode   [i] = oInput.oFireMode   .GetCurValue();
                 if(oInput.oControlMode.GetUserSwitch()) g_CurConfig.Input.aiControlMode[i] = oInput.oControlMode.GetCurValue();
@@ -883,6 +921,8 @@ void cConfigMenu::Move()
                         {
                             if(iAnswer != MSGBOX_ANSWER_KEY) return;
                             
+                            if(iKey != INPUT_KEY_INVALID)
+                            {
                             coreBool bReplace = false;
 
                             // check if new key is already assigned somewhere else
@@ -995,6 +1035,7 @@ void cConfigMenu::Move()
                                 }
                             }
                             }
+                            }
 
                             // 
                             iCurValue = iKey;
@@ -1045,11 +1086,11 @@ void cConfigMenu::Move()
             m_aCueRota[0].SetDirection(MapToAxisInv(g_pPostProcessing->GetDirection(), g_vHudDirection));
 
             // 
-            m_BackRotation .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
-            m_BackSpeed    .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
-            m_UpdateFreq   .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
-            m_PureMode     .SetOverride((STATIC_ISVALID(g_pGame))                               ? -1 : 0);
-            m_Version      .SetOverride((STATIC_ISVALID(g_pGame))                               ? -1 : 0);
+            m_BackRotation.SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
+            m_BackSpeed   .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
+            m_UpdateFreq  .SetOverride((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? -1 : 0);
+            m_PureMode    .SetOverride((STATIC_ISVALID(g_pGame))                               ? -1 : 0);
+            m_Version     .SetOverride((STATIC_ISVALID(g_pGame))                               ? -1 : 0);
 
             // 
             m_aCueLock[0].SetEnabled((STATIC_ISVALID(g_pGame) || g_CurConfig.Game.iPureMode) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
@@ -1147,8 +1188,10 @@ void cConfigMenu::Move()
 
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
-        cMenu::UpdateLine(&m_aLine[i], true);   // TODO 1: causes scroll-box to scroll when wrapping movement
-        // TODO 1: linien koennen fokusiert werden waehrend sie ausserhalb der scroll-box sind
+        const coreBool bInteract = m_VideoBox.ContainsObject(&m_aLine[i]) ? m_VideoBox.IsFocused() :
+                                   m_InputBox.ContainsObject(&m_aLine[i]) ? m_InputBox.IsFocused() : true;
+
+        cMenu::UpdateLine(&m_aLine[i], bInteract);
 
         if(m_aLine[i].IsFocused() && TIME)
         {
@@ -1193,6 +1236,8 @@ void cConfigMenu::CheckValues()
                            (m_TextureFilter  .GetCurValue() !=  Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                           ||
                            (m_RenderQuality  .GetCurValue() !=  g_OldConfig.Graphics.iRender)                                                           ||
                            (m_ShadowQuality  .GetCurValue() !=  g_OldConfig.Graphics.iShadow)                                                           ||
+                           (m_WaterQuality   .GetCurValue() !=  g_OldConfig.Graphics.iReflection)                                                       ||
+                           (m_ParticleEffects.GetCurValue() !=  g_OldConfig.Graphics.iParticle)                                                         ||
                            (m_ShakeEffects   .GetCurValue() !=  g_OldConfig.Graphics.iShake)                                                            ||
                            (m_FlashEffects   .GetCurValue() !=  g_OldConfig.Graphics.iFlash)                                                            ||
                            (m_HitStopEffects .GetCurValue() !=  g_OldConfig.Graphics.iHitStop)                                                          ||
@@ -1231,6 +1276,7 @@ void cConfigMenu::LoadValues()
 {
     const coreUintW iRenderQualityIndex = m_RenderQuality.GetCurIndex();
     const coreUintW iShadowQualityIndex = m_ShadowQuality.GetCurIndex();
+    const coreUintW iWaterQualityIndex  = m_WaterQuality .GetCurIndex();
     const coreUintW iLanguageIndex      = m_Language     .GetCurIndex();
 
     // 
@@ -1259,6 +1305,8 @@ void cConfigMenu::LoadValues()
     m_TextureFilter  .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
     m_RenderQuality  .SelectValue(g_CurConfig.Graphics.iRender);
     m_ShadowQuality  .SelectValue(g_CurConfig.Graphics.iShadow);
+    m_WaterQuality   .SelectValue(g_CurConfig.Graphics.iReflection);
+    m_ParticleEffects.SelectValue(g_CurConfig.Graphics.iParticle);
     m_ShakeEffects   .SelectValue(g_CurConfig.Graphics.iShake);
     m_FlashEffects   .SelectValue(g_CurConfig.Graphics.iFlash);
     m_HitStopEffects .SelectValue(g_CurConfig.Graphics.iHitStop);
@@ -1303,6 +1351,7 @@ void cConfigMenu::LoadValues()
     {
         if(iRenderQualityIndex != m_RenderQuality.GetCurIndex()) this->__UpdateRenderQuality();
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
+        if(iWaterQualityIndex  != m_WaterQuality .GetCurIndex()) this->__UpdateWaterQuality();
         if(iLanguageIndex      != m_Language     .GetCurIndex()) this->__UpdateLanguage();
         this->__UpdateVolume();
         this->__UpdateBackSpeed();
@@ -1345,12 +1394,14 @@ void cConfigMenu::SaveValues()
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_VSYNC,               m_Vsync        .GetCurValue());
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurValue());
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurValue());
-    g_CurConfig.Graphics.iRender   = m_RenderQuality  .GetCurValue();
-    g_CurConfig.Graphics.iShadow   = m_ShadowQuality  .GetCurValue();
-    g_CurConfig.Graphics.iShake    = m_ShakeEffects   .GetCurValue();
-    g_CurConfig.Graphics.iFlash    = m_FlashEffects   .GetCurValue();
-    g_CurConfig.Graphics.iHitStop  = m_HitStopEffects .GetCurValue();
-    g_CurConfig.Graphics.iChroma   = m_ChromaEffects  .GetCurValue();
+    g_CurConfig.Graphics.iRender     = m_RenderQuality  .GetCurValue();
+    g_CurConfig.Graphics.iShadow     = m_ShadowQuality  .GetCurValue();
+    g_CurConfig.Graphics.iReflection = m_WaterQuality   .GetCurValue();
+    g_CurConfig.Graphics.iParticle   = m_ParticleEffects.GetCurValue();
+    g_CurConfig.Graphics.iShake      = m_ShakeEffects   .GetCurValue();
+    g_CurConfig.Graphics.iFlash      = m_FlashEffects   .GetCurValue();
+    g_CurConfig.Graphics.iHitStop    = m_HitStopEffects .GetCurValue();
+    g_CurConfig.Graphics.iChroma     = m_ChromaEffects  .GetCurValue();
 
     // 
     Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurValue()));
@@ -1421,7 +1472,7 @@ void cConfigMenu::SaveValues()
         // 
         g_pMenu->InvokePauseStep();
         
-        if(STATIC_ISVALID(g_pGame))
+        if(STATIC_ISVALID(g_pGame))   // TODO 1: this is called during Move()
         {   // TODO 1: does not work fully, as resources are not loaded yet
             // refresh frame-buffers        
             g_pGlow->Update();
@@ -1429,6 +1480,7 @@ void cConfigMenu::SaveValues()
             {
                 g_pDistortion->Update();
             });
+            coreFrameBuffer::EndDraw();
         }
     }
 
@@ -1493,6 +1545,18 @@ void cConfigMenu::__UpdateShadowQuality()
     cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
     if(pOutdoor) pOutdoor->GetShadowMap()->Reconfigure();
     cShadow::Recompile();
+
+    // 
+    g_pMenu->InvokePauseStep();
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__UpdateWaterQuality()
+{
+    // 
+    g_CurConfig.Graphics.iReflection = m_WaterQuality.GetCurValue();
 
     // 
     g_pMenu->InvokePauseStep();

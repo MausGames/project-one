@@ -12,9 +12,9 @@
 const float c_v1TileRate = 1.4;    // 
 
 // shader output
-varying      vec4  v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
-flat varying vec4  v_v4Border;     // border distance values (xy = inner, zw = outer)
-varying      float v_v1Factor;     // 
+varying      vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
+flat varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
+varying      vec2 v_v2Factor;     // 
 
 
 void VertexMain()
@@ -41,5 +41,6 @@ void VertexMain()
     float v1Max  = max(u_v4Resolution.x, u_v4Resolution.y);
     float v1Min  = min(u_v4Resolution.x, u_v4Resolution.y);
     float v1Term = (v1Max * 0.5 - v1Min * 0.4) / v4Pixel.y;
-    v_v1Factor   = ((a_v2LowTexCoord.y - (1.0 - v1Term)) / v1Term) * 2.2 - 0.2;
+    v_v2Factor.x = (((a_v2LowTexCoord.y - (1.0 - v1Term)) / v1Term) * 1.1 - 0.1) * 2.2;
+    v_v2Factor.y = (a_v2LowTexCoord.x - 0.5) * 0.8;
 }

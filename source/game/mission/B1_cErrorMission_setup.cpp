@@ -97,7 +97,7 @@ void cErrorMission::__SetupOwn()
                 STAGE_FOREACH_ENEMY_ALL(CONCAT(pSquad, __LINE__), pEnemy, i)            \
                 {                                                                       \
                     pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);              \
-                    pEnemy->Configure(120, 0u, c);                                      \
+                    pEnemy->Configure(120, c);                                          \
                     pEnemy->Resurrect();                                                \
                 });                                                                     \
             });                                                                         \
@@ -149,7 +149,7 @@ void cErrorMission::__SetupOwn()
             {
                 //pEnemy->SetPosition(coreVector3(I_TO_F(i - 2u) * 0.2f, 1.1f, 0.0f) * FOREGROUND_AREA3);
                 pEnemy->SetSize    (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
-                pEnemy->Configure  (4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure  (4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus  (ENEMY_STATUS_GHOST);
             });
         });
@@ -292,7 +292,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(30, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(30, COLOR_SHIP_YELLOW);
 
                 if(i < 12u) pEnemy->Resurrect();
             });
@@ -303,7 +303,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(0.4f,0.4f,0.4f));
-                pEnemy->Configure(4, 0u, COLOR_SHIP_GREY);
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE); // turn later into invulnarable/reflect, or manual reflect, to not collide with player
             });
         });
@@ -325,7 +325,7 @@ void cErrorMission::__SetupOwn()
                         return coreVector2(0.0f,0.0f) * FOREGROUND_AREA;
         };
 
-        for(coreUintW i = 12u; i < 22u; ++i)
+        /*for(coreUintW i = 12u; i < 22u; ++i)
         {
             const coreUint8 iType  = (i < 18u) ? 0u        : ((i < 21u) ? 1u        : 2u);
             const coreUintW iCount = (i < 18u) ? 6u        : ((i < 21u) ? 12u       : 36u);
@@ -359,7 +359,7 @@ void cErrorMission::__SetupOwn()
                 }
             }
 
-        }
+        }*/
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -479,7 +479,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
-                pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
             });
         });
@@ -617,7 +617,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(200, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(200, COLOR_SHIP_RED);
             });
 
              pSquad1->GetEnemy(0u)->SetPosition(coreVector3(0.0f,0.0f,0.0f) * FOREGROUND_AREA3);
@@ -666,7 +666,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetPosition(coreVector3(0.0f,0.0f,0.0f));
-                pEnemy->Configure  (2000, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure  (2000, COLOR_SHIP_ORANGE);
 
                 pEnemy->Resurrect();
             });
@@ -735,7 +735,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, 0u, COLOR_SHIP_BLUE);
+                pEnemy->Configure(4, COLOR_SHIP_BLUE);
             });
         });
 
@@ -806,7 +806,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(50, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(50, COLOR_SHIP_ORANGE);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();
@@ -836,7 +836,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(100, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(100, COLOR_SHIP_YELLOW);
             });
 
             pSquad1->GetEnemy(0u)->SetPosition(coreVector3(-0.8f,1.2f,0.0f) * FOREGROUND_AREA3);
@@ -885,6 +885,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
+        // TODO 1: BulletBullet collision       
         Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             // 
@@ -916,7 +917,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(20, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(20, COLOR_SHIP_RED);
 
                 pEnemy->Resurrect();
             });
@@ -967,7 +968,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(100, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(100, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -1011,7 +1012,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(100, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(100, COLOR_SHIP_YELLOW);
             });
 
             pSquad1->GetEnemy(0u)->SetPosition(coreVector3(-0.8f,1.2f,0.0f) * FOREGROUND_AREA3);
@@ -1061,7 +1062,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetPosition(coreVector3(0.0f,0.0f,0.0f));   
-                pEnemy->Configure  (100, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure  (100, COLOR_SHIP_ORANGE);
                 pEnemy->AddStatus  (ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();
@@ -1072,7 +1073,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(30, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure(30, COLOR_SHIP_ORANGE);
 
                 pEnemy->Resurrect();
             });
@@ -1120,7 +1121,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.15f);
-                pEnemy->Configure(40, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(40, COLOR_SHIP_RED);
             });
 
             pSquad1->GetEnemy(0u)->SetPosition(coreVector3( 1.2f,-0.9f,0.0f) * FOREGROUND_AREA3);
@@ -1219,7 +1220,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
-                pEnemy->Configure(200, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(200, COLOR_SHIP_CYAN);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();
@@ -1232,7 +1233,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(4, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -1310,7 +1311,7 @@ void cErrorMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(30, 0u, COLOR_SHIP_BLUE);
+                pEnemy->Configure(30, COLOR_SHIP_BLUE);
                 d_cast<cCinderEnemy*>(pEnemy)->SetAngle(I_TO_F(i));
 
                 pEnemy->Resurrect();
@@ -1359,7 +1360,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.4f,1.4f,1.4f));
-                pEnemy->Configure(200, 0u, COLOR_SHIP_PURPLE);
+                pEnemy->Configure(200, COLOR_SHIP_PURPLE);
             });
         });
 
@@ -1434,7 +1435,7 @@ void cErrorMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * ((i < 6u) ? 1.3f : 1.0f));
-                pEnemy->Configure((i < 6u) ? 50 : 4, 0u, COLOR_SHIP_ORANGE);
+                pEnemy->Configure((i < 6u) ? 50 : 4, COLOR_SHIP_ORANGE);
                 pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
                 
                 
@@ -1605,7 +1606,7 @@ void UnusedWaves()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(2.0f,2.0f,2.0f));
-                pEnemy->Configure(200, 0u, COLOR_SHIP_CYAN);
+                pEnemy->Configure(200, COLOR_SHIP_CYAN);
             });
         });
 
@@ -1765,7 +1766,7 @@ void UnusedWaves()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(20, 0u, COLOR_SHIP_RED);
+                pEnemy->Configure(20, COLOR_SHIP_RED);
 
                 pEnemy->Resurrect();
             });
@@ -1827,7 +1828,7 @@ void UnusedWaves()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(20, 0u, COLOR_SHIP_BLUE);
+                pEnemy->Configure(20, COLOR_SHIP_BLUE);
                 pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();
@@ -1886,7 +1887,7 @@ void UnusedWaves()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(20, 0u, COLOR_SHIP_YELLOW);
+                pEnemy->Configure(20, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -1898,7 +1899,7 @@ void UnusedWaves()
 
                 pEnemy->SetPosition (coreVector3(-vDir * (FOREGROUND_AREA * 1.3f) + vDir.Rotated90() * (FOREGROUND_AREA * 0.4f), 0.0f));
                 pEnemy->SetDirection(coreVector3( vDir, 0.0f));
-                pEnemy->Configure   (20, 0u, COLOR_SHIP_BLUE);
+                pEnemy->Configure   (20, COLOR_SHIP_BLUE);
                 pEnemy->AddStatus   (ENEMY_STATUS_INVINCIBLE);
 
                 pEnemy->Resurrect();

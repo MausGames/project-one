@@ -10,10 +10,8 @@
 #ifndef _P1_GUARD_GAME_H_
 #define _P1_GUARD_GAME_H_
 
-// TODO 3: enemy bullet (and enemy?) cleanup on mission unload (probably not really necessary, can be re-used for next mission)
-// TODO 5: maybe spawn players in flight direction, mission start and continue ?
-// TODO 2: FindPlayer may find player outside of area (during resurrection)
-// TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (maybe add own collision-tracker and merge with the one in player-class)
+// TODO 3: FindPlayer may find player outside of area (during resurrection)
+// TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit properties of all related collision-pairs somehow (maybe add own collision-tracker and merge with the one in player-class) [RP]
 // TODO 3: repair enemy only in coop ? (not duel)
 // TODO 4: play-sounds in special-effects klasse verschieben
 // TODO 3: repair enemy sollte auf selber höhe wie m_aPlayer[i].RenderMiddle(); oder als erstes in TOP gezeichnet werden
@@ -28,6 +26,8 @@
 #define GAME_INTRO_OFFSET     (0.4f)        // 
 #define GAME_INTRO_DURATION   (4.1f)        // 
 #define GAME_RAISE_DEFAULT    (0u)          // 
+#define GAME_GOAL_FACTOR      (10.0f)       // 
+#define GAME_GOAL_MARGIN      (0.1f)        // 
 
 enum eGameStatus : coreUint16
 {
@@ -255,6 +255,7 @@ private:
     coreUint8 m_iOutroType;                 // 
     coreUint8 m_iOutroSub;                  // 
 
+    coreBool  m_bRainbow;                   // 
     coreBool  m_bVisibleCheck;              // 
     coreUint8 m_iRepairMove;                // 
 
@@ -329,6 +330,7 @@ public:
 #endif
 
     // 
+    inline void SetRainbow     (const coreBool bCheck)                        {m_bRainbow      = bCheck;}
     inline void SetVisibleCheck(const coreBool bCheck)                        {m_bVisibleCheck = bCheck;}
     inline void SetRepairMove  (const coreUintW iIndex, const coreBool bMove) {ASSERT(iIndex < GAME_PLAYERS) SET_BIT(m_iRepairMove, iIndex, bMove)}
     inline coreBool HasRepairMove(const coreUintW iIndex) {ASSERT(iIndex < GAME_PLAYERS) return HAS_BIT(m_iRepairMove, iIndex);}
@@ -391,8 +393,10 @@ public:
     inline const coreUintW&    GetNumMissions  ()const {return m_iNumMissions;}
     inline const coreUint8&    GetContinuesLeft()const {return m_iContinuesLeft;}
     inline const coreUint8&    GetContinuesMax ()const {return m_iContinuesMax;}
+    inline       coreUint8     GetContinuesCur ()const {return m_iContinuesMax - m_iContinuesLeft;}
     inline const coreUint8&    GetRaise        ()const {return m_iRaise;}
     inline const coreUint8&    GetOutroType    ()const {return m_iOutroType;}
+    inline const coreBool&     GetRainbow      ()const {return m_bRainbow;}
     inline const sGameOptions& GetOptions      ()const {return m_Options;}
     inline const coreUint8&    GetKind         ()const {return m_Options.iKind;}
     inline const coreUint8&    GetType         ()const {return m_Options.iType;}
@@ -405,6 +409,7 @@ public:
     // 
     static coreUint8  CalcMedal       (const coreFloat fTime, const coreFloat* pfMedalGoal);
     static coreFloat  CalcMedalTime   (const coreFloat fTime, const coreFloat* pfMedalGoal);
+    static coreFloat  CalcMedalMiss   (const coreFloat fTime, const coreFloat* pfMedalGoal);
     static coreUint32 CalcBonusTime   (const coreFloat fTime, const coreFloat* pfMedalGoal);
     static coreUint32 CalcBonusMedal  (const coreUint8 iMedal);
     static coreUint32 CalcBonusBadge  (const coreUint8 iBadge);
@@ -421,6 +426,7 @@ private:
     coreBool __HandleOutro();
     void     __HandleDefeat();
     void     __HandleCollisions();
+    void     __HandleRainbow();
 
     // 
     void __ClearAll(const coreBool bAnimated);

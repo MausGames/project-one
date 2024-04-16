@@ -80,7 +80,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     this->SetSize    (coreVector3(0.0f,0.0f,0.0f));
 
     // configure the boss
-    this->Configure(12000, 0u, coreVector3(0.0f,0.0f,0.0f), false, true);
+    this->Configure(12000, coreVector3(0.0f,0.0f,0.0f), false, true);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
@@ -136,7 +136,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
         m_aParasite[i].SetSize             (coreVector3(coreVector2(1.0f,1.0f) * 5.0f, 0.01f));
         m_aParasite[i].SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
         m_aParasite[i].SetTexSize          (coreVector2(1.0f,1.0f) * 0.7f);
-        m_aParasite[i].Configure           (4, 0u, COLOR_ENERGY_WHITE * 0.4f);
+        m_aParasite[i].Configure           (4, COLOR_ENERGY_WHITE * 0.4f);
         m_aParasite[i].AddStatus           (ENEMY_STATUS_ENERGY | ENEMY_STATUS_TOP | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_LIGHT);
     }
 
@@ -150,7 +150,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
         m_aFollower[i].DefineProgram  ("effect_energy_blink_flat_program");
         m_aFollower[i].SetSize        (coreVector3(coreVector2(1.0f,1.0f) * 5.5f, 0.01f));
         m_aFollower[i].SetTexSize     (coreVector2(1.0f,1.0f) * 0.7f);
-        m_aFollower[i].Configure      (30, 0u, COLOR_ENERGY_WHITE * 0.4f);
+        m_aFollower[i].Configure      (30, COLOR_ENERGY_WHITE * 0.4f);
         m_aFollower[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_TOP | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_LIGHT | ENEMY_STATUS_SECRET);
     }
 
@@ -386,8 +386,8 @@ void cEigengrauBoss::__MoveOwn()
 
                 g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
                 {
-                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
-                    pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
+                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL | PLAYER_STATUS_RAPID_FIRE);
+                    pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN | PLAYER_STATUS_NO_INPUT_RAPID);
                 });
 
                 g_pGame->GetInterface()->SetVisible(true);
@@ -926,8 +926,9 @@ void cEigengrauBoss::__MoveOwn()
 
                 pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
                 pPlayer->AddStatus  (PLAYER_STATUS_NO_INPUT_ALL);
-                pPlayer->SetRainbow (false);
             });
+
+            g_pGame->SetRainbow(false);
 
             g_pGame->GetInterface()->SetVisible (false);
             g_pGame->GetInterface()->SetAlphaAll(0.0f);

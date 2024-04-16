@@ -39,6 +39,8 @@ cBullet::cBullet()noexcept
 // move the bullet
 void cBullet::Move()
 {
+    if(m_fFlyTime) REMOVE_FLAG(m_iStatus, BULLET_STATUS_FRESH)
+    
     // 
     m_fFlyTime.Update(1.0f);
 
@@ -67,7 +69,7 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
 {
     // activate bullet and remove readiness
     if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
-    m_iStatus = BULLET_STATUS_ACTIVE;   // # reset status
+    m_iStatus = BULLET_STATUS_ACTIVE | BULLET_STATUS_FRESH;   // # reset status
 
     // save damage, speed and owner
     m_iDamage = iDamage;
@@ -110,8 +112,6 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact, co
 
     // disable collision
     this->ChangeType(0);
-    //this->SetSize(this->GetSize() * coreVector3(1.5f,1.0f,1.0f)); // TODO 1: nur fuer ray ?
-    //this->coreObject3D::Move();
 }
 
 void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact)
@@ -189,6 +189,15 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersecti
 
     // 
     this->AddStatus(BULLET_STATUS_REFLECTED);
+}
+
+
+// ****************************************************************
+// 
+void cBullet::Ignore()
+{
+    // 
+    this->AddStatus(BULLET_STATUS_GHOST);
 }
 
 
@@ -455,7 +464,7 @@ cRayBullet::cRayBullet()noexcept
 void cRayBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 22.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -473,7 +482,7 @@ void cRayBullet::__ReflectOwn()
     this->SetAlpha(0.0f);
 
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 11.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -490,7 +499,7 @@ void cRayBullet::__MoveOwn()
 
     // update animation
     //m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
-    //this->SetTexOffset(coreVector2(0.35f, 0.0f + 0.0f*m_fAnimation + 0.0f*FRACT(coreFloat(Core::System->GetTotalTime()) * 0.1f)));
+    //this->SetTexOffset(coreVector2(0.35f, 0.0f + 0.0f*m_fAnimation + 0.0f*FRACT(coreFloat(Core::System->GetTotalTimeFloat()) * 0.1f)));
 
     
     // update fade
@@ -529,7 +538,7 @@ cPulseBullet::cPulseBullet()noexcept
 void cPulseBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 22.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -546,7 +555,7 @@ void cPulseBullet::__ReflectOwn()
     this->SetAlpha(0.0f);
 
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 11.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -594,7 +603,7 @@ cSurgeBullet::cSurgeBullet()noexcept
 void cSurgeBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 22.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -612,7 +621,7 @@ void cSurgeBullet::__ReflectOwn()
     this->SetAlpha(0.0f);
 
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 11.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -676,7 +685,9 @@ cTeslaBullet::cTeslaBullet()noexcept
 void cTeslaBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, ABS(m_iDamage), this->GetColor3());
+  //  g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 22.0f, ABS(m_iDamage), this->GetColor3());
+    
+   // g_pSpecialEffects->CreateBlowColor(coreVector3(vImpact, 0.0f), coreVector3(m_vFlyDir, 0.0f), 100.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -693,7 +704,7 @@ void cTeslaBullet::__ReflectOwn()
     this->SetAlpha(0.0f);
 
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, ABS(m_iDamage), this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 11.0f, ABS(m_iDamage), this->GetColor3());
 }
 
 
@@ -715,7 +726,7 @@ void cTeslaBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f * fRelSpeed);
     const coreFloat fLen = MIN1(12.0f * m_fFade) * 1.0f;
-    this->SetSize(coreVector3(coreVector2(1.0f,1.0f) * fLen * 2.5f * m_fScale, 1.0f));
+    this->SetSize(coreVector3(coreVector2(1.0f,1.0f) * fLen * 4.0f * m_fScale, 1.0f));
     this->SetAlpha(MIN1(15.0f * m_fFade));
 
     // 
@@ -730,7 +741,7 @@ void cTeslaBullet::__MoveOwn()
                     vDir = coreVector2(m_bLightningSide ? ABS(vDir.x) : -ABS(vDir.x), vDir.y);
 
         // 
-        g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
+        g_pSpecialEffects->CreateLightning(this, vDir, 7.0f * (4.0f/2.5f) * m_fScale, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
     }
 }
 
@@ -774,7 +785,7 @@ void cFinalBullet::__MoveOwn()
 
     // update animation
     m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
-    m_fAnimation = FMOD(coreFloat(Core::System->GetTotalTime()) * 0.2f, 5.0f);
+    m_fAnimation = FMOD(Core::System->GetTotalTimeFloat(25.0) * 0.2f, 5.0f);
     this->SetTexOffset(coreVector2(0.35f, -0.2f * m_fAnimation));
 
     const coreFloat fRange = STEP(-500.0f, 0.0f, this->GetPosition().z) + CORE_MATH_PRECISION;

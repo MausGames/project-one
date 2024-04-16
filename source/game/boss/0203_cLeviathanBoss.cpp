@@ -73,11 +73,11 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
 
     // configure the boss
-    this->Configure(9700, 0u, COLOR_SHIP_CYAN);
+    this->Configure(9700, COLOR_SHIP_CYAN);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
-    PHASE_HEALTH_GOAL({9700, 8000, 5000, 3200, 2400, 1700, 0})
+    PHASE_HEALTH_GOAL({9700, 8000, 5000, 3200, /*2400,*/ 1700, 0})
 
     // 
     m_Head.DefineModelHigh     ("ship_boss_leviathan_head_high.md3");
@@ -85,7 +85,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     m_Head.DefineVolume        ("ship_boss_leviathan_head_volume.md3");
     m_Head.SetSize             (coreVector3(1.5f,1.5f,1.5f) * 1.3f);
     m_Head.SetCollisionModifier(this->GetCollisionModifier());
-    m_Head.Configure           (500, 0u, COLOR_SHIP_CYAN);
+    m_Head.Configure           (500, COLOR_SHIP_CYAN);
     m_Head.AddStatus           (ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET | ENEMY_STATUS_CHAIN | ENEMY_STATUS_DEACTIVATE);
 
     // 
@@ -96,7 +96,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
         m_aBody[i].DefineVolume        ("ship_boss_leviathan_body_volume.md3");
         m_aBody[i].SetSize             (coreVector3(1.7f,1.7f,1.7f) * 1.3f);
         m_aBody[i].SetCollisionModifier(this->GetCollisionModifier());
-        m_aBody[i].Configure           (300, 0u, COLOR_SHIP_CYAN);
+        m_aBody[i].Configure           (300, COLOR_SHIP_CYAN);
         m_aBody[i].AddStatus           (ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET | ENEMY_STATUS_CHAIN | ENEMY_STATUS_DEACTIVATE);
     }
 
@@ -106,7 +106,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     m_Tail.DefineVolume        ("ship_boss_leviathan_tail_volume.md3");
     m_Tail.SetSize             (coreVector3(1.7f,1.7f,1.7f) * 1.3f);
     m_Tail.SetCollisionModifier(this->GetCollisionModifier());
-    m_Tail.Configure           (300, 0u, COLOR_SHIP_CYAN);
+    m_Tail.Configure           (300, COLOR_SHIP_CYAN);
     m_Tail.AddStatus           (ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_SECRET | ENEMY_STATUS_CHAIN | ENEMY_STATUS_DEACTIVATE);
 
     // 
@@ -226,6 +226,7 @@ void cLeviathanBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     pMission->ResetCollEnemyBullet();
+    pMission->ResetCollBulletBullet();
 
     // 
     for(coreUintW i = 0u; i < LEVIATHAN_RAYS;  ++i) this->__DisableRay (i, bAnimated);
@@ -415,7 +416,7 @@ void cLeviathanBoss::__MoveOwn()
             if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_INC
-                PHASE_RESET(0u)
+                PHASE_AGAIN(0u)
             }
         });
     }
@@ -756,7 +757,7 @@ void cLeviathanBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
             {
-                PHASE_RESET(0u)
+                PHASE_AGAIN(0u)
 
                 m_aiCounter[SPIN_PART] = (m_aiCounter[SPIN_PART] + 2) % LEVIATHAN_PARTS;
             }
@@ -813,6 +814,11 @@ void cLeviathanBoss::__MoveOwn()
             }
 
             this->__RefreshHealth((m_aiCounter[CYCLE_COUNT] == 2) ? 1500 : 600, 600, 600);
+
+            if(m_aiCounter[CYCLE_COUNT] <= 2)
+            {
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT((m_aiCounter[CYCLE_COUNT] == 2) ? 1u : 0u));
+            }
         });
     }
 
@@ -908,7 +914,7 @@ void cLeviathanBoss::__MoveOwn()
                 }
 
                 pBullet->Deactivate(true, vIntersection.xy());
-                pBullet->AddStatus(BULLET_STATUS_GHOST);
+                pBullet->Ignore();
             });
 
             const coreVector2 vPos    = vTarget * FOREGROUND_AREA * 0.6f;
@@ -1008,10 +1014,12 @@ void cLeviathanBoss::__MoveOwn()
                         pPart->SetCollisionModifier(this->GetCollisionModifier());
                         pPart->RemoveStatus(ENEMY_STATUS_GHOST_PLAYER);
                     }
+
+                    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(2u));
                 }
                 else
                 {
-                    PHASE_RESET(0u)
+                    PHASE_RESET(0u)   // not again, too complex
 
                     m_aiCounter[EMERGE_TARGET] += 1;
 
@@ -1152,6 +1160,8 @@ void cLeviathanBoss::__MoveOwn()
                 PHASE_CHANGE_TO(70u)
 
                 this->__RefreshHealth(500, 300, 300);
+
+                g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_BOSS_DEFAULT(3u));
             }
         }
     }
@@ -1611,7 +1621,7 @@ void cLeviathanBoss::__MoveOwn()
         });
     }
 
-    const coreFloat fQuadSpeed = 2.0f;
+    constexpr coreFloat fQuadSpeed = 2.0f;
 
     if((m_iPhase >= 70u) && (m_iPhase < 80u))
     {
@@ -1634,7 +1644,7 @@ void cLeviathanBoss::__MoveOwn()
             }
         });
 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](const cBullet* pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
+        pMission->SetCollBulletBullet([](const cBullet* pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             if(pBulletEnemy->GetID() != cQuadBullet::ID) return;
 
@@ -1981,6 +1991,9 @@ void cLeviathanBoss::__MoveOwn()
             // 
             for(coreUintW i = 0u; i < LEVIATHAN_TILES; ++i)
                 pMission->DisableTile(i, true);
+
+            // 
+            pMission->ResetCollBulletBullet();
 
             // 
             for(coreUintW i = 0u; i < LEVIATHAN_RAYS; ++i)

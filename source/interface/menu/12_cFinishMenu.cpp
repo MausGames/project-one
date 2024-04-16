@@ -64,11 +64,12 @@ cFinishMenu::cFinishMenu()noexcept
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
     // 
-    m_Navigator.BindObject(&m_SteamButton, &m_ExitButton,  NULL, &m_ExitButton,  NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,  &m_SteamButton, NULL, &m_SteamButton, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(NULL,           &m_SteamButton,  NULL, &m_SteamButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_SteamButton, &m_ExitButton,   NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,  &m_SteamButton,  NULL, &m_SteamButton,  NULL, MENU_TYPE_DEFAULT);
 
-    m_Navigator.AssignFirst(&m_SteamButton);
-    m_Navigator.ShowIcon   (true);
+    m_Navigator.AssignMenu(this);
+    m_Navigator.ShowIcon  (true);
 
     // bind menu objects
     this->BindObject(SURFACE_FINISH_DEFAULT, &m_Background);
@@ -131,6 +132,9 @@ void cFinishMenu::Move()
                     if(m_eState == FINISH_WAIT) m_eState = FINISH_OUTRO;   // TODO 1: verhindert, dass man exit drueckt waerend banner noch animiert
                 }
             }
+            
+            // 
+            if(m_fIntroTimer >= MENU_FINISH_BANNER_SPEED_REV) m_Navigator.SetActive(true);
             
             if((fOldTimer < 0.0f) && (m_fIntroTimer >= 0.0f))
             {
@@ -242,6 +246,10 @@ void cFinishMenu::ShowThankYou()
 
     // 
     g_pSave->SaveFile();
+
+    // 
+    m_Navigator.ResetFirst();
+    m_Navigator.SetActive(false);
 
     // 
     this->ChangeSurface(SURFACE_FINISH_DEFAULT, 0.0f);

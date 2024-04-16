@@ -537,7 +537,8 @@ void cScoreTable::__ChangeMaxSeries(const coreUint32 iMaxValue)
 // ****************************************************************
 // constructor
 cTimeTable::cTimeTable()noexcept
-: m_dFrameTime (1.0 / coreDouble(g_fGameRate))
+: m_dLogicalTime  (g_adGameTime[0])
+, m_dPhysicalTime (g_adGameTime[1])
 {
     // 
     this->Reset();
@@ -554,9 +555,8 @@ void cTimeTable::Update()
     m_iTimeMono += 1u;
 
     // 
-    //if(!TIME) return;
-    if(SPECIAL_FROZEN) return;       
-    //ASSERT(TIME == m_dFrameTime)
+    if(SPECIAL_FROZEN) return;
+    //ASSERT(TIME == coreFloat(g_adGameTime[0]))
 
     // 
     m_iTimeEvent += 1u;
@@ -581,7 +581,7 @@ void cTimeTable::Update()
 
     // 
     ASSERT(m_iTimeEvent > 0u)
-    g_pSave->EditGlobalStats()->iTimePlayed += TABLE_TIME_TO_UINT(__TABLE_TIME_CONVERT(m_iTimeEvent)) - TABLE_TIME_TO_UINT(__TABLE_TIME_CONVERT(m_iTimeEvent - 1u));
+    g_pSave->EditGlobalStats()->iTimePlayed += TABLE_TIME_TO_UINT(__TABLE_TIME_CONVERT_PHYSICAL(m_iTimeEvent)) - TABLE_TIME_TO_UINT(__TABLE_TIME_CONVERT_PHYSICAL(m_iTimeEvent - 1u));
 }
 
 
@@ -632,7 +632,7 @@ void cTimeTable::Reset()
     m_iTimeEvent = 0u;
     m_iTimeTotal = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiTimeMission[j] = 0u;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-100.0 / m_dFrameTime) : 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-100.0 / m_dPhysicalTime) : 0u;
 
     // reset all shift values (# no memset)
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiShiftGoodMission[j] = 0u;
@@ -652,7 +652,7 @@ void cTimeTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iS
     // 
     m_iTimeTotal                                  -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
     m_aiTimeMission [iMissionIndex]               -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
-    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0 / m_dFrameTime) : 0u;
+    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0 / m_dPhysicalTime) : 0u;
 
     // 
     m_aiShiftGoodMission [iMissionIndex]               -= m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex];
@@ -677,7 +677,7 @@ void cTimeTable::RevertSegmentNew(const coreUintW iMissionIndex, const coreUintW
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
 
     // 
-    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0 / m_dFrameTime) : 0u;
+    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0 / m_dPhysicalTime) : 0u;
 
     // 
     m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex] = 0u;
@@ -699,7 +699,7 @@ void cTimeTable::StartBoss(const coreUintW iMissionIndex, const coreUintW iBossI
     // 
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iBossIndex    < TABLE_BOSSES)
-    m_aaiTimeSegment[iMissionIndex][MISSION_BOSS_TO_SEGMENT(iBossIndex)] = ((iMissionIndex == MISSION_ATER) && (iBossIndex == 0u)) ? 0u : F_TO_UI(coreDouble(-INTERFACE_BANNER_DURATION_BOSS) / m_dFrameTime);
+    m_aaiTimeSegment[iMissionIndex][MISSION_BOSS_TO_SEGMENT(iBossIndex)] = ((iMissionIndex == MISSION_ATER) && (iBossIndex == 0u)) ? 0u : F_TO_UI(coreDouble(-INTERFACE_BANNER_DURATION_BOSS) / m_dPhysicalTime);
 }
 
 void cTimeTable::StartBoss()
@@ -747,7 +747,7 @@ coreInt32 cTimeTable::GetShiftSegmentSafe()const
 coreFloat cTimeTable::GetTimeShiftedSegmentSafe(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const
 {
     // 
-    return this->GetTimeSegmentSafe(iMissionIndex, iSegmentIndex) + I_TO_F(this->GetShiftSegmentSafe(iMissionIndex, iSegmentIndex));
+    return this->GetTimeSegmentSafe(iMissionIndex, iSegmentIndex) + I_TO_F(this->GetShiftSegmentSafe(iMissionIndex, iSegmentIndex));   // # MAX0 outside
 }
 
 coreFloat cTimeTable::GetTimeShiftedSegmentSafe()const

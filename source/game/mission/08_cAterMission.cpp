@@ -16,7 +16,7 @@ cAterMission::cAterMission()noexcept
 , m_iNextID       (-1)
 , m_bTurfState    (false)
 , m_bSecret       (false)
-, m_iCredits      ((g_pGame->GetKind() == GAME_KIND_ALL) ? 0u : (g_pSave->GetHeader().oProgress.aiAdvance[MISSION_ATER] - 6u))
+, m_iCredits      ((g_pGame->GetKind() == GAME_KIND_ALL) ? 0u : (g_pSave->GetHeader().oProgress.aiAdvance[MISSION_ATER] - 6u))   // # replays haben immer credits
 {
     // 
     m_apBoss[0] = &m_ProjectOne;
@@ -84,7 +84,6 @@ void cAterMission::TransformPlayers()
     pPlayer->EquipWeapon(0u, cFinalWeapon::ID);
     pPlayer->EquipShield(0);
     pPlayer->SetScale   (1.5f / PLAYER_SIZE_FACTOR);
-    pPlayer->SetRainbow (true);
     pPlayer->AddStatus  (PLAYER_STATUS_KEEP_RANGE);
 
     if(g_pGame->IsMulti())
@@ -95,9 +94,11 @@ void cAterMission::TransformPlayers()
         pOther->EquipWeapon(0u, cFinalWeapon::ID);
         pOther->EquipShield(0);
         pOther->SetScale   (1.5f / PLAYER_SIZE_FACTOR);
-        pOther->SetRainbow (true);
         pOther->AddStatus  (PLAYER_STATUS_KEEP_RANGE);
     }
+
+    // 
+    g_pGame->SetRainbow(true);
 
     // 
     g_pGame->GetInterface()->UpdateEnabled();
@@ -142,6 +143,14 @@ void cAterMission::__RenderOwnOver()
 void cAterMission::__RenderOwnTop()
 {
     if(m_pInnerMission) m_pInnerMission->RenderTop();
+}
+
+
+// ****************************************************************
+// 
+void cAterMission::__MoveOwnAlways()
+{
+    if(m_pInnerMission) m_pInnerMission->MoveAlways();
 }
 
 

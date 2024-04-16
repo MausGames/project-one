@@ -40,10 +40,10 @@ cNautilusBoss::cNautilusBoss()noexcept
     this->SetSize(coreVector3(2.0f,2.0f,2.0f));
 
     // configure the boss
-    this->Configure(8000, 0u, COLOR_SHIP_PURPLE);
+    this->Configure(8000, COLOR_SHIP_PURPLE);
 
     // 
-    PHASE_HEALTH_GOAL({8000, 0})
+    PHASE_HEALTH_GOAL({0})
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClaw); ++i)
@@ -51,7 +51,7 @@ cNautilusBoss::cNautilusBoss()noexcept
         m_aClaw[i].DefineModelHigh("ship_boss_nautilus_claw_high.md3");
         m_aClaw[i].DefineModelLow ("ship_boss_nautilus_claw_low.md3");
         m_aClaw[i].SetSize        (coreVector3(2.0f,2.0f,2.0f));
-        m_aClaw[i].Configure      (1, 0u, COLOR_SHIP_PURPLE);
+        m_aClaw[i].Configure      (1, COLOR_SHIP_PURPLE);
         m_aClaw[i].SetParent      (this);
     }
 
@@ -334,7 +334,7 @@ void cNautilusBoss::__MoveOwn()
 
                 if(PHASE_FINISHED)
                 {
-                    PHASE_RESET(0u)
+                    PHASE_RESET(0u)   // TODO 1: PHASE_AGAIN ?
                     PHASE_RESET(1u)
 
                     m_aiCounter[STOMP_COUNT] += 1;
@@ -500,7 +500,7 @@ void cNautilusBoss::__MoveOwn()
     }
 
     // TODO 1: line movement 
-    //const coreVector2 vLinePos = coreVector2(0.0f, 0.1f * SIN(2.0f*PI * 0.08f * coreFloat(Core::System->GetTotalTime()))); 
+    //const coreVector2 vLinePos = coreVector2(0.0f, 0.1f * SIN(2.0f*PI * 0.08f * coreFloat(Core::System->GetTotalTimeFloat()))); 
 }
 
 // ****************************************************************
