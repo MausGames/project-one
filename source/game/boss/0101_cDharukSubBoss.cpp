@@ -563,14 +563,19 @@ void cDharukSubBoss::__MoveOwn()
 
     if(m_fVisibility < -0.5f)
     {
-        if(g_pForeground->IsVisiblePoint(this->GetPosition().xy(), 1.05f))
+        if(g_pForeground->IsVisiblePoint(this->GetPosition().xy(), 1.1f))
         {
             g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
             {
-                const coreVector2 vDiff = this->GetPosition().xy() - (pPlayer->GetPosition().xy() + pPlayer->GetDirection().xy() * pPlayer->GetVisualRadius() * -4.0f);
-                const coreFloat   fDot  = coreVector2::Dot(pPlayer->GetDirection().xy(), vDiff.Normalized());
+                const coreVector2 vPos = pPlayer->GetPosition ().xy();
+                const coreVector2 vDir = pPlayer->GetDirection().xy();
+                const coreVector2 vTan = vDir.Rotated90();
 
-                if(fDot > 0.96f)
+                const coreVector2 vDiff = this->GetPosition().xy() - (vPos + vDir * -16.0f);
+                const coreFloat   fLen  = coreVector2::Dot(vDiff, vDir) * 0.29f;
+                const coreFloat   fSide = coreVector2::Dot(vDiff, vTan);
+
+                if(ABS(fSide) < fLen)
                 {
                     m_fVisibility = 0.0f;
                 }

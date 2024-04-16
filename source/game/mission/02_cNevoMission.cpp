@@ -12,34 +12,35 @@
 // ****************************************************************
 // constructor
 cNevoMission::cNevoMission()noexcept
-: m_Bomb          (NEVO_BOMBS)
-, m_afBombTime    {}
-, m_iBombGone     (0u)
-, m_Blast         (NEVO_BLASTS)
-, m_BlastLine     (NEVO_BLASTS * NEVO_LINES)
-, m_afBlastTime   {}
-, m_Tile          (NEVO_TILES)
-, m_afTileTime    {}
-, m_Arrow         (NEVO_ARROWS)
-, m_apArrowOwner  {}
-, m_afArrowAlpha  {}
-, m_aiArrowDir    {}
-, m_iArrowActive  (0u)
-, m_iArrowFake    (0u)
-, m_bArrowEnabled (true)
-, m_Block         (NEVO_BLOCKS)
-, m_BlockWave     (NEVO_BLOCKS)
-, m_apBlockOwner  {}
-, m_afBlockScale  {}
-, m_afBlockRota   {}
-, m_afScrapTime   {}
-, m_Chip          (NEVO_CHIPS)
-, m_ChipWave      (NEVO_CHIPS)
-, m_vForce        (coreVector2(0.0f,0.0f))
-, m_vImpact       (coreVector2(0.0f,0.0f))
-, m_bClamp        (false)
-, m_bOverdraw     (false)
-, m_fAnimation    (0.0f)
+: m_Bomb           (NEVO_BOMBS)
+, m_afBombTime     {}
+, m_iBombGone      (0u)
+, m_Blast          (NEVO_BLASTS)
+, m_BlastLine      (NEVO_BLASTS * NEVO_LINES)
+, m_afBlastTime    {}
+, m_Tile           (NEVO_TILES)
+, m_afTileTime     {}
+, m_Arrow          (NEVO_ARROWS)
+, m_apArrowOwner   {}
+, m_afArrowAlpha   {}
+, m_aiArrowDir     {}
+, m_iArrowActive   (0u)
+, m_iArrowFake     (0u)
+, m_bArrowEnabled  (true)
+, m_Block          (NEVO_BLOCKS)
+, m_BlockWave      (NEVO_BLOCKS)
+, m_apBlockOwner   {}
+, m_afBlockScale   {}
+, m_afBlockRota    {}
+, m_afScrapTime    {}
+, m_Chip           (NEVO_CHIPS)
+, m_ChipWave       (NEVO_CHIPS)
+, m_vForce         (coreVector2(0.0f,0.0f))
+, m_vImpact        (coreVector2(0.0f,0.0f))
+, m_bClamp         (false)
+, m_bOverdraw      (false)
+, m_fDemoRangeAnim (0.0f)
+, m_fAnimation     (0.0f)
 {
     // 
     m_apBoss[0] = &m_Leviathan;
@@ -236,6 +237,18 @@ cNevoMission::cNevoMission()noexcept
 #endif
 
     // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+    {
+        m_aDemoRange[i].DefineModel  (i ? "object_cube_top.md3" : "object_penta_top.md3");
+        m_aDemoRange[i].DefineTexture(0u, "effect_energy.png");
+        m_aDemoRange[i].DefineProgram("effect_energy_flat_invert_program");
+        m_aDemoRange[i].SetPosition  (coreVector3(0.0f, i ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA3);
+        m_aDemoRange[i].SetColor3    (i ? COLOR_PLAYER_BLUE : COLOR_PLAYER_GREEN);
+        m_aDemoRange[i].SetTexSize   (coreVector2(0.1f,0.1f));
+        m_aDemoRange[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
     cShadow::GetGlobalContainer()->BindList(&m_Bomb);
     g_pGlow->BindList(&m_Blast);
     g_pGlow->BindList(&m_BlastLine);
@@ -244,6 +257,31 @@ cNevoMission::cNevoMission()noexcept
     g_pGlow->BindList(&m_BlockWave);
     g_pGlow->BindList(&m_Chip);
     g_pGlow->BindList(&m_ChipWave);
+
+    if(g_bDemoVersion)
+    {
+        // 
+        constexpr const coreChar* apcTex[] =
+        {
+            "default_normal.png",
+            "environment_animal_diff.png",
+            "environment_animal_norm.png",
+            "environment_block_diff.png",
+            "environment_block_norm.png",
+            "environment_dust_diff.png",
+            "environment_earth_diff.png",
+            "environment_particle_02.png",
+            "environment_sea.png"
+        };
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_apTexCache); ++i)
+        {
+            m_apTexCache[i] = Core::Manager::Resource->Get<coreTexture>(apcTex[i]);
+            STATIC_ASSERT(ARRAY_SIZE(m_apTexCache) == ARRAY_SIZE(apcTex))
+        }
+
+        // 
+        m_pNightmareSound = Core::Manager::Resource->Get<coreSound>("effect_nightmare.wav");
+    }
 }
 
 
@@ -272,6 +310,7 @@ cNevoMission::~cNevoMission()
     this->DisableGuide    (false);
     this->DisableTrend    (false);
     this->DisableContainer(false);
+    this->DisableRanges   (false);
 }
 
 
@@ -705,6 +744,36 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cNevoMission::EnableRanges()
+{
+    // 
+    WARN_IF(m_aDemoRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableRanges(false);
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+    {
+        m_aDemoRange[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(&m_aDemoRange[i]);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::DisableRanges(const coreBool bAnimated)
+{
+    // 
+    if(!m_aDemoRange[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+    {
+        m_aDemoRange[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(&m_aDemoRange[i]);
+    }
+}
+
+
+// ****************************************************************
+// 
 void cNevoMission::SetTileStyle(const coreUintW iIndex, const coreUint8 iStyle)
 {
     ASSERT(iIndex < NEVO_TILES)
@@ -757,10 +826,14 @@ void cNevoMission::__RenderOwnBottom()
 // 
 void cNevoMission::__RenderOwnUnder()
 {
-    //DEPTH_PUSH
+    DEPTH_PUSH
 
     // 
     //m_ChipWave.Render();
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i) m_aDemoRange[i].Render();
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_aDemoRange[i]);
 }
 
 
@@ -770,7 +843,7 @@ void cNevoMission::__RenderOwnOver()
 {
     DEPTH_PUSH
 
-    glDepthMask(false);
+    glDepthMask(false);   // TODO 1: glDisable(GL_DEPTH_TEST); in over ???
     {
         // 
         m_ChipWave.Render();
@@ -1039,9 +1112,9 @@ void cNevoMission::__MoveOwnAfter()
 
         // 
         pWave->SetPosition (pBlock->GetPosition ());
-        pWave->SetSize     (pBlock->GetSize     () * LERPB(0.0f, 1.0f, fValue));
+        pWave->SetSize     (pBlock->GetSize     () * BLENDB(fValue));
         pWave->SetDirection(pBlock->GetDirection());
-        pWave->SetAlpha    (pBlock->GetAlpha    () * LERPB(0.0f, 1.0f, 1.0f - fValue));
+        pWave->SetAlpha    (pBlock->GetAlpha    () * BLENDB(1.0f - fValue));
         pWave->SetTexOffset(pBlock->GetTexOffset());
     }
 
@@ -1085,7 +1158,7 @@ void cNevoMission::__MoveOwnAfter()
         if(!pChip->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        m_afChipTime[i].Update(0.35f * (i ? 1.0f : 0.5f));
+        m_afChipTime[i].Update(0.3f * (i ? 1.0f : 0.5f));
 
         // 
         if(m_afChipTime[i] >= 1.0f) this->DisableChip(i, false);
@@ -1095,7 +1168,7 @@ void cNevoMission::__MoveOwnAfter()
         const coreVector2 vDir    = coreVector2::Direction(LERPBR(0.0f*PI, 4.0f*PI, m_afChipTime[i]));
 
         // 
-        pChip->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 2.5f * LERPBR(1.0f, 0.0f, STEP(0.5f, 1.0f, m_afChipTime[i])));
+        pChip->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 2.5f * LERPBR(1.0f, 0.0f, STEP(0.7f, 1.0f, m_afChipTime[i])));
         pChip->SetDirection(coreVector3(vDir, 0.0f));
         pChip->SetTexOffset(coreVector2(0.0f, FRACT(0.8f * m_fAnimation + fOffset)));
 
@@ -1183,6 +1256,22 @@ void cNevoMission::__MoveOwnAfter()
 #endif
 
     // 
+    if(m_aDemoRange[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemoRange); ++i)
+        {
+            m_fDemoRangeAnim.Update(0.4f);
+
+            const coreVector2 vDir = coreVector2::Direction(m_fDemoRangeAnim * (-1.6f*PI));
+
+            m_aDemoRange[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * (i ? 0.03f : 0.032f) * 50.0f);              
+            m_aDemoRange[i].SetDirection(coreVector3(vDir, 0.0f));
+            m_aDemoRange[i].SetTexOffset(m_aDemoRange[i].GetTexOffset() - m_aDemoRange[i].GetDirection().xy() * (0.04f * TIME));
+            m_aDemoRange[i].Move();
+        }
+    }
+
+    // 
     if(g_pGame->GetBulletManagerEnemy()->GetNumBulletsTypedEst<cGrowBullet>())
     {
         g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cGrowBullet>([](cGrowBullet* OUTPUT pBullet)
@@ -1236,9 +1325,15 @@ void cNevoMission::__MoveOwnAfter()
 
             pBulletEnemy->SetSize(coreVector3(1.0f,1.0f,1.0f) * (pBulletEnemy->GetSize().x * POW(0.9f, fPower)));
 
-            if(bBadge) pBulletEnemy->SetDamage(pBulletEnemy->GetDamage() + pBulletPlayer->GetDamage());
+            if(bBadge)
+            {
+                pBulletEnemy->SetDamage(pBulletEnemy->GetDamage() + pBulletPlayer->GetDamage());
+                g_pGame->PlayHitSound(vIntersection);
+            }
 
             pBulletPlayer->Deactivate(true);
+
+            g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLACEHOLDER);
         });
     }
 }

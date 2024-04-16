@@ -76,8 +76,8 @@ void cSnow::Move()
     if(!m_fVisibility) return;
 
     // 
-    if(m_fDelay) m_fVisibility = MAX(m_fVisibility - m_fDelay * TIME, 0.0f);
-    this->SetAlpha(m_fVisibility);
+    if(m_fDelay) m_fVisibility = MAX0(m_fVisibility - m_fDelay * TIME);
+    this->SetAlpha(BLENDH3(m_fVisibility));
 
     // 
     this->coreFullscreen::Move();

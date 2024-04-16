@@ -60,6 +60,23 @@ inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, cons
     return x;
 }
 
+// ****************************************************************
+// 
+inline FUNC_CONST coreFloat CeilFactor(const coreFloat fValue, const coreFloat fFactor)
+{
+    return CEIL(fValue * fFactor) / fFactor;
+}
+
+inline FUNC_CONST coreFloat FloorFactor(const coreFloat fValue, const coreFloat fFactor)
+{
+    return FLOOR(fValue * fFactor) / fFactor;
+}
+
+inline FUNC_CONST coreFloat RoundFactor(const coreFloat fValue, const coreFloat fFactor)
+{
+    return ROUND(fValue * fFactor) / fFactor;
+}
+
 
 // ****************************************************************
 // 
@@ -145,7 +162,7 @@ template <typename T, typename S, typename R> inline FUNC_LOCAL T ParaLerp(const
 // 
 inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 {
-    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);   // TODO 1: trotzdem noch issue mit step-size, bräuchte man kurven-inkrement, aber an der stelle wo man den wert verwendet
 }
 
 

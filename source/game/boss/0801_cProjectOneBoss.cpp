@@ -70,6 +70,7 @@
 // TODO 1: vielleicht sollte labyrinth mit anderer linie starten, die keine durchgängige horizontale pearl linie hat
 // TODO 1: should it really move all the time or snap into 8x8 ?
 // TODO 1: vielleicht sollten bei teleportation an beiden seiten kleine effekte entstehen, in mission explodieren die gegner ja auch
+// TODO 1: gegner muss auf pearl impact reagieren (?)
 
 // magenta:
 // tried to split the screen again instead of rotating, and however I tried (different factors, movement, various axis), everything just sucks, the teleportation-aspect is just too unpredictable and watching two points is just too much
@@ -106,6 +107,7 @@
 // TODO 1: vielleicht sollte blaue kugel schneller werden, die drehung des spielers braucht mehr impact
 // TODO 1: mehr als 1 kugel in snow phase
 // TODO 1: background wurde bei einem test nicht wieder nach vorne ausgerichtet
+// TODO 1: bei speed-phase, spieler frei bewegen lasen (am rand entlang) und background passt sich an
 
 // cyan:
 // cyan residue kann nicht verwendet werden, weil es mit dem cyan background verschwimmt
@@ -799,7 +801,7 @@ void cProjectOneBoss::__MoveOwn()
 
         pHelper->SetPosition(coreVector3(vPos, 0.0f));
 
-        this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.0f), LERPB(0.0f, 1.0f, MIN(m_fPhaseTime, 1.0f)));
+        this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.0f), BLENDB(MIN1(m_fPhaseTime)));
 
         if(fTime >= fDelay)
         {
@@ -1311,13 +1313,21 @@ void cProjectOneBoss::__MoveOrange()
 
         const coreFloat fSpeed = 1.0f + m_fPhaseTime * 0.06f;
 
-        if(PHASE_MAINTIME_AFTER(2.0f))
+        if(PHASE_MAINTIME_POINT(2.0f))
         {
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
             });
 
+            const coreVector3 vPos = pGelu->GetOrb(0u)->GetPosition();
+
+            g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
+            g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
+        }
+
+        if(PHASE_MAINTIME_AFTER(2.0f))
+        {
             g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 const coreVector2 vDiff2 = pGelu->GetOrb(0u)->GetPosition().xy() - pPlayer->GetPosition().xy();
@@ -1804,8 +1814,6 @@ void cProjectOneBoss::__MoveRed()
                 pMuscus->EnablePearl(i);
                 nInitFunc(pMuscus->GetPearl(i), aiPlacePearl[i]);
             }
-
-            pMuscus->TestGenerate(true);
         }
 
         const coreVector2 vMove = coreVector2(0.0f,-14.0f) * TIME;
@@ -1851,6 +1859,8 @@ void cProjectOneBoss::__MoveRed()
         {
             pBackground->FlashLightning();
             pBackground->GetHeadlight()->SetAlpha(0.0f);
+
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
 
             this->SetAlpha(1.0f);
             this->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
@@ -2339,8 +2349,8 @@ void cProjectOneBoss::__MoveMagenta()
              if((vCurPos.x < -FOREGROUND_AREA.x * 1.0f) && (vMove.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + FOREGROUND_AREA.x * 1.0f); REMOVE_BIT(m_iMeteorDir, i)}
         else if((vCurPos.x >  FOREGROUND_AREA.x * 1.0f) && (vMove.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - FOREGROUND_AREA.x * 1.0f); ADD_BIT   (m_iMeteorDir, i)}
 
-        pEnemy->SetPosition (coreVector3(vCurPos, 0.0f));
-        pEnemy->SetDirection(coreVector3(coreVector2::Direction(-m_fAnimation * (0.4f*PI) + I_TO_F(i)), 0.0f));
+        pEnemy->SetPosition  (coreVector3(vCurPos, 0.0f));
+        pEnemy->DefaultRotate(-m_fAnimation * (0.4f*PI) + I_TO_F(i));
     });
 
     STATIC_ASSERT(PROJECTONE_ENEMIES_METEOR <= sizeof(m_iMeteorDir)*8u)
@@ -2703,7 +2713,7 @@ void cProjectOneBoss::__MoveBlue()
             {
                 PHASE_CHANGE_INC
 
-                pSnow->Enable();
+                pCalor->EnableSnow();
 
                 const coreVector2 vPos = vGlobalDir * FOREGROUND_AREA * 1.25f;
                 const coreVector2 vDir = coreVector2(0.0f,1.0f);
@@ -2839,7 +2849,8 @@ void cProjectOneBoss::__MoveBlue()
 
                     ASSERT(pSnow->IsActive())
                     pSnow->DrawPoint(pBullet->GetPosition().xy(), 20.0f, SNOW_TYPE_REMOVE);
-                    pSnow->Disable(1.0f);
+
+                    pCalor->DisableSnow(true);
 
                     g_pSpecialEffects->MacroExplosionColorBig(pBullet->GetPosition(), COLOR_ENERGY_BLUE);
                 });
@@ -2913,10 +2924,10 @@ void cProjectOneBoss::__MoveBlue()
         {
             for(coreUintW j = 30u; j--; )
             {
-                const coreVector2 vPos = coreVector2(1.7f, (I_TO_F(j) - 14.5f + ((iTick % 2u) ? -0.25f : 0.25f)) * 0.08f) * FOREGROUND_AREA;
+                const coreVector2 vPos = coreVector2((j % 2u) ? 1.7f : 1.72f, (I_TO_F(j) - 14.5f + ((iTick % 2u) ? -0.25f : 0.25f)) * 0.08f) * FOREGROUND_AREA;
                 const coreVector2 vDir = coreVector2(-1.0f,0.0f);
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.5f, this, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.5f, this, vPos, vDir)->ChangeSize(1.5f)->AddStatus(BULLET_STATUS_IMMORTAL);
             }
         });
 
@@ -2998,16 +3009,6 @@ void cProjectOneBoss::__MoveBlue()
 
     if(pSnow->IsActive())
     {
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
-        {
-            if(pSnow->DrawPoint(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 4.0f, SNOW_TYPE_REMOVE) +
-               pSnow->DrawPoint(pBullet->GetPosition().xy(),                                4.0f, SNOW_TYPE_REMOVE) +
-               pSnow->DrawPoint(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 3.0f, SNOW_TYPE_REMOVE))
-            {
-                pBullet->Deactivate(true);
-            }
-        });
-
         g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cOrbBullet>([&](cOrbBullet* OUTPUT pBullet)
         {
             coreVector2 vNewPos = pBullet->GetPosition().xy() + vGlobalMove;
@@ -3022,11 +3023,6 @@ void cProjectOneBoss::__MoveBlue()
             pSnow->DrawPoint(vNewPos, 7.0f, SNOW_TYPE_ADD);
         });
     }
-
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        pPlayer->SetMoveSpeed((!pPlayer->IsRolling() && pSnow->IsActive() && pSnow->TestCollision(pPlayer->GetPosition().xy())) ? 0.2f : 1.0f);
-    });
 
     g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([](cFlipBullet* OUTPUT pBullet)
     {
@@ -3373,6 +3369,8 @@ void cProjectOneBoss::__MoveCyan()
         if(pBulletEnemy->GetID() != cTriangleBullet::ID) return;
 
         pBulletEnemy->Deactivate(true, vIntersection.xy(), pBulletPlayer->GetFlyDir());
+
+        g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLACEHOLDER);
     });
 }
 
@@ -3434,7 +3432,7 @@ void cProjectOneBoss::__MoveGreen()
                 const coreVector2 vPos = this->GetPosition().xy();
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 45.0f));
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5u, 0.4f, this, vPos, vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.4f, this, vPos, vDir)->ChangeSize(1.7f);
             }
         });
 
@@ -4322,7 +4320,7 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
             pCalor->DisableStar(i, bAnimated);
 
         // 
-        pCalor->GetSnow()->Disable(bAnimated ? 1.0f : 0.0f);
+        pCalor->DisableSnow(bAnimated);
 
         // 
         pCalor->GetBoulder()->Kill(bAnimated);
@@ -4368,10 +4366,12 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
     // 
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
-        pPlayer->SetArea     (PLAYER_AREA_DEFAULT);
-        pPlayer->SetMoveSpeed(1.0f);
-        pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+        pPlayer->SetDirection (coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
+        pPlayer->SetArea      (PLAYER_AREA_DEFAULT);
+        pPlayer->SetMoveSpeed (1.0f);
+        pPlayer->SetShootSpeed(1.0f);
+        pPlayer->SetAnimSpeed (1.0f);
+        pPlayer->RemoveStatus (PLAYER_STATUS_NO_INPUT_MOVE);
     });
 
     // 

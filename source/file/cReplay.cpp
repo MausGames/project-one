@@ -162,6 +162,9 @@ void cReplay::EndRecording()
         m_Header.aiScoreTotal[k] = pTable->GetScoreTotal();
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aaiScoreMission[k][j] = pTable->GetScoreMission(j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaaiScoreSegment[k][j][i] = pTable->GetScoreSegment(j, i);
+
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aaiMaxSeriesMission[k][j] = pTable->GetMaxSeriesMission(j);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaaiMaxSeriesSegment[k][j][i] = pTable->GetMaxSeriesSegment(j, i);
     }
 
     // 

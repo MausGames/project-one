@@ -153,7 +153,7 @@ static constexpr sMissionData g_aMissionData[] =
 #define DEPTH_POP            {g_pGame->PopDepthLevel(1u);}
 
 #define __DEPTH_GROUP_SHIP   {this->ChangeDepthLevel(8u, 10u);}                // 2 levels, static
-#define __DEPTH_GROUP_BOTTOM {m_iDepthDebug = 10u;     m_iDepthLevel = 20u;}   // 10 levels, dynamic, 2 in game
+#define __DEPTH_GROUP_BOTTOM {m_iDepthDebug = 10u;     m_iDepthLevel = 20u;}   // 10 levels, dynamic, 3 in game
 #define __DEPTH_GROUP_UNDER  {}                                                // shared with DEPTH_GROUP_BOTTOM
 #define __DEPTH_GROUP_OVER   {m_iDepthDebug = BIT(7u); m_iDepthLevel = 8u;}    // 8 levels, dynamic, 3 in game (can use DEPTH_PUSH_SHIP)
 #define __DEPTH_GROUP_TOP    {m_iDepthDebug = 0u;}                             // shared with DEPTH_GROUP_OVER
@@ -243,8 +243,15 @@ public:
     void FadeMusic(const coreFloat fSpeed);
 
     // 
+    void PlayHitSound    (const coreVector3 vPosition);
+    void PlayReflectSound(const coreVector3 vPosition);
+
+    // 
     void UseContinue();
     void UseRestart();
+
+    // 
+    void RepairPlayer();
 
     // 
     void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
@@ -258,7 +265,7 @@ public:
     // 
     inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
     inline void KillHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) m_aHelper[i].Kill(false);}
-    inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
+    //inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
     RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2 vPosition);

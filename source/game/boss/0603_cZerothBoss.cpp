@@ -28,6 +28,7 @@
 // transition in drag-phase kann nicht an jeder schnittstelle passieren, weil das plötzliche bremsen dann komisch wirkt (zb. nach der bogen-bewegung)
 // spieler kann bei schwing-phase einfach stehen bleiben und alle rand-geschosse werden sauber zerstört, aber der zusätzliche boss-angriff bringt ihn dazu sich zu bewegen (geschwindigkeit der rand-geschosse sollte nicht weiter erhöht werden, weil es sonst zu schwer wird in kombination mit boss-angriff)
 // TODO 1: decent smoke on ice cubes ?
+// TODO 1: boss dreht sich in erster phase permanent, derzeitige rotation on top
 // TODO 1: stone outside of boss should also be ice cube ?
 // TODO 1: MAIN: task-check, fragment, easy, hard idea, coop, regular score, extra score, medal goal, juiciness (move, rota, muzzle, effects), intro, outro, foreshadow, overdrive, sound, attack size/count/speed, enemy/boss size, object size, background rota/speed
 // TODO 1: ice-cube damage in coop will be halved, but should not
@@ -54,10 +55,11 @@
 #define ICE_INDEX   (0u)
 #define EVADE_COUNT (1u)
 #define STAR_HOLD   (2u)
-#define DRAG_COUNT  (3u)
-#define DRAG_SIDE   (4u)
-#define CRASH_COUNT (5u)
-#define SLAP_COUNT  (6u)
+#define STAR_COUNT  (3u)
+#define DRAG_COUNT  (4u)
+#define DRAG_SIDE   (5u)
+#define CRASH_COUNT (6u)
+#define SLAP_COUNT  (7u)
 
 
 // ****************************************************************
@@ -66,6 +68,7 @@
 #define FINAL_DIR     (1u)
 #define LASER_MOVE    (2u)
 #define INFINITY_ROTA (3u)
+#define SHOT_TARGET   (4u)
 
 
 // ****************************************************************
@@ -134,6 +137,7 @@ cZerothBoss::cZerothBoss()noexcept
     {
         m_aIce[i].DefineModelHigh("object_cube_ice.md3");
         m_aIce[i].DefineModelLow ("object_cube_ice.md3");
+        m_aIce[i].DefineVolume   ("object_cube_volume.md3");
         m_aIce[i].DefineTexture  (1u, "environment_water_norm.png");
         m_aIce[i].DefineProgram  ("object_ice_program");
         m_aIce[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
@@ -153,10 +157,12 @@ void cZerothBoss::ResurrectIntro()
     cCalorMission* pMission = d_cast<cCalorMission*>(g_pGame->GetCurMission());
 
     // 
-    pMission->EnableStar(0u, this, coreVector2(0.0f,-8.0f));
+    for(coreUintW i = 0u, ie = g_pGame->IsMulti() ? CALOR_STARS : 1u; i < ie; ++i)
+        pMission->EnableStar(i, this, coreVector2(0.0f,6.0f));
 
     // 
     for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i) this->__SetLimbValue(i, 1.0f);
+    this->__SetLimbValue(ZEROTH_LIMB_TAIL, 0.0f);
 
     // 
     for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i) m_aLimb[i].ChangeToBottom();
@@ -164,6 +170,10 @@ void cZerothBoss::ResurrectIntro()
 
     // 
     m_bForeshadow = true;
+
+    // 
+    constexpr coreUint8 aiNewOrder[] = {cSpearBullet::ID};
+    g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
 
     // 
     m_iPhase = 200u;
@@ -221,7 +231,7 @@ void cZerothBoss::__KillOwn(const coreBool bAnimated)
             pMission->DisableStar(i, bAnimated);
 
         // 
-        pMission->GetSnow()->Disable(bAnimated ? 1.0f : 0.0f);
+        pMission->DisableSnow(bAnimated);
 
         // 
         this->__DisableLaser(bAnimated);
@@ -229,16 +239,10 @@ void cZerothBoss::__KillOwn(const coreBool bAnimated)
         // 
         for(coreUintW i = 0u; i < ZEROTH_ICES; ++i)
             this->__DestroyCube(i, bAnimated);
-
-        // 
-        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            pPlayer->SetMoveSpeed(1.0f);
-        });
-
-        // 
-        g_pGame->GetBulletManagerEnemy()->ResetOrder();
     }
+
+    // 
+    g_pGame->GetBulletManagerEnemy()->ResetOrder();
 
     // 
     m_iPhase = 0u;
@@ -286,7 +290,6 @@ void cZerothBoss::__MoveOwn()
 {
     cCalorMission* pMission = d_cast<cCalorMission*>(g_pGame->GetCurMission());
     cSnow*         pSnow    = pMission->GetSnow();
-    coreObject3D*  pStar    = pMission->GetStar(0u);
 
     // 
     this->_UpdateBoss();
@@ -300,6 +303,8 @@ void cZerothBoss::__MoveOwn()
         this->Kill(false);
         this->_EndBoss();
     }
+
+    coreFloat fStarLength = 4.0f;
 
     // ################################################################
     // 
@@ -446,7 +451,7 @@ void cZerothBoss::__MoveOwn()
                 const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) * ((2.0f/6.0f)*PI) + I_TO_F(iTick) * ((0.5f/6.0f)*PI));
                 const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5u, 1.0f, this, vPos, vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.7f);
             }
         });
     }
@@ -467,7 +472,7 @@ void cZerothBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
-            pSnow->Enable();
+            pMission->EnableSnow();
 
             this->__EnableLaser(ZEROTH_LIMB_HEAD);
         }
@@ -514,7 +519,7 @@ void cZerothBoss::__MoveOwn()
                     const coreVector2 vDir = MapToAxis(coreVector2::Direction(I_TO_F(j) * ((1.0f/6.0f)*PI)), this->GetDirection().xy());
                     const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5u, 0.8f, this, vPos, vDir)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 0.8f, this, vPos, vDir)->ChangeSize(1.7f);
                 }
             }
 
@@ -569,12 +574,7 @@ void cZerothBoss::__MoveOwn()
                 m_aLimb[i].ResetDamageForwarded();
             }
 
-            pSnow->Disable(1.0f);
-
-            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-            {
-                pPlayer->SetMoveSpeed(1.0f);
-            });
+            pMission->DisableSnow(true);
         }
 
         coreUintW iFinished = 0u;
@@ -609,7 +609,7 @@ void cZerothBoss::__MoveOwn()
                 const coreVector2 vDir = MapToAxis(StepRotated90(i), this->GetDirection().xy());
                 const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 0.6f, this, vPos, vDir)->ChangeSize(1.9f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.6f, this, vPos, vDir)->ChangeSize(1.9f)->AddStatus(BULLET_STATUS_IMMORTAL);
             }
         });
 
@@ -750,7 +750,7 @@ void cZerothBoss::__MoveOwn()
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f));
                     const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5u, 1.0f, this, vPos, vDir)->ChangeSize(1.3f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.3f);
                 }
             });
         }
@@ -818,7 +818,7 @@ void cZerothBoss::__MoveOwn()
             const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * GA);
             const coreVector2 vPos = vDir * FOREGROUND_AREA * -1.2f * SQRT2;
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.25f, this, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.25f, this, vPos, vDir)->ChangeSize(1.5f)->AddStatus(BULLET_STATUS_IMMORTAL);
         });
 
         const coreFloat fSpeed = LERP(1.6f, CORE_MATH_PRECISION, STEP(0.0f, 0.25f, this->GetCurHealthPct()));
@@ -834,7 +834,7 @@ void cZerothBoss::__MoveOwn()
                 const coreVector2 vPos = this->GetPosition().xy() + vBase * ZEROTH_RADIUS;
                 const coreVector2 vDir = (vTarger - vPos).Normalized();
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5u, 0.8f, this, vPos, vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 0.8f, this, vPos, vDir)->ChangeSize(1.7f);
             }
         });
 
@@ -1017,12 +1017,8 @@ void cZerothBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK)
         {
-            this->DefaultMoveLerp(coreVector2(0.0f,1.5f), coreVector2(0.0f,0.7f), fTime);
-
-            const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * -8.0f;
-            const coreVector2 vPos  = vBase + coreVector2(0.0f,4.0f);
-
-            pStar->SetPosition(coreVector3(vPos, 0.0f));
+            this->DefaultMoveLerp  (coreVector2(0.0f,1.5f), coreVector2(0.0f,0.7f), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                2.0f*PI,                fTime);
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
@@ -1035,12 +1031,20 @@ void cZerothBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.3f, LERP_LINEAR)
         {
-            this->DefaultRotate(LERPBR(1.0f*PI, 5.0f*PI, fTime));
+            this->DefaultRotateLerp(0.0f*PI, -4.0f*PI, BLENDS(fTime));
 
-            const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * -8.0f;
-            const coreVector2 vPos  = vBase - this->GetDirection().xy() * LERPBR(4.0f, 60.0f, STEP(0.2f, 1.0f, fTime));
+            fStarLength = LERP(fStarLength, 20.0f, SIN(fTime * (1.0f*PI)));
 
-            pStar->SetPosition(coreVector3(vPos, 0.0f));
+            PHASE_CONTROL_TICKER(1u, 0u, 1.0f + 29.0f * SIN(fTime * (1.0f*PI)), LERP_LINEAR)
+            {
+                for(coreUintW j = g_pGame->IsEasy() ? 1u : 3u; j--; )
+                {
+                    const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick * 3u + j) * GA);
+                    const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.3f);
+                }
+            });
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
@@ -1051,68 +1055,133 @@ void cZerothBoss::__MoveOwn()
     // 
     else if(m_iPhase == 202u)
     {
-        static coreFloat fCurLength = 60.0f;
-
-        cPlayer* pPlayer = this->NearestPlayerDual(0u);
-
-        const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * -8.0f;
-        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vBase;
-
-        coreBool bTurn = false;
-        const coreFloat fSpeed = 4.0f;
-        if(F_TO_SI(m_fPhaseTimeBefore * fSpeed / (2.0f*PI)) != F_TO_SI(m_fPhaseTime * fSpeed / (2.0f*PI)))
+        PHASE_CONTROL_TICKER(0u, 0u, 10.0f, LERP_LINEAR)
         {
-            fCurLength = MAX(vDiff.Length(), 15.0f);
-            bTurn = true;
-        }
-
-        const coreVector2 vPos = coreVector2::Direction(m_fPhaseTime * fSpeed) * fCurLength + vBase;
-        pStar->SetPosition(coreVector3(vPos, 0.0f));
-
-        if(pMission->GetCatchObject(0u) != pPlayer)
-        {
-            const coreVector2 vCatchDiff = pPlayer->GetPosition().xy() - pStar->GetPosition().xy();
-            if(vCatchDiff.LengthSq() < POW2(4.0f))
+            if((iTick % 10u) < (g_pGame->IsEasy() ? 7u : 3u))
             {
-                pMission->CatchObject(0u, pPlayer);
-                pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+                m_avVector[SHOT_TARGET].xy(this->NearestPlayerDual(0u)->GetPosition().xy());
+                m_avVector[SHOT_TARGET].zw(this->NearestPlayerDual(1u)->GetPosition().xy());
             }
-        }
-        else if(bTurn)
-        {
+            else
+            {
+                const coreVector2 vMap = coreVector2(1.0f,0.0f);//coreVector2::Direction(I_TO_F((iTick / 10u) % 3u) * ((2.0f/3.0f)*PI) + ((1.0f/6.0f)*PI));
+                
+                for(coreUintW j = 1u; j--; )
+                {
+                    const coreVector2 vPos = this->GetPosition().xy() + vMap * (ZEROTH_RADIUS * (((iTick / 10u) % 2u) ? 1.2f : -1.2f));
+                    const coreVector2 vDir = ((((iTick / 10u) % 2u) ? m_avVector[SHOT_TARGET].xy() : m_avVector[SHOT_TARGET].zw()) - vPos).Normalized();
+    
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.8f);
+
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_YELLOW);
+                }
+            }
+        });
+
+        constexpr coreFloat fDuration = 10.0f;
+
+        //const coreFloat fTime1 = STEPH3(fDuration * (1.0f/6.0f), fDuration * (2.0f/6.0f), m_fPhaseTime);
+        //const coreFloat fTime2 = STEPH3(fDuration * (2.0f/6.0f), fDuration * (3.0f/6.0f), m_fPhaseTime);
+        //const coreFloat fTime3 = STEPH3(fDuration * (3.0f/6.0f), fDuration * (4.0f/6.0f), m_fPhaseTime);
+        //const coreFloat fTime4 = STEPH3(fDuration * (4.0f/6.0f), fDuration * (5.0f/6.0f), m_fPhaseTime);
+
+        //this->__SetLimbValue(2u,        1.0f - fTime1 + fTime3);
+        //this->__SetLimbValue(4u,        1.0f - fTime2 + fTime4);
+        //this->__SetLimbValue(ZEROTH_LIMB_TAIL, fTime2 - fTime3);
+
+        if(PHASE_MAINTIME_AFTER(fDuration))
             PHASE_CHANGE_INC
-        }
     }
 
     // ################################################################
     // 
     else if(m_iPhase == 203u)
     {
+        PHASE_CONTROL_TIMER(0u, 0.2f, LERP_LINEAR)
+        {
+            this->DefaultRotate(LERPBR(0.0f*PI, 6.0f*PI, fTime));
+            
+                
+            const cPlayer* pPlayer = g_pGame->GetPlayer(0u);
+                
+            const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * ZEROTH_RADIUS;
+            const coreVector2 vDiff = pPlayer->GetPosition().xy() - vBase;
+
+            fStarLength = LERPBR(fStarLength, vDiff.Length(), STEP(0.2f, 1.0f, fTime));
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 204u)
+    {
+
+        const coreFloat fSpeed = 4.0f;
+        
+        this->DefaultRotate(m_fPhaseTime * fSpeed);
+
+        cPlayer* pPlayer = g_pGame->GetPlayer(g_pGame->IsMulti() ? m_aiCounter[STAR_COUNT] : 0u);
+
+        const coreVector2 vBase = this->GetPosition().xy() + this->GetDirection().xy() * ZEROTH_RADIUS;
+        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vBase;
+
+        fStarLength = vDiff.Length();
+
+        coreBool bTurn = false;
+        if(F_TO_SI(m_fPhaseTimeBefore * fSpeed / (2.0f*PI)) != F_TO_SI(m_fPhaseTime * fSpeed / (2.0f*PI)))
+        {
+            bTurn = true;
+        }
+
+        if((pMission->GetCatchObject(m_aiCounter[STAR_COUNT]) != pPlayer) && (m_aiCounter[STAR_COUNT] < g_pGame->GetNumPlayers()))
+        {
+            const coreVector2 vCatchDiff = pPlayer->GetPosition().xy() - pMission->GetStar(m_aiCounter[STAR_COUNT])->GetPosition().xy();
+            if(vCatchDiff.LengthSq() < POW2(4.0f))
+            {
+                if(pPlayer->HasStatus(PLAYER_STATUS_DEAD)) g_pGame->RepairPlayer();
+
+                pMission->CatchObject(m_aiCounter[STAR_COUNT], pPlayer);
+                pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_GHOST);
+            }
+        }
+        else if(bTurn)
+        {
+            //if(!g_pGame->GetPlayer(0u)->HasStatus(PLAYER_STATUS_DEAD))
+            {
+                m_aiCounter[STAR_COUNT] += 1;
+
+                if(m_aiCounter[STAR_COUNT] >= coreInt32(GAME_PLAYERS))   // always the same amount
+                {
+                    m_avVector[STAR_LENGTH].x = fStarLength;
+                    PHASE_CHANGE_INC
+                }
+            }
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 205u)
+    {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
         {
-            this->DefaultRotate(LERPB(1.0f*PI, 2.0f*PI, fTime));
+            this->DefaultRotate(LERP(0.0f*PI, 1.0f*PI, fTime));
 
-            const coreVector2 vPos = coreVector2(SIN(fTime * (1.0f*PI)) * -30.0f, LERP(FOREGROUND_AREA.y * 1.4f, FOREGROUND_AREA.y * -1.1f, POW2(POW3(fTime))));
-
-            pStar->SetPosition(coreVector3(vPos, 0.0f));
-            
-            //this->SetDirection(coreVector3(-(vPos - this->GetPosition().xy()).Normalized(), 0.0f));
+            fStarLength = LERPB(m_avVector[STAR_LENGTH].x, fStarLength, fTime);
 
             if(PHASE_FINISHED)
             {
-                cPlayer* pPlayer = d_cast<cPlayer*>(pMission->GetCatchObject(0u));
+                for(coreUintW i = 0u; i < CALOR_STARS; ++i)
+                    pMission->SetStarConnect(i, false);
 
-                pMission->DisableStar(0u, false);
-                pMission->EnableStar (0u, pPlayer, coreVector2(0.0f,0.0f));
+                const coreVector2 vPos = pMission->GetStar(0u)->GetPosition().xy();
 
-                pStar->SetPosition(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3);
+                m_avVector[STAR_LENGTH].zw(vPos);
 
-                pMission->UncatchObject(0u);
-
-                pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
-                pPlayer->ApplyForce  (coreVector2(0.0f,50.0f));
-                pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
-
+                g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPos, 0.0f), coreVector2(0.0f,-1.0f), COLOR_ENERGY_WHITE);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
 
                 PHASE_CHANGE_INC
@@ -1122,16 +1191,56 @@ void cZerothBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 204u)
+    else if(m_iPhase == 206u)
     {
-        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
+        PHASE_CONTROL_TIMER(0u, 1.5f, LERP_LINEAR)
         {
-            this->DefaultMoveLerp  (m_vLastPosition, coreVector2(0.0f,1.5f), fTime);
-            this->DefaultRotateLerp(2.0f*PI,         3.0f*PI,                fTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,0.7f), coreVector2(0.0f,1.8f), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                -2.0f*PI,               fTime);
 
             if(PHASE_FINISHED)
             {
                 this->Kill(false);
+
+                g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+                {
+                    pPlayer->SetMoveSpeed(1.0f);
+                });
+            }
+        });
+
+        if(!m_avVector[STAR_LENGTH].y)         
+        PHASE_CONTROL_TIMER(1u, 3.5f, LERP_LINEAR)
+        {
+            const coreVector2 vPos = LERP(m_avVector[STAR_LENGTH].zw(), coreVector2(0.0f,-1.1f) * FOREGROUND_AREA, fTime);
+
+            for(coreUintW i = 0u; i < CALOR_STARS; ++i)
+                pMission->GetStar(i)->SetPosition(coreVector3(vPos, 0.0f));
+
+            if(PHASE_FINISHED)
+            {
+                m_avVector[STAR_LENGTH].y = 1.0f;
+
+                for(coreUintW i = 0u, ie = g_pGame->IsMulti() ? CALOR_STARS : 1u; i < ie; ++i)
+                {
+                    cPlayer* pPlayer = d_cast<cPlayer*>(pMission->GetCatchObject(i));
+
+                    pMission->DisableStar(i, false);
+                    pMission->EnableStar (i, pPlayer, coreVector2(0.0f,0.0f));
+
+                    pMission->GetStar(i)->SetPosition(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3);
+
+                    pMission->UncatchObject(i);
+
+                    pPlayer->SetDirection(coreVector3(AlongCrossNormal(pPlayer->GetDirection().xy()), 0.0f));
+                    pPlayer->ApplyForce  (coreVector2(0.0f,50.0f));
+                    pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_GHOST);
+                    pPlayer->SetMoveSpeed(0.0f);
+                }
+
+                g_pGame->GetBulletManagerEnemy()->ClearBulletsTyped<cOrbBullet>(true);
+
+                g_pSpecialEffects->MacroExplosionColorBig(pMission->GetStar(0u)->GetPosition(), COLOR_ENERGY_WHITE);
             }
         });
     }
@@ -1158,9 +1267,38 @@ void cZerothBoss::__MoveOwn()
                 const coreVector2 vPos = this->GetPosition().xy();
                 const coreVector2 vDir = g_pEnvironment->GetDirection() * -SIGN(g_pEnvironment->GetSpeed());
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5u, 1.0f, this, vPos, vDir)->ChangeSize(1.8f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.8f);
             });
         }
+    }
+
+    if((m_iPhase >= 200u) && (m_iPhase <= 205u))
+    {
+        if(fStarLength >= 0.0f)
+        {
+            const coreVector2 vPos = this->GetPosition().xy() + this->GetDirection().xy() * (6.0f + fStarLength);
+
+            for(coreUintW i = 0u; i < CALOR_STARS; ++i)
+                pMission->GetStar(i)->SetPosition(coreVector3(vPos, 0.0f));
+        }
+    }
+
+    if((m_iPhase >= 202u) && (m_iPhase <= 204u))
+    {
+        PHASE_CONTROL_TICKER(2u, 0u, 1.0f, LERP_LINEAR)
+        {
+            for(coreUintW j = 120u; j--; )
+            {
+                if((j % 8u) < (g_pGame->IsEasy() ? 6u : 4u)) continue;
+
+                const coreVector2 vDir = coreVector2::Direction((I_TO_F(j) + I_TO_F(iTick % 3u) * (8.0f/3.0f)) * (2.0f*PI) / 120.0f * ((iTick % 2u) ? -1.0f : 1.0f));
+                const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
+
+                const coreFloat fSpeed = 0.9f + 0.08f * I_TO_F(j % 4u);
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, fSpeed, this, vPos, vDir)->ChangeSize(2.0f);
+            }
+        });
     }
 
     if(m_Laser.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
@@ -1262,24 +1400,6 @@ void cZerothBoss::__MoveOwn()
     m_aLimb[1].SetDirection(coreVector3(m_aLimb[1].GetDirection().xy().Rotated120() * -1.0f, 0.0f));
     m_aLimb[4].SetDirection(coreVector3(m_aLimb[4].GetDirection().xy().Rotated120(),         0.0f));
     m_aLimb[5].SetDirection(coreVector3(m_aLimb[5].GetDirection().xy()              * -1.0f, 0.0f));
-
-    if(pSnow->IsActive())
-    {
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
-        {
-            if(pSnow->DrawPoint(pBullet->GetPosition().xy() + 0.5f * pBullet->GetFlyMove(), 4.0f, SNOW_TYPE_REMOVE) +
-               pSnow->DrawPoint(pBullet->GetPosition().xy(),                                4.0f, SNOW_TYPE_REMOVE) +
-               pSnow->DrawPoint(pBullet->GetPosition().xy() - 0.5f * pBullet->GetFlyMove(), 3.0f, SNOW_TYPE_REMOVE))
-            {
-                pBullet->Deactivate(true);
-            }
-        });
-
-        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            pPlayer->SetMoveSpeed((!pPlayer->IsRolling() && pSnow->IsActive() && pSnow->TestCollision(pPlayer->GetPosition().xy())) ? 0.2f : 1.0f);
-        });
-    }
 
     for(coreUintW i = 0u; i < CALOR_STARS; ++i)
     {

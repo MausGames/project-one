@@ -22,7 +22,6 @@
 // TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
 // TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
 // TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
-// TODO 1: morningstar sticks to boss and throws player around instead
 // TODO 1: check if all allocated enemy numbers are correct
 // TODO 2: generate objects are preventing each others outlines while being alpha 0 (especially on diagonal movement)
 // TODO 3: nevo: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
@@ -33,6 +32,10 @@
 // TODO 3: insanity functions in harena copy (and override) some of the mission code, maybe this can be cleaned up
 // TODO 1: what happens to morningstar if any player is dead
 // TODO 4: remove direct access with .List() or Raw containers in all missions (change to Getters)
+// TODO 4: change fangs back from cLodObject to coreObject3D, if lod not required (other objects as well ? (low == high))
+// TODO 3: delay sollte zeit anhalten
+// TODO 3: hail should only use one batchlist, both can be merged
+// TODO 3: cMission::Close() sollte auch nach dem finalen/secret boss aufgerufen werden
 
 
 // ****************************************************************
@@ -132,6 +135,14 @@
 #define GELU_ORBS_RAWS              (GELU_ORBS)                                       // 
 #define GELU_LINES                  (24u)                                             // 
 #define GELU_LINES_RAWS             (GELU_LINES)                                      // 
+#define GELU_COINS                  (4u)                                              // 
+#define GELU_COINS_RAWS             (GELU_COINS * 2u)                                 // 
+#define GELU_GAPS                   (5u)                                              // 
+#define GELU_GAPS_RAWS              (GELU_GAPS)                                       // 
+#define GELU_SHINES                 (16u)                                             // 
+#define GELU_SHINES_RAWS            (GELU_SHINES)                                     // 
+#define GELU_DROPS                  (8u)                                              //                             
+#define GELU_DROPS_RAWS             (GELU_DROPS)                                      //                             
 #define GELU_FANG_STEP              (0.44f)                                           // 
 #define GELU_WAY_STEP               (0.36f)                                           // 
 #define GELU_POSITIONS              (MAX(GELU_FANGS, GELU_WAYS))                      // 
@@ -141,6 +152,10 @@
 #define CALOR_CHAINS                (28u)                                             // 
 #define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
 #define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
+#define CALOR_HAILS                 (3u)                                              // 
+#define CALOR_HAILS_RAWS            (CALOR_HAILS * 2u)                                // 
+#define CALOR_CHESTS                (6u)                                              // 
+#define CALOR_CHESTS_RAWS           (CALOR_CHESTS * 2u)                               // 
 #define CALOR_CHAIN_CONSTRAINT1     (20.0f)                                           // 
 #define CALOR_CHAIN_CONSTRAINT2     (46.0f)                                           // 
 #define CALOR_SWING_SPEED           (7.0f)                                            // 
@@ -149,6 +164,7 @@
 #define MUSCUS_GENERATES_RAWS       (MUSCUS_GENERATES * 2u)                           // 
 #define MUSCUS_PEARLS               (44u)                                             // 
 #define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
+#define MUSCUS_ZOMBIES              (3u)                                              // 
 
 
 // ****************************************************************
@@ -168,26 +184,28 @@
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, __i) {if((coreIntW(__i) >= coreIntW(f)) && (coreIntW(__i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
-#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, 0u, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
+#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, 0u, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect(); m_bDelay = true;});}
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
-#define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
+#define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false); m_bDelay = false;}
 
-#define STAGE_STEP(a,b)                        (STEP(I_TO_F(a), I_TO_F(b), I_TO_F(m_iStageSub)))   // TODO 1: remove ?
+#define STAGE_SINK_UINT(x)                     (bIsDead ? r_cast<coreUint32&> (s_aiSink) : (x))
+#define STAGE_SINK_FLOAT(x)                    (bIsDead ? r_cast<coreFloat&>  (s_aiSink) : (x))
+#define STAGE_SINK_VEC2(x)                     (bIsDead ? r_cast<coreVector2&>(s_aiSink) : (x))
 
 #define STAGE_ADD_PATH(n)                      coreSpline2* const OUTPUT n = this->_AddPath    (__LINE__,      [&](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 cEnemySquad* const OUTPUT n = this->_AddSquad<t>(__LINE__, (c), [&](cEnemySquad* OUTPUT n)
 
-#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
-#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
-#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)
+#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)
+#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)
 #define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_THIS                              this
 
-#define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
-#define STAGE_FOREACH_PLAYER_ALL(e,i)          g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
-#define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
-#define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_PLAYER_ALL(e,i)          g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)
 
 #define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ALIGNED_DELETE(m_piData) STATIC_ASSERT((c) <= 0xFFu) m_iDataSize = (c); m_piData = ALIGNED_NEW(coreUint32, m_iDataSize, ALIGNMENT_CACHE); std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
 #define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
@@ -305,6 +323,8 @@ protected:
 
     coreUint8 m_iBadgeGiven;                                // 
 
+    coreUint8 m_iRecordBroken;                              // 
+
     uCollPlayerEnemyType  m_nCollPlayerEnemy;               // 
     uCollPlayerBulletType m_nCollPlayerBullet;              // 
     uCollEnemyBulletType  m_nCollEnemyBullet;               // 
@@ -312,12 +332,15 @@ protected:
     coreUint8 m_iTakeFrom;                                  // 
     coreUint8 m_iTakeTo;                                    // 
 
+    coreBool m_bDelay;                                      // 
+
     coreBool m_bRepeat;                                     // 
 
     static coreUint16  s_iTick;                             // 
     static coreFloat   s_fLifeTimePoint;                    // 
     static coreFloat   s_fHealthPctPoint;                   // 
     static coreVector2 s_vPositionPoint;                    // 
+    static coreUint32  s_aiSink[2];                         // 
 
 
 public:
@@ -329,6 +352,9 @@ public:
 
     // setup the mission
     void Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo);
+
+    // 
+    void Close();
 
     // render and move the mission
     void RenderBottom();
@@ -384,8 +410,10 @@ public:
     inline cEnemySquad*     GetEnemySquad     (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
     inline const coreUint8& GetStageSub       ()const                       {return m_iStageSub;}
     inline const coreFloat* GetMedalGoal      ()const                       {return m_pfMedalGoal;}
+    inline const coreUint8& GetRecordBroken   ()const                       {return m_iRecordBroken;}
     inline const coreUint8& GetTakeFrom       ()const                       {return m_iTakeFrom;}
     inline const coreUint8& GetTakeTo         ()const                       {return m_iTakeTo;}
+    inline const coreBool&  GetDelay          ()const                       {return m_bDelay;}
 
     // get object properties
     virtual const coreChar* GetMusicName()const {return "";}
@@ -453,6 +481,7 @@ private:
     const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
     coreVector2   m_avBarrierPos  [VIRIDO_BARRIERS];        // 
     coreVector2   m_avBarrierDir  [VIRIDO_BARRIERS];        // 
+    coreBool      m_bBarrierSlow;                           // 
     coreBool      m_bBarrierClamp;                          // 
 
     coreBatchList m_Laser;                                  // 
@@ -536,6 +565,7 @@ public:
 
     // 
     void        SetBarrierScale(const coreUintW iIndex, const coreFloat fScale);
+    inline void SetBarrierSlow (const coreBool bSlow)  {m_bBarrierSlow  = bSlow;}
     inline void SetBarrierClamp(const coreBool bClamp) {m_bBarrierClamp = bClamp;}
 
     // 
@@ -631,6 +661,12 @@ private:
     coreBool    m_bClamp;                             // 
     coreBool    m_bOverdraw;                          // 
 
+    coreObject3D m_aDemoRange[2];                     // 
+    coreFlow     m_fDemoRangeAnim;                    // 
+
+    coreTexturePtr m_apTexCache[9];                   // 
+    coreSoundPtr   m_pNightmareSound;                 // 
+
     coreFlow m_fAnimation;                            // animation value
 
 
@@ -680,6 +716,10 @@ public:
     // 
     void EnableContainer (const coreVector2 vPosition);
     void DisableContainer(const coreBool bAnimated);
+
+    // 
+    void EnableRanges ();
+    void DisableRanges(const coreBool bAnimated);
 
     // 
     void SetTileStyle(const coreUintW iIndex, const coreUint8 iStyle);
@@ -1000,33 +1040,50 @@ private:
 class cGeluMission final : public cMission
 {
 private:
-    cCholBoss m_Chol;                              // 
+    cCholBoss m_Chol;                                // 
 
-    coreBatchList m_Fang;                          // 
-    cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
-    coreUint32    m_iFangActive;                   // 
+    coreBatchList m_Fang;                            // 
+    cLodObject    m_aFangRaw[GELU_FANGS_RAWS];       // 
+    coreUint32    m_iFangActive;                     // 
 
-    coreBatchList m_Way;                           // 
-    coreBatchList m_WayArrow;                      // 
-    coreObject3D  m_aWayRaw[GELU_WAYS_RAWS];       // 
-    coreUint32    m_iWayActive;                    // 
-    coreUint32    m_iWayVisible;                   // 
+    coreBatchList m_Way;                             // 
+    coreBatchList m_WayArrow;                        // 
+    coreObject3D  m_aWayRaw[GELU_WAYS_RAWS];         // 
+    coreUint32    m_iWayActive;                      // 
+    coreUint32    m_iWayVisible;                     // 
+    coreUint32    m_iWayGhost;                       // 
+    coreUint32    m_iWayFree;                        // 
 
-    coreBatchList m_Orb;                           // 
-    coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];     // 
-    coreFlow      m_afOrbTime[GELU_ORBS];          // 
+    coreBatchList m_Orb;                             // 
+    coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];       // 
+    coreFlow      m_afOrbTime[GELU_ORBS];            // 
 
-    coreBatchList m_Line;                          // 
-    coreObject3D  m_aLineRaw  [GELU_LINES_RAWS];   // 
-    coreFlow      m_afLineTime[GELU_LINES];        // 
-    coreUint8     m_iLineMode;                     // 
+    coreBatchList m_Line;                            // 
+    coreObject3D  m_aLineRaw  [GELU_LINES_RAWS];     // 
+    coreFlow      m_afLineTime[GELU_LINES];          // 
+    coreUint8     m_iLineMode;                       // 
 
-    coreVector2 m_avOldPos[GELU_POSITIONS];        // 
+    coreBatchList m_Coin;                            // 
+    coreBatchList m_CoinWave;                        // 
+    coreObject3D  m_aCoinRaw[GELU_COINS_RAWS];       // 
 
-    coreBool  m_abCrushImmune[MISSION_PLAYERS];    // 
-    coreUint8 m_iCrushState;                       // 
+    coreBatchList m_Gap;                             // 
+    coreObject3D  m_aGapRaw  [GELU_GAPS_RAWS];       // 
+    coreFlow      m_afGapTime[GELU_GAPS];            // 
+    coreUint8     m_iGapActive;                      // 
 
-    coreFlow m_fAnimation;                         // animation value
+    coreBatchList m_Shine;                           // 
+    coreObject3D  m_aShineRaw  [GELU_SHINES_RAWS];   // 
+    coreFlow      m_afShineTime[GELU_SHINES];        // 
+    coreUint16    m_iShineActive;                    // 
+
+    coreVector2 m_avOldPos[GELU_POSITIONS];          // 
+    coreUint32  m_iTouchState;                       // 
+
+    coreBool  m_abCrushImmune[MISSION_PLAYERS];      // 
+    coreUint8 m_iCrushState;                         // 
+
+    coreFlow m_fAnimation;                           // animation value
 
 
 public:
@@ -1053,6 +1110,18 @@ public:
     void DisableLine(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableCoin (const coreUintW iIndex);
+    void DisableCoin(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableGap (const coreUintW iIndex);
+    void DisableGap(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableShine (const coreUintW iIndex);
+    void DisableShine(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     inline coreBool IsWayActive   (const coreUintW iIndex)const {ASSERT(iIndex < GELU_WAYS) return HAS_BIT(m_iWayActive,  iIndex);}
     inline coreBool IsWayActiveAny()const                       {return (m_iWayActive != 0u);}
     inline coreBool IsWayVisible  (const coreUintW iIndex)const {ASSERT(iIndex < GELU_WAYS) return HAS_BIT(m_iWayVisible, iIndex);}
@@ -1065,14 +1134,26 @@ public:
     inline void SetLineMode(const coreUint8 iMode) {m_iLineMode = iMode;}
 
     // 
+    inline void SetWayFree(const coreUintW iIndex, const coreBool bFree) {ASSERT(iIndex < GELU_WAYS) SET_BIT(m_iWayFree, iIndex, bFree)}
+
+    // 
     inline void SetCrushFree(const coreBool bCrushFree) {SET_BIT(m_iCrushState, 0u, bCrushFree)}   // move through blocks after crush
     inline void SetCrushLong(const coreBool bCrushLong) {SET_BIT(m_iCrushState, 1u, bCrushLong)}   // move in-and-out of blocks after crush
 
     // 
-    inline coreObject3D* GetFang(const coreUintW iIndex) {ASSERT(iIndex < GELU_FANGS) return &m_aFangRaw[iIndex];}
-    inline coreObject3D* GetWay (const coreUintW iIndex) {ASSERT(iIndex < GELU_WAYS)  return &m_aWayRaw [iIndex * 2u];}
-    inline coreObject3D* GetOrb (const coreUintW iIndex) {ASSERT(iIndex < GELU_ORBS)  return &m_aOrbRaw [iIndex];}
-    inline coreObject3D* GetLine(const coreUintW iIndex) {ASSERT(iIndex < GELU_LINES) return &m_aLineRaw[iIndex];}
+    inline coreBool IsGapActive(const coreUintW iIndex)const {ASSERT(iIndex < GELU_GAPS) return HAS_BIT(m_iGapActive, iIndex);}
+
+    // 
+    inline coreBool IsShineActive(const coreUintW iIndex)const {ASSERT(iIndex < GELU_SHINES) return HAS_BIT(m_iShineActive, iIndex);}
+
+    // 
+    inline coreObject3D* GetFang (const coreUintW iIndex) {ASSERT(iIndex < GELU_FANGS) return &m_aFangRaw[iIndex];}
+    inline coreObject3D* GetWay  (const coreUintW iIndex) {ASSERT(iIndex < GELU_WAYS)  return &m_aWayRaw [iIndex * 2u];}
+    inline coreObject3D* GetArrow(const coreUintW iIndex) {ASSERT(iIndex < GELU_WAYS)  return &m_aWayRaw [iIndex * 2u + 1u];}
+    inline coreObject3D* GetOrb  (const coreUintW iIndex) {ASSERT(iIndex < GELU_ORBS)  return &m_aOrbRaw [iIndex];}
+    inline coreObject3D* GetLine (const coreUintW iIndex) {ASSERT(iIndex < GELU_LINES) return &m_aLineRaw[iIndex];}
+    inline coreObject3D* GetCoin (const coreUintW iIndex) {ASSERT(iIndex < GELU_COINS) return &m_aCoinRaw[iIndex * 2u];}
+    inline coreObject3D* GetGap  (const coreUintW iIndex) {ASSERT(iIndex < GELU_GAPS)  return &m_aGapRaw [iIndex];}
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "mission_05.ogg";}
@@ -1098,13 +1179,33 @@ class cCalorMission final : public cMission
 private:
     cZerothBoss m_Zeroth;                             // 
 
-    cSnow m_Snow;                                     // 
+    cSnow    m_Snow;                                  // 
+    coreFlow m_fSnowTick;                             // 
+    coreFlow m_afSnowStuck[MISSION_PLAYERS];          // 
 
     coreBatchList m_Load;                             // 
     coreObject3D  m_aLoadRaw[CALOR_LOADS_RAWS];       // 
     coreObject3D  m_LoadCopy;                         // 
     const cShip*  m_pLoadOwner;                       // 
     coreFlow      m_afLoadPower[3];                   // (0 = current | 1 = previous | 2 = bump) 
+
+    coreBatchList m_Hail;                             // 
+    coreBatchList m_HailWave;                         // 
+    coreObject3D  m_aHailRaw[CALOR_HAILS_RAWS];       // 
+
+    coreBatchList m_Chest;                            // 
+    coreBatchList m_ChestWave;                        // 
+    coreObject3D  m_aChestRaw  [CALOR_CHESTS_RAWS];   // 
+    coreFlow      m_afChestTime[CALOR_CHESTS];        // 
+
+    coreObject3D m_AimArrow;                          // 
+    coreObject3D m_aAimSphere[3];                     // 
+    const cShip* m_pAimOwner;                         // 
+    coreFlow     m_fAimTime;                          // 
+    coreFlow     m_fAimAlpha;                         // 
+    coreFloat    m_fAimFade;                          // 
+
+    cCustomEnemy m_Bull;                              // 
 
     coreBatchList m_Star;                             // 
     coreBatchList m_StarChain;                        // 
@@ -1114,6 +1215,7 @@ private:
     coreFloat     m_afStarLength[CALOR_STARS];        // 
     coreUint8     m_iStarSwing;                       // 
     coreUint8     m_iStarAnimate;                     // 
+    coreUint8     m_iStarConnect;                     // 
 
     coreFloat m_fSwingSpeed;                          // 
     coreFlow  m_fSwingStart;                          // 
@@ -1137,8 +1239,24 @@ public:
     ASSIGN_ID(6, "CALOR")
 
     // 
+    void EnableSnow ();
+    void DisableSnow(const coreBool bAnimated);
+
+    // 
     void EnableLoad (const cShip* pOwner);
     void DisableLoad(const coreBool bAnimated);
+
+    // 
+    void EnableHail (const coreUintW iIndex);
+    void DisableHail(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableChest (const coreUintW iIndex);
+    void DisableChest(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableAim (const cShip* pOwner);
+    void DisableAim(const coreBool bAnimated);
 
     // 
     void EnableStar (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vOffset);
@@ -1148,10 +1266,14 @@ public:
     inline void BumpLoad(const coreFloat fValue) {ASSERT(fValue > 0.0f) m_afLoadPower[0] = MIN(m_afLoadPower[0] + fValue, I_TO_F(CALOR_LOADS)); m_afLoadPower[2] = 1.0f;}
 
     // 
+    inline coreBool IsChestReady(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_CHESTS) return (m_afChestTime[iIndex] == 0.0f);}
+
+    // 
     inline coreBool IsStarEnabled(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return (m_apStarOwner[iIndex] != NULL);}
 
     // 
-    inline void SetStarLength(const coreUintW iIndex, const coreFloat fLength) {ASSERT(iIndex < CALOR_STARS) m_afStarLength[iIndex] = fLength;}
+    inline void SetStarLength (const coreUintW iIndex, const coreFloat fLength) {ASSERT(iIndex < CALOR_STARS) m_afStarLength[iIndex] = fLength;}
+    inline void SetStarConnect(const coreUintW iIndex, const coreBool bConnect) {ASSERT(iIndex < CALOR_STARS) SET_BIT(m_iStarConnect, iIndex, bConnect)}
 
     // 
     void StartSwing(const coreFloat fSpeed);
@@ -1163,8 +1285,10 @@ public:
 
     // 
     inline cSnow*        GetSnow       ()                            {return &m_Snow;}
-    inline coreObject3D* GetStar       (const coreUintW iIndex)      {ASSERT(iIndex < CALOR_STARS) return &m_aStarRaw    [iIndex * (CALOR_CHAINS + 1u)];}
-    inline cShip*        GetCatchObject(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return m_apCatchObject[iIndex];}
+    inline coreObject3D* GetHail       (const coreUintW iIndex)      {ASSERT(iIndex < CALOR_HAILS)  return &m_aHailRaw    [iIndex * 2u];}
+    inline coreObject3D* GetChest      (const coreUintW iIndex)      {ASSERT(iIndex < CALOR_CHESTS) return &m_aChestRaw   [iIndex * 2u];}
+    inline coreObject3D* GetStar       (const coreUintW iIndex)      {ASSERT(iIndex < CALOR_STARS)  return &m_aStarRaw    [iIndex * (CALOR_CHAINS + 1u)];}
+    inline cShip*        GetCatchObject(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS)  return m_apCatchObject[iIndex];}
     inline cCustomEnemy* GetBoulder    ()                            {return &m_Boulder;}
 
     // get object properties
@@ -1178,6 +1302,7 @@ private:
     void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __RenderOwnTop   ()final;
+    void __MoveOwnBefore  ()final;
     void __MoveOwnMiddle  ()final;
     void __MoveOwnAfter   ()final;
 };
@@ -1196,12 +1321,19 @@ private:
     coreFlow      m_afGenerateTime[MUSCUS_GENERATES];        // 
     coreFlow      m_afGenerateBang[MUSCUS_GENERATES];        // 
     coreFlow      m_afGenerateView[MUSCUS_GENERATES];        // 
-    coreBool      m_bGenerateTest;                           // 
+    coreUint64    m_iGenerateTest;                           // 
+    coreUint64    m_iGenerateHit;                            // 
 
     coreBatchList m_Pearl;                                   // 
     coreBatchList m_PearlWave;                               // 
     coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];           // 
     coreUint64    m_iPearlActive;                            // 
+    coreUint64    m_iPearlHidden;                            // 
+
+    coreObject3D m_aZombie[MUSCUS_ZOMBIES];                  // 
+
+    coreObject3D m_Diamond;                                  // 
+    coreUint8    m_iDiamondIndex;                            // 
 
     coreSpline2  m_aStrikeSpline [MUSCUS_PEARLS];            // 
     coreFlow     m_afStrikeTime  [MUSCUS_PEARLS];            // 
@@ -1228,9 +1360,21 @@ public:
     void DisablePearl(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void ShowGenerate(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateTime[iIndex] = fTime;}
+    void EnableZombie (const coreUintW iIndex);
+    void DisableZombie(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void StartDiamond(const coreUintW iIndex);
+    void EndDiamond  (const coreBool bAnimated);
+
+    // 
+    inline void ShowGenerate(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateTime[iIndex] = MAX(m_afGenerateTime[iIndex], fTime);}
     inline void BangGenerate(const coreUintW iIndex)                        {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateBang[iIndex] = 1.0f;}
-    inline void TestGenerate(const coreBool  bTest)                         {m_bGenerateTest = bTest;}
+    inline void TestGenerate(const coreUintW iIndex, const coreBool bTest)  {ASSERT(iIndex < MUSCUS_GENERATES) SET_BIT(m_iGenerateTest, iIndex, bTest)}
+
+    // 
+    inline coreBool IsGenerateHit    (const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_GENERATES) return HAS_BIT(m_iGenerateHit, iIndex);}
+    inline coreBool IsGenerateDiamond(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_GENERATES) return (iIndex == m_iDiamondIndex);}
 
     // 
     inline coreBool IsPearlActive  (const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return (HAS_BIT(m_iPearlActive, iIndex) && !m_apStrikeTarget[iIndex]);}
@@ -1240,8 +1384,9 @@ public:
     void StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, const cShip* pTarget);
 
     // 
-    inline cPlayer*          GetStrikePlayer(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return m_apStrikePlayer[iIndex];}
-    inline const coreUint64& GetStrikeState ()const                       {return m_iStrikeState;}
+    inline cPlayer*           GetStrikePlayer(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return m_apStrikePlayer[iIndex];}
+    inline const coreVector2& GetStrikeDir   (const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return m_aStrikeSpline [iIndex].GetNode(1u).tTangent;}
+    inline const coreUint64&  GetStrikeState ()const                       {return m_iStrikeState;}
 
     // 
     inline coreObject3D* GetGenerate(const coreUintW iIndex) {ASSERT(iIndex < MUSCUS_GENERATES) return &m_aGenerateRaw[iIndex * 2u];}
@@ -1253,9 +1398,10 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn     ()final;
-    void __RenderOwnOver()final;
-    void __MoveOwnAfter ()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

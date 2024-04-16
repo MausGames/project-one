@@ -28,7 +28,7 @@ cFinishMenu::cFinishMenu()noexcept
     m_ThankYouText.SetPosition    (coreVector2(0.0f,0.05f));
     m_ThankYouText.SetCenter      (m_Background.GetCenter());
     m_ThankYouText.SetColor3      (COLOR_MENU_WHITE);
-    m_ThankYouText.SetTextLanguage("THANK_YOU");
+    m_ThankYouText.SetTextLanguage(g_bDemoVersion ? "THANK_YOU_DEMO" : "THANK_YOU");
 
     m_TotalName.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_TotalName.SetPosition    (coreVector2(0.0f,-0.025f));
@@ -112,6 +112,9 @@ void cFinishMenu::Move()
     {
     case SURFACE_FINISH_DEFAULT:
         {
+            const coreFloat fOldTimer = m_fIntroTimer;
+            
+            
             // 
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= MENU_FINISH_BANNER_SPEED_REV))// && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
@@ -126,6 +129,12 @@ void cFinishMenu::Move()
                     // 
                     if(m_eState == FINISH_WAIT) m_eState = FINISH_OUTRO;
                 }
+            }
+            
+            if((fOldTimer < 0.0f) && (m_fIntroTimer >= 0.0f))
+            {
+                g_MusicPlayer.SelectName("menu.ogg");
+                g_MusicPlayer.Play();
             }
 
             // 
@@ -142,8 +151,8 @@ void cFinishMenu::Move()
                 if((m_fIntroTimer >= MENU_FINISH_BANNER_ANIMATION) && (m_eState < FINISH_WAIT)) m_eState = FINISH_WAIT;
 
                 // calculate visibility and animation value
-                const coreFloat fVisibility = MAX(MIN(m_fIntroTimer, MENU_FINISH_BANNER_SPEED_REV - m_fOutroTimer), 0.0f) * MENU_FINISH_BANNER_SPEED;
-                const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_FINISH_BANNER_ANIMATION, 1.0f)) * MENU_FINISH_BANNER_ANIMATION;
+                const coreFloat fVisibility = MAX0(MIN(m_fIntroTimer, MENU_FINISH_BANNER_SPEED_REV - m_fOutroTimer)) * MENU_FINISH_BANNER_SPEED;
+                const coreFloat fAnimation  = BLENDB(MIN1(m_fIntroTimer / MENU_FINISH_BANNER_ANIMATION)) * MENU_FINISH_BANNER_ANIMATION;
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
                 const coreBool bLeftRight = m_fOutroTimer ? true : false;
@@ -191,7 +200,7 @@ void cFinishMenu::ShowThankYou()
 
     // 
     this->__ResetState();
-    m_fIntroTimer = -MENU_FINISH_DELAY_INTRO;
+    m_fIntroTimer = -MENU_FINISH_DELAY_INTRO - 1.5f;
 
     // 
     coreUint32 iSumScore = 0u;

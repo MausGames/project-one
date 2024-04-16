@@ -26,6 +26,19 @@ cExhaustManager::cExhaustManager()noexcept
     STATIC_ASSERT(EXHAUST_BASES == 3u)
 
     // 
+    m_aPrototype[0].DefineModel  ("object_tube_open.md3");
+    m_aPrototype[0].DefineTexture(0u, "effect_energy.png");
+    m_aPrototype[0].DefineProgram("effect_energy_flat_direct_program");
+
+    m_aPrototype[1].DefineModel  ("object_sphere_center.md3");
+    m_aPrototype[1].DefineTexture(0u, "effect_energy.png");
+    m_aPrototype[1].DefineProgram("effect_energy_flat_program");
+
+    m_aPrototype[2].DefineModel  ("object_sphere.md3");
+    m_aPrototype[2].DefineTexture(0u, "effect_energy.png");
+    m_aPrototype[2].DefineProgram("effect_energy_flat_program");
+
+    // 
     m_ObjectPool.Configure(sizeof(coreObject3D), EXHAUST_POOL_PAGESIZE);
 
     // 
@@ -78,7 +91,7 @@ void cExhaustManager::Move()
         ASSERT(pEnemy != pObject)
 
         // 
-        const coreFloat fOffset = I_TO_F(P_TO_UI(pObject) / sizeof(coreObject3D)) * 0.1f;
+        const coreFloat fOffset = I_TO_F((P_TO_UI(pObject) / sizeof(coreObject3D) % 10u)) * 0.1f;
 
         // 
         switch(it->eType)
@@ -209,6 +222,19 @@ void cExhaustManager::Move()
                 //pObject->SetTexSize  (coreVector2(2.0f,1.0f) * SQRT(pEnemy->GetVisualRadius()) * 0.77f);
             }
             break;
+
+        case EXHAUST_TYPE_UFO:
+            {
+                // TODO 1: cleanup
+                pObject->SetSize     (coreVector3(1.0f,1.0f,1.0f) * pEnemy->GetVisualRange() * 1.4f);
+                pObject->SetTexOffset(coreVector2(0.0f, FRACT(m_fAnimation * -2.0f + fOffset)));
+                pObject->SetPosition (pEnemy->GetPosition ());
+                pObject->SetDirection(pEnemy->GetDirection());
+                pObject->SetColor3   (COLOR_ENERGY_WHITE * 0.5f);
+                pObject->SetAlpha    (pEnemy->GetAlpha    () * (pEnemy->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 0.7f));
+                pObject->SetTexSize  (coreVector2(2.0f,1.0f) * pEnemy->GetVisualRadius() * 0.3f);
+            }
+            break;
         }
     }
 
@@ -239,33 +265,13 @@ void cExhaustManager::BindEnemy(cEnemy* pEnemy, const eExhaustType eType)
         case EXHAUST_TYPE_FREEZER: iBase = 0u; break;
         case EXHAUST_TYPE_CINDER:  iBase = 1u; break;
         case EXHAUST_TYPE_METEOR:  iBase = 2u; break;
+        case EXHAUST_TYPE_UFO:     iBase = 2u; break;
         }
         ASSERT(iBase < EXHAUST_BASES)
 
         // 
-        coreObject3D* pObject = POOLED_NEW(m_ObjectPool, coreObject3D);
+        coreObject3D* pObject = POOLED_NEW(m_ObjectPool, coreObject3D, m_aPrototype[iBase]);
         m_aRenderList[iBase].BindObject(pObject);
-
-        // 
-        switch(iBase)
-        {
-        default: ASSERT(false)
-        case 0u:
-            pObject->DefineModel  ("object_tube_open.md3");
-            pObject->DefineTexture(0u, "effect_energy.png");
-            pObject->DefineProgram("effect_energy_flat_direct_program");
-            break;
-        case 1u:
-            pObject->DefineModel  ("object_sphere_center.md3");
-            pObject->DefineTexture(0u, "effect_energy.png");
-            pObject->DefineProgram("effect_energy_flat_program");
-            break;
-        case 2u:
-            pObject->DefineModel  ("object_sphere.md3");
-            pObject->DefineTexture(0u, "effect_energy.png");
-            pObject->DefineProgram("effect_energy_flat_program");
-            break;
-        }
 
         // 
         sExhaustData oData;

@@ -800,8 +800,8 @@ void cMessierBoss::__MoveOwn()
         const coreVector2 vDir = coreVector2::Direction(I_TO_F(i) * 0.25f*PI - m_fAnimation);
         const coreFloat   fLen = LERPB(0.0f, 18.0f, MIN1(fLifeTime));
 
-        pEnemy->SetPosition (this->GetPosition() + coreVector3(vDir * fLen, 0.0f));
-        pEnemy->SetDirection(coreVector3(coreVector2::Direction((m_fAnimation + I_TO_F(i))), 0.0f));
+        pEnemy->SetPosition  (this->GetPosition() + coreVector3(vDir * fLen, 0.0f));
+        pEnemy->DefaultRotate(m_fAnimation + I_TO_F(i));
     });
 
     const auto nHideFunc = [this](cEnemy* OUTPUT pEnemy)
@@ -834,7 +834,7 @@ void cMessierBoss::__MoveOwn()
             pEnemy->SetPosition(coreVector3(vCurPos, 0.0f));
         }
 
-        pEnemy->SetDirection(coreVector3(coreVector2::Direction((-m_fAnimation + I_TO_F(i))), 0.0f));
+        pEnemy->DefaultRotate(-m_fAnimation + I_TO_F(i));
     });
 }
 

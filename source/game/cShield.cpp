@@ -143,6 +143,20 @@ void cShieldEffect::ClearShields(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cShieldEffect::SetActive(const coreBool bActive)
+{
+    for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
+    {
+        if(m_aShield[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            m_aShield[i].SetEnabled(bActive ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+        }
+    }
+}
+
+
+// ****************************************************************
+// 
 void cShieldEffect::BindEnemy(cEnemy* pEnemy)
 {
     if(pEnemy->HasStatus(ENEMY_STATUS_SHIELDED)) return;
@@ -235,4 +249,14 @@ void cShieldManager::ClearShields(const coreBool bAnimated)
     // 
     for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
         m_aShieldEffect[i].ClearShields(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+void cShieldManager::SetActive(const coreBool bActive)
+{
+    // 
+    for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
+        m_aShieldEffect[i].SetActive(bActive);
 }

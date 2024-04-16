@@ -230,7 +230,7 @@ void cRayWeapon::__ShootOwn()
         m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 2.0f);
 
         // play bullet sound-effect
-        //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 0.8f, SOUND_WEAPON_RAY);
+        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 0.8f, SOUND_WEAPON_RAY);
     }
     else
     {
@@ -240,7 +240,7 @@ void cRayWeapon::__ShootOwn()
         //this->_MakeWhite(pManager->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeTilt(m_pOwner->GetTilt())->ChangeHeight(m_pOwner->GetPosition().z);
 
         // play bullet sound-effect
-        //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), LERP(1.0f, 0.5f, m_fVolume), 1.0f, SOUND_WEAPON_RAY);
+        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), LERP(1.0f, 0.5f, m_fVolume), 1.0f, SOUND_WEAPON_RAY);
     }
 }
 
@@ -272,6 +272,7 @@ void cRayWeapon::__MoveOwn()
     
     const coreVector3 vPos = m_pOwner->GetPosition ();
     const coreVector3 vDir = m_pOwner->GetDirection();
+    const coreVector3 vOri = m_pOwner->GetOrientation();
     const coreVector3 vTan = vDir.RotatedZ90();
     
     //const coreFloat fScale = MAX0(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL));
@@ -281,7 +282,7 @@ void cRayWeapon::__MoveOwn()
         m_aMuzzle[i].SetPosition(vPos + vDir * 3.0f * fScale + vTan * (i ? -1.5f : 1.5f));
         m_aMuzzle[i].SetSize(coreVector3(0.5f, 1.2f * fScale, 0.5f) * 2.3f * 1.7f);// * (0.9f + 0.1f * SIN(fTest * 6.0f*PI)));// * LERP(0.8f, 1.2f, m_fMuzzleTime));
         m_aMuzzle[i].SetDirection(-vDir);
-        m_aMuzzle[i].SetAlpha(STEP(0.0f, 1.0f, m_fMuzzleTime));
+        m_aMuzzle[i].SetAlpha(STEP(0.0f, 1.0f, m_fMuzzleTime) * STEP(0.7f, 1.0f, ABS(vOri.z)));
         m_aMuzzle[i].SetTexOffset(coreVector2(0.02f * (i ? 1.0f : -1.0f), 0.1f) * (fTest + 0.0f*I_TO_F(m_iMuzzleTick)));
         m_aMuzzle[i].SetEnabled(m_fMuzzleTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         

@@ -50,6 +50,7 @@ void cMenuNavigator::Move()
 
         m_iStore = this->__ToIndex(m_pCurObject);
     }
+    else if(s_bJoystick) Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
 
     if(m_pCurObject)
     {
@@ -102,6 +103,12 @@ void cMenuNavigator::Update()
 
         if(vRelative.IsNull() && !Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD))
             REMOVE_BIT(m_aiLock[i], 0u)
+
+        if(s_bJoystick && !m_pCurObject && !m_iFirst)
+        {
+            REMOVE_BIT(m_aiLock[i], 0u)
+            REMOVE_BIT(m_aiLock[i], 1u)
+        }
 
         if(!HAS_BIT(m_aiLock[i], 0u))
         {
@@ -241,12 +248,19 @@ void cMenuNavigator::Update()
     if(s_bJoystick && !m_pCurObject && (m_iStore || m_iFirst))
     {
         m_pCurObject = this->__ToObject(m_iStore ? m_iStore : m_iFirst);
+        
         //for(coreUintW i = 0u, ie = m_aObject.size(); (i < ie) && m_pCurObject && !m_pCurObject->GetAlpha(); ++i)
         //{
         //    const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
         //    if(!iFallback) break;
         //    m_pCurObject = this->__ToObject(iFallback);
         //}
+        for(coreUintW i = 0u, ie = m_aObject.size(); (i < ie) && m_pCurObject && !m_pCurObject->GetAlpha(); ++i)
+        {
+            const coreUint8 iFallback = m_aObject.at(m_pCurObject).iMoveFallback;
+            if(!iFallback) break;
+            m_pCurObject = this->__ToObject(iFallback ? iFallback : m_aObject.at(m_pCurObject).iMoveDown);
+        }
     }
 
     if(!s_bJoystick && !m_iFirst)
@@ -269,6 +283,7 @@ void cMenuNavigator::Update()
 
         Core::Input->SetMousePosition((vPosition + m_vMouseOffset) / vResolution);
     }
+    else if(s_bJoystick) Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
     
     
     if(m_bPressed)
@@ -318,9 +333,13 @@ void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreOb
 // 
 void cMenuNavigator::GlobalUpdate()
 {
-    // 
-    s_vMouseMove += Core::Input->GetMouseRelative().xy() * Core::System->GetResolution();
-    if(s_vMouseMove.LengthSq() > POW2(10.0f)) s_bJoystick = false;
+    if(s_bJoystick)
+    {
+        // 
+        s_vMouseMove += Core::Input->GetMouseRelative().xy() * Core::System->GetResolution();
+        if(s_vMouseMove.LengthSq() > POW2(10.0f)) s_bJoystick = false;
+        if(Core::Input->GetLastMouse() != CORE_INPUT_INVALID_MOUSE) {s_bJoystick = false; Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);}
+    }
 
     // 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
@@ -335,8 +354,7 @@ void cMenuNavigator::GlobalUpdate()
     
 
     Core::Input->ShowCursor(!s_bJoystick && (g_pMenu->GetCurSurface() != SURFACE_EMPTY)   &&
-                                            (g_pMenu->GetCurSurface() != SURFACE_SUMMARY) &&
+                                            (g_pMenu->GetCurSurface() != SURFACE_SUMMARY) &&   // TODO 1: not for segment summary
                                             (g_pMenu->GetCurSurface() != SURFACE_DEFEAT)  &&
-                                            (g_pMenu->GetCurSurface() != SURFACE_FINISH)  &&
                                             (g_pMenu->GetCurSurface() != SURFACE_BRIDGE));
 }

@@ -281,7 +281,8 @@ void cBridgeMenu::ReturnMenu(const coreUint8 iTarget, const coreBool bPaused, co
     g_pGame->GetCombatText()->SetVisible(false);
 
     // 
-    g_pGame->FadeMusic(1.0f);
+    if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg"))   // TODO 1: condition for finale in demo
+        g_pGame->FadeMusic(1.0f);
 
     // 
     this->ChangeSurface(SURFACE_BRIDGE_RETURN_2, 0.0f);//SURFACE_BRIDGE_RETURN_1, 0.0f);   // TODO 1: skip arcade input

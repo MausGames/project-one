@@ -102,6 +102,7 @@
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
 // TODO 3: medal textur ist groß und sollten komprimiert werden, aber hat dann artefakte bei kleiner scale, vielleicht separate kleine textur erzeugen, andere texturen auch ?
 // TODO 1: alle sound-effekte bei denen man was einsammeln soll, prüfen ob pitch-inkrement verwendet werden soll
+// TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
 
 
 // ****************************************************************
@@ -114,8 +115,10 @@
     #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #endif
 
-#define _P1_DEBUG_INPUT_ (1)
-//#define _P1_DEBUG_RANDOM_ (1)
+#if defined(_CORE_DEBUG_)
+    #define _P1_DEBUG_INPUT_ (1)
+    //#define _P1_DEBUG_RANDOM_ (1)
+#endif
 
 #if !defined(_CORE_DEBUG_)
     #if defined(_CORE_SSE_) || defined(_CORE_NEON_)
@@ -176,7 +179,7 @@
 #define COLOR_ENERGY_WHITE   (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.420f, 0.000f))
-#define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.290f, 0.290f))
+#define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.280f, 0.280f))
 #define COLOR_ENERGY_MAGENTA (coreVector3(1.000f, 0.310f, 0.650f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
@@ -215,12 +218,14 @@
 #define SHADER_GLOW          "#define _P1_GLOW_"        " (1) \n"        // post, outdoor, object_ship
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_"  " (1) \n"        // post
 #define SHADER_TRANSPARENT   "#define _P1_TRANSPARENT_" " (1) \n"        // post
+#define SHADER_CHROMA        "#define _P1_CHROMA_"      " (1) \n"        // post
 #define SHADER_DEBUG         "#define _P1_DEBUG_"       " (1) \n"        // post
 #define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"    " (1) \n"        // distortion
 #define SHADER_SINGLE        "#define _P1_SINGLE_"      " (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_"       " (1) \n"        // outdoor, decal, outline
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_"    " (1) \n"        // object_ship
 #define SHADER_DEPTH         "#define _P1_DEPTH_"       " (1) \n"        // object_ship
+#define SHADER_DETAIL        "#define _P1_DETAIL_"      " (1) \n"        // object_ship
 #define SHADER_BLINK         "#define _P1_BLINK_"       " (1) \n"        // energy, object_ship, object_meteor
 #define SHADER_THICK         "#define _P1_THICK_"       " (1) \n"        // outline
 #define SHADER_FLAT          "#define _P1_FLAT_"        " (1) \n"        // outline, energy
@@ -231,7 +236,7 @@
 #define SHADER_RING          "#define _P1_RING_"        " (1) \n"        // energy
 #define SHADER_WAVE          "#define _P1_WAVE_"        " (1) \n"        // object
 #define SHADER_GREY          "#define _P1_GREY_"        " (1) \n"        // vignette
-#define SHADER_LINE          "#define _P1_LINE_"        " (1) \n"        // ink
+#define SHADER_LINE          "#define _P1_LINE_"        " (1) \n"        // ink    // TODO 1: used for ink, remove ?
 
 
 struct sVersion final
@@ -330,6 +335,7 @@ class cMission;
 // ****************************************************************
 // game headers
 extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 resolution
+extern coreFloat       g_fGameRate;         // 
 extern coreVector2     g_vHudDirection;     // 
 extern coreBool        g_bTiltMode;         // 
 extern coreBool        g_bShiftMode;        // 

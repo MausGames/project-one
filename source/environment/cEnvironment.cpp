@@ -198,7 +198,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     }
 
     // 
-    if((iID != cNoBackground::ID) && (iID != cStomachBackground::ID))
+    if((iID != cNoBackground::ID) && (iID != cStomachBackground::ID) && (!g_bDemoVersion || (iID != cDarkBackground::ID)))
         m_iLastID = iID;
 
     if(m_pOldBackground)

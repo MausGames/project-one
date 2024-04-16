@@ -21,6 +21,13 @@
 #define HEADLIGHT_SCALE_FACTOR (SCALE_FACTOR)   // frame buffer resolution factor
 #define HEADLIGHT_INTENSITY    (1.5f)           // 
 
+enum eHeadlightType : coreUint8
+{
+    HEADLIGHT_TYPE_ON      = 0u,   // 
+    HEADLIGHT_TYPE_OFF     = 1u,   // 
+    HEADLIGHT_TYPE_SHATTER = 2u    // 
+};
+
 
 // ****************************************************************
 // 
@@ -58,6 +65,8 @@ private:
     coreTimer m_Flicker;                       // 
     coreUint8 m_iShatter;                      // 
 
+    coreUint8 m_iDefault;                      // 
+
 
 public:
     cHeadlight()noexcept;
@@ -81,6 +90,12 @@ public:
     void PlayFlicker (const coreUint8 iShatter);
     void StopFlicker ();
     void ResetFlicker();
+    
+    inline coreBool IsFlickering()const {return m_Flicker.GetStatus();}
+    
+    inline void SetDefault(const coreUintW iIndex, const coreBool bState) {ASSERT(iIndex < sizeof(m_iDefault)*8u) SET_BIT(m_iDefault, iIndex, bState)}
+    
+    inline coreBool GetDefault(const coreUintW iIndex)const {ASSERT(iIndex < sizeof(m_iDefault)*8u) return HAS_BIT(m_iDefault, iIndex);}
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}

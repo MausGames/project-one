@@ -608,7 +608,7 @@ void cIntroBoss::__MoveOwn()
                 g_pGame->GetItemManager()->AddItem<cFragmentItem>(this->GetPosition().xy());
 
                 g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
 
                 PHASE_CHANGE_INC
             }

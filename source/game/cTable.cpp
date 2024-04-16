@@ -224,8 +224,10 @@ cScoreTable::cScoreTable()noexcept
 // 
 void cScoreTable::Update()
 {
+    ASSERT(STATIC_ISVALID(g_pGame))
+
     // 
-    if(m_fCooldown)
+    if(m_fCooldown && !g_pGame->GetCurMission()->GetDelay())
     {
         m_fCooldown.UpdateMax(-1.0f/2.0f, 0.0f);
         if(!m_fCooldown) this->CancelCooldown();
@@ -243,10 +245,12 @@ void cScoreTable::Reset()
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiScoreSegment[j][i] = 0u;
 
     // reset combo and chain values (# no memset)
-    m_aiComboValue[1] = m_aiComboValue[0] = 0u;
-    m_aiChainValue[1] = m_aiChainValue[0] = 0u;
-    m_fCooldown =  0.0f;
-    m_fOverride = -1.0f;
+    m_iCurCombo = 0u;
+    m_iCurChain = 0u;
+    m_fCooldown = 0.0f;
+    m_iOverride = UINT32_MAX;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiMaxSeriesMission[j] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiMaxSeriesSegment[j][i] = 0u;
 }
 
 
@@ -257,14 +261,18 @@ void cScoreTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW i
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
 
+    // 
     m_iScoreTotal                                  -= m_aaiScoreSegment[iMissionIndex][iSegmentIndex];
     m_aiScoreMission [iMissionIndex]               -= m_aaiScoreSegment[iMissionIndex][iSegmentIndex];
     m_aaiScoreSegment[iMissionIndex][iSegmentIndex] = 0u;
 
-    m_aiComboValue[1] = m_aiComboValue[0] = 0u;
-    m_aiChainValue[1] = m_aiChainValue[0] = 0u;
-    m_fCooldown =  0.0f;
-    m_fOverride = -1.0f;
+    // 
+    m_iCurCombo = 0u;
+    m_iCurChain = 0u;
+    m_fCooldown = 0.0f;
+    m_iOverride = UINT32_MAX;
+    m_aiMaxSeriesMission [iMissionIndex]               -= m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex];
+    m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex] = 0u;
 }
 
 void cScoreTable::RevertSegment()
@@ -279,7 +287,7 @@ void cScoreTable::RevertSegment()
 // 
 coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
-    const coreUint32 iFinalValue = bModified ? F_TO_UI(I_TO_F(iValue) * this->GetModifier()) : iValue;
+    const coreUint32 iFinalValue = bModified ? this->ModifyValue(iValue) : iValue;
 
     // 
     ASSERT(iMissionIndex < TABLE_MISSIONS)
@@ -312,8 +320,10 @@ coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModifi
 void cScoreTable::AddCombo(const coreUint32 iValue)
 {
     // 
-    m_aiComboValue[0] += iValue;
-    m_aiComboValue[1]  = MAX(m_aiComboValue[0], m_aiComboValue[1]);
+    m_iCurCombo += iValue;
+
+    // 
+    this->__ChangeMaxSeries(m_iCurCombo);
 
     // 
     this->RefreshCooldown();
@@ -325,8 +335,10 @@ void cScoreTable::AddCombo(const coreUint32 iValue)
 void cScoreTable::AddChain(const coreUint32 iValue)
 {
     // 
-    m_aiChainValue[0] += iValue;
-    m_aiChainValue[1]  = MAX(m_aiChainValue[0], m_aiChainValue[1]);
+    m_iCurChain += iValue;
+
+    // 
+    this->__ChangeMaxSeries(m_iCurChain);
 
     // 
     this->RefreshCooldown();
@@ -337,11 +349,11 @@ void cScoreTable::AddChain(const coreUint32 iValue)
 // 
 void cScoreTable::TransferChain()
 {
-    if(m_aiChainValue[0])
+    if(m_iCurChain)
     {
         // 
-        const coreUint32 iScore = this->AddScore(m_aiChainValue[0], true);
-        m_aiChainValue[0] = 0u;
+        const coreUint32 iScore = this->AddScore(m_iCurChain, true);
+        m_iCurChain = 0u;
 
         // 
         ASSERT(STATIC_ISVALID(g_pGame))
@@ -367,16 +379,33 @@ void cScoreTable::CancelCooldown()
     this->TransferChain();
 
     // 
-    m_aiComboValue[0] = 0u;
-    m_aiChainValue[0] = 0u;
-    m_fCooldown       = 0.0f;
+    m_iCurCombo = 0u;
+    m_iCurChain = 0u;
+    m_fCooldown = 0.0f;
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::__ChangeMaxSeries(const coreUint32 iMaxValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    m_aiMaxSeriesMission [iMissionIndex]                = MAX(m_aiMaxSeriesMission [iMissionIndex],                iMaxValue);
+    m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex] = MAX(m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex], iMaxValue);
+}
+
+void cScoreTable::__ChangeMaxSeries(const coreUint32 iMaxValue)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->__ChangeMaxSeries(iMaxValue, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
 // ****************************************************************
 // constructor
 cTimeTable::cTimeTable()noexcept
-: m_fFrameTime (TIME)   // TODO 1: will be initialized with variable number from the menu, that's wrong
+: m_dFrameTime (1.0 / coreDouble(g_fGameRate))
 {
     // 
     this->Reset();
@@ -395,12 +424,12 @@ void cTimeTable::Update()
     // 
     //if(!TIME) return;
     if(TIME < 0.001f) return;
-    //ASSERT(TIME == m_fFrameTime)
+    //ASSERT(TIME == m_dFrameTime)
 
     // 
     m_iTimeEvent += 1u;
 
-    if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+    if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && !g_pGame->GetCurMission()->GetDelay())
     {
         const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
         const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();
@@ -471,7 +500,7 @@ void cTimeTable::Reset()
     m_iTimeEvent = 0u;
     m_iTimeTotal = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiTimeMission[j] = 0u;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-100.0f * RCP(m_fFrameTime)) : 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-100.0 / m_dFrameTime) : 0u;
 
     // reset all shift values (# no memset)
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiShiftGoodMission[j] = 0u;
@@ -491,7 +520,7 @@ void cTimeTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iS
     // 
     m_iTimeTotal                                  -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
     m_aiTimeMission [iMissionIndex]               -= m_aaiTimeSegment[iMissionIndex][iSegmentIndex];
-    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0f * RCP(m_fFrameTime)) : 0u;
+    m_aaiTimeSegment[iMissionIndex][iSegmentIndex] = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? F_TO_UI(-100.0 / m_dFrameTime) : 0u;
 
     // 
     m_aiShiftGoodMission [iMissionIndex]               -= m_aaiShiftGoodSegment[iMissionIndex][iSegmentIndex];
@@ -515,7 +544,7 @@ void cTimeTable::StartBoss(const coreUintW iMissionIndex, const coreUintW iBossI
     // 
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iBossIndex    < TABLE_BOSSES)
-    m_aaiTimeSegment[iMissionIndex][MISSION_BOSS_TO_SEGMENT(iBossIndex)] = F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * RCP(m_fFrameTime));
+    m_aaiTimeSegment[iMissionIndex][MISSION_BOSS_TO_SEGMENT(iBossIndex)] = F_TO_UI(coreDouble(-INTERFACE_BANNER_DURATION_BOSS) / m_dFrameTime);
 }
 
 void cTimeTable::StartBoss()

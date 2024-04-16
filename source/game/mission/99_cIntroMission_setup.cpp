@@ -546,7 +546,7 @@ void cIntroMission::__SetupOwn()
 
                     pEnemy->DefaultMovePath     (pPath, vFactor, vOffset * vFactor, fLifeTime);
                     pEnemy->SetDirection        (coreVector3(0.0f,-1.0f,0.0f));
-                    pEnemy->DefaultOrientateLerp(0.0f, 4.0f*PI * vFactor.x, LERPB(0.0f, 1.0f, fLifeTime * RCP(pPath->GetTotalDistance())));
+                    pEnemy->DefaultOrientateLerp(0.0f, 4.0f*PI * vFactor.x, BLENDB(fLifeTime * RCP(pPath->GetTotalDistance())));
                 }
                 else if(STAGE_TICK_LIFETIME(10.0f, 0.0f))
                 {
@@ -681,6 +681,8 @@ void cIntroMission::__SetupOwn()
                     {
                         if(++iWaveCount == 4u) STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
                         else g_pGame->GetCombatText()->DrawProgress(iWaveCount, 4u, pPlayer->GetPosition());
+
+                        g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iWaveCount, 4u), SOUND_ITEM_COLLECT);
                     }
                 });
             });

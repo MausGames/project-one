@@ -20,6 +20,8 @@ cCombatText::cCombatText()noexcept
 , m_fBadgeTimer  (0.0f)
 , m_bVisible     (false)
 , m_fAlpha       (0.0f)
+
+, m_iLastLabel (0u)
 {
     // create label objects
     for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
@@ -48,7 +50,7 @@ cCombatText::cCombatText()noexcept
     // 
     m_BadgeIcon.DefineTexture(0u, "menu_star.png");
     m_BadgeIcon.DefineProgram("default_2d_program");
-    m_BadgeIcon.SetSize      (coreVector2( 1.0f,1.0f) * 0.12f);
+    m_BadgeIcon.SetSize      (coreVector2( 1.0f,1.0f) * 0.11f);
     //m_BadgeIcon.SetAlignment (coreVector2(-1.0f,0.0f));
     m_BadgeIcon.SetTexSize   (coreVector2( 0.5f,1.0f));
 
@@ -110,16 +112,26 @@ void cCombatText::Move()
 
         // 
         const coreVector2 vPosition = coreVector2(oLabel.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - fTimer));
-        const coreVector2 vCenter   = cCombatText::__RestrictCenter(vPosition, coreVector2(0.0f,0.0f), oLabel.GetCenter());
+        //const coreVector2 vCenter   = cCombatText::__RestrictCenter(vPosition, coreVector2(0.0f,0.0f), oLabel.GetCenter());
         const coreFloat   fAlpha    = LERPH3(0.0f, 1.0f, MIN((fTimer)        *  6.0f, 1.0f)) * fAlphaFull;
         const coreFloat   fScale    = LERPB (0.5f, 1.0f, MIN((1.0f - fTimer) * 10.0f, 1.0f));
 
         // update label object
         oLabel.SetPosition(vPosition);
-        oLabel.SetCenter  (vCenter);
+        //oLabel.SetCenter  (vCenter);
         oLabel.SetAlpha   (fAlpha * (((m_aiType[i] != 0u) || (m_iLastLabel == i)) ? 1.0f : 0.6f));
         oLabel.SetScale   (fScale);
-        oLabel.Move();
+        //oLabel.Move();
+
+        oLabel.RetrieveDesiredSize([=, this](const coreVector2 vSize)
+        {
+            ASSERT(Core::System->GetMainThread() == SDL_ThreadID())
+
+            const coreVector2 vCenter = cCombatText::__RestrictCenter(vPosition, vSize, m_aLabel[i].GetCenter());
+
+            m_aLabel[i].SetCenter(vCenter);
+            m_aLabel[i].Move();
+        });
     }
     
     
@@ -154,9 +166,9 @@ void cCombatText::Move()
 
         // 
         const coreVector2 vPosition  = coreVector2(m_BadgeIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fBadgeTimer));
-        const coreVector2 vDirection = coreVector2::Direction(LERPB(0.5f*PI, 2.0f*PI, MIN((1.0f - m_fBadgeTimer) * 1.5f, 1.0f)));
-        const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, coreVector2(0.0f,0.0f), m_BadgeIcon.GetCenter());
-        const coreFloat   fAlpha     = LERPH3(0.0f, 1.0f, MIN(m_fBadgeTimer * 8.0f, 1.0f)) * fAlphaFull;
+        const coreVector2 vDirection = coreVector2::Direction(LERPB(0.5f*PI, 2.0f*PI, MIN1((1.0f - m_fBadgeTimer) * 1.5f)));
+        const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, m_BadgeIcon.GetSize(), m_BadgeIcon.GetCenter());
+        const coreFloat   fAlpha     = BLENDH3(MIN1(m_fBadgeTimer * 8.0f)) * fAlphaFull;
 
         // 
         m_BadgeIcon.SetPosition (vPosition);
@@ -184,19 +196,19 @@ void cCombatText::Move()
 void cCombatText::DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
     // 
-    this->__DrawLabel(PRINT("+%u", iValue), vPosition, bBig, COLOR_MENU_INSIDE, 0u);
+    this->__DrawLabel(PRINT("%u", iValue), vPosition, bBig, COLOR_MENU_INSIDE, 0u);
 }
 
 void cCombatText::DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig)
 {
     // 
-    this->__DrawLabel(PRINT("+%u", iValue), vPosition, bBig, COLOR_MENU_YELLOW, 1u);
+    this->__DrawLabel(PRINT("%u", iValue), vPosition, bBig, COLOR_MENU_YELLOW, 1u);
 }
 
 void cCombatText::DrawChain(const coreUint32 iValue, const coreVector3 vPosition)
 {
     // 
-    this->__DrawLabel(PRINT("+%u", iValue), vPosition, true, COLOR_MENU_BLUE, 2u);
+    this->__DrawLabel(PRINT("%u", iValue), vPosition, true, COLOR_MENU_BLUE, 2u);
 }
 
 void cCombatText::DrawShift(const coreUint32 iValue, const coreVector3 vPosition)
@@ -394,10 +406,10 @@ coreVector2 cCombatText::__RestrictCenter(const coreVector2 vPosition, const cor
     {
         const coreVector2 vRealBorder = Core::System->GetResolution().MaxRatio() * 0.5f - (0.5f - COMBAT_BORDER);
 
-        return coreVector2(CLAMP(vCenter.x, -vRealBorder.x - vPosition.x, vRealBorder.x - vPosition.x),
-                           CLAMP(vCenter.y, -vRealBorder.y - vPosition.y, vRealBorder.y - vPosition.y));
+        return coreVector2(CLAMP(vCenter.x, -vRealBorder.x - vPosition.x + vSize.x * 0.5f, vRealBorder.x - vPosition.x - vSize.x * 0.5f),
+                           CLAMP(vCenter.y, -vRealBorder.y - vPosition.y + vSize.y * 0.5f, vRealBorder.y - vPosition.y - vSize.y * 0.5f));
     }
 
-    return coreVector2(CLAMP(vCenter.x, -COMBAT_BORDER - vPosition.x, COMBAT_BORDER - vPosition.x),
-                       CLAMP(vCenter.y, -COMBAT_BORDER - vPosition.y, COMBAT_BORDER - vPosition.y));
+    return coreVector2(CLAMP(vCenter.x, -COMBAT_BORDER - vPosition.x + vSize.x * 0.5f, COMBAT_BORDER - vPosition.x - vSize.x * 0.5f),
+                       CLAMP(vCenter.y, -COMBAT_BORDER - vPosition.y + vSize.y * 0.5f, COMBAT_BORDER - vPosition.y - vSize.y * 0.5f));
 }

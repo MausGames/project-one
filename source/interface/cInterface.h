@@ -115,6 +115,7 @@ private:
     coreBool m_bVisible;                     // visibility status
     coreFlow m_fAlphaAll;                    // overall alpha value (except for banner)
     coreFlow m_fAlphaBoss;                   // boss alpha value
+    coreFlow m_fAlphaWave;                   // 
     coreFlow m_fAlphaTurf;                   // 
     
     coreFlow m_fAlphaValid;
@@ -168,6 +169,7 @@ public:
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}
     inline void SetAlphaAll (const coreFloat fAlpha)   {m_fAlphaAll  = fAlpha;}
     inline void SetAlphaBoss(const coreFloat fAlpha)   {m_fAlphaBoss = fAlpha;}
+    inline void SetAlphaWave(const coreFloat fAlpha)   {m_fAlphaWave = fAlpha;}
 
 
 private:

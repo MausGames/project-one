@@ -111,6 +111,7 @@ cTorusBoss::cTorusBoss()noexcept
     {
         m_aTurret[i].DefineModelHigh("object_cube_top.md3");
         m_aTurret[i].DefineModelLow ("object_cube_top.md3");
+        m_aTurret[i].DefineVolume   ("object_cube_volume.md3");
         m_aTurret[i].DefineTexture  (0u, "effect_energy.png");
         m_aTurret[i].DefineProgram  ("effect_energy_blink_flat_invert_program");
         m_aTurret[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 3.2f);
@@ -146,6 +147,7 @@ cTorusBoss::cTorusBoss()noexcept
     {
         m_aGunner[i].DefineModelHigh("object_tetra_top.md3");
         m_aGunner[i].DefineModelLow ("object_tetra_top.md3");
+        m_aGunner[i].DefineVolume   ("object_tetra_volume.md3");
         m_aGunner[i].DefineTexture  (0u, "effect_energy.png");
         m_aGunner[i].DefineProgram  ("effect_energy_blink_flat_invert_program");
         m_aGunner[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
@@ -475,7 +477,7 @@ void cTorusBoss::__MoveOwn()
                 this->AddStatus(ENEMY_STATUS_GHOST);
                 this->ChangeToBottom();
 
-                m_pFireSound->PlayPosition(this, 0.0f, 1.0f, true, SOUND_EFFECT, this->GetPosition());
+                m_pFireSound->PlayPosition(this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,100.0f,0.0f));
             }
 
             if(PHASE_TIME_BEFORE(0.85f))
@@ -672,7 +674,7 @@ void cTorusBoss::__MoveOwn()
     // jumps to the other side
     else if(m_iPhase == 83u)
     {
-        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK_REV)
+        PHASE_CONTROL_TIMER(0u, g_pGame->IsEasy() ? 0.8f : 1.0f, LERP_BREAK_REV)
         {
             const coreVector2 vTarget = cTorusBoss::__GrindToPosition(m_avVector[GRIND_VALUE].x) * 0.9f;
 
@@ -861,6 +863,7 @@ void cTorusBoss::__MoveOwn()
                 {
                     pMission->EnableBarrier(i, VIRIDO_BARRIER_FREE, coreVector2(0.0f,1.0f), 0.0f);
                 }
+                pMission->SetBarrierSlow (true);
                 pMission->SetBarrierClamp(false);
             }
         });
@@ -889,7 +892,6 @@ void cTorusBoss::__MoveOwn()
             {
                 pMission->DisableBarrier(i, true);
             }
-            pMission->SetBarrierClamp(true);
         }
     }
 
@@ -938,6 +940,8 @@ void cTorusBoss::__MoveOwn()
 
             for(coreUintW i = 4u; i--; )
             {
+                if(g_pGame->IsEasy() && (i % 2u)) continue;
+
                 const coreVector2 vPos = this->GetPosition().xy();
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
 
@@ -1263,6 +1267,16 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 151u)
     {
+        PHASE_CONTROL_PAUSE(0u, 0.3f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 152u)
+    {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK_REV)
         {
             const coreFloat fHeight = LERP(0.0f, WATER_HEIGHT, fTime);
@@ -1278,7 +1292,7 @@ void cTorusBoss::__MoveOwn()
 
                 g_pSpecialEffects->CreateExplosion (this->GetPosition());
                 g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
-                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 0.8f, SOUND_ENEMY_EXPLOSION_09);
+                g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 0.8f, SOUND_ENEMY_EXPLOSION_11);
                 g_pSpecialEffects->SlowScreen(4.0f);
 
                 // load object resources
@@ -1523,7 +1537,7 @@ void cTorusBoss::__MoveOwn()
         m_WaverHull  .MoveNormal();
 
         // 
-        if(m_iTurretActive) PHASE_CONTROL_TICKER(2u, 0u, 1.0f, LERP_LINEAR)
+        if(m_iTurretActive) PHASE_CONTROL_TICKER(2u, 0u, g_pGame->IsEasy() ? 0.5f : 1.0f, LERP_LINEAR)
         {
             // 
             for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
@@ -1550,6 +1564,8 @@ void cTorusBoss::__MoveOwn()
         // 
         if(m_iGunnerActive) PHASE_CONTROL_TICKER(3u, 0u, 12.0f, LERP_LINEAR)
         {
+            if(g_pGame->IsEasy() && ((iTick % 8u) < 4u)) return;
+
             // 
             for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
             {
@@ -1575,6 +1591,8 @@ void cTorusBoss::__MoveOwn()
             {
                 const cCustomEnemy* pCharger = &m_aCharger[i];
                 if(!pCharger->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                if(g_pGame->IsEasy() && (pCharger->GetLifeTime() > 0.6f)) return;
 
                 const coreVector2 vPos = pCharger->GetPosition().xy();
                 const coreVector2 vDir = coreVector2::Direction(pCharger->GetLifeTime() * 8.0f);
@@ -1611,6 +1629,8 @@ void cTorusBoss::__MoveOwn()
 
                 for(coreUintW j = 6u; j--; )
                 {
+                    if(g_pGame->IsEasy() && (j % 2u)) continue;
+
                     const coreVector2 vPos = pWaver->GetPosition().xy();
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 30.0f));
 

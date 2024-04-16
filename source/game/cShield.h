@@ -58,6 +58,12 @@ public:
     void ClearShields(const coreBool bAnimated);
 
     // 
+    template <typename F> void ForEachShield(F&& nFunction);   // [](coreObject3D* OUTPUT pShield) -> void
+
+    // 
+    void SetActive(const coreBool bActive);
+
+    // 
     void BindEnemy  (cEnemy* pEnemy);
     void UnbindEnemy(cEnemy* pEnemy);
 };
@@ -84,8 +90,27 @@ public:
     void ClearShields(const coreBool bAnimated);
 
     // 
+    void SetActive(const coreBool bActive);
+
+    // 
     inline cShieldEffect* GetEffect(const coreUintW iEffect) {ASSERT(iEffect < SHIELD_EFFECTS) return &m_aShieldEffect[iEffect];}
 };
+
+
+// ****************************************************************
+// 
+template <typename F> void cShieldEffect::ForEachShield(F&& nFunction)
+{
+    // 
+    for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
+    {
+        coreObject3D* pShield = &m_aShield[i];
+        if(!pShield->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        nFunction(pShield);
+    }
+}
 
 
 #endif // _P1_GUARD_SHIELD_H_

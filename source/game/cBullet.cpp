@@ -454,7 +454,7 @@ void cRayBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce
 {
     // 
     if(m_fTilt) g_pSpecialEffects->CreateSplashColor(this->GetPosition(),        60.0f, 5u, this->GetColor3());
-           else g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 10.0f, 1u, this->GetColor3());
+           else g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, 1u, this->GetColor3());
 }
 
 
@@ -504,7 +504,7 @@ void cRayBullet::__MoveOwn()
     const coreFloat fWave = 1.0f + 0.25f * SIN(m_fFade * 30.0f + 1.5f*PI);
     this->SetSize (coreVector3(3.7f * fWave, 3.7f * MIN1(12.0f * m_fFade) * fRelSpeed * 1.0f, 3.7f * fWave) * 0.52f * m_fScale   * (vRealDir.z ? 1.5f : 1.0f));
     this->SetAlpha(MIN1(15.0f * m_fFade));
-    this->SetAlpha(1.0f);
+    //this->SetAlpha(1.0f);
     
     
     this->SetTexSize(coreVector2(0.4f,0.2f * MIN1(12.0f * m_fFade) * fRelSpeed * 1.0f) * 0.01f);
@@ -721,9 +721,6 @@ cOrbBullet::cOrbBullet()noexcept
     this->DefineModel  ("bullet_orb.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -771,9 +768,6 @@ cConeBullet::cConeBullet()noexcept
     this->DefineVolume ("bullet_cone_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -823,9 +817,6 @@ cWaveBullet::cWaveBullet()noexcept
     this->DefineVolume ("bullet_wave_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -875,9 +866,6 @@ cSpearBullet::cSpearBullet()noexcept
     this->DefineVolume ("bullet_spear_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -926,9 +914,6 @@ cTriangleBullet::cTriangleBullet()noexcept
     this->DefineModel  ("bullet_triangle.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -976,9 +961,6 @@ cFlipBullet::cFlipBullet()noexcept
     this->DefineVolume ("bullet_flip_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -1025,9 +1007,6 @@ cQuadBullet::cQuadBullet()noexcept
     this->DefineModel  ("bullet_quad.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -1075,9 +1054,6 @@ cViewBullet::cViewBullet()noexcept
     this->DefineVolume ("bullet_view_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -1111,6 +1087,54 @@ void cViewBullet::__MoveOwn()
     // update animation
     m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN1(20.0f * m_fFade));
+}
+
+
+// ****************************************************************
+// constructor
+cCardBullet::cCardBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_quad.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+}
+
+
+// ****************************************************************
+// 
+void cCardBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
+{
+    // 
+    if(vForce.IsNull()) g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                            10.0f, 3u, this->GetColor3());
+                   else g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), coreVector3(vForce, 0.0f), 50.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cCardBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// move the card bullet
+void cCardBullet::__MoveOwn()
+{
+    // 
+    m_fSpeed = m_fSpeed - 40.0f * TIME;
+
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+
+    // update animation
+    m_fAnimation.UpdateMod(0.2f * m_fAnimSpeed, 8.0f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -1176,7 +1200,7 @@ void cDebrisBullet::__RenderOwnBefore()
 {
     glDisable(GL_DEPTH_TEST);
     {
-        const coreFloat fValue = LERPB(0.0f, 1.0f, FRACT(m_fAnimation * 0.5f));
+        const coreFloat fValue = BLENDB(FRACT(m_fAnimation * 0.5f));
 
         // 
         s_Wave.SetPosition(this->GetPosition());
@@ -1265,7 +1289,7 @@ void cMineBullet::__RenderOwnBefore()
 {
     glDisable(GL_DEPTH_TEST);
     {
-        const coreFloat fValue = LERPB(0.0f, 1.0f, FRACT(m_fAnimation * 0.5f));
+        const coreFloat fValue = BLENDB(FRACT(m_fAnimation * 0.5f));
 
         // 
         s_Wave.SetPosition(this->GetPosition());

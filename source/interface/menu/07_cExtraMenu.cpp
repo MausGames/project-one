@@ -392,28 +392,12 @@ void cExtraMenu::LoadSegments(const coreUintW iIndex)
     const coreUintW iMissionIndex = iIndex - 1u;
 
     // 
-    const coreChar* pcMissionLetter;
-    switch(iMissionIndex)
-    {
-    case  9u: pcMissionLetter = "X1";                             break;
-    case 10u: pcMissionLetter = "X2";                             break;
-    default:  pcMissionLetter = coreData::ToChars(iMissionIndex); break;
-    }
-
-
-    // 
     if(iIndex)
     {
         m_Segment.AddEntry("Adventure", 0u);   // TODO 1: language
         for(coreUintW i = 0u; i < 7u; ++i)
         {
-            
-            // 
-            const coreBool      bBoss = MISSION_SEGMENT_IS_BOSS(i);
-            const coreChar* pcSegmentLetter = bBoss ? "B" : coreData::ToChars(i + 1u);
-        
-        
-            m_Segment.AddEntry(PRINT("%s-%s", pcMissionLetter, pcSegmentLetter), 0u);
+            m_Segment.AddEntry(cMenu::GetSegmentLetters(iMissionIndex, i), 0u);
         }
         m_Segment.SetOverride(0);
     }

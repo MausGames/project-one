@@ -76,7 +76,7 @@ void cDistortion::Update()
                     const coreFloat fSpeed = oWave.GetColor4().y;
 
                     // 
-                    oWave.SetAlpha(MAX(oWave.GetAlpha() - fSpeed * TIME, 0.0f));
+                    oWave.SetAlpha(MAX0(oWave.GetAlpha() - fSpeed * TIME));
                     oWave.SetSize (coreVector2(0.1f,0.1f) * (ABS(fScale) * ((fScale < 0.0f) ? oWave.GetAlpha() : (1.0f - oWave.GetAlpha()))));
                     oWave.Move();
                     oWave.Render();
@@ -93,7 +93,7 @@ void cDistortion::Update()
                     const coreFloat fSpeed = oBurst.GetColor4().yz().LengthSq();
 
                     // 
-                    oBurst.SetAlpha(MAX(oBurst.GetAlpha() - fSpeed * TIME, 0.0f));
+                    oBurst.SetAlpha(MAX0(oBurst.GetAlpha() - fSpeed * TIME));
                     oBurst.SetSize (coreVector2(0.1f,0.1f) * (fScale * (1.0f - oBurst.GetAlpha())));
                     oBurst.Move();
                     oBurst.Render();

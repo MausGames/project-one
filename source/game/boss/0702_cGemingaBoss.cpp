@@ -937,7 +937,7 @@ void cGemingaBoss::__MoveOwn()
                 pEnemy->SetCurHealth(1);
                 pEnemy->RefreshColor();
 
-                pEnemy->SetDirection(coreVector3(coreVector2::Direction(I_TO_F(i) * GA), 0.0f));
+                pEnemy->DefaultRotate(I_TO_F(i) * GA);
             }
         }
 

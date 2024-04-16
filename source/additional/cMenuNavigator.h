@@ -17,10 +17,13 @@
 // TODO 1: allow hiding cursor (e.g. for world-map)
 // TODO 1: correctly handle button-remapping feature
 // TODO 1: auto-move bei gedrückt-halten, aber mit niedrigerer geschwindigkeit
+// TODO 3: when changing input for keyboard+mouse, you can use the joystick to map the left mouse-button
 
 
 // ****************************************************************
 // 
+#define MENUNAVIGATOR_IGNORE_MOUSE (coreVector2(3.0f,3.0f))   // 
+
 enum eMenuType : coreUint8
 {
     MENU_TYPE_DEFAULT      = 0x00u,

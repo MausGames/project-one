@@ -172,7 +172,7 @@ void cSave::Clear()
     // 
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
-        m_Header.oOptions.aiShield  [i]    = 20u;
+        m_Header.oOptions.aiShield  [i]    = 30u;
         m_Header.oOptions.aaiWeapon [i][0] = 1u;
         m_Header.oOptions.aaiSupport[i][0] = 0u;
     }

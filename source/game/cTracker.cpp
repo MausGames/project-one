@@ -126,6 +126,9 @@ void cTracker::Move()
 
     if(!HAS_FLAG(m_iStatus, TRACKER_STATUS_DEAD))
     {
+        // 
+        m_fAnimation.UpdateMod(1.0f, 20.0f);
+
         // move the 3d-object
         this->coreObject3D::Move();
 

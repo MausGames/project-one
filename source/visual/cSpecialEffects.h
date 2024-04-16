@@ -22,6 +22,7 @@
 // TODO 1: separate particles for background rendering (automatic selection, based on start-position ? would be easier to expose)
 // TODO 3: extend particle system to allow custom move algorithms
 // TODO 3: options to completely disable certain sound effects: turn, player shooting
+// TODO 1: 3d-sound option should also affect looping sounds in other classes
 
 
 // ****************************************************************
@@ -39,6 +40,7 @@
 #define SPECIAL_SPLASH_TINY      (25.0f), (13u)
 #define SPECIAL_SPLASH_SMALL     (50.0f), (25u)
 #define SPECIAL_SPLASH_BIG      (100.0f), (50u)
+#define SPECIAL_BLOW_TINY        (25.0f), (13u)
 #define SPECIAL_BLOW_SMALL       (50.0f), (25u)
 #define SPECIAL_BLOW_BIG        (100.0f), (50u)
 #define SPECIAL_CHARGE_SMALL     (30.0f), (25u)
@@ -56,8 +58,9 @@
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
-#define SPECIAL_RELATIVE       (coreVector3(0.0f,0.0f,0.0f))
-#define SPECIAL_SOUND_MEDAL(x) (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
+#define SPECIAL_RELATIVE            (coreVector3(0.0f,0.0f,0.0f))
+#define SPECIAL_SOUND_MEDAL(x)      (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
+#define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.3f, STEP(1.0f, I_TO_F(y), I_TO_F(x))))
 
 enum eSoundEffect : coreUint8
 {
@@ -77,6 +80,7 @@ enum eSoundEffect : coreUint8
     SOUND_ENEMY_EXPLOSION_08,
     SOUND_ENEMY_EXPLOSION_09,
     SOUND_ENEMY_EXPLOSION_10,
+    SOUND_ENEMY_EXPLOSION_11,
 
     SOUND_WEAPON_RAY,
     SOUND_WEAPON_ENEMY,
@@ -101,9 +105,13 @@ enum eSoundEffect : coreUint8
     SOUND_FRAGMENT_APPEAR,
     SOUND_FRAGMENT_COLLECT,
 
+    SOUND_ITEM_COLLECT,
+
     SOUND_SUMMARY_TEXT,
     SOUND_SUMMARY_SCORE,
     SOUND_SUMMARY_MEDAL,
+    SOUND_SUMMARY_PERFECT,
+    SOUND_SUMMARY_RECORD,
 
     SOUND_CONTINUE_TICK,
     SOUND_CONTINUE_ACCEPT,
@@ -124,6 +132,7 @@ enum eSoundEffect : coreUint8
 
     SOUND_EFFECT_DUST,
     SOUND_EFFECT_ERROR,
+    SOUND_EFFECT_FIRE_START,
     SOUND_EFFECT_SHAKE,   // bomb, laser
     SOUND_EFFECT_SWORD_01,    
     SOUND_EFFECT_SWORD_02,    
@@ -153,6 +162,7 @@ private:
     coreParticleSystem m_aParticleDark [2];                 // dark particle system
     coreParticleSystem m_aParticleSmoke[2];                 // smoke particle system
     coreParticleSystem m_aParticleFire [2];                 // fire particle system
+    coreParticleSystem m_aParticleDot  [2];                 // 
     // TODO 1: leviathan laser wird nicht gut von bottom partikel gezeichnet, vielleicht deaktivierbar machen ?
 
     coreObject3D  m_aLightning      [SPECIAL_LIGHTNINGS];   // 
@@ -216,6 +226,7 @@ public:
     void CreateSplashDark (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum,                           const coreBool bDeep = false, const coreBool bLock = false);
     void CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
     void CreateSplashFire (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
+    void CreateSplashDot  (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
 
     // create directional particle blow
     void CreateBlowColor(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
@@ -242,14 +253,15 @@ public:
 
     // 
     void CreateBlastSphere(const coreVector3 vPosition,                               const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
-    void CreateBlastCube  (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
-    void CreateBlastTetra (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
+    void CreateBlastCube  (const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
+    void CreateBlastTetra (const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
 
     // 
     void CreateExplosion(const coreVector3 vPosition);
 
     // 
     void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex);
+    void StopSound(const eSoundEffect eSoundIndex);
 
     // 
     void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs);

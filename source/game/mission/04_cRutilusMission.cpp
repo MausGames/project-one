@@ -32,6 +32,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_iWaveData         (0u)
 , m_iWaveActive       (0u)
 , m_iWaveType         (0u)
+, m_fWavePower        (0.0f)
 , m_Tock              (RUTILUS_TOCKS)
 , m_TockWave          (RUTILUS_TOCKS)
 , m_Slap              (RUTILUS_SLAPS)
@@ -376,6 +377,7 @@ void cRutilusMission::DisableArea(const coreBool bAnimated)
         const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
         {
             pObject->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+            pObject->SetSize    (coreVector3(0.0f, 0.0f, 0.0f));
             pObject->SetEnabled (CORE_OBJECT_ENABLE_NOTHING);
             g_pGlow->UnbindObject(pObject);
         };
@@ -834,7 +836,7 @@ void cRutilusMission::__MoveOwnAfter()
         {
             // 
             m_fAreaTime.UpdateMin(2.0f, 2.0f);
-            fScale = LERPB(0.0f, 1.0f, m_fAreaTime - 1.0f);
+            fScale = BLENDB(m_fAreaTime - 1.0f);
         }
         else
         {
@@ -872,7 +874,7 @@ void cRutilusMission::__MoveOwnAfter()
         {
             // 
             m_fSafeTime.UpdateMin(2.0f, 2.0f);
-            fScale = LERPB(0.0f, 1.0f, m_fSafeTime - 1.0f);
+            fScale = BLENDB(m_fSafeTime - 1.0f);
         }
         else
         {
@@ -1246,11 +1248,13 @@ void cRutilusMission::__UpdateAreaSpeed()
 
     g_MusicPlayer.SetPitch(fEnvSpeed);
 
-    cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
-    pBackground->SetMeteorSpeed(fEnvSpeed);
-
-    g_pEnvironment->SetTargetSpeedNow(4.0f * fEnvSpeed);  // TODO 1: macht Messier rotation kaputt
+    if(g_pEnvironment->GetBackground()->GetID() == cSpaceBackground::ID)
+    {
+        cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
+        pBackground->SetMeteorSpeed(fEnvSpeed);
     
+        g_pEnvironment->SetTargetSpeedNow(4.0f * fEnvSpeed);  // TODO 1: macht Messier rotation kaputt
+    }
 
 
     // 

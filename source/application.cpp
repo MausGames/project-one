@@ -18,14 +18,17 @@ const coreUint8       CoreApp::Settings::Graphics::StencilSize  = 0u;
 const coreBool        CoreApp::Settings::Graphics::AlphaChannel = false;
 const coreBool        CoreApp::Settings::Graphics::DoubleBuffer = true;
 const coreBool        CoreApp::Settings::Graphics::StereoRender = false;
-const coreUint32      CoreApp::Settings::Platform::SteamAppID   = 1624320u;
+/*const*/ coreUint32      CoreApp::Settings::Platform::SteamAppID   = 1624320u;
 
 
 // ****************************************************************
 // setup the application
 void CoreApp::Setup()
 {
-    Core::Platform->DefineAchievement("test", "TEST_ACHIEVEMENT");
+    if(CoreApp::Settings::Platform::SteamAppID == 1624320u)
+    {
+        Core::Platform->DefineAchievement("test", "TEST_ACHIEVEMENT");
+    }
 
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
@@ -88,8 +91,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_cube_normal.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_normal.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_fang_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_penta_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_penta_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -101,6 +106,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_teleporter.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_teleporter.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_rota.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tetra_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_open.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_open.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -436,6 +442,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("full_post.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("full_post_distorted.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION);
     Core::Manager::Resource->Load<coreShader> ("full_post_transparent.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_TRANSPARENT);
+    Core::Manager::Resource->Load<coreShader> ("full_post_chroma.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION SHADER_CHROMA);
     Core::Manager::Resource->Load<coreShader> ("full_post_debug.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION SHADER_DEBUG);
     Core::Manager::Resource->Load<coreShader> ("full_transition_fade.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(0));
     Core::Manager::Resource->Load<coreShader> ("full_transition_wipe.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(1));
@@ -461,6 +468,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_depth.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW SHADER_DEPTH);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_detail.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW SHADER_DEPTH SHADER_DETAIL);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
     Core::Manager::Resource->Load<coreShader> ("object_ice.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ice.frag");
@@ -471,6 +479,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_depth_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW SHADER_DEPTH);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_detail_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW SHADER_DEPTH SHADER_DETAIL);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_meteor_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_meteor_blink_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
@@ -520,6 +529,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("effect_dust.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_dust.wav");
     Core::Manager::Resource->Load<coreSound>("effect_error.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_error.wav");
     Core::Manager::Resource->Load<coreSound>("effect_fire.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_fire.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_fire_start.wav",    CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_fire_start.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_nightmare.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_nightmare.wav");
     Core::Manager::Resource->Load<coreSound>("effect_shake.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_shake.wav");
     Core::Manager::Resource->Load<coreSound>("effect_sword_01.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_sword_01.wav");
     Core::Manager::Resource->Load<coreSound>("effect_sword_02.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_sword_02.wav");
@@ -534,10 +545,12 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_08.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_08.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_09.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_09.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_10.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_10.wav");
+    Core::Manager::Resource->Load<coreSound>("enemy_explosion_11.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_11.wav");
     Core::Manager::Resource->Load<coreSound>("fragment_appear.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
     Core::Manager::Resource->Load<coreSound>("fragment_collect.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
     Core::Manager::Resource->Load<coreSound>("fragment_helper.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_hit.wav");
     Core::Manager::Resource->Load<coreSound>("helper.wav",               CORE_RESOURCE_UPDATE_AUTO, "data/sounds/helper.wav");
+    Core::Manager::Resource->Load<coreSound>("item_collect.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/item_collect.wav");
     Core::Manager::Resource->Load<coreSound>("medal_bronze.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/medal_bronze.wav");
     Core::Manager::Resource->Load<coreSound>("medal_dark.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/medal_dark.wav");
     Core::Manager::Resource->Load<coreSound>("medal_gold.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/medal_gold.wav");
@@ -564,6 +577,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("shield_destroy.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/shield_destroy.wav");
     Core::Manager::Resource->Load<coreSound>("shield_hit.wav",           CORE_RESOURCE_UPDATE_AUTO, "data/sounds/shield_hit.wav");
     Core::Manager::Resource->Load<coreSound>("summary_medal.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_medal.wav");
+    Core::Manager::Resource->Load<coreSound>("summary_perfect.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_perfect.wav");
+    Core::Manager::Resource->Load<coreSound>("summary_record.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_record.wav");
     Core::Manager::Resource->Load<coreSound>("summary_score.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_score.wav");
     Core::Manager::Resource->Load<coreSound>("summary_text.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/summary_text.wav");
     Core::Manager::Resource->Load<coreSound>("weapon_enemy.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/weapon_enemy.wav");
@@ -1135,6 +1150,11 @@ void CoreApp::Setup()
         ->AttachShader("full_post_transparent.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_chroma_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("full.vert")
+        ->AttachShader("full_post_chroma.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_debug_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("full.vert")
         ->AttachShader("full_post_debug.frag")
@@ -1230,6 +1250,11 @@ void CoreApp::Setup()
         ->AttachShader("object_ship_depth.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_detail_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_ship_detail.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ship_blink.frag")
@@ -1273,6 +1298,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_depth_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_ship_depth_inst.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_detail_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object_inst.vert")
+        ->AttachShader("object_ship_detail_inst.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

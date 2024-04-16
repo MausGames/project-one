@@ -20,6 +20,7 @@ cViridoMission::cViridoMission()noexcept
 , m_apBarrierOwner {}
 , m_avBarrierPos   {}
 , m_avBarrierDir   {}
+, m_bBarrierSlow   (false)
 , m_bBarrierClamp  (true)
 , m_Laser          (VIRIDO_LASERS)
 , m_LaserWave      (VIRIDO_LASERS)
@@ -35,7 +36,7 @@ cViridoMission::cViridoMission()noexcept
 , m_BeanWave       (VIRIDO_BEANS)
 , m_aiDrumCount    {}
 , m_aiDrumIndex    {}
-, m_fPoleCount     (0u)
+, m_fPoleCount     (0.0f)
 , m_iPoleIndex     (UINT8_MAX)
 , m_iRealState     (0u)
 , m_iStickyState   (0u)
@@ -178,7 +179,7 @@ cViridoMission::cViridoMission()noexcept
             pBean->DefineProgram(iType ? "effect_energy_flat_program" : "effect_energy_flat_program");
 
             // set object properties
-            pBean->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 3.5f : 2.5f));
+            pBean->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 3.7f : 2.7f));
             pBean->SetColor3 (COLOR_ENERGY_MAGENTA * (iType ? 0.3f : 1.0f));
             pBean->SetTexSize(coreVector2(1.0f,1.0f) * 0.4f);
             pBean->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -192,6 +193,7 @@ cViridoMission::cViridoMission()noexcept
     // 
     m_Globe.DefineModelHigh("object_tetra_top.md3");
     m_Globe.DefineModelLow ("object_tetra_top.md3");
+    m_Globe.DefineVolume   ("object_tetra_volume.md3");
     m_Globe.DefineTexture  (0u, "effect_energy.png");
     m_Globe.DefineProgram  ("effect_energy_flat_invert_program");
     m_Globe.SetTexSize     (coreVector2(1.0f,1.0f) * 0.4f);
@@ -846,8 +848,8 @@ void cViridoMission::__MoveOwnAfter()
         }
 
         // 
-        if(pOwner) oPaddle.SetAlpha(MIN(oPaddle.GetAlpha() + 5.0f*TIME, 1.0f));
-              else oPaddle.SetAlpha(MAX(oPaddle.GetAlpha() - 5.0f*TIME, 0.0f));
+        if(pOwner) oPaddle.SetAlpha(MIN1(oPaddle.GetAlpha() + 5.0f*TIME));
+              else oPaddle.SetAlpha(MAX0(oPaddle.GetAlpha() - 5.0f*TIME));
 
         // 
         if(!oPaddle.GetAlpha()) this->DisablePaddle(i, false);
@@ -879,8 +881,8 @@ void cViridoMission::__MoveOwnAfter()
         }
 
         // 
-        if(m_apBarrierOwner[i]) oBarrier.SetAlpha(MIN(oBarrier.GetAlpha() + 5.0f*TIME, 1.0f));
-                           else oBarrier.SetAlpha(MAX(oBarrier.GetAlpha() - 5.0f*TIME, 0.0f));
+        if(m_apBarrierOwner[i]) oBarrier.SetAlpha(MIN1(oBarrier.GetAlpha() + 5.0f * TIME));
+                           else oBarrier.SetAlpha(MAX0(oBarrier.GetAlpha() - (m_bBarrierSlow ? 1.0f : 5.0f) * TIME));
 
         // 
         if(!oBarrier.GetAlpha()) this->DisableBarrier(i, false);
@@ -968,6 +970,9 @@ void cViridoMission::__MoveOwnAfter()
     
                             // 
                             pBullet->Deactivate(true);
+
+                            // 
+                            g_pGame->PlayHitSound(coreVector3(vIntersection, 0.0f));
                             return;
                         }
                     }
@@ -981,6 +986,9 @@ void cViridoMission::__MoveOwnAfter()
 
                     // 
                     pBullet->Reflect(&oBarrier, vIntersection, vNormal);
+
+                    // 
+                    g_pGame->PlayReflectSound(coreVector3(vIntersection, 0.0f));
                 }
             });
             
@@ -1008,6 +1016,9 @@ void cViridoMission::__MoveOwnAfter()
 
                         // 
                         pBullet->Deactivate(true);
+
+                        // 
+                        g_pGame->PlayHitSound(vIntersection);
                         return;
                     }
                 }
@@ -1021,6 +1032,9 @@ void cViridoMission::__MoveOwnAfter()
 
                 // 
                 pBullet->Reflect(pBarrier, vIntersection.xy(), vNormal);
+
+                // 
+                g_pGame->PlayReflectSound(vIntersection);
             });
         }
     }
@@ -1028,7 +1042,7 @@ void cViridoMission::__MoveOwnAfter()
     // 
     for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
     {
-        coreObject3D& oBarrier = m_aBarrierRaw[i];
+        const coreObject3D& oBarrier = m_aBarrierRaw[i];
 
         m_avBarrierPos[i] = oBarrier.GetPosition ().xy();
         m_avBarrierDir[i] = oBarrier.GetDirection().xy();

@@ -83,6 +83,10 @@ void cDefeatMenu::Move()
     {
     case SURFACE_DEFEAT_CONTINUE:
         {
+            
+            for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
+                m_ContinueImage[i].SetDirection(coreVector2::Direction(coreFloat(Core::System->GetTotalTime()) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_DEFEAT_CONTINUES))));
+            
             // 
             m_fIntroTimer.Update(1.0f);
             if(m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV)
@@ -200,8 +204,8 @@ void cDefeatMenu::Move()
         if((m_fIntroTimer >= MENU_DEFEAT_BANNER_ANIMATION) && (m_eState < DEFEAT_WAIT)) m_eState = DEFEAT_WAIT;
 
         // calculate visibility and animation value
-        const coreFloat fVisibility = MAX(MIN(m_fIntroTimer, MENU_DEFEAT_BANNER_SPEED_REV - m_fOutroTimer), 0.0f) * MENU_DEFEAT_BANNER_SPEED;
-        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_DEFEAT_BANNER_ANIMATION, 1.0f)) * MENU_DEFEAT_BANNER_ANIMATION;
+        const coreFloat fVisibility = MAX0(MIN(m_fIntroTimer, MENU_DEFEAT_BANNER_SPEED_REV - m_fOutroTimer)) * MENU_DEFEAT_BANNER_SPEED;
+        const coreFloat fAnimation  = BLENDB(MIN1(m_fIntroTimer / MENU_DEFEAT_BANNER_ANIMATION)) * MENU_DEFEAT_BANNER_ANIMATION;
 
         // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = m_fOutroTimer ? true : false;

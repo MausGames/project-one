@@ -18,12 +18,23 @@ cGeluMission::cGeluMission()noexcept
 , m_WayArrow      (GELU_WAYS)
 , m_iWayActive    (0u)
 , m_iWayVisible   (0u)
+, m_iWayGhost     (0u)
+, m_iWayFree      (0u)
 , m_Orb           (GELU_ORBS)
 , m_afOrbTime     {}
 , m_Line          (GELU_LINES)
 , m_afLineTime    {}
 , m_iLineMode     (0u)
+, m_Coin          (GELU_COINS)
+, m_CoinWave      (GELU_COINS)
+, m_Gap           (GELU_GAPS)
+, m_afGapTime     {}
+, m_iGapActive    (0u)
+, m_Shine         (GELU_SHINES)
+, m_afShineTime   {}
+, m_iShineActive  (0u)
 , m_avOldPos      {}
+, m_iTouchState   (0u)
 , m_abCrushImmune {}
 , m_iCrushState   (0u)
 , m_fAnimation    (0.0f)
@@ -32,7 +43,7 @@ cGeluMission::cGeluMission()noexcept
     m_apBoss[0] = &m_Chol;
 
     // 
-    m_Fang.DefineProgram("object_ship_glow_inst_program");
+    m_Fang.DefineProgram("object_ship_detail_inst_program");
     {
         for(coreUintW i = 0u; i < GELU_FANGS_RAWS; ++i)
         {
@@ -40,13 +51,16 @@ cGeluMission::cGeluMission()noexcept
             cLodObject* pFang = &m_aFangRaw[i];
             pFang->DefineModelHigh("object_fang.md3");
             pFang->DefineModelLow ("object_fang.md3");
+            pFang->DefineVolume   ("object_fang_volume.md3");
             pFang->DefineTexture  (0u, "ship_enemy.png");
-            pFang->DefineProgram  ("object_ship_glow_program");
+            pFang->DefineTexture  (1u, "menu_background_black.png");
+            pFang->DefineProgram  ("object_ship_detail_program");
 
             // set object properties
             pFang->SetSize             (coreVector3(1.0f,1.0f,1.0f) * 9.0f);
             pFang->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.05f);
-            pFang->SetColor3           (coreVector3(0.5f,0.5f,0.5f));
+            pFang->SetColor3           (coreVector3(1.0f,1.0f,1.0f) * 0.25f);
+            pFang->SetTexOffset        (coreVector2(1.0f,1.0f) * (I_TO_F(i) * (1.0f/7.0f)));
             pFang->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
@@ -66,6 +80,7 @@ cGeluMission::cGeluMission()noexcept
             // load object resources
             coreObject3D* pWay = &m_aWayRaw[i];
             pWay->DefineModel  (iType ? "object_arrow.md3" : "object_cube_top.md3");
+            pWay->DefineVolume ("object_cube_volume.md3");
             pWay->DefineTexture(0u, "effect_energy.png");
             pWay->DefineProgram(iType ? "effect_energy_flat_invert_program" : "effect_energy_flat_spheric_program");
 
@@ -94,7 +109,7 @@ cGeluMission::cGeluMission()noexcept
             pOrb->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
-            pOrb->SetColor3 (COLOR_ENERGY_CYAN * 0.8f);
+            pOrb->SetColor3 (COLOR_ENERGY_CYAN * 0.7f);
             pOrb->SetTexSize(coreVector2(4.0f,4.0f) * 0.9f);
             pOrb->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -124,10 +139,84 @@ cGeluMission::cGeluMission()noexcept
     }
 
     // 
+    m_Coin    .DefineProgram("effect_energy_flat_invert_inst_program");
+    m_CoinWave.DefineProgram("effect_energy_flat_spheric_inst_program");
+    {
+        for(coreUintW i = 0u; i < GELU_COINS_RAWS; ++i)
+        {
+            // determine object type
+            const coreUintW iType = i % 2u;
+
+            // load object resources
+            coreObject3D* pCoin = &m_aCoinRaw[i];
+            pCoin->DefineModel  ("bullet_spear.md3");
+            pCoin->DefineTexture(0u, "effect_energy.png");
+            pCoin->DefineProgram(iType ? "effect_energy_flat_spheric_program" : "effect_energy_flat_invert_program");
+
+            // set object properties
+            pCoin->SetSize   (coreVector3(1.3f,1.0f,1.3f) * (iType ? 4.2f : 3.6f));
+            pCoin->SetColor3 (COLOR_ENERGY_GREEN * 0.8f);
+            pCoin->SetTexSize(coreVector2(0.4f,0.2f));
+            pCoin->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            if(iType) m_CoinWave.BindObject(pCoin);
+                 else m_Coin    .BindObject(pCoin);
+        }
+    }
+
+    // 
+    m_Gap.DefineProgram("effect_energy_flat_spheric_inst_program");
+    {
+        for(coreUintW i = 0u; i < GELU_GAPS_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pGap = &m_aGapRaw[i];
+            pGap->DefineModel  ("object_cube_top.md3");
+            pGap->DefineTexture(0u, "effect_energy.png");
+            pGap->DefineProgram("effect_energy_flat_spheric_program");
+
+            // set object properties
+            pGap->SetColor3 (COLOR_ENERGY_BLUE * 0.9f);
+            pGap->SetTexSize(coreVector2(1.0f,1.0f) * 0.7f);
+            pGap->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Gap.BindObject(pGap);
+        }
+    }
+
+    // 
+    m_Shine.DefineProgram("effect_energy_flat_spheric_inst_program");
+    {
+        for(coreUintW i = 0u; i < GELU_SHINES_RAWS; ++i)
+        {
+
+            // load object resources
+            coreObject3D* pShine = &m_aShineRaw[i];
+            pShine->DefineModel  ("object_cube_top.md3");
+            pShine->DefineTexture(0u, "effect_energy.png");
+            pShine->DefineProgram("effect_energy_flat_spheric_program");
+
+            // set object properties
+            pShine->SetColor3 (COLOR_ENERGY_CYAN * 0.6f);
+            pShine->SetTexSize(coreVector2(1.0f,1.0f) * 0.3f);
+            pShine->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Shine.BindObject(pShine);
+        }
+    }
+
+    // 
     g_pGlow->BindList(&m_Way);
     g_pGlow->BindList(&m_WayArrow);
     g_pGlow->BindList(&m_Orb);
     g_pGlow->BindList(&m_Line);
+    g_pGlow->BindList(&m_Coin);
+    g_pGlow->BindList(&m_CoinWave);
+    g_pGlow->BindList(&m_Gap);
+    g_pGlow->BindList(&m_Shine);
 }
 
 
@@ -140,12 +229,19 @@ cGeluMission::~cGeluMission()
     g_pGlow->UnbindList(&m_WayArrow);
     g_pGlow->UnbindList(&m_Orb);
     g_pGlow->UnbindList(&m_Line);
+    g_pGlow->UnbindList(&m_Coin);
+    g_pGlow->UnbindList(&m_CoinWave);
+    g_pGlow->UnbindList(&m_Gap);
+    g_pGlow->UnbindList(&m_Shine);
 
     // 
-    for(coreUintW i = 0u; i < GELU_FANGS; ++i) this->DisableFang(i, false);
-    for(coreUintW i = 0u; i < GELU_WAYS;  ++i) this->DisableWay (i, false);
-    for(coreUintW i = 0u; i < GELU_ORBS;  ++i) this->DisableOrb (i, false);
-    for(coreUintW i = 0u; i < GELU_LINES; ++i) this->DisableLine(i, false);
+    for(coreUintW i = 0u; i < GELU_FANGS;  ++i) this->DisableFang (i, false);
+    for(coreUintW i = 0u; i < GELU_WAYS;   ++i) this->DisableWay  (i, false);
+    for(coreUintW i = 0u; i < GELU_ORBS;   ++i) this->DisableOrb  (i, false);
+    for(coreUintW i = 0u; i < GELU_LINES;  ++i) this->DisableLine (i, false);
+    for(coreUintW i = 0u; i < GELU_COINS;  ++i) this->DisableCoin (i, false);
+    for(coreUintW i = 0u; i < GELU_GAPS;   ++i) this->DisableGap  (i, false);
+    for(coreUintW i = 0u; i < GELU_SHINES; ++i) this->DisableShine(i, false);
 }
 
 
@@ -190,7 +286,11 @@ void cGeluMission::DisableFang(const coreUintW iIndex, const coreBool bAnimated)
     oFang.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionDarkSmall(oFang.GetPosition());
+    if(bAnimated)
+    {
+        g_pSpecialEffects->MacroExplosionDarkSmall(oFang.GetPosition());
+        g_pSpecialEffects->CreateBreakupDark(&oFang, 80.0f, 15u);
+    }
 }
 
 
@@ -206,10 +306,14 @@ void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2 vPosition
     WARN_IF(pWay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableWay(iIndex, false);
 
     // 
-    ADD_BIT(m_iWayActive,  iIndex)
-    ADD_BIT(m_iWayVisible, iIndex)
+    ADD_BIT   (m_iWayActive,  iIndex)
+    ADD_BIT   (m_iWayVisible, iIndex)
+    REMOVE_BIT(m_iWayGhost,   iIndex)
+    REMOVE_BIT(m_iWayFree,    iIndex)
     STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayActive) *8u)
     STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayVisible)*8u)
+    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayGhost)  *8u)
+    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayFree)   *8u)
 
     // 
     m_avOldPos[iIndex] = coreVector2(0.0f,0.0f);
@@ -281,6 +385,9 @@ void cGeluMission::DisableOrb(const coreUintW iIndex, const coreBool bAnimated)
     // 
     if(!oOrb.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
+    // 
+    if(iIndex < GELU_SHINES) this->DisableShine(iIndex, bAnimated);
+
     if(m_afOrbTime[iIndex] > 0.0f)
     {
         // 
@@ -292,7 +399,6 @@ void cGeluMission::DisableOrb(const coreUintW iIndex, const coreBool bAnimated)
 
     // 
     if(!bAnimated) oOrb.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-
 }
 
 
@@ -340,6 +446,125 @@ void cGeluMission::DisableLine(const coreUintW iIndex, const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cGeluMission::EnableCoin(const coreUintW iIndex)
+{
+    ASSERT(iIndex < GELU_COINS)
+    coreObject3D* pCoin = (*m_Coin    .List())[iIndex];
+    coreObject3D* pWave = (*m_CoinWave.List())[iIndex];
+
+    // 
+    WARN_IF(pCoin->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableCoin(iIndex, false);
+
+    // 
+    pCoin->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    pWave->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::DisableCoin(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < GELU_COINS)
+    coreObject3D* pCoin = (*m_Coin    .List())[iIndex];
+    coreObject3D* pWave = (*m_CoinWave.List())[iIndex];
+
+    // 
+    if(!pCoin->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    pCoin->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    pWave->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->CreateSplashColor(pCoin->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::EnableGap(const coreUintW iIndex)
+{
+    ASSERT(iIndex < GELU_GAPS)
+    coreObject3D& oGap = m_aGapRaw[iIndex];
+
+    // 
+    WARN_IF(oGap.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableGap(iIndex, false);
+
+    // 
+    ADD_BIT(m_iGapActive, iIndex)
+    STATIC_ASSERT(GELU_GAPS <= sizeof(m_iGapActive)*8u)
+
+    // 
+    m_afGapTime[iIndex] = 0.0f;
+
+    // 
+    oGap.SetAlpha  (0.0f);
+    oGap.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::DisableGap(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < GELU_GAPS)
+    coreObject3D& oGap = m_aGapRaw[iIndex];
+
+    // 
+    if(!oGap.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    REMOVE_BIT(m_iGapActive, iIndex)
+
+    // 
+    if(!bAnimated) oGap.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::EnableShine(const coreUintW iIndex)
+{
+    ASSERT(iIndex < GELU_SHINES)
+    coreObject3D& oShine = m_aShineRaw[iIndex];
+
+    // 
+    WARN_IF(oShine.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableShine(iIndex, false);
+
+    // 
+    ADD_BIT(m_iShineActive, iIndex)
+    STATIC_ASSERT(GELU_SHINES <= sizeof(m_iShineActive)*8u)
+
+    // 
+    m_afShineTime[iIndex] = 0.0f;
+
+    // 
+    oShine.SetAlpha  (0.0f);
+    oShine.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::DisableShine(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < GELU_SHINES)
+    coreObject3D& oShine = m_aShineRaw[iIndex];
+
+    // 
+    if(!oShine.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    REMOVE_BIT(m_iShineActive, iIndex)
+
+    // 
+    if(!bAnimated) oShine.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// 
 void cGeluMission::__RenderOwnBottom()
 {
     DEPTH_PUSH
@@ -348,11 +573,22 @@ void cGeluMission::__RenderOwnBottom()
     m_Line.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Line);
 
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Shine.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
+
     DEPTH_PUSH
 
     // 
     m_Orb.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Orb);
+
+    // 
+    m_Gap.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Gap);
 }
 
 
@@ -361,6 +597,17 @@ void cGeluMission::__RenderOwnBottom()
 void cGeluMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_CoinWave.Render();
+    }
+    glDepthMask(true);
+
+    // 
+    m_Coin.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Coin);
 
     // 
     if(m_Fang.GetCurEnabled()) cLodObject::RenderHighList(&m_Fang);
@@ -400,14 +647,19 @@ void cGeluMission::__MoveOwnAfter()
         // 
         const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
         {
-            if(g_pForeground->IsVisiblePoint(pBullet->GetPosition().xy(), 1.05f))
+            if(g_pForeground->IsVisiblePoint(pBullet->GetPosition().xy(), 1.05f) && oFang.GetAlpha())
             {
                 const coreVector2 vDiff = pBullet->GetPosition().xy() - oFang.GetPosition().xy();
 
                 if(InBetween(vDiff, -oFang.GetCollisionRange().xy(), oFang.GetCollisionRange().xy()))
                 {
                     pBullet->Deactivate(true);
-                    if(m_iStageSub == 19u) this->DisableFang(i, true);   // TODO 1: HACK!!!
+
+                    if(m_iStageSub == 19u)   // TODO 1: HACK!!! this code-block should definitely be in the actual stage
+                    {
+                        this->DisableFang(i, true);
+                        this->AddExtraScore(d_cast<cPlayer*>(pBullet->GetOwner()), 40u, oFang.GetPosition());
+                    }
                 }
             }
         };
@@ -419,6 +671,17 @@ void cGeluMission::__MoveOwnAfter()
 
     // 
     this->__UpdateCollisionWay();
+
+    // 
+    const coreVector2 vBaseDir = g_pGame->FindPlayerDual(0u)->GetDirection().xy();
+
+    // 
+    coreBool bSameBase = true;
+    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+    {
+        if(!SameDirection(vBaseDir, pPlayer->GetDirection().xy()))
+            bSameBase = false;
+    });
 
     // 
     for(coreUintW i = 0u; i < GELU_WAYS; ++i)
@@ -447,16 +710,20 @@ void cGeluMission::__MoveOwnAfter()
         // 
         const coreFloat fOffset  = I_TO_F(i) * (1.0f/7.0f);
         const coreBool  bVisible = HAS_BIT(m_iWayVisible, i);
+        const coreBool  bGhost   = HAS_BIT(m_iWayGhost,   i);
+        const coreBool  bFree    = HAS_BIT(m_iWayFree,    i);
 
         // 
-        pWay->SetAlpha    (bVisible ? 1.0f : 0.0f);
+        pWay->SetAlpha    (bVisible ? (bGhost ? 0.5f : 1.0f) : 0.0f);
         pWay->SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
 
         // 
         pArrow->SetPosition (pWay->GetPosition ());
-        pArrow->SetDirection(pWay->GetDirection());
-        pArrow->SetAlpha    (bVisible ? 1.0f : 0.4f);
+        pArrow->SetAlpha    (bVisible ? (bGhost ? 0.5f : 1.0f) : 0.4f);
         pArrow->SetTexOffset(pWay->GetTexOffset());
+
+        // 
+        if(!bFree) pArrow->SetDirection(pWay->GetDirection());
 
         // 
         m_avOldPos[i] = pWay->GetPosition().xy();
@@ -464,9 +731,7 @@ void cGeluMission::__MoveOwnAfter()
         // 
         if(HAS_BIT(m_iWayActive, i))
         {
-            const cPlayer* pPlayer = g_pGame->FindPlayerSide(pWay->GetPosition().xy());
-
-            if(SameDirection(pPlayer->GetDirection().xy(), pWay->GetDirection().xy()))
+            if(bSameBase && SameDirection(vBaseDir, pWay->GetDirection().xy()) && !bFree)
             {
                 REMOVE_BIT(m_iWayVisible, i)
             }
@@ -494,10 +759,12 @@ void cGeluMission::__MoveOwnAfter()
     if(m_iWayActive)
     {
         // 
-        g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)   // copied from group "force rotation"
-        {
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
+        const coreUint32 iOldGhost = m_iWayGhost;
+        m_iWayGhost = 0u;
 
+        // 
+        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
             if(!pPlayer->IsRolling())
             {
                 const coreVector2 vPos = pPlayer->GetPosition().xy();
@@ -505,15 +772,14 @@ void cGeluMission::__MoveOwnAfter()
                 for(coreUintW j = 0u; j < GELU_WAYS; ++j)
                 {
                     const coreObject3D* pWay = (*m_Way.List())[j];
-                    if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, j) || pWay->GetAlpha()) continue;
+                    if(!HAS_BIT(iOldGhost, j) && (!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayActive, j) || pWay->GetAlpha())) continue;
 
-                    const coreVector2 vSize = pWay->GetCollisionRange().xy() * 1.1f;   // otherwise you can rotate when between blocks and take damage
+                    const coreVector2 vSize = pWay->GetCollisionRange().xy() * 1.1f;
                     const coreVector2 vDiff = pWay->GetPosition().xy() - vPos;
 
                     if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
                     {
-                        pPlayer->SetDirection(pWay->GetDirection());
-                        pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
+                        ADD_BIT(m_iWayGhost, j)
                         break;
                     }
                 }
@@ -563,7 +829,7 @@ void cGeluMission::__MoveOwnAfter()
         if(!oLine.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        const coreUintW     iIndex1 = (m_iLineMode == 0u) ? ((i < 12u) ? (i + (i/3u) + 1u) : (i - 12u))      : ((i));
+        const coreUintW     iIndex1 = (m_iLineMode == 0u) ? ((i < 12u) ? (i + (i/3u) + 1u) : (i - 12u))      : ((i)      % GELU_ORBS);
         const coreUintW     iIndex2 = (m_iLineMode == 0u) ? ((i < 12u) ? (i + (i/3u))      : (i - 12u + 4u)) : ((i + 1u) % GELU_ORBS);
         const coreObject3D& oOrb1   = m_aOrbRaw[iIndex1];
         const coreObject3D& oOrb2   = m_aOrbRaw[iIndex2];
@@ -593,7 +859,7 @@ void cGeluMission::__MoveOwnAfter()
         // 
         const coreVector2 vDiff   = (oOrb1.GetPosition().xy() - oOrb2.GetPosition().xy());
         const coreVector2 vPos    = (oOrb1.GetPosition().xy() + oOrb2.GetPosition().xy()) * 0.5f;
-        const coreVector2 vDir    = vDiff.Normalized();
+        const coreVector2 vDir    = vDiff.IsNull() ? coreVector2(0.0f,1.0f) : vDiff.Normalized();
         const coreFloat   fLen    = vDiff.Length() * 0.5f;
         const coreFloat   fOffset = I_TO_F(i) * (1.0f/8.0f);
 
@@ -608,6 +874,88 @@ void cGeluMission::__MoveOwnAfter()
 
     // 
     m_Line.MoveNormal();
+
+    // 
+    for(coreUintW i = 0u; i < GELU_COINS; ++i)
+    {
+        coreObject3D* pCoin = (*m_Coin    .List())[i];
+        coreObject3D* pWave = (*m_CoinWave.List())[i];
+        if(!pCoin->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const coreFloat   fOffset = I_TO_F(i) * (1.0f/8.0f);
+        const coreVector2 vDir    = coreVector2::Direction( (4.0f*PI) * m_fAnimation);
+        const coreVector2 vDir2   = coreVector2::Direction(-(8.0f*PI) * m_fAnimation);
+
+        // 
+        pCoin->SetDirection(coreVector3(vDir, 0.0f));
+        pCoin->SetTexOffset(coreVector2(0.0f, FRACT(0.4f * m_fAnimation + fOffset)));
+
+        // 
+        pWave->SetPosition (pCoin->GetPosition ());
+        pWave->SetDirection(coreVector3(vDir2, 0.0f));
+        pWave->SetAlpha    (pCoin->GetAlpha    ());
+        pWave->SetTexOffset(pCoin->GetTexOffset());
+    }
+
+    // 
+    m_Coin    .MoveNormal();
+    m_CoinWave.MoveNormal();
+
+    // 
+    for(coreUintW i = 0u; i < GELU_GAPS; ++i)
+    {
+        coreObject3D& oGap = m_aGapRaw[i];
+        if(!oGap.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        if(HAS_BIT(m_iGapActive, i)) m_afGapTime[i].UpdateMin( 3.0f, 1.0f);
+                                else m_afGapTime[i].UpdateMax(-3.0f, 0.0f);
+
+        // 
+        if(!m_afGapTime[i]) this->DisableGap(i, false);
+
+        // 
+        const coreFloat fOffset = I_TO_F(i) * (1.0f/5.0f);
+
+        // 
+        oGap.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 8.0f * LERP(1.2f, 1.0f, m_afGapTime[i]));
+        oGap.SetAlpha    (LERPH3(0.0f, 1.0f, m_afGapTime[i]));
+        oGap.SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
+    }
+
+    // 
+    m_Gap.MoveNormal();
+
+    // 
+    for(coreUintW i = 0u; i < GELU_SHINES; ++i)
+    {
+        coreObject3D& oShine  = m_aShineRaw[i];
+        if(!oShine.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        if(HAS_BIT(m_iShineActive, i)) m_afShineTime[i].UpdateMin( 3.0f, 1.0f);
+                                  else m_afShineTime[i].UpdateMax(-3.0f, 0.0f);
+
+        // 
+        if(!m_afShineTime[i]) this->DisableShine(i, false);
+
+        // 
+        const coreFloat   fOffset = I_TO_F(i) * (1.0f/7.0f);
+        const coreVector2 vDir    = coreVector2::Direction((6.0f*PI) * m_fAnimation + (((i % 2u) == ((i / 4u) % 2u)) ? (0.25f*PI) : (0.0f*PI)));
+
+        // 
+        oShine.SetPosition (m_aOrbRaw[i].GetPosition());
+        oShine.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 3.5f * LERP(1.5f, 1.0f, m_afShineTime[i]));
+        oShine.SetDirection(coreVector3(vDir, 0.0f));
+        oShine.SetAlpha    (LERPH3(0.0f, 1.0f, m_afShineTime[i]));
+        oShine.SetTexOffset(coreVector2(0.0f, FRACT(0.2f * m_fAnimation + fOffset)));
+
+        STATIC_ASSERT(GELU_SHINES <= GELU_ORBS)
+    }
+
+    // 
+    m_Shine.MoveNormal();
 }
 
 
@@ -616,6 +964,8 @@ void cGeluMission::__MoveOwnAfter()
 void cGeluMission::__UpdateCollisionFang()
 {
     if(!m_iFangActive) return;
+    
+    m_iTouchState = 0u;
 
     // 
     for(coreUintW i = 0u; i < GELU_FANGS; ++i)
@@ -691,6 +1041,9 @@ void cGeluMission::__UpdateCollisionFang()
             {
                 bIntersect = true;
                 if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
+
+                ADD_BIT(m_iTouchState, j)
+                STATIC_ASSERT(GELU_FANGS <= sizeof(m_iTouchState)*8u)
             }
         }
 
@@ -712,6 +1065,9 @@ void cGeluMission::__UpdateCollisionFang()
                     pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
                     if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
                 }
+
+                if(!InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))   // prevent damaged player being pushed outside
+                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
             }
         }
         else if(!bIntersect && m_abCrushImmune[i])
@@ -722,6 +1078,87 @@ void cGeluMission::__UpdateCollisionFang()
             }
         }
     });
+    
+    if(false)
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+    {
+        const cLodObject& oFang = m_aFangRaw[i];
+        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+        
+        
+        const coreVector2 vFangMove = oFang.GetPosition().xy() - m_avOldPos[i];
+        const coreBool    bMoving   = (!vFangMove.IsNull() && (vFangMove.LengthSq() < POW2(5.0f)));
+        
+        
+        if(bMoving)
+        {
+            for(coreUintW k = 0u; k < GELU_FANGS; ++k)
+            {
+                if(i == k) continue;
+                
+                const cLodObject& oFang2 = m_aFangRaw[k];
+                if(!oFang2.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+                
+                const coreVector2 vDiff = oFang2.GetPosition().xy() - oFang.GetPosition().xy();
+                
+                
+                const coreVector2 vFangMove2 = oFang2.GetPosition().xy() - m_avOldPos[k];
+                //const coreBool    bMoving2   = (!vFangMove2.IsNull() && (vFangMove2.LengthSq() < POW2(5.0f)));
+                
+                if((ABS(vDiff.x) < oFang.GetVisualRange().x * 2.0f + 0.5f) &&
+                   (ABS(vDiff.y) < oFang.GetVisualRange().y * 2.0f + 0.5f) && ((vFangMove - vFangMove2).Length() > (0.1f * TIME)))
+                //for(coreUintW j = 0u; j < 4u; ++j)
+                {
+                    const coreVector2 vSide = AlongCrossNormal(vDiff);//StepRotated90(j);
+                    const coreVector2 vPos  = oFang.GetPosition().xy() + (vSide + vSide.Rotated90()*0.0f) * oFang.GetVisualRange().xy();
+                    
+                    //g_pSpecialEffects->CreateSplashSmoke(coreVector3(vPos, 0.0f), 3.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 1u, COLOR_ENERGY_WHITE);
+                }
+            }
+        }
+    }
+    
+    //m_iFangActive
+    //if(m_aFangRaw[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        coreUintW aiMap[GELU_FANGS];
+        for(coreUintW i = 0u; i < GELU_FANGS; ++i) aiMap[i] = i;
+
+        for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+        {
+            if(!m_aFangRaw[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            for(coreUintW j = 0u; j < GELU_FANGS; ++j)
+            {
+                if(i == j) continue;
+                if(!m_aFangRaw[j].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                const coreVector2 vDiff = m_aFangRaw[i].GetPosition().xy() - m_avOldPos[j];
+                if(vDiff.LengthSq() < POW2(3.0f))
+                {
+                    const coreUint16 iFirst = i;
+
+                    const coreUintW iNew = j;
+                    const coreUintW iOld = aiMap[iFirst];
+
+                    // find second map entry
+                    coreUintW iSecond = iNew;
+                    while(aiMap[iSecond] != iNew) iSecond = aiMap[iSecond];
+
+                    // swap indices (in map)
+                    aiMap[iFirst]  = iNew;
+                    aiMap[iSecond] = iOld;
+                }
+            }
+        }
+
+        coreVector2 avOffset[GELU_FANGS];
+        for(coreUintW i = 0u; i < GELU_FANGS; ++i) avOffset[i] = m_aFangRaw[i].GetTexOffset();
+
+        for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+            m_aFangRaw[i].SetTexOffset(avOffset[aiMap[i]]);
+    }
 }
 
 
@@ -730,6 +1167,9 @@ void cGeluMission::__UpdateCollisionFang()
 void cGeluMission::__UpdateCollisionWay()
 {
     if(!m_iWayActive) return;
+
+    
+    m_iTouchState = 0u;
 
     g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
@@ -744,7 +1184,7 @@ void cGeluMission::__UpdateCollisionWay()
         for(coreUintW j = 0u; j < GELU_WAYS; ++j)
         {
             const coreObject3D* pWay = (*m_Way.List())[j];
-            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j)) continue;
+            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j) || HAS_BIT(m_iWayGhost, j)) continue;
 
             const coreVector2 vWayPos = pWay->GetPosition().xy();
             const coreVector2 vShift  = (pPlayer->GetOldPos() - vWayPos) / vWayRange * 0.02f;
@@ -790,12 +1230,15 @@ void cGeluMission::__UpdateCollisionWay()
         for(coreUintW j = 0u; j < GELU_WAYS; ++j)
         {
             const coreObject3D* pWay = (*m_Way.List())[j];
-            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j)) continue;
+            if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !HAS_BIT(m_iWayVisible, j) || HAS_BIT(m_iWayGhost, j)) continue;
 
             if(InBetween(pPlayer->GetPosition().xy(), pWay->GetPosition().xy() - vWayRange, pWay->GetPosition().xy() + vWayRange))
             {
                 bIntersect = true;
                 if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
+
+                ADD_BIT(m_iTouchState, j)
+                STATIC_ASSERT(GELU_WAYS <= sizeof(m_iTouchState)*8u)
             }
         }
 
@@ -817,6 +1260,9 @@ void cGeluMission::__UpdateCollisionWay()
                     pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
                     if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
                 }
+
+                if(!InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
+                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
             }
         }
         else if(!bIntersect && m_abCrushImmune[i])

@@ -17,6 +17,7 @@ cEnemy::cEnemy()noexcept
 , m_iLastAttacker    (0u)
 , m_bWasDamaged      (false)
 , m_iScore           (0u)
+, m_iExtraDamage     (0)
 , m_iDamageForwarded (0)
 {
     // load object resources
@@ -81,35 +82,38 @@ void cEnemy::Move()
         m_bWasDamaged = false;
 
         // 
-        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD) && g_pForeground->IsVisibleObject(this))
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))   // may change in __MoveOwn
         {
-            this->SetEnabled(HAS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
-            this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
-        }
-        else
-        {
-            this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
-        }
+            if(g_pForeground->IsVisibleObject(this))
+            {
+                this->SetEnabled(HAS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
+                this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
+            }
+            else
+            {
+                this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+            }
 
-        // reduce collision overhead for ghost enemies without bounding volume
-        const coreModelPtr& pLowQuad = Core::Manager::Object->GetLowQuad();
-        if(HAS_FLAG(m_iStatus, ENEMY_STATUS_GHOST))
-        {
-            if(m_pVolume.GetHandle() == NULL) this->DefineVolume(pLowQuad);
-        }
-        else
-        {
-            if(m_pVolume.GetHandle() == pLowQuad.GetHandle()) this->DefineVolume(NULL);
-        }
+            // reduce collision overhead for ghost enemies without bounding volume
+            const coreModelPtr& pLowQuad = Core::Manager::Object->GetLowQuad();
+            if(HAS_FLAG(m_iStatus, ENEMY_STATUS_GHOST))
+            {
+                if(m_pVolume.GetHandle() == NULL) this->DefineVolume(pLowQuad);
+            }
+            else
+            {
+                if(m_pVolume.GetHandle() == pLowQuad.GetHandle()) this->DefineVolume(NULL);
+            }
 
-        // 
-        if(STATIC_ISVALID(g_pGame))
-        {
-            if(HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE) && !HAS_FLAG(m_iStatus, ENEMY_STATUS_SECRET)) g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_INVINCIBLE)->BindEnemy  (this);
-            else                                                                                          g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_INVINCIBLE)->UnbindEnemy(this);
-                //if(HAS_FLAG(m_iStatus, ENEMY_STATUS_DAMAGING)   && !HAS_FLAG(m_iStatus, ENEMY_STATUS_SECRET)) g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_DAMAGING)  ->BindEnemy  (this);
-                //else                                                                                          g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_DAMAGING)  ->UnbindEnemy(this);
-            // TODO 1: same shield state is checked in both types
+            // 
+            if(STATIC_ISVALID(g_pGame))
+            {
+                if(HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE) && !HAS_FLAG(m_iStatus, ENEMY_STATUS_SECRET)) g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_INVINCIBLE)->BindEnemy  (this);
+                else                                                                                          g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_INVINCIBLE)->UnbindEnemy(this);
+                    //if(HAS_FLAG(m_iStatus, ENEMY_STATUS_DAMAGING)   && !HAS_FLAG(m_iStatus, ENEMY_STATUS_SECRET)) g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_DAMAGING)  ->BindEnemy  (this);
+                    //else                                                                                          g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_DAMAGING)  ->UnbindEnemy(this);
+                // TODO 1: same shield state is checked in both types
+            }
         }
     }
 
@@ -145,8 +149,14 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         {
             // 
             const coreInt32 iPower = (bMulti || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
-            const coreInt32 iTaken = ABS(this->_TakeDamage(iDamage * iPower, iElement, vImpact) / iPower);
+            
+            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * (g_pGame->IsEasy() ? 110 : 100);
+            
+            const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 100, iElement, vImpact) / iPower);
             ASSERT(!(this->GetMaxHealth() % iPower))
+
+            
+            m_iExtraDamage = iTotal % 100;
 
             if(iTaken)
             {
@@ -182,7 +192,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 
             if(!m_iCurHealth)
             {
-                if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))   // TODO 1: some immortal enemies killed in scripts need to give score, move stuff into own "GiveScore" function or so
+                if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
                 {
                     // 
                     this->Kill(true);
@@ -213,14 +223,16 @@ void cEnemy::Resurrect()
     const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     const coreBool bBottom = HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM);
     const coreBool bTop    = HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP);
-    ASSERT(!bEnergy || (bEnergy && bSingle))   
-    //ASSERT(!bBottom || (bBottom && bSingle))   
+    ASSERT(!bEnergy || bSingle)   
+    //ASSERT(!bBottom || bSingle)   
 
     // 
     m_fLifeTime       = 0.0f;
     m_fLifeTimeBefore = 0.0f;
     
     m_bWasDamaged = false;
+    
+    m_iExtraDamage = 0;
 
     if(bEnergy)
     {
@@ -266,8 +278,8 @@ void cEnemy::Kill(const coreBool bAnimated)
     const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     const coreBool bBottom = HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM);
     const coreBool bTop    = HAS_FLAG(m_iStatus, ENEMY_STATUS_TOP);
-    ASSERT(!bEnergy || (bEnergy && bSingle))
-    //ASSERT(!bBottom || (bBottom && bSingle))
+    ASSERT(!bEnergy || bSingle)
+    //ASSERT(!bBottom || bSingle)
 
     // 
     if(STATIC_ISVALID(g_pGame))
@@ -291,7 +303,8 @@ void cEnemy::Kill(const coreBool bAnimated)
         }
 
         // 
-        g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, this->GetExplosionSound());
+        const coreFloat fVolume = ((g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID) && (this->GetExplosionSound() == SOUND_ENEMY_EXPLOSION_10)) ? 0.8f : 1.0f;
+        g_pSpecialEffects->PlaySound(this->GetPosition(), fVolume, 1.0f, this->GetExplosionSound());
 
         // 
         if(STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 1u))
@@ -333,11 +346,12 @@ void cEnemy::Kill(const coreBool bAnimated)
 void cEnemy::ResetProperties()
 {
     // set object properties
-    this->SetPosition   (coreVector3(HIDDEN_POS,0.0f));
-    this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
-    this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
-    this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
-    this->SetColor4     (coreVector4(1.0f, 1.0f,1.0f,1.0f));
+    this->SetPosition         (coreVector3(HIDDEN_POS,0.0f));
+    this->SetSize             (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
+    this->SetDirection        (coreVector3(0.0f,-1.0f,0.0f));
+    this->SetOrientation      (coreVector3(0.0f, 0.0f,1.0f));
+    this->SetCollisionModifier(coreVector3(1.0f, 1.0f,1.0f));
+    this->SetColor4           (coreVector4(1.0f, 1.0f,1.0f,1.0f));
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;
@@ -1234,6 +1248,34 @@ void cMeteorEnemy::__KillOwn(const coreBool bAnimated)
 {
     // 
     g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_METEOR);
+}
+
+
+// ****************************************************************
+// constructor
+cUfoEnemy::cUfoEnemy()noexcept
+{
+    // load models
+    this->DefineModelHigh("ship_enemy_miner_high.md3");
+    this->DefineModelLow ("ship_enemy_miner_low.md3");
+}
+
+
+// ****************************************************************
+// 
+void cUfoEnemy::__ResurrectOwn()
+{
+    // 
+    g_pGame->GetExhaustManager()->BindEnemy(this, EXHAUST_TYPE_UFO);
+}
+
+
+// ****************************************************************
+// 
+void cUfoEnemy::__KillOwn(const coreBool bAnimated)
+{
+    // 
+    g_pGame->GetExhaustManager()->UnbindEnemy(this, EXHAUST_TYPE_UFO);
 }
 
 

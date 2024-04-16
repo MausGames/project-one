@@ -550,7 +550,7 @@ void cHarenaMission::__MoveOwnAfter()
         else
         {
             // 
-            oFloor.SetAlpha(MAX(oFloor.GetAlpha() - 5.0f*TIME, 0.0f));
+            oFloor.SetAlpha(MAX0(oFloor.GetAlpha() - 5.0f*TIME));
 
             // 
             if(!oFloor.GetAlpha()) this->DisableFloor(i, false);
@@ -572,13 +572,13 @@ void cHarenaMission::__MoveOwnAfter()
         {
             // 
             m_afSpikeTime[i].UpdateMin(1.0f, 2.0f);
-            fBlend = LERPB(0.0f, 1.0f, MAX(m_afSpikeTime[i] - 1.0f, 0.0f));
+            fBlend = LERPB(0.0f, 1.0f, MAX0(m_afSpikeTime[i] - 1.0f));
         }
         else
         {
             // 
             m_afSpikeTime[i].UpdateMax(-1.0f, -2.0f);
-            fBlend = LERPB(1.0f, 0.0f, MAX(-m_afSpikeTime[i] - 1.0f, 0.0f));
+            fBlend = LERPB(1.0f, 0.0f, MAX0(-m_afSpikeTime[i] - 1.0f));
 
             // 
             if(m_afSpikeTime[i] <= -2.0f) this->DisableSpike(i, false);

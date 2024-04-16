@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_TABLE_H_
 #define _P1_GUARD_TABLE_H_
 
-// TODO 4: handle -INTERFACE_BANNER_DURATION_BOSS differently (also remove MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f))
+// TODO 4: handle -INTERFACE_BANNER_DURATION_BOSS differently (also remove MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f)) -> currently changed to negative-number with coreDouble(I_TO_F(x))
 
 
 // ****************************************************************
@@ -19,10 +19,10 @@
 #define TABLE_BOSSES   (BOSSES)     // 
 #define TABLE_SEGMENTS (SEGMENTS)   // 
 
-#define TABLE_TIME_TO_UINT(x)   (F_TO_UI((x)  * 1000.0f))
-#define TABLE_TIME_TO_FLOAT(x)  (I_TO_F ((x)) / 1000.0f))
+#define TABLE_TIME_TO_UINT(x)   (F_TO_UI  (coreDouble(x) * 1000.0))
+#define TABLE_TIME_TO_FLOAT(x)  (coreFloat(coreDouble(x) / 1000.0))
 
-#define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
+#define __TABLE_TIME_CONVERT(x) (coreFloat(coreDouble(I_TO_F(x)) * m_dFrameTime))
 
 
 // ****************************************************************
@@ -42,7 +42,10 @@ public:
         coreUint32 iRollsMade;         // 
         coreUint64 iBulletsShot;       // 
         coreUint64 iChromaCollected;   // TODO 1: remove 
-        coreUint32 iItemsCollected;    // 
+        coreUint32 iItemsCollected;    // TODO 1: remove 
+
+        coreUint16 iShiftGood;         // 
+        coreUint16 iShiftBad;          // 
     };
 
 
@@ -117,16 +120,20 @@ public:
 class cScoreTable final
 {
 private:
-    coreProtect<coreUint32> m_iScoreTotal;                                       // 
-    coreProtect<coreUint32> m_aiScoreMission [TABLE_MISSIONS];                   // 
-    coreProtect<coreUint32> m_aaiScoreSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+    coreProtect<coreUint32> m_iScoreTotal;                                           // 
+    coreProtect<coreUint32> m_aiScoreMission [TABLE_MISSIONS];                       // 
+    coreProtect<coreUint32> m_aaiScoreSegment[TABLE_MISSIONS][TABLE_SEGMENTS];       // 
 
-    coreProtect<coreUint32> m_aiComboValue[2];                                   // absolute values for combo calculations (0 = current value, 1 = max value) 
-    coreProtect<coreUint32> m_aiChainValue[2];                                   // 
-    coreProtect<coreFlow>   m_fCooldown;                                         // 
-    coreProtect<coreFloat>  m_fOverride;                                         // 
+    coreProtect<coreUint32> m_iCurCombo;                                             // 
+    coreProtect<coreUint32> m_iCurChain;                                             // 
 
-    const cPlayer* m_pOwner;                                                     // 
+    coreProtect<coreFlow>   m_fCooldown;                                             // 
+    coreProtect<coreUint32> m_iOverride;                                             // 
+
+    coreProtect<coreUint32> m_aiMaxSeriesMission [TABLE_MISSIONS];                   // 
+    coreProtect<coreUint32> m_aaiMaxSeriesSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+
+    const cPlayer* m_pOwner;                                                         // 
 
 
 public:
@@ -156,22 +163,32 @@ public:
     void CancelCooldown ();
 
     // 
-    void SetOverride(const coreFloat fValue) {m_fOverride = fValue ? FLOOR(LERP(0.1f, 10.0f, fValue) * 10.0f) * 0.1f : 0.0f; ASSERT((fValue >= 0.0f) && (fValue <= 1.0f))}
-    void ResetOverride()                     {m_fOverride = -1.0f;}
+    inline void     SetOverride  (const coreFloat fLerp) {m_iOverride = fLerp ? F_TO_UI(LERP(1.0f, 100.0f, fLerp)) : 0u; ASSERT((fLerp >= 0.0f) && (fLerp <= 1.0f))}
+    inline void     ResetOverride()                      {m_iOverride = UINT32_MAX;}
+    inline coreBool HasOverride  ()const                 {return (m_iOverride != UINT32_MAX);}
+
+    // 
+    inline coreUint32 ModifyValue(const coreUint32 iValue)const {return (iValue * this->GetModifier()) / 10u;}
 
     // 
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
-    inline coreUint32 GetScoreTotal  ()const                                                             {return m_iScoreTotal;}
-    inline coreUint32 GetScoreMission(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiScoreMission [iMissionIndex];}
-    inline coreUint32 GetScoreSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiScoreSegment[iMissionIndex][iSegmentIndex];}
-    inline coreUint32 GetCurCombo    ()const                                                             {return m_aiComboValue[0];}
-    inline coreUint32 GetMaxCombo    ()const                                                             {return m_aiComboValue[1];}
-    inline coreUint32 GetCurChain    ()const                                                             {return m_aiChainValue[0];}
-    inline coreUint32 GetMaxChain    ()const                                                             {return m_aiChainValue[1];}
-    inline coreFloat  GetCooldown    ()const                                                             {return m_fCooldown;}
-    inline coreFloat  GetModifier    ()const                                                             {return (m_fOverride >= 0.0f) ? coreFloat(m_fOverride) : (1.0f + 0.1f * I_TO_F(m_aiComboValue[0]));}
+    inline coreUint32 GetScoreTotal      ()const                                                             {return m_iScoreTotal;}
+    inline coreUint32 GetScoreMission    (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiScoreMission [iMissionIndex];}
+    inline coreUint32 GetScoreSegment    (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiScoreSegment[iMissionIndex][iSegmentIndex];}
+    inline coreUint32 GetCurCombo        ()const                                                             {return m_iCurCombo;}
+    inline coreUint32 GetCurChain        ()const                                                             {return m_iCurChain;}
+    inline coreFloat  GetCooldown        ()const                                                             {return m_fCooldown;}
+    inline coreUint32 GetModifier        ()const                                                             {return this->HasOverride() ? (m_iOverride + 0u) : (m_iCurCombo + 10u);}
+    inline coreUint32 GetMaxSeriesMission(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiMaxSeriesMission [iMissionIndex];}
+    inline coreUint32 GetMaxSeriesSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex];}
+
+
+private:
+    // 
+    void __ChangeMaxSeries(const coreUint32 iMaxValue, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void __ChangeMaxSeries(const coreUint32 iMaxValue);
 };
 
 
@@ -192,7 +209,7 @@ private:
     coreProtect<coreUint16> m_aiShiftBadMission  [TABLE_MISSIONS];                   // 
     coreProtect<coreUint16> m_aaiShiftBadSegment [TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
-    coreFloat m_fFrameTime;                                                          // 
+    coreDouble m_dFrameTime;                                                          // 
 
 
 public:

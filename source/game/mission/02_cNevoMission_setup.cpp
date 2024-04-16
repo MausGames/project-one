@@ -92,7 +92,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hard-mode: bullets are bigger in general
     // TODO 1: die geschosse über scraps können zerstört werden ohne die scraps, wenn außerhalb des sichtfelds, weil beides unterschiedliche interaction-ranges haben (remove hiding for rotating scraps?)
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top) (die finalen wellen könnten sonst verwirren)
-    // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
+    // TODO 1: MAIN: regular score, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;
@@ -244,41 +244,44 @@ void cNevoMission::__SetupOwn()
             }
         };
 
-        if((m_iStageSub == 3u) && STAGE_SUBTIME_POINT(3.0f))
+        if(g_pGame->IsTask())
         {
-            nCreatScrapFunc(0u, coreVector2(0.9f,1.2f) * FOREGROUND_AREA);
-        }
-        else if((m_iStageSub == 5u) && STAGE_SUBTIME_POINT(5.0f))
-        {
-            nCreatScrapFunc(1u, coreVector2(1.2f,-0.9f) * FOREGROUND_AREA);
-        }
-        else if((m_iStageSub == 15u) && STAGE_BEGINNING2)
-        {
-            nCreatScrapFunc(2u, coreVector2(0.0f, 1.2f) * FOREGROUND_AREA);
-            nCreatScrapFunc(3u, coreVector2(0.0f,-1.2f) * FOREGROUND_AREA);
-        }
-
-        for(coreUintW i = 0u; i < NEVO_SCRAPS; ++i)
-        {
-            coreObject3D& oScrap = m_aScrap[i];
-            if(!oScrap.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            if((m_afScrapTime[i] >= 6.0f) && !g_pForeground->IsVisibleObject(&oScrap))
+            if((m_iStageSub == 3u) && STAGE_SUBTIME_POINT(3.0f))
             {
-                this->DisableScrap(i, false);
+                nCreatScrapFunc(0u, coreVector2(0.9f,1.2f) * FOREGROUND_AREA);
+            }
+            else if((m_iStageSub == 5u) && STAGE_SUBTIME_POINT(5.0f))
+            {
+                nCreatScrapFunc(1u, coreVector2(1.2f,-0.9f) * FOREGROUND_AREA);
+            }
+            else if((m_iStageSub == 15u) && STAGE_BEGINNING2)
+            {
+                nCreatScrapFunc(2u, coreVector2(0.0f, 1.2f) * FOREGROUND_AREA);
+                nCreatScrapFunc(3u, coreVector2(0.0f,-1.2f) * FOREGROUND_AREA);
             }
 
-            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oScrap, [&](const cBullet* pBullet, const coreObject3D* pScrap, const coreVector3 vIntersection, const coreBool bFirstHit)
+            for(coreUintW i = 0u; i < NEVO_SCRAPS; ++i)
             {
-                if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
-                if(!oScrap.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) return;
+                coreObject3D& oScrap = m_aScrap[i];
+                if(!oScrap.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-                this->DisableScrap(i, true);
-                g_pSpecialEffects->PlaySound(oScrap.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+                if((m_afScrapTime[i] >= 6.0f) && !g_pForeground->IsVisibleObject(&oScrap))
+                {
+                    this->DisableScrap(i, false);
+                }
 
-                if(++iScrapCount >= NEVO_SCRAPS) STAGE_BADGE(1u, BADGE_NORMAL, oScrap.GetPosition())
-                else g_pGame->GetCombatText()->DrawProgress(iScrapCount, NEVO_SCRAPS, oScrap.GetPosition());
-            });
+                Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oScrap, [&](const cBullet* pBullet, const coreObject3D* pScrap, const coreVector3 vIntersection, const coreBool bFirstHit)
+                {
+                    if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+                    if(!oScrap.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) return;
+
+                    this->DisableScrap(i, true);
+                    g_pSpecialEffects->PlaySound(oScrap.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_01);
+
+                    if(++iScrapCount >= NEVO_SCRAPS) STAGE_BADGE(1u, BADGE_NORMAL, oScrap.GetPosition())
+                    else g_pGame->GetCombatText()->DrawProgress(iScrapCount, NEVO_SCRAPS, oScrap.GetPosition());
+                });
+            }
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -333,18 +336,18 @@ void cNevoMission::__SetupOwn()
                 {
                     if(vDir.IsAligned())
                     {
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 0.0f, pEnemy, vPos + vTan, vDir)->AddStatus(BULLET_STATUS_IMMORTAL);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 0.0f, pEnemy, vPos - vTan, vDir)->AddStatus(BULLET_STATUS_IMMORTAL);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 0.0f, pEnemy, vPos + vTan, vDir)->ChangeSize(1.1f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>    (5, 0.0f, pEnemy, vPos - vTan, vDir)->ChangeSize(1.1f)->AddStatus(BULLET_STATUS_IMMORTAL);
                     }
                     else
                     {
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 0.0f, pEnemy, vPos + vTan, vDir)->AddStatus(BULLET_STATUS_IMMORTAL);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 0.0f, pEnemy, vPos - vTan, vDir)->AddStatus(BULLET_STATUS_IMMORTAL);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 0.0f, pEnemy, vPos + vTan, vDir)->ChangeSize(1.1f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 0.0f, pEnemy, vPos - vTan, vDir)->ChangeSize(1.1f)->AddStatus(BULLET_STATUS_IMMORTAL);
                     }
                 }
             }
 
-            if(i == 32u)
+            if(g_pGame->IsTask() && (i == 32u))
             {
                 if(STAGE_TAKEOFF)          this->EnableGuide ();
                 if(pEnemy->ReachedDeath()) this->DisableGuide(true);
@@ -455,6 +458,8 @@ void cNevoMission::__SetupOwn()
 
             pBulletEnemy->Deactivate(true, vIntersection.xy(), pBulletPlayer->GetFlyDir());
 
+            g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLACEHOLDER);
+
             iCleanupCount += 1u;
         });
 
@@ -474,12 +479,12 @@ void cNevoMission::__SetupOwn()
             });
         }
 
-        if(!STAGE_CLEARED)
+        if(g_pGame->IsTask() && !STAGE_CLEARED)
         {
             const coreFloat fPercent = I_TO_F(iCleanupCount) / 1700.0f;
 
-            if(fPercent >= 1.0f) STAGE_BADGE(0u, BADGE_EASY, coreVector3(0.0f,0.0f,0.0f))
-            else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fPercent * 100.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
+                 if(fPercent >= 1.0f)  STAGE_BADGE(0u, BADGE_EASY, coreVector3(0.0f,0.0f,0.0f))
+            else if(fPercent >= 0.01f) g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fPercent * 100.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
         }
 
         STAGE_WAVE(0u, "SIEBEN", {50.0f, 75.0f, 100.0f, 125.0f})
@@ -796,7 +801,7 @@ void cNevoMission::__SetupOwn()
         {
             for(coreUintW i = 0u; i < NEVO_TILES; ++i)
             {
-                coreObject3D& oTile = m_aTileRaw[i];
+                const coreObject3D& oTile = m_aTileRaw[i];
                 if(!this->IsTileEnabled(i)) continue;
 
                 STAGE_FOREACH_PLAYER(pPlayer, j)
@@ -838,13 +843,13 @@ void cNevoMission::__SetupOwn()
                 }
             }
 
-            if(m_iStageSub == 3u)
+            if(g_pGame->IsTask() && (m_iStageSub == 3u))
             {
                 constexpr coreUintW aiOrder[] = {1u, 10u, 7u, 12u};
 
                 for(coreUintW i = 0u; i < NEVO_TILES; ++i)
                 {
-                    coreObject3D& oTile = m_aTileRaw[i];
+                    const coreObject3D& oTile = m_aTileRaw[i];
                     if(!this->IsTileEnabled(i)) continue;
 
                     const coreUintW iIndex = std::find(aiOrder, aiOrder + ARRAY_SIZE(aiOrder), i) - aiOrder;
@@ -930,23 +935,26 @@ void cNevoMission::__SetupOwn()
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 5u, COLOR_ENERGY_PURPLE);
             }
 
-            constexpr coreUint8 aiFree[] = {4u, 11u, 18u, 37u, 53u, 56u};
-
-            const coreBool bIsFree = std::memchr(aiFree, i, ARRAY_SIZE(aiFree));
-            ASSERT(i <= 0xFFu)
-
-            if(bIsFree)
+            if(g_pGame->IsTask())
             {
-                if(pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
-                {
-                    pEnemy->SetBaseColor(COLOR_SHIP_BLUE);
-                    pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                }
+                constexpr coreUint8 aiFree[] = {4u, 11u, 18u, 37u, 53u, 56u};
 
-                if(pEnemy->ReachedDeath() && !iTileDone)
+                const coreBool bIsFree = std::memchr(aiFree, i, ARRAY_SIZE(aiFree));
+                ASSERT(i <= 0xFFu)
+
+                if(bIsFree)
                 {
-                    if(++iFreeCount >= ARRAY_SIZE(aiFree)) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
-                    else g_pGame->GetCombatText()->DrawProgress(iFreeCount, ARRAY_SIZE(aiFree), pEnemy->GetPosition());
+                    if(pEnemy->HasStatus(ENEMY_STATUS_INVINCIBLE))
+                    {
+                        pEnemy->SetBaseColor(COLOR_SHIP_BLUE);
+                        pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+                    }
+
+                    if(pEnemy->ReachedDeath() && !iTileDone)
+                    {
+                        if(++iFreeCount >= ARRAY_SIZE(aiFree)) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
+                        else g_pGame->GetCombatText()->DrawProgress(iFreeCount, ARRAY_SIZE(aiFree), pEnemy->GetPosition());
+                    }
                 }
             }
 
@@ -1185,11 +1193,11 @@ void cNevoMission::__SetupOwn()
                         vHelperMove = vDir.Rotated45().Processed(ABS) * vPos.Processed(SIGN) * -150.0f;
                     }
 
-                    if((m_iStageSub >= 2u) && (iChipSpawn < NEVO_CHIPS * 2u))
+                    if(g_pGame->IsTask() && (m_iStageSub >= 2u) && (iChipSpawn < NEVO_CHIPS * 2u))
                     {
-                        if((++iChipSpawn) % (g_pGame->IsEasy() ? 1u : 2u))
+                        if((++iChipSpawn) % 2u)
                         {
-                            const coreUintW iIndex = (iChipSpawn - 1u) / 2u;
+                            const coreUintW iIndex = iChipSpawn / 2u;
 
                             this->EnableChip(iIndex);
                             this->GetChip(iIndex)->SetPosition(coreVector3(vPos, 0.0f));
@@ -1200,11 +1208,9 @@ void cNevoMission::__SetupOwn()
                 }
             }
 
-            const coreFloat fFrequency = (g_pGame->IsEasy() ? 0.7f : 1.0f);
-
             if(m_iStageSub == 6u)
             {
-                if(STAGE_TICK_FREE2(0.5f * fFrequency, 0.0f))   // 2
+                if(STAGE_TICK_FREE2(0.5f, 0.0f))   // 2
                 {
                     iWallCount += 1u;
 
@@ -1232,7 +1238,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(m_iStageSub == 10u)
             {
-                if(STAGE_TICK_FREE2(0.25f * fFrequency, 0.0f))   // 2
+                if(STAGE_TICK_FREE2(0.25f, 0.0f))   // 2
                 {
                     iWallCount += 1u;
 
@@ -1277,7 +1283,7 @@ void cNevoMission::__SetupOwn()
             }
             else
             {
-                if(STAGE_TICK_FREE(0.75f * fFrequency, 0.0f) && (iRotaCount || ((s_iTick % 2u) == 0u)))
+                if(STAGE_TICK_FREE(0.75f * (g_pGame->IsEasy() ? 0.7f : 1.0f), 0.0f) && (iRotaCount || ((s_iTick % 2u) == 0u)))
                 {
                     const cPlayer*    pPlayer = g_pGame->FindPlayerDual(1u);
                     const coreBool    bType   = (m_iStageSub <= 2u) ? true : ((m_iStageSub <= 4u) ? false : !((iRotaCount++) % 2u));
@@ -1317,7 +1323,7 @@ void cNevoMission::__SetupOwn()
                         if(++iChipCollect >= NEVO_CHIPS) STAGE_BADGE(1u, BADGE_NORMAL, pChip->GetPosition())
                         else g_pGame->GetCombatText()->DrawProgress(iChipCollect, NEVO_CHIPS, pChip->GetPosition());
 
-                        g_pSpecialEffects->PlaySound(pChip->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
+                        g_pSpecialEffects->PlaySound(pChip->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iChipCollect, NEVO_CHIPS), SOUND_ITEM_COLLECT);
                     }
                 });
             }
@@ -1330,13 +1336,16 @@ void cNevoMission::__SetupOwn()
                     {
                         iCurEnemy += 1u;
 
-                        const cPlayer*    pPlayer = pEnemy->LastAttacker();
-                        const coreVector2 vDiff   = pEnemy->GetPosition().xy() - pPlayer->GetPosition().xy();
-
-                        if(SameDirection90(vDiff.Normalized(), pEnemy->GetDirection().xy()))   // use old direction
+                        if(g_pGame->IsTask())
                         {
-                            if(++iBackstabCount >= 20u) STAGE_BADGE(2u, BADGE_HARD, pPlayer->GetPosition())
-                            else g_pGame->GetCombatText()->DrawText(coreData::ToChars(20u - iBackstabCount), pPlayer->GetPosition(), COLOR_MENU_INSIDE);
+                            const cPlayer*    pPlayer = pEnemy->LastAttacker();
+                            const coreVector2 vDiff   = pEnemy->GetPosition().xy() - pPlayer->GetPosition().xy();
+
+                            if(SameDirection90(vDiff.Normalized(), pEnemy->GetDirection().xy()))   // use old direction
+                            {
+                                if(++iBackstabCount >= 20u) STAGE_BADGE(2u, BADGE_HARD, pPlayer->GetPosition())
+                                else g_pGame->GetCombatText()->DrawText(coreData::ToChars(20u - iBackstabCount), pPlayer->GetPosition(), COLOR_MENU_INSIDE);
+                            }
                         }
                     }
 
@@ -1732,7 +1741,7 @@ void cNevoMission::__SetupOwn()
             }
             else
             {
-                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.1f", MAX0(2.9f - FLOOR(fLockTime * 10.0f) / 10.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
+                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.1f", MAX0(2.9f - FloorFactor(fLockTime, 10.0f))), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
             }
         }
 #endif
@@ -1857,7 +1866,7 @@ void cNevoMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = -m_aArrowRaw[iArrowIndex].GetDirection().xy();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.8f);
                 }
 
                 if(this->GetArrowFake(iArrowIndex) && (iPack != this->GetArrowDir(iArrowIndex)))
@@ -1921,7 +1930,8 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: große kugerl explodieren in viele kleine
     // TODO 1: hardmode: 3 rotieren vom center nach außen
     // TODO 1: move stuff from here (and Leviathan) into grow-bullet ?
-    // TODO 1: MAIN: task-check, regular score, auf boss übertragen (general, easy, coop), sound, background rota/speed
+    // TODO 1: MAIN: regular score, auf boss übertragen (general, easy, coop), sound, background rota/speed
+    // TODO 1: badge durch big wurde nicht erkannt, in dem moment wo ich getroffen wurde, kann es sein, dass OldPos+FlyMove dann kaputt sind wenn die zeit einfriert ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1988,15 +1998,15 @@ void cNevoMission::__SetupOwn()
         const coreFloat fBulletSpeed = g_pGame->IsEasy() ? 0.8f : 1.0f;
         const coreFloat fAttackSpeed = g_pGame->IsEasy() ? 0.5f : 1.0f;
 
-        const auto nCreateBubbleFunc = [&](const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection, const coreUintW iBubbleIndex = SIZE_MAX, const coreUint32 iBubbleDelay = 0u)
+        const auto nCreateBubbleFunc = [&](const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection, const coreUintW iBubbleIndex = SIZE_MAX, const coreUint32 iBubbleDelay = 0u, const coreUint32 iBubbleDelayEasy = 0u)
         {
             cGrowBullet* pBullet = g_pGame->GetBulletManagerEnemy()->AddBullet<cGrowBullet>(5, fSpeed * fBulletSpeed, pOwner, vPosition, vDirection);
 
-            if((iBubbleIndex != SIZE_MAX) && !HAS_BIT(iBubbleMap, iBubbleIndex))
+            if(g_pGame->IsTask() && (iBubbleIndex != SIZE_MAX) && !HAS_BIT(iBubbleMap, iBubbleIndex))
             {
                 if(iBubbleTick == UINT32_MAX)
                 {
-                    iBubbleTick = iBubbleDelay;
+                    iBubbleTick = g_pGame->IsEasy() ? iBubbleDelayEasy : iBubbleDelay;
                 }
 
                 if(!(iBubbleTick--))
@@ -2034,7 +2044,7 @@ void cNevoMission::__SetupOwn()
             }
         }
 
-        if(m_iStageSub == 5u)
+        if(g_pGame->IsTask() && (m_iStageSub == 5u))
         {
             constexpr coreVector2 avMarker[] = {coreVector2(-2.5f,-0.5f), coreVector2(-1.5f,-2.5f), coreVector2(-0.5f,2.5f), coreVector2(0.5f,0.5f), coreVector2(1.5f,-1.5f), coreVector2(2.5f,1.5f)};
 
@@ -2082,7 +2092,7 @@ void cNevoMission::__SetupOwn()
                     const coreVector2 vPos = coreVector2((I_TO_F(i) - 4.5f) * 0.22f, 1.2f) * FOREGROUND_AREA;
                     const coreVector2 vDir = coreVector2(0.0f,-1.0f);
 
-                    nCreateBubbleFunc(0.9f, pSquad1->GetEnemy(0u), vPos, vDir, 0u, 7u)->ChangeSize(1.0f);
+                    nCreateBubbleFunc(0.9f, pSquad1->GetEnemy(0u), vPos, vDir, 0u, 7u, 7u)->ChangeSize(1.0f);
                 }
             }
         }
@@ -2142,7 +2152,7 @@ void cNevoMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition ().xy();
                     const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90() * ((s_iTick % 2u) ? -1.0f : 1.0f);
 
-                    nCreateBubbleFunc(0.4f, pEnemy, vPos, vDir, (i < 4u) ? 1u : 2u, (i < 4u) ? 17u : 19u)->ChangeSize(0.0f);
+                    nCreateBubbleFunc(0.4f, pEnemy, vPos, vDir, (i < 4u) ? 1u : 2u, (i < 4u) ? 17u : 19u, (i < 4u) ? 9u : 7u)->ChangeSize(0.0f);
                 }
             }
             else if(i < 12u)
@@ -2194,7 +2204,7 @@ void cNevoMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition ().xy();
                     const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90() * ((s_iTick % 2u) ? -1.0f : 1.0f);
 
-                    nCreateBubbleFunc(0.4f, pEnemy, vPos, vDir, 3u, 10u)->ChangeSize(0.0f);
+                    nCreateBubbleFunc(0.4f, pEnemy, vPos, vDir, 3u, 10u, 4u)->ChangeSize(0.0f);
                 }
             }
             else if(i < 17u)
@@ -2216,7 +2226,7 @@ void cNevoMission::__SetupOwn()
                     {
                         const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 4.5f) * 14.0f) + fBase);
 
-                        nCreateBubbleFunc(0.9f, pEnemy, vPos, vDir, 4u, 14u)->ChangeSize(0.0f);
+                        nCreateBubbleFunc(0.9f, pEnemy, vPos, vDir, 4u, 14u, 14u)->ChangeSize(0.0f);
                     }
                 }
             }
@@ -2266,6 +2276,7 @@ void cNevoMission::__SetupOwn()
                     if(++iBubbleCount >= 5u) STAGE_BADGE(2u, BADGE_HARD, pBullet->GetPosition())
                     else g_pGame->GetCombatText()->DrawProgress(iBubbleCount, 5u, pBullet->GetPosition());
 
+                    g_pSpecialEffects->CreateSplashColor(pBullet->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_ORANGE);
                     g_pSpecialEffects->PlaySound(pBullet->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
                 }
 
@@ -2285,7 +2296,7 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        if(apBig[0] && apBig[1])
+        if(g_pGame->IsTask() && apBig[0] && apBig[1])
         {
             const coreVector2 vNorm = (apBig[1]->GetPosition().xy() - apBig[0]->GetPosition().xy()).Normalized();
 
@@ -2454,8 +2465,8 @@ void cNevoMission::__SetupOwn()
 
         if(m_iStageSub >= 8u)
         {
-            if(m_iStageSub < 14u) fMoveSpeed = MIN(fMoveSpeed + 0.5f * TIME, 1.0f);
-                             else fMoveSpeed = MAX(fMoveSpeed - 0.5f * TIME, 0.0f);
+            if(m_iStageSub < 14u) fMoveSpeed = MIN1(fMoveSpeed + 0.5f * TIME);
+                             else fMoveSpeed = MAX0(fMoveSpeed - 0.5f * TIME);
 
             if(fMoveSpeed)
             {
@@ -2689,8 +2700,114 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
+    // demo
+    if(g_bDemoVersion) STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        cTracker* pTracker = g_pGame->GetTracker();
+
+        if(STAGE_BEGINNING)
+        {
+            pTracker->Resurrect();
+            pTracker->EnableWind();
+            pTracker->EnableRange();
+            pTracker->SetPosition(coreVector3(0.0f,1.5f,0.0f) * FOREGROUND_AREA3);
+            pTracker->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+        }
+
+        if(STAGE_TIME_POINT(2.0f))
+        {
+            g_pGame->FadeMusic(0.35f);
+
+            m_pNightmareSound->PlayRelative(this, 1.0f, 1.0f, false, SOUND_EFFECT);
+        }
+
+        if(STAGE_TIME_POINT(3.0f))
+        {
+            g_pGame->GetInterface ()->SetVisible(false);
+            g_pGame->GetCombatText()->SetVisible(false);
+        }
+
+        if(STAGE_TIME_BEFORE(5.0f))
+        {
+            g_pPostProcessing->SetChroma(STEP(3.0f, 5.0f, m_fStageTime) * 2.0f);
+
+            pTracker->SetPosition(coreVector3(0.0f, LERPB(1.5f, 0.7f, STEP(2.0f, 4.0f, m_fStageTime)), 0.0f) * FOREGROUND_AREA3);
+        }
+        else if(STAGE_TIME_POINT(5.3f))
+        {
+            g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,-1.0f));
+        }
+        else if(STAGE_TIME_POINT(5.6f))
+        {
+            pTracker->Kill(false);
+
+            g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));
+
+            g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+            g_pEnvironment->SetTargetSpeedNow(0.0f);
+
+            Core::Manager::Resource->UpdateResources();
+            Core::Manager::Resource->UpdateFunctions();
+
+            STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+            {
+                pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+                pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+            });
+
+            g_pGame->GetBulletManagerPlayer()->ClearBullets(false);
+        }
+        else if(STAGE_TIME_POINT(5.9f))
+        {
+            g_pPostProcessing->SetChroma(0.0f);
+
+            g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+
+            this->EnableRanges();
+        }
+
+        else if(STAGE_TIME_POINT(6.7f))
+        {
+            g_pPostProcessing->SetChroma(1.5f);
+
+            g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+
+            Core::Manager::Resource->UpdateResources();
+            Core::Manager::Resource->UpdateFunctions();
+        }
+        else if(STAGE_TIME_POINT(7.0f))
+        {
+            g_pPostProcessing->SetChroma(0.0f);
+
+            this->DisableRanges(false);
+
+            g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+            g_pEnvironment->SetTargetSpeedNow(6.0f);
+
+            Core::Manager::Resource->UpdateResources();
+            Core::Manager::Resource->UpdateFunctions();
+
+            cPlayer* pPlayer = g_pGame->GetPlayer(0u);
+
+            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+            pPlayer->SetMoveSpeed(0.0f);
+            pPlayer->SetPosition (coreVector3(0.0f,-0.5f,0.0f) * FOREGROUND_AREA3);
+            pPlayer->SetDirection(coreVector3(0.0f, 1.0f,0.0f));
+
+            if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
+
+            m_Leviathan.ResurrectDemo();
+        }
+        else if(STAGE_TIME_AFTER(7.4f))
+        {
+            if(m_Leviathan.HasStatus(ENEMY_STATUS_DEAD))
+                STAGE_FINISH_NOW
+        }
+    });
+
+    // ################################################################
     // boss
-    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    if(!g_bDemoVersion) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_BOSS(m_Leviathan, {180.0f, 270.0f, 360.0, 450.0f})
     });

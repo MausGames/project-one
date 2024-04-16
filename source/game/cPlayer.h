@@ -30,7 +30,7 @@
 #define PLAYER_EQUIP_WEAPONS       (EQUIP_WEAPONS)      // number of weapons a player can carry
 #define PLAYER_EQUIP_SUPPORTS      (EQUIP_SUPPORTS)     // 
 #define PLAYER_LIVES               (LIVES)              // 
-#define PLAYER_COLLISION_MIN       (0.15f)              // 
+#define PLAYER_COLLISION_MIN       (0.2f)               // 
 #define PLAYER_SIZE_FACTOR         (1.15f * m_fScale)   // 
 #define PLAYER_AREA_FACTOR         (1.06f)              // 
 #define PLAYER_RANGE_SIZE          (1.04f)              // 
@@ -73,10 +73,11 @@ enum ePlayerStatus : coreUint16
     PLAYER_STATUS_HEALER         = 0x0010u,   // 
     PLAYER_STATUS_TOP            = 0x0020u,   // 
     PLAYER_STATUS_KEEP_RANGE     = 0x0040u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0080u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0100u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x0200u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x0400u,   // 
+    PLAYER_STATUS_REPAIRED       = 0x0080u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0100u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0200u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x0400u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x0800u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 

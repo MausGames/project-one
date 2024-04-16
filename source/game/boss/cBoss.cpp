@@ -129,21 +129,8 @@ void cBoss::_EndBoss()
     // 
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
+        pPlayer->GetScoreTable()->TransferChain();
         pPlayer->GetScoreTable()->ResetOverride();
-    });
-
-    g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        if(pPlayer->HasStatus(PLAYER_STATUS_DEAD))
-        {
-            pPlayer->Resurrect();
-
-            pPlayer->SetCurHealth(1u);
-            if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
-            {
-                pPlayer->SetCurShield(5u);
-            }
-        }
     });
 }
 
@@ -173,6 +160,14 @@ void cBoss::_UpdateBoss()
                 g_MusicPlayer.Play();
             }
         }
+        
+        ////if(g_pGame->IsEasy() && (InBetween(this->GetCurHealthPct() > 0.01f))
+        //{
+        //    if(FRACT(m_fLifeTime * 1.0f) < FRACT(m_fLifeTimeBefore * 1.0f))
+        //    {
+        //        this->TakeDamage(F_TO_SI(I_TO_F(this->GetMaxHealth()) * 0.001f), ELEMENT_NEUTRAL, this->GetPosition().xy(), NULL);
+        //    }
+        //}
     
     
         for(coreUintW i = 0u; i < BOSS_HELPERS; ++i)

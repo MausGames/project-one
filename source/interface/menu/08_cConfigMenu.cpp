@@ -219,7 +219,7 @@ cConfigMenu::cConfigMenu()noexcept
         m_HudType     .SetEndless(true);
         m_MirrorMode  .SetEndless(true);
 
-        m_Navigator.BindObject(&m_Monitor,        &m_VideoTab,      NULL, &m_Resolution,     NULL, NULL,         MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_Monitor,        &m_VideoTab,      NULL, &m_Resolution,     NULL, &m_GlobalVolume,         MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_Resolution,     &m_Monitor,       NULL, &m_DisplayMode,    NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_DisplayMode,    &m_Resolution,    NULL, &m_AntiAliasing,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_AntiAliasing,   &m_DisplayMode,   NULL, &m_TextureFilter,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
@@ -584,7 +584,9 @@ void cConfigMenu::Move()
 
                         // skip joystick/gamepad input sets without available device
                         if((oInput.oType.GetCurValue() >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurValue() - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
+                        {
                             bSkip = true;
+                        }
 
                         // skip already assigned input sets
                         for(coreUintW k = 0u; k < MENU_CONFIG_INPUTS; ++k)
@@ -640,6 +642,13 @@ void cConfigMenu::Move()
                                 for(coreUintW m = 0u; m < INPUT_KEYS; ++m)
                                 {
                                     coreInt16& iOtherCurValue = this->__RetrieveInputDirValue(k, m);
+
+                                    const coreBool bKeyboard = (k < INPUT_SETS_KEYBOARD);
+                                    if(!bKeyboard && (m == 0u))                          continue;
+                                    if(!bKeyboard && (m == 1u))                          continue;
+                                    if(!bKeyboard && (m == 2u))                          continue;
+                                    if(!bKeyboard && (m == 3u))                          continue;
+                                    if( bKeyboard && (m == 4u + INPUT_KEYS_ACTION - 1u)) continue;
 
                                     // find same value and same input set type
                                     if((iOtherCurValue == iKey) && (((k < INPUT_SETS_KEYBOARD) && (iType < INPUT_SETS_KEYBOARD)) || (k == iType)) && (&iOtherCurValue != &iCurValue))
@@ -1024,8 +1033,7 @@ void cConfigMenu::SaveValues()
 
             if(bManager)
             {
-                Core::Manager::Resource->Reset(CORE_RESOURCE_RESET_EXIT);
-                Core::Manager::Resource->Reset(CORE_RESOURCE_RESET_INIT);
+                Core::Manager::Resource->Reset();
             }
         }
 

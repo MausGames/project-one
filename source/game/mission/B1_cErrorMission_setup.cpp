@@ -1168,7 +1168,7 @@ void cErrorMission::__SetupOwn()
                 const coreVector2 vOldPos = coreVector2(afOldOffset[i % 4u], pEnemy->GetPosition().arr(!bRotate)) / FOREGROUND_AREA;
                 const coreVector2 vNewPos = coreVector2(afNewOffset[i % 4u], pEnemy->GetPosition().arr(!bRotate)) / FOREGROUND_AREA;
                 const coreFloat   fSign   = SIGN(coreVector2::Dot(pEnemy->GetDirection().xy(), coreVector2(-1.0f,1.0f)) * (afNewOffset[i % 4u] - afOldOffset[i % 4u]));
-                const coreFloat   fTime   = LERPB(0.0f, 1.0f, fLifeTime);
+                const coreFloat   fTime   = BLENDB(fLifeTime);
 
                 pEnemy->DefaultMoveLerp     (vOldPos, vNewPos,         fTime);
                 pEnemy->DefaultOrientateLerp(0.0f*PI, 2.0f*PI * fSign, fTime);
@@ -1505,7 +1505,7 @@ void cErrorMission::__SetupOwn()
                 const auto nSumFunc = [](const coreVector2 v) {return v.x + v.y;};
             if(STAGE_BRANCH(1.0f, 2.0f))
             {
-                const coreFloat fHeight = LERPB(-1.0f, 1.2f, 1.0f - MAX(fLifeTime, 0.0f));
+                const coreFloat fHeight = LERPB(-1.0f, 1.2f, 1.0f - MAX0(fLifeTime));
                 pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy() * vGravity.Rotated90().Processed(ABS) + (fHeight * FOREGROUND_AREA.y) * vGravity, 0.0f));
                 
                 
@@ -2513,7 +2513,7 @@ void UnusedWaves()
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
                 const coreVector2 vDir = pEnemy->AimAtPlayerSide().Normalized();       
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5u, 1.0f, pEnemy, vPos, vDir)->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.0f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, pEnemy, vPos, vDir)->SetSize(coreVector3(1.0f,1.0f,1.0f) * 3.0f);
             }
         });
 

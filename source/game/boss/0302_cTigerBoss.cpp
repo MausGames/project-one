@@ -145,7 +145,7 @@ cTigerBoss::cTigerBoss()noexcept
 
     // 
     constexpr coreUintW aiSubs[] = {2u, 2u, 2u, 2u, 2u};
-    STATIC_ASSERT((ARRAY_SIZE(aiSubs) == TIGER_WEAPONS) && std::any_of(aiSubs, aiSubs + ARRAY_SIZE(aiSubs), [](const coreUintW A) {return (A > 0u) && (A <= TIGER_SUBS);}))
+    STATIC_ASSERT((ARRAY_SIZE(aiSubs) == TIGER_WEAPONS) && std::all_of(aiSubs, aiSubs + ARRAY_SIZE(aiSubs), [](const coreUintW A) {return (A > 0u) && (A <= TIGER_SUBS);}))
 
     // 
     for(coreUintW i = 0u; i < TIGER_WEAPONS; ++i)
@@ -703,7 +703,7 @@ void cTigerBoss::__MoveOwn()
     {
         m_fWeaponChange.Update(1.0f);
 
-        m_aWeapon[0].SetSize(this->GetSize() * LERPB(0.0f, 1.0f, MIN(m_fWeaponChange, 1.0f)) * 1.3f);
+        m_aWeapon[0].SetSize(this->GetSize() * BLENDB(MIN1(m_fWeaponChange)) * 1.3f);
 
         const coreVector3 vPos  = m_aWeaponOld[0].GetPosition() + coreVector3(vEnvDirection * (fEnvSpeed * TIME * -10.0f), 0.0f);
         const coreMatrix3 mRota = coreMatrix4::RotationZ(-15.0f * TIME).m123();

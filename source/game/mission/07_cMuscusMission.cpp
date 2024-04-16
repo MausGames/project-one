@@ -17,10 +17,13 @@ cMuscusMission::cMuscusMission()noexcept
 , m_afGenerateTime {}
 , m_afGenerateBang {}
 , m_afGenerateView {}
-, m_bGenerateTest  (true)
+, m_iGenerateTest  (0u)
+, m_iGenerateHit   (0u)
 , m_Pearl          (MUSCUS_PEARLS)
 , m_PearlWave      (MUSCUS_PEARLS)
 , m_iPearlActive   (0u)
+, m_iPearlHidden   (0u)
+, m_iDiamondIndex  (UINT8_MAX)
 , m_afStrikeTime   {}
 , m_apStrikePlayer {}
 , m_apStrikeTarget {}
@@ -42,6 +45,7 @@ cMuscusMission::cMuscusMission()noexcept
             // load object resources
             coreObject3D* pGenerate = &m_aGenerateRaw[i];
             pGenerate->DefineModel  ("object_cube_top.md3");
+            pGenerate->DefineVolume ("object_cube_volume.md3");
             pGenerate->DefineTexture(0u, "effect_energy.png");
             pGenerate->DefineProgram(iType ? "effect_energy_flat_spheric_program" : "effect_energy_flat_invert_program");
 
@@ -82,6 +86,26 @@ cMuscusMission::cMuscusMission()noexcept
     }
 
     // 
+    for(coreUintW i = 0u; i < MUSCUS_ZOMBIES; ++i)
+    {
+        m_aZombie[i].DefineModel  ("object_tetra_top.md3");
+        m_aZombie[i].DefineTexture(0u, "effect_energy.png");
+        m_aZombie[i].DefineProgram("effect_energy_flat_spheric_program");
+        m_aZombie[i].SetSize      (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+        m_aZombie[i].SetColor3    (COLOR_ENERGY_CYAN * 0.8f);
+        m_aZombie[i].SetTexSize   (coreVector2(1.0f,1.0f) * 0.5f);
+        m_aZombie[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
+    m_Diamond.DefineModel  ("object_cube_top.md3");
+    m_Diamond.DefineTexture(0u, "effect_energy.png");
+    m_Diamond.DefineProgram("effect_energy_flat_invert_program");
+    m_Diamond.SetColor3 (COLOR_ENERGY_ORANGE * 0.7f);
+    m_Diamond.SetTexSize(coreVector2(1.0f,1.0f) * 0.4f);
+    m_Diamond.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
     {
         m_aStrikeSpline[i].Reserve(2u);
@@ -110,6 +134,7 @@ cMuscusMission::~cMuscusMission()
     // 
     for(coreUintW i = 0u; i < MUSCUS_GENERATES; ++i) this->DisableGenerate(i, false);
     for(coreUintW i = 0u; i < MUSCUS_PEARLS;    ++i) this->DisablePearl   (i, false);
+    for(coreUintW i = 0u; i < MUSCUS_ZOMBIES;   ++i) this->DisableZombie  (i, false);
 }
 
 
@@ -130,6 +155,12 @@ void cMuscusMission::EnableGenerate(const coreUintW iIndex)
     m_afGenerateView[iIndex] = 0.0f;
 
     // 
+    ADD_BIT   (m_iGenerateTest, iIndex)
+    REMOVE_BIT(m_iGenerateHit,  iIndex)
+    STATIC_ASSERT(MUSCUS_GENERATES <= sizeof(m_iGenerateTest)*8u)
+    STATIC_ASSERT(MUSCUS_GENERATES <= sizeof(m_iGenerateHit) *8u)
+
+    // 
     pGenerate->SetAlpha  (0.0f);
     pGenerate->SetEnabled(CORE_OBJECT_ENABLE_ALL);
     pWave    ->SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -146,6 +177,9 @@ void cMuscusMission::DisableGenerate(const coreUintW iIndex, const coreBool bAni
 
     // 
     if(!pGenerate->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    if(iIndex == m_iDiamondIndex) this->EndDiamond(false);
 
     // 
     m_afGenerateTime[iIndex] = -1.0f;
@@ -171,13 +205,15 @@ void cMuscusMission::EnablePearl(const coreUintW iIndex)
     WARN_IF(pPearl->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisablePearl(iIndex, false);
 
     // 
-    ADD_BIT(m_iPearlActive, iIndex)
+    ADD_BIT   (m_iPearlActive, iIndex)
+    REMOVE_BIT(m_iPearlHidden, iIndex)
     STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iPearlActive)*8u)
+    STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iPearlHidden)*8u)
 
     // 
     m_afStrikeTime  [iIndex] = 0.0f;
-    m_apStrikePlayer[iIndex] = NULL;
     m_apStrikeTarget[iIndex] = NULL;
+    // # do not reset strike-player
 
     // 
     pPearl->SetAlpha  (0.0f);
@@ -214,12 +250,97 @@ void cMuscusMission::DisablePearl(const coreUintW iIndex, const coreBool bAnimat
 
 // ****************************************************************
 // 
+void cMuscusMission::EnableZombie(const coreUintW iIndex)
+{
+    ASSERT(iIndex < MUSCUS_ZOMBIES)
+    coreObject3D& oZombie = m_aZombie[iIndex];
+
+    // 
+    WARN_IF(oZombie.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableZombie(iIndex, false);
+
+    // 
+    oZombie.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&oZombie);
+}
+
+
+// ****************************************************************
+// 
+void cMuscusMission::DisableZombie(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < MUSCUS_ZOMBIES)
+    coreObject3D& oZombie = m_aZombie[iIndex];
+
+    // 
+    if(!oZombie.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    oZombie.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&oZombie);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->CreateSplashColor(oZombie.GetPosition(), 25.0f, 10u, COLOR_ENERGY_CYAN);
+}
+
+
+// ****************************************************************
+// 
+void cMuscusMission::StartDiamond(const coreUintW iIndex)
+{
+    WARN_IF(m_iDiamondIndex != UINT8_MAX) return;
+
+    ASSERT(iIndex < MUSCUS_GENERATES)
+    coreObject3D* pGenerate = (*m_Generate    .List())[iIndex];
+    coreObject3D* pWave     = (*m_GenerateWave.List())[iIndex];
+
+    // 
+    m_iDiamondIndex = iIndex;
+
+    // 
+    ASSERT(pGenerate->IsEnabled(CORE_OBJECT_ENABLE_ALL))
+    pGenerate->SetColor3(COLOR_ENERGY_ORANGE * 0.7f);
+    pWave    ->SetColor3(COLOR_ENERGY_ORANGE * 0.7f);
+
+    // 
+    m_Diamond.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Diamond);
+}
+
+
+// ****************************************************************
+// 
+void cMuscusMission::EndDiamond(const coreBool bAnimated)
+{
+    if(m_iDiamondIndex == UINT8_MAX) return;
+
+    ASSERT(m_iDiamondIndex < MUSCUS_GENERATES)
+    coreObject3D* pGenerate = (*m_Generate    .List())[m_iDiamondIndex];
+    coreObject3D* pWave     = (*m_GenerateWave.List())[m_iDiamondIndex];
+
+    // 
+    m_iDiamondIndex = UINT8_MAX;
+
+    // 
+    pGenerate->SetColor3(COLOR_ENERGY_GREEN * 0.7f);
+    pWave    ->SetColor3(COLOR_ENERGY_GREEN * 0.7f);
+
+    // 
+    m_Diamond.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Diamond);
+}
+
+
+// ****************************************************************
+// 
 void cMuscusMission::StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, const cShip* pTarget)
 {
     ASSERT(iIndex < MUSCUS_PEARLS)
     const coreObject3D* pPearl = (*m_Pearl.List())[iIndex];
 
     ASSERT(pPlayer && pTarget && HAS_BIT(m_iPearlActive, iIndex))
+
+    // 
+    REMOVE_BIT(m_iPearlHidden, iIndex)
 
     // 
     const coreVector2 vDiff = pTarget->GetPosition().xy() - pPearl->GetPosition().xy();
@@ -244,11 +365,23 @@ void cMuscusMission::StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, cons
 
 // ****************************************************************
 // 
+void cMuscusMission::__RenderOwnBottom()
+{
+    DEPTH_PUSH
+
+    // 
+    for(coreUintW i = 0u; i < MUSCUS_ZOMBIES; ++i) m_aZombie[i].Render();
+    for(coreUintW i = 0u; i < MUSCUS_ZOMBIES; ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_aZombie[i]);
+}
+
+
+// ****************************************************************
+// 
 void cMuscusMission::__RenderOwnOver()
 {
     DEPTH_PUSH
 
-    glDepthMask(false);
+    glDepthMask(false);   // TODO 1: glDisable(GL_DEPTH_TEST); in over ???
     {
         // 
         m_GenerateWave.Render();
@@ -261,7 +394,11 @@ void cMuscusMission::__RenderOwnOver()
 
     DEPTH_PUSH
 
-    glDepthMask(false);
+    // 
+    m_Diamond.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Diamond);
+
+    glDepthMask(false);   // TODO 1: glDisable(GL_DEPTH_TEST); in over ???
     {
         // 
         m_PearlWave.Render();
@@ -280,6 +417,9 @@ void cMuscusMission::__MoveOwnAfter()
 {
     // 
     m_fAnimation.UpdateMod(0.2f, 10.0f);
+
+    // 
+    m_iGenerateHit = 0u;
 
     // 
     for(coreUintW i = 0u; i < MUSCUS_GENERATES; ++i)
@@ -312,11 +452,11 @@ void cMuscusMission::__MoveOwnAfter()
 
         // 
         const coreFloat fOffset = I_TO_F(i) * (1.0f/8.0f);
-        const coreFloat fBang   = LERPB(0.0f, 1.0f, 1.0f - m_afGenerateBang[i]);
+        const coreFloat fBang   = BLENDB(1.0f - m_afGenerateBang[i]);
 
         // 
         pGenerate->SetSize     (coreVector3(5.0f,5.0f,5.0f) * LERP(1.2f, 1.0f, fBang));
-        pGenerate->SetAlpha    (LERPH3(0.0f, 1.0f, m_afGenerateView[i]));
+        pGenerate->SetAlpha    (BLENDH3(m_afGenerateView[i]));
         pGenerate->SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
 
         // 
@@ -327,21 +467,28 @@ void cMuscusMission::__MoveOwnAfter()
         pWave->SetTexOffset(pGenerate->GetTexOffset());
 
         // 
-        if(m_bGenerateTest)
+        if(HAS_BIT(m_iGenerateTest, i))
         {
             // 
-            cPlayer::TestCollision(PLAYER_TEST_NORMAL, pGenerate, [&](cPlayer* OUTPUT pPlayer, const coreObject3D* pGenerate, const coreVector3 vIntersection, const coreBool bFirstHit)
+            cPlayer::TestCollision(this->IsGenerateDiamond(i) ? PLAYER_TEST_ALL : PLAYER_TEST_NORMAL, pGenerate, [&](cPlayer* OUTPUT pPlayer, const coreObject3D* pGenerate, const coreVector3 vIntersection, const coreBool bFirstHit)
             {
                 if(!bFirstHit) return;
 
                 // 
-                pPlayer->TakeDamage(5, ELEMENT_GREEN, vIntersection.xy());
+                ADD_BIT(m_iGenerateHit, i)
+
+                // 
+                if(!this->IsGenerateDiamond(i)) pPlayer->TakeDamage(5, ELEMENT_GREEN, vIntersection.xy());
 
                 // 
                 this->BangGenerate(i);
 
                 // 
-                g_pSpecialEffects->CreateSplashColor(pGenerate->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_GREEN);
+                for(coreUintW j = 0u; j < MUSCUS_GENERATES; ++j)
+                    this->ShowGenerate(j, 1.0f);
+
+                // 
+                g_pSpecialEffects->CreateSplashColor(pGenerate->GetPosition(), SPECIAL_SPLASH_SMALL, pGenerate->GetColor3() / 0.7f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             });
         }
@@ -350,6 +497,24 @@ void cMuscusMission::__MoveOwnAfter()
     // 
     m_Generate    .MoveNormal();
     m_GenerateWave.MoveNormal();
+
+    // 
+    if(m_Diamond.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        ASSERT(m_iDiamondIndex != UINT8_MAX)
+        coreObject3D* pGenerate = (*m_Generate.List())[m_iDiamondIndex];
+
+        // 
+        const coreVector2 vDir = coreVector2::Direction(m_fAnimation * (4.0f*PI));
+
+        // 
+        m_Diamond.SetPosition (pGenerate->GetPosition ());
+        m_Diamond.SetSize     (pGenerate->GetSize     () * 0.5f);
+        m_Diamond.SetDirection(coreVector3(vDir, 0.0f));
+        m_Diamond.SetAlpha    (pGenerate->GetAlpha    ());
+        m_Diamond.SetTexOffset(pGenerate->GetTexOffset());
+        m_Diamond.Move();
+    }
 
     // 
     m_iStrikeState = 0u;
@@ -375,7 +540,8 @@ void cMuscusMission::__MoveOwnAfter()
             {
                 // 
                 this->DisablePearl(i, true);
-                g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->CreateBlowColor(pPearl->GetPosition(), coreVector3(-this->GetStrikeDir(i), 0.0f), 100.0f, 10u, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
 
                 // 
                 ADD_BIT(m_iStrikeState, i)
@@ -384,18 +550,21 @@ void cMuscusMission::__MoveOwnAfter()
         }
 
         // 
-        if(HAS_BIT(m_iPearlActive, i)) pPearl->SetAlpha(MIN(pPearl->GetAlpha() + 10.0f*TIME, 1.0f));
-                                  else pPearl->SetAlpha(MAX(pPearl->GetAlpha() - 10.0f*TIME, 0.0f));
+        if(HAS_BIT(m_iPearlActive, i)) pPearl->SetAlpha(MIN1(pPearl->GetAlpha() + 10.0f*TIME));
+                                  else pPearl->SetAlpha(MAX0(pPearl->GetAlpha() - 10.0f*TIME));
 
         // 
         if(!pPearl->GetAlpha()) this->DisablePearl(i, false);
+
+        // 
+        if(HAS_BIT(m_iPearlHidden, i)) pPearl->SetAlpha(0.0f);
 
         // 
         const coreFloat fOffset = I_TO_F(MUSCUS_PEARLS - i) * (1.0f/7.0f);
         const coreFloat fValue  = FRACT(7.0f * m_fAnimation + fOffset);
 
         // 
-        pPearl->SetSize     (coreVector3(2.0f,2.0f,2.0f) * pPearl->GetAlpha());
+        pPearl->SetSize     (coreVector3(2.4f,2.4f,2.4f) * pPearl->GetAlpha());
         pPearl->SetColor3   (m_apStrikeTarget[i] ? (COLOR_ENERGY_WHITE * 0.6f) : (COLOR_ENERGY_YELLOW * 0.7f));
         pPearl->SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
 
@@ -411,4 +580,15 @@ void cMuscusMission::__MoveOwnAfter()
     // 
     m_Pearl    .MoveNormal();
     m_PearlWave.MoveNormal();
+
+    // 
+    for(coreUintW i = 0u; i < MUSCUS_ZOMBIES; ++i)
+    {
+        coreObject3D& oZombie = m_aZombie[i];
+        if(!oZombie.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        oZombie.SetTexOffset(coreVector2(1.0f,1.0f) * -0.5f * m_fAnimation);
+        oZombie.Move();
+    }
 }

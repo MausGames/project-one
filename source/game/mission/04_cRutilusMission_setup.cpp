@@ -187,7 +187,7 @@ void cRutilusMission::__SetupOwn()
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
 
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f * STAGE_STEP(1u, 32u));
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f * STEP(1.0f, 24.0f, I_TO_F(m_iStageSub)));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_GREEN);
@@ -529,7 +529,6 @@ void cRutilusMission::__SetupOwn()
     // TASK: kill a certain group of enemies in order
     // TASK: move into all 4 invisible corners
     // TODO 1: hardmode: player cannot rotate, is rotating all the time, player bullets rotate with background, rotation is based on player position or other actions
-    // TODO 1: do not always set base-color
     // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
     // TODO 1: MAIN: task-check, regular score, sound
     STAGE_MAIN({TAKE_ALWAYS, 1u})
@@ -638,7 +637,7 @@ void cRutilusMission::__SetupOwn()
 
             g_pGame->SetVisibleCheck(m_iStageSub != 21u);
 
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f + 0.25f * STAGE_STEP(1u, 22u));
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.25f + 0.25f * STEP(1.0f, 22.0f, I_TO_F(m_iStageSub)));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
@@ -714,7 +713,7 @@ void cRutilusMission::__SetupOwn()
                 this->DisableCapsule(true);
             }
 
-            const coreFloat fTime = MAX(1.0f - fTransitionTime, 0.0f);
+            const coreFloat fTime = MAX0(1.0f - fTransitionTime);
 
             pHelper->SetPosition(coreVector3(LERPB(-1.2f, 1.08f, fTime) * FOREGROUND_AREA.x, 0.0f, 0.0f));
 
@@ -866,7 +865,7 @@ void cRutilusMission::__SetupOwn()
             }
             else if(i < 76u)
             {
-                const coreFloat fCloseMove = (i >= 68u && i < 72u) ? LERPS(1.0f, 0.3f, MIN1(fCloseTime * 0.2f)) : 1.0f;
+                const coreFloat fCloseMove = (i < 72u) ? LERPS(1.0f, 0.3f, MIN1(fCloseTime * 0.2f)) : 1.0f;
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f) * fCloseMove;
                 const coreVector2 vOffset = coreVector2(0.0f,0.0f);
@@ -898,25 +897,37 @@ void cRutilusMission::__SetupOwn()
 
                 pEnemy->ToAxis(coreVector2::Direction(I_TO_F(i - 92u) / 8.0f * (-2.0f*PI) + (1.75f*PI)));
 
-                if((i - 92u) == iOrderState)
-                {
-                    pEnemy->SetBaseColor(COLOR_SHIP_BLACK, false, true);
-                    g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
-                }
-                else
-                {
-                    pEnemy->SetBaseColor(COLOR_SHIP_RED);
-                }
-
-                if(pEnemy->ReachedDeath())
+                if(iOrderState < 8u)
                 {
                     if((i - 92u) == iOrderState)
                     {
-                        if(++iOrderState >= 8u) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                        if(!pEnemy->HasStatus(ENEMY_STATUS_CUSTOM))
+                        {
+                            pEnemy->SetBaseColor(COLOR_SHIP_BLACK, false, true);
+                            pEnemy->AddStatus   (ENEMY_STATUS_CUSTOM);
+                        }
+
+                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
                     }
-                    else
+
+                    if(pEnemy->ReachedDeath())
                     {
-                        iOrderState = 0xFFu;
+                        if((i - 92u) == iOrderState)
+                        {
+                            if(++iOrderState == 8u) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                        }
+                        else
+                        {
+                            STAGE_FOREACH_ENEMY(pSquad1, pEnemy2, j)
+                            {
+                                if(pEnemy2->HasStatus(ENEMY_STATUS_CUSTOM))
+                                {
+                                    pEnemy2->SetBaseColor(COLOR_SHIP_RED);
+                                }
+                            });
+
+                            iOrderState = 0xFFu;
+                        }
                     }
                 }
             }
@@ -1005,6 +1016,7 @@ void cRutilusMission::__SetupOwn()
         // TODO 1: gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
     // TODO 1: MAIN: task-check, hard idea, regular score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
     // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble
+    // TODO 1:  #### vielleicht gerade gegner-angriffe (wenn sich bubble bewegt)
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData = 6u;
@@ -1102,7 +1114,7 @@ void cRutilusMission::__SetupOwn()
 
             std::memset(aiOwnTick, 0, sizeof(coreUint32) * iNumData);
 
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.5f + 0.25f * STAGE_STEP(1u, 24u));
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.5f + 0.25f * STEP(1.0f, 24.0f, I_TO_F(m_iStageSub)));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
@@ -1144,8 +1156,8 @@ void cRutilusMission::__SetupOwn()
         {
             fAreaMove += 1.0f * TIME;
 
-            if(m_iStageSub < 12u) fAreaLerp = MIN(fAreaLerp + 0.5f * TIME, 1.0f);
-                             else fAreaLerp = MAX(fAreaLerp - 0.5f * TIME, 0.0f);
+            if(m_iStageSub < 12u) fAreaLerp = MIN1(fAreaLerp + 0.5f * TIME);
+                             else fAreaLerp = MAX0(fAreaLerp - 0.5f * TIME);
 
             pHelper->SetPosition(coreVector3(SIN(fAreaMove) * 0.5f * FOREGROUND_AREA.x * BLENDH3(fAreaLerp), 0.0f, 0.0f));
         }
@@ -1183,8 +1195,8 @@ void cRutilusMission::__SetupOwn()
         {
             fAreaMove += 1.0f * TIME;
 
-            if(m_iStageSub < 20u) fAreaLerp = MIN(fAreaLerp + 0.25f * TIME, 1.0f);
-                             else fAreaLerp = MAX(fAreaLerp - 0.25f * TIME, 0.0f);
+            if(m_iStageSub < 20u) fAreaLerp = MIN1(fAreaLerp + 0.25f * TIME);
+                             else fAreaLerp = MAX0(fAreaLerp - 0.25f * TIME);
 
             pHelper->SetPosition(coreVector3(0.0f, SIN(fAreaMove) * 0.5f * FOREGROUND_AREA.y * BLENDH3(fAreaLerp), 0.0f));
         }
@@ -1288,7 +1300,7 @@ void cRutilusMission::__SetupOwn()
                 {
                     if(F_TO_UI(I_TO_F(s_iTick - 1u) * fSpeed) != F_TO_UI(I_TO_F(s_iTick) * fSpeed))
                     {
-                        coreUint32& iOwnTick = aiOwnTick[i % iNumData];
+                        coreUint32& iOwnTick = STAGE_SINK_UINT(aiOwnTick[i % iNumData]);
 
                         if(!g_pGame->IsEasy() || ((iOwnTick % 8u) < 4u))
                         {
@@ -1352,7 +1364,7 @@ void cRutilusMission::__SetupOwn()
                     if(++iTockState == RUTILUS_TOCKS) STAGE_BADGE(1u, BADGE_NORMAL, pTock->GetPosition())
                     else g_pGame->GetCombatText()->DrawProgress(iTockState, RUTILUS_TOCKS, pTock->GetPosition());
 
-                    g_pSpecialEffects->PlaySound(pTock->GetPosition(), 1.0f, 0.7f + 0.05f * I_TO_F(iTockState), SOUND_PLACEHOLDER);
+                    g_pSpecialEffects->PlaySound(pTock->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iTockState, RUTILUS_TOCKS), SOUND_PLACEHOLDER);
                 }
             });
         }
@@ -1371,12 +1383,6 @@ void cRutilusMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < RUTILUS_TOCKS; ++i)
             this->DisableTock(i, false);
-
-        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
-        {
-            pPlayer->SetMoveSpeed (1.0f);
-            pPlayer->SetShootSpeed(1.0f);
-        });
 
         STAGE_FINISH_NOW
     });
@@ -1409,15 +1415,12 @@ void cRutilusMission::__SetupOwn()
     // TASK: attack multiple targets at the same time
     // TASK: fly multiple times around the helper
     // TODO 1: gravitation should work equally with all bullet types (basis-speed verwenden, von cWeapon, oder eher bullet, muss ich eh speichern für längen-veränderung)
-    
     // TODO 1: distortion for waves ?
     // TODO 1: improve player bullet curve shape, with special vertex shader and different bullet entities
-    
-    // TODO 1: move circular wave effect ot some other mechanic, then delete it here
-    
     // TODO 1: improve coop targeting
-
-    // TODO 1: MAIN: task-check, easy, hard idea, coop, regular score, badges, sound, attack size/count/speed, background rota/speed
+    // TODO 1: improve boring middle enemy-waves (first 3 are good, last 2 are good)
+    // TODO 1: bullet-linien sollten nicht unterbrochen werden, zumindest am anfang, nicht so wichtig beim kill
+    // TODO 1: MAIN: task-check, easy, hard idea, coop, regular score, badges, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumTargets = 16u;
@@ -1438,7 +1441,7 @@ void cRutilusMission::__SetupOwn()
             pPath2->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 112u)
+        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 108u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -1461,17 +1464,16 @@ void cRutilusMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-            // TODO 1: 0-11 fixen
-                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1, 12u,  19u)   // ##
-            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1, 20u,  35u)   // ##
-            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 60u,  71u)   // ###
-            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 72u,  79u)   // ####
-            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 80u,  87u)   // ####
-            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 88u,  95u)   // ####
-            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 36u,  43u)   // ##
-            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 44u,  59u)   // ##
-            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 0u,   7u)   // #
-            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 96u, 111u)   // #####
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,   7u)   // #
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  8u,  23u)   // #
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 48u,  59u)   // ##
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 60u,  67u)   // ###
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 68u,  75u)   // ###
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 76u,  83u)   // ###
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 24u,  31u)   // #
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 32u,  47u)   // #
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 84u,  91u)   // ####
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 92u, 107u)   // ####
             else if(STAGE_SUB(11u)) STAGE_DELAY_START_CLEAR
 
             iTransitionState = 0u;
@@ -1480,7 +1482,7 @@ void cRutilusMission::__SetupOwn()
             for(coreUintW i = 0u; i < iNumTargets; ++i)
                 avStart[i] = HIDDEN_POS;
 
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.75f + 0.25f * STAGE_STEP(1u, 11u));
+            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.75f + 0.25f * STEP(1.0f, 11.0f, I_TO_F(m_iStageSub)));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_RED);
@@ -1671,65 +1673,65 @@ void cRutilusMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i >= 12u && i < 72u) ? 1.0f : 0.7f, (i < 12u) ? (0.4f * I_TO_F(i)) : ((i < 96u) ? ((i < 20u || (i >= 36u && i < 72u)) ? 1.0f : ((i >= 80u && i < 88u) ? 2.0f : 0.2f)) : (0.4f * I_TO_F(i - 96u))))
+            STAGE_LIFETIME(pEnemy, (i < 60u) ? 1.0f : 0.7f, (i < 84u) ? ((i < 8u || (i >= 24u && i < 32u) || (i >= 48u && i < 60u)) ? 1.0f : ((i >= 68u && i < 76u) ? 2.0f : 0.2f)) : ((i < 92u) ? (0.4f * I_TO_F(i - 84u) + 1.0f) : (0.4f * I_TO_F(i - 92u) + 0.2f)))
 
-            if(i < 12u)
+            if(i < 48u)
+            {
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(i % 8u) - 3.5f) * 0.28f, (i % 2u) ? -0.05f : 0.05f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                     if(i <  8u) {}
+                else if(i < 16u) pEnemy->Rotate90 ();
+                else if(i < 24u) pEnemy->Rotate270();
+                else if(i < 32u) {}
+                else if(i < 40u) pEnemy->Rotate90 ();
+                else if(i < 48u) pEnemy->Rotate270();
+            }
+            else if(i < 60u)
+            {
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 48u) % 3u) - 1.0f) * 0.28f, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                     if(i < 51u) {}
+                else if(i < 54u) pEnemy->Rotate90 ();
+                else if(i < 57u) pEnemy->Rotate180();
+                else if(i < 60u) pEnemy->Rotate270();
+            }
+            else if(i < 84u)
             {
                 STAGE_REPEAT(pPath2->GetTotalDistance())
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F(i) - 3.5f) * 0.28f, 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F((i - 60u) % 8u) - 3.5f) * 0.28f, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+
+                      if(i < 68u) {}
+                 else if(i < 76u) pEnemy->Rotate90 ();
+                 else if(i < 84u) pEnemy->Rotate270();
+            }
+            else if(i < 92u)
+            {
+                STAGE_REPEAT(pPath2->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(i - 84u) - 3.5f) * 0.28f, 0.0f);
 
                 pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
 
                 pEnemy->Rotate90();
                 if(i % 2u) pEnemy->InvertX();
             }
-            else if(i < 60u)
-            {
-                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F((i - 12u) % 8u) - 3.5f) * 0.28f, (i % 2u) ? -0.05f : 0.05f);
-
-                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-
-                     if(i < 20u) {}
-                else if(i < 28u) pEnemy->Rotate90 ();
-                else if(i < 36u) pEnemy->Rotate270();
-                else if(i < 44u) {}
-                else if(i < 52u) pEnemy->Rotate90 ();
-                else if(i < 60u) pEnemy->Rotate270();
-            }
-            else if(i < 72u)
-            {
-                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F((i - 60u) % 3u) - 1.0f) * 0.28f, 0.0f);
-
-                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-
-                     if(i < 63u) {}
-                else if(i < 66u) pEnemy->Rotate90 ();
-                else if(i < 69u) pEnemy->Rotate180();
-                else if(i < 72u) pEnemy->Rotate270();
-            }
-            else if(i < 96u)
+            else if(i < 108u)
             {
                 STAGE_REPEAT(pPath2->GetTotalDistance())
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F((i - 72u) % 8u) - 3.5f) * 0.28f, 0.0f);
-
-                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
-
-                      if(i < 80u) {}
-                 else if(i < 88u) pEnemy->Rotate90 ();
-                 else if(i < 96u) pEnemy->Rotate270();
-            }
-            else if(i < 112u)
-            {
-                STAGE_REPEAT(pPath2->GetTotalDistance())
-
-                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-                const coreVector2 vOffset = coreVector2((I_TO_F(((i - 96u + 1u) * 3u) % 8u) - 3.5f) * 0.28f, 0.0f);
+                const coreVector2 vOffset = coreVector2((I_TO_F(((i - 92u + 1u) * 3u) % 8u) - 3.5f) * 0.28f, 0.0f);
 
                 pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
             }
@@ -1738,10 +1740,10 @@ void cRutilusMission::__SetupOwn()
 
             const coreFloat fShootSpeed = 9.0f / fLifeSpeed;
 
-            if(!g_pGame->IsEasy() && STAGE_TICK_LIFETIME_BASE(fShootSpeed, (i >= 12u && i < 96u) ? 0.0f : (fLifeOffset * -fShootSpeed)) && ((s_iTick % 13u) >= 9u))
+            if(!g_pGame->IsEasy() && STAGE_TICK_LIFETIME_BASE(fShootSpeed, (i < 84u) ? 0.0f : (fLifeOffset * -fShootSpeed)) && ((s_iTick % 13u) >= 9u))
             {
-                coreVector2& vStart  = avStart [i % iNumTargets];
-                coreVector2& vTarget = avTarget[i % iNumTargets];
+                coreVector2& vStart  = STAGE_SINK_VEC2(avStart [i % iNumTargets]);
+                coreVector2& vTarget = STAGE_SINK_VEC2(avTarget[i % iNumTargets]);
 
                 if(((s_iTick % 13u) == 9u) || (vStart == HIDDEN_POS))
                 {
@@ -1749,7 +1751,7 @@ void cRutilusMission::__SetupOwn()
                     vTarget = pEnemy->NearestPlayerSide()->GetPosition().xy();
                 }
 
-                const coreVector2 vPos = vStart;
+                const coreVector2 vPos =  vStart;
                 const coreVector2 vDir = (vTarget - vPos).Normalized();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
@@ -2191,7 +2193,7 @@ void cRutilusMission::__SetupOwn()
             }
             else
             {
-                pEnemy->SetDirection(coreVector3(coreVector2::Direction(afMeteorRotation[i] * (bMedium ? -1.0f : 1.0f)), 0.0f));
+                pEnemy->DefaultRotate(afMeteorRotation[i] * (bMedium ? -1.0f : 1.0f));
                 afMeteorRotation[i] += 1.1f * TIME;
 
                 if(avMeteorMove[i])
@@ -2276,7 +2278,7 @@ void cRutilusMission::__SetupOwn()
 
                 afAddRotation[i] = FMOD(afAddRotation[i] - 2.4f * TIME, -2.0f*PI);
 
-                pEnemy->SetDirection(coreVector3(coreVector2::Direction(afAddRotation[i]), 0.0f));
+                pEnemy->DefaultRotate(afAddRotation[i]);
 
                 if(STAGE_TICK_LIFETIME_BASE(26.0f, 26.0f * afAddOffset[i]) && ((s_iTick % 4u) < 2u))
                 {

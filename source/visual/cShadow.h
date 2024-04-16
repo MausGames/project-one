@@ -15,6 +15,7 @@
 // TODO 5: poisson sampling
 // TODO 3: make sure no textures are changed when rendering shadow or outline
 // TODO 3: check if projected texture-sampling-offsets in shader are correct (and check if shadow of stings on stings in snow-background can be fixed)
+// TODO 2: shader-program recompile might not work, if there are more than 1 reference for its shaders
 
 // NOTE: shadow map binds local objects (per frame buffer) and global objects (on all frame buffers, for transitions)
 // NOTE: all global objects are on the foreground

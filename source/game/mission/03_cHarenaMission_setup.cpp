@@ -105,6 +105,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: der flip muss verbessert werden: er muss viel sichtbarer sein, farbe form bewegung ?
     // TODO 1: MAIN: task-check, hard idea, regular score, sound, background rota/speed
     // TODO 1: im ersten frame beim flimmern is nur die outline sichtbar (gefüllt) (aufgenommen im video von 05.11.2022)
+    // TODO 1: delay nach N sekunden, wenn der letzte gegner am leben gelassen wird, damit zeit+combo nicht abläuft
     m_aInsanityStage[0] = [this]()
     {
         STAGE_ADD_PATH(pPath1)
@@ -1145,7 +1146,7 @@ void cHarenaMission::__SetupOwn()
                     if(++iEggState >= HARENA_EGGS) STAGE_BADGE(2u, BADGE_HARD, pEgg->GetPosition())
                     else g_pGame->GetCombatText()->DrawText(coreData::ToChars(HARENA_EGGS - iEggState), pEgg->GetPosition(), COLOR_MENU_INSIDE);
 
-                    g_pSpecialEffects->PlaySound(pEgg->GetPosition(), 1.0f, 0.7f + 0.05f * I_TO_F(iEggState), SOUND_PLACEHOLDER);
+                    g_pSpecialEffects->PlaySound(pEgg->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iEggState, HARENA_EGGS), SOUND_PLACEHOLDER);
                 }
             });
         }
@@ -1361,7 +1362,7 @@ void cHarenaMission::__SetupOwn()
                     if(++iFlummiCollect >= iFlummiRequire) STAGE_BADGE(0u, BADGE_EASY, pFlummi->GetPosition())
                     else g_pGame->GetCombatText()->DrawText(coreData::ToChars(iFlummiRequire - iFlummiCollect), pFlummi->GetPosition(), COLOR_MENU_INSIDE);
 
-                    g_pSpecialEffects->PlaySound(pFlummi->GetPosition(), 1.0f, 0.7f + 0.05f * I_TO_F(iFlummiCollect), SOUND_PLACEHOLDER);
+                    g_pSpecialEffects->PlaySound(pFlummi->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlummiCollect, iFlummiRequire), SOUND_PLACEHOLDER);
                 }
             });
         }
@@ -1379,11 +1380,14 @@ void cHarenaMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            ASSERT(!HAS_BIT(iAssert, i % iNumData))
-            ADD_BIT(iAssert, i % iNumData)
+            if(!pEnemy->HasStatus(ENEMY_STATUS_HIDDEN))
+            {
+                ASSERT(!HAS_BIT(iAssert, i % iNumData))
+                ADD_BIT(iAssert, i % iNumData)
+            }
 
-            coreVector2& vMove   = avMove  [i % iNumData];
-            coreVector2& vRotate = avRotate[i % iNumData];
+            coreVector2& vMove   = STAGE_SINK_VEC2(avMove  [i % iNumData]);
+            coreVector2& vRotate = STAGE_SINK_VEC2(avRotate[i % iNumData]);
 
             const coreBool bEnabler = (i == iEnablerIndex);
             const coreBool bMover   = (i == iMoverIndex);
@@ -1868,12 +1872,12 @@ void cHarenaMission::__SetupOwn()
         {
             if(m_iInsanity == HARENA_INSANITY_P1)
             {
-                     if(STAGE_SUB(14u)) {}
+                     if(STAGE_SUB(15u)) {}
             }
             else if(m_iInsanity)
             {
-                     if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 15u, 15u)
-                else if(STAGE_SUB(13u)) {}   // may not be used
+                     if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 15u, 15u)
+                else if(STAGE_SUB(14u)) {}   // may not be used
             }
             else
             {
@@ -1888,8 +1892,7 @@ void cHarenaMission::__SetupOwn()
                 else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1,  9u, 11u)
                 else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 12u, 12u)
                 else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 13u, 14u)
-
-                else if(pSquad1->IsFinished()) pSquad2->ClearEnemies(true);
+                else if(STAGE_SUB(12u)) pSquad2->ClearEnemies(true);
 
                 iBreakRef = 0u;
             }
@@ -2007,7 +2010,7 @@ void cHarenaMission::__SetupOwn()
                 }
             }
         }
-        else if(m_iStageSub == 12u)
+        else if(m_iStageSub == 13u)
         {
             if((iLoopKill < 32u) && STAGE_TICK_FREE2(10.0f, 0.0f))
             {
@@ -2634,6 +2637,8 @@ void cHarenaMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
+            STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
+
             coreUintW iColumn, iRow;
             switch(i)
             {
@@ -2736,15 +2741,15 @@ void cHarenaMission::__SetupOwn()
             }
             else
             {
-                coreFloat& fIntroTime = afIntroTime[i % iNumData];
+                coreFloat& fIntroTime = STAGE_SINK_FLOAT(afIntroTime[i % iNumData]);
 
                 fIntroTime += 3.0f * TIME;
 
-                const coreFloat fValue = LERPB(0.0f, 1.0f, MIN1(fIntroTime));
+                const coreFloat fValue = BLENDB(MIN1(fIntroTime));
                 const coreFloat fSpin  = m_fStageTime * 3.0f + fValue;
 
-                pEnemy->SetSize     (coreVector3(1.0f,1.0f,1.0f) * ((i == iChampion) ? 1.8f : 1.3f) * fValue);
-                pEnemy->SetDirection(coreVector3(coreVector2::Direction((0.5f*PI) * fSpin), 0.0f));
+                pEnemy->SetSize      (coreVector3(1.0f,1.0f,1.0f) * ((i == iChampion) ? 1.8f : 1.3f) * fValue);
+                pEnemy->DefaultRotate((0.5f*PI) * fSpin);
             }
 
             this->CrashEnemy(pEnemy);

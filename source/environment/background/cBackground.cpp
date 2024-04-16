@@ -603,20 +603,14 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick3(const coreBatchList* pO
 // reset with the resource manager
 void cBackground::__Reset(const coreResourceReset eInit)
 {
-    if(HAS_FLAG(eInit, CORE_RESOURCE_RESET_INIT))
+    if(eInit)
     {
         // 
         m_FrameBuffer    .Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
         m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-        if(HAS_FLAG(eInit, CORE_RESOURCE_RESET_RESHAPE))
-        {
-        }
-        else
-        {
-            // 
-            this->__InitOwn();
-        }
+        // 
+        this->__InitOwn();
     }
     else
     {
@@ -630,14 +624,19 @@ void cBackground::__Reset(const coreResourceReset eInit)
 }
 
 
+// ****************************************************************
+// reshape with the resource manager
 void cBackground::__Reshape()
 {
-    m_FrameBuffer    .Delete();
+    // 
+    m_FrameBuffer.Delete();
+    m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+
+    // 
     m_ResolvedTexture.Delete();
-    
-    m_FrameBuffer    .Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
     m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
-        
+
+    // 
     if(m_pWater) m_pWater->Reshape();
 }
 

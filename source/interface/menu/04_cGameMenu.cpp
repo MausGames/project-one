@@ -119,7 +119,7 @@ cGameMenu::cGameMenu()noexcept
     m_aStandardScore[0].SetTextLanguage("GAME_SCORE");
 
     m_aStandardScore[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aStandardScore[1].SetPosition(m_StandardArea.GetPosition() + coreVector2(0.0f,0.066f));
+    m_aStandardScore[1].SetPosition(m_aStandardScore[0].GetPosition() + coreVector2(0.0f,-0.034f));
     m_aStandardScore[1].SetColor3  (COLOR_MENU_WHITE);
 
     m_aStandardTime[0].Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
@@ -127,7 +127,7 @@ cGameMenu::cGameMenu()noexcept
     m_aStandardTime[0].SetTextLanguage("GAME_TIME");
 
     m_aStandardTime[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aStandardTime[1].SetPosition(m_StandardArea.GetPosition() + coreVector2(0.0f,-0.06f));
+    m_aStandardTime[1].SetPosition(m_aStandardTime[0].GetPosition() + coreVector2(0.0f,-0.034f));
     m_aStandardTime[1].SetColor3  (COLOR_MENU_WHITE);
 
     coreUint8 iOffset = 0u;
@@ -213,7 +213,7 @@ cGameMenu::cGameMenu()noexcept
 
     m_aTrainingName[0].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_aTrainingName[0].SetPosition(m_TrainingArea.GetPosition() + coreVector2(0.0f,0.25f));
-    m_aTrainingName[0].SetColor3  (COLOR_MENU_GREEN);
+    m_aTrainingName[0].SetColor3  (COLOR_MENU_WHITE);
     m_aTrainingName[0].SetText("MUSCUS");         
 
     m_aTrainingName[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
@@ -223,23 +223,33 @@ cGameMenu::cGameMenu()noexcept
 
     m_aTrainingScore[0].Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_aTrainingScore[0].SetPosition    (m_TrainingArea.GetPosition() + coreVector2(0.0f,0.1f));
-    m_aTrainingScore[0].SetColor3      (COLOR_MENU_GREEN);
+    m_aTrainingScore[0].SetColor3      (COLOR_MENU_WHITE);
     m_aTrainingScore[0].SetTextLanguage("GAME_SCORE");
 
     m_aTrainingScore[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aTrainingScore[1].SetPosition(m_TrainingArea.GetPosition() + coreVector2(0.0f,0.066f));
+    m_aTrainingScore[1].SetPosition(m_aTrainingScore[0].GetPosition() + coreVector2(0.0f,-0.034f));
     m_aTrainingScore[1].SetColor3  (COLOR_MENU_WHITE);
     m_aTrainingScore[1].SetText("123456");         
 
     m_aTrainingTime[0].Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_aTrainingTime[0].SetPosition    (m_TrainingArea.GetPosition() + coreVector2(0.0f,-0.026f));
-    m_aTrainingTime[0].SetColor3      (COLOR_MENU_GREEN);
+    m_aTrainingTime[0].SetPosition    (m_TrainingArea.GetPosition() + coreVector2(0.0f,-0.0f));
+    m_aTrainingTime[0].SetColor3      (COLOR_MENU_WHITE);
     m_aTrainingTime[0].SetTextLanguage("GAME_TIME");
 
     m_aTrainingTime[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aTrainingTime[1].SetPosition(m_TrainingArea.GetPosition() + coreVector2(0.0f,-0.06f));
+    m_aTrainingTime[1].SetPosition(m_aTrainingTime[0].GetPosition() + coreVector2(0.0f,-0.034f));
     m_aTrainingTime[1].SetColor3  (COLOR_MENU_WHITE);
     m_aTrainingTime[1].SetText("45.6");         
+
+    m_aTrainingMaxSeries[0].Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_aTrainingMaxSeries[0].SetPosition    (m_TrainingArea.GetPosition() + coreVector2(0.0f,-0.1f));
+    m_aTrainingMaxSeries[0].SetColor3      (COLOR_MENU_WHITE);
+    m_aTrainingMaxSeries[0].SetTextLanguage("GAME_COMBO");                  
+
+    m_aTrainingMaxSeries[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aTrainingMaxSeries[1].SetPosition(m_aTrainingMaxSeries[0].GetPosition() + coreVector2(0.0f,-0.034f));
+    m_aTrainingMaxSeries[1].SetColor3  (COLOR_MENU_WHITE);
+    m_aTrainingMaxSeries[1].SetText("x3.5");         
 
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i)
     {
@@ -454,27 +464,30 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) for(coreUintW j = 10u; j <= 100u; j += 10u) m_aDemoShield[i].AddEntry(PRINT("%zu", j), j);
 
     // 
-    if(!g_bDemoVersion) m_Navigator.BindObject(&m_StandardTab, &m_BackButton,         &m_TrainingTab, m_WorldMap.GetPin(6u), &m_TrainingTab,        NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    if(!g_bDemoVersion) m_Navigator.BindObject(&m_TrainingTab, &m_BackButton,         &m_StandardTab, m_WorldMap.GetPin(6u), &m_StandardTab,        NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
-    m_Navigator.BindObject(&m_StartButton, NULL,                  NULL,           m_WorldMap.GetPin(0u), m_WorldMap.GetPin(7u), NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_BackButton,  m_WorldMap.GetPin(2u), NULL,           m_WorldMap.GetPin(6u), NULL,                  NULL, MENU_TYPE_DEFAULT);
-
-    m_Navigator.BindObject(m_WorldMap.GetPin(0u), m_WorldMap.GetPin(8u), NULL,                  &m_BackButton,         m_WorldMap.GetPin(1u), NULL,             MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(1u), m_WorldMap.GetPin(7u), m_WorldMap.GetPin(0u), &m_BackButton,         m_WorldMap.GetPin(2u), NULL,             MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(2u), m_WorldMap.GetPin(3u), m_WorldMap.GetPin(1u), &m_BackButton,         NULL,                  NULL,             MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(3u), m_WorldMap.GetPin(4u), NULL,                  m_WorldMap.GetPin(2u), NULL,                  NULL,             MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(4u), m_WorldMap.GetPin(5u), NULL,                  m_WorldMap.GetPin(3u), NULL,                  NULL,             MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(5u), NULL,                  m_WorldMap.GetPin(6u), m_WorldMap.GetPin(4u), NULL,                  NULL,             MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(6u), NULL,                  m_WorldMap.GetPin(7u), NULL,                  m_WorldMap.GetPin(5u), &m_aaStage[0][0], MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(7u), NULL,                  m_WorldMap.GetPin(8u), m_WorldMap.GetPin(1u), m_WorldMap.GetPin(6u), NULL,             MENU_TYPE_TAB_NODE);
-    m_Navigator.BindObject(m_WorldMap.GetPin(8u), NULL,                  NULL,                  m_WorldMap.GetPin(0u), m_WorldMap.GetPin(7u), NULL,             MENU_TYPE_TAB_NODE);
-
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
+    if(!g_bDemoVersion)
     {
-        for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j)
+        m_Navigator.BindObject(&m_StandardTab, &m_BackButton,         &m_TrainingTab, m_WorldMap.GetPin(6u), &m_TrainingTab,        NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+        m_Navigator.BindObject(&m_TrainingTab, &m_BackButton,         &m_StandardTab, m_WorldMap.GetPin(6u), &m_StandardTab,        NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+        m_Navigator.BindObject(&m_StartButton, NULL,                  NULL,           m_WorldMap.GetPin(0u), m_WorldMap.GetPin(7u), NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_BackButton,  m_WorldMap.GetPin(2u), NULL,           m_WorldMap.GetPin(6u), NULL,                  NULL, MENU_TYPE_DEFAULT);
+
+        m_Navigator.BindObject(m_WorldMap.GetPin(0u), m_WorldMap.GetPin(8u), NULL,                  &m_BackButton,         m_WorldMap.GetPin(1u), NULL,             MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(1u), m_WorldMap.GetPin(7u), m_WorldMap.GetPin(0u), &m_BackButton,         m_WorldMap.GetPin(2u), NULL,             MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(2u), m_WorldMap.GetPin(3u), m_WorldMap.GetPin(1u), &m_BackButton,         NULL,                  NULL,             MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(3u), m_WorldMap.GetPin(4u), NULL,                  m_WorldMap.GetPin(2u), NULL,                  NULL,             MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(4u), m_WorldMap.GetPin(5u), NULL,                  m_WorldMap.GetPin(3u), NULL,                  NULL,             MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(5u), NULL,                  m_WorldMap.GetPin(6u), m_WorldMap.GetPin(4u), NULL,                  NULL,             MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(6u), NULL,                  m_WorldMap.GetPin(7u), NULL,                  m_WorldMap.GetPin(5u), &m_aaStage[0][0], MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(7u), NULL,                  m_WorldMap.GetPin(8u), m_WorldMap.GetPin(1u), m_WorldMap.GetPin(6u), NULL,             MENU_TYPE_TAB_NODE);
+        m_Navigator.BindObject(m_WorldMap.GetPin(8u), NULL,                  NULL,                  m_WorldMap.GetPin(0u), m_WorldMap.GetPin(7u), NULL,             MENU_TYPE_TAB_NODE);
+
+        for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
         {
-            m_Navigator.BindObject(&m_aaStage[i][j], &m_aaStage[(i + MENU_GAME_MISSIONS - 1u) % MENU_GAME_MISSIONS][j], &m_aaStage[i][(j + MENU_GAME_STAGES - 1u) % MENU_GAME_STAGES],
-                                                     &m_aaStage[(i + 1u)                      % MENU_GAME_MISSIONS][j], &m_aaStage[i][(j + 1u)                    % MENU_GAME_STAGES], NULL, MENU_TYPE_TAB_NODE);
+            for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j)
+            {
+                m_Navigator.BindObject(&m_aaStage[i][j], &m_aaStage[(i + MENU_GAME_MISSIONS - 1u) % MENU_GAME_MISSIONS][j], &m_aaStage[i][(j + MENU_GAME_STAGES - 1u) % MENU_GAME_STAGES],
+                                                         &m_aaStage[(i + 1u)                      % MENU_GAME_MISSIONS][j], &m_aaStage[i][(j + 1u)                    % MENU_GAME_STAGES], NULL, MENU_TYPE_TAB_NODE);
+            }
         }
     }
     
@@ -487,8 +500,11 @@ cGameMenu::cGameMenu()noexcept
     m_Navigator.BindObject(&m_DemoStartButton, &m_aDemoShield[0],  &m_DemoBackButton,  &m_DemoType,        &m_DemoBackButton,  NULL, MENU_TYPE_DEFAULT);
     m_Navigator.BindObject(&m_DemoBackButton,  &m_aDemoShield[0],  &m_DemoStartButton, &m_DemoType,        &m_DemoStartButton, NULL, MENU_TYPE_DEFAULT);
 
-    if(!g_bDemoVersion) m_Navigator.AssignSurface(&m_StandardTab, SURFACE_GAME_STANDARD);
-    if(!g_bDemoVersion) m_Navigator.AssignSurface(&m_TrainingTab, SURFACE_GAME_TRAINING);
+    if(!g_bDemoVersion)
+    {
+        m_Navigator.AssignSurface(&m_StandardTab, SURFACE_GAME_STANDARD);
+        m_Navigator.AssignSurface(&m_TrainingTab, SURFACE_GAME_TRAINING);
+    }
 
     m_Navigator.AssignFirst(&m_DemoType);
 
@@ -515,22 +531,23 @@ cGameMenu::cGameMenu()noexcept
     this->BindObject(SURFACE_GAME_TRAINING, &m_StandardFragment);
     this->BindObject(SURFACE_GAME_STANDARD, &m_WorldMap);
     this->BindObject(SURFACE_GAME_STANDARD, &m_StandardHeader);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStandardName);  ++i) this->BindObject(SURFACE_GAME_STANDARD, &m_aStandardName [i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStandardScore); ++i) this->BindObject(SURFACE_GAME_STANDARD, &m_aStandardScore[i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStandardTime);  ++i) this->BindObject(SURFACE_GAME_STANDARD, &m_aStandardTime [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStandardName);      ++i) this->BindObject(SURFACE_GAME_STANDARD, &m_aStandardName [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStandardScore);     ++i) this->BindObject(SURFACE_GAME_STANDARD, &m_aStandardScore[i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStandardTime);      ++i) this->BindObject(SURFACE_GAME_STANDARD, &m_aStandardTime [i]);
 
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS;           ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aMissionLine  [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS;               ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aMissionLine  [i]);
     this->BindObject(SURFACE_GAME_TRAINING, &m_TrainingArea);
     this->BindObject(SURFACE_GAME_TRAINING, &m_TrainingMedal);
     this->BindObject(SURFACE_GAME_TRAINING, &m_TrainingFragment);
-    for(coreUintW i = 0u; i < BADGES;                       ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingBadge[i]);
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS;           ++i) for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j) this->BindObject(SURFACE_GAME_TRAINING, &m_aaStage[i][j]);
+    for(coreUintW i = 0u; i < BADGES;                           ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingBadge[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS;               ++i) for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j) this->BindObject(SURFACE_GAME_TRAINING, &m_aaStage[i][j]);
     this->BindObject(SURFACE_GAME_TRAINING, &m_aStageCursor);
     this->BindObject(SURFACE_GAME_TRAINING, &m_TrainingHeader);
-    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS;           ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aMissionName  [i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrainingName);  ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingName [i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrainingScore); ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingScore[i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrainingTime);  ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingTime [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS;               ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aMissionName      [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrainingName);      ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingName     [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrainingScore);     ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingScore    [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrainingTime);      ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingTime     [i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrainingMaxSeries); ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aTrainingMaxSeries[i]);
 
     this->BindObject(SURFACE_GAME_OPTIONS, &m_Background);
     this->BindObject(SURFACE_GAME_OPTIONS, &m_BackButton);
@@ -1032,10 +1049,9 @@ void cGameMenu::LoadValuesDemo()
     LoadConfig();
 
     m_DemoStage.ClearEntries();
-    m_DemoStage.AddEntryLanguage("DEMO_ALL", 9u);
-    if(g_pSave->GetHeader().oProgress.aiAdvance[1])
+    m_DemoStage.AddEntry(PRINT("%s 0", Core::Language->GetString("MISSION")), 0u);
+    if(!g_pSave->GetHeader().oProgress.bFirstPlay)//g_pSave->GetHeader().oProgress.aiAdvance[1])
     {
-        m_DemoStage.AddEntry(PRINT("%s 0", Core::Language->GetString("MISSION")), 0u);
         m_DemoStage.AddEntry(PRINT("%s 1", Core::Language->GetString("MISSION")), 1u);
         m_DemoStage.AddEntry(PRINT("%s 2", Core::Language->GetString("MISSION")), 2u);
     }
@@ -1121,13 +1137,11 @@ void cGameMenu::RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTP
     }
     else if(m_iCurPage == 2u)
     {
-        const coreBool bAll = (m_aiCurIndex[0] == 9u);
-
         // 
-        (*piMissionID) = g_aMissionData[bAll ? 0u : m_aiCurIndex[0]].iID;
+        (*piMissionID) = g_aMissionData[m_aiCurIndex[0]].iID;
         (*piTakeFrom)  = 0u;
         (*piTakeTo)    = TAKE_MISSION;
-        (*piKind)      = bAll ? GAME_KIND_ALL : GAME_KIND_MISSION;
+        (*piKind)      = GAME_KIND_ALL;
     }
     else ASSERT(false)
 }
@@ -1147,6 +1161,11 @@ void cGameMenu::__SelectStandard(const coreUintW iMissionIndex)
     const sMissionData& oData = g_aMissionData[iMissionIndex];
 
     // 
+    const auto&     oStats     = g_pSave->GetHeader().aLocalStatsMission[iMissionIndex];
+    const coreInt32 iBestShift = coreInt32(oStats.iTimeBestShiftBad) - coreInt32(oStats.iTimeBestShiftGood);
+    const coreFloat fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), 10.0f);
+
+    // 
     m_aStandardName [0].SetColor3(oData.vColor);
     m_aStandardScore[0].SetColor3(oData.vColor);
     m_aStandardTime [0].SetColor3(oData.vColor);
@@ -1154,11 +1173,11 @@ void cGameMenu::__SelectStandard(const coreUintW iMissionIndex)
     // 
     m_aStandardName [0].SetText(oData.pcName);
     m_aStandardName [1].SetText(PRINT("%s %zu", Core::Language->GetString("MISSION"), iMissionIndex));
-    m_aStandardScore[1].SetText(coreData::ToChars(Core::Rand->Uint(999999u)));   // TODO 1: read real data
-    m_aStandardTime [1].SetText(PRINT("%.1f", Core::Rand->Float(99.9f)));   // TODO 1: read real data
+    m_aStandardScore[1].SetText(coreData::ToChars(oStats.iScoreBest));
+    m_aStandardTime [1].SetText(PRINT("%.1f %+d", fBestTime, iBestShift));
 
     // 
-    cMenu::ApplyMedalTexture(&m_StandardMedal, Core::Rand->Uint(MEDAL_BRONZE, MEDAL_DARK), MEDAL_TYPE_MISSION);   // TODO 1: read real data
+    cMenu::ApplyMedalTexture(&m_StandardMedal, g_pSave->GetHeader().oProgress.aiMedalMission[iMissionIndex], MEDAL_TYPE_MISSION);
 }
 
 
@@ -1178,29 +1197,28 @@ void cGameMenu::__SelectTraining(const coreUintW iMissionIndex, const coreUintW 
     const coreBool      bBoss = MISSION_SEGMENT_IS_BOSS(iSegmentIndex);
 
     // 
-    const coreChar* pcMissionLetter;
-    switch(iMissionIndex)
-    {
-    case  9u: pcMissionLetter = "X1";                             break;
-    case 10u: pcMissionLetter = "X2";                             break;
-    default:  pcMissionLetter = coreData::ToChars(iMissionIndex); break;
-    }
+    const auto&     oStats     = g_pSave->GetHeader().aaLocalStatsSegment[iMissionIndex][iSegmentIndex];
+    const coreInt32 iBestShift = coreInt32(oStats.iTimeBestShiftBad) - coreInt32(oStats.iTimeBestShiftGood);
+    const coreFloat fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), 10.0f);
 
     // 
-    const coreChar* pcSegmentLetter = bBoss ? "B" : coreData::ToChars(iSegmentIndex + 1u);
+    m_aTrainingName     [0].SetColor3(oData.vColor);
+    m_aTrainingScore    [0].SetColor3(oData.vColor);
+    m_aTrainingTime     [0].SetColor3(oData.vColor);
+    m_aTrainingMaxSeries[0].SetColor3(oData.vColor);
 
     // 
-    m_aTrainingName [0].SetColor3(oData.vColor);
-    m_aTrainingScore[0].SetColor3(oData.vColor);
-    m_aTrainingTime [0].SetColor3(oData.vColor);
+    m_aTrainingName     [0].SetText(oData.pcName);
+    m_aTrainingName     [1].SetText(PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetSegmentLetters(iMissionIndex, iSegmentIndex)));
+    m_aTrainingScore    [1].SetText(coreData::ToChars(oStats.iScoreBest));
+    m_aTrainingTime     [1].SetText(PRINT("%.1f %+d", fBestTime, iBestShift));
+    m_aTrainingMaxSeries[1].SetText(bBoss ? coreData::ToChars(oStats.iMaxSeries) : PRINT("x%u.%u", 1u + oStats.iMaxSeries / 10u, oStats.iMaxSeries % 10u));
 
     // 
-    m_aTrainingName [0].SetText(oData.pcName);
-    m_aTrainingName [1].SetText(PRINT("%s %s-%s", Core::Language->GetString("MISSION"), pcMissionLetter, pcSegmentLetter));
-    m_aTrainingScore[1].SetText(coreData::ToChars(Core::Rand->Uint(999999u)));   // TODO 1: read real data
-    m_aTrainingTime [1].SetText(PRINT("%.1f", Core::Rand->Float(99.9f)));   // TODO 1: read real data
+    m_aTrainingMaxSeries[0].SetTextLanguage(bBoss ? "GAME_CHAIN" : "GAME_COMBO");
 
     // 
-    cMenu::ApplyMedalTexture(&m_TrainingMedal, Core::Rand->Uint(MEDAL_BRONZE, MEDAL_DARK), bBoss ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE);   // TODO 1: read real data
+    cMenu::ApplyMedalTexture(&m_TrainingMedal, g_pSave->GetHeader().oProgress.aaiMedalSegment[iMissionIndex][iSegmentIndex], bBoss ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE);
+
     // TODO 1: badges
 }

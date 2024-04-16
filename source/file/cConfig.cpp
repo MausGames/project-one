@@ -34,6 +34,13 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);
+
+        //           without available device               
+        if((pConfig->Input.aiType[i] >= INPUT_SETS_KEYBOARD) && (pConfig->Input.aiType[i] - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
+        {
+            pConfig->Input.aiType[i] = i;
+        }
+        // TODO 1: vielleicht zum ersten ungenutzten keyboard set wechseln
     }
 
     // loop trough input sets

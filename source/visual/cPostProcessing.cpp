@@ -19,6 +19,7 @@ cPostProcessing::cPostProcessing()noexcept
 , m_avData            {}
 , m_afOffset          {}
 , m_bOffsetActive     (false)
+, m_fChroma           (0.0f)
 , m_fAnimation        (0.0f)
 
 , m_fFrameValue       (0.0f)
@@ -28,6 +29,7 @@ cPostProcessing::cPostProcessing()noexcept
     m_pProgramSimple      = Core::Manager::Resource->Get<coreProgram>("full_post_program");
     m_pProgramDistorted   = Core::Manager::Resource->Get<coreProgram>("full_post_distorted_program");
     m_pProgramTransparent = Core::Manager::Resource->Get<coreProgram>("full_post_transparent_program");
+    m_pProgramChroma      = Core::Manager::Resource->Get<coreProgram>("full_post_chroma_program");
     m_pProgramDebug       = Core::Manager::Resource->Get<coreProgram>("full_post_debug_program");
     this->Recompile();
 
@@ -79,6 +81,7 @@ void cPostProcessing::Render()
     // select between debug, distorted or simple shader-program
          if(g_bDebugOutput)            this->DefineProgram(m_pProgramDebug);
     else if(g_bTiltMode)               this->DefineProgram(m_pProgramTransparent);
+    else if(m_fChroma)                 this->DefineProgram(m_pProgramChroma);
     else if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
     else                               this->DefineProgram(m_pProgramSimple);
 
@@ -199,11 +202,13 @@ void cPostProcessing::Move()
     }
     else
     {
+        m_Frame.SetAlpha   (0.0f);
+        
         m_fFrameAnimation = 0.0f;
     
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
         {
-            m_aInterior[i].SetAlpha(0.0f);
+            m_aInterior[i].SetAlpha(m_fChroma * POST_CHROMA_FACTOR);
         }
     }
 }
@@ -218,18 +223,30 @@ void cPostProcessing::Recompile()
     const coreChar* pcConfig1 =               g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "";
     const coreChar* pcConfig2 = PRINT("%s%s", g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "", pcConfig1);
     const coreChar* pcConfig3 = PRINT("%s%s",                                    SHADER_TRANSPARENT,     pcConfig1);
-    const coreChar* pcConfig4 = PRINT("%s%s",                                    SHADER_DEBUG,           pcConfig2);
+    const coreChar* pcConfig4 = PRINT("%s%s",                                    SHADER_CHROMA,          pcConfig2);
+    const coreChar* pcConfig5 = PRINT("%s%s",                                    SHADER_DEBUG,           pcConfig2);
+
+    const auto nUpdateFunc = [](const coreHashString& sName, const coreChar* pcConfig)
+    {
+        coreResourceHandle* pHandle = Core::Manager::Resource->Get<coreShader>(sName);
+
+        pHandle->UpdateStart();
+        d_cast<coreShader*>(pHandle->GetRawResource())->SetCustomCode(pcConfig);
+        pHandle->UpdateEnd();
+    };
 
     // change configuration of post-processing shaders
-    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")            ->GetRawResource())->SetCustomCode(pcConfig1);
-    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")  ->GetRawResource())->SetCustomCode(pcConfig2);
-    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_transparent.frag")->GetRawResource())->SetCustomCode(pcConfig3);
-    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")      ->GetRawResource())->SetCustomCode(pcConfig4);
+    nUpdateFunc("full_post.frag",             pcConfig1);
+    nUpdateFunc("full_post_distorted.frag",   pcConfig2);
+    nUpdateFunc("full_post_transparent.frag", pcConfig3);
+    nUpdateFunc("full_post_chroma.frag",      pcConfig4);
+    nUpdateFunc("full_post_debug.frag",       pcConfig5);
 
     // recompile and relink
     m_pProgramSimple     .GetHandle()->Reload();
     m_pProgramDistorted  .GetHandle()->Reload();
     m_pProgramTransparent.GetHandle()->Reload();
+    m_pProgramChroma     .GetHandle()->Reload();
     m_pProgramDebug      .GetHandle()->Reload();
 
     // finish now
@@ -385,7 +402,7 @@ void cPostProcessing::__UpdateSeparator()
     if(m_fSplitScreenValue)
     {
         // 
-        const coreFloat fValue = (m_fSplitScreenValue == 1.0f) ? 1.0f : LERPB(0.0f, 1.0f, m_fSplitScreenValue);
+        const coreFloat fValue = (m_fSplitScreenValue == 1.0f) ? 1.0f : BLENDB(m_fSplitScreenValue);
 
         // 
         m_Separator.SetSize     (coreVector2(LERP(0.1f, 0.01f, fValue), 1.0f));

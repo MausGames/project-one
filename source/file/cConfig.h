@@ -15,8 +15,10 @@
 // TODO 5: don't input-check inactive input-sets in multiplayer
 // TODO 1: default input should differ between keyboard and joystick, and between sets
 // TODO 1: controller input mapping should use gamepad-actions instead of button-IDs
+// TODO 1: controller input mapping should be tied to the GUID
 // TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
+// TODO 2: some options, like mirror-mode, should only take affect if it is allowed
 
 
 // ****************************************************************
@@ -98,7 +100,7 @@ STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint8)*8u)
 #define DEFAULT_MOVE_LEFT(x)  (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_LEFT  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_LEFT  : ((x) == 2u) ? DEFAULT_JOYSTICK_1_MOVE_LEFT  : DEFAULT_JOYSTICK_2_MOVE_LEFT)
 #define DEFAULT_MOVE_DOWN(x)  (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_DOWN  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_DOWN  : ((x) == 2u) ? DEFAULT_JOYSTICK_1_MOVE_DOWN  : DEFAULT_JOYSTICK_2_MOVE_DOWN)
 #define DEFAULT_MOVE_RIGHT(x) (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_RIGHT : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_RIGHT : ((x) == 2u) ? DEFAULT_JOYSTICK_1_MOVE_RIGHT : DEFAULT_JOYSTICK_2_MOVE_RIGHT)
-#define DEFAULT_ACTION(x, n)  (((x) == 0u) ? DEFAULT_KEYBOARD_1_ACTION(n)  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_ACTION(n)  : ((x) == 2u) ? DEFAULT_JOYSTICK_1_ACTION(n)  : DEFAULT_JOYSTICK_2_ACTION(n))
+#define DEFAULT_ACTION(x,n)   (((x) == 0u) ? DEFAULT_KEYBOARD_1_ACTION(n)  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_ACTION(n)  : ((x) == 2u) ? DEFAULT_JOYSTICK_1_ACTION(n)  : DEFAULT_JOYSTICK_2_ACTION(n))
 
 
 // ****************************************************************

@@ -230,6 +230,7 @@ void cFragmentItem::Move()
 
             // 
             g_pSpecialEffects->MacroExplosionDarkBig(m_pTarget->GetPosition());
+            g_pSpecialEffects->PlaySound(m_pTarget->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
 
             // 
             m_pTarget->SetDesaturate(PLAYER_DESATURATE_FRAGMENT);

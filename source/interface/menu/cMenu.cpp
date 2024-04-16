@@ -90,6 +90,8 @@ cMenu::cMenu()noexcept
     {
         m_MainMenu.ActivateDemoVersion();
     }
+    
+    m_TransitionTime.SetTimeID(0);
 }
 
 
@@ -264,7 +266,11 @@ void cMenu::Move()
                         this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
 
                         // 
-                        m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+                        m_BridgeMenu.ReturnMenu(SURFACE_GAME, false, false);
+
+                        // 
+                        m_GameMenu.ChangeSurface((g_pGame->GetKind() == GAME_KIND_MISSION) ? SURFACE_GAME_STANDARD : SURFACE_GAME_TRAINING, 0.0f);
+                        m_GameMenu.LoadValues();
                     }
                 }
                 else if((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && g_MenuInput.bPause) || Core::System->GetWinFocusLost())
@@ -370,8 +376,8 @@ void cMenu::Move()
             }
             else if(m_GameMenu.GetStatus() == 2)
             {
-                // return to previous menu
-                this->ShiftSurface(this, this->GetOldSurface(), 3.0f, 2u, true, false);
+                // return to previous menu          
+                this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 2u, true, false);
             }
         }
         break;
@@ -499,6 +505,14 @@ void cMenu::Move()
                 // 
                 m_FinishMenu.ShowThankYou();
             }
+            else if(m_SummaryMenu.GetStatus() == 3)
+            {
+                // 
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+
+                // 
+                m_BridgeMenu.UseRestart(false);
+            }
         }
         break;
 
@@ -546,7 +560,7 @@ void cMenu::Move()
             else if(m_BridgeMenu.GetStatus() == 2)
             {
                 // 
-                this->ShiftSurface(this, m_BridgeMenu.GetTarget(), 0.75f, 0u);
+                this->ShiftSurface(this, m_BridgeMenu.GetTarget(), (m_BridgeMenu.GetTarget() == SURFACE_TITLE) ? 0.75f : 1.0f, 0u);
 
                 // 
                 this->__EndGame();
@@ -787,6 +801,27 @@ void cMenu::ClearScreen()
 
 
 // ****************************************************************
+// 
+const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    const coreChar* pcMissionLetter;
+    switch(iMissionIndex)
+    {
+    case  9u: pcMissionLetter = "X1";                             break;
+    case 10u: pcMissionLetter = "X2";                             break;
+    default:  pcMissionLetter = coreData::ToChars(iMissionIndex); break;
+    }
+
+    // 
+    const coreChar* pcSegmentLetter = MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? "B" : coreData::ToChars(iSegmentIndex + 1u);
+
+    // 
+    return PRINT("%s-%s", pcMissionLetter, pcSegmentLetter);
+}
+
+
+// ****************************************************************
 // default button update routine
 void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor)
 {
@@ -995,7 +1030,7 @@ void cMenu::__StartGame()
     g_pGame->LoadMissionID(iMissionID, iTakeFrom, iTakeTo);
 
     // 
-    g_pReplay->StartRecording();
+    if(!g_bDemoVersion) g_pReplay->StartRecording();
 }
 
 

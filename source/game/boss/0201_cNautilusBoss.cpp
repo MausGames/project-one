@@ -237,7 +237,7 @@ void cNautilusBoss::__MoveOwn()
             const coreFloat fAim    = (pPlayer->GetPosition().x - this->GetPosition().x) * TIME * fTime * 3.0f;
 
             this->SetPosition         (coreVector3(this->GetPosition().x + fAim, this->GetPosition().y, 0.0f));
-            this->DefaultOrientateLerp(0.0f*PI, 20.0f*PI, LERPB(0.0f, 1.0f, 1.0f - fTime));
+            this->DefaultOrientateLerp(0.0f*PI, 20.0f*PI, BLENDB(1.0f - fTime));
 
             PHASE_CONTROL_TICKER(1u, 0u, 1.8f + 2.0f * fTime, LERP_LINEAR)
             {
@@ -361,7 +361,7 @@ void cNautilusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_LINEAR)
         {
-            this->DefaultMoveLerp    (m_vLastPosition, (pContainer->GetPosition().xy() - NAUTILUS_ATTACH_DIST * this->GetDirection().xy()) / FOREGROUND_AREA, LERPB(0.0f, 1.0f, fTime));
+            this->DefaultMoveLerp    (m_vLastPosition, (pContainer->GetPosition().xy() - NAUTILUS_ATTACH_DIST * this->GetDirection().xy()) / FOREGROUND_AREA, BLENDB(fTime));
             //this->DefaultRotateLerp(1.0f*PI,               0.0f*PI, LERPS(0.0f, 1.0f, fTime));
 
             m_fClawAngle = SIN(PI * fTime);

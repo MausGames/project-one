@@ -31,6 +31,8 @@
 
 #define MSGBOX_NO_CALLBACK      ([](coreInt32) {})         // 
 
+STATIC_ASSERT(MSGBOX_IGNORE_MOUSE != MENUNAVIGATOR_IGNORE_MOUSE)
+
 
 // ****************************************************************
 // message box class
@@ -65,6 +67,8 @@ public:
     template <typename F> void ShowInformation(const coreChar* pcText,                             F&& nCallback);   // [](const corInt32 iAnswer) -> void
     template <typename F> void ShowQuestion   (const coreChar* pcText,                             F&& nCallback);   // [](const corInt32 iAnswer) -> void
     template <typename F> void ShowMapping    (const coreChar* pcText, const coreUint8 iInputType, F&& nCallback);   // [](const corInt32 iAnswer, const coreInt16 iKey) -> void
+
+    inline coreBool IsVisible()const {return (m_nCallback != NULL);}
 
 
 private:

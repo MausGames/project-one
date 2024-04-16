@@ -27,7 +27,8 @@ enum eExhaustType : coreUint8
     EXHAUST_TYPE_MINER,
     EXHAUST_TYPE_FREEZER,
     EXHAUST_TYPE_CINDER,
-    EXHAUST_TYPE_METEOR
+    EXHAUST_TYPE_METEOR,
+    EXHAUST_TYPE_UFO
 };
 
 
@@ -49,6 +50,7 @@ private:
 
 private:
     coreBatchList  m_aRenderList[EXHAUST_BASES];   // 
+    coreObject3D   m_aPrototype [EXHAUST_BASES];   // 
     coreMemoryPool m_ObjectPool;                   // 
 
     coreList<sExhaustData> m_aData;                // 

@@ -26,7 +26,7 @@
 #define COMBAT_LABELS_SMALL (32u)                                       // 
 #define COMBAT_LABELS_BIG   (16u)                                       // 
 #define COMBAT_LABELS       (COMBAT_LABELS_SMALL + COMBAT_LABELS_BIG)   // total number of label objects
-#define COMBAT_BORDER       (0.47f)                                     // 
+#define COMBAT_BORDER       (0.5f)                                      // 
 
 #define COMBAT_MARKERS (8u)
 

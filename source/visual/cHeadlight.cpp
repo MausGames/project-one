@@ -14,6 +14,7 @@
 cHeadlight::cHeadlight()noexcept
 : m_Flicker  (coreTimer(1.0f, 10.0f, 7u))
 , m_iShatter (0u)
+, m_iDefault (0xFFu)
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
 
@@ -82,10 +83,10 @@ void cHeadlight::Update()
         {
             // 
             this->StopFlicker();
-            if(m_iShatter == 2u) m_pShatterSound->PlayRelative(NULL, 0.7f, 1.0f, false, SOUND_EFFECT);
+            if(m_iShatter == HEADLIGHT_TYPE_SHATTER) m_pShatterSound->PlayRelative(NULL, 0.7f, 1.0f, false, SOUND_EFFECT);
 
             // 
-            m_Spot.SetAlpha(m_iShatter ? 0.0f : 1.0f);
+            m_Spot.SetAlpha((m_iShatter == HEADLIGHT_TYPE_ON) ? 1.0f : 0.0f);
         }
     }
 
@@ -145,7 +146,7 @@ void cHeadlight::UpdateDefault(const coreUint8 iType)
             // 
             g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
             {
-                this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection() * 1.15f, coreVector2(60.0f,100.0f) * 1.2f, pPlayer->GetDirection().xy());
+                if(HAS_BIT(m_iDefault, i)) this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection() * 1.15f, coreVector2(60.0f,100.0f) * 1.2f, pPlayer->GetDirection().xy());
             });
         }
         else
@@ -153,13 +154,14 @@ void cHeadlight::UpdateDefault(const coreUint8 iType)
             // 
             g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
             {
-                this->DrawPoint(pPlayer->GetPosition(), coreVector2(1.0f,1.0f) * 30.0f);
+                if(HAS_BIT(m_iDefault, i)) this->DrawPoint(pPlayer->GetPosition(), coreVector2(1.0f,1.0f) * 30.0f);
             });
         }
-        
+
+        STATIC_ASSERT(GAME_PLAYERS <= sizeof(m_iDefault)*8u)
     
     if(g_pGame->GetCurMission() && !g_pGame->GetCurMission()->GetCurBoss())
-        g_pPostProcessing->SetBorderAll(0.0f);
+        g_pPostProcessing->SetBorderAll(0.0f);   // TODO 1: no effect during pause here
     }
 
     // 
@@ -213,7 +215,7 @@ void cHeadlight::PlayFlicker(const coreUint8 iShatter)
     m_Flicker.Play(CORE_TIMER_PLAY_RESET);
 
     // 
-    ASSERT(m_iShatter != 2u)
+    ASSERT(m_iShatter != HEADLIGHT_TYPE_SHATTER)
     m_iShatter = iShatter;
 }
 
@@ -230,7 +232,7 @@ void cHeadlight::ResetFlicker()
     this->StopFlicker();
 
     // 
-    m_iShatter = 0u;
+    m_iShatter = HEADLIGHT_TYPE_ON;
 
     // 
     m_Spot.SetAlpha(1.0f);

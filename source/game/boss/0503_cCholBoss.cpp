@@ -54,6 +54,7 @@
 // TODO 1: view-bullets wurden von way-blöcken aufgehalten, und eigentlich sind beide rosa
 // TODO 1: vielleicht fliegt boss in erster phase auch rauf und runter (separat oder gemischt mit links-rechts)
 // TODO 1: helfer: einer springt bei wellen von der anderen seite raus, bei gitter fliegt einer seitlich runter
+// TODO 1: energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
 
 
 // ****************************************************************
@@ -299,6 +300,7 @@ void cCholBoss::__MoveOwn()
                 PHASE_CHANGE_INC
 
                 this->__EnableFire(0u);
+                // TODO 1: schnelle rotation danach, alle rotationen schnell
             }
         });
     }
@@ -791,6 +793,8 @@ void cCholBoss::__MoveOwn()
 
             pMission->GetOrb(0u)->SetPosition(coreVector3(HIDDEN_POS, 0.0f));   // because line 0 is enabled for a single frame
             pMission->SetLineMode(1u);
+
+            g_pEnvironment->SetTargetDirection(coreVector2(0.0f,-1.0f), 1.0f);
         }
 
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
@@ -862,6 +866,12 @@ void cCholBoss::__MoveOwn()
 
                     pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
                 });
+
+                const coreVector3 vPos = pMission->GetOrb(s_aiTarget[0])->GetPosition();
+                ASSERT(s_aiTarget[0] == s_aiTarget[1])
+
+                g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_CYAN);
+                g_pSpecialEffects->CreateBlastSphere(vPos, SPECIAL_BLAST_SMALL,  COLOR_ENERGY_CYAN);
             }
 
             const auto nChangeTargetFunc = [&](const coreUintW iIndex, const coreUint32 iNewTarget)
@@ -886,31 +896,36 @@ void cCholBoss::__MoveOwn()
                 const coreObject3D* pPrevTarget = pMission->GetOrb(iPrevTarget);
 
                 const coreVector2 vDiff1 = pTarget->GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(vDiff1.LengthSq() < POW2(3.0f))
+
+                const coreBool bTabX = (ABS(vDiff1.y) < 3.0f) && (SIGNUM(s_avOldMove[i].x) != SIGNUM(pInput->vMove.x));
+                const coreBool bTabY = (ABS(vDiff1.x) < 3.0f) && (SIGNUM(s_avOldMove[i].y) != SIGNUM(pInput->vMove.y));
+
+                coreBool bCancel = false;
+
+                if(g_pForeground->IsVisiblePoint(pNextTarget->GetPosition().xy(), 1.2f))
                 {
-                    const coreBool bTabX = SIGNUM(s_avOldMove[i].x) != SIGNUM(pInput->vMove.x);
-                    const coreBool bTabY = SIGNUM(s_avOldMove[i].y) != SIGNUM(pInput->vMove.y);
-
-                    if(g_pForeground->IsVisiblePoint(pNextTarget->GetPosition().xy()))
+                    const coreVector2 vNextDiff = pNextTarget->GetPosition().xy() - pTarget->GetPosition().xy();
+                    if((coreVector2::Dot(vNextDiff, pInput->vMove) > 0.5f) && ((bTabX && IsHorizontal(vNextDiff)) || (bTabY && !IsHorizontal(vNextDiff))))
                     {
-                        const coreVector2 vNextDiff = pNextTarget->GetPosition().xy() - pTarget->GetPosition().xy();
-                        if((coreVector2::Dot(vNextDiff, pInput->vMove) > 0.5f) && ((bTabX && IsHorizontal(vNextDiff)) || (bTabY && !IsHorizontal(vNextDiff))))
-                        {
-                            nChangeTargetFunc(i, iNextTarget);
-                        }
+                        nChangeTargetFunc(i, iNextTarget);
                     }
-
-                    if(g_pForeground->IsVisiblePoint(pPrevTarget->GetPosition().xy()))
-                    {
-                        const coreVector2 vPrevDiff = pPrevTarget->GetPosition().xy() - pTarget->GetPosition().xy();
-                        if((coreVector2::Dot(vPrevDiff, pInput->vMove) > 0.5f) && ((bTabX && IsHorizontal(vPrevDiff)) || (bTabY && !IsHorizontal(vPrevDiff))))
-                        {
-                            nChangeTargetFunc(i, iPrevTarget);
-                        }
-                    }
-
-                    s_avOldMove[i] = pInput->vMove;
                 }
+                else if(SIGNUM(pInput->vMove.y) > 0.0f)
+                {
+                    bCancel = true;
+                }
+
+                if(g_pForeground->IsVisiblePoint(pPrevTarget->GetPosition().xy(), 1.2f))
+                {
+                    const coreVector2 vPrevDiff = pPrevTarget->GetPosition().xy() - pTarget->GetPosition().xy();
+                    if((coreVector2::Dot(vPrevDiff, pInput->vMove) > 0.5f) && ((bTabX && IsHorizontal(vPrevDiff)) || (bTabY && !IsHorizontal(vPrevDiff))))
+                    {
+                        nChangeTargetFunc(i, iPrevTarget);
+                    }
+                }
+
+                             if(bTabX) s_avOldMove[i].x = pInput->vMove.x;
+                if(!bCancel) if(bTabY) s_avOldMove[i].y = pInput->vMove.y;
 
                 pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().xy() + vMove, 0.0f));
 
@@ -919,6 +934,11 @@ void cCholBoss::__MoveOwn()
                 {
                     const coreVector2 vPos = pPlayer->GetPosition().xy() + vDiff2.Normalized() * (3.0f * pPlayer->CalcMoveSpeed() * TIME * SmoothTowards(vDiff2.Length(), 3.0f));
                     pPlayer->SetPosition(coreVector3(vPos, 0.0f));
+
+                    PHASE_CONTROL_TICKER(1u + i, 0u, 30.0f, LERP_LINEAR)
+                    {
+                        if(vDiff2.LengthSq() > POW2(3.0f)) g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_CYAN);
+                    });
                 }
 
                 if(pPlayer->GetPosition().y < FOREGROUND_AREA.y * -0.7f)

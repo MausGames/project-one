@@ -202,7 +202,11 @@ void cShadow::Recompile()
 
         // change configuration of related shaders
         for(coreUintW j = 0u, je = pHandle->GetNumShaders(); j < je; ++j)
+        {
+            pHandle->GetShaderHandle(j)->UpdateStart();
             pHandle->GetShader(j)->SetCustomCode(pcConfig);
+            pHandle->GetShaderHandle(j)->UpdateEnd();
+        }
 
         // recompile and relink
         pHandle.GetHandle()->Reload();

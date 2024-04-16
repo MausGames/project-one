@@ -69,6 +69,7 @@
 #define MENU_CONFIG_INPUTS            (PLAYERS)
 #define MENU_SUMMARY_MEDALS           (6u)
 #define MENU_SUMMARY_ENTRIES          (2u)
+#define MENU_SUMMARY_ENTRIES          (2u)
 #define MENU_SUMMARY_PARTS            (PLAYERS)
 #define MENU_SUMMARY_BANNER_SPEED     (4.0f)
 #define MENU_SUMMARY_BANNER_SPEED_REV (1.0f / MENU_SUMMARY_BANNER_SPEED)
@@ -407,9 +408,10 @@ private:
     cGuiObject m_TrainingMedal;                                   // 
     cGuiObject m_TrainingFragment;                                // 
     cGuiObject m_aTrainingBadge[BADGES];                          // 
-    cGuiLabel  m_aTrainingName [2];                               // 
-    cGuiLabel  m_aTrainingScore[2];                               // 
-    cGuiLabel  m_aTrainingTime [2];                               // 
+    cGuiLabel  m_aTrainingName     [2];                           // 
+    cGuiLabel  m_aTrainingScore    [2];                           // 
+    cGuiLabel  m_aTrainingTime     [2];                           // 
+    cGuiLabel  m_aTrainingMaxSeries[2];                           // 
 
     cGuiLabel  m_aOptionName[MENU_GAME_OPTIONS];                  // 
     cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];                  // 
@@ -788,6 +790,9 @@ private:
     cGuiObject m_BackgroundMain;                                    // 
     cGuiObject m_BackgroundCoop;                                    // 
 
+    cGuiButton m_RestartButton;                                     // restart button
+    cGuiButton m_ExitButton;                                        // exit button
+
     cGuiLabel m_aTitle[2];                                          // 
 
     cGuiLabel m_aHeader[2];                                         // 
@@ -802,11 +807,33 @@ private:
     cGuiLabel m_TotalName;                                          // 
     cGuiLabel m_TotalValue;                                         // 
     cGuiLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
+    cGuiLabel m_TotalBest;                                          // 
 
     coreUint32 m_iFinalValue;                                       // (just for display) 
     coreUint32 m_aiFinalPart [MENU_SUMMARY_PARTS];                  // (just for display) 
     coreUint32 m_aiApplyBonus[MENU_SUMMARY_PARTS];                  // 
     coreUint8  m_aiApplyMedal[MENU_SUMMARY_PARTS];                  // 
+
+
+#define MENU_SUMMARY_ENTRIES_SEGMENT (3u)
+#define MENU_SUMMARY_SIDES (2u)
+
+    cGuiLabel m_aSegmentName [MENU_SUMMARY_ENTRIES_SEGMENT];                       // 
+    cGuiLabel m_aaSegmentValue[MENU_SUMMARY_ENTRIES_SEGMENT][MENU_SUMMARY_SIDES];                       // 
+    cGuiLabel m_aaSegmentPart[MENU_SUMMARY_ENTRIES_SEGMENT][MENU_SUMMARY_PARTS];   // 
+    
+    cGuiLabel m_aSegmentShift[MENU_SUMMARY_SIDES];                       // 
+    
+    cGuiObject m_SegmentMedal;
+    
+    coreUint8 m_iSelection;
+    
+    
+    cGuiLabel m_aPerfect[2];
+    cGuiLabel m_aRecord[4];
+    coreFlow  m_afSignalTime[2];
+    coreUint8 m_iSignalActive;
+    
 
     coreFlow m_fIntroTimer;                                         // 
     coreFlow m_fOutroTimer;                                         // 
@@ -814,6 +841,8 @@ private:
     coreFloat m_fFinalSpinOld;                                      // 
 
     eSummaryState m_eState;                                         // 
+
+    cMenuNavigator m_Navigator;
 
 
 public:
@@ -1089,6 +1118,8 @@ public:
     static void ChangeTab(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface);
     
     static void ClearScreen();
+    
+    static const coreChar* GetSegmentLetters(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 
     // menu helper routines
     static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor);

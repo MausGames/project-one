@@ -16,6 +16,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_aParticleDark    {coreParticleSystem(512u), coreParticleSystem(512u)}
 , m_aParticleSmoke   {coreParticleSystem(512u), coreParticleSystem(512u)}
 , m_aParticleFire    {coreParticleSystem(512u), coreParticleSystem(512u)}
+, m_aParticleDot     {coreParticleSystem(256u), coreParticleSystem(256u)}
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)
 , m_iCurLightning    (0u)
@@ -50,6 +51,8 @@ cSpecialEffects::cSpecialEffects()noexcept
         m_aParticleSmoke[i].DefineTexture(0u, "effect_smoke.png");
         m_aParticleFire [i].DefineProgram("effect_particle_fire_program");
         m_aParticleFire [i].DefineTexture(0u, "effect_smoke.png");
+        m_aParticleDot  [i].DefineProgram("effect_particle_smoke_program");                                      
+        m_aParticleDot  [i].DefineTexture(0u, "environment_particle_02.png");
     }
 
     // 
@@ -126,6 +129,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_08,   "enemy_explosion_08.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_09,   "enemy_explosion_09.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_10,   "enemy_explosion_10.wav");
+    nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_11,   "enemy_explosion_11.wav");
     nLoadSoundFunc(SOUND_WEAPON_RAY,           "weapon_ray.wav");
     nLoadSoundFunc(SOUND_WEAPON_ENEMY,         "weapon_enemy.wav");
     nLoadSoundFunc(SOUND_BULLET_HIT,           "bullet_hit.wav");
@@ -142,9 +146,12 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_FRAGMENT_HELPER,      "fragment_helper.wav");
     nLoadSoundFunc(SOUND_FRAGMENT_APPEAR,      "fragment_appear.wav");
     nLoadSoundFunc(SOUND_FRAGMENT_COLLECT,     "fragment_collect.wav");
+    nLoadSoundFunc(SOUND_ITEM_COLLECT,         "item_collect.wav");
     nLoadSoundFunc(SOUND_SUMMARY_TEXT,         "summary_text.wav");
     nLoadSoundFunc(SOUND_SUMMARY_SCORE,        "summary_score.wav");
     nLoadSoundFunc(SOUND_SUMMARY_MEDAL,        "summary_medal.wav");
+    nLoadSoundFunc(SOUND_SUMMARY_PERFECT,      "summary_perfect.wav");
+    nLoadSoundFunc(SOUND_SUMMARY_RECORD,       "summary_record.wav");
     nLoadSoundFunc(SOUND_CONTINUE_TICK,        "continue_tick.wav");
     nLoadSoundFunc(SOUND_CONTINUE_ACCEPT,      "continue_accept.wav");
     nLoadSoundFunc(SOUND_MENU_START,           "menu_start.wav");
@@ -162,6 +169,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_MENU_SUB_OUT,         "menu_sub_out.wav");
     nLoadSoundFunc(SOUND_EFFECT_DUST,          "effect_dust.wav");
     nLoadSoundFunc(SOUND_EFFECT_ERROR,         "effect_error.wav");
+    nLoadSoundFunc(SOUND_EFFECT_FIRE_START,    "effect_fire_start.wav");
     nLoadSoundFunc(SOUND_EFFECT_SHAKE,         "effect_shake.wav");
     nLoadSoundFunc(SOUND_EFFECT_SWORD_01,      "effect_sword_01.wav");
     nLoadSoundFunc(SOUND_EFFECT_SWORD_02,      "effect_sword_02.wav");
@@ -192,6 +200,7 @@ void cSpecialEffects::Render()
             m_aParticleColor[0].Render();
             m_aParticleDark [0].Render();
             m_aParticleSmoke[0].Render();
+            m_aParticleDot  [0].Render();
 
             // enable additive blending (keep alpha aggregation)
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
@@ -243,6 +252,7 @@ void cSpecialEffects::RenderBottom()
             m_aParticleColor[1].Render();
             m_aParticleDark [1].Render();
             m_aParticleSmoke[1].Render();
+            m_aParticleDot  [1].Render();
 
             // enable additive blending (keep alpha aggregation)
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
@@ -269,6 +279,7 @@ void cSpecialEffects::Move()
                 m_aParticleDark [0].GetNumActiveParticles() || m_aParticleDark [1].GetNumActiveParticles() ||
                 m_aParticleSmoke[0].GetNumActiveParticles() || m_aParticleSmoke[1].GetNumActiveParticles() ||
                 m_aParticleFire [0].GetNumActiveParticles() || m_aParticleFire [1].GetNumActiveParticles() ||
+                m_aParticleDot  [0].GetNumActiveParticles() || m_aParticleDot  [1].GetNumActiveParticles() ||
                 !m_LightningList.List()->empty()            ||
                 !m_GustList     .List()->empty()            ||
                 std::any_of(m_aBlast, m_aBlast + SPECIAL_BLASTS, [](const coreObject3D& oBlast) {return oBlast.GetAlpha() ? true : false;}) ||
@@ -282,6 +293,7 @@ void cSpecialEffects::Move()
             m_aParticleDark [i].Move();
             m_aParticleSmoke[i].Move();
             m_aParticleFire [i].Move();
+            m_aParticleDot  [i].Move();
         }
 
         // 
@@ -484,6 +496,26 @@ void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFl
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       PI*0.5f);
         pParticle->SetColor4Abs  (coreVector4(vColor*0.926f, 1.0f), coreVector4(vColor*0.926f, 0.0f));
         pParticle->SetSpeed      (1.4f * Core::Rand->Float(0.9f, 1.1f));
+    });
+}
+
+void cSpecialEffects::CreateSplashDot(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
+{
+    // 
+    const coreFloat fBase = this->__GetEffectBase(false);
+    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum));
+
+    // 
+    coreUintW i = 0u;
+    m_aParticleDot[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    {
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+
+        pParticle->SetPositionRel(vPosition + vDir,           vDir * Core::Rand->Float(fScale));
+        pParticle->SetScaleAbs   (4.5f,                       3.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), PI);
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
+        pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
 }
 
@@ -742,7 +774,7 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2 vPosFrom, const cor
     {
         // 
         fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
-        fTexLen = ROUND(MAX(fTexLen, 0.5f) * 2.0f) * 0.5f;
+        fTexLen = RoundFactor(MAX(fTexLen, 0.5f), 2.0f);
 
         // 
         oLightning.SetTexSize  (coreVector2(SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);
@@ -842,7 +874,7 @@ void cSpecialEffects::CreateBlastSphere(const coreVector3 vPosition, const coreF
     oBlast.SetTexSize          (coreVector2(12.0f,12.0f));
 }
 
-void cSpecialEffects::CreateBlastCube(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
+void cSpecialEffects::CreateBlastCube(const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -854,13 +886,13 @@ void cSpecialEffects::CreateBlastCube(const coreVector3 vPosition, const coreVec
     oBlast.DefineModel         (m_apBlastModel[1]);
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
-    oBlast.SetDirection        (vDirection);
+    oBlast.SetDirection        (coreVector3(vDirection, 0.0f));
     oBlast.SetCollisionModifier(coreVector3(fScale * 0.77f, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor, 1.0f));
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
 }
 
-void cSpecialEffects::CreateBlastTetra(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
+void cSpecialEffects::CreateBlastTetra(const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -872,7 +904,7 @@ void cSpecialEffects::CreateBlastTetra(const coreVector3 vPosition, const coreVe
     oBlast.DefineModel         (m_apBlastModel[2]);
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
-    oBlast.SetDirection        (vDirection);
+    oBlast.SetDirection        (coreVector3(vDirection, 0.0f));
     oBlast.SetCollisionModifier(coreVector3(fScale * 0.69f, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor, 1.0f));
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
@@ -946,8 +978,9 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_ENEMY_EXPLOSION_07:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_08:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_ENEMY_EXPLOSION_09:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_ENEMY_EXPLOSION_10:   fBaseVolume = 1.4f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_WEAPON_RAY:           fBaseVolume = 0.8f; fBasePitch = 0.5f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_10:   fBaseVolume = 1.7f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ENEMY_EXPLOSION_11:   fBaseVolume = 2.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_WEAPON_RAY:           fBaseVolume = 0.8f; fBasePitch = 0.4f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_WEAPON_ENEMY:         fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_BULLET_HIT:           fBaseVolume = 1.5f; fBasePitch = 0.9f; fBasePitchRnd = 0.1f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_BULLET_REFLECT:       fBaseVolume = 1.1f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
@@ -963,9 +996,12 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_FRAGMENT_HELPER:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_FRAGMENT_APPEAR:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_FRAGMENT_COLLECT:     fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_ITEM_COLLECT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_SUMMARY_TEXT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_SUMMARY_SCORE:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_SUMMARY_MEDAL:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_SUMMARY_PERFECT:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
+    case SOUND_SUMMARY_RECORD:       fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_CONTINUE_TICK:        fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_CONTINUE_ACCEPT:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_MENU_START:           fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
@@ -983,6 +1019,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_MENU_SUB_OUT:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.0f;  bRelative = true;  iType = SOUND_MENU;   break;
     case SOUND_EFFECT_DUST:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_ERROR:         fBaseVolume = 1.0f; fBasePitch = 0.9f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_FIRE_START:    fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SHAKE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = true;  iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SWORD_01:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SWORD_02:      fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
@@ -1031,15 +1068,29 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
 
 // ****************************************************************
 // 
+void cSpecialEffects::StopSound(const eSoundEffect eSoundIndex)
+{
+    // 
+    if(!m_apSound[eSoundIndex].IsUsable()) return;
+    coreSound* pSound = m_apSound[eSoundIndex].GetResource();
+
+    // 
+    if(pSound->EnableRef(this)) pSound->Stop();
+}
+
+
+// ****************************************************************
+// 
 void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs)
 {
     ASSERT(fStrength && iLengthMs)
     if(!STATIC_ISVALID(g_pGame)) return;
 
     // loop through all active players
-    g_pGame->ForEachPlayer([&](const cPlayer* pCurPlayer, const coreUintW i)
+    g_pGame->ForEachPlayerAll([&](const cPlayer* pCurPlayer, const coreUintW i)
     {
         if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
+        if(pCurPlayer->HasStatus(PLAYER_STATUS_DEAD) && !pCurPlayer->ReachedDeath()) return;
 
         const coreUint8   iRumble     = g_CurConfig.Input.aiRumble[i];
         const coreUintW   iJoystickID = g_CurConfig.Input.aiType  [i] - INPUT_SETS_KEYBOARD;
@@ -1052,7 +1103,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))
             {
                 // create rumble effect
-                Core::Input->JoystickRumble(iJoystickID, CLAMP(fStrength * I_TO_F(iRumble) * 0.1f, 0.0f, 1.0f), 0.0f, iLengthMs);
+                Core::Input->JoystickRumble(iJoystickID, 0.0f, CLAMP(fStrength * I_TO_F(iRumble) * 0.1f, 0.0f, 1.0f), iLengthMs);
             }
         }
     });
@@ -1098,6 +1149,7 @@ void cSpecialEffects::ClearAll()
         m_aParticleDark [i].ClearAll();
         m_aParticleSmoke[i].ClearAll();
         m_aParticleFire [i].ClearAll();
+        m_aParticleDot  [i].ClearAll();
     }
 
     // TODO 1: clear other stuff here   

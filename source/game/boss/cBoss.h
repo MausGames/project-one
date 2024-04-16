@@ -65,9 +65,9 @@
 #define LEVIATHAN_RADIUS_INNER_2  (10.0f)                                      // 
 #define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.6f : 4.8f)                          // 
 #define LEVIATHAN_RAY_HEIGHT      (0.2f)                                       // 
-#define LEVIATHAN_RAY_SIZE        (coreVector3(1.2f,50.0f,1.2f))               // 
+#define LEVIATHAN_RAY_SIZE        (coreVector3(1.4f,50.0f,1.4f))               // 
 #define LEVIATHAN_RAY_TEXSIZE     (coreVector2(0.5f,1.5f))                     // 
-#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(2.4f,7.0f,2.4f))                // 
+#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(2.8f,7.0f,2.8f))                // 
 #define LEVIATHAN_RAYWAVE_TEXSIZE (coreVector2(0.5f,0.5f))                     // 
 #define LEVIATHAN_TILES           (20u)                                        // 
 
@@ -119,8 +119,8 @@
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c,    [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)   // NOLINT
-#define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)   // NOLINT
+#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c,    [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
+#define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)
 #define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b, LERP_LINEAR)
 
 #define PHASE_TIME_POINT(t)             (InBetween((t), fTimeBefore, fTime))
@@ -575,6 +575,9 @@ public:
 
     DISABLE_COPY(cLeviathanBoss)
     ASSIGN_ID_EX(203, "LEVIATHAN", COLOR_MENU_CYAN)
+
+    // 
+    void ResurrectDemo();
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_02.ogg";}

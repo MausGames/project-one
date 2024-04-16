@@ -20,6 +20,7 @@
 // TODO 1: completely remove PlayerSide aiming (for coop)
 // TODO 3: normale gruppen-gegner mit TOP haben doppelte outline (einmal im batch, und einmal durch TOP)
 // TODO 3: warrior model eiert etwas beim drehen um die Z-achse (siehe secret enemies bei mimic-wave)
+// TODO 2: preload enemies used in specific stage, before entering stage for the first time
 
 
 // ****************************************************************
@@ -49,7 +50,8 @@ enum eEnemyStatus : coreUint32
     ENEMY_STATUS_WORTHLESS    = 0x8000u,   // TODO 1: should be changed to explicit score value in configure (boss?) + setter ?
     ENEMY_STATUS_LIGHT = 0x10000u,
     ENEMY_STATUS_FLAT  = 0x20000u,
-    ENEMY_STATUS_SECRET = 0x40000u
+    ENEMY_STATUS_SECRET = 0x40000u,
+    ENEMY_STATUS_CUSTOM = 0x80000u
    // ENEMY_STATUS_UNDER = 0x20000u
 };
 
@@ -69,6 +71,7 @@ protected:
     coreUint8 m_iLastAttacker;     // 
     coreBool  m_bWasDamaged;       // 
     coreUint16 m_iScore;
+    coreInt16  m_iExtraDamage;
     coreInt32 m_iDamageForwarded;   // 
 
     coreSet<cEnemy*> m_apMember;   // 
@@ -110,7 +113,7 @@ public:
     
     inline void SetBaseColor(const coreVector3 vColor, const coreBool bInverted = false, const coreBool bIgnored = false, const coreBool bWhite = false)
     {
-        this->cShip::SetBaseColor(vColor * Core::Rand->Float(0.8f, 1.0f), bInverted, bIgnored, bWhite);
+        this->cShip::SetBaseColor(vColor * Core::Rand->Float(0.8f, 1.0f), bInverted, bIgnored, bWhite);    // TODO 1: what if function is called repeatedly, maybe base on address, or just check all occasions
     }
 
     // 
@@ -500,6 +503,27 @@ public:
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_blink_inst_program";}
+
+
+private:
+    // execute own routines
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+};
+
+
+// ****************************************************************
+// UFO enemy class
+class cUfoEnemy final : public cEnemy
+{
+public:
+    cUfoEnemy()noexcept;
+
+    ENABLE_COPY(cUfoEnemy)
+    ASSIGN_ID(9, "UFO")
+
+    // get object properties
+    inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_02;}
 
 
 private:

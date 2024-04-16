@@ -48,22 +48,31 @@ cMainMenu::cMainMenu()noexcept
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
     // 
-    m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ReplayButton, &m_ScoreButton,  NULL, &m_ExtraButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_SteamButton,  NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_SteamButton,  &m_ConfigButton, NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,   &m_SteamButton,  NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    if(g_bDemoVersion)
+    {
+        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ConfigButton, &m_StartButton,  NULL, &m_SteamButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_SteamButton,  &m_ConfigButton, NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExitButton,   &m_SteamButton,  NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    }
+    else
+    {
+        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ReplayButton, &m_ScoreButton,  NULL, &m_ExtraButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, NULL, MENU_TYPE_DEFAULT);
+    }
 
     m_Navigator.AssignFirst(&m_StartButton);
 
     // bind menu objects
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartButton);
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
 
     if(g_bDemoVersion)
     {
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_SteamButton);
     }
     else
@@ -71,6 +80,7 @@ cMainMenu::cMainMenu()noexcept
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     }
 
     #if !defined(_CORE_EMSCRIPTEN_)

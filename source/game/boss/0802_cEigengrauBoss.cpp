@@ -53,6 +53,7 @@
 // TODO 1: screen shake is not working! (because currently only the post-processing object is moved)
 // TODO 1: post-processing fehlt und farben sind anders
 // TODO 1: die seiten sollen anders verschwinden, vielleicht sollen gegner drüber fliegen bevor sie ganz weg sind (hellsinker hat das auch beim finale)
+// TODO 1: kid ikarus https://www.youtube.com/watch?v=PnMWJlCAGug
 
 
 // ****************************************************************
@@ -84,6 +85,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     // load models
     this->DefineModelHigh("object_cube_rota.md3");
     this->DefineModelLow ("object_cube_rota.md3");
+    this->DefineVolume   ("object_cube_volume.md3");
 
     // set object properties
     this->SetPosition(coreVector3(0.0f,0.0f,EIGENGRAU_DEPTH));
@@ -98,6 +100,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
         // 
         m_aLayer[i].DefineModelHigh("object_cube_rota.md3");
         m_aLayer[i].DefineModelLow ("object_cube_rota.md3");
+        m_aLayer[i].DefineVolume   ("object_cube_volume.md3");
         m_aLayer[i].DefineTexture  (0u, "effect_energy.png");
         m_aLayer[i].DefineProgram  ("effect_energy_spheric_program");
         m_aLayer[i].SetSize        (coreVector3(0.0f,0.0f,0.0f));
@@ -126,6 +129,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
         // 
         m_aParasite[i].DefineModelHigh     ("object_tetra_top.md3");
         m_aParasite[i].DefineModelLow      ("object_tetra_top.md3");
+        m_aParasite[i].DefineVolume        ("object_tetra_volume.md3");
         m_aParasite[i].DefineTexture       (0u, "effect_energy.png");
         m_aParasite[i].DefineProgram       ("effect_energy_blink_flat_program");
         m_aParasite[i].SetSize             (coreVector3(coreVector2(1.0f,1.0f) * 5.0f, 0.01f));
@@ -140,6 +144,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
         // 
         m_aFollower[i].DefineModelHigh("object_cube_top.md3");
         m_aFollower[i].DefineModelLow ("object_cube_top.md3");
+        m_aFollower[i].DefineVolume   ("object_cube_volume.md3");
         m_aFollower[i].DefineTexture  (0u, "effect_energy.png");
         m_aFollower[i].DefineProgram  ("effect_energy_blink_flat_program");
         m_aFollower[i].SetSize        (coreVector3(coreVector2(1.0f,1.0f) * 5.5f, 0.01f));

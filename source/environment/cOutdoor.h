@@ -167,6 +167,8 @@ public:
 private:
     // reset with the resource manager
     void __Reset(const coreResourceReset eInit)final;
+
+    // reshape with the resource manager
     void __Reshape()final;
 
     // 

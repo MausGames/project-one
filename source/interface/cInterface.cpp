@@ -98,6 +98,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 , m_bVisible        (false)
 , m_fAlphaAll       (0.0f)
 , m_fAlphaBoss      (0.0f)
+, m_fAlphaWave      (0.0f)
 , m_fAlphaTurf      (0.0f)
 , m_fAlphaValid     (0.0f)
 , m_fAlertStart     (0.0f)
@@ -238,13 +239,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_Medal.DefineTexture(0u, "menu_medal.png");
     m_Medal.DefineProgram("default_2d_program");
     m_Medal.SetTexSize   (coreVector2(0.25f,0.25f));
+
     
     
-        m_aBossTime[0].SetText("0.");
-        m_aBossTime[1].SetText("0");
-        m_aWaveTime[0].SetText("0.");
-        m_aWaveTime[1].SetText("0");
-        
     m_pAlertSound = Core::Manager::Resource->Get<coreSound>("effect_alert.wav");
 }
 
@@ -349,7 +346,7 @@ void cInterface::Render()
 #if !defined(_P1_SCREENSHOT_)
             //m_WaveName    .Render();   // TODO 1: nur in coop weg
 #endif
-        if(m_fAlphaBoss != 1.0f)
+        if(m_fAlphaWave)
         {
             // render wave labels
             m_aWaveTime[0].Render();
@@ -388,7 +385,7 @@ void cInterface::Move()
     // 
     const coreFloat fAlphaPlayerFull = BLENDH3(m_fAlphaAll) * MENU_INSIDE_ALPHA;
     const coreFloat fAlphaBossFull   = fAlphaPlayerFull * BLENDH3(m_fAlphaBoss);
-    const coreFloat fAlphaWaveFull   = fAlphaPlayerFull * BLENDH3(1.0f - m_fAlphaBoss);
+    const coreFloat fAlphaWaveFull   = fAlphaPlayerFull * BLENDH3(m_fAlphaWave);
     const coreFloat fAlphaTurfFull   = fAlphaPlayerFull * BLENDH3(m_fAlphaTurf);
 
     // loop through all player views
@@ -462,19 +459,20 @@ void cInterface::Move()
         oView.oScoreTotal  .SetText(PRINT("%07u", pScoreTable->GetScoreTotal()));
         oView.oScoreMission.SetText(PRINT("%07u", pScoreTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
 
-        const coreBool bCombo = ((pScoreTable->GetModifier() > 1.0f) || m_fAlphaBoss);
+        const coreUint32 iModifier = pScoreTable->GetModifier();
+        const coreBool   bShow     = (iModifier > (pScoreTable->HasOverride() ? 0u : 10u));
         
         // 
-        oView.oCooldownBar.SetSize  (coreVector2(bCombo ? (0.15f * MIN(pScoreTable->GetCooldown() * 1.1f, 1.0f)) : 0.0f, 0.013f));
+        oView.oCooldownBar.SetSize  (coreVector2(bShow ? (0.15f * MIN(pScoreTable->GetCooldown() * 1.1f, 1.0f)) : 0.0f, 0.013f));
         oView.oCooldownBar.SetColor3((pScoreTable->GetCooldown() > 0.5f) ? COLOR_MENU_BLUE : COLOR_MENU_RED);
 
         // 
-        oView.oComboValue.SetText(bCombo ? PRINT("x%.1f", pScoreTable->GetModifier()) : "");
+        oView.oComboValue.SetText(bShow ? PRINT("x%u.%u", iModifier / 10u, iModifier % 10u) : "");
         oView.oChainValue.SetText(pScoreTable->GetCurChain() ? PRINT("+%u", pScoreTable->GetCurChain()) : "");
 
         
         
-        oView.oScoreTotal.SetPosition(coreVector2(oView.oScoreTotal.GetPosition().x, LERPS(-0.005f, -0.04f, (HAS_FLAG(oView.oScoreTotal.GetStyle(), CORE_OBJECT2D_STYLE_ALTCENTER) || !IsHorizontal(Core::System->GetResolution())) ? m_fAlphaBoss.ToFloat() : 0.0f)));
+        oView.oScoreTotal  .SetPosition(coreVector2(oView.oScoreTotal  .GetPosition().x, LERPS(-0.005f, -0.04f, (HAS_FLAG(oView.oScoreTotal.GetStyle(), CORE_OBJECT2D_STYLE_ALTCENTER) || !IsHorizontal(Core::System->GetResolution())) ? m_fAlphaBoss.ToFloat() : 0.0f)));
         oView.oScoreMission.SetPosition(coreVector2(oView.oScoreMission.GetPosition().x, oView.oScoreTotal.GetPosition().y -0.035f));
         oView.oCooldownBar .SetPosition(coreVector2(oView.oCooldownBar .GetPosition().x, oView.oScoreTotal.GetPosition().y -0.11f));
         oView.oComboValue  .SetPosition(coreVector2(oView.oComboValue  .GetPosition().x, oView.oScoreTotal.GetPosition().y -0.045f));
@@ -495,7 +493,7 @@ void cInterface::Move()
         oView.oScoreTotal  .SetAlpha(fAlphaPlayerFull);
         oView.oScoreMission.SetAlpha(fAlphaPlayerFull);
         oView.oCooldownBar .SetAlpha(fAlphaPlayerFull);
-        oView.oComboValue  .SetAlpha(fAlphaPlayerFull * (m_fAlphaBoss ? m_fAlphaBoss.ToFloat() : 1.0f));
+        oView.oComboValue  .SetAlpha(fAlphaPlayerFull);
         oView.oChainValue  .SetAlpha(fAlphaPlayerFull);
         oView.oImmune      .SetAlpha(fAlphaPlayerFull * (1.0f - fImmuneValue));
 
@@ -595,6 +593,21 @@ void cInterface::Move()
         m_aWaveTime[0].SetText(m_aBossTime[0].GetText());
         m_aWaveTime[1].SetText(m_aBossTime[1].GetText());
     }
+    else
+    {
+        if(!fAlphaBossFull)
+        {
+            m_aBossTime[0].SetText("0.");
+            m_aBossTime[1].SetText("0");
+            m_aBossTime[2].SetText("+0");
+        }
+        if(!fAlphaWaveFull)
+        {
+            m_aWaveTime[0].SetText("0.");
+            m_aWaveTime[1].SetText("0");
+            m_aWaveTime[2].SetText("+0");
+        }
+    }
 
     // 
     const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftSegmentSafe();
@@ -613,12 +626,16 @@ void cInterface::Move()
     }
 
     // adjust time position (# only required if alignment is centered)
-    (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2 vSize)
+    m_aBossTime[0].RetrieveDesiredSize([this](const coreVector2 vSize)
     {
         const coreFloat fPos = (vSize.x - 0.022f) * 0.5f;
         const coreFloat fOff = m_BossHealthValue.GetPosition().x;
         m_aBossTime[0].SetPosition(coreVector2(fPos - fOff,        m_aBossTime[0].GetPosition().y));
         m_aBossTime[1].SetPosition(coreVector2(fPos - fOff - 0.0f, m_aBossTime[1].GetPosition().y));
+    });
+    m_aWaveTime[0].RetrieveDesiredSize([this](const coreVector2 vSize)
+    {
+        const coreFloat fPos = (vSize.x - 0.022f) * 0.5f;
         m_aWaveTime[0].SetPosition(coreVector2(fPos,               m_aWaveTime[0].GetPosition().y));
         m_aWaveTime[1].SetPosition(coreVector2(fPos        - 0.0f, m_aWaveTime[1].GetPosition().y));
     });
@@ -655,6 +672,10 @@ void cInterface::Move()
     else
     {
         m_fAlphaValid.UpdateMax(-2.0f, 0.0f);
+    }
+    if(pBoss)
+    {
+        m_fAlphaValid = 0.0f;
     }
     
     
@@ -717,7 +738,7 @@ void cInterface::Move()
     {
         // calculate visibility and animation value
         const coreFloat fVisibility = MIN(fBanner, m_fBannerDuration - fBanner, RCP(m_fBannerSpeed)) * m_fBannerSpeed;
-        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(fBanner / INTERFACE_BANNER_ANIMATION, 1.0f)) * INTERFACE_BANNER_ANIMATION;
+        const coreFloat fAnimation  = BLENDB(MIN1(fBanner / INTERFACE_BANNER_ANIMATION)) * INTERFACE_BANNER_ANIMATION;
 
         // slash banner bar across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = (fBanner < (m_fBannerDuration * 0.5f)) ? false : true;
@@ -736,8 +757,8 @@ void cInterface::Move()
         if(m_iBannerType == INTERFACE_BANNER_TYPE_ALERT) m_aBannerText[3].SetColor3(COLOR_MENU_INSIDE * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, fDanger));
 
         // 
-        m_Medal.SetPosition(coreVector2(0.0f, fAnimation * 0.006f - 0.07f));
-        m_Medal.SetSize    (coreVector2(0.135f,0.135f) * LERP(1.5f, 1.0f, MIN(fBanner * 10.0f, 1.0f)));
+        m_Medal.SetPosition(coreVector2(0.0f, fAnimation * 0.01f - 0.07f));
+        m_Medal.SetSize    (coreVector2(0.135f,0.135f) * LERP(1.5f, 1.0f, MIN1(fBanner * 10.0f)));
 
         const coreFloat fBannerAlpha = BLENDH3(fVisibility) * MENU_INSIDE_ALPHA;
 
@@ -790,6 +811,11 @@ void cInterface::Move()
     if(pBoss && (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
          m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);
     else m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);
+
+    // 
+    if(!pBoss)
+         m_fAlphaWave.UpdateMin( 2.0f, 1.0f);
+    else m_fAlphaWave.UpdateMax(-2.0f, 0.0f);
     
     // 
     if(bTurf)

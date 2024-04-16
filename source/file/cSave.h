@@ -85,6 +85,8 @@ public:
         coreUint32 iCountStart;                   // 
         coreUint32 iCountEnd;                     // 
 
+        coreUint32 iMaxSeries;                    // 
+
         coreUint32 iTimeBestShifted;              // (already shifted) 
         coreUint16 iTimeBestShiftGood;            // 
         coreUint16 iTimeBestShiftBad;             // 

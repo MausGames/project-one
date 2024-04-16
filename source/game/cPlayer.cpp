@@ -173,6 +173,7 @@ void cPlayer::Configure(const coreUintW iShipType)
     // load models
     this->DefineModelHigh(sModelHigh);
     this->DefineModelLow (sModelLow);
+    this->DefineVolume   (sModelHigh);   // prevent clusters
 
     // 
     m_Range .DefineModel(sGeometry);
@@ -434,11 +435,13 @@ void cPlayer::Move()
         {
             const coreFloat fRadius = MAX(this->GetMove().Length(), PLAYER_COLLISION_MIN);
             this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetVolume()->GetBoundingRange());
+
+            ASSERT(!this->GetVolume()->GetNumClusters())
         }
 
         // 
         m_fAnimation.UpdateMod(1.0f * m_fAnimSpeed, 20.0f);
-        this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
+        if(this->IsDarkShading()) this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
 
         // 
         const coreMatrix3 mTiltMat = coreMatrix4::RotationX(m_fTilt).m123();
@@ -643,6 +646,9 @@ void cPlayer::Move()
             
             m_Bubble   .SetColor3(vEnergyColor);
         }
+        
+        // 
+        REMOVE_FLAG(m_iStatus, PLAYER_STATUS_REPAIRED)
     }
 
     // 
@@ -686,6 +692,10 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
         // 
         const coreUint16 iShift = g_pGame->IsMulti() ? 2u : 3u;
         g_pGame->GetTimeTable()->AddShiftBad(iShift);
+
+        m_DataTable.EditCounterTotal  ()->iShiftBad += iShift;
+        m_DataTable.EditCounterMission()->iShiftBad += iShift;
+        m_DataTable.EditCounterSegment()->iShiftBad += iShift;
 
         // 
         g_pGame->GetCombatText()->DrawShift(iShift, this->GetPosition());
@@ -1006,7 +1016,8 @@ void cPlayer::TurnIntoEnemy()
     m_apWeapon[0]->SetOwner(this);
     //this->EquipWeapon(0u, cEnemyWeapon::ID);           // <- bad overwrite
     //this->ActivateNormalShading();           
-    
+
+    this->SetScale(1.1f);
 }
 
 
@@ -1026,6 +1037,9 @@ void cPlayer::TurnIntoPlayer()
     
     this->SetBaseColor(COLOR_SHIP_BLACK);
     this->RefreshColor(1.0f);        
+    
+    
+    this->SetScale(1.0f);
 }
 
 

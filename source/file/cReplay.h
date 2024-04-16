@@ -65,51 +65,54 @@ public:
     // 
     struct sHeader final
     {
-        coreUint32 iMagic;                                                                 // 
-        coreUint32 iVersion;                                                               // 
+        coreUint32 iMagic;                                                                   // 
+        coreUint32 iVersion;                                                                 // 
 
-        coreChar   acName[REPLAY_NAME_LENGTH];                                             // 
-        coreUint64 iStartTimestamp;                                                        // 
-        coreUint64 iEndTimestamp;                                                          // 
+        coreChar   acName[REPLAY_NAME_LENGTH];                                               // 
+        coreUint64 iStartTimestamp;                                                          // 
+        coreUint64 iEndTimestamp;                                                            // 
 
-        coreUint32 iFrameCount;                                                            // 
-        coreUint32 iSnapshotCount;                                                         // 
-        coreUint32 aiPacketCount[REPLAY_PLAYERS];                                          // 
+        coreUint32 iFrameCount;                                                              // 
+        coreUint32 iSnapshotCount;                                                           // 
+        coreUint32 aiPacketCount[REPLAY_PLAYERS];                                            // 
 
-        coreUint8  iNumPlayers;                                                            // 
-        coreUint8  iNumMissions;                                                           // 
-        coreUint8  iNumSegments;                                                           // 
+        coreUint8  iNumPlayers;                                                              // 
+        coreUint8  iNumMissions;                                                             // 
+        coreUint8  iNumSegments;                                                             // 
 
         coreUint8  iOptionKind;
-        coreUint8  iOptionType;                                                            // 
-        coreUint8  iOptionMode;                                                            // 
-        coreUint8  iOptionDifficulty;                                                      // 
-        coreUint8  iOptionFlags;                                                           // 
-        coreUint8  aaiOptionShield [REPLAY_PLAYERS];                                       // 
-        coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                 // 
-        coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                // 
+        coreUint8  iOptionType;                                                              // 
+        coreUint8  iOptionMode;                                                              // 
+        coreUint8  iOptionDifficulty;                                                        // 
+        coreUint8  iOptionFlags;                                                             // 
+        coreUint8  aaiOptionShield [REPLAY_PLAYERS];                                         // 
+        coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                   // 
+        coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                  // 
 
-        coreUint16 iConfigGameSpeed;                                                       // 
-        coreUint16 iConfigUpdateFreq;                                                      // 
-        coreUint16 iConfigVersion;                                                         // 
+        coreUint16 iConfigGameSpeed;                                                         // 
+        coreUint16 iConfigUpdateFreq;                                                        // 
+        coreUint16 iConfigVersion;                                                           // 
 
-        coreUint8  iMissionStartIndex;                                                     // 
-        coreInt32  aiMissionList[REPLAY_MISSIONS];                                         // 
+        coreUint8  iMissionStartIndex;                                                       // 
+        coreInt32  aiMissionList[REPLAY_MISSIONS];                                           // 
 
-        coreUint32 aiScoreTotal    [REPLAY_PLAYERS];                                       // 
-        coreUint32 aaiScoreMission [REPLAY_PLAYERS][REPLAY_MISSIONS];                      // 
-        coreUint32 aaaiScoreSegment[REPLAY_PLAYERS][REPLAY_MISSIONS][REPLAY_SEGMENTS];     // 
+        coreUint32 aiScoreTotal    [REPLAY_PLAYERS];                                         // 
+        coreUint32 aaiScoreMission [REPLAY_PLAYERS][REPLAY_MISSIONS];                        // 
+        coreUint32 aaaiScoreSegment[REPLAY_PLAYERS][REPLAY_MISSIONS][REPLAY_SEGMENTS];       // 
 
-        coreUint32 iTimeTotal;                                                             // 
-        coreUint32 aiTimeMission [REPLAY_MISSIONS];                                        // 
-        coreUint32 aaiTimeSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                       // 
+        coreUint32 iTimeTotal;                                                               // 
+        coreUint32 aiTimeMission [REPLAY_MISSIONS];                                          // 
+        coreUint32 aaiTimeSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                         // 
 
-        coreUint16 aiShiftGoodMission [REPLAY_MISSIONS];                                   // 
-        coreUint16 aaiShiftGoodSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                  // 
-        coreUint16 aiShiftBadMission  [REPLAY_MISSIONS];                                   // 
-        coreUint16 aaiShiftBadSegment [REPLAY_MISSIONS][REPLAY_SEGMENTS];                  // 
+        coreUint32 aaiMaxSeriesMission [REPLAY_PLAYERS][REPLAY_MISSIONS];                    // 
+        coreUint32 aaaiMaxSeriesSegment[REPLAY_PLAYERS][REPLAY_MISSIONS][REPLAY_SEGMENTS];   // 
 
-        coreUint64 iChecksum;                                                              // 
+        coreUint16 aiShiftGoodMission [REPLAY_MISSIONS];                                     // 
+        coreUint16 aaiShiftGoodSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                    // 
+        coreUint16 aiShiftBadMission  [REPLAY_MISSIONS];                                     // 
+        coreUint16 aaiShiftBadSegment [REPLAY_MISSIONS][REPLAY_SEGMENTS];                    // 
+
+        coreUint64 iChecksum;                                                                // 
     };
 
     // 

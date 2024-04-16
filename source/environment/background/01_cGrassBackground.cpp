@@ -486,3 +486,24 @@ void cGrassBackground::__MoveOwn()
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
 }
+
+
+// ****************************************************************
+// 
+void cGrassBackground::__UpdateOwn()
+{
+#if 0
+    const coreBatchList*  pGround  = m_apGroundObjectList[0];
+    const coreProgramPtr& pProgram = pGround->IsInstanced() ? pGround->GetProgram() : pGround->List()->front()->GetProgram();
+
+    // enable the shader-program
+    if(!pProgram.IsUsable()) return;
+    if(!pProgram->Enable())  return;
+    
+    static coreFlow m_fWaveTime;
+    m_fWaveTime.Update(2.0f);
+
+    // 
+    pProgram->SendUniform("u_v1Time", m_fWaveTime);
+#endif
+}

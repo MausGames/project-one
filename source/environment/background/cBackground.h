@@ -41,6 +41,7 @@
 // TODO 4: move base-sound into base class ?
 // TODO 3: caustics for sea background (Worley noise)
 // TODO 3: vielleicht visual height + Z reinrechnen für visibility calculations (dann kann große view range reduziert werden)
+// TODO 5: background object replication bug (wo objekte zu nah zusammen sind an der replikations-linie) (bei fly offset 145 in center), fällt fast nicht auf, nur bei sting-only snow background
 
 
 // ****************************************************************
@@ -229,6 +230,8 @@ protected:
 private:
     // reset with the resource manager
     void __Reset(const coreResourceReset eInit)final;
+
+    // reshape with the resource manager
     void __Reshape()final;
 
     // own routines for derived classes
@@ -285,6 +288,9 @@ protected:
     void __InitOwn()final;
     void __ExitOwn()final;
     void __MoveOwn()final;
+    
+    
+    void __UpdateOwn()final;
 };
 
 

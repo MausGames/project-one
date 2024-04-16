@@ -116,16 +116,29 @@ cGame::~cGame()
     g_pPostProcessing->SetSplitScreen  (false);
     g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO 1: make transition smoother
     g_pPostProcessing->SetSaturationAll(1.0f);   // TODO 1: make transition smoother
+    
+    g_pPostProcessing->SetFrameValue(0.0f);
+    g_pPostProcessing->SetChroma(0.0f);
 
     // 
-    g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
-    g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
-    g_pEnvironment->SetTargetSpeedNow    (ENVIRONMENT_DEFAULT_SPEED);
+    if(g_pEnvironment->GetOldBackground())
+    {
+        g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+        g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+        g_pEnvironment->SetTargetSpeedNow    (ENVIRONMENT_DEFAULT_SPEED);
+    }
+    else
+    {
+        g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION, 0.5f);
+        g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE,      0.5f);
+        g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED,     0.5f);
+    }
 
     // 
     g_pSave->SaveFile();
     
-    g_MusicPlayer.Stop();
+    if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg"))   // TODO 1: condition for finale in demo
+        g_MusicPlayer.Stop();
 }
 
 
@@ -184,6 +197,8 @@ void cGame::Render()
             // render low-priority bullet manager
             m_BulletManagerPlayer.Render();
             m_BulletManagerPlayer.RenderAfter();
+
+            DEPTH_PUSH
 
             // 
             m_ShieldManager.Render();
@@ -326,6 +341,8 @@ void cGame::Render()
             // render low-priority bullet manager
             m_BulletManagerPlayer.Render();
             m_BulletManagerPlayer.RenderAfter();
+
+            DEPTH_PUSH
 
             // 
             m_ShieldManager.Render();
@@ -479,7 +496,6 @@ void cGame::Move()
     // 
     this->__HandleDefeat();
     
-    
     m_fHitDelay.UpdateMax(-20.0f, 0.0f);
     
     //if(HAS_FLAG(m_iStatus, GAME_STATUS_PLAY)) g_pEnvironment->SetTargetSide(m_aPlayer[0].GetPosition().xy() * 0.03f, 10.0f);
@@ -528,12 +544,8 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     // 
     this->__ClearAll(false);
 
-    // 
-    ASSERT(m_pCurMission)
-    const coreInt32 iOldID    = m_pCurMission->GetID();
-    const coreUintW iOldIndex = m_iCurMissionIndex;
-
     // hold old mission (to keep resources valid)
+    ASSERT(m_pCurMission)
     const cMission* pOldMission = m_pCurMission;
 
     // create new mission
@@ -562,46 +574,6 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     // 
     m_iCurMissionIndex = std::find(m_piMissionList, m_piMissionList + m_iNumMissions, iID) - m_piMissionList;
     ASSERT(m_iCurMissionIndex < m_iNumMissions)
-
-    if(iOldID != cNoMission::ID)
-    {
-        // 
-        g_pSave->EditGlobalStats()->iMissionsDone += 1u;
-
-        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
-        {
-            // 
-            const coreUint32 iScoreFull = m_aPlayer[i].GetScoreTable()->GetScoreMission(iOldIndex);
-            g_pSave->EditLocalStatsMission(iOldIndex)->iScoreBest   = MAX(g_pSave->EditLocalStatsMission(iOldIndex)->iScoreBest,       iScoreFull);
-            g_pSave->EditLocalStatsMission(iOldIndex)->iScoreWorst  = MIN(g_pSave->EditLocalStatsMission(iOldIndex)->iScoreWorst - 1u, iScoreFull - 1u) + 1u;
-            g_pSave->EditLocalStatsMission(iOldIndex)->iScoreTotal += iScoreFull;
-        }
-
-        // 
-        const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(m_TimeTable.GetTimeMission(iOldIndex));
-        g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBest   = MAX(g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBest,       iTimeUint);
-        g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorst  = MIN(g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorst - 1u, iTimeUint - 1u) + 1u;
-        g_pSave->EditLocalStatsMission(iOldIndex)->iTimeTotal += iTimeUint;
-        g_pSave->EditLocalStatsMission(iOldIndex)->iCountEnd  += 1u;
-
-        // 
-        const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(m_TimeTable.GetTimeShiftedMission(iOldIndex));
-        if(iTimeShiftedUint < g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShifted)
-        {
-            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShifted   = iTimeShiftedUint;
-            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShiftGood = g_pGame->GetTimeTable()->GetShiftGoodMission(iOldIndex);
-            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBestShiftBad  = g_pGame->GetTimeTable()->GetShiftBadMission (iOldIndex);
-        }
-        if(iTimeShiftedUint > g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShifted)
-        {
-            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShifted   = iTimeShiftedUint;
-            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShiftGood = g_pGame->GetTimeTable()->GetShiftGoodMission(iOldIndex);
-            g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorstShiftBad  = g_pGame->GetTimeTable()->GetShiftBadMission (iOldIndex);
-        }
-
-        // 
-        g_pSave->SaveFile();
-    }
 
     if(iID != cNoMission::ID)
     {
@@ -632,6 +604,12 @@ void cGame::LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom, 
 // 
 void cGame::LoadNextMission()
 {
+    if((m_Options.iKind == GAME_KIND_ALL) || (m_Options.iKind == GAME_KIND_MISSION))
+    {
+        // 
+        m_pCurMission->Close();
+    }
+
     if((m_Options.iKind == GAME_KIND_ALL) && (m_iCurMissionIndex + 1u < m_iNumMissions))
     {
         // 
@@ -732,6 +710,30 @@ void cGame::FadeMusic(const coreFloat fSpeed)
 
 // ****************************************************************
 // 
+void cGame::PlayHitSound(const coreVector3 vPosition)
+{
+    if(!m_fHitDelay)
+    {
+        m_fHitDelay = 1.0f;
+        g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BULLET_HIT);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cGame::PlayReflectSound(const coreVector3 vPosition)
+{
+    if(!m_fHitDelay)
+    {
+        m_fHitDelay = 1.0f;
+        g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BULLET_REFLECT);
+    }
+}
+
+
+// ****************************************************************
+// 
 void cGame::UseContinue()
 {
     ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
@@ -767,6 +769,11 @@ void cGame::UseContinue()
     m_TimeTable.RevertSegment(iMissionIndex, iSegmentIndex);
 
     // 
+    g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+    g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+    g_pEnvironment->SetTargetSpeedNow    (ENVIRONMENT_DEFAULT_SPEED);
+
+    // 
     g_pSave->EditGlobalStats      ()                            ->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsMission(iMissionIndex)               ->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsSegment(iMissionIndex, iSegmentIndex)->iContinuesUsed += 1u;
@@ -779,6 +786,48 @@ void cGame::UseRestart()
 {
     // 
     ADD_FLAG(m_iStatus, GAME_STATUS_QUICK)
+}
+
+
+// ****************************************************************
+// 
+void cGame::RepairPlayer()
+{
+    if(!m_pRepairEnemy) return;
+    
+    cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
+
+    // 
+    pPlayer->Resurrect();
+
+    // 
+    pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
+    //pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
+    pPlayer->SetDesaturate  (PLAYER_DESATURATE);
+    pPlayer->StartFeeling   (PLAYER_FEEL_TIME_REPAIR, 0u);
+    
+    pPlayer->SetCurHealth(1u);
+    if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+    {
+        pPlayer->SetCurShield(5u);
+    }
+    pPlayer->AddStatus(PLAYER_STATUS_REPAIRED);
+        
+    // 
+    g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_REPAIR);
+
+    // 
+    pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;
+    pPlayer->GetDataTable()->EditCounterMission()->iRepairsUsed += 1u;
+    pPlayer->GetDataTable()->EditCounterSegment()->iRepairsUsed += 1u;
+
+    // 
+    g_pSave->EditGlobalStats      ()->iRepairsUsed += 1u;
+    g_pSave->EditLocalStatsMission()->iRepairsUsed += 1u;
+    g_pSave->EditLocalStatsSegment()->iRepairsUsed += 1u;
+
+    // 
+    SAFE_DELETE(m_pRepairEnemy)
 }
 
 
@@ -932,7 +981,7 @@ coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
 coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead)
 {
     // 
-    if(!bWasDead)
+    //if(!bWasDead)
     {
         // 
         switch(iDamageTaken)
@@ -948,7 +997,7 @@ coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool
         STATIC_ASSERT(LIVES == 5u)
     }
 
-    return 0u;
+    //return 0u;
 }
 
 
@@ -1146,38 +1195,7 @@ void cGame::__HandleDefeat()
 
         if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
         {
-            cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
-
-            // 
-            pPlayer->Resurrect();
-
-            // 
-            pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
-            //pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
-            pPlayer->SetDesaturate  (PLAYER_DESATURATE);
-            pPlayer->StartFeeling   (PLAYER_FEEL_TIME_REPAIR, 0u);
-            
-            pPlayer->SetCurHealth(1u);
-            if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
-            {
-                pPlayer->SetCurShield(5u);
-            }
-                
-            // 
-            g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_REPAIR);
-
-            // 
-            pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;
-            pPlayer->GetDataTable()->EditCounterMission()->iRepairsUsed += 1u;
-            pPlayer->GetDataTable()->EditCounterSegment()->iRepairsUsed += 1u;
-
-            // 
-            g_pSave->EditGlobalStats      ()->iRepairsUsed += 1u;
-            g_pSave->EditLocalStatsMission()->iRepairsUsed += 1u;
-            g_pSave->EditLocalStatsSegment()->iRepairsUsed += 1u;
-
-            // 
-            SAFE_DELETE(m_pRepairEnemy)
+            this->RepairPlayer();
         }
     }
 }
@@ -1187,53 +1205,82 @@ void cGame::__HandleDefeat()
 // handle default object collisions
 void cGame::__HandleCollisions()
 {
+    m_ShieldManager.GetEffect(SHIELD_EFFECT_INVINCIBLE)->ForEachShield([this](coreObject3D* OUTPUT pShield)
+    {
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pShield, [this](cBullet* OUTPUT pBullet, const coreObject3D* pShield, const coreVector3 vIntersection, const coreBool bFirstHit)
+        {
+            // 
+            if(m_bVisibleCheck && !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+            if(bFirstHit)
+            {
+                if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
+                {
+                    // 
+                    const coreVector2 vDiff = (vIntersection.xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * TIME)) - pShield->GetPosition().xy();
+                    pBullet->Reflect(pShield, vIntersection.xy(), vDiff.Normalized());
+
+                    // 
+                    this->PlayReflectSound(vIntersection);
+                }
+            }
+        });
+    });
+    
+    
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
-            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST_PLAYER))
+            if(pPlayer->IsNormal())
             {
-                if(true || pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
+                if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST_PLAYER))
                 {
-                    if(pEnemy->GetLifeTime() >= 1.0f)   // TODO 1: modifiers are not applied
-                    
-                    // 
-                    pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-                }
-                else
-                {
-                    // 
-                    const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-                    pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
-                    pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+                    if(true || pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
+                    {
+                        if(pEnemy->GetLifeTime() >= 1.0f)   // TODO 1: modifiers are not applied
 
-                    // 
-                    g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
-                    g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-                    g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLAYER_INTERRUPT);
+                        // 
+                        pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
+                    }
+                    else
+                    {
+                        // 
+                        const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
+                        pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+                        pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+
+                        // 
+                        g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+                        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                        g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLAYER_INTERRUPT);
+                    }
                 }
             }
         }
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
-            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
+            if(pPlayer->IsNormal())
             {
-                // 
-                pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-                //pBullet->Deactivate(true, vIntersection.xy());
-                //pBullet->AddStatus(BULLET_STATUS_GHOST);
+                if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
+                {
+                    // 
+                    pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
+                    //pBullet->Deactivate(true, vIntersection.xy());
+                    //pBullet->AddStatus(BULLET_STATUS_GHOST);
+                }
             }
         }
     });
@@ -1246,6 +1293,8 @@ void cGame::__HandleCollisions()
 
         // 
         if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
+        
+        // TODO 1: fix all cases where bullet is made ghost in collision-callback (e.g. handle penetration, rumble, sound, ...)
 
         if(bFirstHit)
         {
@@ -1272,15 +1321,10 @@ void cGame::__HandleCollisions()
                     }
 
                     // 
-                    g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+                    //g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
 
                     // 
-                    if(!m_fHitDelay && !pEnemy->ReachedDeath())
-                    {
-                        m_fHitDelay = 1.0f;
-                        //g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_BULLET_HIT);
-                        g_pSpecialEffects->PlaySound(vIntersection, 0.5f, 1.0f, SOUND_WEAPON_RAY);
-                    }
+                    if(!pEnemy->ReachedDeath()) this->PlayHitSound(vIntersection);
                 }
 
                 if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
@@ -1293,11 +1337,7 @@ void cGame::__HandleCollisions()
                         pBullet->Reflect(pEnemy, vIntersection.xy(), vDiff.Normalized());
 
                         // 
-                        if(!m_fHitDelay)
-                        {
-                            m_fHitDelay = 1.0f;
-                            g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_BULLET_REFLECT);
-                        }
+                        this->PlayReflectSound(vIntersection);
                     }
                 }
             }

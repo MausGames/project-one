@@ -29,11 +29,12 @@
 #define POST_TEXTURE_UNIT_GLOW        (2u)   // same for glow
 #define POST_TEXTURE_UNIT_DISTORTION  (3u)   // same for distortion
 
-#define POST_INTERIORS   (PLAYERS)
-#define POST_WALLS_BASE  (2u)
-#define POST_WALLS_EXTRA (2u)
-#define POST_WALLS       (POST_WALLS_BASE + POST_WALLS_EXTRA)
-#define POST_BORDERS     (3u)
+#define POST_INTERIORS     (PLAYERS)
+#define POST_WALLS_BASE    (2u)
+#define POST_WALLS_EXTRA   (2u)
+#define POST_WALLS         (POST_WALLS_BASE + POST_WALLS_EXTRA)
+#define POST_BORDERS       (3u)
+#define POST_CHROMA_FACTOR (0.01f)
 
 
 // ****************************************************************
@@ -44,6 +45,7 @@ private:
     coreProgramPtr m_pProgramSimple;            // 
     coreProgramPtr m_pProgramDistorted;         // 
     coreProgramPtr m_pProgramTransparent;       // 
+    coreProgramPtr m_pProgramChroma;            // 
     coreProgramPtr m_pProgramDebug;             // 
 
     coreObject2D m_aInterior[POST_INTERIORS];   // 
@@ -60,6 +62,8 @@ private:
     coreVector3 m_avData  [POST_INTERIORS];     // 
     coreFloat   m_afOffset[POST_WALLS];         // (-x, +x, -y, +y) 
     coreBool    m_bOffsetActive;                // 
+
+    coreFloat m_fChroma;                        // 
 
     coreFlow m_fAnimation;                      // 
 
@@ -99,6 +103,7 @@ public:
     inline void SetSaturationAll(const coreFloat   fSaturation)                         {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetSaturation(i, fSaturation);}
     inline void SetValueAll     (const coreFloat   fValue)                              {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetValue     (i, fValue);}
     inline void SetBorderAll    (const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBorder    (i, fBorder);}
+    inline void SetChroma       (const coreFloat   fChroma)                             {m_fChroma = fChroma;}
 
 
 private:

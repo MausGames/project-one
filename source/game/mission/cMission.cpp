@@ -12,6 +12,7 @@ coreUint16  cMission::s_iTick           = 0u;
 coreFloat   cMission::s_fLifeTimePoint  = 0.0f;
 coreFloat   cMission::s_fHealthPctPoint = 0.0f;
 coreVector2 cMission::s_vPositionPoint  = coreVector2(0.0f,0.0f);
+coreUint32  cMission::s_aiSink[2]       = {};
 
 
 // ****************************************************************
@@ -33,8 +34,10 @@ cMission::cMission()noexcept
 , m_fStageWait          (0.0f)
 , m_pfMedalGoal         (NULL)
 , m_iBadgeGiven         (0u)
+, m_iRecordBroken       (0u)
 , m_iTakeFrom           (0u)
 , m_iTakeTo             (TAKE_MISSION)
+, m_bDelay              (false)
 , m_bRepeat             (false)
 {
 }
@@ -84,6 +87,64 @@ void cMission::Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 
 
 // ****************************************************************
+// 
+void cMission::Close()
+{
+    // 
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+
+    // 
+    g_pSave->EditGlobalStats()->iMissionsDone += 1u;
+
+    // 
+    coreUint32 iScoreFull     = 0u;
+    coreUint32 iMaxSeriesFull = 0u;
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        // 
+        iScoreFull     += pPlayer->GetScoreTable()->GetScoreMission    (iMissionIndex);
+        iMaxSeriesFull += pPlayer->GetScoreTable()->GetMaxSeriesMission(iMissionIndex);
+    });
+
+    // 
+    if(g_pGame->IsCoop()) iMaxSeriesFull /= GAME_PLAYERS;
+
+    // 
+    g_pSave->EditLocalStatsMission()->iScoreBest   = MAX(g_pSave->EditLocalStatsMission()->iScoreBest,       iScoreFull);
+    g_pSave->EditLocalStatsMission()->iScoreWorst  = MIN(g_pSave->EditLocalStatsMission()->iScoreWorst - 1u, iScoreFull - 1u) + 1u;
+    g_pSave->EditLocalStatsMission()->iScoreTotal += iScoreFull;
+
+    // 
+    g_pSave->EditLocalStatsMission()->iMaxSeries = MAX(g_pSave->EditLocalStatsMission()->iMaxSeries, iMaxSeriesFull);
+
+    // 
+    const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(g_pGame->GetTimeTable()->GetTimeMission(iMissionIndex));
+    g_pSave->EditLocalStatsMission()->iTimeBest   = MIN(g_pSave->EditLocalStatsMission()->iTimeBest - 1u, iTimeUint - 1u) + 1u;
+    g_pSave->EditLocalStatsMission()->iTimeWorst  = MAX(g_pSave->EditLocalStatsMission()->iTimeWorst,     iTimeUint);
+    g_pSave->EditLocalStatsMission()->iTimeTotal += iTimeUint;
+    g_pSave->EditLocalStatsMission()->iCountEnd  += 1u;
+
+    // 
+    const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(g_pGame->GetTimeTable()->GetTimeShiftedMission(iMissionIndex));
+    if(iTimeShiftedUint - 1u < g_pSave->EditLocalStatsMission()->iTimeBestShifted - 1u)
+    {
+        g_pSave->EditLocalStatsMission()->iTimeBestShifted   = iTimeShiftedUint;
+        g_pSave->EditLocalStatsMission()->iTimeBestShiftGood = g_pGame->GetTimeTable()->GetShiftGoodMission(iMissionIndex);
+        g_pSave->EditLocalStatsMission()->iTimeBestShiftBad  = g_pGame->GetTimeTable()->GetShiftBadMission (iMissionIndex);
+    }
+    if(iTimeShiftedUint > g_pSave->EditLocalStatsMission()->iTimeWorstShifted)
+    {
+        g_pSave->EditLocalStatsMission()->iTimeWorstShifted   = iTimeShiftedUint;
+        g_pSave->EditLocalStatsMission()->iTimeWorstShiftGood = g_pGame->GetTimeTable()->GetShiftGoodMission(iMissionIndex);
+        g_pSave->EditLocalStatsMission()->iTimeWorstShiftBad  = g_pGame->GetTimeTable()->GetShiftBadMission (iMissionIndex);
+    }
+
+    // 
+    g_pSave->SaveFile();
+}
+
+
+// ****************************************************************
 // render the mission
 void cMission::RenderBottom() {this->__RenderOwnBottom();}
 void cMission::RenderUnder () {this->__RenderOwnUnder ();}
@@ -102,6 +163,9 @@ void cMission::MoveBefore()
     {
         // 
         m_bRepeat = false;
+        
+        // 
+        std::memset(s_aiSink, 0, sizeof(s_aiSink));
 
         if(!m_anStage.empty())
         {
@@ -178,6 +242,9 @@ void cMission::SkipStage()
     m_nCollPlayerEnemy  = NULL;
     m_nCollPlayerBullet = NULL;
     m_nCollEnemyBullet  = NULL;
+
+    // 
+    m_bDelay = false;
 
     // 
     m_bRepeat = true;
@@ -262,6 +329,10 @@ void cMission::DeactivateWave()
     coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex];
     iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 2u);
 
+    
+    // TODO 1: war eigentlich gedacht, falls der spieler ALT+F4 verwendet obwohl er die  bedingung erfuellt hat
+    //if(iMissionIndex == 1u) g_pSave->EditProgress()->bFirstPlay = false;
+
     // 
     this->__CloseSegment();
 
@@ -277,6 +348,13 @@ void cMission::DeactivateWave()
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         pPlayer->HealShield(pPlayer->GetMaxShield() / 5);
+
+        const coreUint32 iCombo = pPlayer->GetScoreTable()->GetCurCombo();
+        if(iCombo)
+        {
+            const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(100u * iCombo, false);
+            g_pGame->GetCombatText()->DrawExtra(iScore, pPlayer->GetPosition(), true);
+        }
     });
 
     // 
@@ -304,6 +382,13 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 
     // 
     g_pGame->GetTimeTable()->AddShiftGood(iBonus);
+    
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+       pPlayer->GetDataTable()->EditCounterTotal  ()->iShiftGood += iBonus;
+       pPlayer->GetDataTable()->EditCounterMission()->iShiftGood += iBonus;
+       pPlayer->GetDataTable()->EditCounterSegment()->iShiftGood += iBonus;
+    });
 
     // 
     g_pGame->GetCombatText()->DrawBadge(iBonus, vPosition);
@@ -344,6 +429,13 @@ void cMission::__OpenSegment()
     if(!g_pGame->IsTask())
     {
         g_pGame->GetTimeTable()->AddShiftGood(10u, iMissionIndex, m_iCurSegmentIndex);
+    
+        g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+           pPlayer->GetDataTable()->EditCounterTotal  ()->iShiftGood += 10u;
+           pPlayer->GetDataTable()->EditCounterMission()->iShiftGood += 10u;
+           pPlayer->GetDataTable()->EditCounterSegment()->iShiftGood += 10u;
+        });
     }
 }
 
@@ -359,8 +451,8 @@ void cMission::__CloseSegment()
     g_pGame->GetShieldManager     ()->ClearShields(true);
 
     // 
-    g_pGame->HideHelpers    ();
-    g_pGame->KillRepairEnemy();
+    g_pGame->HideHelpers ();
+    g_pGame->RepairPlayer();
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
@@ -371,27 +463,28 @@ void cMission::__CloseSegment()
     const coreUint32 iBonus       = cGame::CalcBonusTime(fTimeShifted, m_pfMedalGoal);
 
     // 
-    coreUint8 iMedal = MEDAL_NONE;
+    coreUint8  iMedal         = MEDAL_NONE;
+    coreUint32 iScoreFull     = 0u;
+    coreUint32 iMaxSeriesFull = 0u;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        const coreUint32 iScoreSegment = pPlayer->GetScoreTable()->GetScoreSegment(iMissionIndex, m_iCurSegmentIndex);
+        // 
+        pPlayer->GetScoreTable()->AddScore(iBonus, false);
 
         // 
         iMedal += cGame::CalcMedal(fTimeShifted, m_pfMedalGoal);
 
         // 
-        pPlayer->GetScoreTable()->AddScore(iBonus, false);
-
-        // 
-        const coreUint32 iScoreFull = iScoreSegment + iBonus;
-        g_pSave->EditLocalStatsSegment()->iScoreBest   = MAX(g_pSave->EditLocalStatsSegment()->iScoreBest,       iScoreFull);
-        g_pSave->EditLocalStatsSegment()->iScoreWorst  = MIN(g_pSave->EditLocalStatsSegment()->iScoreWorst - 1u, iScoreFull - 1u) + 1u;
-        g_pSave->EditLocalStatsSegment()->iScoreTotal += iScoreFull;
+        iScoreFull     += pPlayer->GetScoreTable()->GetScoreSegment    (iMissionIndex, m_iCurSegmentIndex);
+        iMaxSeriesFull += pPlayer->GetScoreTable()->GetMaxSeriesSegment(iMissionIndex, m_iCurSegmentIndex);
     });
 
     // 
     if(g_pGame->IsCoop()) iMedal /= GAME_PLAYERS;
     ASSERT(iMedal != MEDAL_NONE)
+
+    // 
+    if(g_pGame->IsCoop()) iMaxSeriesFull /= GAME_PLAYERS;
 
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -411,16 +504,31 @@ void cMission::__CloseSegment()
     g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_END(iMissionIndex, m_iCurSegmentIndex));
 
     // 
+    SET_BIT(m_iRecordBroken, 0u, (iScoreFull     > g_pSave->EditLocalStatsSegment()->iScoreBest))
+    SET_BIT(m_iRecordBroken, 1u, (false))
+    SET_BIT(m_iRecordBroken, 2u, (iMaxSeriesFull > g_pSave->EditLocalStatsSegment()->iMaxSeries))
+
+    // 
+    g_pSave->EditLocalStatsSegment()->iScoreBest   = MAX(g_pSave->EditLocalStatsSegment()->iScoreBest,       iScoreFull);
+    g_pSave->EditLocalStatsSegment()->iScoreWorst  = MIN(g_pSave->EditLocalStatsSegment()->iScoreWorst - 1u, iScoreFull - 1u) + 1u;
+    g_pSave->EditLocalStatsSegment()->iScoreTotal += iScoreFull;
+
+    // 
+    g_pSave->EditLocalStatsSegment()->iMaxSeries = MAX(g_pSave->EditLocalStatsSegment()->iMaxSeries, iMaxSeriesFull);
+
+    // 
     const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(fTime);
-    g_pSave->EditLocalStatsSegment()->iTimeBest   = MAX(g_pSave->EditLocalStatsSegment()->iTimeBest,       iTimeUint);
-    g_pSave->EditLocalStatsSegment()->iTimeWorst  = MIN(g_pSave->EditLocalStatsSegment()->iTimeWorst - 1u, iTimeUint - 1u) + 1u;
+    g_pSave->EditLocalStatsSegment()->iTimeBest   = MIN(g_pSave->EditLocalStatsSegment()->iTimeBest - 1u, iTimeUint - 1u) + 1u;
+    g_pSave->EditLocalStatsSegment()->iTimeWorst  = MAX(g_pSave->EditLocalStatsSegment()->iTimeWorst,     iTimeUint);
     g_pSave->EditLocalStatsSegment()->iTimeTotal += iTimeUint;
     g_pSave->EditLocalStatsSegment()->iCountEnd  += 1u;
 
     // 
     const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(fTimeShifted);
-    if(iTimeShiftedUint < g_pSave->EditLocalStatsSegment()->iTimeBestShifted)
+    if(iTimeShiftedUint - 1u < g_pSave->EditLocalStatsSegment()->iTimeBestShifted - 1u)
     {
+        ADD_BIT(m_iRecordBroken, 1u)
+
         g_pSave->EditLocalStatsSegment()->iTimeBestShifted   = iTimeShiftedUint;
         g_pSave->EditLocalStatsSegment()->iTimeBestShiftGood = g_pGame->GetTimeTable()->GetShiftGoodSegment(iMissionIndex, m_iCurSegmentIndex);
         g_pSave->EditLocalStatsSegment()->iTimeBestShiftBad  = g_pGame->GetTimeTable()->GetShiftBadSegment (iMissionIndex, m_iCurSegmentIndex);
