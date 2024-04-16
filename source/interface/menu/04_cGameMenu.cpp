@@ -80,7 +80,7 @@ cGameMenu::cGameMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
     {
-        m_aMissionName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aMissionName[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
         m_aMissionName[i].SetPosition (m_DirectoryBackground.GetPosition() + m_DirectoryBackground.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.1f - 0.05f*I_TO_F(i)));
         m_aMissionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aMissionName[i].SetColor3   (COLOR_MENU_WHITE);
@@ -114,7 +114,7 @@ cGameMenu::cGameMenu()noexcept
         const coreVector2 vPos  = bBoss ? coreVector2(0.0f, -0.07f * (I_TO_F(i / 6u) * 2.0f - 1.5f)) : coreVector2(0.07f * (I_TO_F(i % 6u) - 2.0f), -0.07f * (I_TO_F(i / 6u) * 2.0f - 2.5f));
         const coreVector2 vSize = bBoss ? coreVector2(0.35f,0.07f)                                   : coreVector2(0.07f,0.07f);
 
-        m_aStage[i].Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_aStage[i].Construct    (MENU_BUTTON, MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
         m_aStage[i].DefineProgram("menu_border_program");
         m_aStage[i].SetPosition  (vPos + m_StageArea.GetPosition());
         m_aStage[i].SetSize      (vSize);
@@ -185,8 +185,12 @@ cGameMenu::cGameMenu()noexcept
     // fill option entries
     m_Players.AddEntryLanguage("GAME_PLAYERS_SOLO", 1u);
     m_Players.AddEntryLanguage("GAME_PLAYERS_COOP", 2u);
-    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_NOTHING",  cNoWeapon ::ID);
-    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_RAY",      cRayWeapon::ID);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_NOTHING",  cNoWeapon   ::ID);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_RAY",      cRayWeapon  ::ID);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_PULSE",    cPulseWeapon::ID);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_WAVE",     cWaveWeapon ::ID);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_TESLA",    cTeslaWeapon::ID);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_ANTI",     cAntiWeapon ::ID);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aSupport[i].AddEntryLanguage("GAME_SUPPORT_NOTHING", 0u);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aSupport[i].AddEntryLanguage("GAME_SUPPORT_SHIELD",  1u);
 
@@ -374,14 +378,22 @@ void cGameMenu::Move()
                 // 
                      if(m_aWeapon [i].GetCurEntry().tValue == 0u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
                 else if(m_aWeapon [i].GetCurEntry().tValue == 1u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+                else if(m_aWeapon [i].GetCurEntry().tValue == 2u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_PURPLE);
+                else if(m_aWeapon [i].GetCurEntry().tValue == 3u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                else if(m_aWeapon [i].GetCurEntry().tValue == 4u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
+                else if(m_aWeapon [i].GetCurEntry().tValue == 5u) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_RED);
                      if(m_aSupport[i].GetCurEntry().tValue == 0u) m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
                 else if(m_aSupport[i].GetCurEntry().tValue == 1u) m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
 
                 // 
                      if(m_aWeapon [i].GetCurEntry().tValue == 0u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.5f));
                 else if(m_aWeapon [i].GetCurEntry().tValue == 1u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == 2u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == 3u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.5f, 0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == 4u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.75f,0.0f));
+                else if(m_aWeapon [i].GetCurEntry().tValue == 5u) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.5f));
                      if(m_aSupport[i].GetCurEntry().tValue == 0u) m_aSupportIcon[i].SetTexOffset(coreVector2(0.25f,0.5f));
-                else if(m_aSupport[i].GetCurEntry().tValue == 1u) m_aSupportIcon[i].SetTexOffset(coreVector2(0.5f, 0.0f));
+                else if(m_aSupport[i].GetCurEntry().tValue == 1u) m_aSupportIcon[i].SetTexOffset(coreVector2(0.5f, 0.5f));
 
                 // 
                 m_aWeaponIcon [i].SetColor3(m_aWeapon [i].GetCaption()->GetColor3());
@@ -466,7 +478,7 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiDisclosure[i] ? true : false);
+        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiAdvance[i] ? true : false);
     }
 
     // 
@@ -475,8 +487,8 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        m_aWeapon [i].SelectValue(g_pSave->GetHeader().oOptions.aiWeapon [i]);
-        m_aSupport[i].SelectValue(g_pSave->GetHeader().oOptions.aiSupport[i]);
+        m_aWeapon [i].SelectValue(g_pSave->GetHeader().oOptions.aaiWeapon [i][0]);
+        m_aSupport[i].SelectValue(g_pSave->GetHeader().oOptions.aaiSupport[i][0]);
     }
 }
 
@@ -491,7 +503,7 @@ void cGameMenu::SaveValues()
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        g_pSave->EditOptions()->aiWeapon [i] = m_aWeapon [i].GetCurEntry().tValue;
-        g_pSave->EditOptions()->aiSupport[i] = m_aSupport[i].GetCurEntry().tValue;
+        g_pSave->EditOptions()->aaiWeapon [i][0] = m_aWeapon [i].GetCurEntry().tValue;
+        g_pSave->EditOptions()->aaiSupport[i][0] = m_aSupport[i].GetCurEntry().tValue;
     }
 }

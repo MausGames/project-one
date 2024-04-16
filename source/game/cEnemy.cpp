@@ -15,15 +15,13 @@ cEnemy::cEnemy()noexcept
 : m_fLifeTime       (0.0f)
 , m_fLifeTimeBefore (0.0f)
 {
+    this->DefineTexture(1u, "menu_background_black.png");
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
     this->DefineProgram("object_ship_blink_program");
 
     // reset base properties
     this->ResetProperties();
-
-
-    this->DefineTexture(1u, "menu_background_black.png");
 }
 
 
@@ -366,7 +364,6 @@ cEnemyManager::~cEnemyManager()
 
     // clear memory
     m_apAdditional.clear();
-    m_aRepeatEntry.clear();
 }
 
 
@@ -455,34 +452,6 @@ void cEnemyManager::Move()
     }
 
     // 
-    FOR_EACH_DYN(it, m_aRepeatEntry)
-    {
-        sRepeatEntry& oEntry = (*it);
-
-        // 
-        if(++oEntry.iCurDelay >= oEntry.iMaxDelay)
-        {
-            // 
-            if(CONTAINS_FLAG(oEntry.pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
-            {
-                DYN_REMOVE(it, m_aRepeatEntry)
-                continue;
-            }
-
-            // 
-            oEntry.iCurDelay = 0u;
-            oEntry.nFunction(oEntry.pEnemy, oEntry.iCurRepeat, oEntry.oData);
-
-            // 
-            if(++oEntry.iCurRepeat >= oEntry.iMaxRepeat)
-            {
-                DYN_REMOVE(it, m_aRepeatEntry)
-                continue;
-            }
-        }
-
-        DYN_KEEP(it)
-    }
 }
 
 
@@ -526,9 +495,6 @@ void cEnemyManager::ClearEnemies(const coreBool bAnimated)
     // deactivate all additional enemies
     FOR_EACH(it, m_apAdditional)
         (*it)->Kill(bAnimated);
-
-    // clear memory
-    m_aRepeatEntry.clear();
 }
 
 
@@ -579,31 +545,6 @@ cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)const
     });
 
     return pEnemy;
-}
-
-
-// ****************************************************************
-// 
-void cEnemyManager::AttachFunction(cEnemy* pEnemy, const coreUint16 iRepeat, const coreFloat fDelay, const coreVariant16& oData, uRepeatFunc nFunction)
-{
-    ASSERT(pEnemy && iRepeat && nFunction)
-
-    // 
-    ASSERT((fDelay >= 0.0f) && (fDelay <= (65535.0f / FRAMERATE_MAX)))
-    const coreUint16 iDelay = F_TO_UI(fDelay * RCP(Core::System->GetTime()));
-
-    // 
-    sRepeatEntry oNewEntry;
-    oNewEntry.pEnemy     = pEnemy;
-    oNewEntry.iMaxRepeat = iRepeat;
-    oNewEntry.iCurRepeat = 0u;
-    oNewEntry.iMaxDelay  = iDelay;
-    oNewEntry.iCurDelay  = 0u;
-    oNewEntry.oData      = oData;
-    oNewEntry.nFunction  = nFunction;
-
-    // 
-    m_aRepeatEntry.push_back(oNewEntry);
 }
 
 

@@ -12,22 +12,23 @@
 
 // TODO: add more stats, e.g. for favorite weapon+support, direction
 // TODO: move time, shoot time, move WASD, move dir 1234, min and max
-// TODO: still add backup mechanism (multiple files), you never know if the application writes garbage even though a temp-file is generated
-// TODO: add immediate update and autosave after progress or achievement changes, even during the game!
-// TODO: add save indicator somewhere on screen (corner), maybe only for important saves (changes) to reduce spam
+// TODO: add save indicator somewhere on screen (corner), maybe only for important saves (changes, game start+end) to reduce spam
+// TODO: output if loading (even backup) or saving did not work -> indicator in game, message box in menu
+// TODO: fix _WEAPONS and _SUPPORTS defines in save and replay
 
 
 // ****************************************************************
 // 
-#define SAVE_FILE_FOLDER    "user"                   // 
+#define SAVE_FILE_FOLDER    ""                       // 
 #define SAVE_FILE_EXTENSION "p1sv"                   // 
 #define SAVE_FILE_MAGIC     (UINT_LITERAL("P1SV"))   // 
 #define SAVE_FILE_VERSION   (0x00000001u)            // 
 
-#define SAVE_NAME_LENTH     (128u)                   // 
 #define SAVE_PLAYERS        (PLAYERS)                // 
 #define SAVE_MISSIONS       (MISSIONS)               // 
 #define SAVE_SEGMENTS       (SEGMENTS)               // 
+#define SAVE_EQUIP_WEAPONS  (EQUIP_WEAPONS)          // 
+#define SAVE_EQUIP_SUPPORTS (EQUIP_SUPPORTS)         // 
 #define SAVE_MEDALS         (MEDAL_MAX)              // 
 
 
@@ -54,9 +55,11 @@ public:
         coreUint32 iTurnsMade;                    // 
         coreUint32 iRollsMade;                    // 
         coreUint64 iBulletsShot;                  // 
+        coreUint32 iItemsCollected;               // 
+        coreUint64 iChromaCollected;              // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
         coreUint32 iFragmentsEarned;              // 
-        coreUint32 iBadgesEarned;                 // (new)  
+        coreUint32 iBadgesEarned;                 // 
     };
 
     // 
@@ -79,30 +82,33 @@ public:
         coreUint32 iTurnsMade;                    // 
         coreUint32 iRollsMade;                    // 
         coreUint64 iBulletsShot;                  // 
+        coreUint32 iItemsCollected;               // 
+        coreUint64 iChromaCollected;              // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
         coreUint32 iFragmentsEarned;              // 
-        coreUint32 iBadgesEarned;                 // (new)  
+        coreUint32 iBadgesEarned;                 // 
     };
 
     // 
     struct sOptions final
     {
-        coreUint8 iPlayers;                  // 
-        coreUint8 aiWeapon [SAVE_PLAYERS];   // 
-        coreUint8 aiSupport[SAVE_PLAYERS];   // 
+        coreUint8 iPlayers;                                        // 
+        coreUint8 iDifficulty;                                     // 
+        coreUint8 aaiWeapon [SAVE_PLAYERS][SAVE_EQUIP_WEAPONS];    // 
+        coreUint8 aaiSupport[SAVE_PLAYERS][SAVE_EQUIP_SUPPORTS];   // 
     };
 
     // 
     struct sProgress final
     {
         coreBool   bFirstPlay;                                      // 
-        coreUint8  aiDisclosure   [SAVE_MISSIONS];                  // 
+        coreUint8  aiAdvance      [SAVE_MISSIONS];                  // 
         coreUint8  aiMedalMission [SAVE_MISSIONS];                  // 
         coreUint8  aaiMedalSegment[SAVE_MISSIONS][SAVE_SEGMENTS];   // 
-        coreUint8  aiFragment     [SAVE_MISSIONS];                  // 
-        coreUint32 aiBadge        [SAVE_MISSIONS];                  // (new)  
-        coreUint64 iTrophy;                                         // (new)  
-        coreUint64 iUnlock;                                         // 
+        coreUint8  aiFragment     [SAVE_MISSIONS];                  // (bitfield)   
+        coreUint32 aiBadge        [SAVE_MISSIONS];                  // (bitfield)   
+        coreUint64 iTrophy;                                         // (bitfield)   
+        coreUint64 iUnlock;                                         // (bitfield)   
     };
 
     // 
@@ -137,13 +143,13 @@ public:
     DISABLE_COPY(cSave)
 
     // 
-    sGlobalStats* EditGlobalStats      ();
-    sLocalStats*  EditLocalStatsMission(const coreUintW iMissionIndex);
-    sLocalStats*  EditLocalStatsMission();
-    sLocalStats*  EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    sLocalStats*  EditLocalStatsSegment();
-    sOptions*     EditOptions          ();
-    sProgress*    EditProgress         ();
+    RETURN_NONNULL sGlobalStats* EditGlobalStats      ();
+    RETURN_NONNULL sLocalStats*  EditLocalStatsMission(const coreUintW iMissionIndex);
+    RETURN_NONNULL sLocalStats*  EditLocalStatsMission();
+    RETURN_NONNULL sLocalStats*  EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    RETURN_NONNULL sLocalStats*  EditLocalStatsSegment();
+    RETURN_NONNULL sOptions*     EditOptions          ();
+    RETURN_NONNULL sProgress*    EditProgress         ();
 
     // 
     coreBool LoadFile();
@@ -156,10 +162,11 @@ public:
 
 private:
     // 
-    static coreUint64 __GenerateChecksum(const sHeader& oHeader);
+    static coreBool __LoadHeader (sHeader* OUTPUT pHeader, const coreChar* pcPath);
+    static void     __CheckHeader(sHeader* OUTPUT pHeader);
 
     // 
-    friend coreBool ValidateSave(cSave* OUTPUT pSave);
+    static coreUint64 __GenerateChecksum(const sHeader& oHeader);
 };
 
 

@@ -110,8 +110,10 @@ void cTinkerMission::__SetupOwn()
             STAGE_GET_UINT  (iCount)
         STAGE_GET_END
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection)//, COLL_VAL(pSquad1))
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit)//, COLL_VAL(pSquad1))
         {
+            if(!bFirstHit) return;
+
             //const coreUintW i = pSquad1->GetIndex(pEnemy);
 
             if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
@@ -489,7 +491,7 @@ void cTinkerMission::__SetupOwn()
             }
             else
             {
-                if(STAGE_TICK_TIME_FREE(20.0f, 0.0f))
+                if(STAGE_TICK_FREE(20.0f, 0.0f))
                 {
                     const coreFloat fCurValue = (i < 20u) ? pEnemy->GetPosition().arr((i < 10u) ? 1u : 0u) : pEnemy->GetPosition().xy().LengthSq();
                     if(fCurValue < fTargetVal)
@@ -501,7 +503,7 @@ void cTinkerMission::__SetupOwn()
             }
         });
 
-        if(STAGE_TICK_TIME_FREE(2.0f, 0.0f))
+        if(STAGE_TICK_FREE(2.0f, 0.0f))
         {
             cEnemy*     pEnemy;
             coreVector2 vPos;
@@ -624,8 +626,10 @@ void cTinkerMission::__SetupOwn()
             STAGE_GET_VEC2(vForce)
         STAGE_GET_END
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, COLL_REF(vForce))
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_REF(vForce))
         {
+            if(!bFirstHit) return;
+
             //vForce += (pEnemy->GetPosition().xy() - pBullet->GetPosition().xy()).Normalized(pBullet->GetFlyDir()) * 10.0f;
             vForce -= AlongCrossNormal(pBullet->GetFlyDir()) * 5.0f;
         });
@@ -808,6 +812,8 @@ void cTinkerMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
+            STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
+
             const cPlayer*    pPlayer = pEnemy->NearestPlayer();
             const coreVector2 vDiff   = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
 
@@ -820,7 +826,7 @@ void cTinkerMission::__SetupOwn()
             pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 30.0f);
 
 
-            if(STAGE_TICK_TIME_FREE(3.0f, 0.0f))
+            if(STAGE_TICK_TIME(3.0f, 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy();
@@ -933,7 +939,7 @@ void cTinkerMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        if(STAGE_TICK_TIME_FREE(10.0f, 0.0f))
+        if(STAGE_TICK_FREE(10.0f, 0.0f))
         {
             const coreFloat fHeight = 1.1 * (1.0f - 2.0f * (I_TO_F((s_iTick-1u) % 41u) / 40.0f));
 

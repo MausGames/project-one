@@ -76,7 +76,7 @@
 // TODO: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
 // TODO: check all RCP for division by zero
 // TODO: reshape causes some batch-list to be initialized twice
-// TODO: look for hot/cold optimizations, e.g. member-list in enemy can be pointer
+// TODO: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
 
 
 // ****************************************************************
@@ -116,6 +116,10 @@
 #define LIVES                (5u)
 #define CONTINUES            (3u)
 #define SHIELD               (100u)
+#define WEAPONS              (6u)
+#define SUPPORTS             (2u)
+#define EQUIP_WEAPONS        (1u)
+#define EQUIP_SUPPORTS       (1u)
 #define FRAMERATE_MIN        (60.0f)
 #define FRAMERATE_MAX        (240.0f)
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
@@ -126,7 +130,7 @@
 // color values
 #define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
 #define COLOR_MENU_BLACK     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
-#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO: improve 
+#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO: improve use Jetbrains Git colors ?
 #define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f))   // TODO: improve 
 #define COLOR_MENU_RED       (coreVector3(1.000f, 0.275f, 0.275f))   // TODO: improve 
 #define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO: improve 
@@ -203,6 +207,13 @@ enum eType : coreInt32
     TYPE_LEVIATHAN_RAY
 };
 
+// 
+enum eSound : coreUint8
+{
+    SOUND_EFFECT = 1u,
+    SOUND_AMBIENT
+};
+
 // attack elements
 enum eElement : coreUint8
 {
@@ -263,7 +274,6 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"
-#include "file/cValidate.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
 #include "visual/cBlur.h"

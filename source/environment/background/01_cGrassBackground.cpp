@@ -284,7 +284,7 @@ cGrassBackground::cGrassBackground()noexcept
     m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
     m_pNatureSound.OnUsableOnce([this, pResource = m_pNatureSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
 }
 
@@ -335,5 +335,5 @@ void cGrassBackground::__MoveOwn()
 
     // adjust volume of the nature sound-effect
     if(m_pNatureSound->EnableRef(this))
-        m_pNatureSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this) * g_CurConfig.Audio.fAmbientVolume);
+        m_pNatureSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

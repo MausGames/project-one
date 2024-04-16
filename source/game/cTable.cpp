@@ -41,32 +41,33 @@ void cDataTable::Reset()
 
     // 
     std::memset(&m_aiFragment, 0, sizeof(m_aiFragment));
+    std::memset(&m_aiBadge,    0, sizeof(m_aiBadge));
 }
 
 
 // ****************************************************************
 // 
-cDataTable::sCounter* cDataTable::EditCounterTotal()
+RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterTotal()
 {
     // 
     return &m_CounterTotal;
 }
 
-cDataTable::sCounter* cDataTable::EditCounterMission(const coreUintW iMissionIndex)
+RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterMission(const coreUintW iMissionIndex)
 {
     // 
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     return &m_aCounterMission[iMissionIndex];
 }
 
-cDataTable::sCounter* cDataTable::EditCounterMission()
+RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterMission()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditCounterMission(g_pGame->GetCurMissionIndex());
 }
 
-cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
     if(iSegmentIndex != MISSION_NO_SEGMENT)
@@ -81,7 +82,7 @@ cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUintW iMissionInd
     return &s_CounterDummy;
 }
 
-cDataTable::sCounter* cDataTable::EditCounterSegment()
+RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
@@ -109,13 +110,10 @@ void cDataTable::GiveMedalMission(const coreUint8 iMedal)
 void cDataTable::GiveMedalSegment(const coreUint8 iMedal, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
-    if(iSegmentIndex != MISSION_NO_SEGMENT)
-    {
-        ASSERT(iMedal        < MEDAL_MAX)
-        ASSERT(iMissionIndex < TABLE_MISSIONS)
-        ASSERT(iSegmentIndex < TABLE_SEGMENTS)
-        m_aaiMedalSegment[iMissionIndex][iSegmentIndex] = iMedal;
-    }
+    ASSERT(iMedal        < MEDAL_MAX)
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+    m_aaiMedalSegment[iMissionIndex][iSegmentIndex] = iMedal;
 }
 
 void cDataTable::GiveMedalSegment(const coreUint8 iMedal)
@@ -141,6 +139,24 @@ void cDataTable::GiveFragment()
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     this->GiveFragment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex());
+}
+
+
+// ****************************************************************
+// 
+void cDataTable::GiveBadge(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+    ADD_BIT(m_aiBadge[iMissionIndex], iSegmentIndex)
+}
+
+void cDataTable::GiveBadge()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->GiveBadge(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 

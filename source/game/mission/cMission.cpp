@@ -115,12 +115,6 @@ void cMission::SkipStage()
     m_anStage.pop_back();
 
     // 
-    m_fStageTime       = 0.0f;
-    m_fStageTimeBefore = 0.0f;
-    m_iStageSub        = 0u;
-    m_pfMedalGoal      = NULL;
-
-    // 
     FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
     FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
 
@@ -131,9 +125,15 @@ void cMission::SkipStage()
     // 
     if(m_piData) std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
 
+    // 
+    m_fStageTime       = 0.0f;
+    m_fStageTimeBefore = 0.0f;
+    m_iStageSub        = 0u;
 
+    // 
+    m_pfMedalGoal = NULL;
 
-    
+    // 
     m_nCollPlayerEnemy  = NULL;
     m_nCollPlayerBullet = NULL;
     m_nCollEnemyBullet  = NULL;
@@ -157,6 +157,9 @@ void cMission::ActivateBoss(const cBoss* pBoss)
 
     // 
     g_pGame->GetInterface()->ShowBoss(m_pCurBoss);
+
+    // 
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_START(g_pGame->GetCurMissionIndex(), m_iCurSegmentIndex));
 }
 
 void cMission::DeactivateBoss()
@@ -186,6 +189,9 @@ void cMission::ActivateWave(const coreChar* pcName)
 
     // 
     g_pGame->GetInterface()->ShowWave(pcName);
+
+    // 
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_START(g_pGame->GetCurMissionIndex(), m_iCurSegmentIndex));
 }
 
 void cMission::DeactivateWave()
@@ -209,7 +215,7 @@ void cMission::__CloseSegment()
 
     // 
     g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
-    g_pGame->GetChromaManager     ()->ClearChromas(true);
+    //g_pGame->GetChromaManager     ()->ClearChromas(true);
     g_pGame->GetItemManager       ()->LoseItems();
     g_pGame->GetShieldManager     ()->ClearShields(true);
 
@@ -252,6 +258,13 @@ void cMission::__CloseSegment()
     const coreUint8 iShowMedal     = MAX(aiMedal[0], aiMedal[1]);
     const coreUint8 iShowMedalType = MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE;
     g_pGame->GetInterface()->ShowScore(iBonus, iShowMedal, iShowMedalType);
+
+    // 
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_END(iMissionIndex, m_iCurSegmentIndex));
+
+    // 
+    g_pSave->SaveFile();
+
 }
 
 

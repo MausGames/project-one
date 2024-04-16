@@ -253,7 +253,7 @@ cSeaBackground::cSeaBackground()noexcept
     m_pUnderSound = Core::Manager::Resource->Get<coreSound>("environment_under.wav");
     m_pUnderSound.OnUsableOnce([this, pResource = m_pUnderSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
 }
 
@@ -293,5 +293,5 @@ void cSeaBackground::__MoveOwn()
 
     // 
     if(m_pUnderSound->EnableRef(this))
-        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this) * g_CurConfig.Audio.fAmbientVolume);
+        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

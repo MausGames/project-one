@@ -667,18 +667,18 @@ void cMenu::__Reset(const coreResourceReset eInit)
 void cMenu::__StartGame()
 {
     // 
-    sGameConfig oConfig = {};
-    oConfig.iDifficulty = 0xFFu;
-    oConfig.bCoop       = (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false;
+    sGameOptions oOptions = {};
+    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers();
+    oOptions.iDifficulty  = 0xFFu;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        oConfig.aaiWeapon [i][0] = m_GameMenu.GetSelectedWeapon (i);
-        oConfig.aaiSupport[i][0] = m_GameMenu.GetSelectedSupport(i);
+        oOptions.aaiWeapon [i][0] = m_GameMenu.GetSelectedWeapon (i);
+        oOptions.aaiSupport[i][0] = m_GameMenu.GetSelectedSupport(i);
     }
 
     // 
     ASSERT(!STATIC_ISVALID(g_pGame))
-    STATIC_NEW(g_pGame, oConfig, GAME_MISSION_LIST_MAIN)
+    STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN)
     g_pGame->LoadNextMission();
 
     // 
@@ -703,10 +703,6 @@ void cMenu::__EndGame()
     }
 
     // 
-    ASSERT(STATIC_ISVALID(g_pGame))
-    STATIC_DELETE(g_pGame)
-
-    // 
     if(g_pSave->GetHeader().oProgress.bFirstPlay)
     {
         g_pSave->EditProgress()->bFirstPlay = false;
@@ -715,6 +711,10 @@ void cMenu::__EndGame()
         m_MainMenu .DeactivateFirstPlay();
         m_GameMenu .DeactivateFirstPlay();
     }
+
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    STATIC_DELETE(g_pGame)
 }
 
 

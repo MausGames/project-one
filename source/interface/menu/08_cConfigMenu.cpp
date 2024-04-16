@@ -169,6 +169,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_HudScale,      GAME_HUDSCALE,       0.26f)
         __SET_OPTION(m_HudType,       GAME_HUDTYPE,        0.26f)
         __SET_OPTION(m_UpdateFreq,    GAME_UPDATEFREQ,     0.26f)
+        __SET_OPTION(m_Version,       GAME_VERSION,        0.26f)
         __SET_OPTION(m_MirrorMode,    GAME_MIRRORMODE,     0.26f)
 
         m_Language    .SetEndless(true);
@@ -274,13 +275,12 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 50u; i <= 150u; i += 1u) m_HudScale.AddEntry(PRINT("%zu%%", i), i);
     m_HudType      .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
-    m_UpdateFreq   .AddEntry        ("60",                     60u);
-    m_UpdateFreq   .AddEntry        ("90",                     90u);
-    m_UpdateFreq   .AddEntry        ("120",                    120u);
-    m_UpdateFreq   .AddEntry        ("150",                    150u);
+    m_HudType      .AddEntryLanguage("HUDTYPE_BORDER",         2u);
+    for(coreUintW i = 60u; i <= 240u; i += 30u) m_UpdateFreq.AddEntry(PRINT("%zu", i), i);
+    m_Version      .AddEntry        ("1.0",                    1u);
+    m_Version      .AddEntryLanguage("VERSION_LATEST",         0u);
     m_MirrorMode   .AddEntryLanguage("VALUE_OFF",              0u);
     m_MirrorMode   .AddEntryLanguage("VALUE_ON",               1u);
-    m_HudType      .AddEntryLanguage("HUDTYPE_BORDER",         2u);
 
     
     m_MenuInput.BindShoulder(SURFACE_CONFIG_VIDEO, &m_VideoTab);
@@ -345,6 +345,7 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_GAME,  &m_HudScale);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_HudType);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_UpdateFreq);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_Version);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_MirrorMode);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueInput); ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aCueInput[i]);
@@ -506,7 +507,7 @@ void cConfigMenu::Move()
 
                     if(oButton.IsClicked())
                     {
-                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
+                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
                         const coreUint8& iType  = oInput.oType.GetCurEntry().tValue;   // # referenced in lambda
 
                         // 
@@ -587,6 +588,7 @@ void cConfigMenu::Move()
             m_TextSize  .SetOverride(-1);   // TODO: enable 
             m_HudScale  .SetOverride(-1);   // TODO: enable 
             m_UpdateFreq.SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
+            m_Version   .SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
 
             // 
             cMenu::UpdateSwitchBox(&m_Language);
@@ -598,6 +600,7 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_HudScale);
             cMenu::UpdateSwitchBox(&m_HudType);
             cMenu::UpdateSwitchBox(&m_UpdateFreq);
+            cMenu::UpdateSwitchBox(&m_Version);
             cMenu::UpdateSwitchBox(&m_MirrorMode);
         }
         break;
@@ -689,6 +692,7 @@ void cConfigMenu::CheckValues()
                            (m_HudScale     .GetCurEntry().tValue != g_OldConfig.Game.iHudScale)                                               ||
                            (m_HudType      .GetCurEntry().tValue != g_OldConfig.Game.iHudType)                                                ||
                            (m_UpdateFreq   .GetCurEntry().tValue != g_OldConfig.Game.iUpdateFreq)                                             ||
+                           (m_Version      .GetCurEntry().tValue != g_OldConfig.Game.iVersion)                                                ||
                            (m_MirrorMode   .GetCurEntry().tValue != g_OldConfig.Game.iMirrorMode)                                             ||
                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
@@ -747,6 +751,7 @@ void cConfigMenu::LoadValues()
     m_HudScale    .SelectValue(g_CurConfig.Game.iHudScale);
     m_HudType     .SelectValue(g_CurConfig.Game.iHudType);
     m_UpdateFreq  .SelectValue(g_CurConfig.Game.iUpdateFreq);
+    m_Version     .SelectValue(g_CurConfig.Game.iVersion);
     m_MirrorMode  .SelectValue(g_CurConfig.Game.iMirrorMode);
 
     // 
@@ -815,6 +820,7 @@ void cConfigMenu::SaveValues()
     g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurEntry().tValue;
     g_CurConfig.Game.iHudType      = m_HudType     .GetCurEntry().tValue;
     g_CurConfig.Game.iUpdateFreq   = m_UpdateFreq  .GetCurEntry().tValue;
+    g_CurConfig.Game.iVersion      = m_Version     .GetCurEntry().tValue;
     g_CurConfig.Game.iMirrorMode   = m_MirrorMode  .GetCurEntry().tValue;
 
     // 
@@ -871,11 +877,12 @@ void cConfigMenu::__UpdateVolume()
     // 
     Core::Audio->SetGlobalVolume(I_TO_F(m_GlobalVolume.GetCurEntry().tValue) * 0.01f);
     Core::Audio->SetMusicVolume (I_TO_F(m_MusicVolume .GetCurEntry().tValue) * 0.01f);
-
-    // 
     g_CurConfig.Audio.fEffectVolume  = I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f;
     g_CurConfig.Audio.fAmbientVolume = I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f;
-    // TODO: update sound volumes here   
+
+    // 
+    Core::Audio->SetTypeVolume(g_CurConfig.Audio.fEffectVolume,  SOUND_EFFECT);
+    Core::Audio->SetTypeVolume(g_CurConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
 }
 
 

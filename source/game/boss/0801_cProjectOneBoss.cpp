@@ -184,7 +184,7 @@ void cProjectOneBoss::__MoveOwn()
                 if(pBullet->GetFlyTime() >= 2.0f) return;
 
                 const coreVector2 vAim = (vPlayerPos - pBullet->GetPosition().xy()).Normalized();
-                const coreVector2 vDir = (pBullet->GetFlyDir() + vAim * (2.0f * Core::System->GetTime())).Normalized(vAim); // TODO: not time-portable   
+                const coreVector2 vDir = SmoothAim(pBullet->GetFlyDir(), vAim, 2.0f);
 
                 pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * Core::System->GetTime());   
                 pBullet->SetFlyDir(vDir);

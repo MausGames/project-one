@@ -17,16 +17,15 @@
 // TODO: STAGE_FLYPAST with dot-product or simpler per-axis
 // TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO: wrap m_piData in function with RETURN_RESTRICT
-// TODO: get rid of m_anStage.emplace(__LINE__, [=]
 
 
 // ****************************************************************
 // mission definitions
-#define MISSION_BOSSES      (BOSSES)                                   // default number of bosses per mission
-#define MISSION_WAVES       (WAVES)                                    // 
-#define MISSION_NO_BOSS     (0xFFu)                                    // no boss currently active (error-value)
-#define MISSION_NO_WAVE     (0xFFu)                                    // 
-#define MISSION_NO_SEGMENT  (0xFFu)                                    // 
+#define MISSION_BOSSES      (BOSSES)   // default number of bosses per mission
+#define MISSION_WAVES       (WAVES)    // 
+#define MISSION_NO_BOSS     (0xFFu)    // no boss currently active (error-value)
+#define MISSION_NO_WAVE     (0xFFu)    // 
+#define MISSION_NO_SEGMENT  (0xFFu)    // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
@@ -50,56 +49,51 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN                      m_anStage.emplace(__LINE__, [this]()
-#define STAGE_SUB(i)                    ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); return true;}())
+#define STAGE_MAIN                             m_anStage.emplace(__LINE__, [this]()
+#define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); return true;}())
 
-#define STAGE_FINISH_NOW                {this->SkipStage();}
-#define STAGE_FINISH_AFTER(t)           {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
+#define STAGE_FINISH_NOW                       {this->SkipStage();}
+#define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
 
-#define STAGE_MEDAL_GOAL(...)           {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
-#define STAGE_BOSS(e,...)               {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
-#define STAGE_WAVE(n,...)               {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
+#define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
+#define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
+#define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
 
-#define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
-#define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
+#define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN {if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});}
 
-#define STAGE_ADD_PATH(n)               const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
-#define STAGE_ADD_SQUAD(n,t,c)          const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
+#define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
+#define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
 
-  
-//#define STAGE_COLL_PLAYER_ENEMY(a,b,i)   this->_CollisionPlayerEnemy (__LINE__, [=](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3& i)
-//#define STAGE_COLL_PLAYER_BULLET(a,b,i)  this->_CollisionPlayerBullet(__LINE__, [=](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3& i)
-//#define STAGE_COLL_ENEMY_BULLET(a,b,i)   this->_CollisionEnemyBullet (__LINE__, [=](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& i)
-#define STAGE_COLL_PLAYER_ENEMY(a,b,v,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3& v)
-#define STAGE_COLL_PLAYER_BULLET(a,b,v,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3& v)
-#define STAGE_COLL_ENEMY_BULLET(a,b,v,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& v)
-#define COLL_VAL(x)                           x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
-#define COLL_REF(x)                          &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
+#define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
+#define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
 
-#define STAGE_START_HERE {m_anStage.clear(); STAGE_MAIN {if(STAGE_BEGINNING) {g_pGame->GetInterface()->ShowMission(this); g_pGame->StartIntro();} if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});}
-  
+#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
+#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
+#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
+#define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
+#define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 
-#define STAGE_FOREACH_PLAYER(e,i)       g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
-#define STAGE_FOREACH_PLAYER_ALL(e,i)   g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
-#define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
-#define STAGE_FOREACH_ENEMY_ALL(s,e,i)  (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_PLAYER_ALL(e,i)          g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
+#define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 
-#define STAGE_GET_START(c)              {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
-#define STAGE_GET_END                   {ASSERT(iDataIndex == iCurDataSize)}
-#define STAGE_GET_INT(n,...)            coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT(n,...)           coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64(n,...)         coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT(n,...)          coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2(n,...)           coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3(n,...)           coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4(n,...)           coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_INT_ARRAY(n,c,...)    coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT_ARRAY(n,c,...)   coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64_ARRAY(n,c,...) coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT_ARRAY(n,c,...)  coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2_ARRAY(n,c,...)   coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3_ARRAY(n,c,...)   coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4_ARRAY(n,c,...)   coreVector4* const OUTPUT n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
+#define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
+#define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT(n,...)                 coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2(n,...)                  coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3(n,...)                  coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4(n,...)                  coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_INT_ARRAY(n,c,...)           coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT_ARRAY(n,c,...)          coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT_ARRAY(n,c,...)         coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2_ARRAY(n,c,...)          coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3_ARRAY(n,c,...)          coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4_ARRAY(n,c,...)          coreVector4* const OUTPUT n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 
 #define STAGE_LIFETIME(e,m,a)                                                                         \
     UNUSED const coreFloat fLifeSpeed          = (m);                                                 \
@@ -109,37 +103,38 @@
     UNUSED coreFloat       fLifeTime           = fLifeTimeBase;                                       \
     UNUSED coreFloat       fLifeTimeBefore     = fLifeTimeBeforeBase;
 
-#define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
-#define STAGE_REPEAT(x)                 {if(STAGE_BRANCH(x, x)) {}}
+#define STAGE_BRANCH(x,y)                      ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
+#define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
 
-#define STAGE_TICK_TIME_FREE(c,o)       ((m_fStageTimeBefore  >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime  * (c) - (o))) != (F_TO_UI(m_fStageTimeBefore  * (c) - (o)))))
-#define STAGE_TICK_TIME(c,o)            ((fLifeTimeBeforeBase >= 0.0f) && STAGE_TICK_TIME_FREE(c, o))
-#define STAGE_TICK_LIFETIME(c,o)        ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o))) != (F_TO_UI(fLifeTimeBefore     * (c) - (o)))))
-#define STAGE_TICK_LIFETIME_BASE(c,o)   ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o))) != (F_TO_UI(fLifeTimeBeforeBase * (c) - (o)))))
+#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime  * (c) - (o))) != (F_TO_UI(m_fStageTimeBefore  * (c) - (o)))))
+#define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase >= 0.0f) && STAGE_TICK_FREE(c, o))
+#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o))) != (F_TO_UI(fLifeTimeBefore     * (c) - (o)))))
+#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o))) != (F_TO_UI(fLifeTimeBeforeBase * (c) - (o)))))
 
-#define STAGE_TIME_POINT(t)             (InBetween((t), m_fStageTimeBefore, m_fStageTime))
-#define STAGE_TIME_BEFORE(t)            (m_fStageTime <  (t))
-#define STAGE_TIME_AFTER(t)             (m_fStageTime >= (t))
-#define STAGE_TIME_BETWEEN(t,u)         (InBetween(m_fStageTime, (t), (u)))
-#define STAGE_BEGINNING                 (STAGE_TIME_POINT(0.0f))
+#define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
+#define STAGE_TIME_BEFORE(t)                   (m_fStageTime <  (t))
+#define STAGE_TIME_AFTER(t)                    (m_fStageTime >= (t))
+#define STAGE_TIME_BETWEEN(t,u)                (InBetween(m_fStageTime, (t), (u)))
+#define STAGE_BEGINNING                        (STAGE_TIME_POINT(0.0f))
 
-#define STAGE_LIFETIME_POINT(t)         (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
-#define STAGE_LIFETIME_BEFORE(t)        (fLifeTime <  (t) && fLifeTime >= 0.0f)
-#define STAGE_LIFETIME_AFTER(t)         (fLifeTime >= (t))
-#define STAGE_LIFETIME_AFTER_BASE(t)         (fLifeTimeBase >= (t))
-#define STAGE_LIFETIME_BETWEEN(t,u)     (InBetween(fLifeTime, (t), (u)))
-#define STAGE_TAKEOFF                   (InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) || (fLifeTimeBase == 0.0f))
+#define STAGE_LIFETIME_POINT(t)                (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
+#define STAGE_LIFETIME_BEFORE(t)               (fLifeTime     <  (t) && fLifeTime     >= 0.0f)
+#define STAGE_LIFETIME_BEFORE_BASE(t)          (fLifeTimeBase <  (t) && fLifeTimeBase >= 0.0f)
+#define STAGE_LIFETIME_AFTER(t)                (fLifeTime     >= (t))
+#define STAGE_LIFETIME_AFTER_BASE(t)           (fLifeTimeBase >= (t))
+#define STAGE_LIFETIME_BETWEEN(t,u)            (InBetween(fLifeTime, (t), (u)))
+#define STAGE_TAKEOFF                          (InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) || (fLifeTimeBase == 0.0f))
 
-#define STAGE_HEALTHPCT_POINT(e,t)      ((e)->ReachedHealthPct(t) && [&]() {s_fHealthPctPoint = (t); return true;}())
-#define STAGE_HEALTHPCT_BEFORE(e,t)     ((e)->GetCurHealthPct() <  (t))
-#define STAGE_HEALTHPCT_AFTER(e,t)      ((e)->GetCurHealthPct() >= (t))
-#define STAGE_HEALTHPCT_BETWEEN(e,t,u)  (InBetween((e)->GetCurHealthPct(), (t), (u)))
-#define STAGE_DIED(e)                   ((e)->ReachedDeath())
+#define STAGE_HEALTHPCT_POINT(e,t)             ((e)->ReachedHealthPct(t) && [&]() {s_fHealthPctPoint = (t); return true;}())
+#define STAGE_HEALTHPCT_BEFORE(e,t)            ((e)->GetCurHealthPct() <  (t))
+#define STAGE_HEALTHPCT_AFTER(e,t)             ((e)->GetCurHealthPct() >= (t))
+#define STAGE_HEALTHPCT_BETWEEN(e,t,u)         (InBetween((e)->GetCurHealthPct(), (t), (u)))
+#define STAGE_DIED(e)                          ((e)->ReachedDeath())
 
-#define STAGE_POSITION_POINT(e,t,v)     (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&]() {s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
-#define STAGE_POSITION_BEFORE(e,t,v)    ((e)->GetPosition().v <  (t))
-#define STAGE_POSITION_AFTER(e,t,v)     ((e)->GetPosition().v >= (t))
-#define STAGE_POSITION_BETWEEN(e,t,u,v) (InBetweenExt((e)->GetPosition().v, (t), (u)))
+#define STAGE_POSITION_POINT(e,t,v)            (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&]() {s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
+#define STAGE_POSITION_BEFORE(e,t,v)           ((e)->GetPosition().v <  (t))
+#define STAGE_POSITION_AFTER(e,t,v)            ((e)->GetPosition().v >= (t))
+#define STAGE_POSITION_BETWEEN(e,t,u,v)        (InBetweenExt((e)->GetPosition().v, (t), (u)))
 #define STAGE_FLYPAST(e,f,v)                         \
     ((e)->GetPosition().v < (f)->GetPosition().v) ^  \
     ((e)->GetPosition().v < (f)->GetOldPos  ().v) || \
@@ -155,6 +150,13 @@
 // mission interface
 class INTERFACE cMission
 {
+private:
+    // 
+    using uCollPlayerEnemyType  = std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3&, const coreBool)>;
+    using uCollPlayerBulletType = std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3&, const coreBool)>;
+    using uCollEnemyBulletType  = std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3&, const coreBool)>;
+
+
 protected:
     cBoss* m_apBoss[MISSION_BOSSES];                           // pointers to all available bosses
 
@@ -180,14 +182,14 @@ protected:
 
     const coreFloat* m_pfMedalGoal;                            // 
 
+    uCollPlayerEnemyType  m_nCollPlayerEnemy;                  // 
+    uCollPlayerBulletType m_nCollPlayerBullet;                 // 
+    uCollEnemyBulletType  m_nCollEnemyBullet;                  // 
+
     static coreUint16  s_iTick;                                // 
     static coreFloat   s_fLifeTimePoint;                       // 
     static coreFloat   s_fHealthPctPoint;                      // 
     static coreVector2 s_vPositionPoint;                       // 
-
-    std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3&)> m_nCollPlayerEnemy;
-    std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3&)> m_nCollPlayerBullet;
-    std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3&)> m_nCollEnemyBullet;
 
 
 public:
@@ -222,6 +224,11 @@ public:
     // 
     inline void SetMedalGoal(const coreFloat* pfMedalGoal) {m_pfMedalGoal = pfMedalGoal; ASSERT(pfMedalGoal)}
 
+    // 
+    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
+    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
+    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
+
     // access mission objects
     inline cBoss*           GetBoss           (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
     inline cBoss*           GetCurBoss        ()const                       {return m_pCurBoss;}
@@ -231,25 +238,10 @@ public:
     inline cEnemySquad*     GetEnemySquad     (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
 
 
-
-     
-    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3& vIntersection) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection);}
-    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection);}
-    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3& vIntersection) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection);}
-
-
 protected:
     // 
     template             <typename F> coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
     template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
-
-    // 
-    //template <typename F> void _CollisionPlayerEnemy (const coreUint16 iCodeLine, F&& nHitFunc)   // TODO  
-    //{
-    //    if(!test) test = nHitFunc;
-    //}
-    //template <typename F> void _CollisionPlayerBullet(const coreUint16 iCodeLine, F&& nHitFunc);   // TODO  
-    //template <typename F> void _CollisionEnemyBullet (const coreUint16 iCodeLine, F&& nHitFunc);   // TODO  
 
 
 private:

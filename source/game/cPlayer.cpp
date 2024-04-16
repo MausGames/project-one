@@ -45,7 +45,7 @@ cPlayer::cPlayer()noexcept
     this->SetMaxHealth(PLAYER_LIVES);
 
     // load first weapons
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
     {
         m_apWeapon[i] = new cNoWeapon();
         m_apWeapon[i]->SetOwner(this);
@@ -114,7 +114,7 @@ cPlayer::~cPlayer()
     this->Kill(false);
 
     // delete weapon objects
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         SAFE_DELETE(m_apWeapon[i])
 }
 
@@ -147,7 +147,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
 // equip new main weapon
 void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 {
-    ASSERT(iIndex < PLAYER_WEAPONS)
+    ASSERT(iIndex < PLAYER_EQUIP_WEAPONS)
     if(m_apWeapon[iIndex]) if(m_apWeapon[iIndex]->GetID() == iID) return;
 
     // delete possible old weapon
@@ -169,8 +169,8 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 #if defined(_CORE_DEBUG_)
 
     // same weapon should not be equipped twice
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
-        for(coreUintW j = i+1u; j < PLAYER_WEAPONS; ++j)
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+        for(coreUintW j = i+1u; j < PLAYER_EQUIP_WEAPONS; ++j)
             ASSERT((m_apWeapon[i]->GetID() != m_apWeapon[j]->GetID()) ||
                    (m_apWeapon[i]->GetID() == cNoWeapon::ID))
 
@@ -182,7 +182,7 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 // 
 void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
 {
-    ASSERT(iIndex < PLAYER_SUPPORTS)
+    ASSERT(iIndex < PLAYER_EQUIP_SUPPORTS)
 
     // 
     switch(iID)
@@ -232,7 +232,7 @@ void cPlayer::RenderAfter()
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
-        for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
             m_apWeapon[i]->Render();
 
         // 
@@ -261,9 +261,9 @@ void cPlayer::Move()
             coreVector2 vNewDir = this->GetDirection().xy();
 
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES + 1u))
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
                 vNewDir = -vNewDir.Rotated90();
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES + 2u))
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 2u))
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
@@ -273,7 +273,7 @@ void cPlayer::Move()
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
                 if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
@@ -343,7 +343,7 @@ void cPlayer::Move()
         this->coreObject3D::Move();
 
         // update all weapons (shooting and stuff)
-        for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
             const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot);
@@ -523,7 +523,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     ADD_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         m_apWeapon[i]->Update(0u);
 
     // 

@@ -644,7 +644,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
     fBasePitch *= (1.0f + Core::Rand->Float(-fBasePitchRnd, fBasePitchRnd));
 
     // 
-    m_apSound[eSoundIndex & 0xFFu]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, false, vPosition);
+    m_apSound[eSoundIndex & 0xFFu]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, false, SOUND_EFFECT, vPosition);
 }
 
 

@@ -342,9 +342,6 @@ void cTorusBoss::__RenderOwnOver()
 // 
 void cTorusBoss::__MoveOwn()
 {
-    if(this->GetCurHealthPct() < 0.9f) this->Kill(true);                
-
-
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
 
     // 
@@ -353,6 +350,8 @@ void cTorusBoss::__MoveOwn()
     static coreVector3 vTestDir = coreVector3(0.0f,1.0f,0.0f);
     
     coreBool bFlip = false;
+    
+    static coreVector2 vOldEnvDir = coreVector2(0.0f,0.0f);
 
     // 
     m_fAnimation   .UpdateMod(-1.0f,               10.0f);
@@ -379,6 +378,8 @@ void cTorusBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.15f, LERP_LINEAR)
         {
             if(PHASE_BEGINNING) this->AddStatus(ENEMY_STATUS_GHOST);
+            
+            // TODO: spin faster at the end, like a real coin
             
             if(fTime < 0.85f)
             {            
@@ -483,6 +484,11 @@ void cTorusBoss::__MoveOwn()
                 g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime)));
             }
 
+            if(m_aiCounter[SUB_PHASE])
+            {
+                vNewOri.yz(coreVector2::Direction(LERP(5.5f*PI, 5.0f*PI, fTime) + (m_aiCounter[ROTATION_DIRECTION] ? 0.0f : PI)));
+            }
+
             if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_TO(m_iPhase + 10u)
@@ -557,6 +563,8 @@ void cTorusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
         {
+            vNewOri.yz(coreVector2::Direction(LERP(4.5f*PI, 4.0f*PI, fTime)));
+
             this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.0f), fTime);
 
             if(PHASE_FINISHED)
@@ -685,7 +693,7 @@ void cTorusBoss::__MoveOwn()
             const coreFloat fBreakTime  = LERPB(0.0f, 1.0f, fTime);
             const coreFloat fSmoothTime = LERPS(0.0f, 1.0f, fTime);
 
-            vNewOri.yz(coreVector2::Direction((5.0f*PI) * fBreakTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f)));
+            vNewOri.yz(coreVector2::Direction((5.5f*PI) * fBreakTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f)));
 
             this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + m_avVector[TUMBLE_DIRECTION].xy(), fBreakTime);
             g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fBreakTime)));
@@ -715,6 +723,9 @@ void cTorusBoss::__MoveOwn()
     // ################################################################
     // ################################################################
 
+    
+    coreVector2 vNewEnvDir = coreVector2(0.0f,0.0f);
+    
     // 
     if(m_iPhase == 0u)
     {
@@ -731,8 +742,13 @@ void cTorusBoss::__MoveOwn()
         const coreVector2 vNewDir = coreVector2::Direction(m_fRotationBoss);
         this->SetDirection  (coreVector3(vNewDir.x, -vNewOri.z*vNewDir.y, vNewOri.y*vNewDir.y));
         this->SetOrientation(coreVector3(0.0f,       vNewOri.y,           vNewOri.z));
+        
+        
+        //g_pEnvironment->SetTargetDirection(vNewDir.InvertedY());
+        //vNewEnvDir = vNewDir.InvertedY();
     }
-
+    vNewEnvDir = g_pEnvironment->GetDirection();
+    
     
 
     if(m_iTurretActive || m_iGunnerActive)
@@ -759,6 +775,7 @@ void cTorusBoss::__MoveOwn()
             pTurret->SetTexOffset  (vTex);
 
             // 
+            pHull->SetPosition   (pTurret->GetPosition   ()); // ###   
             pHull->SetSize       (pTurret->GetSize       () * (1.0f + 0.25f*fTime));
             pHull->SetDirection  (pTurret->GetDirection  ());
             pHull->SetOrientation(pTurret->GetOrientation());
@@ -1017,7 +1034,7 @@ void cTorusBoss::__MoveOwn()
 #if 1
     if(pMission->GetBounceState())
     {
-        const coreVector2 vPos = pMission->GetBall(0u)->GetPosition().xy();
+        //const coreVector2 vPos = pMission->GetBall(0u)->GetPosition().xy();
 
         /*
         for(coreUintW i = 40u; i--; )
@@ -1032,8 +1049,8 @@ void cTorusBoss::__MoveOwn()
         }
          */
         
-        const coreVector2 vDir = IsHorizontal(vPos) ? coreVector2(-SIGN(vPos.x), 0.0f) : coreVector2(0.0f, -SIGN(vPos.y));
-        const coreVector2 vTan = vDir.Rotated90();
+        //const coreVector2 vDir = IsHorizontal(vPos) ? coreVector2(-SIGN(vPos.x), 0.0f) : coreVector2(0.0f, -SIGN(vPos.y));
+        //const coreVector2 vTan = vDir.Rotated90();
         
         for(coreUintW i = 4u; i--; )
         {
@@ -1041,6 +1058,53 @@ void cTorusBoss::__MoveOwn()
         }
     }
 #endif
+
+
+        const coreFloat A = vOldEnvDir.Angle();
+        const coreFloat B = vNewEnvDir.Angle();
+        const coreFloat fAngleDiff = B - A;
+
+        for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
+        {
+            cCustomEnemy* pTurret = &m_aTurret       [i];
+            //coreObject3D* pHull   = &m_aTurretHullRaw[i];
+            if(!pTurret->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+            
+            const coreVector2 vPos = pTurret->GetPosition().xy();
+            const coreFloat   fLen = vPos.Length();
+            
+            //const coreVector2 A = MapToAxis(vOldEnvDir, vPos.Normalized());
+            //const coreVector2 B = MapToAxis(vNewEnvDir, vPos.Normalized());
+
+            // 
+            //pTurret->SetPosition(coreVector3(vPos + (B - A) * fLen, 0.0f));
+            
+            const coreFloat C = vPos.Angle();
+            
+            pTurret->SetPosition(coreVector3(coreVector2::Direction(C + fAngleDiff) * fLen, 0.0f));
+            
+            if(!i)
+            {
+             Core::Debug->InspectValue("A", A);   
+             Core::Debug->InspectValue("B", B);   
+             Core::Debug->InspectValue("C", C);   
+            }
+        }
+        
+        
+        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cQuadBullet>([&](cQuadBullet* OUTPUT pBullet)
+        {
+            const coreVector2 vPos = pBullet->GetPosition().xy();
+            const coreFloat   fLen = vPos.Length();
+            
+            const coreFloat C = vPos.Angle();
+            
+            pBullet->SetPosition(coreVector3(coreVector2::Direction(C + fAngleDiff) * fLen, 0.0f));
+            pBullet->SetFlyDir(coreVector2::Direction(pBullet->GetFlyDir().Angle() + fAngleDiff));
+        });
+
+        
+    vOldEnvDir = vNewEnvDir;
     
 }
 

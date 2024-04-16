@@ -148,7 +148,7 @@ void cVausBoss::__MoveOwn()
                     m_aiCounter[SUB_PHASE]    += 1;
                     m_aiCounter[CURRENT_SIDE] += 1;
 
-                    const coreVector2 vNewBallDir = (this->GetDirection().xy() + this->GetDirection().xy().Rotated90() * 0.5f).Normalized();
+                    //const coreVector2 vNewBallDir = (this->GetDirection().xy() + this->GetDirection().xy().Rotated90() * 0.5f).Normalized();
 
                     //pMission->UnmakeSticky(vNewBallDir);
                     //g_pSpecialEffects->CreateBlowColor(pBall->GetPosition(), coreVector3(vNewBallDir, 0.0f), SPECIAL_BLOW_SMALL, COLOR_ENERGY_GREEN);

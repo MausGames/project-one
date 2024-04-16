@@ -13,7 +13,7 @@
 // constructor
 cSave::cSave()noexcept
 : m_Header {}
-, m_sPath  (SAVE_FILE_FOLDER "/save." SAVE_FILE_EXTENSION)
+, m_sPath  (coreData::UserFolder(SAVE_FILE_FOLDER "/save." SAVE_FILE_EXTENSION))
 {
     // 
     this->LoadFile();
@@ -26,53 +26,63 @@ cSave::~cSave()
 {
     // 
     this->SaveFile();
+
+    // 
+    Core::Manager::Resource->UpdateFunctions();
 }
 
 
 // ****************************************************************
 // 
-cSave::sGlobalStats* cSave::EditGlobalStats()
+RETURN_NONNULL cSave::sGlobalStats* cSave::EditGlobalStats()
 {
     // 
     return &m_Header.oGlobalStats;
 }
 
-cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUintW iMissionIndex)
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUintW iMissionIndex)
 {
     // 
     ASSERT(iMissionIndex < REPLAY_MISSIONS)
     return &m_Header.aLocalStatsMission[iMissionIndex];
 }
 
-cSave::sLocalStats* cSave::EditLocalStatsMission()
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditLocalStatsMission(g_pGame->GetCurMissionIndex());
 }
 
-cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
-    ASSERT(iMissionIndex < REPLAY_MISSIONS)
-    ASSERT(iSegmentIndex < REPLAY_SEGMENTS)
-    return &m_Header.aaLocalStatsSegment[iMissionIndex][iSegmentIndex];
+    if(iSegmentIndex != MISSION_NO_SEGMENT)
+    {
+        ASSERT(iMissionIndex < REPLAY_MISSIONS)
+        ASSERT(iSegmentIndex < REPLAY_SEGMENTS)
+        return &m_Header.aaLocalStatsSegment[iMissionIndex][iSegmentIndex];
+    }
+
+    // 
+    static sLocalStats s_LocalStatsDummy;
+    return &s_LocalStatsDummy;
 }
 
-cSave::sLocalStats* cSave::EditLocalStatsSegment()
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditLocalStatsSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
-cSave::sOptions* cSave::EditOptions()
+RETURN_NONNULL cSave::sOptions* cSave::EditOptions()
 {
     // 
     return &m_Header.oOptions;
 }
 
-cSave::sProgress* cSave::EditProgress()
+RETURN_NONNULL cSave::sProgress* cSave::EditProgress()
 {
     // 
     return &m_Header.oProgress;
@@ -84,35 +94,22 @@ cSave::sProgress* cSave::EditProgress()
 coreBool cSave::LoadFile()
 {
     // 
-    this->Clear();
-
-    // 
-    coreArchive oArchive(m_sPath.c_str());
-    coreFile* pHeader = oArchive.GetFile("header");
-    WARN_IF(!pHeader)
+    if(!cSave::__LoadHeader(&m_Header, m_sPath.c_str()))
     {
-        Core::Log->Warning("Save (%s) could not be loaded!", m_sPath.c_str());
-        return false;
+        // 
+        coreData::FileMove(m_sPath.c_str(), PRINT("%s.invalid_%s", m_sPath.c_str(), coreData::DateTimePrint("%Y%m%d_%H%M%S")));
+
+        // 
+        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.backup", m_sPath.c_str())))
+        {
+            // 
+            this->Clear();
+            return false;
+        }
     }
 
     // 
-    pHeader->Decompress();
-
-    // 
-    std::memcpy(&m_Header, pHeader->GetData(), MIN(pHeader->GetSize(), sizeof(sHeader)));
-    WARN_IF((m_Header.iMagic    != SAVE_FILE_MAGIC)   ||
-            (m_Header.iVersion  != SAVE_FILE_VERSION) ||
-            (m_Header.iChecksum != cSave::__GenerateChecksum(m_Header)))
-    {
-        this->Clear();
-
-        coreData::FileCopy(m_sPath.c_str(), PRINT("%s.invalid_%s", m_sPath.c_str(), coreData::DateTimePrint("%Y%m%d_%H%M%S")));
-
-        Core::Log->Warning("Save (%s) is not a valid save-file!", m_sPath.c_str());
-        return false;
-    }
-
-    Core::Log->Info("Save (%s) loaded", m_sPath.c_str());
+    cSave::__CheckHeader(&m_Header);
     return true;
 }
 
@@ -124,27 +121,34 @@ void cSave::SaveFile()
     // 
     m_Header.iSaveTimestamp = std::time(NULL);
     m_Header.iSaveCount     = m_Header.iSaveCount + 1u;
-    m_Header.iChecksum      = cSave::__GenerateChecksum(m_Header);
 
     // 
     coreByte* pHeaderData = new coreByte[sizeof(sHeader)];
     std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
 
-    // 
-    coreFile* pHeader = new coreFile("header", pHeaderData, sizeof(sHeader));
+    Core::Manager::Resource->AttachFunction([=]()
+    {
+        // 
+        coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));
 
-    // 
-    pHeader->Compress();
+        // 
+        sHeader* pHeader   = r_cast<sHeader*>(pHeaderData);
+        pHeader->iChecksum = cSave::__GenerateChecksum(*pHeader);
 
-    // 
-    coreData::CreateFolder(m_sPath.c_str());
+        // 
+        coreFile* pHeaderFile = new coreFile("header", pHeaderData, sizeof(sHeader));
 
-    // 
-    coreArchive oArchive;
-    oArchive.AddFile(pHeader);
-    oArchive.Save(m_sPath.c_str());
+        // 
+        pHeaderFile->Compress();
 
-    Core::Log->Info("Save (%s) saved", m_sPath.c_str());
+        // 
+        coreArchive oArchive;
+        oArchive.AddFile(pHeaderFile);
+        oArchive.Save(m_sPath.c_str());
+
+        Core::Log->Info("Save (%s) saved", m_sPath.c_str());
+        return CORE_OK;
+    });
 }
 
 
@@ -163,8 +167,64 @@ void cSave::Clear()
     // 
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
-        m_Header.oOptions.aiWeapon [i] = 1u;
-        m_Header.oOptions.aiSupport[i] = 1u;
+        m_Header.oOptions.aaiWeapon [i][0] = 1u;
+        m_Header.oOptions.aaiSupport[i][0] = 1u;
+    }
+}
+
+
+// ****************************************************************
+// 
+coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, const coreChar* pcPath)
+{
+    // 
+    coreArchive oArchive(pcPath);
+    coreFile* pHeaderFile = oArchive.GetFile("header");
+    WARN_IF(!pHeaderFile)
+    {
+        Core::Log->Warning("Save (%s) could not be loaded!", pcPath);
+        return false;
+    }
+
+    // 
+    pHeaderFile->Decompress();
+
+    // 
+    std::memcpy(pHeader, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
+    WARN_IF((pHeader->iMagic    != SAVE_FILE_MAGIC)   ||
+            (pHeader->iVersion  != SAVE_FILE_VERSION) ||
+            (pHeader->iChecksum != cSave::__GenerateChecksum(*pHeader)))
+    {
+        Core::Log->Warning("Save (%s) is not a valid save-file!", pcPath);
+        return false;
+    }
+
+    Core::Log->Info("Save (%s) loaded", pcPath);
+    return true;
+}
+
+
+// ****************************************************************
+// 
+void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
+{
+    // 
+    pHeader->oOptions.iPlayers = CLAMP(pHeader->oOptions.iPlayers, 0u, SAVE_PLAYERS-1u);
+    for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
+    {
+        for(coreUintW j = 0u; j < SAVE_EQUIP_WEAPONS;  ++j) pHeader->oOptions.aaiWeapon [i][j] = CLAMP(pHeader->oOptions.aaiWeapon [i][j], 0u, WEAPONS -1u);
+        for(coreUintW j = 0u; j < SAVE_EQUIP_SUPPORTS; ++j) pHeader->oOptions.aaiSupport[i][j] = CLAMP(pHeader->oOptions.aaiSupport[i][j], 0u, SUPPORTS-1u);
+    }
+
+    // 
+    for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i)
+    {
+        pHeader->oProgress.aiAdvance     [i] = CLAMP(pHeader->oProgress.aiAdvance     [i], 0u, SAVE_SEGMENTS);
+        pHeader->oProgress.aiMedalMission[i] = CLAMP(pHeader->oProgress.aiMedalMission[i], 0u, SAVE_MEDALS-1u);
+        for(coreUintW j = 0u; j < SAVE_SEGMENTS; ++j)
+        {
+            pHeader->oProgress.aaiMedalSegment[i][j] = CLAMP(pHeader->oProgress.aaiMedalSegment[i][j], 0u, SAVE_MEDALS-1u);
+        }
     }
 }
 

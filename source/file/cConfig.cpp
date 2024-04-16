@@ -19,7 +19,7 @@ static coreBool m_abFireToggle[INPUT_TYPES + 1u] = {};
 
 // ****************************************************************
 // check configuration for valid values
-static void CheckConfig(sConfig* pConfig)
+static void CheckConfig(sConfig* OUTPUT pConfig)
 {
 #if defined(CONFIG_FORCE)
 
@@ -94,6 +94,7 @@ void LoadConfig()
     g_OldConfig.Game.iHudScale     = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
     g_OldConfig.Game.iHudType      = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
     g_OldConfig.Game.iUpdateFreq   = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
+    g_OldConfig.Game.iVersion      = Core::Config->GetInt(CONFIG_GAME_VERSION);
     g_OldConfig.Game.iMirrorMode   = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
 
     // read graphics values
@@ -126,6 +127,11 @@ void LoadConfig()
         }
     }
 
+    // 
+    Core::Audio->SetSoundVolume(1.0f);
+    Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_EFFECT);
+    Core::Audio->SetTypeVolume(g_OldConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
+
     // check configuration for valid values
     CheckConfig(&g_OldConfig);
 
@@ -150,6 +156,7 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,     g_OldConfig.Game.iHudScale);
     Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,      g_OldConfig.Game.iHudType);
     Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,   g_OldConfig.Game.iUpdateFreq);
+    Core::Config->SetInt(CONFIG_GAME_VERSION,       g_OldConfig.Game.iVersion);
     Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,   g_OldConfig.Game.iMirrorMode);
 
     // write graphics values

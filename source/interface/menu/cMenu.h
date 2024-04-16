@@ -63,20 +63,20 @@
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
-#define MENU_FONT_DEFAULT       "freesans.ttf"
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",     (15u)//(14u)//(13u)
-#define MENU_FONT_DYNAMIC_2     "dynamic_font",     (21u)//(20u)
-#define MENU_FONT_DYNAMIC_3     "dynamic_font",     (31u)//(30u)
-#define MENU_FONT_DYNAMIC_4     "dynamic_font",     (41u)//(40u)
-#define MENU_FONT_DYNAMIC_5     "dynamic_font",     (71u)//(70u)
-#define MENU_FONT_STANDARD_1    "default.ttf", (15u)//(14u)//(13u)
-#define MENU_FONT_STANDARD_2    "default.ttf", (21u)//(20u)
-#define MENU_FONT_STANDARD_3    "default.ttf", (31u)//(30u)
-#define MENU_FONT_STANDARD_4    "default.ttf", (41u)//(40u)
-#define MENU_FONT_STANDARD_5    "default.ttf", (71u)//(70u)
-#define MENU_FONT_ICON_1        "fontawesome.otf",  (20u)
-#define MENU_FONT_ICON_2        "fontawesome.otf",  (24u)
-#define MENU_FONT_ICON_3        "fontawesome.otf",  (40u)
+#define MENU_FONT_DEFAULT       "keifont.ttf"
+#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (16u)
+#define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (22u)
+#define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (32u)
+#define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (42u)
+#define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (72u)
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (16u)
+#define MENU_FONT_DYNAMIC_2     "dynamic_font",    (22u)
+#define MENU_FONT_DYNAMIC_3     "dynamic_font",    (32u)
+#define MENU_FONT_DYNAMIC_4     "dynamic_font",    (42u)
+#define MENU_FONT_DYNAMIC_5     "dynamic_font",    (72u)
+#define MENU_FONT_ICON_1        "fontawesome.otf", (20u)
+#define MENU_FONT_ICON_2        "fontawesome.otf", (24u)
+#define MENU_FONT_ICON_3        "fontawesome.otf", (40u)
 #define MENU_OUTLINE_SMALL      (1u)
 #define MENU_OUTLINE_BIG        (4u)
 
@@ -193,6 +193,7 @@ enum eEntry : coreUint8
     ENTRY_GAME_HUDSCALE,
     ENTRY_GAME_HUDTYPE,
     ENTRY_GAME_UPDATEFREQ,
+    ENTRY_GAME_VERSION,
     ENTRY_GAME_MIRRORMODE,
     ENTRY_MAX
 };
@@ -200,27 +201,27 @@ enum eEntry : coreUint8
 
 // ****************************************************************
 // icon codes (UTF-8)
-#define ICON_CHECK        (const coreChar*)u8"\uF00C"
-#define ICON_TIMES        (const coreChar*)u8"\uF00D"
-#define ICON_POWER_OFF    (const coreChar*)u8"\uF011"
-#define ICON_REFRESH      (const coreChar*)u8"\uF021"
-#define ICON_ARROW_LEFT   (const coreChar*)u8"\uF060"
-#define ICON_ARROW_RIGHT  (const coreChar*)u8"\uF061"
-#define ICON_ARROW_UP     (const coreChar*)u8"\uF062"
-#define ICON_ARROW_DOWN   (const coreChar*)u8"\uF063"
-#define ICON_SHARE        (const coreChar*)u8"\uF064"
-#define ICON_COGS         (const coreChar*)u8"\uF085"
-#define ICON_CARET_DOWN   (const coreChar*)u8"\uF0D7"
-#define ICON_CARET_UP     (const coreChar*)u8"\uF0D8"
-#define ICON_CARET_LEFT   (const coreChar*)u8"\uF0D9"
-#define ICON_CARET_RIGHT  (const coreChar*)u8"\uF0DA"
-#define ICON_PAUSE_CIRCLE (const coreChar*)u8"\uF28B"
-#define ICON_UNDO_ALT     (const coreChar*)u8"\uF2EA"
-#define ICON_REFRESH_ALT  (const coreChar*)u8"\uF2F1"
-#define ICON_REDO_ALT     (const coreChar*)u8"\uF2F9"
-#define ICON_SHIELD_ALT   (const coreChar*)u8"\uF3ED"
-#define ICON_BURN         (const coreChar*)u8"\uF46A"
-#define ICON_FEATHER_ALT  (const coreChar*)u8"\uF56B"
+#define ICON_CHECK        (r_cast<const coreChar*>(u8"\uF00C"))
+#define ICON_TIMES        (r_cast<const coreChar*>(u8"\uF00D"))
+#define ICON_POWER_OFF    (r_cast<const coreChar*>(u8"\uF011"))
+#define ICON_REFRESH      (r_cast<const coreChar*>(u8"\uF021"))
+#define ICON_ARROW_LEFT   (r_cast<const coreChar*>(u8"\uF060"))
+#define ICON_ARROW_RIGHT  (r_cast<const coreChar*>(u8"\uF061"))
+#define ICON_ARROW_UP     (r_cast<const coreChar*>(u8"\uF062"))
+#define ICON_ARROW_DOWN   (r_cast<const coreChar*>(u8"\uF063"))
+#define ICON_SHARE        (r_cast<const coreChar*>(u8"\uF064"))
+#define ICON_COGS         (r_cast<const coreChar*>(u8"\uF085"))
+#define ICON_CARET_DOWN   (r_cast<const coreChar*>(u8"\uF0D7"))
+#define ICON_CARET_UP     (r_cast<const coreChar*>(u8"\uF0D8"))
+#define ICON_CARET_LEFT   (r_cast<const coreChar*>(u8"\uF0D9"))
+#define ICON_CARET_RIGHT  (r_cast<const coreChar*>(u8"\uF0DA"))
+#define ICON_PAUSE_CIRCLE (r_cast<const coreChar*>(u8"\uF28B"))
+#define ICON_UNDO_ALT     (r_cast<const coreChar*>(u8"\uF2EA"))
+#define ICON_REFRESH_ALT  (r_cast<const coreChar*>(u8"\uF2F1"))
+#define ICON_REDO_ALT     (r_cast<const coreChar*>(u8"\uF2F9"))
+#define ICON_SHIELD_ALT   (r_cast<const coreChar*>(u8"\uF3ED"))
+#define ICON_BURN         (r_cast<const coreChar*>(u8"\uF46A"))
+#define ICON_FEATHER_ALT  (r_cast<const coreChar*>(u8"\uF56B"))
 
 
 // ****************************************************************
@@ -512,6 +513,7 @@ private:
     coreSwitchBoxU8 m_HudScale;
     coreSwitchBoxU8 m_HudType;
     coreSwitchBoxU8 m_UpdateFreq;
+    coreSwitchBoxU8 m_Version;
     coreSwitchBoxU8 m_MirrorMode;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];

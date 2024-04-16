@@ -331,6 +331,12 @@ static void LockFramerate()
             // processor level spinning
             else _mm_pause();
 
+#if defined(_CORE_MSVC_)
+    #define PAUSE YieldProcessor()   // all
+#else
+    #define PAUSE __builtin_ia32_pause()   // only x86/x64
+#endif
+
         #endif
         }
 
@@ -368,16 +374,16 @@ static void DebugGame()
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
-            sGameConfig oConfig = {};
-            oConfig.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
-            oConfig.bCoop       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD);
+            sGameOptions oOptions = {};
+            oOptions.iPlayers    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? 2u : 1u;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
-                oConfig.aaiWeapon [i][0] = cRayWeapon::ID;
-                oConfig.aaiSupport[i][0] = 0u;
+                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
+                oOptions.aaiSupport[i][0] = 0u;
             }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oConfig, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)

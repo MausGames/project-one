@@ -11,10 +11,10 @@
 
 // ****************************************************************
 // constructor
-cGame::cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
+cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
-, m_Interface           (oConfig.bCoop ? GAME_PLAYERS : 1u)
+, m_Interface           (oOptions.iPlayers)
 , m_pRepairEnemy        (NULL)
 , m_piMissionList       (piMissionList)
 , m_iNumMissions        (iNumMissions)
@@ -27,9 +27,9 @@ cGame::cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const co
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
+, m_Options             (oOptions)
+, m_bCoop               (oOptions.iPlayers > 1u)
 , m_iStatus             (0u)
-, m_iDifficulty         (oConfig.iDifficulty)
-, m_bCoop               (oConfig.bCoop)
 {
     ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
 
@@ -44,15 +44,15 @@ cGame::cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const co
 
     // configure first player
     m_aPlayer[0].Configure(PLAYER_SHIP_ATK, COLOR_SHIP_RED);
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oConfig.aaiWeapon [0][i]);
-    for(coreUintW i = 0u; i < PLAYER_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oConfig.aaiSupport[0][i]);
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
 
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_GREEN);//COLOR_SHIP_BLUE);
-        for(coreUintW i = 0u; i < PLAYER_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oConfig.aaiWeapon [1][i]);
-        for(coreUintW i = 0u; i < PLAYER_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oConfig.aaiSupport[1][i]);
+        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oOptions.aaiWeapon [1][i]);
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oOptions.aaiSupport[1][i]);
 
         // 
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
@@ -74,6 +74,9 @@ cGame::cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const co
 
     // load first mission
     m_pCurMission = new cNoMission();
+
+    // 
+    g_pSave->SaveFile();
 }
 
 
@@ -98,6 +101,9 @@ cGame::~cGame()
     g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
     g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE);
     g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED);
+
+    // 
+    g_pSave->SaveFile();
 }
 
 
@@ -358,8 +364,6 @@ void cGame::StartIntro()
         const coreFloat fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
         m_aPlayer[i].SetPosition(coreVector3(fSide, -140.0f, 0.0f));
     }
-
-    // TODO: custom intro per level   
 }
 
 
@@ -385,7 +389,7 @@ void cGame::StartOutro(const coreUint8 iType)
     m_Interface.SetVisible(false);
 
     // 
-    g_pReplay->ApplyKeyFrame(REPLAY_KEYFRAME_MISSION_END(m_pCurMission->GetID()));
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_END(m_pCurMission->GetID()));
 }
 
 
@@ -617,7 +621,7 @@ coreBool cGame::__HandleIntro()
             m_Interface.SetVisible(true);
 
             // 
-            g_pReplay->ApplyKeyFrame(REPLAY_KEYFRAME_MISSION_START(m_pCurMission->GetID()));
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_START(m_pCurMission->GetID()));
         }
         else
         {
@@ -707,7 +711,7 @@ void cGame::__HandleDefeat()
             // 
             g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
-            if(bDefeated && m_bCoop && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
+            if(m_bCoop && bDefeated && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
             {
                 // 
                 m_pRepairEnemy = new cRepairEnemy();
@@ -801,87 +805,86 @@ void cGame::__HandlePacifist()
 void cGame::__HandleCollisions()
 {
     // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy)
-    {
-        pEnemy->ActivateModelLowOnly();
-    });
+    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelLowOnly();});
 
     // 
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        if(!bFirstHit) return;
+        // 
+        if(pEnemy->GetLifeTime() < 0.5f) return;
 
-        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && (pEnemy->GetLifeTime() >= 0.5f))
+        // 
+        m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
+
+        if(bFirstHit)
         {
             // 
-            const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-            pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
-            pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            {
+                // 
+                const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
+                pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+                pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
-            // 
-            g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
-            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                // 
+                g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            }
         }
-
-         
-        m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection);
     });
 
     // 
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        if(!bFirstHit) return;
-
         // 
-        pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-                pBullet->Deactivate(true, vIntersection.xy());
-        // aber minen und raketen sollten explodieren 
+        m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);
 
-        
-        m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection);
+        if(bFirstHit)
+        {
+            // 
+            pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
+            pBullet->Deactivate(true, vIntersection.xy());
+        }
     });
 
     // 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        if(!bFirstHit) return;
-
         // 
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
+
+        if(bFirstHit)
         {
             // 
-            if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
-                pBullet->Deactivate(true, vIntersection.xy());
-
-                // 
-                g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
-            }
-            else
-            {
-                // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
-                if(!pEnemy->ReachedDeath())
+                if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
                 {
-                    const coreVector2 vFlyDir = pBullet->GetFlyDir();
-                    const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
-                    const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
+                    // 
+                    pBullet->Deactivate(true, vIntersection.xy());
 
                     // 
-                    pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                    g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+                }
+                else
+                {
+                    // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
+                    if(!pEnemy->ReachedDeath())
+                    {
+                        const coreVector2 vFlyDir = pBullet->GetFlyDir();
+                        const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
+                        const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
+
+                        // 
+                        pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                    }
                 }
             }
         }
-
-
-
-        //g_pGame->GetChromaManager()->AddChroma(vIntersection.xy(), -pBullet->GetDirection().xy(), CHROMA_SCALE_TINY, pEnemy->GetBaseColor());     
-
-        
-        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection);
     });
 
     // 
@@ -899,10 +902,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy)
-    {
-        pEnemy->ActivateModelDefault();
-    });
+    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelDefault();});
 }
 
 

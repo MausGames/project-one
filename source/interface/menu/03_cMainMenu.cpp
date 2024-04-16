@@ -165,10 +165,14 @@ void cMainMenu::ActivateFirstPlay()
 // 
 void cMainMenu::DeactivateFirstPlay()
 {
+#if !defined(_CORE_DEBUG_)
+
     // 
     m_ScoreButton .SetOverride(-1);   // TODO 
     m_ReplayButton.SetOverride(-1);   // TODO 
     m_ExtraButton .SetOverride(-1);   // TODO 
+
+#endif
 
     // 
     m_ScoreButton .GetCaption()->SetTextLanguage("LEADERBOARDS");

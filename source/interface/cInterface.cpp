@@ -40,7 +40,7 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oShieldValue.SetPosition (aShieldBar[0].GetPosition() + coreVector2(0.035f, 0.01f) * vSide);
     oShieldValue.SetAlignment(coreVector2(1.0f,1.0f) * vSide);
 
-    oScoreTotal.Construct   (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    oScoreTotal.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     oScoreTotal.SetPosition (coreVector2(0.01f,0.0f) * vSide);
     oScoreTotal.SetAlignment(coreVector2(1.0f,-1.0f) * vSide);
 
@@ -531,7 +531,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowBoss(const cBoss* pBoss)
 {
     // show default boss banner
-    this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
+    this->ShowBoss(coreData::StrUpper(pBoss->GetName()), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
 }
 
 
@@ -542,6 +542,7 @@ void cInterface::ShowWave(const coreChar* pcName)
 
 
     if(pcName && pcName[0]) this->ShowStory(pcName);   
+    // TODO: story-text font is still dynamic
 
 
 }
@@ -555,10 +556,10 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
     this->__PrepareBanner();
 
     // set banner text
-    m_aBannerText[0].SetText(pcSub);
-    m_aBannerText[1].SetText(pcSub);
-    m_aBannerText[2].SetText(pcMain);
-    m_aBannerText[3].SetText(pcSub);
+    m_aBannerText[0].SetText(pcMain);
+    m_aBannerText[1].SetText(pcMain);
+    m_aBannerText[2].SetText(pcSub);
+    m_aBannerText[3].SetText(pcMain);
 
     // save animation properties
     m_fBannerStart    = g_pGame->GetTimeTable()->GetTimeEvent();
@@ -596,7 +597,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
 void cInterface::ShowScore(const coreUint32 iScore, const coreUint8 iMedal, const coreUint8 iMedalType)
 {
     // show default score banner
-    this->ShowScore(Core::Language->GetString("BONUS_TIME"), PRINT("%u", iScore), iMedal, iMedalType);
+    this->ShowScore(PRINT("%u", iScore), Core::Language->GetString("BONUS_TIME"), iMedal, iMedalType);
 }
 
 

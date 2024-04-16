@@ -7,6 +7,8 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 
+// TODO: get rid of m_anStage.emplace(__LINE__, [=]
+
 
 // ****************************************************************
 // setup the Virido mission
@@ -696,7 +698,6 @@ void cViridoMission::__SetupOwn()
         STAGE_WAVE("FÜNF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
-STAGE_START_HERE
     // ################################################################
     // boss 1
     STAGE_MAIN
@@ -849,9 +850,9 @@ STAGE_START_HERE
             }
         });
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, COLL_VAL(pSquad1), COLL_VAL(pSquad2), COLL_VAL(afTarget), COLL_VAL(afSign), COLL_VAL(aiFreeState), COLL_VAL(aiFreeMove))
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_VAL(pSquad1), COLL_VAL(pSquad2), COLL_VAL(afTarget), COLL_VAL(afSign), COLL_VAL(aiFreeState), COLL_VAL(aiFreeMove))
         {
-            if(pEnemy->GetID() != cCinderEnemy::ID) return; // TODO: better check for pSquad2 ownership
+            if(!bFirstHit || (pEnemy->GetID() != cCinderEnemy::ID)) return;
 
             const coreUintW i          = pSquad2->GetIndex(pEnemy);
             const coreFloat fNewTarget = AlongCrossNormal(pBullet->GetFlyDir()).Angle() + CORE_MATH_PRECISION;
@@ -1028,6 +1029,8 @@ STAGE_START_HERE
         {
             if((m_iStageSub == 7u) && (fWhirlSpeed < 1.0f)) return;
 
+            STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
+
             const coreVector2 vDiff   = pEnemy->AimAtPlayer ();
             const coreVector2 vCurPos = pEnemy->GetPosition ().xy();
             coreVector2       vCurDir = pEnemy->GetDirection().xy();
@@ -1041,7 +1044,7 @@ STAGE_START_HERE
 
             pEnemy->DefaultMoveForward(vCurDir, 30.0f);
 
-            if(STAGE_TICK_TIME_FREE(9.0f, 0.0f))
+            if(STAGE_TICK_TIME(9.0f, 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy();
@@ -1386,7 +1389,7 @@ STAGE_START_HERE
 
         STAGE_FINISH_NOW
     });
-//STAGE_START_HERE
+STAGE_START_HERE
     // ################################################################
     // boss 2
     STAGE_MAIN
@@ -1500,12 +1503,11 @@ STAGE_START_HERE
             }
         });
 
-        STAGE_COLL_PLAYER_ENEMY(pPlayer, pEnemy, vIntersection)
+        STAGE_COLL_PLAYER_ENEMY(pPlayer, pEnemy, vIntersection, bFirstHit)
         {
-            if(pEnemy->GetCurHealth() == 0)
-            {
-                pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-            }
+            if(!bFirstHit || pEnemy->GetCurHealth()) return;
+
+            pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
         });
 
         STAGE_WAVE("ELF", {20.0f, 30.0f, 40.0f, 50.0f})
@@ -1709,8 +1711,10 @@ STAGE_START_HERE
             STAGE_GET_FLOAT     (fMillAngle, fMillAngle = 0.5f*PI)
         STAGE_GET_END
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, COLL_VAL(pSquad1), COLL_VAL(avForce), COLL_REF(fMillForce))
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_VAL(pSquad1), COLL_VAL(avForce), COLL_REF(fMillForce))
         {
+            if(!bFirstHit) return;
+
             const coreUintW i = pSquad1->GetIndex(pEnemy);
 
             coreUint8 iGroupNum;
@@ -1867,7 +1871,7 @@ STAGE_START_HERE
             }
             else if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
             {
-                if(STAGE_TICK_TIME_FREE((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))
+                if(STAGE_TICK_TIME((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))
                 {
                     const coreVector2 vPos  = pEnemy->GetPosition ().xy();
                     const coreFloat   fBase = pEnemy->GetDirection().xy().Angle();
@@ -2118,7 +2122,7 @@ STAGE_START_HERE
     {
         //nBallSyncFunc(coreVector2(0.0f,-1.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
     });
-STAGE_START_HERE
+
     // ################################################################
     // boss 3
     STAGE_MAIN

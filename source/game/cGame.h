@@ -35,12 +35,12 @@ enum eGameStatus : coreUint8
     GAME_STATUS_FINISHED = 0x20u    // 
 };
 
-struct sGameConfig final
+struct sGameOptions final
 {
-    coreUint8 iDifficulty;                                 // 
-    coreBool  bCoop;                                       // 
-    coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_WEAPONS];    // 
-    coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_SUPPORTS];   // 
+    coreUint8 iPlayers;                                          // 
+    coreUint8 iDifficulty;                                       // 
+    coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_EQUIP_WEAPONS];    // 
+    coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_EQUIP_SUPPORTS];   // 
 };
 
 
@@ -122,13 +122,14 @@ private:
 
     coreUint8 m_iOutroType;                 // 
 
+    sGameOptions m_Options;                 // 
+    coreBool     m_bCoop;                   // 
+
     coreUint8 m_iStatus;                    // 
-    coreUint8 m_iDifficulty;                // 
-    coreBool  m_bCoop;                      // 
 
 
 public:
-    cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept;
+    cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept;
     ~cGame();
 
     DISABLE_COPY(cGame)
@@ -184,14 +185,15 @@ public:
     inline cTimeTable*      GetTimeTable          ()                       {return &m_TimeTable;}
 
     // get object properties
-    inline const coreInt32* GetMissionList()const {return m_piMissionList;}
-    inline const coreUintW& GetNumMissions()const {return m_iNumMissions;}
-    inline const coreUint8& GetContinues  ()const {return m_iContinues;}
-    inline const coreBool&  GetPacifist   ()const {return m_bPacifist;}
-    inline const coreUint8& GetOutroType  ()const {return m_iOutroType;}
-    inline const coreUint8& GetStatus     ()const {return m_iStatus;}
-    inline const coreUint8& GetDifficulty ()const {return m_iDifficulty;}
-    inline const coreBool&  GetCoop       ()const {return m_bCoop;}
+    inline const coreInt32*    GetMissionList()const {return m_piMissionList;}
+    inline const coreUintW&    GetNumMissions()const {return m_iNumMissions;}
+    inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
+    inline const coreBool&     GetPacifist   ()const {return m_bPacifist;}
+    inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
+    inline const sGameOptions& GetOptions    ()const {return m_Options;}
+    inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
+    inline const coreBool&     GetCoop       ()const {return m_bCoop;}
+    inline const coreUint8&    GetStatus     ()const {return m_iStatus;}
 
     // 
     static coreUint8  CalcMedal       (const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal);

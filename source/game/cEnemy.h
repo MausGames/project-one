@@ -110,21 +110,6 @@ private:
 class cEnemyManager final
 {
 private:
-    // 
-    using uRepeatFunc = void (*) (cEnemy* OUTPUT, const coreUint8, const coreVariant16&);
-
-    // 
-    struct sRepeatEntry final
-    {
-        cEnemy*       pEnemy;       // 
-        coreUint16    iMaxRepeat;   // 
-        coreUint16    iCurRepeat;   // 
-        coreUint16    iMaxDelay;    // 
-        coreUint16    iCurDelay;    // 
-        coreVariant16 oData;        // 
-        uRepeatFunc   nFunction;    // 
-    };
-
     // enemy set structure
     struct INTERFACE sEnemySetGen
     {
@@ -146,8 +131,6 @@ private:
 private:
     sEnemySetGen*    m_apEnemySet[ENEMY_SET_COUNT];   // enemy sets (each for a different inherited enemy class)
     coreSet<cEnemy*> m_apAdditional;                  // pointers to additional enemies
-
-    std::vector<sRepeatEntry> m_aRepeatEntry;         // 
 
 
 public:
@@ -175,9 +158,6 @@ public:
 
     // 
     template <typename T> void PrefetchEnemy();
-
-    // 
-    void AttachFunction(cEnemy* pEnemy, const coreUint16 iRepeat, const coreFloat fDelay, const coreVariant16& oData, uRepeatFunc nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUint16 iCurRepeat, const coreVariant16& oData) -> void
 
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}

@@ -127,7 +127,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
     m_pLavaSound = Core::Manager::Resource->Get<coreSound>("environment_lava.wav");
     m_pLavaSound.OnUsableOnce([this, pResource = m_pLavaSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
 }
 
@@ -222,5 +222,5 @@ void cVolcanoBackground::__MoveOwn()
 
 
     if(m_pLavaSound->EnableRef(this))
-        m_pLavaSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this) * g_CurConfig.Audio.fAmbientVolume);
+        m_pLavaSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }
