@@ -33,6 +33,7 @@ cMission::cMission()noexcept
 , m_fStageSubTimeBefore (0.0f)
 , m_pfMedalGoal         (NULL)
 , m_bBadgeGiven         (false)
+, m_bRepeat             (false)
 {
 }
 
@@ -90,22 +91,29 @@ void cMission::MoveBefore()
     // 
     this->__MoveOwnBefore();
 
-    if(!m_anStage.empty())
+    do
     {
         // 
-        m_fStageTimeBefore = m_fStageTime;
-        m_fStageTime.Update(1.0f);
+        m_bRepeat = false;
 
-        // 
-        m_fStageSubTimeBefore = m_fStageSubTime;
-        m_fStageSubTime.Update(1.0f);
+        if(!m_anStage.empty())
+        {
+            // 
+            m_fStageTimeBefore = m_fStageTime;
+            m_fStageTime.Update(1.0f);
 
-        // 
-        m_anStage.back()();
+            // 
+            m_fStageSubTimeBefore = m_fStageSubTime;
+            m_fStageSubTime.Update(1.0f);
 
-        // 
-        if(m_anStage.empty()) g_pGame->StartOutro(0u);
+            // 
+            m_anStage.back()();
+
+            // 
+            if(m_anStage.empty()) g_pGame->StartOutro(0u);
+        }
     }
+    while(m_bRepeat);
 }
 
 void cMission::MoveAfter()
@@ -150,6 +158,9 @@ void cMission::SkipStage()
     m_nCollPlayerEnemy  = NULL;
     m_nCollPlayerBullet = NULL;
     m_nCollEnemyBullet  = NULL;
+
+    // 
+    m_bRepeat = true;
 }
 
 
@@ -244,7 +255,7 @@ void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition)
     });
 
     // 
-    g_pGame->GetCombatText()->AddBadge(iBonus, vPosition);
+    //g_pGame->GetCombatText()->AddBadge(iBonus, vPosition);   // TODO
 }
 
 

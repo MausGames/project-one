@@ -62,7 +62,7 @@ void cCombatText::Move()
         // 
         m_BadgeIcon.SetPosition(coreVector2(0.0f, 0.03f * (1.0f - m_fBadgeTimer)));
         m_BadgeIcon.SetAlpha   (MIN(m_fBadgeTimer * 5.0f, 1.0f));
-        m_BadgeIcon .Move();
+        m_BadgeIcon.Move();
 
         // 
         m_BadgeLabel.SetPosition(m_BadgeIcon.GetPosition());
@@ -73,7 +73,7 @@ void cCombatText::Move()
     // 
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
     {
-        coreLabel& oLabel = m_aLabel [i];
+        cGuiLabel& oLabel = m_aLabel [i];
         coreFlow&  fTimer = m_afTimer[i];
         if(!fTimer) continue;
 
@@ -94,8 +94,8 @@ void cCombatText::Move()
         {
             if(!m_afTimer[j]) continue;
 
-            coreLabel& A = m_aLabel[i];
-            coreLabel& B = m_aLabel[j];
+            cGuiLabel& A = m_aLabel[i];
+            cGuiLabel& B = m_aLabel[j];
 
             // 
             const coreVector2 vRange = (A.GetSize()     + B.GetSize()) * 0.5f;
@@ -130,12 +130,12 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
 
     // 
     if(++m_iCurLabel >= COMBAT_LABELS) m_iCurLabel = 0u;
-    coreLabel& oLabel = m_aLabel [m_iCurLabel];
+    cGuiLabel& oLabel = m_aLabel [m_iCurLabel];
     coreFlow&  fTimer = m_afTimer[m_iCurLabel];
 
     // init label object
     oLabel.SetText  (pcText);
-    oLabel.SetCenter(g_pForeground->Project2D(vPosition).Processed(CLAMP, -0.4f, 0.4f));
+    oLabel.SetCenter(MapToAxis(g_pForeground->Project2D(vPosition).Processed(CLAMP, -0.4f, 0.4f), g_vHudDirection));
     oLabel.SetColor4(coreVector4(vColor, 0.0f));
 
     // start animation timer
@@ -154,7 +154,7 @@ void cCombatText::AddValue(const coreInt32 iValue, const coreVector3& vPosition,
 // 
 void cCombatText::AddBadge(const coreUint32 iValue, const coreVector3& vPosition)
 {
-    const coreVector2 vOnScreen = g_pForeground->Project2D(vPosition).Processed(CLAMP, -0.4f, 0.4f);
+    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition).Processed(CLAMP, -0.4f, 0.4f), g_vHudDirection);
 
     // 
     m_BadgeIcon.SetCenter(vOnScreen);
@@ -166,6 +166,15 @@ void cCombatText::AddBadge(const coreUint32 iValue, const coreVector3& vPosition
     // 
     ASSERT(!m_fBadgeTimer)
     m_fBadgeTimer = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cCombatText::UpdateLayout()
+{
+    // TODO: rotate position if game rotates
+    // TODO: rotate direction (without position) if interface rotates
 }
 
 

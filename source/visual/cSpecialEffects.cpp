@@ -14,7 +14,7 @@
 cSpecialEffects::cSpecialEffects()noexcept
 : m_ParticleColor    (2048u)
 , m_ParticleDark     (1024u)
-, m_ParticleSmoke    (512u)
+, m_ParticleSmoke    (1024u)
 , m_ParticleFire     (1024u)
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)

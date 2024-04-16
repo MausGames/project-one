@@ -33,6 +33,7 @@ cWorldMap::cWorldMap()noexcept
         m_aPin[i].SetSize         (WORLDMAP_PIN_SIZE);
         m_aPin[i].SetTexSize      (coreVector2(0.5f,0.5f) / 1.55f);
         m_aPin[i].SetTexOffset    (coreVector2(0.5f,0.0f) + 0.5f * (coreVector2(0.5f,0.5f) - m_aPin[i].GetTexSize()));
+        m_aPin[i].SetFocusable    (true);
         m_aPin[i].SetFocusModifier(coreVector2(1.5f,1.5f));
 
         m_aPinDot[i].DefineTexture(0u, "menu_mission.png");
@@ -80,7 +81,7 @@ void cWorldMap::Render()
     this->GetProgram()->SendUniform("u_v1Time", FMOD(coreFloat(Core::System->GetTotalTime()), 10.0f));
 
     // 
-    this->coreObject2D::Render();
+    this->cGuiObject::Render();
 
     // 
     for(coreUintW i = 0u; i < WORLDMAP_LINES; ++i) m_aLine  [i].Render();
@@ -100,7 +101,7 @@ void cWorldMap::Render()
 void cWorldMap::Move()
 {
     // 
-    this->coreObject2D::Move();
+    this->cGuiObject::Move();
 
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
@@ -223,7 +224,7 @@ void cWorldMap::EnablePin(const coreUintW iIndex, const coreBool bEnable, const 
 
     // 
     SET_BIT(m_iEnabled, iIndex, bEnable)
-    STATIC_ASSERT(WORLDMAP_PINS <= sizeof(m_iEnabled) * 8u)
+    STATIC_ASSERT(WORLDMAP_PINS <= sizeof(m_iEnabled)*8u)
 }
 
 

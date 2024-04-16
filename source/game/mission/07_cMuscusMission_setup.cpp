@@ -19,7 +19,13 @@ void cMuscusMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+            g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+
+            cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
+
+            pBackground->GetHeadlight()->ResetFlicker();
+            pBackground->SetEnableLightning(false);
+            pBackground->SetEnableHeadlight(true);
 
             g_pGame->GetInterface()->ShowMission(this);
             g_pGame->StartIntro();
@@ -102,7 +108,7 @@ void cMuscusMission::__SetupOwn()
             else if(STAGE_SUB(10u)) STAGE_RESSURECT(pSquad1,  9u,  9u)
             else if(STAGE_SUB(11u)) STAGE_RESSURECT(pSquad1, 10u, 10u)
 
-            if((m_iStageSub >= 2u) && !STAGE_CLEARED)
+            if(((m_iStageSub == 3u) || (m_iStageSub == 7u)) && !STAGE_CLEARED)
             {
                 const coreBool bBlackout = (m_iStageSub == 7u);
                 if(bBlackout) fBlind = 6.0f;
@@ -209,6 +215,110 @@ void cMuscusMission::__SetupOwn()
     //{
     //    STAGE_BOSS(m_Orlac, {60.0f, 120.0f, 180.0, 240.0f})
     //});
+
+    STAGE_START_HERE
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->GetHeadlight()->ResetFlicker();
+        pBackground->SetEnableLightning(true);
+        pBackground->SetEnableHeadlight(false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // automatic forward movement
+    // helper is
+    // rückwärts fliegen (dem spieler zeit geben) (beschleunigung interpolieren ??, aber sehr kurz ??)
+    // stillstand (in mitte) (rotation + dodge muss genutzt werden), gegner kommen auf ihn zu, geschosse kommen von diagonale (visiblity)
+    // erste welle startet nach 2 turns
+    // automatic right-turn on wall-collision ?
+    STAGE_MAIN
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 2u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(50, COLOR_SHIP_ORANGE);
+                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+            });
+        });
+
+        //STAGE_GET_START(1u)
+        //STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 1u)
+        }
+
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            if(STAGE_BEGINNING) pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+
+            coreVector2 vNewPos = pPlayer->GetPosition ().xy();
+            coreVector2 vNewDir = pPlayer->GetDirection().xy();
+
+            vNewPos += vNewDir * (TIME * pPlayer->CalcMoveSpeed());
+
+            const coreVector4 vArea = pPlayer->GetArea();
+
+                 if(vNewPos.x < vArea.x) {vNewDir = coreVector2( 0.0f, 1.0f); vNewPos += vNewDir * ABS(vNewPos.x - vArea.x); vNewPos.x = vArea.x; }
+            else if(vNewPos.x > vArea.z) {vNewDir = coreVector2( 0.0f,-1.0f); vNewPos += vNewDir * ABS(vNewPos.x - vArea.z); vNewPos.x = vArea.z; }
+                 if(vNewPos.y < vArea.y) {vNewDir = coreVector2(-1.0f, 0.0f); vNewPos += vNewDir * ABS(vNewPos.y - vArea.y); vNewPos.y = vArea.y; }
+            else if(vNewPos.y > vArea.w) {vNewDir = coreVector2( 1.0f, 0.0f); vNewPos += vNewDir * ABS(vNewPos.y - vArea.w); vNewPos.y = vArea.w; }
+
+            pPlayer->SetPosition (coreVector3(vNewPos, 0.0f));
+            pPlayer->SetDirection(coreVector3(vNewDir, 0.0f));
+
+           //pPlayer->coreObject3D::Move();
+            
+            // wenn ich hier oder bei bossen die positionen des spielers verändere werden objekte die anhand seiner attribute gesetzt werden falsch berechnet (auch blitze)
+            // !! ich bin hier in MissionBefore!
+            // !! kommentar in  cgame.cpp: how to handle GetMove for player in mission-movebefore ???
+            // fix this all
+            
+        });
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F(i))
+
+            STAGE_REPEAT(pPath1->GetTotalDistance())
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+        });
+
+        STAGE_WAVE("SECHSUNDNEUNZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+        });
+
+        STAGE_FINISH_NOW
+    });
 
     // ################################################################
     // 

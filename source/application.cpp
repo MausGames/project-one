@@ -125,7 +125,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("effect_sand.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_sand.png");
     Core::Manager::Resource->Load<coreTexture>("effect_snow.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_snow.png");
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
-    Core::Manager::Resource->Load<coreTexture>("effect_splatter.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_splatter.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
     //Core::Manager::Resource->Load<coreTexture>("environment_algae.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae.png");
@@ -143,8 +142,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_earth_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_earth_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_grass_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png", false);
-    Core::Manager::Resource->Load<coreTexture>("environment_grass2_diff.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass2_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_grass2_norm.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass2_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_blood_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_blood_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_lava_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_lava_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_leaf.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_leaf.png");

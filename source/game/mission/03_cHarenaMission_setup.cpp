@@ -182,72 +182,12 @@ void cHarenaMission::__SetupOwn()
     });
 
     // ################################################################
-    // hide from super laser
-    // blöcke die von einer seite schützen, und geschosse aufhalten (spieler, gegner)
-    // 90 degree, then 45 degree
-    // 90 degree flip, then 180 degree flip
-    // laser dreht sich 360
-    // gegner der für angriff verantwortlich ist kommt von unten ins bild wärend er schießt, blöcke werden zerstört, dodge hinter ihn
-    // coop
-    //   |        |
-    //   | O    O | O
-    // O |        |
-    //   |
-    // zwei quads (für schräge ecken) mit tiefe zeichnen und depth-test verwenden
-    STAGE_MAIN
-    {
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
-            pPath1->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 1u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->Configure(50, COLOR_SHIP_ORANGE);
-                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
-
-                pEnemy->Resurrect();
-            });
-        });
-
-        //STAGE_ADD_SQUAD(pSquad2, cArrowEnemy, 1u)
-        //{
-        //    STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
-        //    {
-        //        pEnemy->Configure(50, COLOR_SHIP_ORANGE);
-        //        pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
-
-        //        pEnemy->Resurrect();
-        //    });
-        //});
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 0.25f, 0.2f * I_TO_F(i))
-
-            STAGE_REPEAT(pPath1->GetTotalDistance())
-
-            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
-            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-
-            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-        });
-
-        STAGE_WAVE("ZWEIUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
-    });
-
-    // ################################################################
     // 
     //STAGE_MAIN
     //{
     //    STAGE_BOSS(m_Urtica, {60.0f, 120.0f, 180.0, 240.0f})
     //});
-STAGE_START_HERE
+
     // ################################################################
     // enemies form a tower and fall over
     // TODO: give central effect to highlight damaging touch   

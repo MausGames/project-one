@@ -148,7 +148,7 @@ cGrassBackground::cGrassBackground()noexcept
         oBase.DefineTexture(0u, "environment_flowers.png");
         oBase.DefineProgram("effect_decal_light_program");
 
-        for(coreUintW i = GRASS_FLOWER_NUM; i--; )
+        for(coreUintW i = 0u; i < GRASS_FLOWER_NUM; ++i)
         {
             for(coreUintW j = 20u; j--; )   // tries
             {

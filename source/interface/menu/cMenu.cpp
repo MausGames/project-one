@@ -613,7 +613,7 @@ const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor)
+void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor)
 {
     ASSERT(pButton)
 
@@ -632,7 +632,7 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, co
 
 // ****************************************************************
 // 
-void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
+void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox)
 {
     ASSERT(pSwitchBox)
 
@@ -660,7 +660,7 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 
 // ****************************************************************
 // 
-void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
+void cMenu::UpdateAnimateProgram(cGuiObject* OUTPUT pObject)
 {
     ASSERT(pObject)
 
@@ -682,7 +682,7 @@ void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
 
 // ****************************************************************
 // 
-void cMenu::ApplyMedalTexture(coreObject2D* OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType)
+void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType)
 {
     ASSERT(pObject && (iMedal < MEDAL_MAX) && (iMedalType < MEDAL_TYPE_MAX))
 

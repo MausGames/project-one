@@ -173,15 +173,11 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Post Processing");
         Core::Debug->MeasureStart("Interface");
         {
-            Core::Manager::Object->SetSpriteViewDir(g_vHudDirection);
-
             // render the overlay separately
             if(STATIC_ISVALID(g_pGame)) g_pGame->RenderOverlay();
 
             // render the menu
             g_pMenu->Render();
-
-            Core::Manager::Object->SetSpriteViewDir(coreVector2(0.0f,1.0f));
         }
         Core::Debug->MeasureEnd("Interface");
     }
@@ -206,10 +202,7 @@ void CoreApp::Move()
         UpdateInput();
 
         // move the menu
-        
-        Core::Manager::Object->SetSpriteViewDir(g_vHudDirection);
         g_pMenu->Move();
-        Core::Manager::Object->SetSpriteViewDir(coreVector2(0.0f,1.0f));
         if(!g_pMenu->IsPaused())
         {
             // 
@@ -222,6 +215,9 @@ void CoreApp::Move()
             {
                 // move the game
                 g_pGame->Move();
+
+                // move the overlay separately
+                g_pGame->MoveOverlay();
             }
 
             // 
@@ -232,16 +228,6 @@ void CoreApp::Move()
 
             // move post-processing
             g_pPostProcessing->Move();
-        }
-        
-        
-
-        if(STATIC_ISVALID(g_pGame)) // outside for bridge menu
-        {
-            // move the overlay separately
-            Core::Manager::Object->SetSpriteViewDir(g_vHudDirection);
-            g_pGame->MoveOverlay();
-            Core::Manager::Object->SetSpriteViewDir(coreVector2(0.0f,1.0f));
         }
 
         // update the music-player
@@ -258,7 +244,7 @@ void CoreApp::Move()
 // init resolution properties
 void InitResolution(const coreVector2& vResolution)
 {
-    // calculate biggest possible 1:1 resolution   
+    // calculate biggest possible 1:1 resolution
     g_vGameResolution = coreVector2(1.0f,1.0f) * vResolution.Min();
 }
 
@@ -277,6 +263,8 @@ void InitDirection()
     }
 
     // 
+    Core::Manager::Object->SetSpriteViewDir  (g_vHudDirection);
+    Core::Manager::Object->SetSpriteAltCenter(g_vGameResolution);
     Core::Manager::Object->RefreshSprites();
 }
 
@@ -335,12 +323,6 @@ static void LockFramerate()
 
             // processor level spinning
             else _mm_pause();
-
-#if defined(_CORE_MSVC_)
-    #define PAUSE YieldProcessor()   // all
-#else
-    #define PAUSE __builtin_ia32_pause()   // only x86/x64
-#endif
 
         #endif
         }

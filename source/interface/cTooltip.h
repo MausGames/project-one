@@ -34,10 +34,10 @@
 
 // ****************************************************************
 // tooltip class
-class cTooltip final : public coreObject2D
+class cTooltip final : public cGuiObject
 {
 private:
-    coreLabel m_aLine[TOOLTIP_LINES];   // text lines
+    cGuiLabel m_aLine[TOOLTIP_LINES];   // text lines
 
     coreUintW m_iNumLines;              // currently active text lines
     coreBool  m_bDisplay;               // display the tooltip (once)

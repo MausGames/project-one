@@ -24,8 +24,8 @@ cCalorMission::cCalorMission()noexcept
     m_apBoss[2] = &m_Zeroth;
 
     // 
-    m_Star     .DefineProgram("object_ship_glow_inst_program");       
-    m_StarChain.DefineProgram("object_ship_glow_inst_program");       
+    m_Star     .DefineProgram("effect_energy_flat_invert_inst_program");
+    m_StarChain.DefineProgram("effect_energy_flat_invert_inst_program");
     {
         for(coreUintW i = 0u; i < CALOR_STARS_RAWS; ++i)
         {
@@ -35,11 +35,12 @@ cCalorMission::cCalorMission()noexcept
             // load object resources
             coreObject3D* pStar = &m_aStarRaw[i];
             pStar->DefineModel  (iType ? "object_sphere.md3" : "object_star.md3");
-            pStar->DefineTexture(0u, "ship_enemy.png");      
-            pStar->DefineProgram("object_ship_glow_program");     
+            pStar->DefineTexture(0u, "default_black.png");
+            pStar->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
-            pStar->SetSize   (iType ? coreVector3(0.7f,0.7f,0.7f) : coreVector3(1.2f,1.2f,1.2f));
+            pStar->SetSize   (iType ? coreVector3(0.7f,0.7f,0.7f) : coreVector3(1.5f,1.5f,1.5f));
+            pStar->SetColor3 (COLOR_ENERGY_WHITE * 0.8f);
             pStar->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
@@ -49,8 +50,8 @@ cCalorMission::cCalorMission()noexcept
     }
 
     // 
-    cShadow::GetGlobalContainer()->BindList(&m_Star);
-    cShadow::GetGlobalContainer()->BindList(&m_StarChain);
+    g_pGlow->BindList(&m_Star);
+    g_pGlow->BindList(&m_StarChain);
 }
 
 
@@ -62,8 +63,8 @@ cCalorMission::~cCalorMission()
     m_Snow.Disable(0.0f);
 
     // 
-    cShadow::GetGlobalContainer()->UnbindList(&m_Star);
-    cShadow::GetGlobalContainer()->UnbindList(&m_StarChain);
+    g_pGlow->UnbindList(&m_Star);
+    g_pGlow->UnbindList(&m_StarChain);
 
     // 
     for(coreUintW i = 0u; i < CALOR_STARS; ++i) this->DisableStar(i, false);
@@ -136,14 +137,17 @@ void cCalorMission::__RenderOwnBottom()
 void cCalorMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
+    DEPTH_PUSH   // TODO: first push causes outline-overdraw artifacts, precision too low on the first level, can it be handled on outline(-shader) ?
 
-    glDepthMask(false);
-    {
-        // 
-        m_StarChain.Render();
-        m_Star     .Render();
-    }
-    glDepthMask(true);
+    // 
+    m_StarChain.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_StarChain);
+
+    DEPTH_PUSH
+
+    // 
+    m_Star.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Star);
 }
 
 
@@ -152,7 +156,7 @@ void cCalorMission::__RenderOwnUnder()
 void cCalorMission::__MoveOwnAfter()
 {
     // 
-    m_fSwing.UpdateMod(2.0f, 2.0f*PI);
+    m_fSwing.UpdateMod(3.0f, 2.0f*PI);
 
     // 
     m_Snow.Move();
@@ -167,25 +171,43 @@ void cCalorMission::__MoveOwnAfter()
         const cShip* pOwner = m_apStarOwner[i];
         if(pOwner)
         {
-            const coreVector2 vDir = coreVector2::Direction(m_fSwing);
+            if(CONTAINS_BIT(m_iStarState, i))
+            {
+                const coreVector2 vDir = coreVector2::Direction(m_fSwing);
+
+                // 
+                pStar->SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 10.0f, 0.0f));
+                pStar->SetDirection(coreVector3(vDir, 0.0f));
+            }
+            else
+            {
+                const coreVector2 vDiff = pOwner->GetPosition().xy() - pStar->GetPosition().xy();
+
+                // 
+                c_cast<cShip*>(pOwner)->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), CALOR_CHAIN_CONSTRAINT), 0.0f));
+            }
 
             // 
-            pStar->SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 10.0f, 0.0f));
-            pStar->SetDirection(coreVector3(vDir, 0.0f));
-        }
+            const coreVector2 vDiff    = pOwner->GetPosition().xy() - pStar->GetPosition().xy();   // # again
+            const coreVector2 vDir     = vDiff.Normalized();
+            const coreFloat   fLen     = vDiff.Length();
+            const coreFloat   fTension = STEPH3(CALOR_CHAIN_CONSTRAINT - 5.0f, CALOR_CHAIN_CONSTRAINT, fLen);
 
-        // 
-        for(coreUintW j = 0u; j < CALOR_CHAINS; ++j)
-        {
-            coreObject3D* pChain = (*m_StarChain.List())[i*CALOR_CHAINS + j];
+            // 
+            for(coreUintW j = 0u; j < CALOR_CHAINS; ++j)
+            {
+                coreObject3D* pChain = (*m_StarChain.List())[i*CALOR_CHAINS + j];
 
-            
-            const coreFloat fOffset = I_TO_F(j) / I_TO_F(CALOR_CHAINS);
-            
-            const coreVector2 vPos = LERP(pOwner->GetPosition().xy(), pStar->GetPosition().xy(), fOffset);
+                // 
+                const coreFloat   fOffset = MIN(I_TO_F(j) * 2.5f + 4.7f, fLen);
+                const coreVector2 vPos    = pOwner->GetPosition().xy() - vDir * fOffset;
 
-            pChain->SetPosition(coreVector3(vPos, 0.0f));
-            
+                // 
+                pChain->SetPosition(coreVector3(vPos, 0.0f));
+                pChain->SetColor3  (LERP(COLOR_ENERGY_WHITE * 0.8f, COLOR_ENERGY_RED * 0.8f, fTension));
+                pChain->SetAlpha   (STEPH3(1.7f, 2.2f, fLen - fOffset));
+                pChain->SetEnabled (pChain->GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            }
         }
     }
 

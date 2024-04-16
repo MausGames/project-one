@@ -644,7 +644,7 @@ coreBool cInterface::IsStoryActive()const
 void cInterface::UpdateLayout()
 {
     // 
-    const coreObject2DStyle eStyle  = CORE_OBJECT2D_STYLE_DEFAULT | (g_CurConfig.Game.iHudType ? CORE_OBJECT2D_STYLE_NOTHING : CORE_OBJECT2D_STYLE_ASPECTCENTER);
+    const coreObject2DStyle eStyle  = CORE_OBJECT2D_STYLE_VIEWDIR | (g_CurConfig.Game.iHudType ? CORE_OBJECT2D_STYLE_ALTCENTER : CORE_OBJECT2D_STYLE_NOTHING);
     const coreVector2       vTop    = coreVector2(0.0f, 0.5f);
     const coreVector2       vBottom = coreVector2(0.0f,-0.5f);
 

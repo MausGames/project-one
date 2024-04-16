@@ -201,7 +201,7 @@ void cSummaryMenu::Move()
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * MENU_SUMMARY_BANNER_SPEED;
 
                 // 
-                const auto nBlendMedalFunc = [&](coreObject2D* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold)
+                const auto nBlendMedalFunc = [&](cGuiObject* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold)
                 {
                     const coreFloat fFadeIn = CLAMP((fBlendIn - fThreshold) * 10.0f, 0.0f, 1.0f);
 
@@ -216,7 +216,7 @@ void cSummaryMenu::Move()
                 for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) nBlendMedalFunc(&m_aMedalSegment[i], MISSION_SEGMENT_IS_BOSS(i) ? 0.07f : 0.055f, 0.8f + 0.055f * I_TO_F(i));
 
                 // 
-                const auto nBlendLabelFunc = [&](coreLabel* OUTPUT pName, coreLabel* OUTPUT pValue, coreLabel* OUTPUT pPart, const coreFloat fThreshold)
+                const auto nBlendLabelFunc = [&](cGuiLabel* OUTPUT pName, cGuiLabel* OUTPUT pValue, cGuiLabel* OUTPUT pPart, const coreFloat fThreshold)
                 {
                     const coreObjectEnable eEnabled = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 

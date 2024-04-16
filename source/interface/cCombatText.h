@@ -25,14 +25,14 @@
 class cCombatText final
 {
 private:
-    coreLabel m_aLabel [COMBAT_LABELS];   // label objects to display combat text
+    cGuiLabel m_aLabel [COMBAT_LABELS];   // label objects to display combat text
     coreFlow  m_afTimer[COMBAT_LABELS];   // animation timers
 
     coreUintW m_iCurLabel;                // current label object
 
-    coreObject2D m_BadgeIcon;             // 
-    coreLabel    m_BadgeLabel;            // 
-    coreFlow     m_fBadgeTimer;           // 
+    cGuiObject m_BadgeIcon;               // 
+    cGuiLabel  m_BadgeLabel;              // 
+    coreFlow   m_fBadgeTimer;             // 
 
 
 public:
@@ -50,6 +50,9 @@ public:
 
     // 
     void AddBadge(const coreUint32 iValue, const coreVector3& vPosition);
+
+    // 
+    void UpdateLayout();
 
     // reset the combat text
     void Reset();

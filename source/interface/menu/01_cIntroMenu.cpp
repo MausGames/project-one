@@ -153,7 +153,8 @@ void cIntroMenu::StartIntro()
             if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_DEFAULT;
 
             // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 20u, MENU_OUTLINE_SMALL);   // # always filter filename
+            cGuiButton* pButton = new cGuiButton();
+            pButton->Construct    (MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 20u, MENU_OUTLINE_SMALL);   // # always filter filename
             pButton->DefineProgram("menu_border_program");
             pButton->SetPosition  (coreVector2(0.00f,0.09f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
             pButton->SetSize      (coreVector2(0.34f,0.07f));

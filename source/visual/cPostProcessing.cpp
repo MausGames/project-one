@@ -261,7 +261,6 @@ void cPostProcessing::__UpdateWall()
         m_aWall[i].SetDirection (vFlip * (fSide *  coreVector2(-1.0f,1.0f)));
         m_aWall[i].SetCenter    (vFlip * (fSide *  0.5f));
         m_aWall[i].SetAlignment (vFlip * (fSide * -1.0f));
-        m_aWall[i].SetStyle     (CORE_OBJECT2D_STYLE_DEFAULT | CORE_OBJECT2D_STYLE_ASPECTCENTER);
         m_aWall[i].Move();
     }
 }

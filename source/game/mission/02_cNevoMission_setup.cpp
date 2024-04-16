@@ -484,6 +484,308 @@ void cNevoMission::__SetupOwn()
     //});
 
     // ################################################################
+    // attack triggers on multiple sides
+    // multiple enemies protect each others weakspots (like for barrier group)
+    // 1 side, then multiple sides
+    // (rotating arrow (90 degree))
+    // (flipping side with each kill)
+    // 4x4 enemy block with pattern (see paper)
+    // multiple same near each other (in line or adjacent) <> multiple mixed near each other
+    // first: -> with v, then <- with ^, then -> with v+>/^ (seite hätte besseren flow)
+    // rotation im uhrzeigersinn, dann entgegen (wegen anordnung der ersten linie 4x4 gruppe)
+    // maximal 2 spieler-rotation pro angreifbarer ausrichtung
+    // erste 3 gegner sind tutorial
+    // TODO: 2 gegner pro seite, rotating arrow, start mit oben, gegen uhrzeigersinn
+    STAGE_MAIN
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath2)
+        {
+            pPath2->Reserve(2u);
+            pPath2->AddNode(coreVector2(1.3f,0.0f), coreVector2(-1.0f,0.0f));
+            pPath2->AddStop(coreVector2(0.0f,0.0f), coreVector2(-1.0f,0.0f));
+            pPath2->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 43u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(4, COLOR_SHIP_GREEN);
+                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+            });
+        });
+
+        constexpr coreUintW iMapSize = 16u;
+
+        STAGE_GET_START(iMapSize)
+            STAGE_GET_UINT_ARRAY(aiArrowMapRaw, iMapSize)
+        STAGE_GET_END
+
+        coreUint8* aiArrowMap = r_cast<coreUint8*>(aiArrowMapRaw);
+
+        const auto nEnableArrowFunc = [&](const coreUintW iArrowIndex, const coreUintW iEnemyIndex, const coreVector2& vDirection)
+        {
+            const cEnemy*   pEnemy = pSquad1->GetEnemy(iEnemyIndex);
+            const coreUint8 iPack  = PackDirection(vDirection) / 2u;
+            ASSERT(iPack < 4u)
+
+            this->EnableArrow(iArrowIndex, pEnemy, vDirection);
+            aiArrowMap[(iEnemyIndex * 4u + iPack) % (iMapSize * 4u)] = iArrowIndex + 1u;
+        };
+
+        for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
+        {
+            if(m_apArrowOwner[i] && CONTAINS_FLAG(m_apArrowOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+                this->DisableArrow(i, true);
+        }
+
+        if(STAGE_CLEARED)
+        {
+            std::memset(aiArrowMap, 0, sizeof(coreUint32) * iMapSize);
+
+            if(STAGE_SUB(1u))
+            {
+                STAGE_RESSURECT(pSquad1, 0u, 0u)
+                nEnableArrowFunc( 0u,  0u, coreVector2( 0.0f,-1.0f));
+            }
+            else if(STAGE_SUB(2u))
+            {
+                STAGE_RESSURECT(pSquad1, 1u, 1u)
+                nEnableArrowFunc( 1u,  1u, coreVector2( 0.0f, 1.0f));
+            }
+            else if(STAGE_SUB(3u))
+            {
+                STAGE_RESSURECT(pSquad1, 2u, 2u)
+                nEnableArrowFunc( 2u,  2u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 3u,  2u, coreVector2( 1.0f, 0.0f));
+            }
+            else if(STAGE_SUB(4u))
+            {
+                STAGE_RESSURECT(pSquad1, 3u, 6u)
+                nEnableArrowFunc( 4u,  3u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc( 5u,  4u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc( 6u,  5u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc( 7u,  6u, coreVector2( 0.0f, 1.0f));
+            }
+            else if(STAGE_SUB(5u))
+            {
+                STAGE_RESSURECT(pSquad1, 7u, 10u)
+                nEnableArrowFunc( 0u,  7u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 1u,  8u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 2u,  9u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 3u, 10u, coreVector2( 0.0f,-1.0f));
+            }
+            else if(STAGE_SUB(6u))
+            {
+                STAGE_RESSURECT(pSquad1, 11u, 14u)
+                nEnableArrowFunc( 4u, 11u, coreVector2(-1.0f, 0.0f));
+                nEnableArrowFunc( 5u, 12u, coreVector2(-1.0f, 0.0f));
+                nEnableArrowFunc( 6u, 13u, coreVector2(-1.0f, 0.0f));
+                nEnableArrowFunc( 7u, 14u, coreVector2(-1.0f, 0.0f));
+            }
+            else if(STAGE_SUB(7u))
+            {
+                STAGE_RESSURECT(pSquad1, 15u, 18u)
+                nEnableArrowFunc( 8u, 15u, coreVector2( 1.0f, 0.0f));
+                nEnableArrowFunc( 9u, 16u, coreVector2( 1.0f, 0.0f));
+                nEnableArrowFunc(10u, 17u, coreVector2( 1.0f, 0.0f));
+                nEnableArrowFunc(11u, 18u, coreVector2( 1.0f, 0.0f));
+            }
+            else if(STAGE_SUB(8u))
+            {
+                STAGE_RESSURECT(pSquad1, 19u, 22u)
+                nEnableArrowFunc(12u, 19u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc(13u, 20u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc(14u, 21u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc(15u, 22u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc(16u, 22u, coreVector2(-1.0f, 0.0f));
+            }
+            else if(STAGE_SUB(9u))
+            {
+                STAGE_RESSURECT(pSquad1, 23u, 26u)
+                nEnableArrowFunc( 0u, 23u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 1u, 24u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 2u, 25u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 3u, 26u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 4u, 26u, coreVector2( 1.0f, 0.0f));
+            }
+            else if(STAGE_SUB(10u))
+            {
+                STAGE_RESSURECT(pSquad1, 27u, 42u)
+                nEnableArrowFunc( 5u, 27u, coreVector2(-1.0f, 0.0f));
+                nEnableArrowFunc( 6u, 28u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 7u, 29u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc( 8u, 30u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc( 9u, 31u, coreVector2( 1.0f, 0.0f));
+                nEnableArrowFunc(10u, 32u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc(11u, 33u, coreVector2( 1.0f, 0.0f));
+                nEnableArrowFunc(12u, 34u, coreVector2( 1.0f, 0.0f));
+                nEnableArrowFunc(13u, 35u, coreVector2(-1.0f, 0.0f));
+                nEnableArrowFunc(14u, 36u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc(15u, 37u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc(16u, 38u, coreVector2(-1.0f, 0.0f));
+                nEnableArrowFunc(17u, 39u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc(18u, 40u, coreVector2( 0.0f,-1.0f));
+                nEnableArrowFunc(19u, 41u, coreVector2( 0.0f, 1.0f));
+                nEnableArrowFunc(20u, 42u, coreVector2( 1.0f, 0.0f));
+            }
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            if(i < 27u)
+            {
+                STAGE_LIFETIME(pEnemy, 0.7f, (i < 3u) ? 0.0f : (0.2f * I_TO_F((i - 3u) % 4u)))
+
+                STAGE_REPEAT(pPath1->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                     if(i == 0u) pEnemy->Rotate270();
+                else if(i == 1u) pEnemy->Rotate90 ();
+                else if(i == 2u) pEnemy->Rotate270();
+                else if(i <  7u) pEnemy->Rotate90 ();
+                else if(i < 11u) pEnemy->Rotate270();
+                else if(i < 15u) pEnemy->Rotate90 ();
+                else if(i < 19u) pEnemy->Rotate270();
+                else if(i < 23u) {}
+                else if(i < 27u) pEnemy->Rotate180();
+            }
+            else
+            {
+                STAGE_LIFETIME(pEnemy, 2.1f, 0.0f)
+
+                const coreVector2 vFactor = coreVector2((((i - 27u) % 4) < 2u) ? -1.0f : 1.0f, 1.0f);
+                const coreVector2 vOffset = coreVector2(I_TO_F((i - 27u) % 4u) * 0.2f - 0.3f, I_TO_F((i - 27u) / 4u) * 0.2f - 0.3f);
+
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset, fLifeTime);   // # no factor multiplication
+            }
+        });
+
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_THIS, COLL_VAL(pSquad1), COLL_VAL(aiArrowMap))
+        {
+            if(!bFirstHit) return;
+
+            const coreUintW   i     = pSquad1->GetIndex(pEnemy);
+            const coreVector2 vSide = AlongCrossNormal(-pBullet->GetFlyDir());
+            const coreUint8   iPack = PackDirection(vSide) / 2u;
+            ASSERT(iPack < 4u)
+
+            coreUint8& iEntry = aiArrowMap[(i * 4u + iPack) % (iMapSize * 4u)];
+            if(iEntry)
+            {
+                this->DisableArrow(iEntry - 1u, true);
+
+                iEntry = 0u;
+
+                coreUint32& iEntryAll = r_cast<coreUint32&>(aiArrowMap[(i * 4) % (iMapSize * 4u)]);
+                if(!iEntryAll)
+                {
+                    pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+                }
+
+                const coreVector2 vPos  = pEnemy->GetPosition().xy();
+                const coreFloat   fBase = vSide.Angle();
+
+                for(coreUintW j = 3u; j--; )
+                {
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 1.0f) * 36.0f) + fBase);
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
+                }
+            }
+        });
+
+        STAGE_WAVE("EINUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+STAGE_START_HERE
+    // ################################################################
+    // hide from super laser
+    // blöcke die von einer seite schützen, und geschosse aufhalten (spieler, gegner)
+    // 90 degree, then 45 degree
+    // 90 degree flip, then 180 degree flip
+    // laser dreht sich 360
+    // gegner der für angriff verantwortlich ist kommt von unten ins bild wärend er schießt, blöcke werden zerstört, dodge hinter ihn
+    // coop
+    //   |        |
+    //   | O    O | O
+    // O |        |
+    //   |
+    // zwei quads (für schräge ecken) mit tiefe zeichnen und depth-test verwenden
+    
+    // partikel gezogen ()  werden gegen schussrichtung eingesaugt, bei schuss muss er linear nach in schussrichtung gehn und sich ausbreiten in weite
+    // unter gegen, geschosse, container
+    STAGE_MAIN
+    {
+        if(STAGE_BEGINNING) this->EnableContainer(coreVector2(0.0f,0.0f));
+        
+        
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 1u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(50, COLOR_SHIP_ORANGE);
+                pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
+
+                pEnemy->Resurrect();
+            });
+        });
+
+        //STAGE_GET_START(1u)
+        //STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 1u)
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F(i))
+
+            STAGE_REPEAT(pPath1->GetTotalDistance())
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+        });
+
+        STAGE_WAVE("ZWEIUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+
+    // ################################################################
+    // reset all arrows
+    STAGE_MAIN
+    {
+        for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
+            this->DisableArrow(i, false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
     // 
     //STAGE_MAIN
     //{

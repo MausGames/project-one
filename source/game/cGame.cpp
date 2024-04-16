@@ -73,8 +73,9 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
         m_aHelper[i].Configure(ELEMENT_WHITE + i);
 
     // 
-    m_Interface.UpdateLayout();
-    m_Interface.UpdateEnabled();
+    m_Interface .UpdateLayout();
+    m_Interface .UpdateEnabled();
+    m_CombatText.UpdateLayout();
 
     // load first mission
     m_pCurMission = new cNoMission();
@@ -230,7 +231,7 @@ void cGame::Move()
 
     // move the mission
     m_EnemyManager.MoveBefore();
-    // how to handle GetMove for player in mission-movebefore ???    
+    // TODO: how to handle GetMove for player in mission-movebefore ???    
     m_pCurMission->MoveBefore();
     {
         // move all players
@@ -267,11 +268,8 @@ void cGame::Move()
 // render the overlay separately
 void cGame::RenderOverlay()
 {
-    // render combat text and interface
+    // render interface and combat text
     m_Interface .Render();
-    
-    
-    
     m_CombatText.Render();
 }
 
@@ -280,9 +278,9 @@ void cGame::RenderOverlay()
 // move the overlay separately
 void cGame::MoveOverlay()
 {
-    // move combat text and interface
-    m_CombatText.Move();
+    // move interface and combat text
     m_Interface .Move();
+    m_CombatText.Move();
 }
 
 
@@ -974,7 +972,7 @@ void cGame::__HandleCollisions()
                     if(!pEnemy->ReachedDeath())
                     {
                         // 
-                        pBullet->Reflect(pEnemy, vIntersection.xy(), 20.0f);
+                        pBullet->Reflect(pEnemy, vIntersection.xy(), -pBullet->GetFlyDir());// 20.0f);
                     }
                 }
             }

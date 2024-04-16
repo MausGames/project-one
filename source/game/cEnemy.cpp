@@ -81,18 +81,18 @@ void cEnemy::Move()
         }
 
 
-
-        if(STATIC_ISVALID(g_pGame)) 
-        {
-            if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
-            {
-                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->BindEnemy(this);
-            }
-            else
-            {
-                if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->UnbindEnemy(this);
-            }
-        }
+        // TODO: better would be a shield which is only visible on bullet-hits (and tighter, maybe around silhouette)
+        //if(STATIC_ISVALID(g_pGame)) 
+        //{
+        //    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
+        //    {
+        //        if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->BindEnemy(this);
+        //    }
+        //    else
+        //    {
+        //        if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->UnbindEnemy(this);
+        //    }
+        //}
 
         //this->SetTexSize  (coreVector2(1.2f,1.2f));
         //this->SetTexOffset(coreVector2(0.0f, FMOD(coreFloat(Core::System->GetTotalTime()) * -0.25f, -1.0f)));

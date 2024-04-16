@@ -65,7 +65,7 @@ void cErrorMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.25f, 0.2f * I_TO_F(i))
+            STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F(i))
 
             STAGE_REPEAT(pPath1->GetTotalDistance())
 

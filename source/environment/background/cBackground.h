@@ -27,7 +27,7 @@
 // TODO: remove texture-sampling from lightning effect in moss
 // TODO: stomach should not create all vertices
 // TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
-// TODO: grass textures are duplicated (normal maps)
+// TODO: grass and blood textures are duplicated (especially normal maps)
 
 
 // ****************************************************************
@@ -373,10 +373,11 @@ private:
     coreUint8    m_iThunderIndex;       // 
 
     coreSoundPtr m_pRainSound;          // 
-    
-    
-    
-    cHeadlight m_Headlight;   // 
+
+    cHeadlight m_Headlight;             // 
+
+    coreBool m_bEnableLightning;        // 
+    coreBool m_bEnableHeadlight;        // 
 
 
 public:
@@ -387,9 +388,12 @@ public:
     ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED)
 
     // 
-    inline void SetRainDirection(const coreVector2& vDirection) {m_vRainDirection = vDirection; ASSERT(vDirection.IsNormalized())}
-    
-        inline cHeadlight* GetHeadlight() {return &m_Headlight;}
+    inline void SetRainDirection  (const coreVector2& vDirection) {m_vRainDirection   = vDirection; ASSERT(vDirection.IsNormalized())}
+    inline void SetEnableLightning(const coreBool     bEnable)    {m_bEnableLightning = bEnable;    m_fLightningDelay = 0.0f;}
+    inline void SetEnableHeadlight(const coreBool     bEnable)    {m_bEnableHeadlight = bEnable;}
+
+    // 
+    inline cHeadlight* GetHeadlight() {return &m_Headlight;}
 
 
 private:
@@ -431,28 +435,6 @@ private:
     // execute own routines
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
-    void __UpdateOwn     ()final;
-};
-
-
-// ****************************************************************
-// 
-class cCaveBackground final : public cBackground
-{
-private:
-    cHeadlight m_Headlight;   // 
-
-
-public:
-    cCaveBackground()noexcept;
-
-    DISABLE_COPY(cCaveBackground)
-    ASSIGN_ID_EX(52, "Cave", coreVector3(0.0f,0.0f,0.0f))
-
-
-private:
-    // execute own routines
-    void __RenderOwnAfter()final;
     void __UpdateOwn     ()final;
 };
 

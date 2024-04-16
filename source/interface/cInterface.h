@@ -44,12 +44,12 @@ private:
     // player view structure
     struct sPlayerView final
     {
-        coreObject2D aLife[INTERFACE_LIVES];   // player lives
-        coreObject2D aShieldBar[2];            // player shield bar (0 = background, 1 = foreground)
-        coreLabel    oShieldValue;             // player shield value
-        coreLabel    oScoreTotal;              // total score
-        coreLabel    oScoreMission;            // mission score
-        coreFlow     fSpin;                    // 
+        cGuiObject aLife[INTERFACE_LIVES];   // player lives
+        cGuiObject aShieldBar[2];            // player shield bar (0 = background, 1 = foreground)
+        cGuiLabel  oShieldValue;             // player shield value
+        cGuiLabel  oScoreTotal;              // total score
+        cGuiLabel  oScoreMission;            // mission score
+        coreFlow   fSpin;                    // 
 
         void Construct(const coreUintW iIndex);
     };
@@ -59,24 +59,24 @@ private:
     sPlayerView m_aView[INTERFACE_VIEWS];   // player views
     coreUint8   m_iNumViews;                // number of constructed player views
 
-    coreObject2D m_aBossHealthBar[2];       // boss health bar (0 = background, 1 = foreground)
-    coreLabel    m_BossHealthValue;         // boss health value
-    coreLabel    m_aBossTime[2];            // boss time (0 = seconds, 1 = deci-seconds)
-    coreFlow     m_fBossSpin;               // 
+    cGuiObject m_aBossHealthBar[2];         // boss health bar (0 = background, 1 = foreground)
+    cGuiLabel  m_BossHealthValue;           // boss health value
+    cGuiLabel  m_aBossTime[2];              // boss time (0 = seconds, 1 = deci-seconds)
+    coreFlow   m_fBossSpin;                 // 
 
-    coreLabel m_WaveName;                   // wave name
-    coreLabel m_aWaveTime[2];               // wave time (0 = seconds, 1 = deci-seconds)
+    cGuiLabel m_WaveName;                   // wave name
+    cGuiLabel m_aWaveTime[2];               // wave time (0 = seconds, 1 = deci-seconds)
 
-    coreObject2D m_BannerBar;               // banner background
-    coreLabel    m_aBannerText[4];          // banner labels
-    coreFloat    m_fBannerStart;            // animation start time
-    coreFloat    m_fBannerDuration;         // 
-    coreUint8    m_iBannerType;             // animation type (boss, mission, score)
+    cGuiObject m_BannerBar;                 // banner background
+    cGuiLabel  m_aBannerText[4];            // banner labels
+    coreFloat  m_fBannerStart;              // animation start time
+    coreFloat  m_fBannerDuration;           // 
+    coreUint8  m_iBannerType;               // animation type (boss, mission, score)
 
-    coreLabel m_aStoryText[2];              // 
+    cGuiLabel m_aStoryText[2];              // 
     coreFloat m_fStoryStart;                // 
 
-    coreObject2D m_Medal;                   // 
+    cGuiObject m_Medal;                     // 
 
     coreFlow m_fAnimation;                  // 
 

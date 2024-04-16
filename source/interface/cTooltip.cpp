@@ -44,7 +44,7 @@ void cTooltip::Render()
     m_bDisplay = false;   // # display once
 
     // render the background
-    this->coreObject2D::Render();
+    this->cGuiObject::Render();
 
     // render all active text lines
     for(coreUintW i = 0u; i < m_iNumLines; ++i)
@@ -59,7 +59,7 @@ void cTooltip::Move()
     if(!m_bDisplay) return;
 
     // move the background
-    this->coreObject2D::Move();
+    this->cGuiObject::Move();
 
     // move all active text lines
     for(coreUintW i = 0u; i < m_iNumLines; ++i)

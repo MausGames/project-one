@@ -19,8 +19,9 @@
 // TODO: wrap m_piData in function with RETURN_RESTRICT
 // TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
 // TODO: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
-// TODO: change all missions to STATIC_MEMORY (check memory)
+// TODO: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
 // TODO: check if TYPE_NEVO_BOMB still needed
+// TODO: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
 
 
 // ****************************************************************
@@ -58,6 +59,8 @@
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
 #define NEVO_TILES                  (16u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
+#define NEVO_ARROWS                 (21u)                                             // 
+#define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
@@ -65,9 +68,10 @@
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
-#define CALOR_CHAINS                (15u)                                             // 
+#define CALOR_CHAINS                (16u)                                             // 
 #define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
 #define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
+#define CALOR_CHAIN_CONSTRAINT      (46.0f)                                           // 
 
 
 // ****************************************************************
@@ -78,6 +82,11 @@
 #define STAGE_FINISH_NOW                       {this->SkipStage();}
 #define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
 
+#define STAGE_MAIN_2(...)     {static constexpr coreUint8 A[] = __VA_ARGS__; /* {0u, 1u} */}
+/*
+vor dem einfügen in den stage-container wird geprüft ob sie überhaupt hinzugefügt werden soll
+es muss definiert werden in welchen waves (nummern) eine stage hinzugefügt werden soll, bezogen auf die "vorbereitungen" und "abschlüsse"
+*/
 #define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
@@ -219,6 +228,8 @@ protected:
     uCollPlayerEnemyType  m_nCollPlayerEnemy;                  // 
     uCollPlayerBulletType m_nCollPlayerBullet;                 // 
     uCollEnemyBulletType  m_nCollEnemyBullet;                  // 
+
+    coreBool m_bRepeat;                                        // 
 
     static coreUint16  s_iTick;                                // 
     static coreFloat   s_fLifeTimePoint;                       // 
@@ -409,30 +420,38 @@ private:
 class cNevoMission final : public cMission
 {
 private:
-    cNautilusBoss  m_Nautilus;                       // 
-    cAmemasuBoss   m_Amemasu;                        // 
-    cLeviathanBoss m_Leviathan;                      // 
+    cNautilusBoss  m_Nautilus;                        // 
+    cAmemasuBoss   m_Amemasu;                         // 
+    cLeviathanBoss m_Leviathan;                       // 
 
-    coreBatchList m_Bomb;                            // 
-    cLodObject    m_aBombRaw  [NEVO_BOMBS_RAWS];     // 
-    coreBool      m_abBombGone[NEVO_BOMBS];          // 
+    coreBatchList m_Bomb;                             // 
+    cLodObject    m_aBombRaw  [NEVO_BOMBS_RAWS];      // 
+    coreBool      m_abBombGone[NEVO_BOMBS];           // 
 
-    coreBatchList m_Blast;                           // 
-    coreBatchList m_BlastLine;                       // 
-    coreObject3D  m_aBlastRaw  [NEVO_BLASTS_RAWS];   // 
-    coreFlow      m_afBlastTime[NEVO_BLASTS];        // 
+    coreBatchList m_Blast;                            // 
+    coreBatchList m_BlastLine;                        // 
+    coreObject3D  m_aBlastRaw  [NEVO_BLASTS_RAWS];    // 
+    coreFlow      m_afBlastTime[NEVO_BLASTS];         // 
 
-    coreBatchList m_Tile;                            // 
-    coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];     // 
-    coreFlow      m_afTileTime[NEVO_TILES];          // 
+    coreBatchList m_Tile;                             // 
+    coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];      // 
+    coreFlow      m_afTileTime[NEVO_TILES];           // 
 
-    cLodObject  m_Container;      // 
-    coreVector2 m_vForce;                            // 
-    coreVector2 m_vImpact;                           // 
-    coreBool    m_bClamp;                            // 
-    coreBool    m_bOverdraw;                         // 
+    coreBatchList m_Arrow;                            // 
+    coreObject3D  m_aArrowRaw   [NEVO_ARROWS_RAWS];   // 
+    const cShip*  m_apArrowOwner[NEVO_ARROWS];        // 
+    coreUint8     m_aiArrowDir  [NEVO_ARROWS];        // 
 
-    coreFlow m_fAnimation;                           // animation value
+    coreObject3D m_Beam;                              // 
+    coreObject3D m_BeamShelter;                       // 
+
+    cLodObject  m_Container;                          // 
+    coreVector2 m_vForce;                             // 
+    coreVector2 m_vImpact;                            // 
+    coreBool    m_bClamp;                             // 
+    coreBool    m_bOverdraw;                          // 
+
+    coreFlow m_fAnimation;                            // animation value
 
 
 public:
@@ -453,6 +472,10 @@ public:
     // 
     void EnableTile (const coreUintW iIndex, const coreUintW iDimension);
     void DisableTile(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableArrow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
+    void DisableArrow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void EnableContainer (const coreVector2& vPosition);

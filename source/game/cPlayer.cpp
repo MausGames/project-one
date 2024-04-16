@@ -246,6 +246,9 @@ void cPlayer::Move()
 
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        coreVector2 vNewPos = this->GetPosition().xy();
+        coreVector3 vNewOri = coreVector3(0.0f,0.0f,1.0f);
+
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
             coreVector2 vNewDir = this->GetDirection().xy();
@@ -276,21 +279,8 @@ void cPlayer::Move()
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
-            coreVector2 vNewPos = this->GetPosition().xy();
-
-            // 
-            if(this->IsRolling())
-            {
-                // roll the ship
-                const coreFloat fSpeed = 50.0f + LERPB(25.0f, 0.0f, m_fRollTime);
-                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed * m_fSpeed);
-            }
-            else
-            {
-                // move the ship
-                const coreFloat fSpeed = CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f;
-                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed * m_fSpeed);
-            }
+            // move the ship
+            vNewPos += m_pInput->vMove * (Core::System->GetTime() * this->CalcMoveSpeed());
 
             // apply external forces
             if(!m_vForce.IsNull())
@@ -306,20 +296,23 @@ void cPlayer::Move()
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
-            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy());// * RCP(Core::System->GetTime()) / 60.0f;
-            coreVector3 vOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(Core::System->GetTime() * FRAMERATE_MIN + CORE_MATH_PRECISION);
+            vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
+        }
 
+        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
+        {
             // 
             if(this->IsRolling())
             {
                 const coreFloat fAngle = LERPB(0.0f, 4.0f*PI, m_fRollTime);
                 const coreFloat fSide  = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), UnpackDirection(m_iRollDir)));
-                vOri *= coreMatrix4::RotationAxis(fAngle * fSide, this->GetDirection()).m123();
+                vNewOri *= coreMatrix4::RotationAxis(fAngle * fSide, this->GetDirection()).m123();
             }
 
             // set new position and orientation
             this->SetPosition   (coreVector3(vNewPos, 0.0f));
-            this->SetOrientation(vOri);
+            this->SetOrientation(vNewOri);
         }
 
         // normalize collision size
@@ -359,7 +352,7 @@ void cPlayer::Move()
 
         // 
         m_Dot.SetPosition(this->GetPosition());
-        m_Dot.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_DOT_SIZE * m_Dot.GetAlpha()   * 1.1f);
+        m_Dot.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_DOT_SIZE * m_Dot.GetAlpha()       * 1.1f);
         m_Dot.Move();
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
@@ -780,6 +773,16 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
     m_Exhaust.SetDirection(this->GetDirection());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();
+}
+
+
+// ****************************************************************
+// 
+coreFloat cPlayer::CalcMoveSpeed()const
+{
+    // 
+    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f);
+    return m_fSpeed * fModifier;
 }
 
 
