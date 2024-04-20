@@ -19,18 +19,20 @@ void FragmentMain()
 
 #if defined(_P1_CHROMA_)
 
+    // 
     for(int i = 0; i < 3; ++i)
     {
     vec2 v2TexCoord = v_av2TexCoord[1] + vec2(u_v4Color.a * float(i - 1));
 
 #else
 
+    // 
     vec2 v2TexCoord = v_av2TexCoord[1];
 
 #endif
 
-    //float fFactor = 200.0;
-    //vec2 v2TexCoord2 = round(v2TexCoord * fFactor) / fFactor; // [PX]
+    //const float fFactor = 200.0;
+    //vec2 v2TexCoord2 = round(v2TexCoord * fFactor) / fFactor;   // [PX]
 
 #if defined(_P1_DISTORTION_)
 
@@ -46,18 +48,18 @@ void FragmentMain()
         const float B = 128.0;
     #endif
     if(any(bvec4(lessThan(v2Distortion, vec2(A / 255.0)), greaterThan(v2Distortion, vec2(B / 255.0)))))
+    {
         v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.4, 0.4);
+    }
 
 #endif
 
     // lookup textures
-    vec4 v4Foreground  = coreTextureBase2D(0, v2TexCoord); // [PX]
+    vec4 v4Foreground  = coreTextureBase2D(0, v2TexCoord);       // [PX] v2TexCoord2
     vec3 v3Environment = coreTextureBase2D(1, v2TexCoord).rgb;
     vec3 v3Glow        = coreTextureBase2D(2, v2TexCoord).rgb;   // # low-res
-    
-    
-   
-  //  v4Foreground.rgb *= mix(1.05, 0.85, max(fract(v2TexCoord.x * fFactor + 0.5), 1.0 - fract(v2TexCoord.y * fFactor + 0.5))); // [PX]
+
+    //v4Foreground.rgb *= mix(1.05, 0.85, max(fract(v2TexCoord.x * fFactor + 0.5), 1.0 - fract(v2TexCoord.y * fFactor + 0.5)));   // [PX]
 
 #if !defined(_P1_GLOW_)
 
@@ -66,16 +68,17 @@ void FragmentMain()
 
 #endif
 
-    // vignetting 
+    // apply vignetting effect
     float v1Intensity = 1.0 - u_v4Color.b * coreLengthSq(v_v2CenterCoord);
 
     // draw blend between all textures (glow only on environment for high contrast)
     vec3 v3Blend = ((max((v3Environment - vec3(0.06)) * v1Intensity - vec3(coreLuminance(v3Glow) * 1.5), 0.0) + v3Glow) * (1.0 - v4Foreground.a) + v4Foreground.rgb * 1.05);
 
+    // 
 #if defined(_P1_TRANSPARENT_)
     float v1Alpha = max(coreLuminance(v3Environment), v4Foreground.a);
 #else
-    float v1Alpha = 1.0;
+    const float v1Alpha = 1.0;
 #endif
 
     // 
@@ -85,22 +88,25 @@ void FragmentMain()
 
 #if defined(_P1_CHROMA_)
 
+    // 
     v4Intermediate[i] = v3Final[i];
     v4Intermediate.a  = v1Alpha;
     }
 
 #else
 
+    // 
     v4Intermediate.rgb = v3Final;
     v4Intermediate.a   = v1Alpha;
 
 #endif
 
-    gl_FragColor.rgb = coreSaturate(v4Intermediate.rgb + vec3(coreDither() / 50.0));
-    gl_FragColor.a   = v4Intermediate.a;
+    // 
+    gl_FragColor = vec4(coreSaturate(v4Intermediate.rgb + vec3(coreDither() / 50.0)), v4Intermediate.a);
 
 #if defined(_P1_DEBUG_)
 
+    // 
     #define DEBUG_LINE(a,v,p) if((v_av2TexCoord[1].a > (v - 0.001)) && (v_av2TexCoord[1].a < (v + 0.001))) gl_FragColor.rgb = mix(vec3(0.0, 1.0, 0.0), gl_FragColor.rgb, p);
 
          DEBUG_LINE(x, 0.25,  0.6) else DEBUG_LINE(y, 0.25,  0.6)
@@ -113,20 +119,3 @@ void FragmentMain()
 
 #endif
 }
-
-
-//v3Environment.rgb = vec3(1.0 - coreLuminance(v3Environment.rgb));
-//v3Environment.rgb = mix(v3Environment.rgb, vec3(coreLuminance(v3Environment.rgb)), u_v4Color.r);
-
-//if(v3Gray.r != 0.0)
-//{
-//    vec3 v3Sepia = vec3(dot(v3Color, vec3(0.299, 0.587, 0.114))) + vec3(0.191, -0.054, -0.221);
-//    gl_FragColor = vec4(mix(v3Color, v3Sepia, u_v4Color.r), 1.0);
-//
-//    //gl_FragColor = vec4(mix(v3Color, v3Gray, 0.7), 1.0);
-//}
-//gl_FragColor = vec4(mix(v3Color, v3Gray, step(6.0, dot(v3Color, vec3(1.0, 10.0, 10.0)))), 1.0);
-
-//gl_FragColor = vec4(vec3(1.0 - v3Gray.x), 1.0);
-
-//float v1Intensity = max(1.0 - mix(u_v4Color.b, u_v4Color.a, step(0.5, v_av2TexCoord[1].x)) * coreLengthSq(v_av2TexCoord[1] - vec2(0.5)), 0.0);

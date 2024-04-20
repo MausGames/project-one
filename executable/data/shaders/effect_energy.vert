@@ -25,12 +25,6 @@ void VertexMain()
 {
 #if defined(_P1_FLAT_)
 
-    //mat3 m3Test = transpose()
-//
-    //vec3 v3Base = (a_v3RawPosition * u_v3Size);
-    //vec3 v3BasePosition = coreQuatApply(u_v4Rotation, v3Base * vec3(1.0, 1.0, u_v4Color.x));
-
-
     // transform position (and make flat)
     vec3 v3BasePosition = coreQuatApply(u_v4Rotation, a_v3RawPosition * u_v3Size);
     vec4 v4NewPosition  = vec4(v3BasePosition * vec3(1.0, 1.0, 0.0) + u_v3Position, 1.0);

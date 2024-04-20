@@ -21,6 +21,7 @@ varying float v_v1Strength;   // outline intensity
 
 void VertexMain()
 {
+    // 
 #if defined(_P1_THICK_)
     const float v1Thickness = 0.8;
 #else
@@ -31,9 +32,6 @@ void VertexMain()
     vec3 v3BasePosition = coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * v1Thickness));
 
 #if defined(_P1_FLAT_)
-
-    // (and make flat) 
-    gl_Position = u_m4ViewProj * vec4(v3BasePosition * vec3(1.0, 1.0, 0.0) + u_v3Position, 1.0);
 
     // 
 #if defined(_P1_BULLET_)
@@ -46,6 +44,9 @@ void VertexMain()
     const float v1Depth = -1.0;
 #endif
 
+    // (and make flat) 
+    gl_Position = u_m4ViewProj * vec4(v3BasePosition * vec3(1.0, 1.0, 0.0) + u_v3Position, 1.0);
+
     // 
     gl_Position.z -= (v1Depth * 0.0012 - 0.0006) * gl_Position.w;
 
@@ -54,7 +55,7 @@ void VertexMain()
     // 
     gl_Position = u_m4ViewProj * vec4(v3BasePosition + u_v3Position, 1.0);
 
-    // increase depth to draw behind base object  
+    // increase depth to draw behind base object
     gl_Position.z += 0.4 * gl_Position.w;
 
 #endif
@@ -66,6 +67,6 @@ void VertexMain()
 
 #endif
 
-
-    gl_Position.z = clamp(gl_Position.z, -gl_Position.w, gl_Position.w);   // so outlines can be rendered for near objects in Eigengrau
+    // make sure outlines can be rendered for close objects in Eigengrau
+    gl_Position.z = clamp(gl_Position.z, -gl_Position.w, gl_Position.w);
 }

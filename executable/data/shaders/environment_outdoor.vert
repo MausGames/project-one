@@ -44,6 +44,7 @@ void LerpLightingTransform(const in vec3 v3Position, const in float v1Lerp)
     v_v3TangentCam   = TBN * u_v3CamPosition;
 }
 
+
 void VertexMain()
 {
 #if defined(CORE_GL_gpu_shader4)

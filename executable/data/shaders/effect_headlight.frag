@@ -12,7 +12,5 @@ void FragmentMain()
 {
     // 
     float v1Value = coreTextureBase2D(0, v_av2TexCoord[0]).r;
-
-    // 
     gl_FragColor  = vec4(vec3(0.0), (1.0 - v1Value) * u_v4Color.a);
 }

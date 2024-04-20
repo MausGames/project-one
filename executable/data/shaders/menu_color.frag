@@ -10,6 +10,6 @@
 
 void FragmentMain()
 {
-    // 
+    // bam, just color
     gl_FragColor = u_v4Color;
 }

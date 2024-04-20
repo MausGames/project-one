@@ -11,7 +11,7 @@
 
 
 // constant values
-const float c_v1TileRate = 1.4;    // 
+const float c_v1TileRate = 1.4;   // 
 
 // shader output
 varying      vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)

@@ -11,7 +11,7 @@
 
 void VertexMain()
 {
-    // 
+    // transform position and texture coordinates
     gl_Position      = coreObject3DPositionLow();
     v_av2TexCoord[0] = coreObject3DTexCoordLow();
 }

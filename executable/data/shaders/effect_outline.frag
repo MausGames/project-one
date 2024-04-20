@@ -23,7 +23,7 @@
 
 void FragmentMain()
 {
-    // 
+    // select base color
 #if defined(_P1_LIGHT_)
     const vec3 v3Base = vec3(0.9);
 #else

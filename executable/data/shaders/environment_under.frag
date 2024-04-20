@@ -21,9 +21,6 @@ void FragmentMain()
     // lookup normal map
     vec3 v3TexNormal = coreTexture2D(0, v_av2TexCoord[0]).xyz;
          v3TexNormal = normalize(v3TexNormal * 2.0 - 1.0);
-         
-         
-   // float v1Depth       = coreTextureBase2D(3, v2ScreenCoord).r;
 
     // set distortion vector
     vec2 v2Distortion = v3TexNormal.xy * 0.015 * DistortionStrength(v2ScreenCoord);
@@ -33,5 +30,4 @@ void FragmentMain()
 
     // draw final color
     gl_FragColor = vec4(mix(c_v3Blue, v3Refraction, 0.78), 1.0);
-    //gl_FragColor = vec4(vec3(smoothstep(0.62, 0.75, v1Depth)), 1.0);
 }

@@ -19,7 +19,7 @@ varying vec2 v_v2Border;            //
 void FragmentMain()
 {
     // lookup textures
-    vec3 v3TexNormal = coreTexture2D(1, v_av2TexCoord[1]).xyz;   // TODO 1: change (tex-coord?) back to 0, 1 is only needed for blocks, make own block shader with single-channel color
+    vec3 v3TexNormal = coreTexture2D(1, v_av2TexCoord[1]).xyz;   // TODO 1: change tex-coord back to 0, 1 is only needed for blocks, make own block shader with single-channel color
     vec3 v3TexColor  = coreTexture2D(0, v_av2TexCoord[1]).rgb;   // 
 
 #if (_P1_SHADOW_) == 1
@@ -65,7 +65,7 @@ void FragmentMain()
 
 #else
 
-    // ingore shadow map
+    // ignore shadow map
     const float v1Light = 1.0;
 
 #endif

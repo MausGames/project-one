@@ -12,11 +12,11 @@
 
 void VertexMain()
 {
-
-    vec4 v4NewPosition  = vec4(coreObject3DTransformRaw(), 1.0);
-    
     // 
-    gl_Position      = u_m4ViewProj     * v4NewPosition;
+    vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
+
+    // transform position and texture coordinates
+    gl_Position      = u_m4ViewProj * v4NewPosition;
     v_av2TexCoord[0] = coreObject3DTexCoordRaw();
 
     // transform lighting properties

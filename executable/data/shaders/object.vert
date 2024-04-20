@@ -32,9 +32,7 @@ void VertexMain()
 
     // 
     vec3 v3WavePos    = a_v3RawPosition;
-         //v3WavePos.y += 0.12 * sin(v3WavePos.z * 2.0 + u_v3Position.y * 0.3125 * PI - u_v1Time) * min(v3WavePos.z, 1.0);
          v3WavePos.y += 0.22 * sin(v3WavePos.z * 2.0 + u_v3Position.y * 0.3125 * PI - u_v1Time) * clamp(v3WavePos.z * 1.0 - 1.0, 0.0, 1.0);
-         //v3WavePos.y += 0.22 * sin(u_v3Position.y * 0.3125 * PI - u_v1Time) * clamp(v3WavePos.z * 0.8 - 1.0, 0.0, 1.0);
 
     // 
     vec4 v4NewPosition  = vec4(coreObject3DTransform(v3WavePos), 1.0);
@@ -64,7 +62,7 @@ void VertexMain()
 #if defined(_CORE_OPTION_INSTANCING_)
     float v1Blink = a_v1Blink;
 #else
-    float v1Blink = u_v1Blink;   // TODO 1: put into fragment shader 
+    float v1Blink = u_v1Blink;   // TODO 1: put into fragment shader
 #endif
 
     // transform lighting properties

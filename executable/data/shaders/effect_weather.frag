@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////
 
 
-// 
+// shader input
 varying vec2 v_av2OverlayCoord[_P1_OVERLAYS_];   // 
 
 
@@ -25,6 +25,7 @@ vec4 GetMultipleTextures()
     // 
     return v4Output;
 }
+
 
 void FragmentMain()
 {

@@ -16,13 +16,13 @@
 #endif
 
 // constant values
-const vec3  c_v3Blue         = vec3(0.85, 0.85, 0.85) * 0.9 + vec3(0.0, 0.43, 0.69) * 0.1;   // default surface color
-const float c_v1ThreshIgnore = 0.6980;   // 
-const float c_v1ThreshTrace  = 0.6962;   // 
-const float c_v1MaxHeight    = 20.0;     // 
+const vec3  c_v3Blue         = vec3(0.85) * 0.9 + vec3(0.0, 0.43, 0.69) * 0.1;   // default surface color
+const float c_v1ThreshIgnore = 0.6980;                                           // when to discard rendering (depth)
+const float c_v1ThreshTrace  = 0.6962;                                           // when to use ray-tracing   (depth)
+const float c_v1MaxHeight    = 20.0;                                             // ice height value (needs sync with iterations and ignore-threshold)
 
 // shader input
-flat varying vec4 v_v4Lighting;          // lighting properties (xyz = light direction, w = height offset for smooth shores)
+flat varying vec4 v_v4Lighting;                                                  // lighting properties (xyz = light direction, w = height offset for smooth shores)
 
 
 float GetReflFactor(const in vec3 v3ReflNormal, in vec3 v3BumpNormal)
@@ -37,21 +37,25 @@ float GetReflFactor(const in vec3 v3ReflNormal, in vec3 v3BumpNormal)
     return v1ReflFactor;
 }
 
+
 vec3 GetBumpNormal(const in vec2 v2Offset)
 {
     // lookup normal map
     return (coreTexture2D(0, v_av2TexCoord[0] + v2Offset).xyz) * 2.0 - 1.0;
 }
 
+
 float GetDepthValue(const in vec2 v2ScreenCoord)
 {
 #if defined(GL_ES)
 
+    // 
     float A = u_v4Resolution.z;
     return (coreTextureBase2D(3, v2ScreenCoord + vec2(  A, 0.0)).r +
             coreTextureBase2D(3, v2ScreenCoord + vec2( -A, 0.0)).r +
             coreTextureBase2D(3, v2ScreenCoord + vec2(0.0,   A)).r +
             coreTextureBase2D(3, v2ScreenCoord + vec2(0.0,  -A)).r) * 0.25;
+
 #else
 
     // 
@@ -59,6 +63,7 @@ float GetDepthValue(const in vec2 v2ScreenCoord)
 
 #endif
 }
+
 
 void FragmentMain()
 {
@@ -84,6 +89,7 @@ void FragmentMain()
 
     if(v1Depth > c_v1ThreshTrace)
     {
+        // 
     #if (_CORE_QUALITY_ >= 1)
         const float v1StepSize = 3.0;
     #else
@@ -142,7 +148,8 @@ void FragmentMain()
     // set distortion vector and lookup reflection texture
     vec2 v2Distortion = v3BumpNormal.xy * 0.012 * DistortionStrength(v2ScreenCoord);
     vec3 v3Reflection = coreTextureBase2D(1, v2ScreenCoord + v2Distortion).rgb;
-    
+
+    // 
     float v1Border = (1.0 - smoothstep(-0.001, 0.0025, (c_v1ThreshTrace - v1Depth) + 0.03 * (v2Distortion.x + v2Distortion.y))) * max(1.0 - 0.05 * v1Height, 0.0) + max(v1BumpFactor - 0.7, 0.0);
 
     // adjust depth value
@@ -156,6 +163,5 @@ void FragmentMain()
     v3Reflection = mix(c_v3Blue * v1Intensity, v3Reflection, max(dot(v3BumpNormal, v3MathViewDir) - 0.4, 0.0)) + vec3(v1ReflFactor);
 
     // draw final color
-    //float v1Light = (0.85 + 0.15 * v2ScreenCoord.x);
-    gl_FragColor  = vec4(mix(min(mix(v3Refraction, v3Reflection, v1Depth + 0.2) * (v1BumpFactor * 0.1 + 0.95), 1.0), vec3(1.0), v1Border), 1.0);
+    gl_FragColor = vec4(mix(min(mix(v3Refraction, v3Reflection, v1Depth + 0.2) * (v1BumpFactor * 0.1 + 0.95), 1.0), vec3(1.0), v1Border), 1.0);
 }
