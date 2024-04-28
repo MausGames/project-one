@@ -379,7 +379,7 @@ void cMenuNavigator::Update()
 
             const sMenuEntry& oEntry = m_aObject.at(m_pCurObject);
 
-            if(m_pCurObject && cMenuNavigator::IsValid(m_pCurObject))   // TODO 1: für alles im loop ?
+            if(m_pCurObject && cMenuNavigator::IsValid(m_pCurObject))   // TODO 1: for everything in the loop ?
             {
                 if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS))
                 {
@@ -421,7 +421,7 @@ void cMenuNavigator::Update()
             {
                 coreObject2D* pNewObject = NULL;
 
-                // TODO 1: erlaub schräge eingabe hier, für arcade input
+                // TODO 1: allow diagonal input here, for arcade input
 
                 if(m_aDynamic.count(m_pCurObject)) m_aDynamic.at(m_pCurObject)(m_pCurObject, iPack);
                 switch(iPack)

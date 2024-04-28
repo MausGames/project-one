@@ -20,7 +20,7 @@
 // TODO 4: check if ForEachBullet or ForEachBulletTypes is faster, and adjust all use-cases accordingly (also FindBullet* and GetNumBullets*)
 // TODO 4: grow bullet code could be moved out of NevoMission to a GlobalMove function
 // TODO 3: implement reserve-function, called before large bullet-requests >=100 (same for enemies, for every squad?)
-// TODO 3: player bullets in der luft überlagern sich komisch (transparenz von alten geschossen überdecken neue geschosse) und eigene outlines werden manchmal drüber gerendert
+// TODO 3: player bullets in the air (when jumping) overlap each other strangely (transparency of old bullets cover new bullets) and own outlines are sometimes rendered above
 
 
 // ****************************************************************
@@ -1294,7 +1294,7 @@ template <typename T> void cBulletManager::ReserveBullet(const coreUintW iNumBul
     this->PrefetchBullet<T>();
     sBulletSet<T>* pSet = d_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
 
-    if(pSet->apEnemyPool.size() < iNumBullets) nicht richtig für bullets
+    if(pSet->apEnemyPool.size() < iNumBullets) not correct for bullets
     {
         const coreUintW iNumPot = coreMath::CeilPot(iNumBullets);
 

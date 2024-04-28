@@ -214,8 +214,8 @@ void cHelper::Resurrect(const coreBool bSmooth)
     
     
     
-    this->SetAlpha(1.0f);   // alpha wert kann nach kill noch verändert werden
-    // achtung, hidden wird vor resurrect gesetzt
+    this->SetAlpha(1.0f);   // alpha value can still be changed after kill
+    // caution, hidden will be set before resurrection
 
     // 
     if(bSmooth)

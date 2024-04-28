@@ -301,10 +301,10 @@ void cMenu::Move()
     cMenuNavigator::GlobalUpdate();
 
     // 
-    if(!Core::Manager::Resource->IsLoading())   // TODO 1: hier wegen sync mit environment-change   
+    if(!Core::Manager::Resource->IsLoading())   // TODO 1: here due to sync with environment-change
         m_TransitionTime.Update(1.0f);
 
-    //     damit nicht dinge angeklickt werden (sowohl maus als auch controller)(switch-boxen verändern) während sie noch nicht sichtbar sind
+    //     to prevent things from being clicked (both mouse and controller) (e.g. changing switch boxes) while they are not yet visible
     if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO))
         Core::Input->ClearMouseButtonAll();
 

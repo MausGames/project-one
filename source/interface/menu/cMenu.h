@@ -11,7 +11,7 @@
 #define _P1_GUARD_MENU_H_
 
 // TODO 3: unload fonts currently not used (e.g. from score-menu)
-// TODO 3: options menu: highlight changed options mit sternchen oder eigenem icon (damit text nicht immer erneuert werden muss) (oder farb-änderung)
+// TODO 3: options menu: highlight changed options with star or own icon (so that text doesn't always have to be renewed) (or color change)
 // TODO 3: options menu: 15 second on video change, yes, no
 // TODO 5: display unattached joysticks and joystick names somehow
 // TODO 3: display gamepad/device name in options description
@@ -21,24 +21,22 @@
 // TODO 3: load replay number only on first entry, load headers async on demand, handle changes during runtime
 // TODO 4: locked config input buttons are set with dummy values before getting locked
 // TODO 2: [MF] handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
-// TODO 3: leichtes wackeln des texts wenn sich switch-box ändert
-// TODO 3: welle, wenn button/switchbox gedrückt wird
+// TODO 3: add small text movement if switch-box changes
 // TODO 1: click-wave when clicking on active button or tab (not for switch-box), what about stage tile ?
-// TODO 3: anderes: ganzes menü wackelt/shifted wenn man tab ändert, tabs verändern höhe, buttons ändern größe bei selection
-// TODO 3: menu sound response is super-confused with gamepad-input, related to having fokus on multiple sub-menus (unnecessary button-fokus sound -> catch initial focusing), and being able to focus disabled buttons (active tab, save button)
+// TODO 3: whole menu wobbles/shifts when you change tab
+// TODO 3: menu sound response is super-confused with gamepad-input, related to having focus on multiple sub-menus (unnecessary button-fokus sound -> catch initial focusing), and being able to focus disabled buttons (active tab, save button)
 // TODO 3: de-couple interface-class and display in options when game is not running (for HUD type option)
-// TODO 3: wenn zwischen borderless und windowed gewechselt wird mit Desktop resolution, wird im size-change-event das 0:0 überschrieben und der save-button bleibt aktiv
-// TODO 3: wenn im windowed mode die resolution zu groß ist, wird sie geclamped und der save-button bleibt aktiv
+// TODO 3: if you switch between borderless and windowed with Desktop resolution, the 0:0 is overwritten in the size change event and the save button remains active
+// TODO 3: if the resolution is too big in windowed mode, it will be clamped and the save button remains active
 // TODO 4: why do I have ChangeLanguage for switch-boxes, what does it do, should I add it to the engine instead?
 // TODO 4: switch more menus to SetHighlightColor, which is more efficient
-// TODO 2: this->ChangeSurface(XXX, 0.0f) mit timeless wrappen
+// TODO 2: this->ChangeSurface(XXX, 0.0f) wrap with timeless
 // TODO 4: remove unnecessary tiles, medals, and others related to the missing Ater segments (and possible second bosses everywhere else)
 // TODO 1: show mission summary for Ater before arcade summary on ?
 // TODO 1: show player separation for arcade summary
 // TODO 3: add auto-scroll for armory-segment-switch, for shoulder-buttons and arrow-keys
 // TODO 2: latam language, text in summary menu is etwas zu nah beinander
-// TODO 1: alle menü rendering orders optimieren, speziell für shader, speziell im game-menü
-// TODO 3: check render-reihenfolge (bind-object) in ALLEN menüs und view-boxen
+// TODO 1: optimize all menu render orderings, especially for shaders, especially in the game menu (also bind-object, in ALL menus and view-boxes)
 // TODO 1: (remove mission page in armory)
 // TODO 3: get rid of the additional interface object in config-menu
 // TODO 3: when switching resolution (AA change, engine reset), the next mouse click is not recognized (no press event is coming from SDL, only the release event) (nicht immer!)

@@ -79,23 +79,22 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // force rotation
-    // enemies spawn against turn-direction at beginning, because player stays away from them, and then is already positioned for the first enemy of the next sub-stage
-    // enemies spawning against shoot-direction feels too cumbersome
-    // enemies are aligned with arrow pattern (if possible)
-    // player-position can be controlled a lot here, make sure to have proper player<>enemy placement
-    // plate movement is opposite to enemy movement, otherwise annoying attack-bubbles may appear (can be reduced by increasing speed of enemies, but still annoying)
-    // enemies flying perpendicular to shoot direction also need to move near the border, to make switching directions necessary
-    // during moving plates, enemies on the side either still is bad (you can just mow them down), and moving too (too confusing, you crash all the time)
-    // finaler ansturm ist kein problem, wenn man weiß von welcher seite er anfängt
-    // TASK: alle verirrten gegner zerstören
+    // - enemies spawn against turn-direction at beginning, because player stays away from them, and then is already positioned for the first enemy of the next sub-stage
+    // - enemies at the start spawning against shoot-direction feels too cumbersome
+    // - enemies are aligned with arrow pattern (if possible)
+    // - player-position can be controlled a lot here, make sure to have proper player<>enemy placement
+    // - plate movement is opposite to enemy movement, otherwise annoying attack-bubbles may appear (can be reduced by increasing speed of enemies, but still annoying) (not at the very end though /shrug)
+    // - enemies flying perpendicular to shoot direction also need to move near the border, to make switching directions necessary
+    // - during moving plates, enemies on the side either still is bad (you can just mow them down), and moving into shoot direction too (too confusing, you crash all the time)
+    // TASK: destroy all stray enemies
     // TASK: try to turn into the wrong direction
     // ACHIEVEMENT: never shoot to the left (in regular game rotation)
-    // TODO 1: hard mode: alles ist um 90 grad gedreht! (color/dir changes every X.X seconds) -> but adjust affected enemies in double-plate sub-stages to be meaningful in both types    (check if achievement is still correct)
+    // TODO 1: hard mode: everything is turned by 90 degrees! (color/dir changes every X.X seconds) -> but adjust affected enemies in double-plate sub-stages to be meaningful in both types (check if achievement is still correct)
     // TODO 1: hard mode: maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
-    // TODO 1: effect (+ sound) when getting forced and unforced ? (also for boss) (not permanent, but when entering/exiting)
-    // TODO 5: badge: kugerl bei rush-gruppe einsammeln
-    // TODO 5: badge: nicht zu lange auf einer platte; hin und her N times; timer für blau, etc.
-    // TODO 5: badge: another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge (oder für boss)
+    // TODO 1: effect (+ sound) when getting forced and unforced ? (also for boss) (not permanent, but when entering/exiting) (was quite annoying in a quick test)
+    // TODO 5: badge: collect stuff in the rush wave
+    // TODO 5: badge: not on one plate for too long; back and forth N times; timer for blue, etc.
+    // TODO 5: badge: another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge (or for the boss)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -570,18 +569,17 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // screen rotation and rotated shooting
-    // rotation at the start needs proper introduction, feedback and time, so the player can get accustomed
-    // on further rotation-changes waiting time can be reduced to keep total time low, player understands already
-    // rotation should not be too fast, the player can lose control, but not too slow, to make the mechanic significant and interesting
-    // bullets can be made unaffected by rotation, but does not really feel better, bullets rotating with the background created better visual clusters
-    // make sure to adjust start-time from diagonally flying enemies
-    // both 4er groups coming from each side spawn 1243, which is a bit more interesting than 1234
-    // first circle group shows that there are enemies which do not shoot, to make second non-shooting circle group in a more intense situation less surprising
-    // shooting enemies coming fro multiple different sides was nearly impossible to implement, it is just too overwhelming (the double-diagonal group is an exception, because they merge into a single shoot-direction)
-    // very spread-out linear-flying shooting enemies were also too overwhelming, every shooting group needs a single point of attack to compensate for the rotation difficulty
-    // still circle group should not be too far on the outside, otherwise it is too annoying shooting them down, but not too much in the center, as it gets too easy
-    // linear flying enemies and 4 corner enemies at the end both work by evading bullets which get affected by the rotation, while the enemies stand still, which creates some kind of maelstrom (similar to r-type leaver wave, or messier boss)
-    // 4 corner enemies (both groups) are in blind spot on purpose
+    // - rotation at the start needs proper introduction, feedback and time, so the player can get accustomed
+    // - on further rotation-changes waiting time can be reduced to keep total time low, player understands already
+    // - rotation should not be too fast, the player can lose control, but not too slow, to make the mechanic significant and interesting
+    // - bullets can be made unaffected by rotation, but does not really feel better, bullets rotating with the background created better visual clusters
+    // - make sure to adjust start-time from diagonally flying enemies
+    // - both 4-enemy groups coming from each side spawn 1243, which is a bit more interesting than 1234
+    // - shooting enemies coming fro multiple different sides was nearly impossible to implement, it is just too overwhelming (the double-diagonal group is an exception, because they merge into a single shoot-direction)
+    // - very spread-out linear-flying shooting enemies were also too overwhelming, every shooting group needs a single point of attack to compensate for the rotation difficulty
+    // - still circle group should not be too far on the outside, otherwise it is too annoying shooting them down, but not too much in the center, as it gets too easy
+    // - linear flying enemies and 4 corner enemies at the end both work by evading bullets which get affected by the rotation, while the enemies stand still, which creates some kind of maelstrom (similar to r-type leaver wave, or Messier boss)
+    // - 4 corner enemies (both groups) are in blind spot on purpose
     // TASK: shoot multiple times on the helper, at specific intervals
     // TASK: move into all 4 invisible corners
     // TASK EXTRA: kill a certain group of enemies in order
@@ -1197,21 +1195,21 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // slowdown areas
-    // bubble works as shield to hide from attacks
-    // side-moving sphere works with continue attack, but not with wave-attack, front-moving sphere never works, round-moving sphere not sure
-    // first group shows the speed-reduction without attacks, next one with attacks
-    // enemies should attack from the opposite side in coop, so target-player can hide behind bubble
-    // enemies in matrix wave should already get a bit into middle without slow-down (which highlights the effect), except on the side where player will likely be
-    // sobald speedup-bubble erscheint kommen 4 gegner gleichzeitig und können schnell getötet werden, das ist ok, das problem für den spieler sind die geschosse die dann schon auf dem weg sind
-    // zwei gegner hintereinander sollten nicht von der selben stelle spawnen, durch die zeit-verzögerten bullets sind die gleich wieder tot weil der nachhall so lang ist
-    // zwei gegner gleichzeitig mit weitem wellen-angriff funktioniert nicht, die geschosse überlagern sich zu sehr, oder bei shift kommen die angriffe zu oft
-    // bei finalen wellen-angriff gegnern müssen die schon 1 mal schießen bevor sie zerstört werden können
+    // - bubble works as shield to hide from attacks
+    // - side-moving sphere works with continue attack, but not with wave-attack, front-moving sphere never works, round-moving sphere not sure
+    // - first group shows the speed-reduction without attacks, next one with attacks
+    // - enemies should attack from the opposite side in coop, so target-player can hide behind bubble
+    // - enemies in matrix wave should already get a bit into middle without slow-down (which highlights the effect), except on the side where player will likely be
+    // - as soon as the speedup bubble appears, 4 enemies arrive at the same time and can be killed quickly, that's ok, the problem for the player is the bullets that are already on their way
+    // - two enemies in a row shouldn't spawn from the same place, because the time-delayed bullets kill them straight away as the delay is so long
+    // - two enemies at the same time with a wide wave attack doesn't work, the projectiles overlap too much, or with shift the attacks come too often
+    // - during the final wave attack, enemies should shoot once before they can be destroyed
     // TASK: collect fast objects, which can only be caught within slowdown bubble
     // TASK: graze along the enemy bullets
     // ACHIEVEMENT: destroy all enemies while you are slowed down
     // TODO 1: hardmode: slowdown/safe field follows player
-    // TODO 1: hardmode: effekt is invertiert (entweder seiten vertauscht, oder speed-up in bubble, oder speed-up allgemein und bubble macht es normal)
-    // TODO 1: effekt um verlangsamte objekte herum (schein)
+    // TODO 1: hardmode: effect is inverted (either sides swapped, or speed-up in bubble, or speed-up in general and bubble makes it normal)
+    // TODO 1: effect around slowed objects (glow)
     // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble (?)
     // TODO 5: badge: go in and out multiple times
     // TODO 1: show graze indicator
@@ -1736,18 +1734,18 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // gravitation influences bullets
-    // gravity both requires to get near to enemies, and allows to shoot in a curve
-    // geschoss-gruppe muss mit selber flugbahn erzeugt werden um die gravitation leichter nachvollziehbar zu machen
-    // alle gegner sollen gleichzeitig schießen, wodurch flugbahnen clustern und leichter nachvollziehbar sind
-    // bewegende gegner sind zu leicht zu treffen (stille gegner erfordern es sich mit der mechanik auseinander zu setzen), einige ausnahmen können eingebaut werden zum relaxen
-    // gravity with distance-falloff is too inconsistent regarding gameplay (too far away is boring, to near is too unpredictable)
-    // speed-preservation is easy to grasp, but the created flight-patterns are too boring
-    // vertikal und horizontal hat identisches gameplay, der einzige unterschied ist, dass eines geschosse abstoßt und das andere anzieht
+    // - gravity both requires to get near to enemies, and allows to shoot in a curve
+    // - bullet groups must be created with the same trajectory to make gravity and their movement easier to understand
+    // - all enemies should shoot at the same time if possible, which clusters trajectories and makes them easier to track
+    // - moving enemies are too easy to hit (non-moving enemies require you to deal with the mechanics), some exceptions can be built in to relax
+    // - gravity with distance-falloff is too inconsistent regarding gameplay (too far away is boring, to near is too unpredictable)
+    // - speed-preservation is easy to grasp, but the created flight-patterns are too boring
+    // - vertical and horizontal have identical gameplay, the only difference is that one repels bullets and the other attracts them
     // TASK: attack multiple targets at the same time
     // TASK: fly multiple times around the helper
     // ACHIEVEMENT: never hit yourself
     // TODO 1: hardmode: gravitation also influences player (and enemies ?)
-    // TODO 1: gravitation should work equally with all bullet types (basis-speed verwenden, von cWeapon, oder eher bullet, muss ich eh speichern für längen-veränderung) [RP]
+    // TODO 1: gravitation should work equally with all bullet types (use base speed, from cWeapon, or rather bullet, I have to save it anyway for length changes) [RP]
     // TODO 1: distortion for waves ?
     // TODO 1: improve player bullet curve shape, with special vertex shader and different bullet entities
     STAGE_MAIN({TAKE_ALWAYS, 3u})
@@ -2224,22 +2222,22 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // meteor split-up with enemies at the end
-    // wenn zerstört fliegt gegner in richtung wo er raus schaut dreht sich und schießt wield um sich, verhält sich sonst wie meteorit
-    // bounce zwischen meteoriten is total nicht nachvollziehbar, Ikaruga und RSG haben sowas nicht (nur bounce mit wand und konsistente aufteilung)
-    // meteoriten mit gegnern darin müssen etwas mehr aushalten um nicht unabsichtlich beim erzeugen schon zerstört zu werden
-    // middle meteors flying in line are faster, as an additional modifier
-    // they are called meteors consistently, but actually they are asteroids
-    // violette gegner am ende müssen vorher introduced werden, deswegen ist es wichtig einen davor schon zu erzeugen, aber eher bei wenigen meteoriten, damit man den gegner leichter beobachten kann
-    // rundum gegner sollten nicht vollgas in die mitte fahren (sondern mit winkel), da es leichter ist die gegner rechtzeitig zu erkennen und ihnen auszuweichen
-    // mittlere meteoriten erzeugen kleine meteoriten abhängig von ihrem winkel, es sollten keine kleinen erzeugt werden die sich achsen-ausgerichtet bewegen (2 von ihnen werden sonst sofort wieder zerstört)
-    // TASK: heb dir meteoriten vom anfang bis zu einer bestimmten sub-phase auf
+    // - they are called meteors consistently, but actually they are asteroids
+    // - when destroyed, the enemy flies in the direction where he is looking out, turns and shoots around, otherwise behaves like a meteorite
+    // - bounce between meteorites is totally incomprehensible, Ikaruga and RSG don't have anything like that (only bounce with a wall and consistent distribution)
+    // - meteorites with enemies in them have to withstand a little more damage in order not to be accidentally destroyed while they are being created
+    // - medium meteors flying in line are faster, as an additional modifier
+    // - blue enemies at the end have to be introduced beforehand, so it's important to create one beforehand, but with a few meteorites so that you can observe the enemy more easily
+    // - around-attacking enemies should not drive full throttle into the middle (but at an angle), as it is easier to recognize the enemies in time and dodge them
+    // - medium meteorites create small meteorites depending on their angle, no small ones should be created that move in axis alignment (otherwise 2 of them will be destroyed immediately)
+    // TASK: save meteorites from the beginning until a specific sub-phase
     // TASK: destroy the big meteorite before impact
     // TASK EXTRA: destroy the debris meteor and collect all debris bevor they disappear
     // ACHIEVEMENT: keep all shooting enemies alive and active till the end
     // TODO 1: hard mode: every small meteor splits into 4 more smaller meteors
     // TODO 1: hard mode: indestructible meteors
     // TODO 1: hard mode: meteor bounce
-    // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
+    // TODO 1: either here or at boss, the small meteorites, when destroyed, fly onto the screen and create small cracks (no distortion, just decal)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -2890,34 +2888,34 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // teleport everything
-    // every representation where the teleporter can be avoided will not work, as the player will always avoid it due to unpredictability, so teleporter need to span across screen
-    // dangers of teleportation (especially with changing directions) are hard to assess, so players will avoid using it with the ship
-    // when the player has to use the teleporter, the situation needs to be easy and predictable (only one location with enemies)
-    // it is important that the player has to use the feature in some way
-    // [deprecated] special care needs to be taken for split-screen coop, players cannot change sides
-    // tests were done with rotation (unpredictable), movement (unnecessary), 90 degree difference (unpredictable), infinity (unnecessary)
-    // moving both portals into their direction or against it, can cause space-folding or -expansion which is physically impossible (e.g. folding would catch objects in the portal and crush them)
-    // 1: show player the mechanic
-    // 2-5: force the player to use teleporter
-    // 6: enemies need to move the player into a safe location
-    // 7: groups are not in center, to make movement a bit easier (attacking enemies will not attack player)
-    // 8-11: 1-2-2-1 pattern
-    // (TODO 1: portale werden am ende zu gegnern, ZeroRanger)
+    // - every representation where the teleporter can be avoided will not work, as the player will always avoid it due to unpredictability, so teleporter need to span across screen
+    // - dangers of teleportation (especially with changing directions) are hard to assess, so players will avoid using it with the ship
+    // - when the player has to use the teleporter, the situation needs to be easy and predictable (only one location with enemies)
+    // - it is important that the player has to use the feature in some way
+    // - (old: special care needs to be taken for split-screen coop, players cannot change sides)
+    // - tests were done with rotation (unpredictable), movement (unnecessary), 90 degree difference (unpredictable), infinity (unnecessary)
+    // - moving both portals into their direction or against it can cause space-folding or -expansion which is physically impossible (e.g. folding would catch objects in the portal and crush them)
+    // - 1: show player the mechanic
+    // - 2-5: force the player to use teleporter
+    // - 6: enemies need to move the player into a safe location
+    // - 7: groups are not in center, to make movement a bit easier (attacking enemies will not attack player)
+    // - 8-11: 1-2-2-1 pattern
+    // TODO 1: portals become enemies at the end, ZeroRanger
     // TODO 1: YOU CAN CANCEL BULLETS WITH TELEPORTATION (local or all)
-    // TODO 1: badge: in der mitte am anfang
+    // TODO 1: badge: get into the middle at the beginning
     // TODO 1: on vertical, enemy from below may ram into player
     // TODO 1: if player starts in the center, helper switch places (permanent) and teleport players outside
-    // TODO 1: add quad and sphere object in front of teleporters to show direction, oder pfeile, oder links und rechts (wegen kreuz)
-    // TODO 1: man soll bei 1 und 2 nicht seitlich vorbeischießen können, aber trotzdem visuellen rand haben
-    // TODO 1: bei kreuz, geschosse in der mitte werden zerstört
-    // TODO 1: vielleicht teleporter-transition sofort nach farb-effekt, mit LERPB
-    // TODO 1: invincible enemy flies down the left site and shoots infinity bullets to the right
-    // TODO 1: !!!! am teleportations-ausgang werden alle angriffe zerstört und spieler ist kurzzeitig unverwundbar
-    // TODO 1: !!!! vielleicht teleportation mit rechenfehler (InvertedX wieder entfernen)
-    // TODO 1: !!!! gegner sollten sich nicht bewegen, sie spawnen aus portalen (unsichtbar, bis erswter teleportation)
-    // TODO 1: !!!! wenn portale als hindernisse wahrgenommen werden, sollten sie auch als solche funktionieren
-    // TODO 5: kontinuierlicher angriff in ein portal rein, und aus dem anderen raus während sich das portal rotiert und bewegt
-    // TODO 1: links und rechts teleporter, meteoriten kommen raus in unendlichkeit, sind manchmal so arranged (seitlich und von oben-schräg), dass man durch teleporter durch muss
+    // TODO 1: add quad and sphere object in front of teleporters to show direction, or arrow, or left and right (because of cross)
+    // TODO 1: you shouldn't be able to shoot sideways at 1 and 2, but still have a visual border
+    // TODO 1: during cross, bullets in the middle will be destroyed
+    // TODO 1: maybe teleporter transition immediately after color effect, with LERPB
+    // TODO 1: invincible enemy flies down the left side and shoots infinity bullets to the right
+    // TODO 1: !!!! at the teleportation exit, all bullets are destroyed and the player is briefly invulnerable
+    // TODO 1: !!!! maybe teleportation with calculation error (remove InvertedX again)
+    // TODO 1: !!!! enemies shouldn't move, they spawn from portals (invisible until first teleportation)
+    // TODO 1: !!!! if portals are perceived as obstacles, they should function as such
+    // TODO 5: continuous attack into one portal and out of the other as the portal rotates and moves
+    // TODO 1: teleporters left and right, meteorites come out into infinity, are sometimes arranged in such a way (sideways and diagonally from above) that you have to go through teleporters
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {

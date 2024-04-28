@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_PASSWORDS_H_
 #define _P1_GUARD_PASSWORDS_H_
 
-// TODO 3: implement automatic game-restart (app-exit, app-init)
-
 
 // ****************************************************************
 // 

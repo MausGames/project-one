@@ -8,16 +8,16 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// in finaler phase, erster durchgängiger strahl sollte in die spawn-zone der residue geschosse reingehn, damit man den angriff mit weniger druck sieht
-// geschosse sollten nicht starten (oder weitergehen)( während boss noch zu tief ist, weil sie sonst in der luft starten
-// angriffe oder ähnliches sollten verhindern, dass der spieler in die mitte geht bei den kreis-förmigen phasen
-// parts die sich in der pfeil-phase bewegen haben sehr wobbly gewirkt, statische position wirkt interessanter (vom problem-lösungs-aspekt her)
-// in finaler phase, die ganze zeit rundum-laser war voll nervig, aber is trotzdem interessant den bildschirm leicht zu verdecken während man durch geschosse schwimmt
-// gelbe und blaue farbe des lasers ist inspiriert vom organischen gegner in Gradius, auch der rundum-laser in finaler phase
-// (zwischen ende von grow-bullet abschnitt und 5-laser angriff braucht es ne pause um die beiden angriffe mental zu trennen)
+// - in final phase, first continues (tripple) ray should go into spawn of residue-bullets, so player can see it without much pressure
+// - bullets should not be created while boss is too deep, otherwise they spawn in the air (disconnected from the boss)
+// - attacks or similar should prevent the player from going into the center durch circular phases
+// - moving parts during the arrow-phase felt very wobbly, static positions felt much more interesting
+// - in final phase, rotating lasers (towards screen) were annoying, but still interesting to hide parts of the screen (with dirt) while swimming through bullets
+// - yellow and blue color of the lasers is inspired by the organic boss from Gradius, also the rotating lasers in final phase
+// - (old: a small pause is required between end of grow-bullet phase and 5-laser phase, to mentally separate both attacks)
 // ACHIEVEMENT: destroy the same player-ship two times by the same laser
-// TODO 1: hard-mode: alle laser-einschläge erzeugen zusätzliche geschosse (betrifft alle phasen außer grow-bullet und arrow)
-// TODO 1: quad-bullet teppich verdeckt laser-einschlag
+// TODO 1: hard-mode: all laser-impacts create additional bullets (affects all phases except grow-bullet and arrow)
+// TODO 1: quad-bullet carpet hides laser-impact
 
 // NOTE: never ever use exactly 4 rays with equal distribution, the resulting laser+fire pattern does NOT look good
 

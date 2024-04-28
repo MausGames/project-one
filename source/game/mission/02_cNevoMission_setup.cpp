@@ -77,25 +77,24 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // leave destroyable residue on its way (r-type leaver)
-    // [deprecated] enemies cannot move on the same path in infinity as the bullets would just overlay or need some handling
-    // multiple following enemies with the same move pattern will overlay after some time
-    // enemy direction creates a whirl
-    // destroying player bullets on impact is bad
-    // changing speed breaks bullet pattern
-    // following snake is also bad
-    // bit-matrix or clearing on contact is bad
-    // start direction against whirl direction to not clutter the bullets and show the whirl effect
-    // beide sichel-angriffe am ende nicht gleichzeitig, weil spieler sonst eingequetscht wird
-    // non-homing gegner müssen schöne muster bilden
-    // non-homing muss sich immer so bewegen, dass sie sich nicht mit aktuellem flow mitbewegen (wegen bullet-clustering)
+    // - (old: enemies cannot move on the same path in infinity as the bullets would just overlay or need some handling)
+    // - multiple following enemies with the same move pattern will overlay after some time
+    // - in rotation groups, enemy spawn position and direction should create a whirl pattern
+    // - enemy start direction against whirl direction to not clutter the bullets and show the whirl effect better
+    // - destroying player bullets on impact felt bad (and is already used in snow stage)
+    // - changing enemy speed breaks the bullet pattern
+    // - following snake (consisting of multiple enemies) felt bad (and created enemy bullet issues)
+    // - don't use both sickle attacks at the same time at the end, otherwise the player will be squeezed
+    // - non-homing enemies have to form nice patterns
+    // - non-homing enemies should always move in such a way that they do not move with the current flow (to avoid bullet clustering)
     // TASK: clean a certain amount ot residue
-    // TASK: 4 kugeln unter bullets die man abschießen muss
+    // TASK: 4 spheres hidden under bullets which need to be hit
     // TASK EXTRA: guide one of the followers in circles
     // ACHIEVEMENT: have at least 1500 bullets active at the same time
     // COOP: each player can only destroy each bullet type
     // TODO 1: hard-mode: bullets get bigger with time
     // TODO 1: hard-mode: bullets are bigger in general
-    // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top) (die finalen wellen könnten sonst verwirren)
+    // TODO 1: homing and non-homing enemies need visual distinction (e.g. some kind of effect on top) (the final waves may confuse otherwise)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;
@@ -556,16 +555,16 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // switch everything on
-    // 6: in last sub-pattern, some middle tiles already marked, as otherwise it would be too easy to activate all
-    // 6: for coop, make sure tiles are equally distributed
-    // 1-5: blending in tiles needs to be equally delayed, to not favor certain start-positions
-    // enemies need to die fast after loosing invincibility
-    // rotating grid should not be too fast, as back-and-forth flipping can easily happen, and player needs to be able to move with (faster than) rotation
+    // - in gauntlet, in last sub-pattern, some tiles are already marked, as otherwise it would be too easy to activate all
+    // - in gauntlet, for coop, make sure tiles are equally distributed
+    // - blending in tiles needs to be equally delayed, to not favor certain start-positions
+    // - enemies need to die fast after loosing invincibility
+    // - rotating grid should not be too fast, as back-and-forth flipping can easily happen, and player needs to be able to move with rotation (faster than rotation)
     // TASK: kill all unprotected enemies before protection wears off
     // TASK: activate some plates in a certain order
     // TASK EXTRA: enable a list of tiles in a very short time
     // ACHIEVEMENT: never touch a plate twice in the spinning puzzle
-    // TODO 1: hardmode: flipswitch galaxy, || =, mit blink delay wie bei rot+blau blöcke in Mario 3D World (achtung: laser könnten so ähnlich sein wie bomben beim endboss)
+    // TODO 1: hardmode: flipswitch galaxy, || =, with blink delay like the red + blue blocks from Mario 3D World (note: lasers could be similar to bombs in the final boss)
     // TODO 1: hardmode: flipswitch galaxy: blocking tiles moving around, lasers blocking movement between tiles
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
@@ -1083,21 +1082,21 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // bomberman hero
-    // gegner fliegt auf den spieler zu, weniger nervig, spieler muss trotzdem manchmal ausweichen, lebenspunkte müssen dementsprechend hoch sein um den burst auszugleichen
-    // diagonal position makes linear bombs stronger, linear position makes diagonal bombs stronger
-    // make sure there is a pause between 4 and 5(rota), make sure to start 5(rota) from different side then 4
-    // consistent explosion delays make it easier to focus on the enemies simultaneously
-    // letting the enemy spawn bombs made the pattern too simple, a separate spawner creates more pressure
-    // 2 safe-spots after another in bomb-hail phase should not share same axis (related to enemy movement)
-    // wall phase patterns need to be deterministic (also need to start deterministic)
-    // bounce and rotation directions need to be opposite
-    // linear movement can't use diagonal bombs as the explosion-lines will pop
+    // - enemy flies towards the player, which is less annoying, player still has to dodge sometimes, enemy life points have to be high enough to compensate the player burst damage
+    // - diagonal line-position makes linear bombs stronger, linear line-position makes diagonal bombs stronger
+    // - make sure there is a pause between 4(wall) and 5(rota), make sure to start 5 from different side than 4
+    // - consistent explosion delays make it easier to focus on the enemies simultaneously
+    // - letting the enemy spawn bombs made the pattern too simple, a separate spawner creates more pressure
+    // - consecutive safe-spots in bomb-hail phase should not share the same axis
+    // - wall phase patterns need to be deterministic (also need to start deterministic)
+    // - bounce and rotation directions need to be opposite
+    // - linear (infinite) movement can't use diagonal bombs as the explosion-lines will pop on teleport
     // TASK: collect all bomb remains
     // TASK: kill enemy multiple times from behind
     // ACHIEVEMENT: never stop moving, never stop shooting
     // TODO 1: hardmode: enemy attacks with simple pattern
-    // TODO 1: hardmode: bomben schießen geschosse bei explosion, gekreuzt oder entlang strahl
-    // TODO 1: hardmode: bomben können angegriffen werden und vorzeitig explodieren, oder blockieren einfach nur angriffe
+    // TODO 1: hardmode: bombs shoot bullets when exploded, crossed or along beam
+    // TODO 1: hardmode: bombs can be attacked and explode prematurely, or simply block attacks
     // TODO 5: task: destroy the weird bomb
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
@@ -1559,19 +1558,19 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // attack triggers on multiple sides
-    // [deprecated] (rotating arrow (90 degree)) (flipping side with each kill) (enemies with 2/3/4 arrows) (big enemy with changing arrow (rotating or flipping) (over time, or after a kill))
-    // erste 3 gegner-wellen sind tutorial
-    // der letzte gegner sollte von hinten angreifbar sein, weil man dann eh nicht mehr nachkommt
-    // sekundär-gegner in 2x2 sollten nicht nach vorne schauen, mann kommt nicht nach nachdem man die primär-gegner entfernt hat, aus selben grund sollten primär-gegner nicht nach hinten schauen
-    // gegner bewegungen sollten nicht zu schnell sein, man ist sonst überfordert die direction zu matchen
-    // jede sub-gruppe braucht einen default-flow, schnellere flows können bestimmt gefunden werden, aber gar kein flow is orsch
-    // enemies are either distributed with 0.2f or 0.5f
+    // - (idea: enemies with 2/3/4 arrows)
+    // - first 3 enemy waves are the tutorial
+    // - (old: the last enemy should be attackable from behind because at the end you won't be able to keep up anyway)
+    // - secondary enemies in 2x2 shouldn't look forward, you can't keep up after removing the primary enemies, for the same reason primary enemies shouldn't look behind
+    // - enemy movements shouldn't be too fast, otherwise you'll be overwhelmed trying to match the direction
+    // - every subgroup needs a default flow, faster flows can certainly be found, but no flow at all is bad
+    // - enemies are either distributed with 0.2f or 0.5f
     // TASK: never look too long into the same direction (at the end)
     // TASK: some enemies can and should be killed from a different side
     // ACHIEVEMENT: finish the stage without turning more than 20 times
     // TODO 1: hardmode: hidden arrow
     // TODO 1: hardmode: arrow change direction with tick (visible display), though this is already in the final boss
-    // TODO 1: hardmode: jeder gegner hat zwei pfeile (consistent mit der gruppe)
+    // TODO 1: hardmode: every enemy has two arrows (consistent with the group)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fDistance = 1.1f;
@@ -2119,27 +2118,22 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // dicke kugerl die am rand bleiben
-    // [deprecated] - all: bullet speed is much lower than enemy speed, to create a perceptible path for the player to use
-    // [deprecated] - all: bullet frequency is not too high, to better distinguish individual bullets
-    // [deprecated] - all: enemy attack begins later, to not slow down bullets immediately after shooting
-    // [deprecated] - 1,2: enemy path is not too wide, to not slow down bullets immediately after shooting
-    // bullets vergrößern mit angriff is orsch, du kannst nicht schießen während du versuchst zwischen geschossen durch zu gehen, aber dadurch bist du zu schnell, schiff wegdrehen is un-intuitiv, bullets zerstören ab größe is 1-dimensional (vergrößern sollte eher für die andere gruppe aufgehoben werden (mit gegnern))
-    // gruppen die danach kommen, können/sollten von den angriffen der gruppe davor verdeckt werden
-    // derzeitiger fokus liegt darauf den spieler sich vorsichtig durch die masse bewegen zu lassen, wie durch wasser schwimmen
-    // gegner die sich gegenüber sind sollen den spieler dazu bringen hin un her zu drehen, um den einen anzugreifen, und die angriffe des anderen durchdringbar zu machen
-    // gegner die geschosse hinter sich herziehen haben fokus auf flow
-    // die vertikalen linien sollen den spieler dazu bringen 90grad durch zu fliegen
-    // gegner die geschosse erzeugen sind angreifbar aufgrund der range (gegner und bullets) und ihrer bewegung
-    // grow-bullets aus gegner sollten mit 0.0f statt 1.0 starten, damit man die gegner noch sieht und angriffe inder nähe besser durchkommen
+    // - growing bullets through attacks is bad, you can't shoot while you're trying to dodge between them which makes you move too fast, and turning the ship away is un-intuitive, destroying bullets with specific size is 1-dimensional (growing should be reserved for a different stage (with enemies))
+    // - attacks from previous groups can cover later groups
+    // - current focus is on letting the player move carefully through the mass, like swimming through water
+    // - enemies facing each other should force the player to turn back and forth in order to defend against their attacks
+    // - the horizontal lines and vertical rain should (possibly) bring the player to fly through with 90 degree rotation
+    // - enemy movement and their attack direction influences their attackability and needs to be properly handled
+    // - grow-bullets from enemies should start with scale 0.0f instead of 1.0f so that you can still see the enemies and attacks can get through more easily
     // TASK: destroy all orange balls
     // TASK: move between the two big spheres
     // TASK EXTRA: reach a set of specific points
     // ACHIEVEMENT: find and touch the Chroma
     // TODO 1: hardmode: maybe all bullets get gravity, "flooding" the bottom (ZeroRanger kugerl-auge-boss)
     // TODO 1: hardmode: they bounce once
-    // TODO 1: hardmode: große kugerl explodieren in viele kleine
-    // TODO 1: hardmode: 3 rotieren vom center nach außen
-    // TODO 1: move stuff from here (and Leviathan) into grow-bullet ?
+    // TODO 1: hardmode: big bullets explode into many small ones
+    // TODO 1: hardmode: 3 rotate from the center outwards
+    // TODO 3: move stuff from here (and Leviathan) into grow-bullet ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2586,22 +2580,21 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // occupy areas with energy
-    // rotation der großen dreiecke entgegen der flug-drehrichtung (auch gruppe 1)
-    // flug-rotation um bewegung gefährlicher zu machen und gegen safe-spots
-    // erste welle so aufbauen um dreiecke möglichst gleichmäßig zu verteilen, spieler kann trotzdem überlappen, könnte aber zeit kosten
-    // hohe geschwindigkeit erhöht intensity und aufmerksamkeit
-    // wenn flug-drehrichtung anfängt, zweite welle von der seite kommen, von wo die großen dreiecke kommen werden
-    // TODO 1: helfer spawnt und fliegt in Ntem teleportiertem dreieck, verschwindet nach nächster teleportation, kleiner funken-effekt bei kill (falls doch noch sichtbar)
+    // - rotation of the large triangles should be against the direction of flight rotation (also group 1)
+    // - flight rotation to make movement more dangerous and to prevent safe spots
+    // - set up the first wave so that triangles are distributed as evenly as possible. Players can still overlap, but it could cost time
+    // - high speed increases intensity and attention
+    // TODO 1: helper spawns and flies on Nth teleported triangle, disappears after next teleportation, small spark effect on kill (if still visible)
     // TODO 1: something after the last wave (changing the triangles (size, movement), or the number, or ...), or start ? hmmm, no I want to start up quick
     // TODO 1: also focus on difference from d/generate wave, make area strongly occupied ?
     // TODO 1: create an absurd big object/triangle in the middle
-    // TODO 1: gegner-masse kommt auf spieler zu, alle mit energy, man muss loch rein schießen
+    // TODO 1: mass of enemies flies towards the player, all with energy, you have to shoot a hole into them
     // TODO 1: small enemy triangles stay (maybe only for hard)
     // TODO 1: keep triangles from growing with attacks
     // TODO 1: movement only from right to left
     // TODO 1: (previously bullet shrink+grow, mentioned in bottom of Waves page)
-    // TODO 1: gegner versuchen dich in mustern zu berühren, schlange,
-    // TODO 1: frei gewordene objekte fliegen auf spieler zu oder in kreiselbewegung nach außen
+    // TODO 1: enemies try to touch you in a pattern, snake
+    // TODO 1: freed objects fly towards the player or in outwards-spinning motion
     // TODO 1: triangles, spheres, quads, all have different (basic) behavior
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 5u})

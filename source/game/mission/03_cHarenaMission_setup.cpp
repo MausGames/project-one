@@ -87,22 +87,22 @@ void cHarenaMission::__SetupOwn()
 
     // ################################################################
     // ghost appears for few seconds (zelda wizzrobe)
-    // keine einzelnen gegner am anfang, sonst sieht der spieler die mechanik nicht, wenn er sie einfach über den haufen schießt
-    // 1: two groups active at the same time to continue with changes while keeping enemies active for a longer time
-    // 1: two different invincible states, hidden and flickering, to give the player perception of change while he has to wait (loadbar)
-    // (old) 3: pattern should not have too long straight lines, as this makes it too easy, and should have no corners, as this creates placement artifacts
-    // 1: diamond shape to not be able to kill 2 groups at the same time
-    // stuttering side-movement needs to be only in one direction, otherwise player does not recognize the move pattern
-    // stuttering side-movement needs a safe-space (at the bottom) because being in the middle of them is hard to evade, as it's already hard to hit
-    // player should already look in the right direction at the start of the threshold wave, the previous wave is doing that with the movement-direction of the enemies
-    // bei order-wave sollten keine 3 hintereinander von ein-und-derselben position angreifbar sein (2 ist ok, weil das logisch ist), wenn möglich keine 2 felder bewegen zwischen 2 angriffen und drehung nur um 90 grad
-    // bei threshold wave sollte der threshold verschoben sein, damit spieler nicht mit seitlichem angriff trifft, und gegner geschosse schräg fliegen (schöner)
-    // memory (unsichtbare gegner die man treffen kann) hat überhaupt nicht funktioniert, hat zu wenig tension erzeugt, und war zu leicht (einfach nieder-mähen), aber gut für badge
+    // - no individual enemies at the beginning, otherwise the player won't see the mechanics if they just shoot them down
+    // - on first wave, two groups active at the same time to continue with changes while keeping enemies active for a longer time
+    // - on first wave, two different invincible states, hidden and flickering, to give the player perception of change while he has to wait (loading bar)
+    // - on first wave, diamond shape to not be able to kill 2 groups at the same time
+    // - on snake wave, pattern should not have too long straight lines, as this makes it too easy, and should have no corners, as this creates placement artifacts
+    // - stuttering side-movement needs to be only in one direction, otherwise player does not recognize the move pattern
+    // - stuttering side-movement needs a safe-space (bottom screen) because being in the middle of them is hard to evade, as it's already hard to hit
+    // - player should already look in the right direction at the start of the threshold wave, the previous wave is doing that with the movement-direction of the enemies
+    // - on threshold wave, the threshold should be shifted a bit, so that players don't hit with a side attack, and enemy bullets fly at an angle (more beautiful)
+    // - in order wave, no 3 in a row should be attackable from one and the same position (2 is ok because that's logical), if possible don't move 2 fields between 2 attacks and only rotate by 90 degrees
+    // - memory (invisible enemies that you can hit) didn't work at all, didn't create enough tension, and was too easy (just mow down), but would be good for badge
     // TASK: destroy all broken enemies on their first appearance
     // TASK: let the very last enemy survive, alone
     // TASK EXTRA: kill 4 very quick enemies before they disappear
     // ACHIEVEMENT: follow the head of the snake group for at least 10 seconds
-    // TODO 1: hardmode: bad visibility (sand storm) in einer der missionen hier, muss vielleicht sinus-förmig (oder anders) ganz verschwinden, auch geschosse wegen pressure
+    // TODO 1: hardmode: bad visibility (sand storm) in one of the missions here, maybe has to disappear completely in a sinusoidal manner (or in another way), also bullets due to pressure
     // TODO 1: hardmode: enemies also shoot when getting invisible
     m_aInsanityStage[0] = [this]()
     {
@@ -841,19 +841,19 @@ void cHarenaMission::__SetupOwn()
 
     // ################################################################
     // whac-a-mole
-    // smoke can distract from bullets
-    // non-linear movement is harder to track
-    // shooting on "hide" instead of "show" is too overwhelming, identifying both initial bullet-direction and movement at the same time
-    // (deprecated) 8 pattern is too overwhelming (order: 0, 3, 5, 2, 6, 1, 7, 4 (flawed)) (order: 0, 3, 6, 2, 7, 4, 1, 5 (perfect)) (0, 5, 2, 7, 4, 1, 6, 3 (circular))
-    // during rotation, if move pattern moves against rotation the enemy stays in the air, which looks weird
-    // hiding current enemy movement did not add any value, especially on rotating 8 enemies it is just too overwhelming (maybe for hard mode ? might be too light, also change pattern or order ?)
-    // first enemy flies from below maybe through player, to show there is no harm
+    // - smoke can distract from bullets
+    // - non-linear movement is harder to track
+    // - shooting on "hide" instead of "show" is too overwhelming, identifying both initial bullet-direction and movement at the same time
+    // - 8-enemy pattern is quite overwhelming (order: 0, 3, 5, 2, 6, 1, 7, 4 (flawed)) (order: 0, 3, 6, 2, 7, 4, 1, 5 (perfect)) (0, 5, 2, 7, 4, 1, 6, 3 (circular))
+    // - during rotation, if move pattern moves against rotation the enemy stays in the air, which looks weird
+    // - hiding current enemy movement did not add any value, especially on rotating 8 enemies it is just too overwhelming (maybe for hard mode ? might be too light, also change pattern or order ?)
+    // - first enemy flies from below maybe through player, to show there is no harm
     // TASK: kill golden enemy
     // TASK: collect all eggs
     // ACHIEVEMENT: attack every enemy once as the wrong target
     // TODO 1: hardmode: big can change, like in tiger boss, just (iBig << 1u), maybe not on the first 1-2 hits
-    // TODO 5: coop: ein gegner muss innerhalb des zeitlimits von beiden erwischt werden
-    // TODO 5: idea: gegner die eng zusammen gehen
+    // TODO 5: coop: one enemy must be hit by both within the time limit
+    // TODO 5: idea: enemies which move close together (into the center)
     // TODO 5: idea: eggs are layed when hitting an enemy, and stay in final phase? (will the last egg be hidden?)
     // TODO 5: badge: ride the wave
     m_aInsanityStage[1] = [this]()
@@ -1368,27 +1368,25 @@ void cHarenaMission::__SetupOwn()
 
     // ################################################################
     // enemies form a tower and fall over
-    // should not create bullets, to focus on the movement and tower (bullets are too distracting) (except for final enemy)
-    // should be fast enough to be a thread, but needs visual space to properly identify movement
-    // complete vertical or horizontal movement is too easy
-    // don't spawn too far on the side to properly blend them in, but not too near center, to highlight the tower structure
-    // try to stack enemies all facing into the same direction, otherwise it looks not as fascinating
-    // [deprecated] 4: stacking only two gives a lot of safe ways to kill them when they try to hit you
-    // 1: show tower and flight mechanic
-    // 2: show infinite displaced tower
-    // 1: shoot away from second tower, to give spacial distance, and highlight the displacement mechanic
-    // 3, 4, 5: left around, right around, left around
-    // last 2: top right, top left
-    // it is important that the flight start-direction can be properly identified
-    // moving enemies need to look into their fly-direction, to not cause teleportation when hitting them outside the view (though it's more likely they are hit from where they come and not from where they go)
-    // sandstorm hides shadow artifacts
-    // player can kill a lot of sub-groups by staying at the bottom
+    // - should not create bullets, to focus on the movement and tower (bullets are too distracting) (except for final enemy)
+    // - should be fast enough to be a threat, but needs visual space to properly identify movement
+    // - complete vertical or horizontal movement is quite easy
+    // - don't spawn too far on the side to properly blend them in, but not too near center, to highlight the tower structure
+    // - try to stack enemies all facing into the same direction, otherwise it looks not as fascinating
+    // - first group, show tower and bounce mechanic
+    // - second group, show infinite displaced tower
+    // - first group, shoot away from the second tower, to make better use of the space, and highlight the displacement mechanic
+    // - for rotating groups, left around, right around, left around
+    // - it is important that the bounce start-direction can be properly identified
+    // - moving enemies need to look into their fly-direction, to not cause teleportation when hitting them outside the view (though it's more likely they are hit from where they come and not from where they go)
+    // - background sandstorm hides shadow artifacts
+    // - player can kill a lot of sub-groups by staying at the bottom, which is fine I guess
     // TASK: destroy all unshielded enemies
     // TASK: collect enough flummies at the end
     // ACHIEVEMENT: dance at least 30 seconds with the final enemy without getting hit
     // TODO 1: hardmode: every enemy attacks, or explodes into bullets
     // TODO 1: hardmode: N infinity enemies or bullets
-    // TODO 5: coop: abwechselnd gegner treffen
+    // TODO 5: coop: take turns hitting opponents
     m_aInsanityStage[2] = [this]()
     {
         constexpr coreUintW iNumEnemies = 61u;
@@ -1948,24 +1946,24 @@ void cHarenaMission::__SetupOwn()
 
     // ################################################################
     // mothership spawns enemies
-    // create 1-2 arrow burst attacks without mother as introduction, player may think those are normal enemies, but should get suspicious
-    // wave attack should not spin too fast, as this makes it impossible to properly slip through a hole, but fast enough to make the player move
-    // shield requires the player to destroy it from the coming spin-side, to properly attack the mother between his attacks
-    // player can actually stand still against burst attack, but that's fine
-    // targeted border attack requires player to move and attack to create proper holes
-    // line border attack requires the player to always shoot holes, while the targeted border attack can be avoided with movement
-    // many of the spawn locations have last player position in mind, based on possible attack locations (specify sub-stage numbers)
-    // arrows should have enough life to drive player back if he just keeps shooting at them, but not too much to provide action
-    // time between burst attacks gives the player a chance to attack (adjust timing)
-    // slight initial delay for the burst attack, to reduce clustering
-    // coop attack order: intro 1 0, einzeln 1 0 1, von rechts 0 1
-    // number of enemies/arrows determined by worst-case, 3x16 + 100 (transition from top-lines to multi-shield)
-    // sonnen-schlag sollt von oben kommen, das is leichter zu kontern (gegner-pattern davor geht nach unten) und einfacher zu navigieren, weil man ihn von unten dann töten kann (natürliche richtung)
-    // eine sonnen-reihe muss sich invertiert drehen, weil es sonst viel zu leicht ist das schild zu zerstören
-    // bewegte mothers sollten exakt zwischen den arrows sein, um die gefahr eines schlechten spieler-angriffs zu reduzieren (bei der nur 1 von 2 geschosse trifft)
-    // multi-schild und sonne müssen sich verlangsamt ausbreiten, weil der spieler sonst nicht mehr reagieren kann
-    // multi-schild braucht guten abstand zwischen schichten, damit spieler reinfliegen kann, wenn er will
-    // man könnte jeden zweiten gegner nicht resurrecten und die muster wären alle noch schön
+    // - create 1-2 arrow burst attacks without mother as introduction, player may think those are normal enemies, but should get suspicious
+    // - wave attack should not spin too fast, as this makes it impossible to properly slip through a hole, but fast enough to make the player move
+    // - shield may require the player to destroy it from the coming spin-side, to properly attack the mother between his attacks
+    // - player can actually stand still against burst attacks without getting hit, but that's fine
+    // - targeted border attack requires player to move and attack to create proper holes
+    // - line border attack requires the player to always shoot holes, while the targeted border attack can be avoided with movement
+    // - many of the spawn locations have last player position in mind, based on possible attack locations
+    // - arrows should have enough life to drive player back if he just keeps shooting at them, but not too much to provide action
+    // - time between burst attacks gives the player a chance to attack
+    // - slight initial delay for the burst attack, to reduce clustering (due to mother movement)
+    // - coop attack order: intro 1 0, single 1 0 1, from the right 0 1
+    // - number of enemies/arrows determined by worst-case, 3x16 + 100 (transition from top-lines to multi-shield)
+    // - sun pattern should come from above, this is easier to counter (enemy pattern before goes downwards) and easier to navigate because you can then kill the mother from below (natural direction)
+    // - one sun-layer must rotate inverted, otherwise it is far too easy to destroy the shield
+    // - moving mothers (from the right) should be exactly between the arrows to reduce the risk of a bad player attack (where only 1 of 2 bullets hits)
+    // - multi-shield and sun must expand slowly, otherwise the player will no longer be able to react
+    // - multi-shield needs good spacing between layers so player can fly in if he wants
+    // - you could disable resurrection of every second enemy and the patterns would all still be beautiful
     // TASK: kill N arrows at the start
     // TASK: kill all marked arrows
     // ACHIEVEMENT: never destroy one of the small enemies
@@ -2618,19 +2616,19 @@ void cHarenaMission::__SetupOwn()
 
     // ################################################################
     // spikes from the ground and such
-    // funken beim spawnen von gegner lenkt zu sehr ab
-    // ring-wave, or cone-shaped from center sucked (even after retrying ring-wave)
-    // [deprecated] trying to let player move from a soon-to-be-spike to a soon-to-be-no-spike feels bad and hard to use, the time difference needs to be greatly extended which reduces pacing, a jump like in mario is missing (to create player-induced short invincibility from spikes)
-    // sägezahn pacing (schnell langsam schnell)
-    // gegner spawnen in stacheln, dadurch wird mögliche kollision mit spieler vermieden
-    // gegner spawning muss schönes muster und delay haben
-    // erste zwei stacheln müssen langsam und in der mitte spawnen, damit spieler genau sieht was passiert
-    // spieler muss genau sehen wo bald stacheln kommen und wo gefahr ist (einfärben der platten und stacheln)
+    // - effects when spawning enemies are too distracting
+    // - ring-wave, or cone-shaped from center sucked (even after retrying ring-wave)
+    // - (old: trying to let player move from a soon-to-be-spike to a soon-to-be-no-spike feels bad and hard to use, the time difference needs to be greatly extended which reduces pacing, a jump like in mario is missing (to create player-induced short invincibility from spikes))
+    // - sawtooth pacing (fast slow fast)
+    // - enemies spawn in spikes, thereby avoiding possible collisions with players
+    // - enemy spawning must have a nice pattern and delay
+    // - the first two spikes must spawn slowly and in the middle so that the player can see exactly what is happening
+    // - the player has to see exactly where spikes will soon appear and where there is danger (color plates and expand spikes)
     // TASK: collect all the good plates
     // TASK: a single enemy with lots of health needs to be killed, but disappears after some time
     // ACHIEVEMENT: only move along the middle line until everything goes silent
     // TODO 1: hard mode: infinity movement (only X or Y always, even with possible pattern issues, though maybe some have nice transitions) (also enemies ?)
-    // TODO 1: dünklere kreise sollten auf der platte sein, wo die stacheln raus kommen ? 
+    // TODO 1: darker circles should be on the plate where the spikes come out?
     // TODO 5: badge: % time moving on purple plates
     // TODO 5: badge: touch each plate at least once (needs visual highlight)
     m_aInsanityStage[4] = [this]()
@@ -3169,13 +3167,13 @@ void cHarenaMission::__SetupOwn()
 
     // ################################################################
     // can only kill in order
-    // coop last enemy, need to work together
-    // abwechselnd links rechts
-    // doppelgruppe nur breites pattern um ausweichen zu erleichtern
-    // reihenfolge am weitesten entfernt
+    // - coop last enemy, need to work together
+    // - alternating left and right
+    // - double group only wide pattern to make it easier to dodge
+    // - order furthest apart
     // TODO 1: show 3142 group at start, matrix of enemies
     // TODO 1: simon says, linear up and down, to make distinction easy, and to prevent accidental hits (order forward, backward, mirrored, to stay fair but variable)
-    // TODO 1: static assertion, keine der chief-order darf enemy-count übersteigen
+    // TODO 1: static assertion, none of the chief orders may exceed the enemy count
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {

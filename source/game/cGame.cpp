@@ -311,7 +311,7 @@ void cGame::Render()
             m_EnemyManager.RenderOver();
             m_pCurMission->RenderOver();
 
-            // TODO 1: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
+            // TODO 1: push or GL_DEPTH_TEST ?? move up ??
             glDepthMask(false);
             {
                 // 
@@ -455,7 +455,7 @@ void cGame::Render()
             m_EnemyManager.RenderOver();
             m_pCurMission->RenderOver();
 
-            // TODO 1: push oder GL_DEPTH_TEST ?? rauf schieben ?? 
+            // TODO 1: push or GL_DEPTH_TEST ?? move up ??
             //glDepthMask(false);   because of pulse weapon
             {
                 // 

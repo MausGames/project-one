@@ -13,9 +13,9 @@
 // TODO 3: FindPlayer may find player outside of area (during resurrection)
 // TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit properties of all related collision-pairs somehow (maybe add own collision-tracker and merge with the one in player-class) [RP]
 // TODO 3: repair enemy only in coop ? (not duel)
-// TODO 4: play-sounds in special-effects klasse verschieben
-// TODO 3: repair enemy sollte auf selber höhe wie m_aPlayer[i].RenderMiddle(); oder als erstes in TOP gezeichnet werden
-// TODO 3: bei restart blendet die musik sprunghaft wieder ein (mission, segment)
+// TODO 4: move play-sounds into special-effects class
+// TODO 3: repair enemy should be rendered on same height as m_aPlayer[i].RenderMiddle(); or first as TOP
+// TODO 3: on restart, music is blended in without smooth transition (mission, segment)
 
 
 // ****************************************************************

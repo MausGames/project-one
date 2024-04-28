@@ -247,7 +247,7 @@ template <typename T, typename S, typename R> inline FUNC_LOCAL T LerpPara(const
 // 
 inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 {
-    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);   // TODO 1: trotzdem noch issue mit step-size, bräuchte man kurven-inkrement, aber an der stelle wo man den wert verwendet [RP]
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);   // TODO 1: still an issue with step size, you need curve increment, but at the location where you use the value [RP]
 }
 
 
@@ -262,7 +262,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
     return coreVector2::Direction(SmoothAimAngle(vOldDir.Angle(), vNewDir.Angle(), fStrength));
-} // TODO 1: gegen ende der kurve isses so langsam, dass es nie sein ziel trifft
+} // TODO 1: towards the end of the curve it is so slow that it never hits its target
 
 
 // ****************************************************************
@@ -270,7 +270,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 constexpr FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
     ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
-    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));   // TODO 1: nicht framerate unabhängig (innerhalb des thresholds), je höher die FPS, desto langsamer (sanfter) ist die bewegung innerhalb des thresholds [RP]
+    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));   // TODO 1: not frame rate independent (within the threshold), the higher the FPS, the slower (smoother) the movement is within the threshold [RP]
 }
 
 

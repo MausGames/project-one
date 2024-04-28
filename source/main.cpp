@@ -660,7 +660,7 @@ static void ReshapeGame()
     Core::Reshape();
     
     
-    if(STATIC_ISVALID(g_pGame))   // TODO 1: sollte nur beim draggen passieren, passiert aber auch bei normaler resolution änderung durch options (GetWinSizeChanged ist in beiden fällen TRUE)
+    if(STATIC_ISVALID(g_pGame))   // TODO 1: should only happen when dragging, but also happens with normal resolution changes through the options menu (GetWinSizeChanged is TRUE in both cases)
     {
         g_pGame->GetInterface ()->UpdateLayout();
         g_pGame->GetInterface ()->UpdateSpacing();

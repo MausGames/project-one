@@ -1282,7 +1282,7 @@ void cNevoMission::__MoveOwnAfter()
 
             // 
             const coreVector2 vDiff = pPlayer->GetOldPos() - pContainer->GetPosition().xy();
-            pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);   // TODO 1: vermutlich broken, sollte mit korrekter kollision ersetzt werden
+            pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);   // TODO 1: maybe broken, should be replaced with correct collision
 
             // 
             g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE * 0.8f);

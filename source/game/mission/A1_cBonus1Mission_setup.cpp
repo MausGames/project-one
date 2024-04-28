@@ -77,32 +77,32 @@ void cBonus1Mission::__SetupOwn()
 
     // ################################################################
     // hide from super laser
-    // blöcke die von einer seite schützen, und geschosse aufhalten (spieler, gegner)
+    // blocks that protect from one side and stop bullets (players, opponents)
     // 90 degree, then 45 degree
     // 90 degree flip, then 180 degree flip
-    // laser dreht sich 360
-    // gegner der für angriff verantwortlich ist kommt von unten ins bild wärend er schießt, blöcke werden zerstört, dodge hinter ihn
+    // laser rotates 360
+    // enemy responsible for attack comes into picture from the bottom while he shoots, blocks are destroyed, dodge behind him
     // coop
     //   |        |
     //   | O    O | O
     // O |        |
     //   |
-    // zwei quads (für schräge ecken) mit tiefe zeichnen und depth-test verwenden
+    // draw two quads (for slanted corners) with depth and use depth testing
     // 
-    // partikel gezogen ()  werden gegen schussrichtung eingesaugt, bei schuss muss er linear nach in schussrichtung gehn und sich ausbreiten in weite
-    // unter gegen, geschosse, container
+    // particles are sucked in against the direction of the shot, when shot it has to go linearly in the direction of the shot and spread out in width
+    // below enemies, bullets, container
     //
-    // container in mitte
-    // laser von oben und folgt mustern und verfolgt spieler
-    // einzelne schüsse (mit druckwelle)
-    // laser ändert winkel im kreis herum und schwingt hin und her an container vorbei
-    // laser wird super-dick
+    // container in the center
+    // laser from above and follows patterns and tracks players
+    // single shots (with shockwave)
+    // laser changes angle in a circle and swings back and forth past container
+    // laser becomes super-thick
     // fat laser with warning: from top, left, right, bottom, top -> and around 90 degree -> ball moves down enemies above -> ball moves up enemies below
-    // strahl wird immer kleiner, dann kommt ein kleiner gegner mit dem strahl den man noch töten muss
+    // beam gets smaller and smaller, then a small enemy comes with the beam that you still have to kill
     // 
-    // shelter werden durch erste schüsse erzeugt, die einzeln sind, danach kontinuierlich
-    // super-laser wird durch gegen-richtungs ansaugen angezeigt
-    // gegner sollen sich bewegen und kurven fahren
+    // shelters are created by initial shots, which are single, then continuous
+    // super-laser is indicated by suction in the opposite direction
+    // enemies should move and fly curves
     // it should not be possible to stand in the same shadow for two consecutive big shots
     // TODO: add border objects below each border (2x per shelter) instead of the wobbling
     STAGE_MAIN({TAKE_ALWAYS, 0u})
@@ -238,7 +238,7 @@ void cBonus1Mission::__SetupOwn()
 
                 // 
                 const coreVector2 vDiff = pPlayer->GetOldPos() - pShelter->GetPosition().xy();
-                pPlayer->ApplyForce(vDiff.Normalized() * 20.0f);   // TODO 1: replace with proper move logic oder verursach schaden
+                pPlayer->ApplyForce(vDiff.Normalized() * 20.0f);   // TODO 1: replace with proper move logic or cause damage
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE);

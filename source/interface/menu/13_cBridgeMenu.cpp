@@ -310,7 +310,7 @@ void cBridgeMenu::Move()
                 g_pPostProcessing->SetValueAll   (fBlend);
                 g_pPostProcessing->SetSoundVolume(fBlend);
 
-                if(g_pMenu->IsPaused())   // TODO 1: mit m_bPaused ersetzen ?
+                if(g_pMenu->IsPaused())   // TODO 1: replace with m_bPaused ?
                 {
                     g_pGame->MoveOverlay();      
                     ASSERT(STATIC_ISVALID(g_pGame))      

@@ -1224,9 +1224,9 @@ void cRutilusMission::__MoveOwnAfter()
                 }
             }
             
-            // TODO 1: kollision mit enemy-bullet auf anderer seite war möglich
-            // TODO 1: geschosse können durchfliege wenn nah dran, oder auch auf anderer seite, wenn man grad rauskam, auch von gegnern
-            // TODO 1: schiffe werden leicht rotiert wenn winkel-differenz beider teleporter durch frame-step immer leicht abweicht, da der step nicht ausgeglichen wird, passiert nicht wenn winkel-differenz konstant ist (e.g. immer 180 grad)
+            // TODO 1: collision with enemy bullet on other side ot teleporter was possible
+            // TODO 1: bullets can fly through (without teleport) if you're close, or the other way around if you're just getting out, even from opponents
+            // TODO 1: ships are rotated slightly if the angle difference of both teleporters always deviates slightly due to frame step, since the step is not compensated, this does not happen if the angle difference is constant (e.g. always 180 degrees)
 
             return false;
         };
@@ -1295,8 +1295,8 @@ void cRutilusMission::__MoveOwnAfter()
         g_pGame->GetBulletManagerPlayer()->ForEachBullet(nTeleportBulletFunc);
         g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nTeleportBulletFunc);
         
-        // TODO 1: zerstörte bullet sollten keinen effekt am ausgang erzeugen
-        // TODO 1: gegner bullets sollten immer zerstört werden
+        // TODO 1: destroyed bullets should not create an effect at the exit
+        // TODO 1: enemy bullets should always be destroyed
     }
 
 #endif

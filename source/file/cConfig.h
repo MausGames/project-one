@@ -18,7 +18,7 @@
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 // TODO 3: last-used input type might get disconnected, without reset
 // TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized to 0, but gets set to the set with the mouse-button when navigating menu with mouse
-// TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
+// TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> though you need so seee all buttons, so you understand fire-up, fire-down etc. (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
 // TODO 3: on very first startup, lowest resampler is selected, even when high sound quality is default (also do for quality settings, currently default value is just identical)
 
 

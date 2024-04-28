@@ -15,7 +15,7 @@
 // TODO 3: render wind, bubble, etc. in group for multiplayer
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
-// TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
+// TODO 3: large part of all sub-objects are constantly added and removed from glow, should be permanent (resurrect<>kill), and controlled with SetEnabled, also for tracker and P1
 
 
 // ****************************************************************

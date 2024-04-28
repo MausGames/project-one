@@ -85,19 +85,17 @@ void cCalorMission::__SetupOwn()
 
     // ################################################################
     // evade being attacked
-    // 2. group shows single-enemy split-up extended in 3. group
-    // first groups are positioned a bit from center, to give player a safe space to navigate among unpredictable enemy-evasion movements
-    // evasion needs visual feedback, especially on multi-jumper
-    // directly evading enemies evade diagonal, so evasion is valid from any attack-direction
-    // don't shoot while still at original position, will merge bullets especially on 3. group
-    // [deprecated] only disable collision while enemy is at original position, otherwise feels unfair when they fly through bullets
-    // [deprecated] multi-jumper needs to shoot late, to note cause immediate hit when moving into player
-    // multi-jumper should not start at the cross of last position of path-enemy
-    // multi-jumper should not move together again after splitting up
-    // next groups need to spawn (source, target) where player would not attack from/into the previous group
-    // uhrzeiger-gruppen haben die selbe winkel-geschwindigkeit, um sie leichter zu steuern
-    // in sternen-gruppe hat jeder seinen eigenen pfad, geht nur mit ungerader anzahl gegner
-    // enemies move smooth, flakes move flat
+    // - 2. group shows single-enemy split-up, extended in 3. group
+    // - first groups are positioned a bit from center, to give player a safe space to navigate among unpredictable enemy-evasion movements
+    // - evasion needs visual feedback, especially on multi-jumper
+    // - directly evading enemies should evade diagonal, so evasion is valid from any attack-direction
+    // - don't let enemies shoot while still at original position, otherwise will merge bullets especially on 3. group
+    // - multi-jumper should not start at the cross from last position of path-enemy
+    // - multi-jumper should not move together again after splitting up
+    // - next groups need to spawn (source, target) where player would not attack from/into the previous group
+    // - the clock group has the same angular speed to make it easier to control
+    // - (old: in star group, everyone has their own path, only goes with an odd number of enemies)
+    // - enemies move smooth, flakes move flat
     // TASK: collect all moving flakes
     // TASK: intercept every move by the jumping enemies
     // ACHIEVEMENT: destroy all enemies while your partner needs repair
@@ -655,20 +653,20 @@ void cCalorMission::__SetupOwn()
 
     // ################################################################
     // snowstorm makes the windscreen dirty
-    // player will evade snow after explosion, it will drive players away
-    // player can fly above the first group, to assume a more aggressive position
-    // enemy creating snow while moving makes him nearly immune, even with offset or timed creation, it also does not fit to the rest and adds no pressure
-    // low health, enemies are protected by snow
-    // 1-4: show bullet interaction
-    // 5-6: show slow down
-    // 7: ramp up, tease invert
-    // 8: invert
-    // creating bullets from walls did not feel good, it was just back-and-forth for the player
-    // creating snow without action (drops, avalanche, etc.) felt disconnected and random
-    // hiding enemies in the snow does not fit to the rest of the mechanic
-    // enemy at the bottom shows invert-blast, shows that not every enemy attacks, and adds a pause
-    // after some time, snow gets overwhelming and you cannot see changes anymore, so the invert-mechanic was able to help on that
-    // gegner schützen sich gegenseitig mit dem schnee den sie erzeugen
+    // - player will avoid snow after explosion, it will drive players away
+    // - player can fly above the first group, to assume a more aggressive position
+    // - enemy creating snow while moving makes him nearly immune, even with offset or timed creation, it also does not fit to the rest and adds no pressure
+    // - low health, enemies are protected by snow
+    // - 1-4: show bullet interaction
+    // - 5-6: show slow down
+    // - 7: ramp up, tease invert
+    // - 8: invert
+    // - creating bullets from walls or snow did not feel good, it was just back-and-forth for the player
+    // - creating snow without action (drops, avalanche, etc.) felt disconnected and random
+    // - hiding enemies (completely) in the snow does not fit to the rest of the mechanic
+    // - enemy at the bottom shows invert-blast, shows that not every enemy attacks, and adds a pause
+    // - after some time, snow gets overwhelming and you cannot see changes anymore, so the invert-mechanic was able to help on that
+    // - enemies protect each other with the snow they create
     // TASK: destroy all enemies under the snow
     // TASK: get stuck in snow
     // TASK EXTRA: collect all snowing objects
@@ -1131,22 +1129,22 @@ void cCalorMission::__SetupOwn()
 
     // ################################################################
     // everything moves against current direction
-    // kein infinity für gegner, schwer nachvollziehbar, könnte sich einer verstecken
-    // alle gegner im dungeon sind optional, man könnte einen verpassen und backtracking is unmöglich, portale sind fad, auf punkte achten!
-    // [deprecated] in dungeon tunnel, gegner dürfen sich nicht hinter einer geraden befinden, die werden sonst einfach mit-erschossen
-    // alle gegner im dungeon haben ihre eigene row, colum, und sind nicht identisch zwischen räumen
-    // gegner-anordnung sollen den spieler dazu bringen sich zu drehen, unterschied 90 (leicht) und 180 (schwer)
-    // erste gegner gruppe muss den spieler zum drehen bringen, während geschosse ihm noch nicht schaden zufügen können, aber schon gut sichtbar sind
-    // fallen an türen locken den spieler dort hin, und weil sie unterschiedlich sind weiß man wo man rein und raus gekommen ist
-    // gegner gruppen in den ersten zwei phasen müssen einen guten flow haben (mit augenmerk auf spieler-rotation), aufpassen, dass die nächsten gegner nicht gleich erschossen werden
-    // letzter gegner der zweiten phase muss den spieler zum dungeon-eingang leiten (dreht sich schon)
-    // eckiger tunnel im dungeon bereitet den spieler vor
-    // außerhalb des dungeons sollten keine gegner sein, außer einer, weil man sie sonst leicht verpassen kann
-    // bullets in dungeon are created in order to have consistent straight line overlap everywhere (bottom to top, left to right), corners are ignored and random though
-    // corners in dungeon have double-bullets, but they are important for collision handling
-    // collision handling in the dungeon is extremely unstable, and can fail with slightly different parameters, should be fixed or not reused (possible issues: player collision handling, bullet collision range (player needs to touch cluster), global move, bullet test order, cGame callback being called later, ...)
-    // background needs to move slower, to improve distinction with the moving bullets (could also be during a sandstorm, rainstorm or other visual distortion to completely remove the background movement)
-    // fullscreen arrow/cone distracts too much from chests and the target arrow
+    // - no infinity for opponents, difficult to understand, some could be hiding
+    // - all enemies in the dungeon are optional, you could miss one and backtracking is impossible, portals are boring, pay attention to points!
+    // - (old: in dungeon start-tunnel, opponents should not be behind a straight line, otherwise they will simply be shot when turning (though I think tat's good to show the dungeon movement))
+    // - all enemies in the dungeon have their own row, colum, and are not identical between rooms
+    // - enemy arrangement should make the player turn, distinguish between 90 (easy) and 180 (hard)
+    // - first enemy group has to make the player turn while bullets cannot yet do any damage to him, but are already clearly visible
+    // - traps on doors lure the player there, and because they are different you know where you got in and out
+    // - enemy groups in the first two phases must have a good flow (with attention to player rotation), be careful that the next opponents are not shot straight away
+    // - last enemy of the second phase must guide the player to the dungeon entrance (already rotating)
+    // - start-tunnel in dungeon prepares the player
+    // - there should be no enemies outside the dungeon (except a special one), otherwise you can easily miss them
+    // - bullets in dungeon are created in order to have consistent straight line overlap everywhere (bottom to top, left to right), corners are ignored and random though
+    // - corners in dungeon have double-bullets, but they are important for collision handling
+    // - collision handling in the dungeon is extremely unstable, and can fail with slightly different parameters, should be fixed or not reused (possible issues: player collision handling, bullet collision range (player needs to touch cluster), global move, bullet test order, cGame callback being called later, ...)
+    // - background needs to move slower, to improve visual distinction with the moving bullets (could also be during a sandstorm, rainstorm or other visual distortion to completely remove the background movement)
+    // - fullscreen arrow/cone (to show the current move direction) distracts too much from chests and the target arrow
     // TASK: collect hidden treasure-boxes in dungeons (open up when flying over it)
     // TASK: destroy secret enemy at the back of the initial room
     // ACHIEVEMENT: create a prison with a maximum size of 4x4 bullets
@@ -1842,22 +1840,21 @@ void cCalorMission::__SetupOwn()
 
     // ################################################################
     // stick to one side and stay there
-    // side movement of galaga groups helps to attack them even when they attack directly
-    // splitting side-groups to 4-4-4-4 (instead of 8-8) makes it easier to prevent getting hit
-    // wenn man bei den seiten-gegnern im letzten moment umschwenkt und drauf hält, muss man überleben, der cross-point soll sich nicht bewegen (beware of coop)
-    // gegner können sich nicht zu schnell in/gegen flugrichtung bewegen, man nimmt sie nicht war wegen dem schnellen boden
-    // hat nicht funktioniert: pang (boring + slow), flip speed (too unpredictable crashing into stuff), rotate (there was no meaningful mechanic, just visual, player-controlled needs incentive and this is only done by shooting along border)
-    // erste gruppe soll dog-fight feeling vermitteln
-    // items als task einsammeln is orsch, da ein degree of freedom fehlt, und man warten muss bis die items auf die eigene achse fallen
-    // in galaga, only the bottom enemies shoot, but ignoring it here creates a better bullet-pattern
+    // - side movement of galaga groups helps to attack them even when they attack directly
+    // - splitting side-groups to 4-4-4-4 (instead of 8-8) makes it easier to prevent getting hit
+    // - if you switch at the lat moment on the side-moving enemies and keep shooting, you have to survive, the cross-point should not move (beware of coop)
+    // - enemies cannot move too quickly in the direction of flight, you don't notice them because of the fast background
+    // - did not work: pang (boring + slow), flip speed (too unpredictable crashing into stuff), rotate (there was no meaningful mechanic, just visual, player-controlled needs incentive and this is only done by shooting along border)
+    // - the first group should feel like a dog-fight
+    // - collecting items as a task is difficult because there is one degree of freedom missing and you have to wait until the items fall on your axis
+    // - in galaga, only the bottom enemies shoot, but ignoring it here creates a better bullet-pattern
     // TASK: destroy the UFO
     // TASK: reach the top, while on full speed, with back-fire push
     // ACHIEVEMENT: destroy all regular enemies while shooting down
-    // TODO 5: badge: order on first tontaubenschießen
-    // TODO 5: badge: irgendwas mit/wärend dem helper am ende
-    // TODO 5: badge: gegner dropen items die nach unten fliegen, wie in anderen shmups
-    // TODO 1: hardmode: richtung ändert sich ständig
-    // TODO 1: hardmode: man wird regelmäßig raufgeschleudert
+    // TODO 5: badge: order on first skeet-shooting
+    // TODO 5: badge: something with/during the helper at the end
+    // TODO 1: hardmode: direction changes all the time
+    // TODO 1: hardmode: you get tossed up on a regular basis
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2301,28 +2298,28 @@ void cCalorMission::__SetupOwn()
 
     // ################################################################
     // smaller stone is dragged by player with chain
-    // 2: should align with swing-direction, which is easier to hit because swing-direction is against fly-direction
-    // 3: clustered enemies should feel like hitting a brick-building with a wrecking ball
-    // 8: removing bullet-carpet is really satisfying (feedback)
-    // bullet-carpet pattern needs to make vertically moving enemies visible within
-    // bullet-carpet needs to move slower, in relation to swing-speed
-    // enemies within bullet-carpet should not shoot
-    // temporarily loose ability to remove bullet-carpet to scare and pressure player shortly
-    // enemies only come from above, to improve the feeling of facing an army
-    // attacks should stay local to enemies, the difficulty is attacking and navigating around enemies without getting hit from their local attacks
-    // in coop, captured enemies need to be usable on the whole screen, e.g. transfer to other player
+    // - 2: should align with swing-direction, which is easier to hit because swing-direction is against fly-direction
+    // - 3: clustered enemies should feel like hitting a brick-building with a wrecking ball
+    // - 8: removing bullet-carpet is really satisfying (feedback)
+    // - bullet-carpet pattern needs to make vertically moving enemies visible within
+    // - bullet-carpet needs to move slower, in relation to swing-speed
+    // - enemies within bullet-carpet should not shoot
+    // - temporarily loose ability to remove bullet-carpet to scare and pressure player shortly
+    // - enemies only come from above, to improve the feeling of facing an army
+    // - attacks should stay local to enemies, the difficulty is attacking and navigating around enemies without getting hit from their local attacks
+    // - (old: in coop, captured enemies need to be usable on the whole screen, e.g. transfer to other player)
     // TASK: do enough damage to Zeroth before time runs out
     // TASK: attack specific targets with your normal weapon
     // ACHIEVEMENT: in coop only capture enemies with a single player
     // COOP: dirrection of both morning stars is different
     // TODO 1: hardmode: enemies keep attacking while being swung
     // TODO 1: hardmode: permanent bullets from top
-    // TODO 5: badge: zerstöre N bullets mit morgenstern (+ anzeige, aber erst am ende)
+    // TODO 5: badge: destroy N bullets with morning star (+ display, but only at the end)
     // TODO 5: badge: some enemies are paired (swing one on the other), only once
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         
-        // TODO 1: nur cleanup
+        // TODO 1: only cleanup
         for(coreUintW i = 0u; i < CALOR_STARS; ++i)
         {
             if(m_apStarOwner[i] && (m_apStarOwner[i] != &m_Zeroth) && !m_iStarSwing)
@@ -2685,15 +2682,15 @@ void cCalorMission::__SetupOwn()
 
     // ################################################################
     // keep shooting and charge it (astral chain)
-    // gegner müssen so positioniert sein, dass du vom king ablassen musst
-    // first few orbs need to introduce player to orb-charge, and orb-attack (TODO 1: and orb-shrink if possible)
-    // orb must shrink fast enough, to make it meaningful
-    // gegner links und rechts vom king dürfen nicht zu nah sein, sonst schießt man sie unabsichtlich ab beim ausweichen
+    // - enemies must be positioned in such a way that you have to let go of the king
+    // - first few orbs need to introduce player to orb-charge, and orb-attack (TODO 1: and orb-shrink if possible)
+    // - orb must shrink fast enough, to make it meaningful
+    // - enemies to the left and right of the king should not be too close, otherwise you will accidentally shoot them while dodging
     // TODO 1: force bullet order ? red more important ?
     // TODO 1: continuous sound to improve understanding grow<>shrink
-    // TODO 1: funkten bei ball-aufladung in welle verwandeln ?
+    // TODO 1: turn sparks into waves when the ball is charged ?
     // TODO 1: beginnt sich ab nem bestimmten orb zu bewegen (vaus ball ?) ?
-    // TODO 1: how to practically introduce orb shrinking ? durch (leichte) bewegung ?
+    // TODO 1: how to practically introduce orb shrinking ? through (light) movement ?
     // TODO 1: do not remove energy-effect on king after resurrection ?
     // TODO 1: maybe he is caught in an ice block
     // TODO 1: rotate (all balls) helper around enemy to highlight state

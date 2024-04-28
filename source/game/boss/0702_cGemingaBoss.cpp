@@ -8,24 +8,24 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// pillen und pacman aussehen passen sehr gut zusammen
-// using teleporter was too complicated, either you had to attack boss and attack teleporter at the same time, which was just too much, or if teleporter used as "don't hit them", hitting them completely confuses the player
-// man muss merken, dass die sichtbarkeit der bumeränge kürzer wird, thresholds entsprechend setzen
-// erste phase soll einleiten, und auch zeigen, dass du dem boss keinen schaden zufügen kannst, während sein mund geschlossen ist
-// geschosse in einsaug-phase sollten den mund so verdecken, dass es keinen safe-spot geben kann
-// dharuk sollte sich nicht zu schnell bewegen, weil es schon schwer genug ist ihn gut zu treffen
-// dharuk sollte in letzter phase nicht mehr unsichtbar werden, weil das duplicate eh schon zu sehr ablenkt
-// seiten-geschosse bei dharuk sind einfach zu verarbeiten als gezielte geschosse oder rundum geschosse, es sollte aber nur 1 geschoss-loch vorhanden sein, weil das präzise lineare durch-fliegen vom feeling her guten kontrast zum freien positionieren zwischendurch hat (die seiten-geschosse passen auch gut zum spawning aus allen 4 richtungen)
-// der erste abschnitt dreht sich um fressen, der zweite um dharuk, der dritte ums aufteilen
-// orange geschosse sollten bis zum rand gehen, aber bei abwechselnden schießen wird das nur von einer der beiden hälften gemacht ohne es komplett zu überspannen
-// stampf-phase geht nur auf einer ache, um die achse zu verändern müsste der boss in die mitte springen
-// pearls sollten so erzeugt werden, dass ihre animation eine schöne welle erzeugt (in bewegungs-richtung vom boss)
+// - pearls and pacman appearance fit very well together
+// - (old: using teleporter was too complicated, either you had to attack boss and attack teleporter at the same time, which was just too much, or if teleporter used as "don't hit them", hitting them completely confuses the player)
+// - you have to notice that the visibility of the boomerangs is becoming shorter, set thresholds accordingly
+// - first phase is meant to introduce, and also to show that you can't do any damage to the boss while his mouth is closed
+// - bullets in vacuum phase should cover the mouth in such a way that there can be no safe spot
+// - Dharuk shouldn't move too fast because it's already hard enough to hit him properly
+// - (old: Dharuk should not become invisible in the final phase, because the duplicate is already too distracting)
+// - side bullets from Dharuk are easier to process than targeted bullets or around bullets, but there should only be 1 bullet hole because the precise linear fly-through has a good feel in contrast to the free positioning in between (the side bullets fit also good for spawning from all 4 directions)
+// - the first section is about eating, the second about Dharuk, the third about separation
+// - orange bullets should go all the way to the edge, but when shooting alternately this is only done from one of the two halves without completely spanning it
+// - the stomp phase only works on one axis, to change the axis the boss would have to jump into the middle
+// - pearls should be created in such a way that their animation creates a nice wave (in the direction of movement from the boss)
 // ACHIEVEMENT: collect your first pearl without reflecting a bullet
-// TODO 1: hardmode: pacman geister die einen verfolgen
-// TODO 1: hardmode: generate fields die eine (simple) (unsichtbare) arena bilden
-// TODO 1: lebenspunkte des inneren bosses sollten sichtbar werden (entweder zweiter bar, der separat gesteuert werden kann, oder ausblenden boss life 1, einblenden boss life 2 (mit hoch-animieren), oder shared life, anpassen der health-grenzen und anwenden auf geminga)
+// TODO 1: hardmode: pacman ghost which hunt you
+// TODO 1: hardmode: generate fields which form a (simple) (invisible) arena
+// TODO 1: health points of the inner boss should be visible (either second bar, which can be controlled separately, or hide boss life 1, show boss life 2 (with up-animation), or shared life, adjust the health limits and apply to geminga)
 // TODO 1: player bullets shot into mouth should be on the same visual height
-// TODO 1: repair-enemy wird beim einsaugen und ausspucken über boss gezeichnet, boss kann aber nicht TOP gesetzt werden, wegen partikel-effekte, repair-enemy muss angepasst werden (render-order oder size)
+// TODO 1: repair-enemy is rendered over boss when sucking in and spitting out, but boss cannot be set to TOP because of particle effects, repair-enemy has to be adjusted (render order or size)
 
 
 // ****************************************************************

@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO 5: torus erzeugt am anfang den ball (mit charge und rückstoß-spin effekt), kann abgeschossen werden, bringt sich aber nix (?)
+// TODO 5: Torus creates the ball at the beginning (with charge and recoil-spin effect), can be shot, but does nothing (?)
 
 
 // ****************************************************************

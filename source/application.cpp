@@ -45,7 +45,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray_volume.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");  // TODO 1: kann man wieder hinzufügen wenn triangle-sphere intersection implementiert wurde (+ _volume weg?), CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");  // TODO 1: can be added again if triangle-sphere intersection has been implemented (+ remove _volume ?), CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb_volume.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
@@ -112,7 +112,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_penta_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_penta_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
-    Core::Manager::Resource->Load<coreModel>  ("object_sphere_center.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere_center.md3");   // TODO 1: wegen bonus mission, noch benötigt?, CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_sphere_center.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere_center.md3");   // TODO 1: for bonus mission, still required?, CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_spike.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_spike.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3");   // TODO 1: CORE_MODEL_LOAD_NO_CLUSTERS ?
     Core::Manager::Resource->Load<coreModel>  ("object_sting.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sting.md3", CORE_MODEL_LOAD_NO_CLUSTERS);

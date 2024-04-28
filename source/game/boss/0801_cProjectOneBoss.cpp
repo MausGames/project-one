@@ -19,85 +19,85 @@
 // - white:   [66] transition, transition, transition, transition, transition
 // - intro:   phase
 
-// boss should use absolutely all mechanics from the game (so far), a color for every mission and its mechanics, with new combinations and twists, this makes the fight extremely long (>12 min), but it is possible to scale by reducing the required number of colors the player has to beat
+// - boss should use absolutely all mechanics from the game (so far), a color for every mission and its mechanics, with new combinations and twists, this makes the fight extremely long (>12 min), but it is possible to scale by reducing the required number of colors the player has to beat
 // TODO 1: (remove turf from base classes)
-// TODO 1: hard mode: add another mechanic to each sub-stage, spieler muss in der letzten phase doch angreifen
+// TODO 1: hard mode: add another mechanic to each sub-stage, player needs to attack in last phase
 // TODO 1: hard mode: turf
 
 // yellow:
-// spikes sollten so lang aktiv sein, dass es für den spieler wichtig ist seine position dem auf-und-ab der spikes anzupassen
-// rotation der circle-ghosts ist gegen die rotation der moles
-// spikes sollten nicht parallel zur zweiten ghost gruppe fliegen
-// spikes sollten oben anfangen und langsam beschleunigen
-// letting the last ghost spawn the boss adds another dimension to player-positioning based on the spikes
+// - spikes should be active long enough that it is important for the player to adapt his position to the up and down of the spikes
+// - rotation of the circle ghosts is against the rotation of the moles
+// - spikes should not fly parallel to the second ghost group
+// - spikes should start at the top and accelerate slowly
+// - letting the last ghost spawn the boss adds another dimension to player-positioning based on the spikes
 // TODO 1: (badge: activate all spikes)
 
 // orange:
-// placing way-blocks between orbs felt too clunky and not fluid enough
-// placing player on orb-line and move orb-line with shooting felt forced and made attacking the boss very unsatisfying
-// orb should spawn from a place where player is not shooting to, otherwise it will be hidden (so boss leaves on right, and orb spawns from left)
-// way-block direction should generally be the same as their spawning-location, to make it more comprehensible
-// in way-block phase, "falscher" block sollte nach richtigen (selbe seite) kommen und max 90 grad unterschied haben
-// in way-block phase, 4er block kann nur mit ner pause davor kommen, is sonst too much
-// in fang phase, animationen schauen linear und ohne gleichzeitige bewegung am besten aus, wie ein schiebe-puzzle (obwohl nicht das gleiche)
-// bullets in letzter phase sollten nicht zu dicht sein, durch die reduzierung des spiel-felds wird es eh immer schwerer
+// - placing way-blocks between orbs felt too clunky and not fluid enough
+// - placing player on orb-line and move orb-line with shooting felt forced and made attacking the boss very unsatisfying
+// - orb should spawn from a place where player is not shooting to, otherwise it will be hidden (so boss leaves on right, and orb spawns from left)
+// - way-block direction should generally be the same as their spawning-location, to make it more comprehensible
+// - in way-block phase, "wrong" block should come after correct block (same side) and have a maximum difference of 90 degrees
+// - in way-block phase, block of 4 should only come with a break beforehand, otherwise it's too much
+// - in fang phase, animations look best linear and without simultaneous movement, like a sliding puzzle (although not the same)
+// - bullets in the last phase shouldn't be too dense, when the playing field is reduced it becomes increasingly difficult anyway
 
 // red:
-// second corpse pattern can start later, to give player time to understand first swap-teleportation
-// using a cone-light to show generates was too easy, as player can just spin around all the time, so it made sense to switch to a short point-light
-// boss sollte in letzter phase nicht auch noch selbst angreifen (auch wenns komisch aussieht), weil es einfach too much ist, fokus sollte auf gute seiten-patterns sein
+// - second corpse pattern can start later, to give player time to understand first swap-teleportation
+// - using a cone-light to show generates was too easy, as player can just spin around all the time, so it made sense to switch to a short point-light
+// - boss shouldn't attack himself in the last phase (even if it looks strange), because it's simply too much, focus should be on good side patterns
 
 // magenta:
-// tried to split the screen again instead of rotating, and however I tried (different factors, movement, various axis), everything just sucks, the teleportation-aspect is just too unpredictable and watching two points is just too much
-// bullets between phases need to be removed, because of gravity-mechanic creating inconsistent transitions (gravity phase starts with bullets not affected or being affected and overwhelming player, and ends with bullets not affected anymore)
-// direction plates sollten nur blau sein, weil die rote platte sich mit dem magenta background und roten gravity waves zu sehr vermischt
-// similar to Messier boss, meteors should not reflect bullets
-// TODO 1: (badge: alle meteoriten abschießen/entfärben)
+// - tried to split the screen again instead of rotating, and however I tried (different factors, movement, various axis), everything just sucks, the teleportation-aspect is just too unpredictable and watching two points is just too much
+// - bullets between phases need to be removed, because of gravity-mechanic creating inconsistent transitions (gravity phase starts with bullets not affected or being affected and overwhelming player, and ends with bullets not affected anymore)
+// - (old: direction plates should only be blue, because the red plates mix too much with the magenta background and red gravity waves)
+// - similar to Messier boss, meteors should not reflect bullets
+// - TODO 1: (badge: hit/desaturate all meteors)
 
 // purple
-// all bullet types need to be present in some way
-// phases: attack from everywhere, from top with slower sub, from right with faster sub, still linear attack, moving circular attack
-// first wave (survival wave) should use the same movement pattern as the very first enemy group (though slight differences are allowed, but pattern should be identical)
-// view-bullets should come from the side (side-scroller), to differentiate stronger from the wave-bullets (vert-scroller)
-// quad bullet also need some very slow ones which stay long in the middle, to give additional obstacles when flying around boss (long enough)
-// triangle bullets need to be dense enough to make it hard to evade them across half of the screen
+// - all bullet types need to be present in some way
+// - phases: attack from everywhere, from top with slower sub, from right with faster sub, still linear attack, moving circular attack
+// - first wave (survival wave) should use the same movement pattern as the very first enemy group (though slight differences are allowed, but pattern should be identical)
+// - view-bullets should come from the side (side-scroller), to differentiate stronger from the wave-bullets (vert-scroller)
+// - quad bullet also need some very slow ones which stay long in the middle, to give additional obstacles when flying around boss (long enough)
+// - triangle bullets need to be dense enough to make it hard to evade them across half of the screen
 
 // blue:
-// geschoss-wände in erster phase fungieren als tore durch die der spieler im richtigen zeitpunkt hindurch muss
-// schnee sollte nicht in finale phase mitgenommen werden, weil er unter dem violettem bullet-teppich sehr schwer zu erkennen ist, und ausweichmanöver (unerwartet) behindert
-// bullet-teppich mit unterschiedlichen richtungen gleichzeitig (oben nach rechts, unten nach links) war extrem verwirrend zu navigieren, man hat löcher verpasst und konnte dann nicht mehr ausweichen
-// blaue kugel sollte nicht zu schnell sein, weil der spieler ihre bewegung dann nicht mehr präzise genug kontrollieren kann
-// TODO 1: schnee sollte interpoliert erzeugt werden
+// - bullet-walls in the first phase act as gates through which the player must pass at the right time
+// - snow should not be kept into the final phase, because it is very difficult to see under the purple carpet of bullets and (unexpectedly) hinders evasive maneuvers
+// - bullet-carpet with different directions at the same time (up to the right, down to the left) was extremely confusing to navigate, you missed holes and then couldn't dodge anymore
+// - the blue ball should not be too fast, because the player will then no longer be able to control its movement precisely enough
+// TODO 1: snow should be created with interpolation
 
 // cyan:
-// cyan residue kann nicht verwendet werden, weil es mit dem cyan background verschwimmt
-// bomben sollten abwechselnd gerade und schräg liegen, auch auf selber höhe
-// zeit zwischen sturmflug bei platten-phase gibt dem spieler zeit zu denken und sich zu bewegen, und der schnelle flug vom gegner fühlt sich intensiver an
-// platten-phase sollte mit muster starten, weil es sonst zu leicht ist
-// boss in platten-phase sollte nur entlang einer achse fliegen, um seine platten-interaktion berechenbarer zu machen
-// the last phase feels like swimming in water
-// die drehung des bosses und des pfeils sind wie eine uhr, um die richtung berechenbarer zu machen
-// grow bullets sollten die mitte nicht berühren, der boss sollte immer angreifbar sein (auch wenn nur knapp)
+// - cyan residue bullets cannot be used, because it blurs with the cyan background
+// - bombs should be placed alternately straight and diagonally, even at the same height
+// - time between charges during plate phase gives the player time to think and move, and the fast charge from the boss feels more intense
+// - plate phase should start with a pattern, otherwise it is too easy
+// - boss in plate phase should only fly along one axis to make his plate interaction more predictable
+// - the last phase feels like swimming in water
+// - the rotation of the boss and the arrow are like a clock to make the direction-change more predictable
+// - grow bullets should not touch the center, the boss should always be vulnerable (even if just barely)
 
 // green:
-// geschwindigkeit vom violettem laser muss sehr langsam anfangen und erst spät schnell werden um diese phase in zwei sub-phasen mit weichem übergang zu teilen (fly free, get dragged)
-// bei hoher laser geschwindigkeit muss der spieler durch bewegung entlang des lasers versuchen den geschossen auszuweichen
-// both lasers having different speeds sounds interesting, but it negatively affects attacking the boss, making it very annoying
-// moving bullets during transition feel much more dynamic than frozen bullets, especially combined with the movement-interaction
-// boss should only charge from a single direction, otherwise player cannot plan his evasive maneuvers (which are hard in this phase), and can become very confused when boss suddenly appears from somewhere else than expected
-// bullets in schild-phase sollten eher den spieler am movement hindern, weswegen sie langsam und dicht sind
-// spieler kann an den schild-ecken in alle richtungen fliegen, aber das is in ordnung (weil logisch), besonders solange die geschosse normal blockiert werden
-// started first with free moving shields, and 45 degree shields, but the fixed labyrinth felt much more interesting in combination with the jump mechanic
-// 4x4 labyrinth was a bit too much, and the distance between player and boss for attacks was too short, even with a lower bullet density than now
+// - speed of the violet laser should start very slowly and only become fast later in order to divide this phase into two sub-phases with a smooth transition (fly free, get dragged)
+// - at high laser speeds, the player must dodge bullets by moving along the laser
+// - both lasers having different speeds looks interesting, but it negatively affects attacking the boss, making it very annoying
+// - moving bullets during transition feel much more dynamic than frozen bullets, especially combined with the movement-interaction
+// - boss should only charge from a single direction, otherwise player cannot plan his evasive maneuvers (which are hard in this phase), and can become very confused when boss suddenly appears from somewhere else than expected
+// - bullets in shield phase should rather prevent the player from moving around, which is why they are slow and dense
+// - player can fly in all directions at the shield corners, but that's okay (because it is logical), especially as long as player bullets are blocked normally
+// - tried out free moving shields, and 45 degree shields, but the fixed labyrinth felt much more interesting in combination with the jump mechanic
+// - 4x4 labyrinth was a bit too much, and the distance between player and boss for attacks was too short, even with a lower bullet density than now
 
 // white:
-// boss should end with the final bullet-wave, upcoming events should not count to the time-bonus, and should not be disturbed with the time-bonus popup
-// background should not be too bright, otherwise bullets become harder to see
-// TODO 1: einzelne bullet phasen dokumentieren
+// - boss should end with the final bullet-wave, upcoming events should not count to the time-bonus, and should not be disturbed with the time-bonus popup
+// - background should not be too bright, otherwise bullets become harder to see
+// TODO 1: add documentation for individual bullet phases
 
 // intro:
-// soll nur zum aufwärmen sein, nicht zu schwer und nicht zu lang
-// boss sollte permanent schießen
+// - should just be a warm-up, not too heavy and not too long
+// - boss should shoot permanently
 
 
 // ****************************************************************

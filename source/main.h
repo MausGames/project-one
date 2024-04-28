@@ -53,11 +53,11 @@
 // TODO 2: prevent shaking of center-aligned rectified animated text (did I mean something like seconds?)
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 // TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
-// TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
-// TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
+// TODO 3: menu outlines broken in transition at 1759x990 (generally at [odd X even]), menu line objects shift their texture -> resolution must remain the same X=Y, so position shift should be implemented (but then also ALL 2D objects?)
+// TODO 4: if possible, static variables in functions should be pulled out so that an init check is not constantly done
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
-// TODO 3: sphere model kann ungenau sein (visual), vor allem bei der area-bubble bei P1 magenta phase
-// TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
+// TODO 3: sphere model can be inaccurate (visually), especially with the area-bubble in the P1 magenta phase
+// TODO 3: arrows of the switch boxes are slightly vertically shifted at 1920x1080
 // TODO 1: [MF] [HIGH] [ULTRA] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
 // TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select (shoot speed, shoot damage, move speed, score multiplier, player size, player bullet size, enemy size, enemy bullet size, enemy bullet/attack speed, enemy speed, side-modifier (more damage to the right), extra/minus life, extra/minus shield, ...)
 // TODO 4: cleanup badge difficulty and index mixup
@@ -65,19 +65,19 @@
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
 // TODO 5: plant movement
-// TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (HANDLE EXHAUST) (maybe with separation of active-list), eine liste für shadow
+// TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (HANDLE EXHAUST) (maybe with separation of active-list), one list for shadow
 // TODO 3: improve big boss explosion: Sakurai https://www.youtube.com/watch?v=ZDopYzDX-Jg   https://youtu.be/D-4RsUI3ZNI?t=246   energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
 // TODO 1: [MF] praise the player ! https://www.youtube.com/watch?v=fryDyXROp8A
 
 // Public Feedback and Suggestions:
 // TODO 3: improve player ship visuals
 // TODO 3: improve bloom without affecting visibility, or make configurable
-// TODO 3: D4Windows anschauen, ob sie maus steuert und controller gleichzeitig verwendet (vielleicht wegen gyro oder accelerometer ?)
+// TODO 3: check D4Windows to see if it controls mouse and controller at the same time (maybe because of gyro or accelerometer?)
 
 // Merged List:
 // TODO 3: add more details to cloud background (transparent enemy ships far in the back ? like Ikagura and RSG)
-// TODO 3: einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
-// TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?) multiplicative blending
+// TODO 3: a different bottom-background in the cloud level? city, different texture, outdoor?
+// TODO 3: something needs to be done if the player hitboxes overlap (maybe not possible, push?) multiplicative blending
 
 // Cleanup Task List:
 // TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet

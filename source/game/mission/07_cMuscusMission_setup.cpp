@@ -95,34 +95,34 @@ void cMuscusMission::__SetupOwn()
 
     // ################################################################
     // ghost enemies only move when nobody is looking
-    // gegner müssen "mehr" machen wenn sie im schatten sind, damit sich die dunkel-phase lohnt
-    // kontinuierliche geschosse erzeugen eine sich windende schlange, ist aber leicht zu erraten
-    // kleine wellen von aktueller position ist wesentlich subtiler, und extrem erschreckend wenn das licht aus ist
-    // geschosse sollen nur navigation erschweren, wenn ich auf der linie des gegners bin sollt ich ihn angreifen können, ohne dass mir ein geschoss im weg steht
-    // waiting time before and after the light goes out, to comprehend the situation, enemy starts far away and "taps" to the player, to emphasis the situation and give enough time for the player to react
-    // dicker gegner (am ende) kann überraschen
-    // wenn gegner außerhalb des lichts von anfang an sichtbar sind, wird die ganze spannung weggenommen (die mechanik wird nicht voll ausgereizt), wenn sie unsichtbar sind muss man ihre position aber erraten können (geschosse)
-    // wenn gegner sich anders verhalten innerhalb und außerhalb licht, kommt das nicht zur geltung (zu kurz), da innerhalb des lichts auch gleich getötet wird
-    // flucht vor licht (und spieler) ist nervig wenn man versucht auf die gegner zu zielen
-    // mehrere verfolgende gegner konvergieren zu stark auf den gleichen pfad
-    // bei 6x6 gruppe sollte das erste ziel am mittleren rand anfangen (um leichter gefunden zu werden), aber nicht dort wo man abhängig von der vorherigen gruppe hinschießen würde
-    // in the 6x6 wave, having enemies stay disappeared instead of appearing again when looking away is much more comprehensible, and removes some back-and-forth animation issues
-    // gegner in der 6x6 gruppe sollten nicht ganz am rand sein, weil sie sonst nicht gut auffallen
-    // no collision with player, which makes 6x6 easier
-    // the two single snakes and the jumping enemy are right-left-right
-    // there should be a pause after the first big enemy, due to the high shooting frequency requiring the player to navigate to safety first
-    // in the on-and-off scenario at the end it should be possible to light-up two enemies in a row if fast enough
-    // erster gegner muss weit am rand sein (um die unsichtbarkeits mechanik zu erklären), und sich bewegen (um auch gleich die beziehung mit den geschossen als positions-indikator zu erklären), zweiter gegner muss weit weg vom ersten sein
-    // beim teleporter gegner sollte die nächste position nicht zu nah am kreuz der vorherigen position sein, beachte den lichtkegel
-    // currently blending-in and blending-out is binary (which is much smoother), except in 6x6 wave, where it gets mixed with the lerp-value, to make sure no enemy is visible inside the cone
+    // - enemies have to do “more” when they are in the shadows to make the dark phase worth it
+    // - continuous bullets create a winding snake, but it's easy to guess
+    // - small bullet waves from current position is much more subtle, and extremely frightening when the lights are turned off
+    // - (old: bullets are only supposed to make navigation more difficult, if I'm on the enemy's line I should be able to attack him without a bullet standing in my way)
+    // - waiting time before and after the light goes out, to comprehend the situation, enemy starts far away and "steps" to the player, to emphasise the situation and give enough time for the player to react
+    // - big opponent (at the end) may surprise
+    // - if enemies outside of the light are visible from the start, all the tension is taken away (the mechanic is not fully utilized), but if they are invisible you have to be able to guess their position (bullets)
+    // - if enemies behave differently inside and outside the light, this doesn't properly show up (too short), because inside the light they get immediately killed
+    // - enemies trying to avoid the light or to escape from it is very annoying (when you try to aim at the enemies)
+    // - multiple pursuing enemies converge too much on the same path
+    // - in the 6x6 wave, the first target should start near the middle (to be easier to find), but not where you would shoot depending on the previous group
+    // - (old: in the 6x6 wave, having enemies stay disappeared instead of appearing again when looking away is much more comprehensible, and removes some back-and-forth animation issues)
+    // - enemies in the 6x6 wave shouldn't be at the very edge, otherwise they won't be noticed
+    // - no collision with player, which makes 6x6 easier
+    // - the two single snakes and the teleporting enemy are right-left-right
+    // - there should be a pause after the first big enemy, due to the high shooting frequency requiring the player to navigate to safety first
+    // - (old: in the on-and-off scenario at the end it should be possible to light-up two enemies in a row if fast enough)
+    // - the first enemy should be far to the edge (to explain the invisibility mechanic) and move (to also explain the relationship with the bullets as a position indicator), the second enemy should be far away from the first
+    // - for the teleporting enemy, the next position should not be too close to the cross of the previous position, pay attention to the light cone
+    // - currently blending-in and blending-out is binary (which is much smoother), except in 6x6 wave, where it gets mixed with the lerp-value, to make sure no enemy is visible inside the cone
     // TASK: destroy all hidden enemies
     // TASK: touch an invisible enemy
     // TASK EXTRA: charge the sun
     // ACHIEVEMENT: destroy 5 enemies while no light is shining on them
     // COOP: active light alternates between players
     // TODO 5: badge: let them all stare at you (keep all in 6x6 visible for 1 second)
-    // TODO 5: badge: etwas einsammeln/berühren, dass man nur mit licht sieht, nur in bestimmter phase, N items
-    // TODO 1: hardmode: zusätzliche Mario geister die man nicht töten kann (vlt. nur einer)
+    // TODO 5: badge: collect/touch something that you can only see with light, only in a certain phase, N items
+    // TODO 1: hardmode: additional Mario ghosts that cannot be killed (maybe only one)
     // TODO 1: disable shadow and water-reflection (completely) for segments in darkness, to hide popping artifacts (though only for shadow)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -683,26 +683,25 @@ void cMuscusMission::__SetupOwn()
 
     // ################################################################
     // damaging fields hide themselves (d/generation)
-    // idea: field chases player and gets visible regularly (often)
-    // idea: snake
-    // idea: linien auf allen 4 seiten die sich unsichtbar richtung mitte bewegen (außen-blöcke sichtbar)
-    // idea: block in enemy
-    // enemies should be aligned to same boundary as blocks, at least the still ones
-    // alle blöcke sollten raster-aligned sein, wenn möglich
-    // grow kann ich nicht machen, der spieler muss die größe einschätzen können, somit muss sowohl größe als auch geschwindigkeit konstant bleiben
-    // spieler muss nicht sehen wie jeder block aus bild geht, lenkt nur ab, und ist eh klar wenn intro-block sichtbar bild verlässt
-    // wenn sich gegner bewegen, entweder mit dem muster, oder 90/180 zum muster (wird derzeit nicht eingehalten)
-    // blöcke zu verfolgen ist mental schon sehr komplex, weswegen man die twists in grenzen halten sollte
-    // gegner die mit den blöcken moven können ruhig mehr life haben, weil spawning eh im rythmus stattfindet
-    // bei übergang zu links-rechts welle muss spieler in die mitte gedrängt werden, wegen des plötzlichen richtungs-wechsel
+    // - all blocks should be grid aligned if possible
+    // - enemies should be aligned to same grid as blocks, at least the still ones
+    // - blocks cannot be grown, the player has to be able to estimate the size, so both size and speed have to remain constant
+    // - the player doesn't have to see how each block leaves the screen, it's just distracting, and it's clear anyway when the intro block leaves the screen visible
+    // - when enemies move, they should either with the pattern, or 90/180 to the pattern (currently not)
+    // - pursuing blocks is mentally very complex, which is why you should keep the twists to a minimum
+    // - on transition to left-right wave, player has to be pushed into the middle because of the sudden change in direction
     // TASK: touch all diamond fields
     // TASK: spin once against direction of last line
     // ACHIEVEMENT: finish the stage without ever letting a damaging field disappear
-    // TODO 5: badge: show arrows how to pass through holes ##
-    // TODO 5: badge: attack enemies in certain order in last wave oder left-right oder up-down wave, oder in einzel-wave davor
+    // TODO 5: badge: follow arrows which show how to pass through holes
+    // TODO 5: badge: attack enemies in certain order in last wave or left-right or up-down wave or in single-wave
     // TODO 5: badge: get N blocks (count-down) at N places at the bottom
-    // TODO 1: hard mode: alles 45 grad gedreht
-    // TODO 1: hard mode: der rand is mit generates zugedeckt (man sieht die ecken?)
+    // TODO 1: hard mode: everything rotated by 45 degrees
+    // TODO 1: hard mode: the edge is covered with blocks (can you see the corners?)
+    // TODO 5: idea: field chases player and gets visible regularly (often)
+    // TODO 5: idea: snake
+    // TODO 5: idea: lines on all 4 sides that move invisibly towards the middle (outer blocks visible)
+    // TODO 5: idea: block in enemy
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep        = 0.275f;
@@ -1313,27 +1312,27 @@ void cMuscusMission::__SetupOwn()
 
     // ################################################################
     // collect lots of shiny pills (pacman, snake)
-    // idea: enemy has orb shield or tail you need to collect
-    // idea: bouncing pearls (linear, not gravity, like pong)
-    // in the chain-stage, balls need to be far enough apart to not accidentally spawn ball into player
-    // enemy should die with the impact of the last ball, not require the player to attack, to remove confusion and delay
-    // ball animations need to be in a sequential pattern
-    // the combination of collecting stuff and shooting at stuff was a disaster (because of the requirement to collect everything to advance), it was possible to give collecting a meaning, by causing "changes" (e.g. enemy invincibility), but it felt very sluggish (A, B, A, B), also enemies dropping the balls cause players to move into enemies while killing (for speed) which felt forced
-    // the first wave of pearls cannot be evaded, to show that they can be collected
-    // enemy flying in circle should not be too fast, as otherwise you cannot get out anymore behind him
-    // bouncy balls sollten nicht zu niedrig bouncen (sonst zu leicht), und konsistente X geschwindigkeit haben (sonst zu schwer, bräuchten alle andere bewegungs-geschwindigkeit vom spieler)
-    // von unten kommende bouncy balls sollten nicht zu nah am rand sein, schaut besser aus und is angenehmer zu fangen wenn man einen (am rand) verpasst
-    // geschoss-abstände bei den kontinuierlichen angriffen sollten breit genug sein, damit man durch kann, aber nicht zu breit um gefährlich/blockierend zu bleiben, vor allem beim folgenden gegner wichtig
+    // - in the chain phase, balls need to be far enough apart to not accidentally spawn ball into player
+    // - enemy should die with the impact of the last ball, not require the player to attack, to remove confusion and delay
+    // - ball animations need to be in a sequential pattern
+    // - the combination of collecting stuff and shooting at stuff was a disaster (because of the requirement to collect everything to advance), it was possible to give collecting a meaning, by causing "changes" (e.g. enemy invincibility), but it felt very sluggish (A, B, A, B), also enemies dropping the balls cause players to move into enemies while killing (for speed) which felt forced
+    // - the first wave of pearls cannot be evaded, to show that they can be collected
+    // - enemy flying in circle should not be too fast, as otherwise you cannot get out anymore behind him
+    // - bouncy balls should not bounce too low (otherwise too easy), and have consistent X speed (otherwise too hard, would require a different movement speed from the player)
+    // - bouncy balls coming from below shouldn't be too close to the edge, they look better and are easier to catch if you miss one (at the edge)
+    // - bullet pauses for continuous attacks should be wide enough to allow you to get through, but not too wide to still be dangerous/blocking, especially important when the enemy starts following you
     // TASK: try to destroy the enemy with your normal weapon / attack enemy when his shield is down, until his health is gone
     // TASK: find all hidden pearls
     // ACHIEVEMENT: strike the enemy only while its shield is up
     // TODO 1: hardmode: two enemies
     // TODO 1: hardmode: fake pearls inbetween/mixed (blocky)
+    // TODO 5: badge: catch the blue bouncy ball in the bouncy ball phase (disappears at X), or which is created by the boss like a bullet
+    // TODO 5: idea: enemy has orb shield or tail you need to collect
+    // TODO 5: idea: bouncing pearls (linear, not gravity, like pong)
     // TODO 1: background side-movement might be easier for direct attack from top
-    // TODO 1: striking pearls sollten sich strecken (direction anpassen + Y size größer + leichte XY size kleiner) (schon mit partikeln gemacht ?)
-    // TODO 1: striking attack sollte weiter weggehn wenn sie näher bei target sind, vielleicht beschleunigt das mehr
+    // TODO 1: striking pearls should stretch (adjust direction + Y size larger + XY size slightly smaller) (already made with particles?)
+    // TODO 1: striking pearls should go further away when you are closer to target, maybe that will speed up more
     // TODO 1: maybe also update strike-spline target tangent in real-time (e.g. when enemy moves into strike the animation gets slower)
-    // TODO 5: badge: fang den blauen flummi in der flummi phase (verchwindet bei X), oder der vom boss wie ein geschoss erzeugt wird
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iHiddenFirst = 31u;
@@ -1986,33 +1985,33 @@ void cMuscusMission::__SetupOwn()
 
     // ################################################################
     // trade places with others
-    // disable bullets of attacking enemies when jumping into them, otherwise unavoidable
-    // das design kann/muss die position des spielers kontrollieren
-    // first enemies should be far enough away to introduce teleport
-    // enemies can be in a line to show multi-jump
-    // high speed killing with correct rotation -> COOP (double-ended left right, you can start from each side)
-    // zu komplexe highspeed-gruppen hatten schlechtes feeling, max zwei rotations-richtungen
-    // in highspeed-gruppe gegner müssen weit genug auseinander sein (zur seite), um nicht unabsichtlich mehrere hintereinander anzugreifen
-    // vor zweiter highspeed-gruppe, gegner müssen so angeordnet sein, dass man in einer guten ecke startet
-    // some shooting enemies are near each other, to make teleport risky
-    // first wave in multi-wave group (from same direction) should not start with enemies in the line along the previous group
-    // enemies in multi-wave group should be behind bullets, to give the player enough room to react after a teleportation
-    // in multi-wave group there should be no two enemies in the same column
-    // die bewegenden gruppen sind wichtig um nicht nur starr einen fixen pfad zu folgen, sondern auch reaktions-geschick zu zeigen
-    // der zweite trail ist so rotiert, dass der erste gegner der nächsten gruppe nicht zu nah am spieler ist
-    // wenn transformiert mit gefächertem angriff, sollten nicht alle gegner von einer richtung oder entlang einer linie fliegen, sonst sterben alle sofort
-    // bei abwechselnden wellen, kann es vorkommen (1mal) dass gegner nicht sofort angegriffen werden können, weil die welle noch an ihnen vorbeiziehen muss, das ist ok und verlangt vom spieler zeitliche präzision
-    // der versteckte trail darf nicht sofort wieder nach unten gehen, wo die letzte welle noch entlang fliegt
-    // der versteckte trail muss mit 1 gegner anfangen, der den start vorgibt, danach immer mit zwei gegnern um die geschwindigkeit des spielers zu erhöhen (wie bei kirby fast-food mini-game)
-    // spawnende trail gegner dürfen niemals mit spieler kollidieren
-    // es sollten immer min 2 gegner bei den wave gruppen für coop sein
-    // in der multi-wave gruppe sollten manche gegner auf einer anderen höhe sein, damit man nicht schnell die gesamte gruppe zerstören kann wenn man sich schnell dreht
+    // - disable bullets of attacking enemies when jumping into them, otherwise unavoidable
+    // - the design can/has to control the position of the player
+    // - first enemies should be far enough away to introduce teleport
+    // - enemies can be in a line to show multi-jump
+    // - high-speed killing with correct rotation -> coop (double-ended left right, you can start from each side)
+    // - high-speed groups that were too complex felt bad, max two rotation directions
+    // - in high-speed groups, enemies must be far enough apart (to the side) so as not to accidentally attack several in a row
+    // - before second high-speed group, enemies must be arranged so that you start in a good corner
+    // - some shooting enemies are near each other, to make teleport risky
+    // - first wave in multi-wave group (from same direction) should not start with enemies in the line along the previous group
+    // - enemies in multi-wave group should be behind bullets, to give the player enough room to react after a teleportation
+    // - in multi-wave group there should be no two enemies in the same column
+    // - the moving groups are important not only to rigidly follow a fixed path, but also to show reaction skills
+    // - the second high-speed group is rotated so that the first enemy of the next wave is not too close to the player
+    // - when player is transformed with the spread attack, not all enemies should fly from one direction or along one line, otherwise everyone will die immediately
+    // - on the single-wave groups, it may happen (once) that enemies cannot be attacked immediately because the wave still has to pass them, this is ok and requires the player to be precise in timing
+    // - the hidden high-speed group should not immediately go back down where the last bullet-wave is still flying
+    // - the hidden high-speed group should start with 1 enemy, who sets the start, then always with two enemies to increase the player's speed (like in the Kirby fast-food mini-game)
+    // - spawning high-speed enemies should never collide with players
+    // - there should always be at least 2 enemies in the wave groups for coop
+    // - (old: in the multi-wave group, some enemies should be at a different height so that you can't quickly destroy the entire group if you turn quickly)
     // TASK: teleport 5 times for only a very short distance
     // TASK: jump over 3 lines at once
     // TASK EXTRA: destroy all quick enemies
     // ACHIEVEMENT: travel a large total distance through teleportation (3332.5 normal, 6419.2 exaggerated)
     // TODO 1: hardmode: all cinder enemies attack after teleportation, or teleportation attacks you
-    // TODO 1: hardmode: something dangerous will be left behind after teleportation
+    // TODO 1: hardmode: something dangerous will be left behind after teleportation (permanent object, bullet wave ?)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData    = 16u;
@@ -2625,19 +2624,19 @@ void cMuscusMission::__SetupOwn()
 
     // ################################################################
     // corpses remain on the field
-    // enemies should not get attached to the side they are spawning from to reduce issues (steep angles or out-of-view kills) (but why are last two groups different ? though it looks better)
-    // first bullet wave needs an opening at the bottom, as player will most likely start there
-    // moving enemy waves need to have good flow when killing one after another, and distinct paths (when all waves would spawn together)
-    // corners should not be safe-spots
-    // every bullet in the corpse-phase should be removed in the middle (though inverting it or twisting it would be allowed)
-    // legion sollte mit einem spread-angriff anfangen, sobald er angreifbar ist
-    // legion muss bei erster bewegung einen schritt zurückmachen, damit der spieler sieht, dass bewegung stattfindet, und um die distanz zum spieler zu erhöhen damit die erste richtige bewegung den spieler nicht gleich zerquetscht
-    // similar to zelda water boss https://youtu.be/HRQXOCU8OWA?t=1005
+    // - enemies should not get attached to the side they are spawning from to reduce issues (steep angles or out-of-view kills) (but why are last two groups different ? though it looks better)
+    // - first bullet wave needs an opening at the bottom, as player will most likely start there
+    // - moving enemy waves need to have good flow when killing one after another, and distinct paths (when all waves would spawn together)
+    // - corners should not be safe-spots
+    // - every bullet in the corpse-phase should be removed in the middle (though inverting it or twisting it would be allowed)
+    // - legion should start with a spread attack as soon as it is vulnerable
+    // - legion has to take a step back the first time it moves so that the player can see that movement is taking place and to increase the distance to the player so that the first real movement doesn't crush the player straight away
+    // - similar to zelda water boss https://youtu.be/HRQXOCU8OWA?t=1005 (even though the main inspiration is Castlevania's Legion boss)
     // TASK: destroy all zombies
     // TASK: touch the helper for N seconds
     // TASK EXTRA: never touch any of the enemies
     // ACHIEVEMENT: destroy all enemies in reverse order
-    // TODO 1: hard-mode: geschoss-linie die im kreis rotiert, bei allen stages!, auch bei legion, gegen legion rotation (andere bullet-farbe)
+    // TODO 1: hard-mode: bullet line that rotates in a circle, at all stages!, also at Legion, against Legion rotation (different bullet color)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumEnemies = 40u;
@@ -3319,7 +3318,7 @@ void cMuscusMission::__SetupOwn()
     // enemy has weakpoint which he keeps away from player
     // - all: miners rotation start against fly direction, to make evading the initial attack easier
     // - 2: cinders in pair always rotate together away from player when one is shot from outer direction, to prevent ping-pong effect
-    // TODO 1: miner should be grey ?   
+    // TODO 1: miner should be grey ?
     // TODO 1: don't actually rotate away, but stay fixed or rotate consistent
     // TODO 1: rotate like an atom across center-enemy
     // TODO 1: snakehead with tail, destroy tail

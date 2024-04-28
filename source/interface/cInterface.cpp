@@ -521,7 +521,7 @@ void cInterface::Move()
     const coreFloat fAlphaSegmentFull = fAlphaPlayerFull * BLENDH3(m_fAlphaSegment);
     const coreFloat fAlphaTurfFull    = fAlphaPlayerFull * BLENDH3(m_fAlphaTurf);
     
-    this->UpdateSpacing();   // TODO 1: sollte nicht ständig aufgerufen werden
+    this->UpdateSpacing();   // TODO 1: should not be called all the time
     
     
     const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (cInterface::__IsFlipped() ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
@@ -2138,7 +2138,7 @@ void cInterface::__Update()
 {
     //m_aBannerText[2].SetText(pcSub);
     
-    // TODO 1: wird nicht aufgerufen wenn die resolution geändert wird
+    // TODO 1: is not called when the resolution is changed
     
     if(g_bSteamDeck && (Core::Language->GetString("OVERFLOW_SEGMENT_NAME")[0] != '0'))
     {

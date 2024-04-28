@@ -8,24 +8,24 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// movement in reconstruction phase should be linear, smooth movement feels sluggish, and it's already smoothly interpolated anyway
-// web should not revert too much, as the algorithm can just move forward
-// first direction block wave from left-right should have one (any) pointing up, first wave from top-bottom should have one (bottom) pointing up
-// orb-netz sollte sich nach kurzer zeit so schnell runter bewegen, dass man nicht mehr draufhalten kann, weil man sich sonst nicht schnell genug nach oben bewegen kann, aber nicht zu schnell, dass man sich nicht mehr traut anzugreifen
-// boss sollte nur eine resurrection haben, bei mehreren fühlt sich der spieler eher verarscht als überrascht
-// the flipped shooting during the swing phase is more interesting and removes safe spots
-// make aiming in final phase not too precise, to reduce (unnecessary) pressure, and speed not too high, to allow player to dodge and attack properly
-// in linearer einzelteil-phase, teile müssen sich bis zum rand bewegen, weil man sonst einfach stehen bleiben kann
-// in stand-rotierender einzelteil-phase, alle 4 teile sollten nicht gleichzeitig in eine richtung feuern, weil man sonst nicht ausweichen kann
-// nur eine wand sollte sich auf den spieler zubewegen, zu viele seiten sind zu kompliziert (vor allem mit zusätzlichen geschossen) (is schon heavy in normaler wave), außerdem könnte einschlag nur in mitte sein weil teile sonst langsam verdeckt werden, und einzelteile würden sich beim abschuss komisch überlagern
-// einzelteil-phase sollt kohärente muster haben, damit die gefahr einfach einzuschätzen ist, vor allem weil der spieler die bewegung kontrolliert (er soll sich nicht so fühlen als hätte er keine kontrolle)
-// final big explosion is used to highlight that the boss is really finished now
+// - movement in reconstruction phase should be linear, smooth movement feels sluggish, and it's already smoothly interpolated anyway
+// - orb-web should not revert too much, so the algorithm can just move forwards (and does not need to move backwards)
+// - first direction block wave from left-right should have one line (any) pointing up, first wave from top-bottom should have one line (bottom) pointing up
+// - orb-web should move down fast enough (after a short time), so the player cannot keep shooting without being able to move up, but not too fast, so the player still dares to attack
+// - boss should only resurrect once, with serveral the player feels more fooled than surprised
+// - the flipped shooting during the swing phase is more interesting and removes safe spots
+// - make aiming in final phase not too precise, to reduce (unnecessary) pressure, and speed not too high, to allow player to dodge and attack properly
+// - in linear reconstruction phase, parts should move to the edge, otherwhise player can simply stand still
+// - in still-rotating reconstruction phase, all 4 parts should not shoot into the same direction, otherwise player cannot dodge
+// - only one wall should move towards the player, too many sides are too complex (especially with additional bullets) (is already heavy in regular stage), also part impact could only be in the middle per wall as they would quickly get hidden by other walls, and parts would intersect with each other
+// - reconsturction phase should have coherent patterns, so that danger is easy to assess, especially because the player control the movement (they shouldn't feel like they have no control)
+// - final big explosion is used to highlight that the boss is really finished now
 // ACHIEVEMENT: defeat the boss without ever moving yourself
-// TODO 1: hard mode: hitze und wasser
+// TODO 1: hard mode: heat and water
 // TODO 4: enum for the wingstate
-// TODO 1: boss glüht nach dem einschlag in boden (und wand ?)
-// TODO 1: rotierende einzelteile kurz vorm abschuss brauchen einen weiter (glow) effekt, damit mans gscheit sieht
-// TODO 1: ram von boss und wings braucht flammen-wellen-effekt
+// TODO 1: boss glows after each impact on the ground (and wall ?)
+// TODO 1: rotating parts need a glow-effect shortly before flying towards wall, so the player can properly see the danger
+// TODO 1: ram-attack from boss and wings need a flame-wave-effect
 
 
 // ****************************************************************

@@ -8,30 +8,31 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// crashing enemies should not smoke, and should be subtle, otherwise they are too annoying
-// adding the tank is just too much, so some of the attacks from enemies are therefore removed, and focus is on the enemy mechanics in combinations with the unique tank attacks
-// it is very harder to find a perfect safe-spot, because of the tank-movement
-// explosion when changing weapons is hiding fade-in of new weapon
-// position change of the tank into move direction also changes the way tank-aiming interacts with the player (e.g. on side the attacks mostly hit the other side, in center it is evenly distributed, turning by 90 degree also changes the side by 90 degree)
-// after a weapon change, the new weapon needs to attack 1-2 times before enemies appear
-// the haubitze and the wizzrobe enemies work well together with their different timings (especially when enabled groups are completely separate and on the border, player has to switch or time perfectly for a multi-kill)
-// rotating side-movement with laser-weapon changes the primary attack direction (which is very apparent for this weapon)
-// using the laser-weapon with the mole enemies, it is very important the laser color is distinct from the mole color (the laser had the same color before, and it was so confusing)
-// tower enemies should be very simple, as they can damage the player besides the tank weapon for the first time, so complex setups can overwhelm the player (especially moving enemies were too much)
-// deactivated spike-plates should indicate the next enemies to spawn
-// the child enemies need to be killed fully to cause damage to the boss, which adds a bit more depth tho this sub-phase, especially when also evading the wave-attack
-// alle angriffe, außer die raketen, erscheinen an der einschlags-stelle, ein teppich von der anderen seite zum ziel war zu un-balanced (zu nah am einschlag war zu leicht, zu fern zu schwer), geschosse entlang des schusses waren viel zu schwer, und ein wellen-angriff direkt vom tank aus hat die mitte komplett unbrauchbar gemacht (und hat zu sehr eingeschränkt)
-// intro gegner sollten weit auseinander stehen, damit man die abstürze gut sieht, und später kommen, damit der spieler erst versucht den tank anzugreifen (und dabei die haubitze sieht, mit der aiming mechanik die bei allen waffen gleich ist)
-// abstürzende gegner sollten explodieren vor absturz, was besonders wichtig ist um die gegner über spike-plates zu kaschieren
+// - crashing enemies should not smoke, and should be subtle, otherwise they are too annoying
+// - adding the tank is just too much, so some of the attacks from enemies are therefore removed, and focus is on the enemy mechanics in combinations with the unique tank attacks
+// - it is very hard to find a perfect safe-spot, because of the tank-movement
+// - explosion when changing weapons is hiding fade-in of new weapon
+// - position change of the tank into move direction also changes the way tank-aiming interacts with the player (e.g. on side the attacks mostly hit the other side, in center it is evenly distributed, turning by 90 degree also changes the side by 90 degree)
+// - after a weapon change, the new weapon needs to attack 1-2 times before enemies appear
+// - the haubitze and the wizzrobe enemies work well together with their different timings (especially when enabled groups are completely separate and on the border, player has to switch or time perfectly for a multi-kill)
+// - rotating side-movement with laser-weapon changes the primary attack direction (which is very apparent for this weapon)
+// - using the laser-weapon with the mole enemies, it is very important the laser color is distinct from the mole color (the laser had the same color before, and it was so confusing)
+// - tower enemies should be very simple, as they can damage the player besides the tank weapon for the first time, so complex setups can overwhelm the player (especially moving enemies were too much)
+// - deactivated spike-plates should indicate the next enemies to spawn (though currently 2 plates spawn with one enemy)
+// - the child enemies (arrows) need to be killed fully to cause damage to the boss, which adds a bit more depth to this sub-phase, especially when also evading the wave-attack
+// - all attacks, except rockets, spawn at the impact-location, a continous line from one side directed to the target was too un-balanced (near the impact was too easy, far was too hard), bullets along the tank-shot were way to hard, and a wave-attack spawning from the tank made the center completely useless (and was too restricting)
+// - intro enemies should be far apart, so you can properly see the crashes, and they should spawn with delay, so the player first tries to attack the tank directly (and so he sees the tank-shot and aming-mechanic, which is the same for all weapons)
+// - crashing enemies should explode before crash, which is important to hide the render-order change between enemies and spike-plates
 // ACHIEVEMENT: get hit by every tank-weapon exactly once
-// TODO 1: hard-mode: wind + minen
-// TODO 1: hard mode: wind force in environment-richtung (damit es von tiger position beeinflusst wird) (stark genug, dass man beim schießen nicht dagegen ankommt)
-// TODO 1: Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
-// TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
-// TODO 5: (mines need to be enemies to allow blinking, combo/chain)
-// TODO 5: (in die stacheln schießen erzeugt effekt (knusprig))
-// TODO 5: (make sure to disable wind on boss-death (hard if necessary))
-// TODO 5: (sting calculations only for enabled stings)
+// TODO 1: hard-mode: wind + mines
+// TODO 1: hard mode: wind force into environment-direction (so it is influenced by tiger position) (strong enough, so player cannot move against it while shooting)
+// TODO 1: symbol I V X L C D M, value 1 5 10 50 100 500 1000 -> attach with a small quad as sub-weapon per weapon
+// TODO 1: should I still add small numbers and/or colors for each weapon ? an own quad above the weapon (can be hidden by explosion)
+// TODO 3: improve indication where the next enemy in the spike-phase spawns (different spike delays?)
+// TODO 5: (old: mines need to be enemies to allow blinking, combo/chain)
+// TODO 5: (old: shooting into stings should create special-effect (knusprig))
+// TODO 5: (old: make sure to disable wind on boss-death (hard if necessary))
+// TODO 5: (old: sting calculations only for enabled stings)
 
 
 // ****************************************************************
@@ -1918,7 +1919,7 @@ void cTigerBoss::__CreateTrail(const coreUintW iIndex, const coreVector3 vInters
                 coreObject3D* pObject = MANAGED_NEW(coreObject3D);
                 pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
                 pObject->DefineTexture(0u, "default_white.png");
-                pObject->DefineProgram("effect_decal_single_program");   // TODO 1: eigenen decal_color shader (similar to menu_color, ohne textur)
+                pObject->DefineProgram("effect_decal_single_program");   // TODO 1: own decal_color shader (similar to menu_color, without textur)
 
                 // set object properties
                 pObject->SetSize     (coreVector3(vDecalSize, 1.0f));

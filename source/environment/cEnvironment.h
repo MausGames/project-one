@@ -12,7 +12,7 @@
 
 // TODO 5: separate culling between normal rendering and shadow, to improve efficiency (though this would update instancing buffer again ?)
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
-// TODO 3: da is ein 1-frame delay für TargetNow funktionen
+// TODO 3: there is a 1-frame delay for TargetNow functions
 
 
 // ****************************************************************

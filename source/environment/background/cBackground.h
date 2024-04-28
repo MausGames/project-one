@@ -27,14 +27,14 @@
 // TODO 3: remove draw-call for volcano smoke base-objects
 // TODO 3: adding temporary objects can/should implicitly rotate the position ?
 // TODO 3: use __Reset in water class, instead of __OwnInit
-// TODO 3: tropfen einschlag bei moss
+// TODO 3: drop impact in moss
 // TODO 3: there is no shadow on the lava (add shadow to lava or blend on edges ?)
 // TODO 3: if dark-background blocks are only using 1 channel, only use single-channel texture, but requires special shader (merge with normal map then ?)
 // TODO 4: move base-sound into base class ?
 // TODO 3: caustics for sea background (Worley noise)
-// TODO 3: vielleicht visual height + Z reinrechnen für visibility calculations (dann kann große view range reduziert werden)
-// TODO 3: background object replication bug (wo objekte zu nah zusammen sind an der replikations-linie) (bei fly offset 145 in center), fällt fast nicht auf, nur bei sting-only snow background
-// TODO 2: bei background-density interpolation, wenn infinity-jump durchgeführt wird, poppen objekte noch immer rein/raus
+// TODO 3: maybe add visual height + Z in culling calculations (then large view range can be reduced)
+// TODO 3: background object replication bug (where objects are too close together on the replication line) (at fly offset 145 in center), is almost not noticeable, only with sting-only snow background
+// TODO 2: during background-density interpolation, when infinity jump is performed, objects still pop in/out
 // TODO 3: shadow-flickering on 45 degree pyramids on intel and amd slightly
 
 
@@ -176,7 +176,7 @@ protected:
     static coreMemoryPool s_MemoryPool;              // 
 
     static coreRand       s_Rand;                    // 
-    // TODO 3: rand für background, outdoor (andere location für dieses coreRand object?) (oder eigentlich nur ein stack-object in Outdoor und Background)
+    // TODO 3: rand for background, outdoor (different location for this coreRand object?) (or actually just a stack object in outdoor and background)
 
 
 public:

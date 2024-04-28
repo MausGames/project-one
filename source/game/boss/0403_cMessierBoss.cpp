@@ -8,22 +8,22 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// time-bullets of different ticks cannot be near each others along fly-dir(!), because of depth-order switch when reverting
-// bei time bullets, wenn sich erzeugungs-tick nicht mit zerstörungs-tick überlager müsst der ticker beim invertieren ausgeglichen werden (derzeit nicht der fall)
-// meteors rotating against their movement-direction makes them more visible
-// first time-bullet phase is easier at the bottom (normal phase) but harder at the top (revert phase)
-// meteors in the first phase should not move too slow, as it is just too easy and boring
-// in the first phase, player will try to stay near boss, this is ok and should be amplified
-// screen rotation sollte gegen gravi-rotation sein, ansonsten wird es viel zu schnell
-// in gravi-rotation, bullet-wände sollen den spieler zwingen gegen strömung zu fliegen und sich dadurch zu drehen
-// meteoriten sollten keine geschosse reflektieren, weil das sonst zu verwirrend ist
-// bullets während meteoriten-phase war zu viel, vor allem weil sie ja auch von gravitation beeinflusst werden
-// platten müssen so überlagert werden, dass sie gut sichtbar und effektiv sind (kleine über große, schnelle über langsamere)
-// platten sollte spieler nur so wegdrehen, dass er mit 1 aktion wieder richtung boss schauen kann (außer wenn spieler neben boss fliegt, aber das is speziell)
-// time bubble hides stopping background movement
+// - time-bullets of different ticks cannot be near each others along fly-dir(!), because of depth-order switch when reverting
+// - on time-bullets, if the creation-tick does not interleave with the destruction-tick, the ticker needs to be adjusted on invert (currently not the case)
+// - meteors rotating against their movement-direction makes them more visible
+// - first time-bullet phase is easier at the bottom (normal phase) but harder at the top (revert phase)
+// - meteors in the first phase should not move too slow, as it is just too easy and boring
+// - in the first phase, player will try to stay near boss, this is ok and should be amplified
+// - screen-rotation should be against gravi-rotation, otherwise everything will be too fast
+// - in gravi-rotation, bullet-walls should force the player to move against the drift and rotate the ship
+// - meteors should not reflect bullets, as this confuses too much
+// - general bullet attacks during meteor-phase were too much, as they are also influenced by gravitation
+// - plates need to be rendered above each other in a way so they are clearly visible and effective (small above big, fast above slow)
+// - after plate rotation, the player should be able to face the boss again with only a single action (in any control mode) (except when player flies on the side of boss, but this is special)
+// - time bubble hides stopping background movement
 // ACHIEVEMENT: destroy one of the big meteors
-// TODO 1: hard mode: in intro fliegt ein meteorit auf den bildschirm und crackt ihn
-// TODO 1: [MF] art der ring-rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
+// TODO 1: hard mode: in intro a meteor flies towards the screen and cracks it
+// TODO 1: [MF] style of the boss-ring rotation changes during the boss-fight (make sure the rotation in the time-phase is visible enough)
 
 
 // ****************************************************************

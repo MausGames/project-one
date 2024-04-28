@@ -16,8 +16,8 @@
 // TODO 2: use oldest active label instead of nothing, if all labels are busy (or dynamically allocated fallback)
 // TODO 4: use index instead of pointer for order-list ?
 // TODO 3: also invert with full mirror mode (like interface, maybe move outside ?) (even more, like summary and continue menu) (should it be a 3rd option ? Off, Light, Full)
-// TODO 5: size-bump für critical (https://youtu.be/mfr7mGW6Z2U?t=17)
-// TODO 2: es könnten mehrere badge stars gleichzeitig benötigt werden
+// TODO 5: size-bump for critical information (https://youtu.be/mfr7mGW6Z2U?t=17)
+// TODO 2: multiple badge stars at the same time might be required
 // TODO 3: merge badge and trophy texture ?
 
 

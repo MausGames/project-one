@@ -8,8 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO 1: hard mode: x3 gegner und x3 attacks (= x9)
-// TODO 1: hard mode: helfer kommen in den wellen vor und greifen mit an
+// TODO 1: hard mode: x3 enemies and x3 attacks (= x9)
+// TODO 1: hard mode: helpers appear in the stages and attack
 
 
 // ****************************************************************
@@ -120,7 +120,7 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // simple without attacks 1
-    // teaches: moving (general), shooting (general, sustained), combo, enemies from every side, enemies fly infinite (#1), segment structure, sub-stage structure
+    // - teaches: moving (general), shooting (general, sustained), combo, enemies from every side, enemies fly infinite (#1), segment structure, sub-stage structure
     // - 5: from different side than previous group, to not fly into players
     // TASK: hit all additional enemies
     // ACHIEVEMENT: destroy all enemies without pressing a single button
@@ -312,10 +312,9 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // simple without attacks 2
-    // teaches: use whole game area, enemies fly infinite (#2), turning, dodging attacks (#1)
-    // [deprecated] - 2: enemies cannot be killed in one run by shooting upwards, so they may fly another run
-    // seiten-gruppen sollten mit delay anfangen, damit man zeit hat das badge zu verstehen
-    // angriffs-gruppe muss auf der seite anfangen, damit der spieler nicht zu sehr vom ersten angriff des spiels überrascht wird
+    // - teaches: use whole game area, enemies fly infinite (#2), turning, dodging attacks (#1), badge (#1)
+    // - back groups should start with a delay so that you have time to understand the badge
+    // - attacking group should start on the side so that the player is not too surprised by the first attack of the game
     // TASK: destroy enemies up and down
     // ACHIEVEMENT: destroy only one enemy per turn
     STAGE_MAIN({TAKE_ALWAYS, 1u})
@@ -554,10 +553,10 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // simple with attacks
-    // teaches: dodging attack (#2), invincibility, damaging touch, badge (#1)
-    // geschwindigkeit des charges sollte am anfang hoch sein, damit der spieler (nahezu) unmöglich ausweichen kann
-    // chargende gegner aus der ecke werden nicht so wahrscheinlich schon beim spawnen getötet, zusätzlich sind sie eine kurze zeit immun
-    // erster chargender gegner kommt von dort wo der spieler unwahrscheinlicher ist
+    // - teaches: dodging attack (#2), invincibility, damaging touch
+    // - speed of the charge enemies should be high at the beginning so that it is (almost) impossible for the player to dodge
+    // - charge enemies from the corner are less likely to be killed when they spawn (and they are also immune for a short time)
+    // - first charge enemy comes from where the player is less likely
     // TASK: collect all items
     // ACHIEVEMENT: merge 4 enemies
     STAGE_MAIN({TAKE_ALWAYS, 2u})
@@ -803,8 +802,8 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // simple with heavy attacks
-    // teaches: enemy health, causing damage, moving slow, small hitbox, badge (#2)
-    // gegner unten sollten möglichst nah am rand sein, damit der spieler sich drehen muss
+    // - teaches: enemy health, causing damage, moving slow (#1), small hitbox (#1), badge (#2)
+    // - enemies at the bottom should be as close to the edge as possible so that the player has to turn
     // TASK: try to destroy the impaled enemy
     // ACHIEVEMENT: only do damage during odd seconds
     STAGE_MAIN({TAKE_ALWAYS, 3u})
@@ -1023,13 +1022,13 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // movement training
-    // teaches: moving fast, (extra score), (taking damage), (shield), (lives), badge (#3)
-    // first enemy of this group needs to start on the other side of the last enemy from the previous group
-    // some enemies need low health, because they might be reached too late for a full attack (but low health will make the next enemy spawn sooner)
-    // side waves force player to turn again (a bit stressful this time)
-    // side waves and side enemies need to be alternating, also in relation to hole-positions
-    // delay between full waves needs to be adjusted to show alle effects even in the worst-case position of the player
-    // last enemy shows, that not all enemies can be killed in one go, under some conditions
+    // - teaches: moving fast, moving slow (#2), small hitbox (#2), badge (#3), everything
+    // - first enemy of this group needs to start on the other side of the last enemy from the previous group
+    // - some enemies need low health, because they might be reached too late for a full attack (but low health will make the next enemy spawn sooner)
+    // - side waves force player to turn again (a bit stressful this time)
+    // - side waves and side enemies need to be alternating, also in relation to hole-positions
+    // - delay between full waves needs to be adjusted to show alle effects even in the worst-case position of the player
+    // - last enemy shows that not all enemies can be killed in one go and may disappear, under some conditions
     // TASK: move through all the bullet walls
     // ACHIEVEMENT: neither cause nor take any damage
     STAGE_MAIN({TAKE_ALWAYS, 4u})

@@ -8,29 +8,29 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// snow-laser darf sich nicht zu schnell bewegen (test on 60 FPS), weil er keine dynamische funktion hat, und dann löcher hinterlässt
-// angriff während laser-phase soll den spieler vom boss fernhalten, damit er nicht ständig kurz umrunden kann
-// wie auch bei den anderen bossen, darf der spieler im boss-intro keinen schaden erhalten, weswegen der damaging-state disabled ist
-// in first phase, having multiple "attack all" phases did not work, as player could just fly back and forth between two limbs
-// in first phase, CW around, CCW around, 042513, the tail should pop out the head
-// in infinity phase, pattern sollte nicht zu dicht sein, weil man sonst nicht durch navigieren kann und dann den boss zu sehr auf abstand hält
-// in infinity phase, da geschosse sich jetzt auch bewegen sollte global move langsamer sein, damit die maximal-geschwindigkeit nicht zu hoch ist, außerdem wegen bewegung können bullets in der luft stehen bleiben was ok ist
-// wenn alle limbs draußen zum (regulären) angreifen sind, sollte auch unverwundbarkeit vom panzer aufgehoben werden
-// in infinity phase, wechsel von 2-schuss auf 4-schuss fällt nicht auf wenn sich drehung nicht zusätzlich ändert
-// in ice-cube phase sollte der spieler daran gehindert werden mit dem cube zum boss zu gelangen
-// push-effekt in drag-phase sollte nicht zu stark sein, weil der spieler sonst wenig spielraum für bewegung hat
-// am ende von drag-phase soll spieler zum boss gezogen werden (bremsung vom background), wodurch der übergang in die schwing-phase kräftiger wirkt
-// am beginn und ende von drag-phase müssen alle geschosse zerstört werden, bei beschleunigung und bremsung fliegt der spieler sonst zu leicht in die geschosse rein
-// den boss die eiswürfel erzeugen zu lassen (e.g. mit einem strahl) war zu verwirrend, weil es gleichzeitig mit dem fernhalten des spielers ist (geschoss-welle)
-// bei erstem eis-würfel darf der boss keinen angriff machen, damit man sich darauf konzentrieren kann zu verstehen was zu tun ist
-// boss sollte in schwing-phase nicht zu schnell schwingen, damit man ihn gut angreifen kann, dabei soll eine fixe pause zwischen den angriffen sein (wenn boss schräg ist) in der man zeit hat sich zu drehen
-// schnee sollte erst nach bounce-transition verschwinden, als zusätzliche steigerung dieser phase
-// transition in drag-phase kann nicht an jeder schnittstelle passieren, weil das plötzliche bremsen dann komisch wirkt (zb. nach der bogen-bewegung)
-// spieler kann bei schwing-phase einfach stehen bleiben und alle rand-geschosse werden sauber zerstört, aber der zusätzliche boss-angriff bringt ihn dazu sich zu bewegen (geschwindigkeit der rand-geschosse sollte nicht weiter erhöht werden, weil es sonst zu schwer wird in kombination mit boss-angriff)
+// - snow-laser must not move too fast (tested on 60 FPS), because it has no dynamic function and then leaves holes
+// - attack during laser-phase is intended to keep the player away from the boss, so that they cannot do a super-short round
+// - (old: as with the other bosses, the player is not allowed to receive any damage in the boss intro, which is why the damaging state is disabled)
+// - in first phase, having multiple "attack all" phases did not work, as player could just fly back and forth between two limbs
+// - in first phase, CW around, CCW around, 042513, the tail should pop out the head
+// - in infinity phase, pattern shouldn't be too dense, otherwise the player won't be able to navigate through it ans then keeps the boss too far away
+// - in infinity phase, since bullets now also move, global move should be slower so that the maximum speed it not too high, though bullets can then just stand still if both movements cancel each other (which is ok)
+// - if all limbas ar outside for (regular) attacks, the shell invulnerability should also be removed
+// - in infinity phase, the switch from 2-shot to 4-shot is not noticeable if there is no additional change in rotation
+// - in ice-cube phase, the player should basically be prevented from getting to the boss with the cube
+// - push-effect in the drag phase should not be too strong, otherwise the player has little room for movement
+// - at the end of the drag phase, the player should be pulled towards the boss (background brake), which makes the transition to the swing phase more powerful
+// - at the beginning and end of the drag phase, all bullets must be destroyed, otherwise the player will into the bullets too easily when accelerating and braking
+// - (old: having the boss create the ice-cubes (e.g. with a beam) was too confusing, because it is at the same time as keeping the player away)
+// - on the first ice-cube the boss is not allowed to make an attack, so the player can concentrate on understanding what needs to be done
+// - boss should not swing too fast in the swing phase, so that you can attack him properly, and there should be a fixed pause between attacks (where boss is at the proper angle) in which you have time to turn
+// - snow should only disappear after bounce transition, as an additional enhancement to this phase
+// - transition in drag phase cannot happen at any time or sub-phase, because the sudden braking would seem strange (e.g. after the arc movement)
+// - player can simply stand still during swing phase and all edge bullets will be cleanly destroyed, but the additional boss attack makes them move (the soeed if the edge bullets should not be increased futher, otherwise it will be too difficult in combination with the boss attack)
 // ACHIEVEMENT: touch all the fresh ice-cubes
 // COOP: only one player is chained to the boss
-// TODO 1: hard mode: gleiten
-// TODO 1: in finaler phase, flip-bullets und partikel sollten unter gegner sein (auch im level), aber cone-bullets drüber, kann man das im bullet-manager aufteilen ? oder eigener bullet-manager für boss (nur für cone) [[das ganze is aber ziemlich orsch, normale gegner können (derzeit) nicht TOP gemacht werden]]
+// TODO 1: hard mode: slipping movement (ice)
+// TODO 1: in final phase, flip bullet and particles should be below enemies (also in stage), but cone bullets should be above, can that be split up in the bullet manager? or own bullet manager for boff (only for cones) [[but the whole thing is pretty bad, normal enemies cannot be made TOP (currently)]]
 // TODO 1: chain should break on game over instead of just disappear (also in wave) (not when zero-length)
 
 

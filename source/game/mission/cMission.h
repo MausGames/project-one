@@ -18,11 +18,11 @@
 // TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory), or create 2 max-size blocks (old, cur), also in Ater mission ?
 // TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
 // TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
-// TODO 1: check if all allocated enemy numbers are correct (warum war das kein MF?, wirklich einmal alle durchchecken)
+// TODO 1: check if all allocated enemy numbers are correct (why wasn't that a MF?, really check them all out)
 // TODO 2: generate objects are preventing each others outlines while being alpha 0 (especially on diagonal movement)
-// TODO 3: nevo: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
+// TODO 3: nevo: render order of blasts is static, sometimes they overlap, not consistent
 // TODO 4: mission code sometimes accesses variables directly without wrapper-functions (mixed), bosses always need wrapper functions, should this be handled consistently ?
-// TODO 4: warum sind s_iTick und co. static ?
+// TODO 4: why are s_iTick and co. static ?
 // TODO 3: change m_piData into static buffer (needs manual clear), that way I can also remove init-number (!!! sometimes there are 2 missions in memory at the same time)
 // TODO 3: morning star chain should be above player wind
 // TODO 3: insanity functions in harena copy (and override) some of the mission code, maybe this can be cleaned up

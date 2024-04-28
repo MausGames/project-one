@@ -77,12 +77,12 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // push
-    // bullets fly fast to give visual waves with space inbetween (but should not be shot too often to compensate)
-    // in mill, player should not be able to pass when enemies are axis aligned
-    // in 3 only five enemies / half the circle should peek out
-    // in 2 lines should move over the center
-    // in 1 enemies should not reach bottom
-    // in 1 and 2 back of enemies should not be reachable without shooting at them first
+    // - bullets fly fast to give visual waves with space inbetween (but should not be shot too often to compensate)
+    // - in mill, player should not be able to pass when enemies are axis aligned (though I think it's currently possible)
+    // - in 3, only five enemies / half the circle should peek out
+    // - in 2, lines should move over the center
+    // - in 1, enemies should not reach bottom
+    // - in 1 and 2, back of enemies should not be reachable without shooting at them first
     // TASK: hit specific enemies to reactivate them
     // TASK: collect all coins in the dungeon
     // ACHIEVEMENT: hit every enemy at least one time
@@ -649,35 +649,32 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // the walls are coming at you
-    // [deprecated] 1) erste sub-gruppe muss (schnell) still stehen, damit der spieler die wände bewegen sieht
-    // [deprecated] 2) weitere flache sub-gruppen um mechanik stärker begreifbar zu machen, e.g. dass alle wände betroffen sind
-    // [deprecated] gleich nach erste gruppe spikes erzeugen kommt schnell zum geschäft nachdem mechanik gezeigt wurde, geht gut
-    // gegner durch wand-verschiebung zu verstecken generiert nervige pausen, besser die gegner flugbahn mitverschieben
-    // wenn 2 wände aufeinander zukommen, sollten gegner von nicht den tunnel entlang fliegen, das macht es zu leicht
-    // wenn wände auf spieler zukommen müssen flache gegner-gruppen (ohne bewegung) darüber stehen, damit spieler drauf schießt und sieht, dass er sie zurückdrängen kann
-    // am ende müssen wände vom spieler zurückgedrückt und eingerastet werden
-    // beim zusammendrücken sollten immer nur zwei wände betroffen sein, vier sind zu viel (außer im finale)
-    // gegner sollten nicht von mehr als 2 richtungen gleichzeitig kommen (außer eck-gruppe), sonst dreht sich spieler verwirrt im kreis
-    // [deprecated] delay bevor wände sich zurückziehen ist schwer kontrollierbar und begreifbar
-    // gruppe in den ecken zeigt das enemy-anchoring sehr gut und schaut lustig aus, sub-gruppe für speed-runner die sich die wände absichtlich herziehen
-    // in der finalen phase lassen profis die mauern näher kommen um durch kurze wege schneller töten zu können
-    // do not render this above water (wall-bullets and enemies reflect and pop in)
-    // erste gruppe zieht spieler an die richtige position
-    // erste box-bewegung muss abseits sein, damit eine bewegung entsteht bei egal welcher start-position
-    // enemies are ghost+hidden, to prevent them from getting shot and rendering shadow, if they start in middle but are behind wall
-    // gegner sieht man orsch unter den stacheln (müssen groß, andersfarbig und weit genug weg sein von wand)
+    // - hiding enemies behind moved walls generates annoying pauses, it's better to move the enemy's flight path as well
+    // - when two walls move together, enemies shouldn't fly along the tunnel if possible, that makes it too easy
+    // - when walls start moving towards players, flat groups of enemies have to stand over them (without movement) so that the player can shoot at them and see that he can push the walls back
+    // - when walls start moving towards players, only two walls should be affected, four is too many (except in the final wave)
+    // - at the end, walls have to be pushed back by the player and locked into place
+    // - enemies should not come from more than 2 directions at the same time (except the corner group), otherwise the player will spin in circles, confused
+    // - (old: delay before walls retreat is difficult to control and understand)
+    // - enemies in the corners shows enemy-wall anchoring very well and looks fun
+    // - in the final phase, professionals let the walls come closer in order to be able to kill faster
+    // - do not render this above water (wall-bullets and enemies reflect and pop in)
+    // - first group moves players to the correct position
+    // - the first box movement must be off to the side so that a movement occurs regardless of the starting position
+    // - enemies are ghost+hidden, to prevent them from getting shot and to render shadow, should they start in middle but are behind wall
+    // - it's difficult to see enemies under the spikes (they have to be big, different colors and far enough away from the wall)
     // TASK: destroy specific enemies first
     // TASK: attack walls in certain order during the box phase
     // TASK EXTRA: find and destroy all hidden enemies
     // ACHIEVEMENT: never hit the walls / never miss any shot
     // TODO 1: hard mode: attacking the border creates attacks (stings fly away, and respawn a second later ?)
-    // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
+    // TODO 1: something has to flash or react when hitting the wall (e.g. the spikes?, an invisible line at the edge (in the playing field))
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fOffMin = 0.0f;
         constexpr coreFloat fOffMax = 1.0f;
 
-        const coreUint8 aiBoxOrder[] = {2u, 0u, 3u, 0u, 2u, 1u, 3u, 1u, 2u, 3u, 0u, 1u, 0u, 2u, 3u, UINT8_MAX};   // TODO 1: nAdvanceOrderFunc cannot access aiBoxOrder
+        const coreUint8 aiBoxOrder[] = {2u, 0u, 3u, 0u, 2u, 1u, 3u, 1u, 2u, 3u, 0u, 1u, 0u, 2u, 3u, UINT8_MAX};   // TODO 1: constexpr, nAdvanceOrderFunc cannot access aiBoxOrder
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -1395,19 +1392,19 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // geometry falls together and forms safe spots
-    // gegner am anfang sollten den spieler nie in die enge treiben, den säulen auszuweichen ist anstrengend genug -> keine flachen gruppen
-    // erste säule gegenüber von erster gegnerwelle
-    // kreuz-tunnel, erster gegner muss seitlich anfangen, letzter gegner oben, nach doppel-gegner nicht zurück zum vorherigen
-    // in erster phase, gegner oben und unten nutzen die blöcke als schild, nicht gleichzeitig oben und unten, war zu schwer die stampf-attacken zu sehen
-    // in kreuz-tunnel, gegner von angriffen zu entkoppeln erhöhte engagement, im zweiten teil die gegner seitlich statt im tunnel bewegen zu lassen macht es weniger einfach alle zu töten, weil man fürs ausweichen nicht ständig draufhalten kann
+    // - enemies at the beginning should never push the player into a corner, avoiding the pillars is tiring enough -> no flat groups
+    // - first pillar opposite the first wave of enemies
+    // - in the first phase, enemies at the top and bottom use the blocks as a shield, not at the top and bottom at the same time, it was too difficult to see the stomp attacks
+    // - in cross tunnel, first enemy must start at the side, last enemy at the top, after double enemy do not go back to the previous one
+    // - in cross tunnel, decoupling enemies from attacks increased intensity, in the second part letting the enemies move sideways instead of in the tunnel makes it less easy to kill everyone because you can't keep firing as you also need to dodge bullets, so you need proper timing
     // TASK: destroy the elevator robotnik enemy
     // TASK: collect all gap objects
     // TASK EXTRA: touch all black stones
     // ACHIEVEMENT: destroy 30 enemies from inside the rocks
     // TODO 1: hardmode: blocks have stings (but not always, and they attack certain areas, e.g in the tunnel from both sides), enemies start attacking
     // TODO 1: move shake (and color management if not yet) to mission code, it's only visual
-    // TODO 1: smoke zwischen bewegenden steinen (smoke+partikel? oder nur smoke?)
-    // TODO 1: enemy-exhaust effekt ist nicht sichtbar über den steinen
+    // TODO 1: smoke between moving stones (smoke+particles? or just smoke?) (this created a lot of distraction!)
+    // TODO 1: enemy-exhaust effect is not visible above the stones
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = GELU_FANG_STEP;
@@ -2141,17 +2138,15 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // snap to grid
-    // player should not be moved if his current orb gets destroyed, to not move him into possible attack without being able to know or react (but provide way to both move into desired valid orb from there, and to return to far valid node as fallback)
-    // [deprecated] do not reduce movement-speed while shooting, feels sluggish
-    // moving enemies between orbs cause waiting time and frustration, but moving on nodes causes too much pressure related to attacks (because fine evasion is not possible) -> no enemy should move, player needs to be able to kill them on his own pace
-    // rotating orbs is impossible from a UX perspective
-    // [deprecated] attacks while moving between orbs (with sluggishness) are too hard to control precisely
-    // the spawn pattern should make sure that it is impossible for the single player to stand at a location where the next enemy might spawn
-    // [deprecated] moving or stretching orbs is possible (e.g. inner 4 orbs to outer), but a meaningful enemy pattern related to it might be problematic
-    // lines can be used even when they blend-out, as long as the target orb is enabled
-    // moving everything statically is possible and feels nice, but does not add any depth (so it's only used to improve the rail-sequence)
-    // in rail-sequence, make sure enemies are stretched out, so player has to move all the way, and nearly touch the sides, and enemies do not die too quickly
-    // in 3. grid, 2/2+2/3 (X/Y, start 0, oben links) is ne todesfalle
+    // - player should not be moved if his current orb gets destroyed, to not move him into possible attack without being able to know or react (but provide way to both move into desired valid orb from there, and to return to far valid node as fallback)
+    // - moving enemies between orbs cause waiting time and frustration, but moving on nodes causes too much pressure related to attacks (because fine evasion is not possible) -> no enemy should move, player needs to be able to kill them on his own pace
+    // - rotating orbs is impossible from a UX perspective (without a ton of testing)
+    // - the spawn pattern should make sure that it is impossible for the single player to stand at a location where the next enemy might spawn
+    // - at first I found speed-down during shooting sluggish, but it's actually more natural (as it's the default behaviour), and allows more gameplay variations where you HAVE to move between orbs and attack
+    // - lines can still be used while they blend-out, as long as the target orb is enabled
+    // - moving everything statically (without stretching) is possible and feels nice, but does not add any depth (so it's only used to improve the rail-sequence)
+    // - in rail-sequence, make sure enemies are stretched out, so player has to move all the way, and nearly touch the sides, and enemies do not die too quickly
+    // - in current 3rd grid, 2/2+2/3 (X/Y, start 0, upper-left) is a death-trap
     // TASK: touch every orb at least once (collect all shines)
     // TASK: hit all additional targets
     // ACHIEVEMENT: be on top of an orb which does not exist anymore
@@ -2161,7 +2156,7 @@ void cGeluMission::__SetupOwn()
     // TODO 5: badge: collect yellow blocks as badge (+ extra score ?)
     // TODO 5: badge: move along a marked line after another
     // TODO 5: badge: guitar hero
-    // TODO 5: badge: items in finaler phase einsammeln die von oben herunterfliegen
+    // TODO 5: badge: collect items in the final phase that fly down from above
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -2807,26 +2802,25 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // blocks react to certain move or turn directions
-    // arrows in your direction are transparent
-    // use as shield from enemy attacks
-    // erste reihe hat keine pfeile nach unten, und später keine nach oben, um sicher zu stellen, dass spieler am ende auf richtiger seite ist
-    // erste reihe hat keine zwei gleichen pfeile hintereinander, außer bei letztem abschnitt
-    // erster gegner muss verdeckt sein um kollision zu zeigen
-    // zweite gruppe muss seitlich sein um flip mechanik zu zeigen
-    // dritte gruppe zwingt spieler durch blöcke durch zu fliegen
-    // [deprecated] line pattern should have no arrows down and only 1-turn changes, to make navigation easier in this first moving pattern
-    // block pattern should not have same direction twice
-    // checkerboard pattern should provide a distinct path to kill enemies as fast as possible (also in coop, equal amount of enemies for each player) (also every empty field has a single arrow it points at) (you can shortcut by flying close to enemies, but that's fine)
-    // there should be an empty line between pattern changes and every pattern starts at 0 (deterministic)
-    // collision modifier needs to be big enough, so player cannot squeeze throw 2 blocks touching their corners
-    // bei linien-welle, nicht alle 4 varianten in einer reihe, damit der spieler sich immer drehen muss, aber so dass einzige drehung sowohl links oder rechts ein loch öffnet
-    // blöcke sollen von links kommen, um von regulären side-scrollern abzuweichen (e.g. revert-part in Gradius V)
-    // in linien welle, linie sollt nicht durchgehend ausgerichtet sein weil zu leicht, gegner die separat fliegen sind interessanter, aber nicht entlang bewegungs-richtung weil zu leicht, gruppe oben drückt den spieler zurück während er sie töten will, gruppe unten setzten den spieler unter druck nicht zerquetscht zu werden
-    // in cluster gruppe, gegner müssen durch blöcke fliegen, damit sie nicht in einem zug zerstört werden können
+    // - arrows in your direction are transparent
+    // - use as shield from enemy attacks
+    // - first row has no arrows pointing down, and later no arrows pointing up, to ensure that player is on the right side at the end
+    // - first row does not have two identical arrows in a row, except for the last section
+    // - first enemy must be blocked to show collision
+    // - second group must be at the side to show flip mechanics
+    // - third group forces players to fly through blocks
+    // - block pattern should not have same direction twice
+    // - checkerboard pattern should provide a distinct path to kill enemies as fast as possible (also in coop, equal amount of enemies for each player) (also every empty field has a single arrow it points at) (you can shortcut by flying close to enemies, but that's fine)
+    // - there should be an empty line between pattern changes and every pattern starts at 0 (deterministic)
+    // - collision modifier needs to be big enough, so player cannot squeeze throw 2 blocks touching their corners
+    // - in line wave, not all 4 variants in a row so that the player always has to turn, but so that a single turn opens a hole either left or right
+    // - in line wave, line should not consistent of a single direction only because it is too easy, opponents who fly separate from the lines are more interesting, but not along the direction of movement because it is too easy, group above pushes the player back while he wants to kill them, group below puts the player under pressure not to be crushed
+    // - blocks should come from the left to deviate from regular side-scrollers (e.g. revert part in Gradius V)
+    // - in spread wave, enemies have to fly through blocks so that they cannot be destroyed in one move
     // TASK: dance dance revolution variant
     // TASK: various blocks spin around and get destroyed when touched
     // ACHIEVEMENT: never touch a solid block
-    // TODO 1: hardmode: arrows drehen oder flippen sich alle N sekunden
+    // TODO 1: hardmode: arrows rotate or flip every N seconds
     // TODO 1: hardmode: no arrows visible, maybe under exception (timed, blinking, when disabled)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
@@ -3350,14 +3344,14 @@ void cGeluMission::__SetupOwn()
 
     // ################################################################
     // bend
-    // cannot throw enemies at each other, may cause unstable movement  
-    // cannot let all enemies of a sub-wave pass a single point, too easy (includes circle movement)  
-    // push-strength needs to be scaled to make sure that a whole 2x2 group can be killed in a single sweep by grazing one of their sides  
-    //     on first sub-wave center group needs to move into player, as they will naturally try to shoot and dodge them, see the mechanic, and evade their first bullet-wave  
-    // make this wave easier for advanced players, as the enemy-movement might not be as deterministic  
-    // difference between attackable and non-attackable must be very clear
-    //     on first wave, one of the up-flying enemies need to fly first with some delay, to show the bullet-attack
-    // coop: player not receiving two groups in second sub-wave needs to receive two groups in first sub-wave
+    // - cannot throw enemies at each other, may cause unstable movement
+    // - cannot let all enemies of a sub-wave pass a single point, too easy (includes circle movement)
+    // - push-strength needs to be scaled to make sure that a whole 2x2 group can be killed in a single sweep by grazing one of their sides
+    // - make this wave easier for advanced players, as the enemy-movement might not be as deterministic
+    // - difference between attackable and non-attackable must be very clear
+    // -     on first sub-wave center group needs to move into player, as they will naturally try to shoot and dodge them, see the mechanic, and evade their first bullet-wave
+    // -     on first wave, one of the up-flying enemies need to fly first with some delay, to show the bullet-attack
+    // - in coop, player not receiving two groups in second sub-wave needs to receive two groups in first sub-wave
     // TODO 1: completely disable player-enemy collision, just in case
     // TODO 1: enemies coming from all sides at the same time
     // TODO 1: enemies want to stay with you, can only be killed when far away
@@ -3365,11 +3359,11 @@ void cGeluMission::__SetupOwn()
     // TODO 1: fixed fields where enemies bend (gradius mines)
     // TODO 1: damagable state stays longer, or until teleport
     // TODO 1: linie (entlang) (die aufeinander prallt)
-    // TODO 1: schwachen kreis anzeigen, in dem gegner angreifbar sind (berührung), kreis kann kleiner werden, (gegner auf anderer seite werden aktiv)
-    // TODO 1: gegner die nur aus der ferne angreifbar sind (und von nah-gegnern beschützt werden) (schauen anders aus ?)
-    // TODO 1: ringelspiel (ikaruga), bienen-waben blöcke (mit invert in mitte, und umgekehrt), checkerboard
-    // TODO 1: SCHAU ob man eine andere mechanik von der liste rein-mergen kann ####################################################
-    // TODO 1: fixe position, wie minenfeld, ferne gegner greifen an
+    // TODO 1: show a weak circle in which opponents are vulnerable (touch), circle can become smaller, (enemies on the other side become active)
+    // TODO 1: enemies that can only be attacked from a distance (and are protected by close enemies) (look different?)
+    // TODO 1: merry-go-round (Ikaruga), honeycomb blocks (with invert in the middle, and vice versa), checkerboard
+    // TODO 1: LOOK if you can merge another mechanic from the list ####################################################
+    // TODO 1: fixed position, like a minefield, distant enemies attack
     // TODO 1: add bouncy ball, which enemies evade
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 5u})

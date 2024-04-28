@@ -14,7 +14,7 @@
 // TODO 1: snapshot data: both player positions and state (roll, feel, force, interrupt, health, dead/repair (stats), continues, scores, shoot (timer), input), bullets, (chroma (bullets)), background [RP]
 // TODO 3: async loading and saving
 // TODO 3: hard stage skip, hard enemy kill, hard boss health
-// TODO 3: kompression könnte noch verstärkt werden wenn daten von ABABAB auf AAABBB geändert werden vorm komprimieren (geht einfach mit version bump)
+// TODO 3: compression could be further improved if data is changed from ABABAB to AAABBB before compression (easy with version bump)
 // TODO 3: add move-step to keyframe (fallback: go to the marked packet and iterate rev until finding the first move packet)
 
 

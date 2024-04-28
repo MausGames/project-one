@@ -88,17 +88,14 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // shields on sides to force attacks from certain directions
-    // [deprecated] - 3: starts with offset, to not fly into players
-    // [deprecated] - 4: reflect all bullets and players with force, except with barrel roll
-    // [deprecated] - 5: arranged to allow only one kill per turn, and to improve coop gameplay
-    // position after killing enemies (based on their shield position) needs to be considered when spawning next wave
-    // first long shields need to push 50% of the area, to remove safe-spots
-    // long side-moving pattern needs to start at corners, one up one down, to prevent easy corner killing
-    // barrier indices are manual, to control overdraw
+    // - player position after killing enemies (based on their shield position) needs to be considered when spawning next wave
+    // - first long shields need to push 50% of the area, to remove safe-spots
+    // - long side-moving pattern needs to start at corners, one up one down, to prevent easy corner killing
+    // - barrier indices are all manual, to control render order
     // TASK: destroy all marked shields
     // TASK: kill enemy with reflected bullet
     // ACHIEVEMENT: reflect a single bullet at least 20 times
-    // TODO 1: hard mode: reflektierte geschosse verursachen schaden
+    // TODO 1: hard mode: reflected bullets cause damage
     // TODO 1: drum shield needs blink!
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -698,22 +695,21 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // cut with laser through everything
-    // the delay when rays "appear" is important, not when they "stop"
-    // rays should not come from below, first segments main direction is upwards
-    // 1, 2 coming from upper left, 3, 4 coming from upper right
-    // 1 starts right to left, 2 starts left to right, 3 starts right to left, 4 starts left to right
-    // enemies on the line spawn in the middle of the line
-    // first two patterns have no single equal line
-    // no intro-crossing in first two patterns
-    // bullets have a 3-delay pattern, but on the side and when enemies die the pattern might break
-    // fast line shows the player that there is no harm, in preparation for the multi-line wave
-    // enemies in 3 need to be positioned to easily kill them (to reduce pressure, which is reserved for later)
-    // gegner ohne linie dürfen sich nicht zu schnell bewegen, weil es den spieler überfordert, vor allem mit der task
-    // die beiden drehenden gruppen sollten sich nicht in die selbe richtung drehen
-    // die mehrfach-linien sollen ein schönes muster nach unten schießen, dem man ausweichen muss während man gegen die wand gedrückt wird
-    // TASK: 4 kugerl die auf linie liegen und nach kurzer zeit verschwinden müssen abgeschossen werden
-    // TASK: markierte linie muss für 1 sekunde berührt werden (pole dancing)
-    // TASK: gegner in finaler phase in bestimmter reihenfolge töten, ändert sich je nach start-gegner
+    // - the delay when rays "appear" is important, not when they "stop"
+    // - rays should not come from below, first segments main direction is upwards
+    // - 1., 2. coming from upper left, 3., 4. coming from upper right
+    // - 1. starts right to left, 2. starts left to right, 3. starts right to left, 4. starts left to right
+    // - enemies on the line should spawn in the middle of the line
+    // - first two patterns have no single equal line
+    // - bullets have a 3-delay pattern, but on the side and when enemies die the pattern might break
+    // - fast line shows the player that there is no harm, in preparation for the multi-line wave
+    // - enemies in 3. need to be positioned to easily kill them (to reduce pressure, which is reserved for later)
+    // - enemies without line should not move too fast, as the sudden transition might overwhelm the player
+    // - both rotating waves should not rotate into the same direction
+    // - the multi lines should shoot down in a nice pattern, that you have to avoid while being pushed against the wall
+    // TASK: 4 objects that lie on a laser and disappear after a short time must be shot
+    // TASK: marked line must be touched for 1 second (pole dancing)
+    // TASK EXTRA: destroy enemies in a certain order in the final phase, changes depending on the starting enemy
     // ACHIEVEMENT: touch every laser at least once
     // HARD: lasers block bullets
     STAGE_MAIN({TAKE_ALWAYS, 1u})
@@ -1236,20 +1232,20 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // enemies jump into camera
-    // - all: target shadow is essential, to communicate direct targeting in third sub-stage
-    // - 1,2: bullet patterns provide a lot of safe space, as jumping into the camera may overwhelm the player
-    // on circle group, enemies should not jump 3 or 5, so not everyone can be killed form the center
-    // on 2x2 enemies, they may jump into position from previous enemies, but that should be fine
-    // hopping enemies always need a 50% shift partner, so the gameplay keeps on moving (which makes those groups look faster, even though they have frequent pauses due to hopping)
-    // big enemy stomp sollte keine löcher haben, damit man drüber springen muss
-    // big enemy stomp can also be circumvented by staying near him (if attack comes from him), and compensate rotation or jumping over him for extra damage
-    // circle group jumps into opposite circle-direction of 2x2 and chess group
+    // - target shadow is essential, also to communicate direct targeting in third sub-stage
+    // - bullet patterns should provide a lot of safe space, as jumping into the camera may overwhelm the player
+    // - on circle group, enemies should not jump 3 or 5 places (around), so that not everyone can be killed form the center
+    // - on 2x2 group, they may jump into positions of previous enemies, but that should be fine
+    // - hopping enemies always need a 50% shift partner, so the gameplay keeps on moving (which makes those groups look faster, even though they have frequent pauses due to hopping)
+    // - big enemy stomp bullets should not have holes, so you have to jump over them (on normal)
+    // - big enemy stomp bullets can also be circumvented by staying near him (if attack comes from him), and compensate rotation by jumping over him for extra damage
+    // - circle group, 2x2 group, and chess group should jump in alternating directions
     // TASK: fly over marked shadows
     // TASK: jump over big enemy
     // TASK EXTRA: kill all single-jumpers
     // ACHIEVEMENT: do not move while enemies are in the air
     // TODO 1: hardmode: enemies attack from the air
-    // TODO 1: wave bullets sollten sich schön überlagern bei 2x2
+    // TODO 1: wave bullets should have a nice render ordering in 2x2 group
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData   = 12u;
@@ -1904,21 +1900,17 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // enemy charges straight forward on death (r-type fish)
-    // - (old) 2: should start on same spot and opposite of first group, to reduce accidental collision (which is more likely with 2x2)
-    // [deprecated] no passive attack, not impact attack, no bounce, because it's too overwhelming together with the green ball
-    // fire speed fast enough to create visual line, but not too fast, to create holes on sharp angles (which have less predictable path)
-    // [deprecated] 2x2 instead of 1x4 (enemy block instead of line), to force player keeping fire at the same position while an enemy is already flying at them
-    // both circle waves should start from left, and follow the same flip-movement and rotation
-    // small circle waves look like fireworks, big circle wave looks like a water-wheel
-    // angle and number of bounces of bounce enemy needs to be comprehensible, and the player should end near the bottom
-    // directions on fixed-direction moving enemies needs to give some holes for players to fly through, directions only facing into middle did not work
-    // spawn-fokus ist oben, damit der spieler unten einen sicheren platz hat
-    // TASK: N gegner schiffe bleiben im rand stecken und müssen abgeschossen werden
+    // - fire speed fast enough to create visual line, but not too fast, to create holes on sharp angles (which have less predictable path, so it should be possible to micro-dodge them)
+    // - small circle waves look like fireworks, big circle wave looks like a water-wheel
+    // - angle and number of bounces of bounce enemy needs to be comprehensible, and the player-position should end near the bottom
+    // - directions on fixed-direction moving enemies needs to give some holes for players to fly through, directions only facing into middle did not work
+    // - general spawn-focus is at the top, so that the player has a safe space below
+    // TASK: N enemy ships get stuck in the wall and have to be shot down
     // TASK: shoot N enemies at target object
     // TASK EXTRA: continue attacking big ship when bouncing around
     // ACHIEVEMENT: intercept the big enemy 7 times while it rushes around
     // TODO 1: hard-mode: enemies which charge infinitely (teleport, N-times)
-    // TODO 1: hard-mode: every enemy bounces once (what about bouncy enemy?), oder 1 infinity move (and bouncy enemy just moves N times infinitely)
+    // TODO 1: hard-mode: every enemy bounces once (what about bouncy enemy?), or 1 infinity move (and bouncy enemy just moves N times infinitely)
     // TODO 1: hard-mode: enemies explode into near attack
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
@@ -2390,25 +2382,25 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // enemies move and shoot with player
-    // falls auf schießen reagiert werden soll, dann auf cooldown der waffe
-    // gegner müssen immer gegen schussrichtung schießen um leichte kills zu vermeiden (speziell wenn ihre richtung fix ist, oder eine ihrer pos-achsen) (außer im finale)
-    // gegner in 3, wenn sie von ner schräge kommen sieht man alle 4 selbst wenn man am rand oder der ecke fliegt, müssen aber weit genug vom rand spawnen um kollisionen zu vermeiden wenn spieler in ecke ist
-    // gegner in 3, wenn sie schräg kommen werden sie auch nicht unabsichtlich beim spawnen schon abgeschossen, das selbe für die finale gruppe (+ die finale gruppe sollte so spawnen, dass sich keine zwei gegner überlagern, schaut orsch aus)
-    // enemies not visible are not allowed to shoot (especially in sub 3)
-    // in coop: wenn spieler stirbt soll ziel-spieler gewechselt werden, aber nicht bei wiederbelebung
-    // in hunter gruppe, gegner müssen so positioniert werden, dass man nicht "von anfang an" an den rand gehen und alles niederschießen kann
-    // in hunter gruppe muss offset+multiplier so gesetzt sein, dass alle gegner sichtbar bleiben
-    // gerade linie oder welle auf spieler zu (auch mit multiplier) war zu kompliziert, kollisionen und bumping war unvermeidbar, vor allem wenn man geschossen ausweichen muss, oder es war zu verwirrend und man wollte sie vorbeilassen und von seite angreifen
-    // fast infinity gruppe is auf zwei seiten aufgeteilt, weil sonst die geschoss-anzahl viel zu hoch und kompliziert war, spieler hat sich nur aufs dodgen konzentriert, und nicht mitbekommen wie die gegner sich bewegen
-    // kreis gruppe sollte nicht zu schnell rotieren, weil sie sonst zu leicht ist (fliegen einfach in den strahl ohne viel gegenwehr)
-    // prison gruppe ist so aufgebaut, dass für jede spieler-richtung 3 gegner aus verschiedenen richtungen in die mitte schießen (T form), für die rand-gegner kann man die 2 gegner ein linie nicht zerstören ohne von 1 angegriffen wird, für die mittel-gegner gibt es eine reihenfolge (das ist aber ok)
-    // gegner (außer in fast infinity gruppe) sollten sich nicht mit -1.0f bewegen, weil sonst die navigation relativ zu den gegnern zu schwer ist, vor allem bei wall gruppe
-    // hunter dürfen nicht zu langsam sein, weil sonst keine löcher zwischen ihren angriffen entstehen
+    // - if enemies should react to shooting, they should check for player-weapon cooldown
+    // - enemies should always shoot in the opposite direction to avoid easy kills (especially if their movement-direction is fixed, or one of their position-axes) (except in the finale)
+    // - in crosshair group, if they spawn from a corner you can see all 4 groups even if you fly at the edge or the corner, but they still need to spawn far enough from the edge to avoid collisions when the player is in the corner
+    // - in crosshair group, if they spawn from a corner they won't be accidentally shot down, the same for the final group (+ the final group should spawn in such a way that no two enemies overlap each other, looks bad)
+    // - enemies not visible are not allowed to shoot (especially in crosshair group)
+    // - in co-op, if player dies, target player should be changed, but not when revived
+    // - in hunter group, enemies have to be positioned in such a way that you can't go to the edge "from the start" and shoot everything down
+    // - in hunter group, offset+multiplier must be set so that all enemies remain visible
+    // - (old: straight line or wave towards player (even with multiplier) was too complicated, collisions and bumping were unavoidable, especially when you have to dodge bullets, or it was too confusing and you wanted to let them pass and attack from the side)
+    // - fast infinity group is separated into two sides, because otherwise the number of bullets was far too high and complicated, the player only concentrated on dodging and didn't notice how the enemies were moving
+    // - circle group should not rotate too quickly, otherwise it would be too easy (as they just fly into the player-attack without much resistance)
+    // - prison group is structured in such a way that for each player direction 3 enemies shoot from different sides into the middle (T shape), for the corner enemies you cannot destroy 2 enemies of a line without being attacked at least once, for the middle enemies there is a specific order (but that's ok)
+    // - enemies (except in fast infinity group) should not move with -1.0f, otherwise navigation relative to the enemies is too difficult, especially in the wall group
+    // - hunters can't be too slow, otherwise there won't be any holes between their bullets
     // TASK: collect all moving energy beans
-    // TASK: 3 geheime gegner, die sich nur an bestimmter position zeigen
-    // TASK EXTRA: crosshair gegner müssen in bestimmter reihenfolge getötet werden
+    // TASK: 3 secret enemies that only show up at certain positions
+    // TASK EXTRA: crosshair enemies must be killed in a specific order
     // ACHIEVEMENT: destroy all enemies while shooting to the right (in regular game rotation)
-    // TODO 1: HARD: 1:1 invert-mimic für beide spieler, mit den schnellen laser-bullets (gelbe geschosse?), oder steuerung komplett invertiert
+    // TODO 1: hard mode: 1:1 invert-mimic for both players, with fast laser bullets (yellow bullets?), or completely invert movement controls
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iHelperIndex = 23u;

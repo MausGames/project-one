@@ -8,22 +8,22 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// nicht zu wenig erzeugen, aber trotzdem etwas "kräftigere" objekte als der gradius boss
-// am anfang delay um die spear-bullet zu zeigen, bevor man einen anderen angriff damit kombiniert
-// nach jump, wenn ein objekt erzeugt wird, begwegt sich der boss auf spieler zu, damit das erzeugte objekt nicht sofort/einfach zerstört werden kann
-// laser sollten nicht unabhängig von der charge-attack erzeugt werden, weil sie sonst gleichzeitig passieren und den spieler verwirren und sein ausweich-manöver blockieren
-// objekte sollten nicht zu schnell erzeugt werden, weil sie sonst überfordern, vor allem bei der wand-bounce phase
-// schuss-geschwindigkeit der spear-bullets und dreh-geschwindigkeit sollten immer ein schönes muster haben
-// charge-attack sollte nicht gemacht werden, wenn spieler zu nah am rand ist (perpendicular), weil sonst die beid-seitige ausweich-möglichkeit fehlt
-// bei roter durchgehender attacke sollte man grad noch so durchschlüpfen können
-// view-bullets am ende sollen durchgängig sein, um spieler im kreis bewegen zu lassen (wenn möglich), aber trotzdem leicht versetzt und ausgefranst, um gracing zu erschweren
-// die schilde bringen spieler dazu sich um boss herum zu bewegen
-// durchgängig aufrichtige bewegung is kompletter bullshit, animation schaut orsch aus wenn sie boss auch dabei dreht, und der boss wirkt nicht mehr so massiv
+// - don't create too few, but still "stronger" objects than the Gradius boss (I have no idea anymore which boss that was)
+// - delay at the beginning to show the spear-bullets, before combining it with another attack
+// - after jump when an object was created, boss moves towards player so the created objects cannot be easily/immediately destroyed
+// - laser should not be created independently from the charge-attack, so they work in a consistent way and don't confuse and block evasive maneuvers of the player
+// - objects should not be created too fast, as they could overwhelm, especially in the wall-bounce phase
+// - shooting-speed of spear-bullets and rotation-speed should always create a nice pattern
+// - charge-attacks should not be made if player is near the border (perpendicular), so the player can evade towards both sides
+// - on the continuous red attack you should just be able to slip through
+// - view-bullets at the and should be continuous, so player has to move in circles, but still with slight offset to make gracing harder
+// - shields should force the player to move around (or at least left and right)
+// - general errect movement is complete bullshit, animation looks really bad especially if boss is rotating, and he doesn't look massive anymore
 // ACHIEVEMENT: fly through the gate without taking damage
 // TODO 4: clean up code (also in mission)
-// TODO 1: hard mode: all object behaviors increase, gelber angriff is undurchdringbar (7 statt 3 geschosse)
-// TODO 1: hard mode: neue beschwörung die nicht zerstört werden kann (vielleicht finaler ball kann nicht zerstört werden)
-// TODO 3: purple helper shield wird unter laser gezeichnet
+// TODO 1: hard mode: all object behaviors increase, yellow attack is a solid line (7 instead of 3 bullets)
+// TODO 1: hard mode: new summons which cannot be destroyed (maybe final ball cannot be destroyed)
+// TODO 3: purple helper shield is rendered behind laser
 // TODO 1: [MF] [HIGH] MAIN: sound
 
 

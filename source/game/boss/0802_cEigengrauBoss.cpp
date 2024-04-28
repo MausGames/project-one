@@ -8,36 +8,36 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// for top enemies, on height 60, the maximum side can be 30, otherwise distance between player, enemies and bullets is hard to understand, the minimum side can be 10, otherwise player and bullets disappear inside enemy
-// erste gegner fungieren als tutorial für geänderte rotation, wichtig, weil der kampf selbst sehr intensiv ist, und plötzliche gegner nicht als solche wahrgenommen werden könnten
-// sub-phasen mit bullet-rotation sollten nicht hintereinander sein, da sie sich sonst gegenseitig beeinflussen
-// random spread und random lines sollten keinen gezielten angriff haben, weil der zusammen mit der bullet-drehung nicht mehr richtig zielt
-// random lines haben in der mitte eine kontinuierliche linie, mit geringem abstand zur ersten äußeren linie, um leichten safe-spot in mitte zu vermeiden, random spread (welches früher kommt) könnte uu. random in die mitte schießen (vom algorithmus her)
-// kreuze mit ungerader anzahl an geschossen schaut besser aus, weil die mitte sich nicht komisch überlagert
-// offset beim direkten angriff sollte nicht zu hoch sein, weil der spieler sonst einfach ruhig stehenbleiben kann und nicht getroffen wird
-// rotations sub-phase (random spread, random lines, center wave, side wave) sollten möglichst abwechseln, besonders random spread und random lines sollten sich unterscheiden
-// gegner-spawning sollte möglichst gut verteilt sein
-// kamera-bewegung hilft beim ausweichen von geschossen, weil man die tiefe und perspektive besser erkennen kann
-// tunnel-objekt hat die perspektive gut hervorgehoben, hat aber nicht zu der offenen weite gepasst, die das entfernen der seiten-teile ermöglicht
-// wenn möglich, sollten geschosse nicht immer direkt vom boss spawnen, weil sie den boss zu sehr verdecken, und die perspektive verzerren (wodurch das "weite" feeling schlechter wird, und ausweichen schwerer wird)
-// golden angle muster war schön, funktioniert aber nur wenn es von mitte ausgeht und gerade fliegt, und hatte somit wenig gameplay-nutzen
-// kreuze mit 4 linien waren zu overwhelming
-// kreuze mit gegenseitig bewegenden linien hatten nicht die erwartende tiefe, weil man einfacher ausweichen konnte als bei normalen kreuzen (sie funktionieren auch nur wenn sie aus mitte kommen, wegen rotation)
-// wenn möglich, geschosse sollten bis zum rand gehn, bei dem der spieler sich noch positionieren kann
-// there were some experiments with restricting game object visibility to the regular game-area, but it doesn't come close to the intensified feeling of using the whole screen
-// attacks which move sideways during flight are too hard to predict, the rotation is easy enough though, maybe because of perspective influences
-// creating a sinus-tunnel (e.g. left-right) was not feasible, if the wave was slow it was boring, if the wave was fast the player-ship disappeared behind the curve which was confusing
-// the classical rotating hole attack was too similar to the rotating lines, but the lines are more versatile
-// gegner die spawnen brauchen eine incentive um angegriffen zu werden (entweder sind sie unausweichlich, oder greifen selbst an)
-// neither repair-enemy nor continue is properly handled, both situations are prevented by making players invincible
-// TODO 1: hard: additional enemies and side-turning
+// - (old: for top enemies, on height 60, the maximum side can be 30, otherwise distance between player, enemies and bullets is hard to understand, the minimum side can be 10, otherwise player and bullets disappear inside enemy)
+// - (old: first enemies act as a tutorial for the different rotation, important because the fight itself is very intense and sudden opponents may not be perceived as such)
+// - rotating sub-phases should not occur consecutively, otherwise they will influence each other (as rotation handling is global)
+// - random spread and random lines should not have a targeted attack, because together with the bullet rotation it no longer aims correctly (or looks out of place if moving straight)
+// - random lines have a continuous line in the middle, with a small distance to the first outer line, in order to avoid an easy safe spot in the middle, random spread (which comes earlier) could possibly shoot randomly into the middle (by the algorithm)
+// - crosses with an odd number of bullets looks better, because the middle part doesn't overlap strangely
+// - offset on the direct attack should not be too high, otherwise the player can simply stand still and not get hit
+// - rotating sub-phases (random spread, random lines, center wave, side wave) should alternate their direction if possible, especially random spread and random lines should be different
+// - (old: enemy spawning should be distributed as well as possible)
+// - camera movement helps for dodging bullets, because you can better perceive the depth and perspective
+// - tunnel-rendering emphasized the perspective well, but did not fit to the big open space (feeling) which was possible by the removal of the side parts
+// - if possible, bullets should not always spawn directly from the boss, because they obscure the boss too much and distort the perspective (which makes the "wide" feeling worse and makes dodging more difficult)
+// - golden angle pattern looked nice, but only works when it starts from the center and flies straight, and therefore had little gameplay value
+// - crosses with 4 lines were too overwhelming
+// - crosses with mutually moving lines did not have the expected depth because they were easier to dodge than normal crosses (they also only work when they come from the middle, due to rotation)
+// - if possible, bullets should go to the edge where the player can still position himself
+// - there were some experiments with restricting game object visibility to the regular game-area, but it doesn't come close to the intensified feeling of using the whole screen
+// - attacks which move sideways during flight are too hard to predict, the rotation is easy enough though, maybe because of perspective influences
+// - creating a sinus-tunnel (e.g. left-right) was not feasible, if the wave was slow it was boring, if the wave was fast the player-ship disappeared behind the curve which was confusing
+// - the classical rotating hole attack was too similar to the rotating lines, but the lines are more versatile
+// - (old: enemies that spawn need an incentive to be attacked (either they are unavoidable or attack themselves))
+// - neither repair-enemy nor continue is properly handled, both situations are prevented by making players invincible
+// TODO 1: hard mode: additional enemies and side-turning
 // TODO 1: improve player-arrow appearance when looking into/outof z-axis
-// TODO 1: background für time-score-banner hängt in leere bei vertikaler resolution
-// TODO 1: improve bullet depth überlagerung
-// TODO 1: post-processing fehlt und farben sind anders, fix glow and distortion on extended viewport
-// TODO 1: boss sollte vielleicht eigenen shader haben, zum rand hin weniger transparenz (spherisch ?) statt ganz flach
-// (TODO 1: sinus-line gegner sieht man schlecht von oben kommen (vielleicht beim ersten gegner ein loch lassen um (überraschendes) erstes ausweichen zu erleichtern))
-// (TODO 1: handle farb-änderung von adds)
+// TODO 1: background of time-score-banner just hangs in the air on vertical aspect-ratio
+// TODO 1: improve bullet depth handling
+// TODO 1: post-processing is missing and colors are different, fix glow and distortion on extended viewport
+// TODO 1: boss should perhaps have its own shader, less transparency towards the edge (spherical?) instead of completely flat
+// TODO 1: (old: sine-line opponents are difficult to spot coming from above (perhaps leave a hole on the first opponent to make the (surprise) dodge easier))
+// TODO 1: (old: handle color-changes on enemies)
 
 
 // ****************************************************************

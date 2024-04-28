@@ -56,10 +56,10 @@ enum eEnemyStatus : coreUint32
    // ENEMY_STATUS_UNDER = 0x20000u
 };
 
-    //ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### geschosse werden reflektiert (bubble)  
-    //ENEMY_STATUS_DAMAGING    = 0x0200u,   //    ### kollision verursacht schaden (spikes)  
-    //ENEMY_STATUS_IMMORTAL    = 0x0400u,   //    ### soll nicht sterben, geschosse gehen hindurch  
-    //ENEMY_STATUS_GHOST       = 0x0800u,   //    ### keine kollisionen mit spieler oder geschosse mehr    
+    //ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### bullets are reflected (bubble)  
+    //ENEMY_STATUS_DAMAGING    = 0x0200u,   //    ### collision causes damage (spikes)  
+    //ENEMY_STATUS_IMMORTAL    = 0x0400u,   //    ### should not die, bullets fly through  
+    //ENEMY_STATUS_GHOST       = 0x0800u,   //    ### no collisions with player or bullets anymore    
 
 // ****************************************************************
 // enemy entity interface

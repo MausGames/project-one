@@ -24,7 +24,7 @@ Pulse
 
 18x
 2
-36dps (muss niedriger als ray sein, 90% von ray)
+36dps (needs to be lower than ray, 90% of ray)
 
 18x / 3 = 6x
 2x3 = 6
@@ -32,7 +32,7 @@ Pulse
 
 1.5x
 2x12 + 3 = 27
-40.5dps (kann höher sein, weil man eh nah ran muss, aber <= ray) (mitte etwas stärker um, damit man nur 2 statt 3 treffer braucht) (- muss leicht niedriger als sustained fire sein, sonst bringt sich sustained nix)
+40.5dps (can be higher because you have to get close anyway, but <= ray) (a little stronger in the middle so that you only need 2 hits instead of 3) (- has to be slightly lower than sustained fire, otherwise sustained fire would be useless)
 
 Wave
 

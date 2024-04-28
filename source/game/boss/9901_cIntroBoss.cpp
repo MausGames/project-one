@@ -8,16 +8,15 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// teaches: chain, fragment, boss structure, everything
-// blaue und orangene geschosse dürfen nicht unten starten (brei dreh-angriff), weil man sonst nicht ausweichen kann
-// bei rundum-schwung nach innen schießen war komplett fürn orsch
-// spinning rotation on target attack needs to alternate, because rotation speed depends on player movement and so the difference can be hidden a bit
-// general rotation between phases needs to alternate
-// bei rundum-schwung, boss sollte nicht mit schwung nach außen fliegen, sonst erwischt es den überraschten spieler, erst schwung bremsen
+// - teaches: chain, fragment, boss structure, everything
+// - blue and orange bullets should not start at the bottom (spinning attack), otherwise you can't dodge them as easily as intended
+// - shooting inwards during the all-round swing was completely bad
+// - spinning rotation on target attack needs to alternate, because rotation speed depends on player movement and so the speed difference can be hidden a bit
+// - general rotation between phases needs to alternate
+// - on all-round swing transition, boss should not fly outwards with the swing, otherwise the surprised player will get hit, slow down first
 // ACHIEVEMENT: keep the extra enemy alive, until the boss gets rid of it
-// TODO 1: hard: shield, verfolgt spieler (vielleicht front), und wehrt angriffe ab
-// TODO 5: das erste fragment bekommt man im intro (die mitte der tafel, das viereck), und saugt einen ein und zerstört das schiff, und erzeugt eine graue kopie (Eigengrau) -> erst dann bekommt man blauen schein und quad, auch health-icon anders
-// TODO 1: [MF] [HIGH] sounds verbessern
+// TODO 1: hard mode: add a (real) shield, follows player (maybe at front), and deflects attacks
+// TODO 1: [MF] [HIGH] improve sound
 
 
 // ****************************************************************
