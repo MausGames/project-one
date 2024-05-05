@@ -1,0 +1,27 @@
+direktes ausweichen
+linear ausweichen (fixed, perpendicular)
+circular ausweichen
+spline ausweichen
+sinus ausweichen (mehrmals hin und her schwingen mit untersch. offsets)
+fixe positionen anfliegen
+
+einzelne gegner
+versteckte gegner ineinander (wenig, viele)
+
+atomare aufteilung (inenander + untersch. kantige pfade)
+
+alle gegner greifen an, sobald sie von ihrer original-position weg sind (wenig bullets, viele)
+
+------------------------------------------------------
+
+original triplet 1
+original triplet 2
+original triplet 3
+vertical linear links-rechts-links 7
+(sinus-welle)
+stern
+großer uhrzeiger (ineinander in beide richtungen 180)
+straße
+fixe positionen anfliegen 1->2->3->4 (der letzte bekommt mächtigeren angriff)
+
+bienen

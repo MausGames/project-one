@@ -1,0 +1,45 @@
+fixe richtung
+auf spieler zu
+rotierend
+
+still
+bewegend
+
+never bounce
+(bounce once)
+bounce often (heavy)
+
+reguläre bullets
+permanent bullets
+
+
+
+-----
+aufgefächerte linie oben, fixe richtung
+2x2 gruppen die in kurve nach unten fliegen, rotierende richtung
+
+infinity reihe oben, gegner nach unten
+links rechts infinity nach unten, abwechselnd schräge
+
+einzelner größerer gegner der N mal herumfliegt, fixe richtung
+
+old group 2
+old group 3
+
+
+--------
+
+intro
+????
+on all sides
+side movement
+
+3 räder nach unten
+rießiges invertiertes rad nach unten (dreh-richtung vom 2. kleinen rad)
+bouncy enemy (fixe richtung 45 grad)
+
+old group 1 (modified, side movement ?)
+old group 2 (modified) around
+old group 3 (modified) around
+
+

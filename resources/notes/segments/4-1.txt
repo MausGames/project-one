@@ -1,0 +1,55 @@
+make wave from the right longer, to highlight forcing the direction like in a classic side-scroller
+
+plate left shooting to right, plate right shooting to left, plate left disappears then, and remaining plate needs to be adjusted for transition
+- enemies raining from top on both sides with delays
+
+(rotating plate)
+(schräge plate)
+
+bei oben-unten kommen gegner von selber seite links oder rechts, mit delay, wie bei denen von oben und unten, die sollen durchgängig kommen
+
+
+bei move, 4 links und rechts
+bei links-rechts, gegner abwechselnd links und rechts
+
+
+------------
+intro top, left, bottom, right
+right:
+- ###
+left and right:
+- from left
+- raining from top and bottom on both sides with delays (all the way to the border)
+double:
+- from left and right on specific direction
+- from right all from the same direction
+double:
+- from above
+- from below
+quad still
+- from above
+quad moving
+- from above   4x
+- from below   4x
+- from side   nebeneinander
+
+
+
+   # v
+#    v
+  #  t
+   # t
+ #   v
+#    v
+#  # vt
+ ##  tv
+#  # vt
+
+------------
+intro top, left, bottom, right
+double left-right
+double top-bottom
+quad still
+quad moving      -> auch gegner von links rechts
+
+40s

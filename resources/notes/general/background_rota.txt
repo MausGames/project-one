@@ -1,0 +1,55 @@
+virido
+[X] 1 nothing
+[X] 2 
+[X] 3 nach oben links
+[X] 4 nach oben rechts
+[X] 5 
+[ ] 6 
+
+nevo
+[X] 1 nothing
+[X] 2 rotiert mit rotierenden platten und rotiert die lezte noch zu ende
+[X] 3 360 abhängig von zerstörten gegnern (gegen platten-rotation)   / nach links oben
+[X] 4 nach links
+[X] 5 lange rota zu gerade
+[X] 6 
+
+harena
+[X] 1 nothing
+[X] 2 nothing
+[X] 3 180er rotation
+[X] 4 verkehrt
+[X] 5 180er rotation
+[X] 6 
+
+rutilus
+[X] 1 rotation am anfang (schräge weg geben)
+[X] 2 nothing
+[X] 3 
+[X] 4 
+[X] 5 
+[X] 6 
+
+gelu
+[X] 1 zwei rotationen in der gruppe (halb halb)
+[X] 2 
+[X] 3 
+[X] 4 
+[X] 5 
+[X] 6 
+
+calor
+[X] 1 zwei rotationen in der gruppe (halb halb)
+[X] 2 gerade und hart rechts bei snow, mit back-rotation nach vorne bei rotierenden gegnern
+[X] 3 nothing
+[X] 4 nothing
+[X] 5 schräg links, dann schräg rechts, dann gerade bei seiten-gegnern für teppich
+[X] 6 
+
+muscus
+[X] 1 nothing
+[X] 2 nothing
+[X] 3 links rechts nach bewegung
+[X] 4 rotation bei wellen-waves halb, dann halb bei unsichtbare
+[X] 5 langsame rotation (so wie jetzt)
+[X] 6 

@@ -1,0 +1,113 @@
+bearer
+fortress
+forgotten
+fire
+wielder
+god##
+law
+knight
+demon
+fold
+broken
+leap
+howling
+wind
+destroyer
+sorrow
+destiny
+raider
+master
+bringer
+searing
+Catcher
+carrier
+outcast
+keeper
+radiant
+unforgiving
+SEEKER
+incomplete
+
+##name muss bezug auf aussehen UND mechaniken haben##
+ALLE NAMEN MÜSSEN MYSTISCH KLINGEN, DENK AN ALTE TEMPEL
+
+Ruin
+The Shattering/Ancient Keeper
+The Unyielding Collector
+
+Defiant
+# The Collector
+# Nautilus
+
+The Serpent of Decay
+The Dragon of Ruin
+
+# The Serpent of Ruin
+# Leviathan
+
+The Army of Radiance
+shattering
+The Broken/Shattered Serpent
+The Unison Serpent
+The Last Keeper
+The Last Protector
+The Relentless Protector
+The Serpent of Light
+unconstrained serpent
+The Army of (the)
+The Undying Flame
+The Radiant Army
+The Father of Time
+The First Singularity
+The Center of the Universe
+the first flame
+the flame of life
+The Lightbringer
+the forgotten army
+
+The Doom Bringer (von Futurama)
+
+
+****************************************************************
+BACKUP
+
+Washer
+Arbelos
+Deferent
+Arcuba
+Aion
+Ananke
+Oort
+Noc Lar
+Cirrus
+Piolet
+Anemon
+Amphiprion
+Alcedo
+Pulsar
+Splinter
+Shiver
+Ice XI
+Amarok
+Asag
+
+The First Guardian
+The Invocation from Below
+The Sum of all Evils
+The lone Kingfisher
+The Heart of Darkness
+The Unseen Central Fire
+
+
+****************************************************************
+MISSIONS
+
+99 Intro
+01 Virido / Viridis (green)
+02 Nevo / Aqua (water)
+03 Harena (sand)
+04 Rutilus (orangerot) / Rufus (rot)
+05 Gelu (cold)
+06 Calor (hot)
+07 Muscus (moss) / Pluvia (rain)
+08 Ater (matt schwarz) / Piceus (schwarz)

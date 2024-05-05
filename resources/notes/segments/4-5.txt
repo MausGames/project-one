@@ -1,0 +1,81 @@
+meteor-wellen erscheinen in regelmäßigen abständen, unabhängig von kill, jedoch speedup indem man alle zerstört oder %, am ende erscheint der große meteor
+((alle movement patterns sollten gleich sein (vom winkel her)))
+explosive meteoriten die geschoss-welle erzeugen (360° viel), unterscheiden sich optisch
+großer meteorit erzeugt geschosse und kleine meteoriten wenn er schaden nimmt
+großer meteorit erzeugt kleine meteoriten wenn er einschlägt
+
+
+klein:
+semi-random welle von oben (als intro)
+gerade welle nach unten von oben
+abwechselnde welle links-rechts
+halbe wave von oben mitte
+8 von allen 8 seiten richtung mitte (vielleicht leicht versetzt im winkel)
+
+
+mittel:
+4 von 4 seiten gerade mit selben shift
+N hintereinander in schlange, liegender 8er, eher mittel weil kleine zu leicht sind
+
+
+klein + mittel:
+
+
+
+(line von unten reflektiert auf seite und weiter (karo muster))
+
+
+-----------------------------------------------
+if(bBig)
+{
+    ASSERT(!iAddIndex)
+    iAddIndex = iSpawnSmall;
+
+    for(coreUintW j = 0u; j < 4u; ++j)
+    {
+        pSquad2->GetEnemy(j)->Resurrect();
+    }
+
+    for(coreUintW j = 0u; j < 2u; ++j)
+    {
+        const coreUintW   iIndex = (iSpawnMedium++);
+        const coreVector2 vDir   = coreVector2(j ? -1.0f : 1.0f, 2.0f).Normalized();
+
+        cEnemy* pNewEnemy = pSquad1->GetEnemy(iIndex);
+
+        pNewEnemy->SetPosition (pEnemy->GetPosition() + coreVector3(vDir * 2.0f, 0.0f));
+        pNewEnemy->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+        pNewEnemy->SetMaxHealth(50);
+        pNewEnemy->Resurrect();
+
+        avMove[iIndex] = vDir;
+    }
+}
+
+if(bMedium)
+{
+    for(coreUintW j = 0u; j < 4u; ++j)
+    {
+        const coreUintW   iIndex = (iSpawnSmall++);
+        const coreVector2 vDir   = (coreVector2::Direction(I_TO_F(j) * (0.5f*PI) + (0.25f*PI)) * coreVector2(1.0f,2.0f)).Normalized();
+
+        cEnemy* pNewEnemy = pSquad1->GetEnemy(iIndex);
+
+        pNewEnemy->SetPosition (pEnemy->GetPosition() + coreVector3(vDir * 2.0f, 0.0f));
+        pNewEnemy->SetSize     (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
+        pNewEnemy->SetMaxHealth(bBig ? 50 : 10);
+        pNewEnemy->Resurrect();
+
+        avMove[iIndex] = vDir;
+    }
+}
+else if(false)
+{
+    for(coreUintW j = 0u; j < 4u; ++j)
+    {
+        const coreVector2 vPos = pEnemy->GetPosition ().xy();
+        const coreVector2 vDir = StepRotated90X(j);
+
+        g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+    }
+}

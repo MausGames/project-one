@@ -1,0 +1,25 @@
+virido:
+- circular shapes (Xenoblade X) [s]
+- trees
+
+nevo:
+- corals (cyan)
+- little fish (yellow, shark)
+- spongebob [s]
+
+harena:
+- pillars [s]
+
+rutilus:
+
+gelu:
+- pyramids (and other egyptian) structures [s]
+
+calor:
+- big spikey plants
+- coarse corals
+
+muscus:
+- dead wood and trees
+- water lilies
+- stone crosses and cube pillar graves (in water) [s]

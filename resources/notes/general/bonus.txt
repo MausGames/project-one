@@ -1,0 +1,11 @@
+[X] bonus beim einsammeln von badges
+[X] malus bei getroffen werden
+[X] bonus und malus im save speichern
+[X] bonus und malus im replay speichern
+[X] anzeigen im interface
+[X] anzeigen im combat text
+[X] anzeigen im menü
+
+[ ] alle änderungen prüfen und aufräumen
+
+[X] damage taken nicht mehr für medal

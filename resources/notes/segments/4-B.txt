@@ -1,0 +1,93 @@
+- theme: rule bending effects (time reverse, rotation)
+- attack problem: protected by meteors
+- boss starts with low health, and regenerates
+- turning time back
+- sucks stuff to him (attack from behind, Gradius mine boss)
+- meteoriten werden im kreis um ihn herum gedreht (bildschirm beginnt sich dann auch zu drehen)
+- (Spieler bennötigt selbst Meteoritenschild, welches sich schnell nachlädt für mehr Action)
+
+- spieler wird wild herumgedreht, linie für force-rotation nach oben stabilisiert, aber gleichzeitig kommen angriffe von links und rechts
+- fullscreen slowdown from time to time
+- gravitiation von linker oder rechter wand, bullets fliegen darauf zu, meteoriten oder geschossen fliegen von anderer seite
+
+badges: bei lauter unverwundbaren meteoriten zerstör den einen der zerstört werden kann (leicht andere farbe)
+
+
+-------------------------------------------------------------------
+metroids flying to the fourth wall creating bumps and cracks
+
+// TODO 1: zeit könnte auch rückwärts laufen, und wenn man ihn auf 100% bringt bevor die zeit auf 0 geht kommt geheime phase, mehr als 100% HP, label wobbelt um anzuzeigen, dass das ok ist, bonus punkte ?
+// TODO 3: reversed bullets should disappear into boss with slight fade
+// bullets using time shift can't be near each others along fly-dir, because of depth-order
+// reverse bullets are created with wrong delay, der tick fürs erzeugen beim boss und fürs erzeugen an der wand überlagern sich nicht korrekt
+// meteoriten-rotations angriff in mittel phase vor gravitation, meteoriten werden weggeschossen und dann geht gravitation los
+// links und rechts teleporter, meteoriten kommen raus in unendlichkeit, sind manchmal so arranged (seitlich und von oben-schräg), dass man durch teleporter durch muss
+// intro: meteoriten kommen zusammen, kurze drehung und wartezeit, dann bumm, und messier bricht raus schon mit schild
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+
+
+-------------------------------------------------------------------
+- force rotation
+  - welle von boss, 1, 2, beim 3. mal h
+  - spieler wird wild herumgedreht, horizontale linie für force-rotation nach oben stabilisiert (am unteren rand), aber gleichzeitig kommen angriffe von links und rechts
+  
+  - könnten auch wellen von oben sein, die einen zur seite zeigen lassen (nicht nach unten), oder sich drehen (kniffliger)
+
+- screen rotation
+  - während später phase im strudel, spieler wird dadurch fixiert, aber alles andere dreht sich noch
+
+- slowdown
+  - fullscreen slowdown from time to time
+
+- gravitation
+  - gravitation walls left and right, mit meteoriten oder gegner-geschossen von anderer seite
+
+- meteors
+  - small meteor shield
+  - big meteors during gravitation vortex (von außen)
+  - meteoriten können zerstör werden, regenerieren sich aber (gemeinsam, timer geht los sobald einer zerstört wurde, restliche werden nach außen geworden und verschwinden am rand) (oder 4 bleiben immer aktiv, danach regenerieren sie sich in reihenfolge der zerstörung) (oder regeneriert immer voll sobald alle zerstört sind)
+  - meteoriten wand von links oder rechts
+
+
+-------------------------------------------------------------------
+
+meteoriten bewegen sich weiter nach unten, stehen erst still nach zeit-phase
+
+100% -> 50%
+- oben
+
+- gravitation left and right
+   - fängt rechts an, meteoriten-wellen mit loch (unten) von links, dann boom und is links (wenn meteoriten die mitte passieren ab % life), meteoriten in der mitte fliegen dann in die andere richtung
+
+- gravitation bottom
+
+- force rotation above
+
+50% -> 10%
+
+- bestimmte bullet patterns die bei rückwärts gut ausschauen würden
+   - 1: 
+   - 2:
+   - 3:
+   - könnten im boss mit low-overhead struct getrackt werden, struct of arrays, pos (8), dir/angle (4), type (1), speed is konstante pro type
+      - könnte aber zu problemen wegen timing führen, vielleicht einfach generation funcs invertieren und dann wieder wechsel abhängig von % health
+
+10% -> 50%
+- oben
+- glocken-schlag effekt (NWN), zwei zeiger erscheinen vorwärts und beginnen sich rückwärts zu drehen, verschwinden am ende der phase
+- spieler kann kurz nicht feuern (mit glocken-schlag) und seine geschosse werden zerstört
+- boss kann nicht über 50% health gehen!
+
+- geschosse fliegen rückwärts
+
+- fullscreen slowdown bei ende (transition)
+  - gleichzeitig kommt gewaltiger bullet-angriff vom boss (dodonpachi), den man nur dank der niedrigen geschwindigkeit ausweichen kann
+     - enthält alle geschoss-typen von vorher
+
+50% -> 0%
+- fliegt in mitte (transition)
+
+- strudel beginnt + große meteoriten kommen von außen
+
+- bei 20% beginnt sich screen zu drehen
+

@@ -1,0 +1,17 @@
+
+matrix
+- enemies should move in hex-circle, so they don't touch each other
+
+bubble still
+- abwechselnd links und rechts von oben nach unten
+
+bubble bewegend 1
+- 3 waves (horizontal)
+(start auf seite von gegner von welle davor nicht kam)
+
+3   2    2   1
+1 # 3    1 # 2
+3   2    2   1
+
+bubble bewegend 2
+- wide shooter (man muss aus bubble raus) (oben-link + unten rechts, vertical)

@@ -1,0 +1,55 @@
+
+grow:
+1 gegner von oben mit 3er burst (hintereinander) nach unten
+1 gegner von rechts mit 6er burst (hintereinander) nach unten
+
+gegner rollen mit wave-attack von links recht links rechts
+
+wall (50% shift) von rechts mit gegner oben und unten nach links abwechselnd
+
+gegner rollen mit star-burst von oben oben
+
+gegner rotierend mittig (kommt von links) mit langsamer doppel-rotation
+
+shrink:
+
+kontinuierliche geschosse von links und rechts unten wärend 2 gegner links rechts vorbeifliegen
+
+gemischt:
+2 gegner nebeneinander hocken oben, einer schießt blau fächer, einer violett, abwechselnd
+
+
+
+----------
+Ner burst gefächert
+Ner burst hintereinander target
+
+star-burst
+
+2/4 kontinuierlich herum or target
+ - 2 langsam
+
+kugeln hinten raus im pattern (wie flammen im arrow)
+
+wall (untersch. flug-richtungen) from right with enemies there
+maelstrom
+
+each wall (gerade) should make it possible to shoot through
+
+
+twist: hohe geschwindigkeit bei geschossen
+twist: invertierte geschosse
+
+abwechselnd normale und invertierte in wand
+
+
+
+
+
+
+----------
+balls bounce around
+
+sammeln sich am boden
+
+regulär

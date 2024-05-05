@@ -1,0 +1,24 @@
+simon says, linear up and down, to make distinction easy, and to prevent accidental hits (order forward, backward, mirrored, to stay fair but variable)
+
+selbe gegner mehrmals angreifbar
+
+nur aktiver gegner greift an mit starkem rundum-pattern
+
+alle aktivieren (jeden einmal treffen)
+2 gleichzeitig aktiv und aktivierung wird mit jedem treffer fortgesetzt (spieler kann reihenfolge etwas kontrollieren)
+
+schießstand-enten mehrere reihen (untersch. geschwidnigkeiten)
+im kreis herum
+3er/Ner-reihe nach unten, einzeln, klärt auf nach treffer (ikaruage/RSG tunnel mit gegnern)
+gegner bedecken den rand (2 seiten oben rechts), und einzelne kommen nach vor, bei treffer gehen zurück
+
+N gegner die man nur in reihe angreifen kann, dann N gegner die alle angreifbar sind und in der selben reihe für badge  (entweder nacheinander von oben, oder vielleicht links alle angreifbar, rechts in reihe)
+
+alte chief-positionierung
+
+
+
+
+-----------
+schießstand-enten mehrere reihen
+im kreis herum

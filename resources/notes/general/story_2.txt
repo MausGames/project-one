@@ -1,0 +1,34 @@
+[X] intro:   <passt>
+[X] virido:  <nichts>
+[X] nevo:    p1 erscheint + chromatic + flip + dark background -> dann alles zurück zum original und outro
+[X] harena:  weißer helfer fliegt von links nach rechts in summary (muss in game klasse)
+[X] rutilus: <nichts>
+[ ] gelu:    weißer helfer fliegt auf rechter seite nach oben in summary
+[ ] calor:   p1 erscheint + chromatic + ranges in black + ranges in dark -> dann alles zurück zum original und outro
+[X] muscus:  <nichts>
+
+
+
+
+dark background flimmert für sehr kurze zeit auf beim outro
+
+p1 flimmert kurz an einer stelle auf
+
+gegenüberstellung blau und grün (blau unten) flimmert kurz auf
+
+weißer helfer
+bunte helfer
+
+
+
+yellow [54] <> purple [75]
+orange [78] <> blue [63]
+red [76] <> cyan [40]
+magenta [78] <> green [63]
+
+
+yellow [54] <> cyan [40]
+green [63] <> blue [63]
+red [76] <> purple [75]
+magenta [78] <> orange [78]
+

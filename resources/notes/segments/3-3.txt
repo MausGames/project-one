@@ -1,0 +1,20 @@
+infinitely flying enemy(s) which needs to be destroyed, needs deterministic movement
+
+the whole tower moves along with everything
+
+side moving single enemies  ^left vright, (or just from top left and right)
+linie von oben
+
+-----
+big enemy 5-10s
+
+
+-----
+middle
+left
+right
+around
+around rotating
+4 groups
+
+30-40s

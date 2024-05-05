@@ -1,0 +1,55 @@
+
+-------------------------------------------------------------------
+
+
+more than 50 different handcrafted arcade stages
+
+
+10 challenging bosses
+- boss Torus intro (mit Warnung (überdeckt?))
+- boss Leviathan
+- boss Messier (rotation phase)
+
+Solve Tasks
+- ###
+- ###
+
+Discover Secrets
+- helper shot
+- show plate animation (3)
+
+Work Together
+- ###
+- ###
+
+
+Are you really doing the right thing?
+
+
+<flickern>
+
+EIGENGRAU
+
+<flickern>
+P1 finale phase (kurz)
+<show blue and green>
+
+release date + steam + itch
+
+
+
+
+
+-------------------------------------------------------------------
+- Screenshots
+    grass:   lasers (alt)
+    volcano: blocks (alt)
+    snow:    morgenstern (felsen, erste 6er mit zweiter sichtbar)
+    desert:  Boss: tiger (links-rechts wizzrobes, boss schießt nach rechts, spieler nach links)
+    moss:    bullets (alt)
+    menu:    Level Selection Menu: classic mode sichtbar, sea background
+    
+    cloud:   Coop: cloud 04, links rechts (untersch. höhe)
+    sea:     kugerl (2 gruppe am anfang) ODER plates (rotated)
+    space:   rotated (leicht rotiert, mittel, ersten gegner von 4er gruppe töten)
+

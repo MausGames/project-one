@@ -1,0 +1,242 @@
+
+    // TODO 1: wave where middle bullets faster than outer bullets, or left-right faster than up-down, then invert
+    // TODO 1: tunnel to follow
+
+
+
+- * open and half open quad (still)
+- star field
+- kreis mit unterschiedlicher rotation
+- rotating lines
+- quad mit unterschiedlichem speed
+- double twister
+- rotating spheres
+- * open and half open quad (rotating)
+- * two snakes
+
+
+
+
+
+- kreise mit öffnung (vielleicht)
+
+
+
+
+abhängig von spieler position
+richtungen sind von linie/block blockiert
+
+
+
+            if(nStageMiniTickFunc(0.5f, 0.0f))   // quad mit unterschiedlichem speed
+            {
+                if(s_iTick < 8u)
+                {
+                    for(coreUintW i = 0u; i < 80u; ++i)
+                    {
+                        const coreVector2 vSide   = StepRotated90(i / 20u);
+                        const coreVector2 vTarget = vSide.Rotated90() * ((I_TO_F(i % 20u) - 9.5f) * 0.1f) + vSide;
+
+                        const coreVector2 vPos   = vTarget * FOREGROUND_AREA * 1.2f;
+                        const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                        const coreFloat   fSpeed = vTarget.Length() * (((s_iTick % 2u) == ((i / ((s_iTick >= 4u) ? 5u : ((s_iTick >= 2u) ? 10u : 20u))) % 2u)) ? 0.5f : 1.0f);
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>((s_iTick >= 6u) ? ((s_iTick % 2u) ? 7 : 6) : 5, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    }
+                }
+                else nStageMiniChangeFunc(6u);
+            }
+
+            
+            if(nStageMiniTickFunc(30.0f, 0.0f))   // two snakes
+            {
+                if(s_iTick < 160u)
+                {
+                    const coreVector2 vSide   = StepRotated90(((s_iTick / 20u) + 1u) % 4u);
+                    const coreVector2 vTarget = vSide.Rotated90() * ((I_TO_F(s_iTick % 20u) - 9.5f) * ((s_iTick < 80u) ? -0.1f : 0.1f)) + vSide;
+
+                    const coreVector2 vPos   = vTarget * FOREGROUND_AREA * 1.2f;
+                    const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                    const coreFloat   fSpeed = vTarget.Length() * 1.3f;
+
+                                      g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, pDummy, vPos,             vDir)            ->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    if(s_iTick < 80u) g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, pDummy, vPos * -1.0f,     vDir * -1.0f)    ->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                                 else g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, pDummy, vPos.Rotated90(), vDir.Rotated90())->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                }
+                else nStageMiniChangeFunc(10u);
+            }
+
+
+
+
+else if(iStageMini == 1u)
+        {
+            if(nStageMiniTickFunc(1.0f, 0.0f))   // kreise mit öffnung (vielleicht)
+            {
+                if(s_iTick < 10u)
+                {
+                    const coreFloat fBase = g_pGame->FindPlayerDual(s_iTick % 2u)->GetPosition().xy().Rotated90().Angle();
+                        
+                    for(coreUintW i = 0u; i < 80u; ++i)   // TODO 1: 2 unrolling
+                    {
+                        if((i < 5u) || (i >= 35u && i < 45u) || (i >= 75u)) continue;
+
+                        const coreVector2 vTarget = coreVector2::Direction(I_TO_F(i) / 80.0f * 2.0f*PI + fBase);
+
+                        const coreVector2 vPos   = vTarget * FOREGROUND_AREA * SQRT2 * 1.2f;
+                        const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                        const coreFloat   fSpeed = 1.5f;
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>((s_iTick % 2u) ? (((s_iTick / 2u) % 2u) ? 7 : 6) : 5, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    }
+                }
+                else nStageMiniChangeFunc(2u);
+            }
+        }
+
+    if(iStageMini == 1u)
+        {
+            if(nStageMiniTickFunc(30.0f, 0.0f))
+            {
+                if(s_iTick < 160u)
+                {
+                    const coreVector2 vSide   = StepRotated90(((s_iTick / 20u) + 1u) % 4u);
+                    const coreVector2 vTarget = vSide.Rotated90() * ((I_TO_F(s_iTick % 20u) - 9.5f) * ((s_iTick < 80u) ? -0.1f : 0.1f)) + vSide;
+
+                    const coreVector2 vPos   = vTarget * FOREGROUND_AREA * 1.2f;
+                    const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                    const coreFloat   fSpeed = vTarget.Length() * 1.3f;
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(6, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(7, fSpeed, pDummy, vPos * -1.0f,     vDir * -1.0f)    ->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                }
+                else nStageMiniChangeFunc(2u);
+            }
+        }
+        else 
+        
+        
+        if(iStageMini == 1u)
+        {
+            if(nStageMiniTickFunc(2.0f, 0.0f))
+            {
+                if(s_iTick < 20u)
+                {
+                    for(coreUintW i = 0u; i < 20u; ++i)
+                    {
+                        const coreVector2 vSide   = StepRotated90(s_iTick % 4u);
+                        const coreVector2 vTarget = vSide.Rotated90() * ((I_TO_F(i) - 9.5f) * 0.1f) + vSide;
+
+                        const coreVector2 vPos   = vTarget * FOREGROUND_AREA * 1.2f;
+                        const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                        const coreFloat   fSpeed = 1.0f;
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    }
+                }
+                else nStageMiniChangeFunc(2u);
+            }
+        }
+        else 
+        
+        
+        
+        
+        if(iStageMini == 1u)
+        {
+            if(nStageMiniTickFunc(1.0f, 0.0f))
+            {
+                if(s_iTick < 6u)
+                {
+                    for(coreUintW i = 0u; i < 80u; ++i)
+                    {
+                        if((s_iTick < 4u) ? ((i >= ((s_iTick + 2u) % 4u) * 20u) && (i < (((s_iTick + 2u) % 4u) + 1u) * 20u)) : ((s_iTick % 2u) == ((i / 5u) % 2u))) continue;
+
+                        const coreVector2 vDir = coreVector2::Direction(I_TO_F(i) / 80.0f * 2.0f*PI);
+
+                        const coreVector2 vPos   = -vDir * SQRT2 * FOREGROUND_AREA * 1.2f;
+                        //const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                        const coreFloat   fSpeed = 1.0f;
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(6, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    }
+                }
+                else nStageMiniChangeFunc(2u);
+            }
+        }
+        else 
+        
+        
+        
+        
+        else if(iStageMini == 1u)
+        {
+            if(nStageMiniTickFunc(1.0f, 0.0f))
+            {
+                if(s_iTick < 10u)
+                {
+                    const coreVector2 vCenter = g_pGame->FindPlayerDual(s_iTick % 2u)->GetPosition().xy().Normalized();
+                        
+                    for(coreUintW i = 0u; i < 20u; ++i)
+                    {
+                        const coreVector2 vTarget = vCenter + 0.2f * coreVector2::Direction(I_TO_F(i) / 20.0f * 2.0f*PI);
+
+                        const coreVector2 vPos   = vTarget * FOREGROUND_AREA * SQRT2 * 1.2f;
+                        const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                        const coreFloat   fSpeed = 1.5f;
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    }
+                }
+                else nStageMiniChangeFunc(2u);
+            }
+        }
+        
+        
+        
+        else if(iStageMini == 1u)
+        {
+            if(nStageMiniTickFunc(1.0f, 0.0f))
+            {
+                if(s_iTick < 10u)
+                {
+                    for(coreUintW i = 0u; i < 80u; ++i)
+                    {
+                        const coreVector2 vTarget = coreVector2::Direction(I_TO_F(i) / 80.0f * 2.0f*PI + I_TO_F(s_iTick) * 1.0f*PI);
+
+                        const coreVector2 vPos   = vTarget * FOREGROUND_AREA * SQRT2 * 1.2f;
+                        const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                        const coreFloat   fSpeed = ((i / 8u) % 2u) ? 0.6f : 1.2f;
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>((s_iTick % 2u) ? 7 : 5, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    }
+                }
+                else nStageMiniChangeFunc(2u);
+            }
+        }
+        
+        
+        
+        else if(iStageMini == 1u)
+        {
+            if(nStageMiniTickFunc(0.5f, 0.0f))
+            {
+                if(s_iTick < 8u)
+                {
+                    for(coreUintW i = 0u; i < 80u; ++i)
+                    {
+                        if((i / 2u) % 2u) continue;
+                        
+                        const coreVector2 vSide   = StepRotated90(i / 20u);
+                        const coreVector2 vTarget = vSide.Rotated90() * ((I_TO_F(i % 20u) - 9.5f) * 0.1f) + vSide;
+
+                        const coreVector2 vPos   = vTarget * FOREGROUND_AREA * 1.2f;
+                        const coreVector2 vDir   = vTarget.Normalized() * -1.0f;
+                        const coreFloat   fSpeed = vTarget.Length() * 0.8f;
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(((s_iTick % 2u) == ((i / ((s_iTick >= 4u) ? 5u : ((s_iTick >= 2u) ? 10u : 20u))) % 2u)) ? 7 : 6, fSpeed, pDummy, vPos, vDir)->ChangeSize(1.3f)->AddStatus(BULLET_STATUS_IMMORTAL);
+                    }
+                }
+                else nStageMiniChangeFunc(2u);
+            }
+        }

@@ -1,0 +1,52 @@
+
+-------------------------------------------------------------------
+distinct effect
+
+badge achieved
+fragment collected
+segment ended
+medal achieved (for each type)
+boss warning
+
+
+-------------------------------------------------------------------
+gameplay effect
+
+bullet hit
+bullet reflect (invincibility, rain on metal)
+turn
+(control take)
+(control back)
+interrupt
+interrupt over
+explosion (different for each enemy)
+(einflug)
+
+
+-------------------------------------------------------------------
+other effect
+
+continue counter
+spinning numbers (score in summary)
+
+
+-------------------------------------------------------------------
+menu
+
+selection change (controller)
+tab change
+into sub-menu
+out of sub-menu
+confirm
+decline
+change switch box
+disabled switch box
+melody (play game, play replay, continue)
+dedicated volume ping
+
+
+-------------------------------------------------------------------
+jingle/stinger
+
+mission victory
+fragment appears (Zelda-like solution jingle)

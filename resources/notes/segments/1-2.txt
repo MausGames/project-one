@@ -1,0 +1,20 @@
+viele linien eng untereinander kommen nach unten, stoppen aber kurz vorm ende
+4 welle links, 4 links-rechts-links-rechts, 8
+oder 4 welle links, 8 welle rechts-links
+
+viele linien mit gegnern, kommen alle gleichzeitig (gegner, linien zuerst, dann alle gegner), wenn einer getötet wird werden alle linien zerstört und gegner fliegen im kreis in luft
+von oben
+
+4/6 lines, cross, rotating
+
+super-schnelle linien mit gegnern
+hin, hin, und dann her
+
+
+
+
+
+ray collision:
+eigne spieler-api
+mit storage für pos+dir
+verwendung bei: leviathan ray, laser

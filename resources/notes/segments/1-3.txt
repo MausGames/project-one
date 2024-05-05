@@ -1,0 +1,42 @@
+4 jumps
+8 jumps
+target jumps after another
+
+
+huge enemy
+
+chess jump movement
+
+use side-jumping (from same-kill group) ?
+
+jumping in clusters (e.g. 2x2, line, circle (in-out, in circles (zelda armors), across around), pairs like shoes)
+delayed, at the same time, 2-step, 
+
+hoppseln mit target attack
+
+
+----
+4 line
+2x4 line
+target small
+
+2x2
+circle (vielleicht schräge sprünge statt gegenüber, anders rum zu chess und 2x2)
+chess
+
+
+
+big
+
+
+
+
+----
+treffer lässt sie weiter springen
+
+
+----
+2x2 x2
+circle across around
+hoppseln (entlang linie, line nach unten (zelda)
+schach

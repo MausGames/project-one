@@ -1,0 +1,38 @@
+horizontal lines
+vertical lines
+blast
+all
+
+normal
+invert
+
+bullet wall
+bullet circle
+
+
+
+-----
+
+vertical lines
+horizontal lines
+blast invert
+all
+
+bullet wall, enemies come horizontally at top and bottom, vertical snow
+(left-right wall, 2x2 ?) 4
+
+helper 
+
+bullet circle, enemies come down left and right, horizontal snow
+(flip circle) enemies come in circle from border, blast
+
+
+gegner fliegen oben entlang, ziehen schnee hinter sich (sieht aber keiner), 3er gefächert nach unten, vertical
+gegner fliegen seitlich entlang, horizontal
+slalom von oben
+slalom links-rechts gleichzeitig
+???
+
+around with cross 2X1 + 2x2 reverse
+every kill fills the screen, in 4 corners  0.7
+

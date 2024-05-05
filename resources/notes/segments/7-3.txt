@@ -1,0 +1,44 @@
+
+// idea: enemy has orb shield or tail you need to collect
+// idea: shoot reflecting lines of balls form side into field
+// idea: ball lines shot from (top) left or right with gravity down and different x-force
+
+raining pearls from top, which also bounce (with various force)
+
+enemy attacks with pearls, and bullets come from the border
+big pearl cluster
+
+rotating line/cross
+
+
+enemy:
+- verfolgt spieler entlang X achse von oben und schießt gerade runter
+- fliegt im kreis und schießt kontinuierlich richtung mitte
+- fliegt unendlich von links nach rechts (dann invertiert) auf letzter höhe des spielers, und schießt dabei seiten-angriffe
+- attack burst with every hit pearl
+
+
+
+-----------
+bounce from bottom [4]
+bounce snake [4]
+windra [5]
+center wave [X]
+big pearl cluster [X]
+
+4 follows player on top
+5 flys in circle
+(6 infinity fly)
+
+
+----------------------------------
+- wave from top
+- lines from top [1]
+- line from left [1]
+- sinus line from right [1]
+- raster [2]
+- double circle [3]
+
+1 normale wave / top left
+2 spread wave / top right
+3 snake shot / top middle

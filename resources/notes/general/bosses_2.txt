@@ -1,0 +1,64 @@
+- think about fragment phase/aquisition
+- remove unfinished waves
+- reorder waves -> related to bosses, and mission 01 with only 4 waves atm
+- come up with mechanic combinations (comments, docs, txt)
+- design bosses
+
+in bosses.txt
+
+
+-------------------------------------------------------------------
+5 fragment-teile, wie bei bomberman (3 bei jeder wave) (sichtbar im UI)    -> is aber eher was für die badges (+ sichtbar im UI)
+oder ein spezifisches extra, wie bei wow    -> zu ähnlich wie ein badge, es sei denn es ist immer gleich
+oder eine bestimmte % in einer gewissen zeit erreichen    -> wär aber ähnlich zu dem haupt-ziel des spielers so schnell wie möglich zu sein
+oder eine menge von partikeln einsammeln, die entweder deterministisch oder boss-spezifisch erzeugt werden
+
+chain
+
+helper
+- alle helper zerstören oder sammeln
+
+
+-------------------------------------------------------------------
+shields on sides to force attacks from certain directions | reflect into vulnerable side
+# cut with laser through everything
+## enemies jump into camera
+## enemy charges straight forward on death (r-type fish)
+## enemies move and shoot with player
+
+## leave destroyable residue on its way (r-type leaver)
+## switch everything on
+## bomberman hero
+## attack triggers on multiple sides
+## dicke kugerl die am rand bleiben | grow and shrink bullets
+
+## ghost appears for few seconds (zelda wizzrobe)
+## whac-a-mole
+## enemies form a tower and fall over
+# mothership spawns enemies
+## spikes from the ground and such | running sushi conveyer belt
+
+## force rotation #############
+# screen rotation and rotated shooting
+# slowdown areas
+# gravitation influences bullets
+meteor split-up with enemies at the end
+
+## push
+## the walls are coming at you
+## geometry falls together and forms safe spots | tunnels in the middle (hollow knight)
+## snap to grid #############
+## blocks react to certain move or turn directions
+
+## evade being attacked
+# snowstorm makes the windscreen dirty
+## everything moves against current direction
+## stick to one side and stay there #############
+smaller stone is dragged by player with chain | stone drags player with chain
+
+ghost enemies only move when nobody is looking
+damaging fields hide themselves (d/generation) | falling block mini game
+# collect lots of shiny pills (pacman, snake)
+## trade places with others #############
+## corpses remain on the field | enemies merge into bigger enemies
+

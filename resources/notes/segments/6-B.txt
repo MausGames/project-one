@@ -1,0 +1,112 @@
+
+- theme: 
+- attack problem: weapons get frozen -> morning star, invincible shell
+- boss wird auch mit morningstar herumgeschwungen
+- man kann schwing-seite ändern indem man gegen unverwundbaren gegner schlägt
+- bekommt mehrere morningstars, zieht wände mit morgensternen zusammen
+- lifebar is auch kaputt und zeigt nix an
+
+- morningstar bleibt in boss stecken, und boss zieht spieler herum, am ende bekommt der spieler den boss und schwingt ihn herum (is aber trotzdem eine phase mit angriffen)
+- boss evaded
+- snowstorm strahl, der auch eiswürfel erzeugt, einzelne schüsse, fächer schuss, rundum schuss
+- lineare move-geschosse von seite mitte, wie damals
+
+- eis laser erzeugt stacheln am rand (zum unterschied mit moving-wall-stacheln, sind sie nur am getroffenen bereich)
+
+
+
+-------------------------------------------------------------------
+
+// kontinuierlicher laser erzeugt snow, oder laser und cube bewegung (na, was is mit schwingen), aber irgendwas das kontinuierlich nen pfad zeichnet
+// TODO 1: handle cubes die am morgenstern hängen, aber jetzt zerstört werden müssen (weil ein neuer cube erzeugt wird)
+// TODO 1: decent smoke on ice cubes
+// TODO 1: schildkröte, zieht gliedmaßen ein, kann "umfallen"
+// TODO 1: stone outside of boss should also be ice cube
+// TODO 1: sollte sich mehr bewegen, so wie andere bosse
+// nur extremitäten können angegriffen werden, ziehen sich zurück
+
+
+ice cube mechanic
+   - shield has to be broken with frost-blocks attached to the morning-star, multiple times per shield, multiple times per battle
+
+kaputtes UI:
+   - intro text is kaputt
+   - health % sind kaputt (wert remapping), und/oder bar zeigt nix an
+
+boss fliegt herum wie hockey-puck
+   - erzeugt davor überall snow
+
+dreht sich oft
+
+
+
+
+du bekommst den morgen stern in den boss rein, er wehrt sich und beginnt dich zu ziehen, wenn er zu viel schaden nimmt kommt ne explosion und er wird langsam von dir gezogen (dein speed is verlangsamt) und es geht in die schwing-phase, am ende wenn er stirbt reißt die kette, er fliegt aus bild, und am anderen ende (mittig) wieder rein, und knallt dann gegen wand und zerschellt
+
+-------------------------------------------------------------------
+
+- evade
+   - gliedmaßen verschwinden wenn man drauf schießen will
+   - alle 5 -> phase-wechsel
+   - 1 nach dem anderen (zuerst, und dann alle 5 8außer den gerade abgeschossenen)
+
+- snowstorm
+   - snowstorm strahl, der auch eiswürfel erzeugt, []einzelne schüsse, []fächer schuss, []rundum schuss
+   - eis laser erzeugt stacheln am rand (zum unterschied mit moving-wall-stacheln, sind sie nur am getroffenen bereich)
+
+- move against
+   - (lineare move-geschosse von seite mitte, wie damals)
+   - boss bewegt sich auch gegen flugrichtung (infinity), dreht sich dabei und macht schaden -> gegner gradius 5 !!! geschosse gehen kaputt nach ner zeit
+
+- stick to one side
+   - boss swings you around -> e.g. boss is links, zieht dich nach links, und du schwingst rechts mit altem ketten-movement
+
+- morgenstern
+   - ice cube mechanic
+      - shield has to be broken with frost-blocks attached to the morning-star, multiple times per shield, multiple times per battle
+   - swing boss around
+      - schwing-seite ändert sich während boss nicht gefangen werden kann
+      - boss zieht zuerst spieler herum, dann umgekehrt
+   - die gefangenen cubes können freie cubes zerstören
+   - wird eingezogen am bobsch wenn nicht benötigt
+
+
+-------------------------------------------------------------------
+
+lebenspunkte werden vor der fang-phase nur sehr leicht angegriffen, auf 90%
+statet am anfang ohne körperteile sichtbar, auch bei intro-resurrection
+
+
+
+- hockeypuck (transition)
+   - welle bei einschlag
+
+- evade
+
+- hockeypuck (transition)
+
+- snowstorm
+   - körper-teile gehn rein und raus
+
+- hockeypuck (transition)
+   - geht am ende raus
+
+- move against
+   - alle körperteile draußen, gehn voll rein ab bestimmtem life -> man muss alle teile zerstören
+   - reagiert am ende nicht mehr auf richtung und geht einfach raus
+
+unverwundbar
+
+- eiswürfel
+
+- drag phase
+   - in circle
+   - invert speed
+
+- schwing phase
+   - ? destroy bullets with him
+   - ? destroy more ice cubes with him (he creates them)
+   - ? he shoots at you
+   - viele geschosse von allen seiten, sollten so schnell sein, dass sie einen treffen, wenn man stehn bleibt
+   - + gegner greift auch an
+

@@ -1,0 +1,32 @@
+gegner mit 4-5 schichten  10+15+20+25+30=100, 70 bei 4
+gegner mit langen linear rotierenden
+
+mother movement
+line attack von links, mit mother bewegung von oben aber mit linien-bewegung
+
+wave mit mehreren hintereinander (per disc) dann loch
+
+langsame wave [[globale kontrolle]], kombinier mit hintereinander-per-disc abwechselnd hintereinander oder inneinander (farbe!) (ikaruga)
+
+langsame dicke linien durch die man durchnavigieren muss
+
+circular von außen zum mittelpunkt und wieder nach außen
+((vielleicht auch rotierende linie)) das is so snow-wave mäßig -> oder schnell sich drehende linie die nach innen maschiert
+
+
+--------
+intro
+single no-shield
+double shielded
+target attack, right
+target attack, bottom
+wave attack
+line attack
+<continue von oben>
+
+30s
+
+
+multi-shield von oben  5s
+welle links  10s
+windrad von unten  5s

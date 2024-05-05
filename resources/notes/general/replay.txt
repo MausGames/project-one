@@ -1,0 +1,48 @@
+[X] replay nur speichern bei arcade summary
+    [X] dialog box (save replay, yes, no)
+    [X] slot selection (console) (slot-file)
+    [X] save-error (desktop, console)
+[X] replay menu (overview)
+    [X] info
+    [X] delete (kleineres logo)
+    [X] rename (kleineres logo)
+    [X] navigation
+    [X] new tag
+    [X] scroll box
+[X] pause + config changes + game over handling recording
+[X] pause + config changes + game over handling playback
+[X] handle game speed and frequency   (+fix vsync)
+[X] handle game and HUD rotation and mirror mode
+[X] handle background rotation and speed
+[X] restart handling recording          [X] handle nameless and quick status on restart
+[X] restart handling playback           [X] handle nameless and quick status on restart
+[X] handle trophies like stage 0-1
+[X] fix vsync again (game over timing issue)
+[ ] snapshots
+[X] optimization (delta frames)
+[ ] optimization (async load and save)
+[X] corruption check and msg-box (HasData?)
+
+[ ] interface (time + bar, speed, splatoon replay controls)
+[X] add and download replay to leaderboard
+[X] increment counter for saving "Replay 1"
+[ ] force skip on certain keyframes -> ermöglicht auch manual skip
+
+[X] tabs in overview
+[X] show REPLAY in game
+[ ] start at mission
+
+[X] save error handling for downloads
+
+name
+top wie bei armory, aber nur best score, best time, medal, danach unten linien von arcade summary
+config: difficulty, speed, ... alles aus armory
+version
+
+WORK IN PROGRESS
+
+tabs ?
+
+
+
+mission menu

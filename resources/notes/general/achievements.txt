@@ -1,0 +1,90 @@
+
+achievements (https://twitter.com/iocat/status/1611493660180492288)
+
+Progress: (use mission symbol)
+- The Blade of Beginning: Change your color > Boss 0 [secret]
+- The Gate of Creation: Destroy everything > Boss 1 [secret]
+- The Shattered Dragon: Burn under the ocean > Boss 2 [secret]
+- The Untouchable: Be above such things > Boss 3 [secret]
+- The Center of the Universe: Go back in time > Boss 4 [secret]
+- The Undying Flame: End it once and for all > Boss 5 [secret]
+- The Invincible Fortress: Never let go > Boss 6 [secret]
+- The World Eater: Get eaten alive > Boss 7 [secret]
+- The Final Enemy: Betray me > Kill Project One [secret]
+- Your Best Friend: Find yourself > Kill Eigengrau [secret]
+- The Last Defender: Play an old arcade game > Bonus 1 [secret]
+- ###: ### > Bonus 2 [secret]
+
+Task per Segment: (use segment symbol, with color) task_01_01
+- ###: ### > Boss 0: keep enemy on sword alive until it gets thrown away
+- ###: ### > Boss 1: fly through the hole
+- Gelu 5-4: Be on top of an orb which does not exist anymore
+
+Challenge:  -> handle as trophy in save   challenge_01
+- [1] ###: ### > 
+- [2] ###: ### > 
+- [3] Extreme Arcade: ### > X medal in arcade
+- [4] ###: ### > all X medals
+- [5] ###: ### > all badges
+- [6] ###: ### > obtain all badges of a single mission within a single game (except intro)
+- [7] ###: ### > finish 6 different segments on 200% game speed (with any options)
+- [8] ###: ### > finish a single mission in mirror mode
+- [9] One Color Clear: ### > play the whole game in a single run from intro to the very last boss without using a continue and without equipping a shield (any difficulty and speed)
+
+
+- [7] Faster than Light: ### > finish 6 different stages on 200% game speed (with any options)
+- [4] Extreme Collection: ### > all X medals stages (on any difficulty and player count, combined)
+- [4] ###: ### > all X medals areas (on any difficulty and player count, combined)
+- [4] ###: ### > X medal in arcade  (on any difficulty and player count)
+- [5] Through Outer Space / To the Stars: ### > all badges
+- [9] One Color Clear: ### > Play everything in a single run without using a continue and without equipping a shield (on any difficulty and speed)
+spectral
+
+10
+
+Stats: stats_01  (connected with stats)
+- ###: ### > turn around at least 1000 times
+- ###: ### > destroy N enemies
+- ###: ### > shoot N bullets
+- ###: ### > 
+- ###: ### > 
+- ###: ### > 
+- ###: ### > 
+- ###: ### > 
+- ###: ### > obtain all Badges of a Segment
+- ###: ### > obtain all Badges of a Mission
+- ###: ### > obtain all Badges in the regular game
+- ###: ### > obtain all X Medals
+
+score gained
+
+10
+
+finish a mission in under N minutes
+
+On A Normal Day: receive a medal in every segment on normal difficulty
+Take It Easy: receive a medal in every segment on easy difficulty
+
+
+-------------------------------------------------------------------
+Missing
+
+[X] bomberman hero:         survive 5 blasts of the final phase without getting hit (on normal difficulty) / only let the enemy explode while a bomb is exploding / <<never stop moving, never stop shooting>>
+[X] evade being attacked:   touch every enemy / <<destroy all enemies while your partner needs repair>>
+
+[X] Leviathan:              <<get the same player-ship destroyed two times by the same laser>>
+[X] Tiger:                  spin around the boss 10 times without getting hit / <<get hit by every tank-weapon exactly once>>
+(sollten alle möglichst vorne seien, nicht bis ende)
+
+[ ] evasion task:           noch was steuern mit den move-gegnern (anderer gegner, item), das aber super-schnell ist, bei path-gruppe 2 dinger
+
+
+-------------------------------------------------------------------
+something with the game time (only odd seconds)
+(never shoot outside the game area)
+beat segment in range of a specific time
+only in certain screen area
+don't stop moving
+damage a group of enemies without destroying them
+player needs to die (two times (repair))
+only attack while repair-enemy flies around

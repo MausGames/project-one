@@ -1,0 +1,78 @@
+anziehen
+abstoßen
+
+circular
+links-recht
+oben-unten
+schräg
+
+mitte
+bewegend (?)
+am rand (?)
+
+bullets
+enemies
+
+pulse
+
+stärke variieren
+
+
+
+---------------------------
+
+abstoßen links-rechts 2
+- reihe oben
+- reihen links und rechts (zusammen
+
+abstoßen schräg 2
+- 3er gruppen in allen 4 ecken
+
+anziehen schräg 1
+
+anziehen oben-unten 2
+
+unten am rand 1
+- enemies come from bottom in sinus jump wave (straight, dann zur entfernteren seite hin)
+
+
+spezielle änderungen:
+- 2 gegner in der mitte am anfang weg oder aufteilen 4+4
+- 2 gegner direkt am spitzerl bei schräger gruppe weg
+//- gegner von allen 4 seiten, die 3 unten sollen nicht kommen
+
+
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1, 28u, 35u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1, 36u, 51u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  0u, 11u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 68u, 75u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 68u, 75u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 68u, 75u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 28u, 35u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 76u, 87u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 36u, 51u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 88u, 103u)
+            else if(STAGE_SUB(11u)) STAGE_DELAY_START_CLEAR
+            
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1, 12u,  19u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1, 20u,  35u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 0u,   11u)   // #
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 72u,  79u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 80u,  87u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 88u,  95u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 36u,  43u)   // #
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 60u,  71u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 44u,  59u)   // #
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 96u, 111u)
+            else if(STAGE_SUB(11u)) STAGE_DELAY_START_CLEAR
+
+
+
+
+-----------------------------
+
+
+bewegen
+- enemies left and right
+
+anziehen links-rechts (+still)

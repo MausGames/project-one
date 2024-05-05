@@ -1,0 +1,27 @@
+12 stufen
+jede stufe soll eine veränderung hervorrufen
+ziel beginnt sich zu bewegen
+gegner und angriffe
+finale phase wenn alles voll
+veränderung hindert spieler daran zu chargen, auf immer eine andere weise
+
+- geschosse von roten kugeln circular nach außen
+- gegner bounced herum, erzeugt druckwellen bei bounce
+- kugeln bouncen herum, fressen bullets
+- 
+
+
+
+
+ 1  nothing/tutorial
+ 2  
+ 3  
+ 4  
+ 5  
+ 6  
+ 7  
+ 8  
+ 9  
+10  
+11  
+12  

@@ -1,0 +1,37 @@
+intro phase    blue: ###
+
+pacman 0
+pacman 1
+pacman 2
+pacman 3     cyan: erscheint an einer stelle wie die pearls und verschwindet wieder, rechts oben entlang der linie
+
+bounce      purple: bounced einmal hin und her bei 50% kugerl eingesammelt
+
+suck 1   flat lines
+suck 2   rotating lines
+suck 3   single dots
+suck 4   titling lines      red: fliegt unter boss vorbei links nach rechts
+
+---
+
+dharuk rush 1
+dharuk side       magenta: fliegt unten vorbei
+dharuk rush 2
+
+---
+
+cone bullets 1
+
+green jumping     green: kommt einmal aus boss raus und verschwindet mit sprung-ende
+
+cone bullets 2     orange: einmal mittig von oben nach unten
+
+yellow rotation     yellow: fliegt einmal herum
+
+
+
+
+außeinander brechen + jump + yellow
+every shake
+
+

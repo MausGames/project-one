@@ -1,0 +1,17 @@
+4 gegner mittig gestreut
+
+dann die 4 seitlichen + boss
+boss beginnt sich zu drehen mit morgenstern am rücken
+
+phase bullets + boss + morgenstern + seine periphery attackieren
+
+wenn alle spieler gefangen übergang
+spieler kann weiterschießen wärend gefangen (+ weiter drehen ?)
+
+spieler wird bei 0 grad vertical nac hunten geschleudert, kette reißt, boss fliegt dabei weg, spieler wird in boden geworden und prallt zurück (wie dmals)
+sobald spieler an kette zieht kommt sie halb mit stein raus, wenn nochmal zurück noch nochmal ziehen kommt sie ganz raus, langasmer anlauf
+bei 2 spielern bekommt der den stein der als zweites zieht, delay beim ziehen
+
+
+schwingen is nach unten hin schneller als nach oben
+eisblock auf morgenstern, der zerbricht wenn der spieler gefangen wird

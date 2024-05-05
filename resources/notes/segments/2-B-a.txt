@@ -1,0 +1,89 @@
+- destroy all body parts
+
+- jump up and down from bottom
+
+- around in circle
+- 1 laser rotation
+- 5 laser rotation + overdrive
+
+- split up
+
+
+
+nach 5 laser rotation gehen die teile etwas nach außen und werden langsamer, immer 1 dreht sich dann im kreis, spieler muss rundherum fliegen
+
+einzelteile fliegen links und rechts infinity runter und schießen mit laser (+ oben steht gegner und schießt nach unten)
+
+
+-------------------------------------------------------------------
+
+- destroyable residue
+  - (beim ein und austauchen aus erde erzeugt jedes körperteil residue welches sich kreisförmig (gebremst) nach außen bewegt) (zu leicht zu zerstören)
+
+
+- switch everything on
+  - einzelne körperteile stehen in platten, alle müssen aktiviert werden
+  - platten beeinflussen sich gegenseitig
+  - platten heben unverwundbarkeit auf
+  - ganz kleine platten in einer reihe bewegen sich infinity
+
+
+- attack arrows
+  - einzelne körperteile haben pfeile ###
+
+
+- bomberman hero
+  - bomben kommen in linie aus losen schwanz raus, bis zum rand
+
+
+- dicke kugerl
+
+
+-------------------------------------------------------------------
+
+
+- jump out and in into earth (transition) (intro)
+  - show exit with some smoke (Zelda)
+
+
+- im kreis herumfliegen (transition)
+  - residue angriffe: ###
+
+
+- 1 laser rotation
+  - noch kein drehen der körperteile
+  - vielleicht eher anderes muster als mittiger donut
+
+75%
+
+- im kreis herumfliegen (transition)
+  - kugerl: ###
+
+
+- 5 laser rotation + overdrive (transition)
+
+
+- nach außen dreh angriff
+  - drehende richtung bleibt einfach stehen für eine umrundung ?
+  - + normale geschosse
+
+50%
+
+- einzelne springen aus boden
+  - attack arrows: ####
+  - nur körper-teile, werden dadurch schon zerstört
+  - pfeil sollte abhängig vom spieler gesetzt werden (oder positionen zum vorherigen) und spieler bekommt zeit anzugreifen
+
+
+- einzelteile fliegen links und rechts infinity runter
+  - platten; ####
+  - körperteile fliegen seitlich (schon zerstört, kopf und schwanz sind oben und unten
+
+25%
+
+- rein raus wie am anfang, dann schaut kopf von unten und fährt einmal mit laser entland zum rand, dann kommt ganzer körper von unten
+- körper dreht sich längs und radiert mit laser herum, fährt von unten nach oben vorbei
+- fliegt dann immer gerade aus von verschiedenen seiten (diagonal?) bis tot
+
+
+

@@ -1,0 +1,45 @@
+arrow snake im kreis herum
+lange linie mit nur 1 richtigem pfeil >>>>v<<<<
+  -> mehrere 4er linien mit 2 nach oben und 2 nach unten
+gegner kommen verzögert von allen 4 seiten (entlang) und man muss in der mitte spielen
+
+
+pfeile entlang der ganzen mauer
+
+spieler hat auch pfeil und kann nur von vorne schaden erleiden
+
+items fliegen entgegengesetzt der pfeile raus
+pfeile in bestimmter reihenfolge zerstören, sind unten aufgelistet von links nach rechts
+
+einige gegner können auch von anderer seite abgeschossen werden 0/N, pfeile sind aktiv in diesem zustand (jeder seite ?)
+ -> gegner mit falschem pfeil in gruppe mit anderen pfeilen
+
+jede seite hat % und spieler-ausrichtung erhöht es
+ 
+ 
+o r u | r u o r | o l o r | r | r u l o u r l o | r u l o r u l o r u l o | r | o l u r | r | o ...
+o          
+u        
+l       
+r             
+ 
+
+-------------------------------------------------------------------
+- 3er intro linien
+- 4er von rechts
+- 4er von oben
+- einzelne von links [nur nach rechts zeigend]
+- 2x2 von unten
+- [schnell den seiten entlang]
+- transition
+- 4x4
+- transition
+- 6x6
+
+- [gegner schwingen auf und ab]
+
+
+- helper:  
+- badge 1: einige gegner können auch von anderer seite abgeschossen werden
+- badge 2: 
+- badge 3: 

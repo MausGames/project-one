@@ -1,0 +1,91 @@
+
+-------------------------------------------------------------------
+general
+[ ] set enemy values, set chain values (?)
+[X] all values need to be separate for each game-mode+difficulty+coop+etc.   -> save-game
+[X] mehr extra score
+[X] TIME wird immer in kombination mit shift angezeigt im menü/interface
+[X] PERFECT and NEW RECORD should animate like IMMUNE
+
+(Combo System: every killed enemy or action gives score and increases multiplier, making damage or action sustains multiplier, the multiplier is reduced by getting damage or time)
+(Chain System: chain is collected by making damage, and paid out by getting damage or time, the multiplier depends on boss health (0.0 -> 10.0))
+(never award 0 points anywhere)
+
+
+-------------------------------------------------------------------
+summary mission
+[X] PERFECT for max medal and dodge bonus (solo/coop)
+[X] show best score (and if NEW RECORD was made)
+[X] cleanup view
+
+(Medal Bonus (Mission): fixed amount per medal, best medals only on summary gives PERFECT)
+(Evasion Bonus (Mission): 1-4 normal score reduction (lives), 5-X special score reduction (shield), unharmed on summary gives PERFECT)
+
+
+-------------------------------------------------------------------
+summary segment
+[X] show best score, best time, best combo/chain, current score, current time, current combo/chain, show medal (and if NEW RECORD was made)
+[X] cleanup view (shift separate)
+[X] again, return
+[X] time in summary is 0.1s höher als im interface
+
+
+-------------------------------------------------------------------
+end segment
+[X] bonus score for combo at the end
+[ ] in coop, wave-score-banner hat links-rechts bereich zum vergleichen
+[X] zeigt auch best time     -> interface
+[ ] zeigt auch max combo/chain und best combo/chain (x3.4 MAX klein und grau)
+[X] segment-specific animationen am ende sollten die zeit pausieren, combo-bonus geben
+
+(award medal based on time, getting hit increases time, getting badges reduces time, never award 0 points)
+
+
+-------------------------------------------------------------------
+interface
+[X] tasks sollten sichtbar sein (wave + drehung, wenn eine erlangt wird)
+[X] helper sollten sichtbar sein (wave + drehung, wenn eine erlangt wird)
+[X] target-medal bei boss sichtbar
+[ ] beide scoring modes müssen sich im UI unterscheiden (chain und combo text müssen am UI sichtbar sein, um den aktuellen mode zu highlighten)
+[X] health icon animiert
+[X] inner outside mode + korrekt in echtzeit aktualisieren + boss-movement
+[X] display best time (wave + boss)
+[ ] anderer shield bar
+[X] platz für name, aber noch kein name
+[X] time should reset properly (e.g. after mission)
+[X] icons hinter mission and boss name
+[X] einige dinge repositionieren sich nicht, wenn man auflösung ändert in pause
+[X] effect on UI when recovering life or shield (and on player, and combat text)
+[X] badges need contrast distinction between enabled/disabled
+
+[ ] cooldown bar with outline
+[X] ### correct blending of best-time, best-name, and on boss-death    -> zeit wird auch am ende von segment ausgeblendet -> falsch
+[X] aber sollte bei combat-text überlagerung, countdown sich gegenseitig nicht verschieben ?
+[X] correct icon refresh on engine reset
+
+[X] icon bei Ater mission
+[X] helpers bei ProjectOne + Eigengrau ?
+[X] tasks, wenn es nicht genug tasks gibt ? (intro ua.)
+
+cleanup
+[X] code (interface, combat text, icon class)
+[X] textures
+[X] TODOs anpassen (combat text, icon class)
+
+
+-------------------------------------------------------------------
+combat text
+[X] +- sollte nur bei shift vorkommen
+[X] effekt: schüttel rauf und runter: ###
+[X] effekt: seitlich langezogen geht zusammen: ###
+[X] effekt: fliegt seitlich rein mit bremsen, dann seitlich raus mit beschleunigung: ###
+[X] unterschiedliche text typen sollten sich nicht überlagern
+
+(score+extra, combo bonus, chain end, badge, hit (shift), task stuff)
+
+
+-------------------------------------------------------------------
+menu
+
+
+

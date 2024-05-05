@@ -1,0 +1,236 @@
+vorsicht mit den variationen der mechaniken, beim boss sollte nicht zu viel neueres gelernt werden müssen
+
+
+-------------------------------------------------------------------
+Intro
+- theme: teaching the player
+- attack problem: <nothing>
+- geschoss-welle mit loch von jeder seite nacheinander
+- drives along each border to force player turn, changes regularly
+- erste mechanik die auf player rotation reagiert: ###
+- unverwundbarkeit
+- will spieler rammen/greifen
+- strong bullet pattern
+
+
+-------------------------------------------------------------------
+Torus
+- theme: creation
+- attack problem: nothing
+- rollt am rand entlang (urtica)
+- (man schießt auf ein art wasser-rad, um drehung zu verursachen)
+
+- blue shield rotating with enemy
+- three thick purple rays
+- purple shields
+- shoot shields
+- lasers turn with player direction (maybe also move)
+
+badges: move through the hole
+
+
+-------------------------------------------------------------------
+Leviathan
+- theme: 
+- attack problem: destroy all body parts
+- laser rotation
+- split up into single enemies
+
+- moving residue von oben wie vorhang nach unten, von allen einzelnen körperteilen, oder vom ganzen wurm
+- einzelne körperteile haben 1-N pfeile
+- bomben kommen aus schwanz raus, als linie oder spread-attack
+- angreifende gegner sind in platten die aktiviert werden müssen, stehen an fixe punkte, bewegen sich unendlich (finale phase edition 1)
+- platten beeinflussen sich gegenseitig
+
+badges: go in the middle once, destroy parts from head to toe once
+
+
+-------------------------------------------------------------------
+Tiger
+- theme: battle above and below, communication between both layers, player will stay in the middle and the border is full of danger
+- attack problem: destroy enemies to damage him
+- wind (minen fliegen links und rechts am wind vorbei (spieler muss drehen, und auf wind aufpassen))
+- stacheln auf seite
+- angriff durch minen
+- multiple weapons just dropping back (haben zahlen auf rückseite) (normale haubitze (border circle wave), raketen (folgen), stinger, laser (mehrfach reflexion schuss der sich aufbaut, bewegende dots zeigen bahn (blenden ein/aus)))
+
+- ghost enemies and tower enemies kommen einfach und dienen als "munition"
+
+badges: 
+
+>> %HP
+wind weht nach links, von rechts kommen minen 50%
+wind weht nach rechts, minen rechts verschwinden, von links mommen minen 50% (wind weht vielleicht länger (%HP), minen muster ist anders)
+wind weht nach unten, von oben kommen minen durchgängig (mehr abstand)
+wind dreht sich im kreis
+
+weapon 1: stings
+weapon 3: purple, reflexion laser
+weapon 4: blue, haubitze
+weapon 7: green, rockets
+weapon 8:
+
+spikes: moving spike plates (line of spikes)
+
+NEW: 
+boss-specific <> mechanics
+damage from above, haubitze, mines+wind <> hidden, tower, stings
+
+
+-------------------------------------------------------------------
+Messier
+- theme: rule bending effects (time reverse, rotation)
+- attack problem: protected by meteors
+- boss starts with low health, and regenerates
+- turning time back
+- sucks stuff to him (attack from behind, Gradius mine boss)
+- meteoriten werden im kreis um ihn herum gedreht (bildschirm beginnt sich dann auch zu drehen)
+- (Spieler bennötigt selbst Meteoritenschild, welches sich schnell nachlädt für mehr Action)
+
+- spieler wird wild herumgedreht, linie für force-rotation nach oben stabilisiert, aber gleichzeitig kommen angriffe von links und rechts
+- fullscreen slowdown from time to time
+- gravitiation von linker oder rechter wand, bullets fliegen darauf zu, meteoriten oder geschossen fliegen von anderer seite
+
+badges: bei lauter unverwundbaren meteoriten zerstör den einen der zerstört werden kann (leicht andere farbe)
+
+teleporter: infinity left and right, with attack (meteor-line) following you, you have to keep flying (helper kommen von unten-links und oben-rechts, und fliegen wieder in kurve auf links und rechts
+
+
+-------------------------------------------------------------------
+Chol
+- theme: rhythm and force (ramming)
+- attack problem: resurrects/regenerates several times
+- stirbt mehrmals (3 phasen)
+- schießt seine flügel in den rand (großer einschlag, und radiert am rand entlang)
+- wirft mit direction-blocks von der seite (dance dance revolution) dann riesige von oben
+- zieht den bildschirm rand raus (bewegt sich erst leicht weg und erzeugt dann einen ruck)
+- (old urtica attack with wall wave)
+- bekommt ein schild und man muss die weggeschossenen flügel attackieren
+- dort wo ein geschoss einschlägt, kommt ne geschoss-fontäne raus und bleibt ne zeit land
+- hard mode: nach erster wiederbelebung hat der spieler thermometer und muss wasser einsammeln, vor erster wiederbelebung gibts schon wasser
+
+- jagt kralle in jeden der 4 ränder und zieht sie zusammen, man muss krallen abschießen um es zu beenden (Metroid Dread)
+- geometry bildet vollen safe-spot und hüllt dann alles sein (wie bei mario) (boss is kurz weg ?)
+- snap to grid kommt schnell von oben nach unten, unten sind stacheln, man muss durch-navigieren und kommt oben am ende wieder raus und dreht sich nochmal
+- push of boss, er kämpft dagegen an
+
+badges: 
+
+- grid das sich nach unten bewegt, und entweder sind da überall stacheln, oder grid bleibt stehn und es kommen dir-blöcke
+- riesige dir-blöcke die wie die solid blöcks sind
+
+
+-------------------------------------------------------------------
+Zeroth
+- theme: 
+- attack problem: weapons get frozen -> morning star, invincible shell
+- boss wird auch mit morningstar herumgeschwungen
+- man kann schwing-seite ändern indem man gegen unverwundbaren gegner schlägt
+- bekommt mehrere morningstars, zieht wände mit morgensternen zusammen
+- lifebar is auch kaputt und zeigt nix an
+
+- morningstar bleibt in boss stecken, und boss zieht spieler herum, am ende bekommt der spieler den boss und schwingt ihn herum (is aber trotzdem eine phase mit angriffen)
+- boss evaded
+- snowstorm strahl, der auch eiswürfel erzeugt, einzelne schüsse, fächer schuss, rundum schuss
+- lineare move-geschosse von seite mitte, wie damals
+
+- eis laser erzeugt stacheln am rand (zum unterschied mit moving-wall-stacheln, sind sie nur am getroffenen bereich)
+
+badges: 
+
+
+-------------------------------------------------------------------
+Geminga
+- theme: 
+- attack problem: inside of body, invincible outside
+- eats the player
+- eats the last enemy of previous wave, and just stays there while score is given
+- pacman move to one side, comes out of the other
+
+- tries to suck you in, you need to use also sucked-in enemies to teleport away
+- boss kotzt lauter leichen aus, paar leichen sind auch im inneren mit dharuk
+
+badges: 
+
+- pills, die sich gegen spieler-flugrichtung bewegen
+
+
+-------------------------------------------------------------------
+Project One
+- theme: color
+- 9 phases for each color one (helper), wird durch zerstören der entsprechenden farbe verursacht in sub-phase (radiant), außer weiß -> kommt zum schluss
+- jede phase hat eigenen lifebar in entsprechender farbe
+- hat auch grünes dot 5-eck, und kann 5-eck bubble bekommen
+- difficulty: you only have to kill 4/8 helpers
+- intro: movement wie spieler, he can also turn into 4 directions + spin around, ###
+- sub: helfer umkreisen in langsam, P1 in mitte, der den meisten schaden nimmt fliegt auf P1 zu, rest fliegt weg
+- gelb: [rockets and mines] occupy area, follow player, (destroy stuff)
+- orange: [###]
+- rot: [###] licht geht aus, man sieht aber noch platten am boden
+- rosa: [gravitation and metroids]
+- violett: [space and time] <--##separate
+- blau: [###]
+- cyan: [###] rotiert mit durchgängigen laser herum (spieler muss nah an ihm bleiben)
+- grün: [###]
+- weiß: [bullethell] kommt wenn P1 raucht und fast zerstört wird, unverwundbar, ikaruga no-shoot phase, aber mit komplexeren mechaniken (als legion), e.g. bei denen man auch sachen aktivieren muss
+
+hat dot und bubble (für übergänge)
+
+badges: 
+
+spawn and control many enemies
+malygos
+infinty
+darkness
+energy, laser-verbindungen
+boss duplication (wie beim alten P1 boss, anderes auch ?)
+
+von den 5 mechaniken einer mission werden 2-3 gleichzeitig verwendet, kombiniert
+missionen können dynamisch instanziert werden (kaschieren mit fixer transition (3s)), Ater hat eh kaum speicher
+
+boden hat einen absoluten und tatsächlichen wert pro tile, spieler drückt tiles rein, boss drückt sie rauf
+
+
+sollen mechaniken von bossen sein, von waves ?
+jede farbe soll eine konkrete situation sein, keine mehr-phasige (kann aber alternieren zwischen 2 sub-phasen) (außer weiße phase)
+1-2 mechaniken aus waves wiederverwenden, nicht mehr, boss hat sonst kein konkretes theme
+jede sub-phase braucht min 2-3 sub-sub-phasen, der boss muss lang sein
+
+
+-------------------------------------------------------------------
+Eigengrau
+- theme: 
+- riesiger lifebar (max 100% 1:1)
+- (hat finale phase wo man nicht angreifen kann (klassisch)) -> aber rotation ?
+- regenbogen geschosse
+- (man schießt in framebuffer, der einen anderen background freigibt) -> % anzeige, splatoon mäßig
+- rand verschwindet, aber spieldfeld markierung bleibt, raus zoomen, kamerabewegung, alles weiß, (seiten-panel brechen bei finalem boss auf und zeigen weiße animationen), spielfeld is etwas kleiner als reguläres quad, boss befindet sich and den 4 seiten außerhalb (schaut leicht rein)
+
+klasische tunnel angriffe:
+- sichere (rotierende) kreise
+- mehrfach diagonale (bewegende) linien
+
+
+
+-------------------------------------------------------------------
+New Boss 1
+- Pong
+
+
+-------------------------------------------------------------------
+New Boss 2
+- Ink
+
+
+-------------------------------------------------------------------
+Intro
+Torus
+Leviathan
+Tiger
+Saros
+Chol
+Zeroth
+Nagual
+Project One
+Eigengrau
+

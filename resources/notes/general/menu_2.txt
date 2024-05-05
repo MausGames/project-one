@@ -1,0 +1,186 @@
+
+
+-------------------------------------------------------------------
+Game Menu
+[X] wave icons (7x5 (wave) + 7x1 (boss) + 1 (intro) + 1 (p1) + 1 (eigengrau) = 45)
+[X] separate demo, armory, base-game menu-navigator
+
+- badge descriptions werden in submenü angezeigt, mit ????? außer bei einer noch nicht erhaltenen
+
+- irgendwo in der ecke sollten wieder die optionen stehen "Solo / Normal" (kleinstes font, blass)
+
+- modes:
+  - mission
+  - segment
+  - arcade
+    - man kann die start-mission bestimmen
+
+- armory
+  - summary (mission/level name, best stuff, medal, badges/fragment (with description))
+  - nochmal die optionen (verändern stats drüber)
+  - game speed
+  - shields
+  - (space for weapons + icons)
+
+- options
+  - type (solo, coop)
+  - (mode)
+  - difficulty (easy, normal)
+
+(mission Ater hat keine mission medal+time+etc.)
+(gauntlet/arcade run verfügbar von anfang an (play all missions without pause inbetween, and total/final score, for experienced players))
+(spieler kann entscheiden, wie er das spiel spielen will [Arcade][Stage][Level])
+
+
+-------------------------------------------------------------------
+Extra Menu
+[X] remove quests (for now)
+[ ] fragments: texture + color (outline) + text
+[X] stats
+[X] credits
+[X] password
+[X] stats-gamepad input
+
+
+-------------------------------------------------------------------
+Config Menu
+[X] description for options and other (eigene blasse linie als background, sollte eigenes design haben ?) (doppelte oder 1.5 höhe ?)
+
+
+-------------------------------------------------------------------
+Defeat Menu
+[ ] echtes menü wie bei segment summary
+[ ] möglichkeit schild, (speed) und (difficulty) zu ändern
+
+(https://twitter.com/SslTpot/status/1564102738367156230 -> game over menu + mission intro)
+
+
+-------------------------------------------------------------------
+(Score Menu)
+
+
+-------------------------------------------------------------------
+(Replay Menu)
+
+
+-------------------------------------------------------------------
+Warning Banner
+[X] mehr fullscreen effekte, ohne die animationen der bosse zu verdecken (ganz viele tramnsparente WARNING texte fligen langsam über schirm, mit alpha-vignetting)
+
+
+-------------------------------------------------------------------
+Mission Intro
+[X] side fade
+
+
+-------------------------------------------------------------------
+Boss Intro
+[X] side fade
+
+
+-------------------------------------------------------------------
+Fragment
+[ ] fragment namen: gelb, orange, rot, lila, rosa, blau, türkis, grün
+[ ] fragment quotes (deutsch + localized at the same time): ###
+[X] bei normalen credits sieht man fragment-tafel am ende (kann auch voll sein, wenn man Eigengrau skipt)
+[X] wenn man final fragment einsammelt, baut sich die tafel zusammen (alle teile fliegen nochmal nacheinander in die mitte) und erschafft Eigengrau
+[X] fragments haben alle color outline im UI
+
+[X] bei explosion soll die volle tafel aufblinken in mitte (eigene textur, flache optik) mit hue shift (screen) + eigener sound-effekt (das pfeifen wieder ?)
+[X] helfer und fragment sollen scoring relevanz haben #### [100 chain punkte] oder zeit für abschuss, [+ x1.0 bonus-multi wenn in dark-mode], punkte für fragment ####
+[X] tafel-animation beim einsammeln
+[X] einsammeln sollte für 1 sekunde unterbunden werden wegen explosion
+[X] fragmente kommen nicht mehr wenn sie mal eingesammelt wurden
+[X] tafel in demo cliff-hanger: nach zweiter dark-background szene, schwarz mit voller tafel davor
+[ ] #### wo/wie progress anzeigen ?
+
+[ ] (kugerl beim einsammeln sollen stärker nach außen fliegen (mehr zeit wenn nötig))
+
+Wer geboren werden will, muss eine Welt zerstören.
+Was er aber nicht gelernt hatte, war dies: mit sich und seinem Leben zufrieden zu sein.
+
+(Der Vogel kämpft sich aus dem Ei. Das Ei ist die Welt. Wer geboren werden will, muss eine Welt zerstören. Der Vogel fliegt zu Gott. Der Gott heißt Abraxas.)
+
+(add badges and fragments to summary)
+(end of project one is similar to sonic 1 chaos emeralds, the fragments fit to each helper, you hint that something might happen)
+(wenn ein fragment eingesammelt wird, sieht man wie es im hohen bogen auf spieler zufliegt, wird in summary angezeigt (wie chaos emerald, Sonic extra life))
+(final fantasy ending screen (objekt in mitte (fragment, Sonic) darüber text THE END ?), "thank you for playing" beim tod von P1, in normalem playthorugh kommen credits über alle backgrounds, die grau werden und verrotten (turf brennt sich langsam ein), beim echten playthrough sind sie bunt)
+(fragments have color outline/highlights in game and UI)
+(jedes fragment hat einen namen)
+(every fragment has a quote)
+(when collected all the base fragments: "Only one (piece) remains")
+(fragment unlock screen ist mit animation wo das fragment in den platz rast (z richtung), mit stampf sound)
+
+
+-------------------------------------------------------------------
+Save Game
+
+[X] 4x4x4 im save
+[X] compress and decompress save directly (and others?) (DecompressTo, CompressFrom)  + cleanup save-class
+
+[X] correct stats tracking
+[X] correct progress
+[X] no save-game changes (stats, progress) during replay
+
+[X] implement all passwords from the design docs, use german colors
+[X] implement unlock screen + hook + sound
+[X] implement basic NEW concept (already for mirror mode, speed up option, extra menu)  es gibt nur bits für NEW anzeige und wann wieder verschwindet, ein unlock kann mehrere bits setzen (Configuration -> Game -> Mirror Mode)
+
+[X] implement achievements in steam (including images)
+[X] implement achievements in code
+   - segment comments + einige prototypen
+
+[ ] add comments to all waves+bosses, + initial idea if applicable
+[ ] think about challenges (min 10) + icons
+[ ] implement challenges
+[X] update progress icons
+[ ] think about and add achievement NAMES and DESCRIPTIONS
+[X] current unlock hooks
+[ ] cleanup (also move unlock-core out of bridge menu)
+
+unlocks
+- mirror mode
+- speed up option
+
+
+-------------------------------------------------------------------
+General Improvements
+[X] button animation
+[X] tab animation
+[X] besserer fokus bei gamepad input
+[X] stage icons in: game menu, stats, summary, level selection (lines)
+[ ] stage icons in: replay, leaderboard
+[ ] medal differences (segment, boss, mission)
+[X] gamepad cursor interpolieren
+[X] wrap and properly handle line-coloring
+[X] how to handle control swap ?
+[X] ARE YOU READY box vor dem start, mit großem START button
+[X] switch-box locking
+
+[ ] (back-button sollte aufblicken, wenn man B drückt)
+[ ] (button blinken/flickern beim drücken ? e.g. haupt-menü)
+[ ] (leichtes wackeln oder schieben des texts wenn sich switch-box ändert)
+[ ] (implement full button remapping ?)
+
+
+-------------------------------------------------------------------
+General Fixes
+[X] fix sound when changing tabs with controller
+[X] buttons flickern when config discarded wird
+[ ] neue menu musik (sanfter)
+[ ] neuer sound
+[X] neuen cursor + neue animationen im pause menü correct resetten (mit first)
+[X] schnelles durch-fahren mit der maus schaut orsch aus (im main-menu)   (vielleicht erst auf 1.0 hochfahren bevor es wieder runter geht (bool))
+[X] kein sound bei gamepad control in msg-box
+
+[X] continue button hängt bei options->main->armory->main->options
+[X] continue button im option menü is aktiv, wenn vom Level tab zurück-gegnagne wird, aber die andern tab nicht !
+[X] switchboxen etc. aktualisieren sich nicht beim weg-gehen von sub-menü
+[X] coop shield war falsch beim aller ersten reingehen
+[X] return from level to options and then going back in, cursor is weird
+[X] doppelter sound, wenn continue gedrückt wird (auch mit maus)
+[X] kein sound wenn mission selected ODER geklickt wird
+
+[ ] menu score wird nicht aktualisiert wenn man von mission zurückkehrt, ohne neu zu selecten
+[ ] selection in main menu muss korrekt behandelt werden (ohne andere menüs zu beeinflussen
+

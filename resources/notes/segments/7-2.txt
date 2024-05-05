@@ -1,0 +1,48 @@
+
+crossing lines with one hole
+diagonal, nur loch in mitte, und nicht abwechselnd (zu hektisch)
+
+const coreUint8 iSide = (iSpawnCount % 2u) ? 4u : 7u;
+                
+for(coreUintW i = 0u; i < 11u; ++i)
+{
+    if(i != 5u) nCreateGenerateFunc(7u, 1.0f, fStep * (I_TO_F(i) - 5.0f), 0.0f);
+}
+                
+for(coreUintW i = 0u; i < 11u; ++i)
+{
+    if(i != 5u) nCreateGenerateFunc(4u, 1.0f, fStep * (I_TO_F(i) - 5.0f), 0.0f);
+}
+
+
+wenn sich gegner bewegen, entweder mit dem muster, oder 90/180 zum muster
+blöcke zu verfolgen ist mental schon sehr komplex, weswegen man die twists in grenzen halten sollte
+gegner die mit den blöcken moven können ruhig mehr life haben, weil spawning eh im rythmus stattfindet
+
+
+
+
+---------------------------
+oben-unten bei rampe (6+6?)
+6+6 bei left-right
+
+
+4 oben nah beinander
+
+
+
+rauf-runter-rauf-runte
+seitliche welle links oder rechts
+
+
+
+------------------------------------------
+- single blocks
+- double blocks
+- tetris blocks
+- left and right
+- top 4+4
+- top 1+1+1+1
+- rotation
+
+40s

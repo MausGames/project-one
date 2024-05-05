@@ -1,0 +1,115 @@
+first rotation
+
+second rotation
+laser spin
+laser dance
+
+green arrow
+
+plates
+
+bullet carpet
+
+
+
+
+
+
+-------------------------------------------------------------------
+
+- laser spin 1
+  - laser beginnt früher, sobald er in der mitte ist keine kopf-drehung, schilde + platten   <plates>
+  - bei erster drehung mit kopf-laser, nach platten unterbricht laser ab und zu damit man auf die andere seite kommt
+
+- laser spin 5 [kein turn?]
+- laser dance [kein turn?]
+
+- ((jump up and down from bottom)) links und rechts
+
+- tripple arrow phase   <arrows>
+  - alle 3 körper-teile komme naus boden und drehen sich langsam im kreis, haben veränderlichen pfeil, immer 1 greift an, 3 verschiedene angriffe
+
+- side-line phase
+  - körperteile fliegen links und rechts runter mit laser gleichzeitig, oben is kopf, gezielter breiter angriff von kopf (2 bullet patterns)
+  - wechsel auf kugerl oder kugerl von schwanz von unten   <kugerl>
+
+- ((jump up and down from bottom))
+
+- carpet vom boden, geschosse fliegen schräg und reflektieren links und rechts nach oben, selbe bewegung wie damals   <residue>
+
+
+
+boss in der mitte mit laser dreht sich im kreis und alle platten um ihn herum müssen aktiviert werden (schräges muster)
+
+laser schüsse gezielt von oben und seite (man sieht teile nicht) + platten bewegen sich: schräges muster, anzahl aktiviert beeinflusst geschwindigkeit
+
+
+
+
+
+
+körper-teile sind in kugerl, wie jelly
+
+laser der den teppich erzeugt so rund wie im demo-finale
+
+> keine bullet-reflektion bei 0 HP
+
+
+
+<residue>
+<plates>
+<bombs> +++
+<arrows>
+<kugerl>
+
+
+
+-------------------------------------------------------------------
+[X] yellow:  [tiles]
+[X] orange:  [first laser]
+[X] red:     [second laser] fly through the center during Z rotation
+[ ] magenta: [first rota]
+[X] purple:  [advanced laser phase]
+[X] blue:    [grow phase] 
+[X] cyan:    [curtain phase] 1x auf der laser-seite vom boss
+[X] green:   [arrow phase] jumping up like an arrow (if not possible from bottom then from side)
+
+
+red: wenn man durch-fliegt auf der anderen seite raus
+magenta
+orange
+
+
+
+
+helper magenta
+helper blue
+helper red
+dead-color + reflection
+
+68-79
+
+ 1u 
+ 2u
+ 3u
+ 4u
+ 5u
+ 6u
+ 7u
+ 8u
+ 9u
+16u 10
+17u 11
+19u 12
+20u 13
+21u 14
+22u 15
+23u 16
+24u 17
+25u 18
+26u 19
+27u 20
+28u 21
+29u 22
+30u 23
+32u 24

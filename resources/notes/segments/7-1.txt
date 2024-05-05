@@ -1,0 +1,28 @@
+ghost grid (no attack, but disappear with light, last one is true enemy) (maybe single target attacks)
+same but there are 100 enemies which disappear temporary in light, except for targets (haystack)
+(unsichtbarer) gegner der an einer anderen stelle (unsichtbar) auftaucht, sobald man ihn bescheint
+
+kontinuierlicher angriff von punkt (schlange)
+
+nach 6x6 geister grid geht lampe wieder aus, und man wird von geistern (nacheinander) attackiert, lampe geht dann wieder an und aus 1s1s1s
+
+
+
+anfangs wellen, leicht verändert
+gegner von spezifischer position (kontinuierliche angriffe), damit erster teleporter nicht unabsichtlich schon aufgedeckt wird
+teleporter
+leichte welle mit kontinuierlich
+6x6
+kontinuierlich mit lampe an aus
+
+
+6x6 gegner sollten nur im inneren sein
+
+
+
+----------------------------------------------
+- links und rechts
+- in linien oben
+- licht aus
+- verfolger klein
+- verfolger groß

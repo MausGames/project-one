@@ -1,0 +1,97 @@
+****************************************************************
+Play Game
+ - Standard
+   - Stage Select (begin at)
+   - Best Score (0-8, total (best run))
+   - Medaille (mission, both text and change on map), Fragment (both text and change on map), Pacifist (mission), Masochist (mission)
+ - Training
+   - Wave/Boss Select (only)
+   - Best Score, Best Time
+   - Medaille (wave, boss), Badge, Fragment, Pacifist (wave, boss), Masochist (wave, boss)  -> [X][P][M](b)(f)
+ - Armory
+   - Game Type (Solo, Coop, [Duel])
+   - Game Mode (Original, [Pacifist], [Masochist])
+   - Difficulty (Easy, Normal, [Hard])
+   - Weapon
+   - Support
+ - Immediate armory, if no save-game present, skipping standard/training
+ - Unavailable items are not visible at all
+
+
+****************************************************************
+Leaderboards
+ - Global, Friends, Local
+ - Game Type, Game Mode, Difficulty
+ - Stages (0-8, total (best run))
+
+
+****************************************************************
+Replays
+ - List (Filename, Player, Timestamp (scrollbar (should be easy)))
+ - Details (Times, Scores)
+ - Selection Sub Menu
+    - Play, Delete, Rename
+
+
+****************************************************************
+Extras
+ - Progress (trophies, fragment-tafel (circle), badge-tafel (quad), mit tooltips)
+ - Stats (numbers (selection total, mission, segment (two boxes for total+mission and all+segment)))
+ - Other
+   - Credits (appear after finishing game)
+   - Password
+
+
+****************************************************************
+Settings
+ - Video
+   - Monitor (reset)
+   - Resolution (reset)
+   - Display Mode (reset)
+   - Anti Aliasing (reset)
+   - Texture Filter (realtime)
+   - Render Quality (realtime) > Changes trilinear filtering, shader sampling rate, and various effects
+   - Shadow Quality (realtime)
+   - # Shake Effects (0%-200%), Flash Effects (Off, On, also lightbulb and enemy flicker), Particle Effects (Off, On, replace with color smoke, not smoke and flames)
+ - Audio
+   - Overall Volume (realtime, with ping)
+   - Music Volume (realtime, with ping)
+   - Effect Volume (realtime, with ping)
+   - Ambient Volume (realtime, with ping)
+ - Input
+   - 2x Input Type
+   - (2x Rumble)
+   - 2x Firing Mode (Normal, Invert, Toggle)
+   - 2x Move Up, Down, Left, Right
+   - 2x Shoot, Turn Left, Turn Right, Pause
+   - Swap Input
+   - Set All
+ - Game
+   - Language (realtime)
+   - Text Size (realtime)
+   - Game Rotation (realtime)
+   - Game Scale (realtime)
+   - Game Speed (50%-100%, 110%-200% (unlock))
+   - Hud Rotation (realtime)
+   - Hud Scale (realtime)
+   - Hud Type (realtime)
+   - Update Frequency
+   - Game Version (latest (1.2), 1.0, 1.1, 1.2)
+   - Mirror Mode (realtime, unlock)
+
+
+****************************************************************
+Exit Game
+
+
+****************************************************************
+Select Language
+ - Hidden Mini Game
+
+
+****************************************************************
+- Pause Menu
+- Summary Menu
+- Defeat Menu
+- Finish Menu
+- Bridge Menu

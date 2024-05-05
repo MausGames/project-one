@@ -1,0 +1,113 @@
+
+// TODO 1: boss intro, ein anderer mächtiger boss entsteht (fledermaus, Dharuk, bumeränge sammeln sich und er entsteht aus einer energy-version), schreit, banner kommt, kampf geht los, und wird dann gefressen, nach biss lange in der mitte, musik ist weg, neues banner kommt
+// TODO 1: mund soll im offenen zustand leicht auf und ab flattern, wie bei Chol
+// pillen und pacman aussehen passen sehr gut zusammen
+// TODO 1: im inneren (der secret phase) kämpft man gegen den gefressenen boss
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+
+- theme: 
+- attack problem: inside of body, invincible outside
+- eats the player
+- eats the last enemy of previous wave, and just stays there while score is given
+- pacman move to one side, comes out of the other
+
+- tries to suck you in, you need to use also sucked-in enemies to teleport away
+- boss kotzt lauter leichen aus, paar leichen sind auch im inneren mit dharuk
+
+- pills, die sich gegen spieler-flugrichtung bewegen
+
+
+-------------------------------------------------------------------
+
+- stomp attack
+   - small separation and stomp first (to show mechanic), then attack player
+
+- separated two-sided attack
+
+- separated rotation attack
+
+- bounced wie ne kugel von unten ab, dreht sich dabei
+
+- pacman follow
+   - sudden turn ?
+   - move to one side, comes out of the other
+
+   - schnapp angriff (wie vom intro)
+
+   - bewegt sich inifity, macht 1 kurve bei spieler
+
+   - verfolgende oder infinity bewegung in 360 grad
+
+- eat up
+
+- dharuk
+   - lebenspunkte % sind verknüpft zwischen bossen
+   - explosion von dharuk bringt geminga dazu den spieler auszukotzen
+
+
+-------------------------------------------------------------------
+
+- ghost
+   - boss fliegt immer wieder beim bildschirm raus, und bekommt seine unsichtbarkeit zurück, verrät sich aber durch angriffe, dort wo er rausgeht, sollte er nicht rein kommen
+
+- degenerate
+   - mit kleinen bumerängen ? -> normale links-rechts phase, aber sie verschwinden nach kurzer zeit
+
+- pills
+   - mehrere kleine pillen entstehen (wie bei one-after-another phase) und boss versucht sie zu bekommen
+   - N fixe pattern
+   - und große pillen, wenn alle kleinen weg sind
+   - wenn boss sie bekommt, werden spieler verlangsamt für N sekunden, so langsam dass man ohne schießen dem boss entkommt, aber nicht mit schießen
+
+   - angriffs-welle mit geschossen und pillen gleichzeitig
+
+   - der boss frisst die pillen nicht auf, sondern hinterlässt sie (bemmerl)
+
+- teleportation
+   - tries to suck you in, you need to use also sucked-in enemies to teleport away
+
+   - mit verwandlung kann man auch außen schaden machen
+   - boss spuckt verwandlungs-gegner aus, weg von spielern, bzw. hält der was aus
+
+- legion
+   - boss kotzt lauter leichen aus (paar leichen sind auch im inneren mit dharuk)
+   - kotzt spieler aus, dreht sich im kreis und kotzt lauter leichen aus, ((die man angreifen kann)), volle 360 versetzt vom spieler
+   - ((greifen zeitversetzt an, selbe zeit wie kotz-kreis, in mitte, wo boss ist, der kurz stehn bleibt und durch-atmet, man hat zeit legion zu zerstören))
+   - greifen schräg an, so dass sich das spielfeld in eine raute mit tödlichem rand verwandelt, wird schräger mit zeit
+
+   - boss kotzt eine wand mit leichen voll, dann saugt wieder ein -> angriffe von wand + (force) + gegner werden am ende wieder eingesaugt
+   - eine seite wird eingedeckt und geschoss-wand mit unterschiedlichen mustern geht in eine richtung (speed, löcher, gemeinsame seitliche beweung, aber alle haben selbe richtung)
+
+
+-------------------------------------------------------------------
+
+- spuck leichen nach oben, boss saugt von unten ein, geschosse fliegen von oben in mund, 1 pattern das immer intensiver wird, am ende saugt er leichen wieder ein, dann spieler
+- spieler werden schon verwandelt ausgespuckt
+
+- ghost boss fängt erst an sich zu bewegen wenn er sichtbar wird
+
+-------------------------------------------------------------------
+
+outside #1  (bleibt zusammen)
+
+pacman phase
+- boss verfolgt spieler
+- pills erscheinen, boss verfolgt pills
+
+einsauge phase
+- legion
+
+
+inside
+
+- ghost
+
+- degenerate
+
+
+outside #2  (teilt sich auf)
+
+- stomp attack
+
+- separated two-sided attack
+

@@ -1,0 +1,150 @@
+Windows:
+[X] alles per segment ohne schild und normal
+[X] alle badges sammeln
+[X] alle fragmente sammeln
+[X] P1 ohne alle fragmente besiegen, direkt nach Geminga
+[X] P1 ohne alle fragmenten besiegen nochmal (cheaten)
+[X] P1 mit allen fragmenten besiegen, regular (cheaten)
+[X] P1 mit allen fragmenten besiegen, secret (cheaten)
+[X] P1 mit allen fragmenten besiegen, regular nochmal (cheaten)
+[X] P1 mit allen fragmenten besiegen, secret nochmal (cheaten)
+
+
+macOS:
+[X] alles Classic Mode mit schild und easy ohne allen fragment
+
+
+Linux:
+[X] Classic Mode mit allen fragmenten, easy, regular (cheaten) (background rotation disabled, und speed reduced)
+[X] Classic Mode mit allen fragmenten, normal, secret (cheaten) (mirror mode)
+[X] Coop, alle per segmente (cheaten)
+[X] alle achievements sammeln
+[X] challenge achievements testen (code only)
+[X] game speed 50%, game speed 200%    -> virido, nevo, Eigengrau
+[X] rotiertes game, rotiertes hud    -> intro, rutilus+boss, P1, Eigengrau
+
+
+[X] reference shader compiler
+[X] test mode
+[X] performance and memory benchmark (Windows)
+
+
+-------------------------------------------------------------------
+
+player-bullets bei eigengrau verbessern
+
+sound bei fress end-animation von geminga
+
+story beim ende von geminga wo P1 von unten kommt und länger 
+Ater intro wenn P1 noch nicht besiegt wurde, bei der alle 8 helfer von oben kommen (touhou) und bestimmte angriffe machen mit ihren bullets
+story-punkte (mit P1) sind komplet out-of-place
+
+gamepad 1 and keyboard 1 instead of 2 (könnte auch gamepad rechts machen ?)
+fixup menu sound: back-button should make noise when using gamepad
+wenn man im stage-menü vom back button nach oben geht, sollte die letzte stage der untersten mission ausgewählt werden, auch wenn boss nicht verfügbar (+ wenn man von der mission darüber nach unten geht)
+
+herzschlag bei wechsel zu P1 schiff
+energy-schein + soundeffekt wenn helfer auf P1 zufliegen
+
+
+bei 4-3 2 items mehr
+bei 4-3 graze value blockiert die sicht
+
+
+
+-------------------------------------------------------------------
+[X] twitter msg 1-day
+[X] trailer
+[X] twitter msg steam
+[X] twitter msg itch
+[ ] reddit msg linux
+[ ] reddit msg mac
+[ ] reddit msg shmup
+[ ] news steam
+[ ] news itch
+
+[X] remove weapons
+[ ] improve story beats    -> add P1 unten still bei moss, add p1 fliegt bei virido     dark-background intro        story with mit __ClearAll zerstört    text am ende
+[ ] improve surfer and flake
+[X] improve leviathan plates   -> just add shields
+[ ] improve time bubble
+[ ] improve gravity bubble
+COMPLETE
+
+
+
+-------------------------------------------------------------------
+and tomorrow is finally the day.
+I still can't believe it, but tomorrow is finally the release of Eigengrau.
+It was a long journey, but I don't regret it. I hope every player will have fun.
+🥲
+
+#screenshotsaturday #gamedev #indiegame #shmup #EigengrauGame
+
+
+
+-------------------------------------------------------------------
+Eigengrau is 🎉 OUT NOW 🎉
+
+A colorful shoot 'em up where every situation, every enemy, and every boss offers a different handcrafted experience.
+🚀💥
+
+You can find it here:
+https://store.steampowered.com/app/1624320/Eigengrau/
+https://mausgames.itch.io/eigengrau
+
+Have fun! 🥳
+
+#gamedev #indiegame #shmup #EigengrauGame
+
+<video>
+
+
+🎉🥂🥳🚀💥
+
+
+I also want to thank everyone who has supported me along the way! I could not have done it without you. ❤️
+
+
+
+-------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------
+
+01
+purple target triangle
+cyan target sphere
+pink beans quad
+
+02
+blue residue quad
+
+03
+green eggs sphere
+orange flummis triangle
+
+04
+orange/blue targets quad
+cyan tocks triangle
+
+05
+green coins flip
+blue gaps quad
+(yellow surfers quad)
+
+06
+(yellow flakes triangle)    red?
+pink chests quad
+orange targets quad         
+
+07
+orange diamonds quad
+
+
+
+-------------------------------------------------------------------
+I already posted here a couple of months ago.
+
+The demo was also updated to version 1.0.0, but the number of changes is so significnat that I do not dare writing any patch notes.

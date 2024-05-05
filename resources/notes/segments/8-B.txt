@@ -1,0 +1,787 @@
+- theme: color
+- 9 phases for each color one (helper), wird durch zerstören der entsprechenden farbe verursacht in sub-phase (radiant), außer weiß -> kommt zum schluss
+- jede phase hat eigenen lifebar in entsprechender farbe
+- hat auch grünes dot 5-eck, und kann 5-eck bubble bekommen
+- difficulty: you only have to kill 4/8 helpers
+- intro: movement wie spieler, he can also turn into 4 directions + spin around, ###
+- sub: helfer umkreisen ihn langsam, P1 in mitte, der den meisten schaden nimmt fliegt auf P1 zu, rest fliegt weg
+- gelb: [rockets and mines] occupy area, follow player, (destroy stuff)
+- orange: [###]
+- rot: [###] licht geht aus, man sieht aber noch platten am boden
+- rosa: [gravitation and metroids]
+- violett: [space and time] <--##separate
+- blau: [###]
+- cyan: [###] rotiert mit durchgängigen laser herum (spieler muss nah an ihm bleiben)
+- grün: [###]
+- weiß: [bullethell] kommt wenn P1 raucht und fast zerstört wird, unverwundbar, ikaruga no-shoot phase, aber mit komplexeren mechaniken (als legion), e.g. bei denen man auch sachen aktivieren muss
+
+hat dot und bubble (für übergänge)
+
+spawn and control many enemies
+malygos
+infinty
+darkness
+energy, laser-verbindungen
+boss duplication (wie beim alten P1 boss, anderes auch ?)
+
+von den 5 mechaniken einer mission werden 2-3 gleichzeitig verwendet, kombiniert
+missionen können dynamisch instanziert werden (kaschieren mit fixer transition (3s)), Ater hat eh kaum speicher
+
+boden hat einen absoluten und tatsächlichen wert pro tile, spieler drückt tiles rein, boss drückt sie rauf
+
+
+sollen mechaniken von bossen sein, von waves ?
+jede farbe soll eine konkrete situation sein, keine mehr-phasige (kann aber alternieren zwischen 2 sub-phasen) (außer weiße phase)
+1-2 mechaniken aus waves wiederverwenden, nicht mehr, boss hat sonst kein konkretes theme
+jede sub-phase braucht min 2-3 sub-sub-phasen, der boss muss lang sein
+
+
+-------------------------------------------------------------------
+
+// TODO 1: white flash on impact of white helper
+// different phases should map to the general feeling and behavior of the same-colored bosses
+// background sind weiß-schwarz-graue blöcke, und farbe ändert sich je nach phase (breitet sich wie ne welle aus)
+// TODO 1: final endboss, ship jumps into z dimension, while side blocks move away, star fox (either looping or dive animation), rotation around z
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+
+// cDarkBackground:
+// - jede boss phase hat eine andere animation
+// - welle von links nach rechts
+// - welle aus mitte
+// - schachmuster (auf und ab animation)
+// - rotation
+// - auf und ab linien, größere blöcke, diagonale
+// - boss macht bomben-angriffe die eine lokale welle erzeugen
+// - hügel bewegt sich mit etwas vom boss/spieler mit
+// - blöcke reist es weg von mitte(?) beginnend nach außen bei transition zu eigengrau
+// - TODO 1: color vignetting (per block, or in shader), maybe for all environments -> TO algorithm
+// - const coreFloat Z = (((X + (Y + iOffset)) % 2u) ? -5.0f : 5.0f) * SIN(Core::System->GetTotalTime());
+// - m_aBlockRaw[i].SetColor3(coreVector3(1.0f,1.0f,1.0f) * (0.5f + 0.5f * ABS(vPosition.Normalized().z)));
+// - colors on blocks may need *1.5 like on ship-shader
+// - return (iIndex + F_TO_UI(m_fFlyOffset / DARK_DETAIL)) % DARK_BLOCKS_Y; GetBlockShift
+// - color interpolation der blocks, abhängig von ihrer höhe, entweder zwischen zwei farbtönen oder farbton+grau
+
+oder farben werden mit entsprechend eingefärbten angriffen assoziiert, naja
+
+3 mechaniken werden ausgewählt:
+1 übergreifendes und 2 für abwechselnde phasen
+2 alternative phasen, min 1 hat mehrere stufen, alternierend oder hintereinander, transition (außer letzte) oder loop
+
+!!! die mechaniken sollen aber auch miteinander interagieren
+
+reihenfolge wird in intro phase bestimmt, je nachdem in welcher reihenfolge man die helfer zerstört
+
+
+-------------------------------------------------------------------
+
+- background
+   - welle von links nach rechts, oben nach unten
+   - schachmuster (auf und ab animation)
+   - rotation
+   - boss macht bomben-angriffe die eine lokale welle erzeugen
+   - hügel bewegt sich mit etwas vom boss/spieler mit
+   - auf und ab linien, größere blöcke, diagonale
+
+- sub
+   - wenn man die reihenfolge gleich mit den level-farben macht passiert etwas
+
+
+-------------------------------------------------------------------
+
+- intro
+   - simple bullet-attacks und patterns wie bei intro-sword
+   - ???
+   
+   - eröffnung mit teppich von oben mit 1-2 löchern
+   - dann fixer seiten angriff abhängig von spieler-position, mit leichter seiten-bewegung
+   - bottom teppich
+   - 1 2 2 1 2 2, oben, rechts, unten, links
+   - regenbogen geschosse und bubble
+   - rotations-angriff (white phase)
+
+- gelb
+   - wizzrobe
+   - mole
+   - tower
+   - mother *
+   - spikes *
+      - bouncy children attack
+      - boss is mole (mit multi-jumps) (teilt sich auf mehrere auf, ohne farbe, aber nur bei einem kommt er raus)
+      - boss is wizzrobe
+      - wizzrobe spikes
+      - sich bewegende spike-platten linie, gehen langsam out of sync (121212, bleibt aktiv)
+      - boss gets child shield once
+
+- orange
+   - push
+   - walls *
+   - geometry
+   - snap
+   - rota blocks *
+      - gitter aus rota blöcken die von rechts nach links moven
+      - wände kommen näher wenn du drauf feuerst
+      - riesige rota-blöcke, die sich wie geometry blöcke verhalten (zerquetschende wände und man kann nur mit korrekter rotation überleben)
+      - lineares snap-gitter unten, dass von rechts nach links geht
+      - im inneren eines rings, der gepusht wird
+      - zwei rota block linien direkt hintereinander, die obere bewegt sich seitlich
+      - eine blocklinie mit sowohl rota blöcken als auch geoemetry
+      - geometry kommt von seite, und man kann sie pushen mit schuss (um loch zu erzeugen)
+      - 4 block waves von allen 4 seiten, immer gleich
+      - du bist auf einem 2x2 gitter, und pushst es durch deine schüsse !!!! die wände haben einfach nur stacheln
+
+- rot
+   - ghost
+   - degenerate
+   - pills *
+   - teleport
+   - corpses
+      - pills, die man im dunkeln suchen muss
+      - dark, aber du hast einen runden schein, oder du hast gar keinen schein, aber boss hat einen großen
+      - ab und zu teleportierst du dich an die stelle vom boss, und er sich an deine!!!
+      - fixe corpses die direkt auf den boss schießen
+      - degenerate fixer dichter links-rechts pfad von oben, und letzte reihe bleibt aktiv, verschwindet aber mit dunkelheit kurz vorm ende -> corpses erscheinen dann und schießen direkt auf dich, und du kannst sie zerstören
+      - corpses schießen in kreis auf spieler, geschosse verlangsamen sich, spieler muss sich aus kreis raus-teleportieren
+
+- magenta
+   - force dir
+   - rotation
+   - slowdown
+   - gravity
+   - meteors *
+      - großes rotierendes meteoriten-feld wie bei boss damals
+      - boss is die ganze zeit in verlangsamungs bubble, er macht sie später größer (nicht alles einhüllen)
+      - force-rotation mit rotation
+
+- violett
+   - intro
+      - verhalten wie spieler ? drehung, langsamer bei schießen
+      - spieler kann nur noch gerade schießen, bekommt weit-schuss, dodonpachi wellen kommen
+      - gegner-wellen von intro kommen, boss von intro kommt
+
+      - fliegt in kurven-formation (aller erste gruppe) und schießt dabei gerade, dann in rotation
+      - geht auf einer seite raus und sofort auf der anderen rein
+      
+      - down in rotation (no shooting)
+      - yellow wave movement
+      - wave rotation attack, from top, to top
+      - sniper shot, from left, to border
+      - following, from the other side of player, straight out
+      - top wave attack, from the right, to the right
+
+- blau
+   - evade
+   - snowstorm *
+   - stick to side
+   - move against *
+   - drag stone
+      - lineare move-geschosse von seite mitte, wie damals
+      - boss erzeugt permanent move geschosse
+      - dickes permanentes move geschoss welches schnee erzeugt
+      - boss hat morning star mit eis
+      - spieler wird auf und ab (x2), links und rechts geschleudert (transition)
+      - ### linke seite, rechte seite (eng an kante), auch oben unten (raute) wegen kugerl
+
+- cyan
+   - residue
+   - switches *
+   - arrows *
+   - bombs *
+   - dicke kugerl
+      - riesiger rotierender arrow auf boss (dot-check)
+      - switches, welche vom boss wieder disabled werden, müssen abstand zueinander haben
+      - boss legt bomben wie bei bomberman, zwischen den switches ?
+      - dicke kugerl fliegen von allen seiten auf mitte zu
+      - dicke kugerl sind schon verlangsamt wenn sie vom rand kommen
+      - ### abwechselnd 1 2 1 2
+
+- grün
+   - shields *
+   - lasers *
+   - jumpers
+   - chargers *
+   - mimik
+      - bei jeder reflection im charge wird ein laser+kugerl erzeugt, in letzte flugrichtung
+      - boss hat permanent laser attached an sich, und der laser dreht sich
+      - boss schießt mit schilden (gerade oder V form)
+      - boss charged auf spieler zu, rotiert dabei und hat einen drift (wird stärker?), reflektiert N mal
+      - schilde kleben verkehrt an spieler und er kann nur noch von bestimmten seiten angreifen
+      - spieler muss ein schild nutzen
+      - charge in unendlichkeit (start to bottom, top left to top bottom, flip x, left to right, flip x)
+      - sprung-ziel bewegt sich
+      - schilde können längs rotieren, spieler wird nur in 1 richtung durchgelassen
+
+- weiß
+   - eine neue mechanik! (turf ? aber mit background ? würd blöcke weiß und schwarz machen)
+   - danach ähnlich wie in intro-phase, aber mit mehr wumps
+   - ???
+   - wie bei intro, aber kann nicht nur gerade schießen
+   - schießt alle regenbogen geschosse gleichzeitig
+   - einzelne schüsse
+   - fünf phasen, bei denen man turf bekommen muss und dann genug schaden verursachen muss, jeweils mit min 1 steigerung
+      - flug von der seite und in eine richtung schießen, steigerung: rotation
+      - 5-eck rotations flug, steigerng: ????
+      - verfolgung mit 4-way rotation, steigerung: ????
+   - drei ikaruga phasen (bei 0%, spieler kann nicht mehr schießen, turf is komplett eingenommen mit flash)
+      - flower blast, steigernd ?
+      - strudel von links, steigernd
+      - linien von rechts, steigernd
+      - GA geschosse in alle richtungen
+      - finale welle
+
+- bewegung:
+   - fixe positionen anfliegen mit fixen kurven-rotationen + vollen rotation
+   - rotationen am stand, anvisieren von spieler
+   - lineares fliegen entlang achse hin und her
+   - infinity fliegen, mit kurve, volle pfade wie gegner, einfach gerade weiter, spawnen auf höhe von spieler
+   - zwischen N-ecken fliegen abhängig von zeit oder health
+   - im kreis herum fliegen, klein, groß, alternierend
+   - am spieler haften bleiben mit abstand, fix, rundherum
+   - in mitte
+   - spieler verfolgen wie residue-gegner, wie raketen
+   - boss greift dich an basierend auf deiner aktuellen blick-richtung (seitlich, hinter dir)
+   - diagonale bewegung mit rotation
+
+- structure:
+   - intro: phase
+   - yellow: phase 3+A, phase 1+A
+   - orange: transition 2, transition 1, phase 2
+   - red: phase 3, phase 2
+   - magenta: phase 1+A, phase 1+A, phase 2
+   - violett: transition, phase, phase, phase, phase
+   - blue: phase 1, phase 3, phase 1
+   - cyan: phase 2, phase 3
+   - green: phase 2, transition 1, phase 2
+   - white: transition, transition, transition, transition, transition
+
+   - phase 2, transition 1, phase 2
+   - phase 3, phase 1, overarching 1
+   - phase 2, phase 2, again but with overarching 1
+   - phase 5
+   - transition #, phase #
+
+
+-------------------------------------------------------------------
+
+
+
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 153u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
+        {
+            const coreVector2 vTarget = coreVector2::Direction(0.0f) * 0.8f;
+
+            this->DefaultMoveLerp(m_vLastPosition, vTarget, fTime);
+
+            const coreFloat fAngleFrom = m_vLastDirection.xy().Angle();
+            const coreFloat fAngleTo   = vTarget.Angle() + PI;
+
+            this->DefaultRotateLerp(fAngleFrom, fAngleFrom + AngleDiff(fAngleTo, fAngleFrom), fTime);
+
+            switch(m_aiCounter[SIDE_COUNT] % 4)
+            {
+            default: ASSERT(false)
+            case 1:                    break;
+            case 2: this->Rotate270(); break;
+            case 3: this->Rotate180(); break;
+            case 0: this->Rotate90 (); break;
+            }
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 154u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
+        {
+            const coreVector2 vFrom = coreVector2::Direction(I_TO_F(((m_aiCounter[SIDE2_COUNT])     * 2) % 5) * (0.4f*PI)) * 0.8f;   
+            const coreVector2 vTo   = coreVector2::Direction(I_TO_F(((m_aiCounter[SIDE2_COUNT] + 1) * 2) % 5) * (0.4f*PI)) * 0.8f;   
+
+            const coreFloat fAngleFrom = vFrom.Angle() + PI;
+            const coreFloat fAngleTo   = vTo  .Angle() + PI;
+
+            this->DefaultMoveLerp(vFrom, vTo, fTime);
+            this->DefaultRotateLerp(fAngleFrom, fAngleFrom + AngleDiff(fAngleTo, fAngleFrom) - (((m_aiCounter[SIDE2_COUNT] % 3) == 2) ? (2.0f*PI) : 0.0f), fTime);
+
+            switch(m_aiCounter[SIDE_COUNT] % 4)
+            {
+            default: ASSERT(false)
+            case 1:                    break;
+            case 2: this->Rotate270(); break;
+            case 3: this->Rotate180(); break;
+            case 0: this->Rotate90 (); break;
+            }
+
+            if(PHASE_FINISHED)
+            {
+                if(this->GetLostHealth() >= 2000)
+                {
+                    PHASE_CHANGE_INC
+                }
+                else
+                {
+                    PHASE_RESET(0u)
+                    PHASE_AGAIN
+
+                    m_aiCounter[SIDE2_COUNT] += 1;
+                }
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 155u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            m_avVector[SIDE_TARGET] = coreVector4(0.0f,0.0f,0.0f,0.0f);
+        }
+
+        coreVector2 vVelocity = m_avVector[SIDE_TARGET].xy();
+
+        const coreVector2 vTarget = this->NearestPlayerDual(0u)->GetPosition().xy();
+        const coreVector2 vDiff   = vTarget - this->GetPosition().xy();
+
+        vVelocity += 80.0f * TIME * vDiff.Normalized() * (1.0f + 0.5f * SIN(m_fPhaseTime * PI));
+        vVelocity *= FrictionFactor(1.0f * (1.0f + 0.5f * SIN(m_fPhaseTime * PI)));
+
+        const coreVector2 vNewPos = this->GetPosition().xy() + vVelocity * TIME;
+
+        this->SetPosition(coreVector3(vNewPos, 0.0f));
+        
+        //this->SetDirection(coreVector3(vVelocity.Normalized(), 0.0f));
+        if(m_aiCounter[SIDE_COUNT] < 4u)
+        {
+            this->SetDirection(coreVector3(StepRotated90((m_aiCounter[SIDE_COUNT] % 4u + 4u - (F_TO_UI(m_fPhaseTime) % 4u)) % 4u), 0.0f));
+        }
+        else
+        {
+            this->SetDirection(coreVector3(StepRotated90((m_aiCounter[SIDE_COUNT] + F_TO_UI(m_fPhaseTime)) % 4u), 0.0f));
+        }
+        //this->SetDirection(coreVector3(StepRotated45(F_TO_UI(m_fPhaseTime * 2.0f) % 8u), 0.0f));
+
+        m_avVector[SIDE_TARGET].xy(vVelocity);
+
+        if(this->ReachedDeath())
+        {
+            PHASE_CHANGE_INC
+
+            g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+
+            this->__BecomeGhost();
+
+            g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
+        }
+    }
+
+
+
+
+-------------------------------------------------------------------
+
+
+
+
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 151u)
+    {
+        const coreFloat fSafe = 0.5f;
+
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_LINEAR)
+        {
+            this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition.InvertedX(), fTime);
+
+            if(!PHASE_TIME_BETWEEN(fSafe - 0.1f, fSafe + 0.1f))
+            {
+                PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+                {
+                    nShootFunc();
+                });
+            }
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+    
+    
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 152u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            const coreVector2 vPos = this->NearestPlayerDual(m_aiCounter[SIDE_COUNT] % 2)->GetPosition().xy();
+            //const coreVector2 vDir = coreVector2(SIGN(vPos.x), 0.0f);
+            
+            const coreVector2 vDiff = vPos - this->GetPosition().xy();
+            const coreVector2 vDir = AlongCrossNormal(vDiff).Rotated90().Processed(ABS) * vPos.Processed(SIGN);
+
+            m_avVector[SIDE_TARGET].xy(vPos / FOREGROUND_AREA + vDir * -0.4f);
+            m_avVector[SIDE_TARGET].zw(vDir);
+        }
+
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
+        {
+            this->DefaultMoveLerp(m_vLastPosition, m_avVector[SIDE_TARGET].xy(), fTime);
+            this->SetDirection(coreVector3(m_avVector[SIDE_TARGET].zw(), 0.0f));
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(154u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 153u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_HERMITE3)
+        {
+            PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+            {
+                nShootFunc();
+            });
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(152u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 154u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            const coreVector2 vPos  = this->NearestPlayerDual(m_aiCounter[SIDE_COUNT] % 2)->GetPosition().xy();
+            const coreVector2 vDiff = vPos - this->GetPosition().xy();
+
+            m_avVector[SIDE_TARGET].x = -SIGN(coreVector2::Dot(this->GetDirection().xy().Rotated90(), vDiff));
+        }
+
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_HERMITE3)
+        {
+            const coreFloat fAngle = m_vLastDirection.xy().Angle();
+
+            this->DefaultRotateLerp(fAngle, fAngle + (1.5f*PI) * m_avVector[SIDE_TARGET].x, fTime);
+
+            PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+            {
+                nShootFunc();
+            });
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(152u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 155u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
+        {
+            const coreFloat fAngle = m_vLastDirection.xy().Angle();
+
+            this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.0f),                        fTime);
+            this->DefaultRotateLerp(fAngle,        fAngle + AngleDiff(1.0f*PI, fAngle) - 4.0f*PI, fTime);
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_TO(10u)
+            }
+        });
+    }
+
+
+
+-------------------------------------------------------------------
+
+
+
+
+        if(false) PHASE_CONTROL_TICKER(0u, 0u, 20.0f, LERP_LINEAR)
+        {
+            const coreVector2 vPos = this->GetPosition ().xy();
+            const coreVector2 vDir = this->GetDirection().xy();
+            const coreVector2 vTan = vDir.Rotated90();
+
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cRayBullet>(1, 8.0f, this, vPos + vTan*1.5f, vDir)->SetColor3(vBulletColor);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cRayBullet>(1, 8.0f, this, vPos - vTan*1.5f, vDir)->SetColor3(vBulletColor);
+        });
+
+        // normale welle
+        if(false) PHASE_CONTROL_TICKER(1u, 0u, 1.0f, LERP_LINEAR)
+        {
+            const coreVector2 vPos = this->GetPosition().xy();
+
+            for(coreUintW j = 40u; j--; )
+            {
+                const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) / 40.0f * (2.0f*PI));
+
+                this->__AddBullet((j + (iTick * 3u)) % 8u, 5, 1.0f, vPos, vDir);
+            }
+        });
+
+        if(false) PHASE_CONTROL_TICKER(1u, 0u, 10.0f, LERP_LINEAR)
+        {
+            const coreVector2 vPos = this->GetPosition ().xy();
+            const coreVector2 vDir = this->AimAtPlayerDual(0u).Normalized();
+
+            this->__AddBullet(iTick % 8u, 5, 1.0f, vPos, vDir);
+        });
+
+        if(false) PHASE_CONTROL_TICKER(1u, 0u, 2.0f, LERP_LINEAR)
+        {
+            const coreVector2 vPos  = this->GetPosition ().xy();
+            const coreFloat   fBase = this->GetDirection().xy().Angle();
+            const coreUintW   iNum  = 8u;
+
+            for(coreUintW j = iNum; j--; )
+            {
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iNum - 1u) * 0.5f) * 10.0f) + fBase);
+
+                this->__AddBullet((j + (iTick * 3u)) % 8u, 5, 1.0f, vPos, vDir);
+            }
+        });
+
+        // follow bullets
+        if(false)
+        {
+            PHASE_CONTROL_TICKER(1u, 0u, 10.0f, LERP_LINEAR)
+            {
+                const coreVector2 vPos  = this->GetPosition ().xy();
+                const coreFloat   fBase = this->AimAtPlayerDual(0u).Angle();//this->GetDirection().xy().Angle();
+                const coreUintW   iNum  = 1u;
+    
+                for(coreUintW j = iNum; j--; )
+                {
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iNum - 1u) * 0.5f) * 50.0f) + fBase);
+    
+                    this->__AddBullet((j + (iTick * 3u)) % 8u, 5, 1.0f, vPos, vDir);
+                }
+            });
+
+            const coreVector2 vPlayerPos = this->NearestPlayerDual(0u)->GetPosition().xy();
+            //this->SetPosition(coreVector3(vPlayerPos.x, 0.8f * FOREGROUND_AREA.y, 0.0f));
+
+            g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+            {
+                if(pBullet->GetFlyTime() >= 2.0f) return;
+
+                const coreVector2 vAim = (vPlayerPos - pBullet->GetPosition().xy()).Normalized();
+                const coreVector2 vDir = SmoothAim(pBullet->GetFlyDir(), vAim, 2.0f);
+
+                pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * TIME);   
+                pBullet->SetFlyDir(vDir);
+            });
+        }
+        
+        
+        
+
+
+-------------------------------------------------------------------
+
+
+
+
+
+
+    // ################################################################
+    // 
+    else if(false && m_iPhase == 141u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.4f, LERP_LINEAR)
+        {
+            const coreVector2 vBase = StepRotated90(m_aiCounter[SIDE_COUNT] % 4);
+            const coreVector2 vDir  = vBase.Rotated90() * (((m_aiCounter[SIDE_COUNT] / 2) % 4) ? -1.0f : 1.0f);
+            const coreVector2 vOffset = vBase.Rotated90() * ((I_TO_F(m_aiCounter[SIDE_COUNT] % 3) - 1.0f) * 0.2f) * 0.0f;
+
+            this->DefaultMoveLerp(vBase * 1.3f + vOffset, vBase * -1.3f + vOffset, fTime);
+            this->SetDirection   (coreVector3(vDir, 0.0f));
+            
+            //this->SetDirection   (coreVector3(MapToAxis(vDir, coreVector2::Direction(fTime * (1.0f*PI) + (0.5f*PI))), 0.0f));
+
+            PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+            {
+                nShootFunc();
+            });
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_RESET(0u)
+                PHASE_AGAIN
+
+                m_aiCounter[SIDE_COUNT] += 1;
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(false && m_iPhase == 141u)
+    {
+        this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
+        //this->DefaultMoveTarget()
+        
+        PHASE_CONTROL_TIMER(0u, 0.2f, LERP_LINEAR)
+        {
+            this->SetDirection(coreVector3(coreVector2::Direction(fTime * (2.0f*PI) + I_TO_F(m_aiCounter[SIDE_COUNT]) * (1.0f*PI)), 0.0f));
+
+            PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+            {
+                nShootFunc();
+            });
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_RESET(0u)
+                PHASE_AGAIN
+
+                m_aiCounter[SIDE_COUNT] += 1;
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(false && m_iPhase == 141u)
+    {
+        const coreFloat fSafe = 0.9f;
+
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_LINEAR)
+        {
+            this->DefaultMoveLerp(coreVector2(-1.0f,1.05f), coreVector2(-1.0f,-1.05f), fTime);
+            this->SetDirection(coreVector3(1.0f,0.0f,0.0f));
+
+            if(!PHASE_TIME_BETWEEN(fSafe - 0.1f, fSafe + 0.1f))
+            {
+                PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+                {
+                    nShootFunc();
+                });
+            }
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_RESET(0u)
+                PHASE_AGAIN
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(false && m_iPhase == 141u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.3f, LERP_SMOOTH)
+        {
+            const coreVector2 vFrom = coreVector2::Direction(I_TO_F(((m_aiCounter[SIDE_COUNT])     * 2) % 5) * (0.4f*PI)) * 0.7f;   
+            const coreVector2 vTo   = coreVector2::Direction(I_TO_F(((m_aiCounter[SIDE_COUNT] + 1) * 2) % 5) * (0.4f*PI)) * 0.7f;   
+
+            const coreFloat fAngleFrom = vFrom.Angle() + PI;
+            const coreFloat fAngleTo   = vTo  .Angle() + PI;
+
+            this->DefaultMoveLerp(vFrom, vTo, fTime);
+            this->DefaultRotateLerp(fAngleFrom, fAngleFrom + AngleDiff(fAngleTo, fAngleFrom) - (((m_aiCounter[SIDE_COUNT] % 3u) == 2u) ? (2.0f*PI) : 0.0f), fTime);
+
+            PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+            {
+                nShootFunc();
+            });
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_RESET(0u)
+                PHASE_AGAIN
+
+                m_aiCounter[SIDE_COUNT] += 1;
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 141u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            m_avVector[SIDE_TARGET] = coreVector4(0.0f,0.0f,0.0f,0.0f);
+        }
+
+        coreVector2 vVelocity = m_avVector[SIDE_TARGET].xy();
+
+        const coreVector2 vTarget = this->NearestPlayerDual(0u)->GetPosition().xy();
+        const coreVector2 vDiff   = vTarget - this->GetPosition().xy();
+
+        vVelocity += 80.0f * TIME * vDiff.Normalized() * (1.0f + 0.5f * SIN(m_fPhaseTime * PI));
+        vVelocity *= FrictionFactor(1.0f * (1.0f + 0.5f * SIN(m_fPhaseTime * PI)));
+
+        const coreVector2 vNewPos = this->GetPosition().xy() + vVelocity * TIME;
+
+        this->SetPosition(coreVector3(vNewPos, 0.0f));
+        
+        this->SetDirection(coreVector3(vVelocity.Normalized(), 0.0f));
+        
+        this->SetDirection(coreVector3(StepRotated90(F_TO_UI(m_fPhaseTime) % 4u), 0.0f));
+        //this->SetDirection(coreVector3(StepRotated45(F_TO_UI(m_fPhaseTime * 2.0f) % 8u), 0.0f));
+
+        PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+        {
+            nShootFunc();
+        });
+
+        m_avVector[SIDE_TARGET].xy(vVelocity);
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 141u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            m_avVector[SIDE_TARGET] = coreVector4(1.0f,1.0f,0.0f,0.0f).Normalized();
+        }
+
+        coreVector2 vCurPos = this->GetPosition ().xy();
+        coreVector2 vCurDir = m_avVector[SIDE_TARGET].xy();
+
+        const coreVector2 vDiff = this->AimAtPlayerDual(1u);
+
+        if(coreVector2::Dot(vDiff, vCurDir) <= 0.0f)
+        {
+            vCurDir = vCurDir.Rotated90() * SIGN(coreVector2::Dot(vDiff, vCurDir.Rotated90()));
+            m_aiCounter[SIDE_COUNT] += 1;
+        }
+
+             if((vCurPos.x < -FOREGROUND_AREA.x * 1.1f) && (vCurDir.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + FOREGROUND_AREA.x * 1.1f); vCurDir.x =  ABS(vCurDir.x); m_aiCounter[SIDE_COUNT] += 1;}
+        else if((vCurPos.x >  FOREGROUND_AREA.x * 1.1f) && (vCurDir.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - FOREGROUND_AREA.x * 1.1f); vCurDir.x = -ABS(vCurDir.x); m_aiCounter[SIDE_COUNT] += 1;}
+             if((vCurPos.y < -FOREGROUND_AREA.y * 1.1f) && (vCurDir.y < 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y + FOREGROUND_AREA.y * 1.1f); vCurDir.y =  ABS(vCurDir.y); m_aiCounter[SIDE_COUNT] += 1;}
+        else if((vCurPos.y >  FOREGROUND_AREA.y * 1.1f) && (vCurDir.y > 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y - FOREGROUND_AREA.y * 1.1f); vCurDir.y = -ABS(vCurDir.y); m_aiCounter[SIDE_COUNT] += 1;}
+
+        this->SetPosition(coreVector3(vCurPos, 0.0f));
+        this->DefaultMoveForward(vCurDir, 29.0f);
+        
+        m_avVector[SIDE_TARGET].xy(vCurDir);
+        
+        this->SetDirection(coreVector3(vCurDir.Rotated90() * (((m_aiCounter[SIDE_COUNT] / 4) % 2) ? -1.0f : 1.0f), 0.0f));
+        //this->SetDirection(coreVector3(coreVector2::Direction(m_fPhaseTime * 1.5f), 0.0f));
+
+        PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+        {
+            nShootFunc();
+        });
+    }

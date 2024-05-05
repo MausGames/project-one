@@ -1,0 +1,53 @@
+-intro-
+[gegner fall zu boden und bleiben dort stecken (keine rotation), man muss seitlich angreifen]
+galaga 1
+galaga 2
+worms
+[jumping worms] so dass garantiert eine seite zu einem kommt, und man muss sich unter bogen stellen
+jumper 1 [mit 2 gemischt]
+-jumper 2-
+[pang]
+[up-down] wärend gegner von links rechts wie bei frogger kommen, abhängig von getöteten gegnern ?
+[spieler rotation] geschossen ausweichen die entlang seite fliegen, bouncy gegner der beim einschlag so ne welle erzeugt
+[super-schnelles finale]
+
+~35s
+~45s
+
+environment rotation
+ - 
+pang (rotierender dicker gegner, die kleineren verlieren etwas an höhe)
+
+---
+tetris/ookami steine kommen von unten nach oben und müssen zerstört werden
+geschoss wände von oben, komplexeres muster
+niedriges springen, spieler muss unter bogen durch
+beschleunigung hin und her (bevorzugt oben-unten), gegner in der mitte (bewegen sich, wie bei frogger)
+super-schnelle gegner fliegen vorbei (ZeroRanger)
+
+
+---
+gegner kommen mit geschoss-linien von oben, gegner mit rotierenden linien kommen von seite aus boden (zuerst auch bevor die gruppe kommt)
+gegner kommen auch von links nach rechts mit linie nach unten
+kombiniert mit rotation ?
+wurm-gegner komme von oben mitte (nicht ganz mittig)
+
+wurm
+gegner lnks rechts, nein, da steht dann der spieler !
+jumper 1
+jumper 2
+finale welle
+
+
+
+intro
+galaga 1
+galaga 2
+worms
+jumper 1
+jumper 2
+
+- jumper1 sollte doppelt sein
+- jumper2 sollte spring-wurm sein
+
+horizontal links-rechts gegner, manche kommen auf spieler-höhe

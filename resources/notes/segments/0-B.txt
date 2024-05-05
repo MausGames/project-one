@@ -1,0 +1,93 @@
+- geschoss wände
+
+
+
+
+
+
+- rotations angriff
+  - bremst sich ein und rotiert in die andere richtung für swing
+- swing in circle (andere richtung als rotations angriff)
+  - geht nach außen an den rand
+- strike from side
+- left-right cut + radieren am boden
+  - radiert einmal eine runde (oder 3/4) am rand bevor er rauszieht
+  - zieht sich aus dem boden und beginnt sofort mit nächster phase
+- target player
+
+
+
+
+
+
+
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 10u)
+    {
+        PHASE_CONTROL_TICKER(0u, 0u, 0.7f, LERP_LINEAR)
+        {
+            coreFloat fSide;
+            coreVector2 vDir;
+            switch(iTick)
+            {
+            case 0u: fSide = -0.6f; vDir = coreVector2( 1.0f, 0.0f); break;
+            case 1u: fSide =  0.0f; vDir = coreVector2( 0.0f,-1.0f); break;
+            case 2u: fSide =  0.6f; vDir = coreVector2( 0.0f, 1.0f); break;
+            case 3u: fSide =  0.0f; vDir = coreVector2(-1.0f, 0.0f); break;
+
+            default:
+                fSide = (iTick % 2u) ? -0.2f : 0.2f;
+                vDir  = coreVector2(0.0f,-1.0f);
+                break;
+            }
+
+            for(coreUintW i = 0u; i < 26u; ++i)
+            {
+                const coreVector2 vPos = (vDir * -1.3f - vDir.Rotated90() * fSide) * FOREGROUND_AREA;
+                const coreVector2 vTan = vDir.Rotated90() * (I_TO_F(i) * 0.06f + 0.3f) * FOREGROUND_AREA;
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, this, vPos + vTan, vDir)->MakeWhite()->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, this, vPos - vTan, vDir)->MakeWhite()->ChangeSize(1.7f);
+            }
+
+            //if(PHASE_FINISHED)
+            //    PHASE_CHANGE_INC
+        });
+    }
+
+
+/*
+    // ################################################################
+    // 
+    else if(m_iPhase == 61u)
+    {
+        PHASE_CONTROL_TIMER(0u, 2.0f, LERP_SMOOTH)
+        {
+            
+            
+            
+            if(PHASE_BEGINNING)
+            {
+                m_avVector[LAST_TARGET].xy(this->NearestPlayerDual(F_TO_UI(m_avVector[LAST_TARGET].z))->GetPosition().xy());
+            }
+            
+            const coreVector2 vDiff = m_avVector[LAST_TARGET].xy() - this->GetPosition().xy();
+            
+            const coreFloat fAngle = m_vLastDirection.xy().Angle() + LERP(0.0f, AngleDiff(vDiff.Angle(), m_vLastDirection.xy().Angle()), fTime);
+            const coreVector2 vDir = coreVector2::Direction(fAngle);
+
+            this->SetDirection(coreVector3(vDir, 0.0f));
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC
+
+                PHASE_RESET(1u)
+
+                m_avVector[LAST_TARGET].xy(this->GetPosition().xy() + vDir * vDiff.Length());
+            }
+        });
+    }
+*/

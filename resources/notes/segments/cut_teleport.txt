@@ -1,0 +1,589 @@
+enemies moving through teleporter
+
+unpredictable stages can have enemies without shooting
+- rotation (single line, dual line)
+- movement (up-and-down, infinity, 90 degree, 1 move 1 still)
+- infinity (opposite, 90 degree)
+
+
+
+1 flipped klapp auf und zu
+
+infinity left and right, with attack (meteor-line) following you, you have to keep flying
+
+
+(schräg angeordnet, entweder beide in selbe richtung und gehen beide synchron auf-ab, oder einer invertiert und asynchron auf-ab)
+
+
+
+-----------------------
+normal (half top-left and bottom-right, inverted, 3/3/3)
+- enemies from side
+- enemies from top (straight)
+
+moving up and down (opposite left and right)
+- enemies from top (straight)
+- enemies from bottom
+
+inverted (3/3/3)
+- from left to right (up, down, up), hintereinander
+- coming from top in all 3 chambers, left-right-left-right
+
+moving auf und zu (sinus -1/+1)
+- from left to right (up, down, up)
+- block at the top (getting flipped all the time)
+
+
+
+(selbe richtung nebeneinander)
+(beginnen gegeneinander zu rotieren (letztes, + spieler re-alignen)
+(90 degree full length, starten ganz oben und ganz links, bewegung) (geht mathematisch nicht)
+
+
+
+-----------------------
+normal
+- top line
+- top-left-bottom-right
+invert
+- bait
+- left and right
+- 4 individual
+
+40s
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+                m_aTeleporter[0].SetSize(coreVector3(1.05f * 0.65f * FOREGROUND_AREA.x, 1.0f, 1.0f));
+                m_aTeleporter[1].SetSize(coreVector3(1.05f * 0.65f * FOREGROUND_AREA.x, 1.0f, 1.0f));
+                
+                const coreFloat   fTime = m_fStageTime - 2.2f;
+                const coreVector2 vDir  = coreVector2::Direction(fTime);
+                const coreVector2 vPos  = vDir.Rotated90() * 0.85f * FOREGROUND_AREA;
+                
+                m_aTeleporter[0].SetPosition (coreVector3(-vPos, 0.0f));
+                m_aTeleporter[1].SetPosition (coreVector3( vPos, 0.0f));
+                m_aTeleporter[0].SetDirection(coreVector3(-vDir, 0.0f));
+                m_aTeleporter[1].SetDirection(coreVector3( vDir, 0.0f));
+#endif
+#if 0
+                m_aTeleporter[0].SetSize(coreVector3(1.6f * FOREGROUND_AREA.x, 1.0f, 1.0f));
+                m_aTeleporter[1].SetSize(coreVector3(1.6f * FOREGROUND_AREA.x, 1.0f, 1.0f));
+                
+                const coreFloat   fTime = m_fStageTime - 2.2f;
+                const coreVector2 vDir  = coreVector2::Direction(0.5f*PI);
+                const coreVector2 vDir2  = coreVector2::Direction(0.5f*fTime);
+                
+                m_aTeleporter[0].SetPosition (coreVector3(0.0f,0.0f,0.0f));
+                m_aTeleporter[1].SetPosition (coreVector3(0.0f,0.0f,0.0f));
+                m_aTeleporter[0].SetDirection(coreVector3(MapToAxis(-vDir.Rotated90(), vDir2), 0.0f));
+                m_aTeleporter[1].SetDirection(coreVector3(MapToAxis(vDir,             vDir2), 0.0f));
+#endif
+#if 0
+                m_aTeleporter[0].SetSize(coreVector3(1.05f * 0.71f * FOREGROUND_AREA.x, 1.0f, 1.0f));
+                m_aTeleporter[1].SetSize(coreVector3(1.05f * 0.71f * FOREGROUND_AREA.x, 1.0f, 1.0f));
+                
+                const coreFloat   fTime = m_fStageTime - 2.2f;
+                const coreVector2 vDir  = coreVector2::Direction(fTime);
+                const coreVector2 vPos  = vDir.Rotated90() * 0.77f * FOREGROUND_AREA;
+                
+                m_aTeleporter[0].SetPosition (coreVector3(-vPos, 0.0f));
+                m_aTeleporter[1].SetPosition (coreVector3( vPos.InvertedX(), 0.0f));
+                m_aTeleporter[0].SetDirection(coreVector3(-vDir, 0.0f));
+                m_aTeleporter[1].SetDirection(coreVector3( vDir.InvertedX(), 0.0f));
+#endif
+
+
+
+
+
+
+
+
+
+
+
+    // ################################################################
+    // teleport everything
+    // every representation where the teleporter can be avoided will not work, as the player will always avoid it due to unpredictability, so teleporter need to span across screen
+    // dangers of teleportation (especially with changing directions) are hard to assess, so players will avoid using it with the ship
+    // when the player has to use the teleporter, the situation needs to be easy and predictable (only one location with enemies)
+    // it is important that the player has to use the feature in some way
+    // [deprecated] special care needs to be taken for split-screen coop, players cannot change sides
+    // tests were done with rotation (unpredictable), movement (unnecessary), 90 degree difference (unpredictable), infinity (unnecessary)
+    // moving both portals into their direction or against it, can cause space-folding or -expansion which is physically impossible (e.g. folding would catch objects in the portal and crush them)
+    // 1: show player the mechanic
+    // 2-5: force the player to use teleporter
+    // 6: enemies need to move the player into a safe location
+    // 7: groups are not in center, to make movement a bit easier (attacking enemies will not attack player)
+    // 8-11: 1-2-2-1 pattern
+    // (TODO 1: portale werden am ende zu gegnern, ZeroRanger)
+    // TODO 1: badge: in der mitte am anfang
+    // TODO 1: on vertical, enemy from below may ram into player
+    // TODO 1: if player starts in the center, helper switch places (permanent) and teleport players outside
+    // TODO 1: add quad and sphere object in front of teleporters to show direction, oder pfeile, oder links und rechts (wegen kreuz)
+    // TODO 1: man soll bei 1 und 2 nicht seitlich vorbeischießen können, aber trotzdem visuellen rand haben
+    // TODO 1: bei kreuz, geschosse in der mitte werden zerstört
+    // TODO 1: vielleicht teleporter-transition sofort nach farb-effekt, mit LERPB
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,0.7f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 126u)                     
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
+
+                if(i < 14u)
+                {
+                }
+                else if(i < 20u)
+                {
+                    pEnemy->SetPosition (coreVector3(-0.9f, 1.3f + I_TO_F(i - 14u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+                    
+                    if(i % 2u) pEnemy->InvertX();
+                }
+                else if(i < 26u)
+                {
+                    pEnemy->SetPosition (coreVector3(-0.9f, 1.3f + I_TO_F(i - 20u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+
+                    pEnemy->InvertX();
+                    
+                    if(i % 2u) pEnemy->InvertX();
+                }
+                else if(i < 32u)
+                {
+                    pEnemy->SetPosition (coreVector3(((i - 26u) % 2u) ? -0.7f : -0.5f, 1.3f + I_TO_F(i - 26u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+
+                    pEnemy->InvertY();
+                    
+                    if(i % 2u) pEnemy->InvertX();
+                }
+                else if(i < 38u)
+                {
+                    pEnemy->SetPosition (coreVector3(((i - 32u) % 2u) ? -0.7f : -0.5f, 1.3f + I_TO_F(i - 32u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+
+                    pEnemy->InvertY()->InvertX();
+                    
+                    if(i % 2u) pEnemy->InvertX();
+                }
+                else if(i < 46u)
+                {
+                    pEnemy->SetPosition (coreVector3((I_TO_F(i - 38u) - 3.5f) * 0.3f, 1.3f + I_TO_F(i - 38u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+                    
+                    
+                    if(i % 2u) pEnemy->InvertY();
+                }
+                else if(i < 54u)
+                {
+                    pEnemy->SetPosition (coreVector3(0.9f, 1.3f + I_TO_F(i - 46u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+                    
+                    pEnemy->Rotate90();
+                    if(i % 2u) pEnemy->Rotate180();
+                }
+                else if(i < 60u)
+                {
+                    pEnemy->SetPosition (coreVector3((I_TO_F((i - 54u) % 3u) - 1.0f) * 0.9f, 1.3f + I_TO_F((i - 54u) / 3u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+                }
+                /*
+                else if(i < 28u)
+                {
+                    pEnemy->SetPosition (coreVector3((I_TO_F(i - 20u) - 3.5f) * 0.2f, -1.3f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetPosition (coreVector3((i < 24u) ? -0.9f : 0.9f, -1.3f + I_TO_F(i - 20u) * -0.2f, 0.0f) * FOREGROUND_AREA3 * coreVector3(1.0f, (i < 24u) ? -1.0f : 1.0f, 1.0f));
+                    pEnemy->SetDirection(coreVector3(0.0f,1.0f,0.0f)* coreVector3(1.0f, (i < 24u) ? -1.0f : 1.0f, 1.0f));
+                }
+                else if(i < 34u)
+                {
+                    pEnemy->SetPosition (coreVector3(1.3f, (I_TO_F(i - 28u) - 2.5f) * 0.3f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(-1.0f,0.0f,0.0f));
+
+                    pEnemy->Rotate90();
+                }
+                else if(i < 40u)
+                {
+                    pEnemy->SetPosition (coreVector3((I_TO_F(i - 34u) - 2.5f) * 0.3f, 1.3f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+
+                    pEnemy->Rotate90();
+                }
+                else if(i < 48u)
+                {
+                    pEnemy->SetPosition (coreVector3((I_TO_F(i - 40u) - 3.5f) * 0.2f * 0.0f - 0.4f, 1.3f + I_TO_F(i - 40u) * 0.2f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+
+                    pEnemy->Rotate90();
+                }
+                else if(i < 56u)
+                {
+                    pEnemy->SetPosition (coreVector3((I_TO_F(i - 56u) - 3.5f) * 0.2f, -1.3f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetPosition (coreVector3((i < 52u) ? -0.9f : 0.9f, -1.3f + I_TO_F(i - 56u) * -0.2f, 0.0f) * FOREGROUND_AREA3 * coreVector3(1.0f, (i < 52u) ? -1.0f : 1.0f, 1.0f));
+                    pEnemy->SetDirection(coreVector3(0.0f,1.0f,0.0f)* coreVector3(1.0f, (i < 52u) ? -1.0f : 1.0f, 1.0f));
+
+                    pEnemy->Rotate90();
+                }
+                 */
+            });
+        });
+
+        STAGE_GET_START(4u + RUTILUS_TELEPORTER * 2u)
+            STAGE_GET_UINT      (iTransitionState)
+            STAGE_GET_FLOAT     (fTransitionTime)
+            STAGE_GET_FLOAT     (fMoveSpeed)
+            STAGE_GET_FLOAT     (fMoveTime)
+            STAGE_GET_VEC2_ARRAY(avOldPosition, RUTILUS_TELEPORTER)
+        STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  6u,  7u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  8u,  9u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 10u, 13u)
+            
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 14u, 19u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 20u, 25u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 26u, 31u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 32u, 37u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 38u, 45u)
+            
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 46u, 53u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 54u, 59u)
+            
+            //else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 28u, 33u)
+            //else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 34u, 39u)
+            //else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            //else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 40u, 47u)
+            //else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 48u, 55u)
+
+            //else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            //else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1,  6u, 11u)
+            //else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 12u, 19u)
+            //else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 20u, 27u)
+            
+            //else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 28u, 33u)
+            //else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 34u, 45u)
+            //else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            //else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            
+            //     if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            //else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  6u,  7u)
+            //else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  8u,  9u)
+            //else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 10u, 11u)
+            //else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 12u, 13u)
+            //else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 14u, 15u)
+            //else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 16u, 21u)
+            //else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 22u, 22u)
+            //else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 23u, 23u)
+            //else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 24u, 24u)
+            //else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 25u, 25u)
+            else if(STAGE_SUB(18u)) STAGE_DELAY_START_CLEAR
+
+            iTransitionState = 0u;
+            fTransitionTime  = 0.0f;
+
+            for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
+                avOldPosition[i] = m_aTeleporter[i].GetPosition().xy() / FOREGROUND_AREA;
+        }
+
+        cHelper* pHelperOrange = g_pGame->GetHelper(ELEMENT_ORANGE);
+        cHelper* pHelperBlue   = g_pGame->GetHelper(ELEMENT_BLUE);
+
+        if(STAGE_BEGINNING)
+        {
+            pHelperOrange->Resurrect();
+            pHelperBlue  ->Resurrect();
+        }
+
+        fTransitionTime += 1.0f * TIME;
+
+        fMoveSpeed = MIN(fMoveSpeed + 1.0f * TIME, 1.0f);
+        fMoveTime  = fMoveTime + fMoveSpeed * TIME;
+
+        if(m_iStageSub == 1u)
+        {
+            if(iTransitionState == 0u)
+            {
+                const coreFloat   fTime = MIN(fTransitionTime, 1.2f);
+                const coreVector2 vPos  = coreVector2((SIN(fTime / 1.2f * 0.5f*PI) * 2.0f - 1.0f) * (1.2f - fTime) - 0.4f*0.0f, LERP(/*-0.55f*/-0.3f, 0.4f, SIN(fTime / 1.2f * 1.0f*PI))) * FOREGROUND_AREA;
+
+                m_aTeleporter[0].SetPosition(coreVector3( vPos,    0.0f));
+                m_aTeleporter[1].SetPosition(coreVector3(-vPos,    0.0f));
+                m_aTeleporter[0].SetSize    (coreVector3(0.0f,1.0f,1.0f));
+                m_aTeleporter[1].SetSize    (coreVector3(0.0f,1.0f,1.0f));
+
+                if(fTransitionTime >= 1.2f)
+                {
+                    iTransitionState += 1u;
+
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) this->EnableTeleporter(i);
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) g_pSpecialEffects->CreateSplashColor(m_aTeleporter[i].GetPosition(), 50.0f, 10u, RUTILUS_TELEPORTER_COLOR(i));
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) g_pDistortion->CreateWave(m_aTeleporter[i].GetPosition(), DISTORTION_WAVE_SMALL);
+                    this->SetTeleporterActive(1u);
+                }
+            }
+            else if(iTransitionState == 1u)
+            {
+                const coreFloat fTime = MIN(fTransitionTime - 1.2f, 1.0f);
+                const coreFloat fSize = LERPB(0.0f, /*0.67f*/1.1f, fTime) * FOREGROUND_AREA.x;
+
+                m_aTeleporter[0].SetSize(coreVector3(fSize, 1.0f, 1.0f));
+                m_aTeleporter[1].SetSize(coreVector3(fSize, 1.0f, 1.0f));
+                
+                
+                m_aTeleporter[0].SetPosition (coreVector3(1.05f,0.0f,0.0f) * FOREGROUND_AREA3);
+                m_aTeleporter[1].SetPosition (coreVector3(-1.05f,0.0f,0.0f) * FOREGROUND_AREA3);
+                m_aTeleporter[0].SetDirection(coreVector3(1.0f,0.0f,0.0f));
+                m_aTeleporter[1].SetDirection(coreVector3(1.0f,0.0f,0.0f));
+
+                if(fTransitionTime >= 2.2f)
+                {
+                    iTransitionState += 1u;
+                }
+            }
+        }
+        else if(false && (m_iStageSub >= 5u) && (m_iStageSub <= 9u))
+        {
+            if((m_iStageSub == 5u) && STAGE_BEGINNING2)
+            {
+                fMoveSpeed = 0.0f;
+                fMoveTime  = 0.0f;
+            }
+
+            //const coreFloat fHeight = fMoveTime * 0.3f;
+
+            //m_aTeleporter[0].SetPosition(coreVector3(-0.4f, FmodRange(fHeight - 0.55f, -1.1f, 1.1f), 0.0f) * FOREGROUND_AREA3);
+            //m_aTeleporter[1].SetPosition(coreVector3( 0.4f, FmodRange(fHeight + 0.55f, -1.1f, 1.1f), 0.0f) * FOREGROUND_AREA3);
+
+            const coreFloat fHeight = (TriangleWave(fMoveTime * 0.15f + 0.25f) * 2.0f - 1.0f) * /*0.55f*/0.8f;
+
+            m_aTeleporter[0].SetPosition(coreVector3(/*-0.4f*/0.0f, fHeight - /*0.55f*/0.3f, 0.0f) * FOREGROUND_AREA3);
+            m_aTeleporter[1].SetPosition(coreVector3(/* 0.4f*/0.0f, fHeight + /*0.55f*/0.3f, 0.0f) * FOREGROUND_AREA3);
+        }
+        else if(m_iStageSub == 10u)
+        {
+            if(iTransitionState == 0u)
+            {
+                if(fTransitionTime >= 0.5f)
+                {
+                    iTransitionState += 1u;
+
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
+                    this->SetTeleporterActive(0u);
+                }
+            }
+            else if(iTransitionState == 1u)
+            {
+                const coreFloat   fTime = LERPS(0.0f, 1.0f, CLAMP((fTransitionTime - 1.0f) * 0.5f, 0.0f, 1.0f));
+                //const coreVector2 vPos  = LERP(coreVector2(0.0f,0.3f), coreVector2(0.7f,0.0f), fTime) * FOREGROUND_AREA;
+                const coreVector2 vDir  = coreVector2::Direction(fTime * -1.5f*PI);
+
+                m_aTeleporter[0].SetPosition (coreVector3(LERP(avOldPosition[0], coreVector2( /*0.55f*/0.7f,0.0f), fTime) * FOREGROUND_AREA,             0.0f));
+                m_aTeleporter[1].SetPosition (coreVector3(LERP(avOldPosition[1], coreVector2(-/*0.55f*/0.7f,0.0f), fTime) * FOREGROUND_AREA,             0.0f));
+                m_aTeleporter[0].SetDirection(coreVector3(-vDir.InvertedY(), 0.0f));
+                m_aTeleporter[1].SetDirection(coreVector3( vDir,             0.0f));
+
+                const coreFloat fSize = LERPB(0.67f, 1.05f, fTime) * FOREGROUND_AREA.x;
+
+                m_aTeleporter[0].SetSize(coreVector3(fSize, 1.0f, 1.0f));
+                m_aTeleporter[1].SetSize(coreVector3(fSize, 1.0f, 1.0f));
+
+                if(fTransitionTime >= 3.0f)
+                {
+                    iTransitionState += 1u;
+                }
+            }
+            else if(iTransitionState == 2u)
+            {
+                if(fTransitionTime >= 3.5f)
+                {
+                    iTransitionState += 1u;
+
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
+                    this->SetTeleporterActive(1u);
+                }
+            }
+        }
+        else if((m_iStageSub >= 12u) && (m_iStageSub <= 13u))
+        {
+            if((m_iStageSub == 12u) && STAGE_BEGINNING2)
+            {
+                fMoveSpeed = 0.0f;
+                fMoveTime  = 0.0f;
+            }
+
+            const coreFloat fHeight = (TriangleWave(fMoveTime * 0.1f + ((0.7f + 1.1f) / 1.1f) * 0.25f) * 2.0f - 1.0f) * 1.1f * FOREGROUND_AREA.x;
+
+            m_aTeleporter[0].SetPosition(coreVector3( fHeight, 0.0f, 0.0f));
+            m_aTeleporter[1].SetPosition(coreVector3(-fHeight, 0.0f, 0.0f));
+        }
+        else if(m_iStageSub == 14u)
+        {
+            if(iTransitionState == 0u)
+            {
+                if(fTransitionTime >= 0.5f)
+                {
+                    iTransitionState += 1u;
+
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
+                    this->SetTeleporterActive(0u);
+                }
+            }
+            else if(iTransitionState == 1u)
+            {
+                const coreFloat   fTime = LERPS(0.0f, 1.0f, CLAMP((fTransitionTime - 1.0f) * 0.5f, 0.0f, 1.0f));
+                //const coreVector2 vPos  = LERP(coreVector2(0.0f,0.3f), coreVector2(0.7f,0.0f), fTime) * FOREGROUND_AREA;
+                //const coreVector2 vDir  = coreVector2::Direction(fTime * 0.5f*PI);
+
+                m_aTeleporter[0].SetPosition (coreVector3(LERP(avOldPosition[0], coreVector2(0.0f,0.0f), fTime) * FOREGROUND_AREA,             0.0f));
+                m_aTeleporter[1].SetPosition (coreVector3(LERP(avOldPosition[1], coreVector2(0.0f,0.0f), fTime) * FOREGROUND_AREA,             0.0f));
+                m_aTeleporter[0].SetDirection(coreVector3(coreVector2::Direction(LERP(-0.5f*PI, 0.75f*PI, fTime)), 0.0f));
+                m_aTeleporter[1].SetDirection(coreVector3(coreVector2::Direction(LERP(0.5f*PI, -0.75f*PI, fTime)),             0.0f));
+
+                if(fTransitionTime >= 3.0f)
+                {
+                    iTransitionState += 1u;
+                }
+            }
+            else if(iTransitionState == 2u)
+            {
+                if(fTransitionTime >= 3.5f)
+                {
+                    iTransitionState += 1u;
+
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
+                    this->SetTeleporterActive(1u);
+                }
+            }
+        }
+        else if((m_iStageSub >= 16u) && (m_iStageSub <= 17u))
+        {
+            if((m_iStageSub == 16u) && STAGE_BEGINNING2)
+            {
+                fMoveSpeed = 0.0f;
+                fMoveTime  = 0.0f;
+            }
+
+            const coreVector2 vDir = coreVector2::Direction(fMoveTime * -0.5f + 1.25f*PI);
+
+            m_aTeleporter[0].SetDirection(coreVector3(vDir.Rotated90(), 0.0f));
+            m_aTeleporter[1].SetDirection(coreVector3(vDir, 0.0f));
+        }
+        else if(m_iStageSub == 18u)
+        {
+            const coreFloat fPos = (LERPB(0.0f, 0.7f, 1.0f - fTransitionTime) + SIN(fTransitionTime * 1.0f*PI) * 0.3f) * FOREGROUND_AREA.y;
+
+            m_aTeleporter[0].SetPosition(coreVector3(-fPos, 0.0f, 0.0f));
+            m_aTeleporter[1].SetPosition(coreVector3( fPos, 0.0f, 0.0f));
+
+            if(fTransitionTime >= 1.0f)
+            {
+                for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
+                    this->DisableTeleporter(i, true);
+
+                pHelperOrange->Kill(false);
+                pHelperBlue  ->Kill(false);
+
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+
+                STAGE_DELAY_END
+            }
+        }
+
+        pHelperOrange->SetPosition(m_aTeleporter[0].GetPosition());
+        pHelperBlue  ->SetPosition(m_aTeleporter[1].GetPosition());
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 1.0f, (i < 6u) ? 2.0f : 0.0f)
+
+            if(i >= 14u && i < 100u)
+            {
+                if(STAGE_LIFETIME_AFTER(0.0f)) pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 30.0f);
+
+                coreVector2       vCurPos = pEnemy->GetPosition ().xy();
+                const coreVector2 vCurDir = pEnemy->GetDirection().xy();
+
+                     if((vCurPos.x < -FOREGROUND_AREA.x * 1.3f) && (vCurDir.x < 0.0f)) vCurPos.x += FOREGROUND_AREA.x * 2.6f;
+                else if((vCurPos.x >  FOREGROUND_AREA.x * 1.3f) && (vCurDir.x > 0.0f)) vCurPos.x -= FOREGROUND_AREA.x * 2.6f;
+                     if((vCurPos.y < -FOREGROUND_AREA.y * 1.3f) && (vCurDir.y < 0.0f)) vCurPos.y += FOREGROUND_AREA.y * 2.6f;
+                else if((vCurPos.y >  FOREGROUND_AREA.y * 1.3f) && (vCurDir.y > 0.0f)) vCurPos.y -= FOREGROUND_AREA.y * 2.6f;
+
+                pEnemy->SetPosition(coreVector3(vCurPos, 0.0f));
+            }
+            else
+            {
+                STAGE_LIFETIME(pEnemy, 1.0f, (i < 6u) ? 2.0f : ((i >= 14u && i < 16u) ? 3.5f : 0.0f))
+
+                if(i < 14u)
+                {
+                    const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                    const coreVector2 vOffset = (i < 6u) ? coreVector2((I_TO_F(i) - 2.5f) * 0.2f, ABS(I_TO_F(i) - 2.5f) * 0.05f - 0.025f) : coreVector2(I_TO_F(i % 2u) * 0.2f - 0.82f, 0.2f);
+
+                    pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                         if(i <  6u) {}
+                    else if(i <  8u) pEnemy->Rotate270();
+                    else if(i < 10u) pEnemy->Rotate270()->InvertY();
+                    else if(i < 12u) pEnemy->Rotate90 ()->InvertY();
+                    else if(i < 14u) pEnemy->Rotate90 ();
+                }
+                else if(i < 26u)
+                {
+                    const coreVector2 vFactor = coreVector2(1.0f, (i == 22u || i == 25u) ? -1.0f : 1.0f);
+                    const coreVector2 vOffset = (i < 16u) ? coreVector2(0.0f,0.2f) : ((i < 22u) ? coreVector2((I_TO_F((i - 16u) % 3u) - 1.0f) * 0.2f + 0.3f, ABS(I_TO_F((i - 16u) % 3u) - 1.0f) * 0.05f + 0.2f) : coreVector2((i % 2u) ? -0.3f : 0.3f, 0.2f));
+
+                    pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                         if(i < 15u) pEnemy->Rotate90 ();
+                    else if(i < 16u) pEnemy->Rotate270();
+                    else if(i < 19u) pEnemy->Rotate180();
+
+                    pEnemy->Rotate90();
+                }
+            }
+
+            //if(STAGE_TICK_LIFETIME(1.2f, 0.0f))
+            //if(STAGE_TICK_TIME(1.2f, 0.0f))
+            if(STAGE_TICK_TIME(10.0f, 0.0f))
+            //if(false && STAGE_TICK_LIFETIME(10.0f, 0.0f))
+            {
+                const coreUintW   iCount = 1u;//(i < 6u || (i >= 14 && i < 22u)) ? 1u : 5u;
+                const coreVector2 vPos   = pEnemy->GetPosition().xy();
+                const coreFloat   fBase  = pEnemy->AimAtPlayerSide().Angle();
+
+                for(coreUintW j = iCount; j--; )
+                {
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - I_TO_F(iCount - 1u) * 0.5f) * 4.0f) + fBase);
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.3f);
+                }
+            }
+        });
+
+        STAGE_WAVE("EINUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });

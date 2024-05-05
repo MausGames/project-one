@@ -1,0 +1,32 @@
+ganz letzter gegner verfolgt einem länger und direkt
+letzter gegner schießt im zu-flug auf spieler
+rotate enemies in circle
+big gegner hat keine blauen partikel und wird nach geheimen muster bestimmt (fliegen in mitte und dann wieder auseinander?)
+intro mit big gegner allein (kommt von seite/links)
+8 pattern
+andere muster:
+- 4 oben 4 unten
+- diagonale alternierend
+- N eng in der mitte (alternierend innen außen)
+- 
+
+
+----------
+4 pattern
+6 pattern
+everyone is big
+last attack
+
+40s
+
+
+
+----------
+einzeln nahe mitte + leicht oben
+4 oben-unten
+4 diagonal
+6 außen-innen
+8 begin rotating
+
+everyone is big + rotating
+last attack

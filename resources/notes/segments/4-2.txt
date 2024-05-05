@@ -1,0 +1,23 @@
+
+
+
+curvy movement (u turn, 90 degree in/out)
+
+enemy line(s)
+from all sides
+
+along borders (hidden)
+on all 4 corners still (hidden)
+
+unaffected:   (bei denen sollte es sich mehr in der mitte abspielen)
+- enemy line(s)
+- from all sides
+
+
+------------------
+schräg + 2 gerade + 3 diagonal
+rotation + 4 gerade + 3 diagonal
+invertiert + 4 unaffected
+
+
+40s

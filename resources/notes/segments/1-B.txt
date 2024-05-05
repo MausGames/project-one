@@ -1,0 +1,130 @@
+- fly to fixed spots and create bullet-wave
+- create objects
+
+- move along border and crush player
+- bounce around (more complex, and create attack or object on bounce, like Gradius)
+- (in center with global rotation attacks)
+
+(durch die erzeugung von gegnern aus der mission wird hervorgehbeon, das alle kommenden bosse mechaniken aus den missionen verwenden werden)
+
+cyan quad:    target cluster
+red triangle: continuous around
+orange cone:  charge
+green/blue sphere: rundum
+purple flip:  laser
+other ideas: burst aus nähe
+
+nicht zu wenig erzeugen, aber trotzdem etwas "kräftigere" objekte als der gradius boss
+
+-------------------------------------------------------------------
+- blue shields
+  - rotating with boss (maximum of 2/3)   -> needs some heavy changes
+  - shooting shields
+  - wasser rad: boss is voll geschützt, aber an die ecke schießen dreht die schilde und macht sie durchlässig
+
+- purple lasers
+  - thick purple lasers (like the old lasers)
+  - create laser-objects which simply block your movement (during border-phase, maybe also bounce)
+
+- jumping enemies
+  - create jumping enemies
+  - boss jumps around (coin flip) (just stand there in the hole) (multi-jump)
+
+- charging enemies
+  - create charging enemies, fly after being attacked
+
+- mimic
+  - simple mirror movement of boss, and he creates stuff on his location, and attacks so player needs to move
+  - or up-down bounce, with one axis mirror movement
+
+- combo
+  - [lasers / mimic] lasers turn with player direction (maybe also move)
+  - [lasers / mimic] generator-enemies on laser move with player
+  - [shields / lasers] purple shields
+  - [shields / mimic] 3 shields active on boss, changes with player direction, rotate around (boss in der mitte)
+
+
+-------------------------------------------------------------------
+
+
+- to fixed positions
+   - gets overflipped on reaching %
+
+- coin flip
+   - erzeugt grüne burst-spheren am einschlag
+   - letzter flip ist in die mitte
+   - rotation ist komplett ausgesetzt
+
+- infinity moving from right (transition)
+   - only 3 times, top, bottom, center
+   - start up by moving with normal orientation
+   - crash against wall (stuck), and start rotating to move along border
+
+- along border
+   - crush player (but only after first 2 sides)
+   - no overflip on transition
+
+- jump 1
+   - create ### during movement
+   - gets overflipped on transition
+
+- jump 2
+   - create purple laser enemies on impact
+   - gets overflipped on transition
+
+- circle into center (transition)
+   - rotiert immer schneller
+
+- center
+   - bekommt schilde (vielleicht ecken)
+   - spinning attack
+   - durchgängiger angriff der sich dreht gegen schild-richtung
+
+- against player position
+   - gets overflipped on reaching % (again)
+   - creates ### in regular intervals
+   - irgendwas einsammeln mit gegner ?
+   - gegner erzeugt mit distanz etwas (also grid distribution), das nicht zerstört werden kann
+
+
+-------------------------------------------------------------------
+aufrecht bewegend entlang linie, entweder spieler direkt verfolgen, oder unendlich in X mit target auf Y (oder swap)
+aufrecht rotierend und dicke kugerl erzeugen (oder charge gegner) (transition: knallt gegen wand (in mitte) wo er dann wild herum-spint) aber dabei auch die mitte verlässt, wie ein kreisel
+death: aus aufrechter rotation in kompletter multiation (schnell, dann wird langsamer), mit absturz auf boden
+
+   - rotiert immer schneller und kippt dann um (macht flip-sprung um wieder flach zu liegen)
+   - oder sobald er in mitte ankommt macht er einen flip am stand
+
+- (boss rotiert so schnell, dass geschosse abprallen)
+
+
+
+-------------------------------------------------------------------
+[X] blue:    <super simple>
+[X] green:   entsteht nach zweitem srpung und fliegt mit torus mit aber bremst nicht    | oder entsteht BEI zweitem sprung
+[X] orange:  bei bewegung unten, zweite rschuss auf spieler
+[ ] purple:  entsteht nach 3ter landung und fliegt lansam nach außen entlang linie
+[X] cyan:    wie cube aber an ecke wo keiner kommt, selbes movement
+[ ] red:     fliegt mit erstem geschoss von zweitem gegner
+[X] yellow:  fliegt nach außen wie schild, halbkreis
+[X] magenta: lower right corner peak-out
+
+
+spieler muss was machen um manche helfer zu bekommen -> ersatz für badges
+
+
+purple, stürtzt von oben nach unten und schläft kurz am rand auf
+red, gegner kommt gegenüber raus (bei flachem bounce) und bounced entgegen boss bewegung nach gegenüber
+green, 
+
+
+
+-------------------------------------------------------------------
+[ ] red:     
+[ ] blue:    
+[ ] orange:  
+[ ] green:   
+[ ] cyan:    
+[ ] purple:  
+[ ] yellow:  
+[ ] magenta: 

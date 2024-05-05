@@ -1,0 +1,41 @@
+
+!!! trail bei dem die gegner erst nach einer teleportation erscheinen (2 gegner sichtbar)
+gegner mit bewegung (e.g. 1324 aufgeteilt von oben)
+
+mehrere wellen nach unten mit N*2 gegnern dazwischen
+
+4(3) ideen für die transformation:
+- shooter, enemies from various sides ...
+- 
+- 
+- 
+
+die transformation soll etwas ermöglichen, was ich davor nicht gekonnt hab! -> und darauf sollen die gegner-wellen gebaut werden
+
+20:
+lllrrrllrrrlrlrlrrr
+
+
+
+
+
+----------------------------------
+- top         [+ line]
+- sides       [+ line]
+- small trail [+ line]
+- bottom      [+ line]   -> moving from bottom up (more in the middle) and the last enemy is static at bottom again
+- first shooter
+- [combination with shooter and normal enemy]
+- three shooters -> vielleicht nur 2, oder 1(diagonal gegenüber)>3
+- [combination with shooter and normal enemy]
+- big trail
+- five waves
+- * mehrere waves von oben mit gegnern dazwischen, zwei statische top-gegner um aus letzter welle raus zu kommen
+- transformation
+
+40s
+
+
+
+
+- five waves -> 2 mehr (oben die zwei shooter werden vier normale, und shooter kommt dann unten)

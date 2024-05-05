@@ -1,0 +1,54 @@
+Badges:
+# doch nur 1 VISIBLE badge pro wave, trotzdem sichtbar im menu, trotzdem 3 in code
+   - um information overload zu reduzieren
+   - weil es zu schwierig ist für alle waves 3 "gute" badges zu finden
+   - sollten konkrete und sichtbare zusätzliche aufgaben sein
+- 2 HIDDEN badges, ohne irgendeinen hinweis, separate anzeige im menü, silberner statt goldener stern
+
+Helpers:
+# all, can be very subtle (just hidden in an object), explanation for mechanics (teleporter), or as show-tutorial
+- they fly out of boss
+
+Easy:
+# all (remove or reduce some attacks, if possible do not change mechanics)
+
+Hard:
+# all (add gameplay-specific modifications, something ridiculous)
+
+Coop:
+- most cooperation comes from the increased health of enemies, causing some limits to shift if not working/shooting together
+- vieles kommt auch aus dem targeting pattern
+- 3 categories:
+   - A) welche die in solo und coop gleich sind
+   - B) welche die in solo und coop anders sind
+   - NOTWENDIG: welche die für coop spezielles handling brauchen (e.g. enemies move with player)
+# A, B, oder A+B ? -> A+B, but no significant changes, only behaviour or targeting or limit-shift
+
+Duel:
+- on hold for v1.0.0
+- #####
+
+Pacifist:
+- on hold for v1.0.0
+- #####
+
+Masochist:
+- on hold for v1.0.0
+- #####
+
+Extra:
+# only where it makes sense (plates, pills, charges, etc.)
+
+Fragment (how):
+- könnte durch die selbe mechanik bereitgestellt werden, die sich aber unterschiedlich zeigt
+   - zb. helfer zerstören, boss % in bestimmter zeit erreichen, chain, 
+   - das würde sinn machen um diese phase nicht komplett entkoppelt, sondern sie anständig mit transitions integriert zu haben
+- erst möglich nachdem P1 besiegt wurde (password)
+- #####
+
+Fragment (what):
+- an additional phase, with an additional health bar
+- #####
+
+Other:
+- groups which can benefit from being multi-enemy: screen-rotation

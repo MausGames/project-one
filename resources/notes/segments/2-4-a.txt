@@ -1,0 +1,34 @@
+3er linien intro (links v, oben <, unten ^)
+
+left-right movement with up-down arrows, sometimes linear, sometimes flipped, ~15s
+then up-down movement, but still horizontal lines
+
+two lines cross with >>>>>vv<<<
+or just from one direction
+
+einzelne im gestreuten gitter nach unten
+
+2x2 blocks from one direction, 2 protect 2 others
+
+4x4 current puzzle
+
+6x6 puzzle
+
+#####
+in welle von oben kommen <<>> vor
+in welle von rechts kommen keine nach rechts-offen vor
+
+
+----------------------------
+4x4 spiral
+
+donut puzzle
+
+
+
+< ^ v
+> < > <
+v ^ v ^
+< ^
+>
+v

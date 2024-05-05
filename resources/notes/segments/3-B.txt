@@ -1,0 +1,124 @@
+-------------------------------------------------------------------
+// TODO 1: (mines need to be enemies to allow blinking, combo/chain)
+// TODO 1: in die stacheln schießen erzeugt effekt (knusprig)
+// TODO 1: implement high watermark in __AddEnemy
+// TODO 1: make sure to disable wind on boss-death (hard if necessary)
+// TODO 1: for bounce-bullets, change fly time or position, to make sure whole line disappears together (or switch to bounce count)
+// TODO 1: sting calculations only for enabled stings
+// TODO 1: raupen-spuren im sand bei einigen gegner-welle ndavor schon (foreshadowing)
+// dying enemies flying towards boss doesn't feel right when you yourself are flying above boss
+// all together: wind, mines, enemies, haubitze ... is just too much
+
+
+-------------------------------------------------------------------
+- theme: battle above and below, communication between both layers, player will stay in the middle and the border is full of danger
+- attack problem: destroy enemies to damage him
+- wind (minen fliegen links und rechts am wind vorbei (spieler muss drehen, und auf wind aufpassen))
+- stacheln auf seite
+- angriff durch minen
+- multiple weapons just dropping back (haben zahlen auf rückseite) (normale haubitze (border circle wave), raketen (folgen), stinger, laser (mehrfach reflexion schuss der sich aufbaut, bewegende dots zeigen bahn (blenden ein/aus)))
+
+- ghost enemies and tower enemies kommen einfach und dienen als "munition"
+
+badges: 
+
+>> %HP
+wind weht nach links, von rechts kommen minen 50%
+wind weht nach rechts, minen rechts verschwinden, von links mommen minen 50% (wind weht vielleicht länger (%HP), minen muster ist anders)
+wind weht nach unten, von oben kommen minen durchgängig (mehr abstand)
+wind dreht sich im kreis
+
+weapon 0: 
+weapon 2: stings
+weapon 3: purple, reflexion laser
+weapon 4: blue, haubitze
+weapon 7: green, rockets
+weapon 8:
+
+spikes: moving spike plates (line of spikes)
+
+NEW: 
+boss-specific <> mechanics
+damage from above, haubitze, mines+wind <> hidden, tower, stings
+
+
+-------------------------------------------------------------------
+- multiple shoots in a row with one of the weapons
+
+- wind (aber keine minen ? lieber spikes)
+
+boss fährt oben, mitte unten
+fahrt-richtung kann sich drehen
+
+
+
+-------------------------------------------------------------------
+- Wizzrobe
+  - komplett verteilt auf feld (gleichzeitig) + zusammen mit minen ?
+  - 2 sub-phasen:
+    - still-stehend: ###
+    - bewegend: ###
+
+- Mole
+  - N gegner die mit muster herumfliegen, nur der markierte kann zerstört werden
+
+- Tower
+  - einzelner turm (der herumfliegt), gegner stürzen erst ab nach ihrer zeit
+
+- Mother
+  - massen-angriff auf boss, gewaltige mengen an gegner fliegen vom rand
+
+- Spikes
+  - stachel wand is bei Zeroth
+  - platten seite, dann bewegt sie sich mit wind (unterschiedlich schnell) gleichmäßig verteilt
+
+
+-------------------------------------------------------------------
+
+2 separate event-spaces, above and below
+braucht sync-points um below-angriffe zu zeigen
+
+wizzrobe + haubitze
+mole + laser
+tower +
+mother + wave
+stings + 
+
+34
+6
+16
+32
+16
+
+
+# above
+
+
+
+- stacheln
+
+- super-laser
+  - mehrere einzel-schüsse, fix (damit man nicht schon auf boss schießt), letzter trifft boss und verursacht schaden, dann kontinuierlicher strahl
+
+
+# below
+
+- haubitze (runde explosion)
+  - erzeugt schockwelle am rand
+
+- laser (linearer reflektierender strahl)
+  - reflektiert N mal von der wand
+  - kann einfach eine linie aus normalen geschossen sein, als abwechslung
+
+- wave (X/Y axis angriff, zwei kleine hintereinander)
+  -
+
+- rockets (verfolgung)
+  - verfolgt spieler für N sekunden und fliegt dann am rand raus
+
+- ### (kreisförmeriger angriff aus mitte)
+  -
+
+- super-laser von oben
+  - muss über boss gezogen werden, wärend man scheiße und wind ausweicht
+

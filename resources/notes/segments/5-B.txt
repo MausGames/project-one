@@ -1,0 +1,133 @@
+- theme: rhythm and force (ramming)
+- attack problem: resurrects/regenerates several times
+- stirbt mehrmals (3 phasen)
+- schießt seine flügel in den rand (großer einschlag, und radiert am rand entlang)
+- wirft mit direction-blocks von der seite (dance dance revolution) dann riesige von oben
+- zieht den bildschirm rand raus (bewegt sich erst leicht weg und erzeugt dann einen ruck)
+- (old urtica attack with wall wave)
+- bekommt ein schild und man muss die weggeschossenen flügel attackieren
+- dort wo ein flügel einschlägt, kommt ne geschoss-fontäne raus und bleibt ne zeit lang
+- hard mode: nach erster wiederbelebung hat der spieler thermometer und muss wasser einsammeln, vor erster wiederbelebung gibts schon wasser
+
+- jagt kralle in jeden der 4 ränder und zieht sie zusammen, man muss krallen abschießen um es zu beenden (Metroid Dread)
+- geometry bildet vollen safe-spot und hüllt dann alles ein (wie bei mario) (boss is kurz weg ?)
+- snap to grid kommt schnell von oben nach unten, unten sind stacheln, man muss durch-navigieren und kommt oben am ende wieder raus und dreht sich nochmal
+- push of boss, er kämpft dagegen an
+
+badges: 
+
+- grid das sich nach unten bewegt, und entweder sind da überall stacheln, oder grid bleibt stehn und es kommen dir-blöcke
+- riesige dir-blöcke die wie die sold blöcks sind
+
+beim ersten tod wird fake time-bonus angezeigt, der einen bestimmten wert darstellt (zeit, datum, etc.)
+
+
+-------------------------------------------------------------------
+// TODO 1: flügel sollten sehr dynamisch sein, wie ein vogel, gehen nach hinten bei sturzflug
+// TODO 1: rotation von körper oder flügel signalisieren bestimmten angriff -> andere bosse auch
+// TODO 1: show boss banner with each resurrection ?
+// TODO 1: ram von boss und wings braucht flammen-wellen-effekt
+// TODO 1: outline vom body is dünner als von flügeln (wegen shape)
+// TODO 1: wing-parts crushing into the screen get a timer, and explode if not attacked
+// TODO 1: sollte sich mehr bewegen, so wie andere bosse
+// TODO 1: flügel können separat feuer verlieren, für angriffe
+// wave with heat areas und temperaturanzeige über spieler is hidden phase
+// tod: gegner wird von seinen eigenen flügeln aufgespießt, tak-tak-tak-tak-boom
+// 3 verschiedene death animations, die letzte is offensichtlicher
+// intro: boss fliegt wie meteoriten auf den boden (bam-bam-bam-bam-BAM) (von selber richtung), und baut sich dann zusammen, glüht ab nachm einschlag (energy overlay), + trail
+// death 1: fliegt in lava, kommt wieder raus
+// feuer baut sich auf mit partikeln von vorne nach hinten, kann sich mit flügel-bewegung strecken
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: mehrere einzelne einschläge schon während der background sich noch bewegt, dann bleibt erstehen und alle 5 schlagen nochmal ein
+
+
+-------------------------------------------------------------------
+hawk storm attack von links, rechts, oben, unten (transition?)
+   - startet am rand und rast am anderen rand raus, erzeugt geschoss-wellen beidseitig
+   - letzter raser schläft in wand ein
+
+resurrection
+   - beim ersten tod wird fake time-bonus angezeigt, der einen bestimmten wert darstellt (zeit, datum, etc.)
+   - jede todes-animation ist anders (bei letzter glaubt man kurz er kommt zurück, stirbt aber wirklich)
+
+sollte sich mehr bewegen, so wie andere bosse
+   - schwung bewegung um mitte herum
+
+
+-------------------------------------------------------------------
+
+- push
+   - alle teile sind verstreut und man muss ihn wieder zusammen-bauen (bewegen sich gleichzeitig, aber nur für diese phase)
+   - position und rotation (langsam)
+   - einzelteile sollten zusammen-spiele und schöne bewegungs-muster erzeugen
+   - types
+      - rauf und runter, seite an seite
+      - rotation in mitte längs
+      - bounce schräg herum
+
+- walls are coming at you
+   // TODO 1: boss schießt die 4 flügel in den boden und zieht ihn nach oben mit seinen spitzen, spieler muss ihn nach unten schießen, beim rausziehen der flügel werden die spitzen rausgeschossen, X0X0, in zwei wellen
+   - jagt kralle in jeden der 4 ränder und zieht sie zusammen, man muss krallen abschießen um es zu beenden (Metroid Dread)
+   - dort wo ein flügel einschlägt, kommt ne geschoss-fontäne raus und bleibt ne zeit lang
+
+- geometry falls together
+   - boss "haut" gegen wand von der dann was kommt
+   - geometry bildet vollen safe-spot und hüllt dann alles ein (wie bei mario) (boss bleibt einfach stehn) [einseitig !] zb. von oben, man sieht dann schon das loch
+   - blöcke verschwinden in komplett andere richtung wieder (wenn möglich gegenüber)
+   - 13542 -> spieler muss aus mitte raus wenn 3 nach oben geht, bevor 5 nach unten geht, 5 verschwindet nach unten
+
+- snap to grid
+   - snap to grid kommt schnell von oben nach unten, unten sind stacheln, man muss durch-navigieren und kommt oben am ende wieder raus und dreht sich nochmal (orbs werden einfach aufgelöst bei % health)
+   - 3x3
+   - einfach nur 4 unten und DDR mit den angriffen von oben, nacheinander, dann gleichzeitig und man muss zum loch
+
+- direction blocks
+    // TWIST: (boss?) line of blocks fom left and right at the same time, but with different direction, can crush player  left+right and up+down
+    // TWIST: lines from the bottom
+
+
+-------------------------------------------------------------------
+
+
+first (60%)
+
+- bullet phase mit direction blocks
+
+- schwung
+
+- walls
+   - einzeln
+   - dann alle
+   - bleiben herumliegen für push phase
+
+- push
+   - boss muss wieder zusammen gebaut werden
+
+- ???
+
+- flügel explodieren nacheinander und fliegen aus bild, dann boss
+
+
+second (35%)
+
+- sturmangriff
+
+- geometry falls together bei letztem sturmangriff, der nach oben ging, dann fallen säulen nach unten
+   - boss wird nach unten befördert aber recovered
+
+- snap to grid von unten
+   - bewegt sich von oben nach unten
+   - stacheln sind unten, die man auch angreifen kann
+   - fixer pfad, der sich wiederholt
+   - bei treffer (oder treshold berührung) gehts kurz rückwärts und beschleunigt dann wieder, wie ein gummi-ball
+
+- flügel werden nacheinander zerstört mit fallenden HP (shared) (im abstand zur zerstörung der orbs) alles wackelt dabei
+
+third (5%)
+
+- sehr kurze phase, boss is allein versucht drehend(orientation) den spieler zu berühre(arrow follow), explodiert dann einfach
+
+
+
+
+

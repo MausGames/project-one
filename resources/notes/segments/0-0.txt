@@ -1,0 +1,52 @@
+
+- spieler startet rot (blau/gelb), und wird am ende erst grau
+- health icons sind genau so
+- 1000 shield, 250 wird immer regeneriert, you cannot die
+
+
+
+- control erklärung ist neben spieler (anchor), kommt unter bestimmten bedingungen, verschwindet nicht sofort wieder, blendet langsam ein und aus
+
+
+-------------------------------------------------------------------
+1:
+- [moving (general), shooting (general, sustained), combo, enemies from every side, enemies fly infinite (#1), segment structure, sub-stage structure]
+- controls: nach zeit ohne move (3s)
+- controls: nach zeit ohne angriff (aber nach move) (3s)
+
+2:
+- [use whole game area, enemies fly infinite (#2)]
+- [turning] enemy line (ohne angriffe, wobbly aber durchgängig) top (from left), bottom (from right) (with game-area modification), left and right (from top, leicht verzögert wegen badge)
+- controls: nach zeit ohne turn (3s)
+- badge: wenn man die untere gruppe zerstört
+
+3:
+- [dodging attacks]
+- [invincibility]
+- [damaging touch] gegner fliegen auf spieler zu 1 + 1 + 1 + 3/4
+- badge: 
+
+4:
+- [enemy health, causing damage] 4 gegner von verschiedenen stellen, viel, wenig, viel, wenig health, drehen sich leicht schräg als wären sie kaputt, ohne angriffe
+- [moving slow, small hitbox] old whirl attack
+- badge: beim 4. spawnt ein zusätzlicher gegner
+
+5:
+- [moving fast, extra] mehrere geschoss-wellen mit loch, geben extra-punkte, wenn man durch-fliegt
+- [taking damage, lives, shield] drei geschoss-wellen (ohne gegner) denen der spieler nicht ausweichen kann (shield hit, shield destroy, feel), danach nur noch gegner ohne angriffe
+- badge: wenn man durch die letzte geschoss-welle erfolgreich durch-fliegt
+
+### a game by martin mauersics mitten im level (nur beim ersten mal, wie mit Eigengrau text)
+
+
+-------------------------------------------------------------------
+boss:
+- [chain, fragment, alles]
+- geschoss-welle mit loch von jeder seite nacheinander
+
+
+das erste fragment bekommt man im intro (die mitte der tafel, das viereck), und saugt einen ein und zerstört das schiff, und erzeugt eine graue kopie (Eigengrau) -> erst dann bekommt man blauen schein und quad, auch health-icon anders
+es muss einen mini-boss im intro geben (container! nicht P1), der einem die standard steuerung trainiert (slow/fast, turn, scoring), der einem das fragment gibt, und man kann nicht sterben
+
+
+

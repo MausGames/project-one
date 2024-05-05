@@ -1,0 +1,116 @@
+// one hand, one foot (or something else), one eye (links awakening)
+// die einzelteile des fragments bilden die hand oder ähnliches
+// white outlines, own shader
+// im laufe des kampfes werden seitenteile immer dünkler, bis zu der phase wo man ins auge fliegt und alles verschmilzt, spieler kann dann überall fliegen
+// boss is im background, moved weiter weg, rotation wechselt von XY zu XZ, transition wird mit flachem quad (oder 3 bunten achsen, beides) in spielerschiff dargestellt, pseudo-movement nach unten (partikel), gegner/hände und bullets kommen von links und rechts, boss ist unten, greift mit geschossen von unten an, manchmal auch was von oben am windshield (yoshi's story)
+// P1 is von allen helfern umgeben, sie opfern sich stück für stück, in P1 um ihm die fähigkeit zu geben sich nach unten zu drehen
+// boss kann auf händen um am windschild erscheinen
+// boss ist auge, auf würfel im hintergrund, hat zwei hände die aus einzelteilen bestehen, die man vorher einzeln angreift
+// wenn der boss besiegt wurde fliegt man ins auge in totenstille (wird immer größer und umschließt alles in dunkelheit), wo der weiße würfel in der mitte das finale objekt ist, man kann nicht mehr schießen, wenn man den würfel berührt verschmilzt man mit ihm, leuchtet weiß und kann sich nicht mehr bewegen (lerp), dann erscheint in der mitte "Thank you for playing", und der bildschirm zerreißt (ausgehen von spieler) samt text in ein weißes bild, seite fährt langsam wieder in mitte, dann wird grass background eingeblendet, credits starten mit melodie, wärend credits werden background durchgeblendet bis zum cloud background, es fliegen nochmal alle helfer durchs bild mit ENDE (deutsch) in der mitte, danach score eingabe
+// hand will create balls (grab) and shoot at player, multiple times, which fly like mischief-makers ball, and create wave on border
+// hand can slap on ground to create bullets and gray wave
+// hand can drag game screen into side
+// Eigengrau -> Eye gengrau / Auge ngrau -> Auge sieht farben und formen (vierecke, dreiecke, kreise)
+// gegner-welle von links/rechts die oben/unten startet, man muss rotieren um sie abzuwehren
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// rotation um Z achse
+
+// der tunnel und alle objekte werden gegen flug-richtung geshiftet, wodurch bewegungen mehr impact haben, außerdem kann man den rand des tunnels mit dem verschwundenen rand des spiel-felds gleichsetzen
+// boss hat mehrere health-bars, erster healthbar ist approach zum boss, wenn healthbar weg ändert sich musik das auge geht auf und boss-name erscheint, welches auch als tutorial fürs drehen (dinge kommen von links und recht) dient
+
+
+-------------------------------------------------------------------
+
+- theme: 
+- riesiger lifebar (max 100% 1:1)
+- (hat finale phase wo man nicht angreifen kann (klassisch)) -> aber rotation ?
+- regenbogen geschosse
+- (man schießt in framebuffer, der einen anderen background freigibt) -> % anzeige, splatoon mäßig
+- rand verschwindet, aber spieldfeld markierung bleibt, raus zoomen, kamerabewegung, alles weiß, (seiten-panel brechen bei finalem boss auf und zeigen weiße animationen), spielfeld is etwas kleiner als reguläres quad, boss befindet sich and den 4 seiten außerhalb (schaut leicht rein)
+
+klasische tunnel angriffe:
+- sichere (rotierende) kreise
+- mehrfach diagonale (bewegende) linien
+
+
+-------------------------------------------------------------------
+
+ränder shaken und werden wie bei transition aufgelöst mit weiß
+weiße outlines müssen dicker sein
+geschosse sollten zum rand verschwinden am ende, mitte nach oben
+rand ist vielleicht nur sichtbar wo spieler oder geschosse sind
+
+
+boss von hinten
+
+- boss eröffnet mit bullet-ring
+- gerader angriff
+- verteilter angriff von kleinen/einzelnen und großen clustern
+- mit linien beginnen
+
+- bullet patterns
+   - rotierendes loch
+   - mehrere linien: alle vertikal, alle horizontal, alle schräg, alle kreuz und quer | gleichzeitig, hintereinander, drehend (2 vertikal, 3 horizontal, 4 schräg, kreuz-und-quer, kreuz rotierend links, doppel-kreuz rotierend rechts)
+   - geschoss-cluster, mehrere hintereinander um ihnen tiefe zu geben (rund, eckig, 3er fan)
+   - durchgehende linie von mitte rundherum (wenn boss nahe is)
+   - quadrate 4x4 die hintereinander in muster kommen
+   - multiple lines with depth, like flying through a mikado-puzzle
+   
+
+- seiten angriffe
+   - gegner die spawnen brauchen eine incentive um angegriffen zu werden (entweder sind sie unausweichlich, oder greifen selbst an, oder ???)
+   - eigene "geschosse" die von unten kommen und semi-spawnen links und rechts (zuerst) in vertikaler linie mit delay, bewegung + angriff (sonic aufzug, aber langsamer)
+      - ikaruga kreis der immer kleiner wird (sinus-welle)
+
+- oben angriffe
+   - definiere 1 ganzes, 4 hälften oder 4 viertel (achsen) bei denen angriffe immer treffen, da aiming nach oben sehr schwer ist
+      - movement: ganz, linke hälfte, rechts-unten viertel
+
+
+boss kommt näher
+   
+   
+   
+   
+
+-------------------------------------------------------------------
+
+
+- bullets: explosion #multi#
+
+- bullets: rotating lines (normal, targeted, (star))
+
+- follower: single spawn
+- bullets: direct attack [adds]  |  - follower: kreuz und quer
+
+- bullets: random spread (normal, rotated)
+
+- parasite: single spawn
+- parasite: spread move
+
+- bullets: random rays (normal, rotated)
+
+- bullets: blocks [adds]  |  - follower: circle wave
+
+- bullets: center wave (normal, skipped)
+- bullets: side wave [adds]  |  - follower: sinus line
+
+- bullets: explosion #multi#
+
+- parasite: circle
+
+- bullets: static lines (vertical, horizontal, rotated, random)
+
+
+-------------------------------------------------------------------
+
+- bullets: rotating lines
+- bullets: direct attack C
+- bullets: random spread A
+- bullets: center wave B
+- bullets: blocks C
+- bullets: random rays A
+- bullets: side wave B C
+- bullets: static lines
+
+

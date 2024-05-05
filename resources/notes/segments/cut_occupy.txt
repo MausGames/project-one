@@ -1,0 +1,67 @@
+
+// TODO 1: create an absurd big object/triangle in the middle
+// TODO 1: gegner-masse kommt auf spieler zu, alle mit energy, man muss loch rein schießen
+// TODO 1: small enemy triangles stay (maybe only for hard)
+// TODO 1: gegner versuchen dich in mustern zu berühren, schlange,
+// TODO 1: frei gewordene objekte fliegen auf spieler zu oder in kreiselbewegung nach außen
+// TODO 1: triangles, spheres, quads, all have different (basic) behavior
+
+
+infinity flying (triangle), infinity bouncing (sphere), fixed position (+ grow/shrink) (quad)
+alternativ: sphere bounced, und quad moved up-down oder left-right
+
+fokus darauf, das absolut jedes objekt sich in die masse der anderen einreiht ohne zu verschwinden
+es gibt konkrete punkte wo alle verschwinden, aber dann kommt ein neuer objekt-typ
+
+KEINE kombination von mehr als 1, es kann zu unvorhergesehenen konstellationen kommen, nur mehr als 1 davon is katastrophal
+
+am ende werden die gegner denen die objekte gehören alle wiederbelebt und man kann sie töten (naja, was is mit denen die weit außerhalb vom rand sind)
+
+
+infinity flow:
+- 
+
+bounce:   ((bounce is orsch und zu random, es sei den er is nur links-rechts ode rauf-runter!))
+- 
+
+grow shrink:
+- 
+
+
+
+absurd big triangle in center, created by merging all existing triangles (get smaller when flying to center, first is base), and smaller triangles from enemies fly to middle and make it even bigger
+in the end it starts wobbling and then implodes (breakrev)
+
+
+
+---------------------------------
+still:
+(bei still dürfen nicht mehrere hintereinander am selben pfad erscheinen)
+- circle around single
+- spread left
+- spread right
+- top to bottom straight across
+
+
+moving:
+- L corner to corner
+- complete line into current direction
+- circle around multi x2
+
+
+big:
+(gegner kommen alle aus mitte (sphere))
+- starfield mit fixem muster
+- rotating outside (Ner gruppen aufgeteilt)
+- lineare schuss-wuscht gegen dreiecks-rotation
+
+
+---------------------------------
+- circle wave with big areas
+- linear wave left
+- linear wave right
+- circle wave
+- circle wave
+- circle wave
+
+25s

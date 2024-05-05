@@ -1,0 +1,25 @@
+einzelne gerade 1+XY+3burst
+einzelne diagonal 1+XY+3burst
+3er gerade
+3er diagonal
+einzelne rotierende
+3x3 raster
+wall
+constant movement gerade (diagonale bomben), 1+3
+bounce movement diagonal (gerade bomben), 1+3
+rotieren herum (gerade bomben)
+
+
+
+1: einzelne, gerade, von Y, langsam
+2: einzelne, schräg, von Y, langsam
+3: 3er /\, gerade, von X, langsam
+4: 3er -|, schräg, von X, langsam
+5: einzelne, rotierend, von XY, schnell
+6: 3x3 raster, schnell
+
+7: constant, gerade, von ???, schnell
+8: bouncy, gerade, von ???, schnell
+9: rotating, gerade, von ???, schnell
+
+10: wall, langsam

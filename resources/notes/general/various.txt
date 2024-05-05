@@ -1,0 +1,167 @@
+- leviathan braucht overhaul, vielleicht erste phase schon normale rotation wie damals, seriously
+- 
+[ ] quad-bullet teppich verdeckt laser-einschlag
+[ ] vielleicht bei arrow-phase laser von boss mitte im uhrzeigersinn
+    - kopf kommt zuerst rauf, pause, dann erstes körperteil
+    - 
+
+    
+    
+
+    
+
+
+unfair mission
+
+i love games
+
+
+
+
+4er
+4er
+4er  #(von oben, durch die mitte)
+4er move
+
+rush von rechts
+
+top-left
+bottom right and left  #(1, rechts mitte, nach unten)
+top right and left alternating
+
+4 von rechts  #(ganz links, nach oben)
+2x4 von oben und unten
+
+4 von oben still  #(2, von rechts nach links mittig)
+4 von oben nach unten
+4 von oben nach oben  #(3, von unten, mittig)
+
+
+
+
+            inspiriert von Xenowurscht 2: Electric Boogaloo
+            
+            
+            
+            
+vertical
+- top line
+- side lines
+
+diagonal
+- corners
+- from top
+<invert>
+- from right
+- from left
+
+horizontal
+- top line
+- 4 sides
+
+moving
+- side lines
+- various from top
+
+
+
+
+spezielle gegner anvisieren
+zwei aufeinander crashen lassen
+im dungeon items einsammeln die sich mitbewegen
+
+top   1 4 in top row
+left+right  2   4 from top on right,    6 from top on left
+circle  1 top
+sticks  2    3  on the left, 5 on the bottom
+8 move  1    left
+rota line   1  all right
+4+4   1   bottom right of top
+            
+            
+            
+oben-unten
+links-rechts
+raster
+
+            
+            
+random meteors (1 cyan) 20
+line from above (1 cyan) 10
+alternating sides (1 cyan) 10
+wave and big (1 cyan) 11 +4
+4 bigs from 4 sides (1 blue) 4 +16
+8 small from 4 sides (4 cyan) 8
+
+4 big from top (1 blue) 4 +16
+big meteor (4 blue) 1 +4 +2 +8
+            
+            
+/*
+                this->EnablePlate(1u, 0.5f, 0.25f, 0.0f, -0.5f);
+
+                this->SetPlateOffset(0u, -0.25f);
+                this->SetPlateScale (0u, -0.5f);
+
+                this->SetPlateDirection(0u, coreVector2( 1.0f,0.0f));
+                this->SetPlateDirection(1u, coreVector2(-1.0f,0.0f));
+            
+            
+
+                this->EnablePlate(2u, -0.25f, -0.25f, -0.5f, -0.5f);
+                this->EnablePlate(3u,  0.25f,  0.25f, -0.5f, -0.5f);
+
+                this->SetPlateOffset(0u, -0.5f);
+                this->SetPlateScale (0u,  0.0f);
+                this->SetPlateOffset(1u,  0.5f);
+                this->SetPlateScale (1u,  0.0f);
+
+                this->SetPlateDirection(2u, coreVector2( 1.0f,0.0f));
+                this->SetPlateDirection(3u, coreVector2(-1.0f,0.0f));
+            
+            
+
+                this->EnablePlate(0u, -0.25f, -0.25f, -0.5f, -0.5f);
+
+                this->DisablePlate(2u, false);
+
+                this->SetPlateRotated(0u, bRotated);
+                this->SetPlateRotated(1u, bRotated);
+
+                this->EnablePlate(1u, 0.0f, -0.125f, 0.0f, -0.25f);
+                this->EnablePlate(2u, 0.0f,  0.125f, 0.0f, -0.25f);
+                this->EnablePlate(4u, 5.0f,  5.0f,   0.0f, -0.25f);
+
+                this->SetPlateOffset(0u, -0.375f);
+                this->SetPlateScale (0u, -0.25f);
+                this->SetPlateOffset(3u,  0.375f);
+                this->SetPlateScale (3u, -0.25f);
+
+                this->SetPlateDirection(1u, coreVector2(-1.0f,0.0f));
+                this->SetPlateDirection(2u, coreVector2( 1.0f,0.0f));
+            */
+            
+            
+            
+normal evade
+double evade  (zu wenig gegner)
+big evade
+side evade  (zu wenig gegner)
+
+lines left and right   -> alle sharen movement
+star    -> alle sharen movement     -> 10 gegner, (drehen sich im kreis und gehen immer näher in die mitte (gegen clock richtung)) -> 10 gegner aber 1.0f
+clock    -> alle sharen movement    -> clock is so lange dass sie die diagonale berührt
+
+path    -> actual worm
+wave
+
+
+
+
+- partikel effekte einbauen
+- gruppen anpassen: 2, 3, 4
+- code aufräumen
+
+
+-0.3 0.7
+0.0 0.9

@@ -1,0 +1,38 @@
+low FPS movement (fixed movement teleportation * * *)
+
+mit bewegung (kontinuierlich, im kreis, oder still beim flimmern, dann schnell nach außen)
+
+gegner flimmert an A, erscheint aber dann bei B
+
+flimmert auf und ab mit bewegung
+
+memory
+
+
+---------
+old flimmer+move pattern oben von rechts, unten von links
+flimmert mit bewegung und bewegt sich dann weiter richtung mitte, immer 2 aus pool, pattern von seite
+alle gegner flimmern permanent, immer 1 wird aktiv, der nächste wird aktiv nach dem tod vom vorherigen, im kreis oder 4x3 am rand oder schräges 3x3/4x43 muster
+memory (mehrere gleichzeitig um den flow in waves aufrecht zu halten) (erste N gegner kann unsichtbar mehrfach schießen (mehrere um es nicht zu übersehen), danach N gegner die nur 1 mal schießen)
+
+
+
+##memory secret enemy als badge
+## no wasted shot in memory -> badge
+
+
+------
+ 0 < 16 old 1
+16 < 32 new chess
+32 < 48 old 2
+48 < 56 side stuttering
+56 < 68 side moving
+68 < 74 ???
+74 < 86 circle in order
+86 < 116 old 3 (nutzt die gesamte fläche besser)
+
+
+
+chess
+
+memory
