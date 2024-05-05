@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 set(BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(ENGINE_DIRECTORY ${BASE_DIRECTORY}/../CoreEngine)
 
-project(ProjectOne VERSION 0.1.0)
+project(ProjectOne VERSION 1.3.4)
 add_subdirectory(${ENGINE_DIRECTORY}/projects/cmake CoreEngine)
 add_executable(ProjectOne)
 
@@ -18,6 +18,9 @@ set_target_properties(
 
 target_sources(
     ProjectOne PRIVATE
+    ${BASE_DIRECTORY}/source/additional/cAchievements.cpp
+    ${BASE_DIRECTORY}/source/additional/cMenuNavigator.cpp
+    ${BASE_DIRECTORY}/source/additional/cPasswords.cpp
     ${BASE_DIRECTORY}/source/environment/background/cBackground.cpp
     ${BASE_DIRECTORY}/source/environment/cEnvironment.cpp
     ${BASE_DIRECTORY}/source/environment/cOutdoor.cpp
@@ -49,28 +52,34 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/cPlayer.cpp
     ${BASE_DIRECTORY}/source/game/cShield.cpp
     ${BASE_DIRECTORY}/source/game/cShip.cpp
+    ${BASE_DIRECTORY}/source/game/cTracker.cpp
     ${BASE_DIRECTORY}/source/game/cTable.cpp
     ${BASE_DIRECTORY}/source/game/cWeapon.cpp
     ${BASE_DIRECTORY}/source/interface/menu/cMenu.cpp
     ${BASE_DIRECTORY}/source/interface/cArcadeInput.cpp
     ${BASE_DIRECTORY}/source/interface/cCombatText.cpp
     ${BASE_DIRECTORY}/source/interface/cCreditRoll.cpp
+    ${BASE_DIRECTORY}/source/interface/cFigure.cpp
     ${BASE_DIRECTORY}/source/interface/cInterface.cpp
     ${BASE_DIRECTORY}/source/interface/cMsgBox.cpp
+    ${BASE_DIRECTORY}/source/interface/cMusicBox.cpp
+    ${BASE_DIRECTORY}/source/interface/cNewIndicator.cpp
     ${BASE_DIRECTORY}/source/interface/cScrollBox.cpp
     ${BASE_DIRECTORY}/source/interface/cTooltip.cpp
-    ${BASE_DIRECTORY}/source/interface/cWorldMap.cpp
     ${BASE_DIRECTORY}/source/visual/cBlur.cpp
     ${BASE_DIRECTORY}/source/visual/cDistortion.cpp
+    ${BASE_DIRECTORY}/source/visual/cExhaust.cpp
     ${BASE_DIRECTORY}/source/visual/cForeground.cpp
     ${BASE_DIRECTORY}/source/visual/cGlow.cpp
     ${BASE_DIRECTORY}/source/visual/cHeadlight.cpp
+    ${BASE_DIRECTORY}/source/visual/cIcon.cpp
     ${BASE_DIRECTORY}/source/visual/cInk.cpp
     ${BASE_DIRECTORY}/source/visual/cOutline.cpp
     ${BASE_DIRECTORY}/source/visual/cPostProcessing.cpp
     ${BASE_DIRECTORY}/source/visual/cShadow.cpp
     ${BASE_DIRECTORY}/source/visual/cSnow.cpp
     ${BASE_DIRECTORY}/source/visual/cSpecialEffects.cpp
+    ${BASE_DIRECTORY}/source/visual/cTurf.cpp
     ${BASE_DIRECTORY}/source/visual/cWindscreen.cpp
     ${BASE_DIRECTORY}/source/application.cpp
     ${BASE_DIRECTORY}/source/main.cpp
@@ -117,5 +126,14 @@ else()
     endif()
 
 endif()
+
+if(NOT CORE_DEBUG)
+
+    set_source_files_properties(
+        ${BASE_DIRECTORY}/source/environment/background/cBackground.cpp
+        PROPERTIES
+        COMPILE_FLAGS -O3
+        SKIP_PRECOMPILE_HEADERS ON
+    )
 
 endif()

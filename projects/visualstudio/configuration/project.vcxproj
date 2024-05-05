@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\source\additional\cAchievements.cpp" />
+    <ClCompile Include="..\..\..\source\additional\cMenuNavigator.cpp" />
+    <ClCompile Include="..\..\..\source\additional\cPasswords.cpp" />
     <ClCompile Include="..\..\..\source\application.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\01_cGrassBackground.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -80,7 +83,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\environment\background\cBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\cBackground.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\environment\cEnvironment.cpp" />
     <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp" />
     <ClCompile Include="..\..\..\source\environment\cWater.cpp" />
@@ -106,111 +114,111 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0201_cNautilusBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0202_cAmemasuBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0203_cLeviathanBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0301_cUrticaBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0302_cTigerBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0303_cLuciferBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0401_cQuaternionBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0402_cSarosBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0403_cMessierBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0501_cTartarusBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0502_cPhalarisBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0503_cCholBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0601_cFenrirBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0602_cShelobBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0603_cZerothBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0701_cOrlacBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0702_cGemingaBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0703_cNagualBoss.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0801_cProjectOneBoss.cpp">
@@ -236,6 +244,7 @@
     <ClCompile Include="..\..\..\source\game\cShield.cpp" />
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
     <ClCompile Include="..\..\..\source\game\cShip.cpp" />
+    <ClCompile Include="..\..\..\source\game\cTracker.cpp" />
     <ClCompile Include="..\..\..\source\game\cWeapon.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\01_cViridoMission.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -332,11 +341,13 @@
     <ClCompile Include="..\..\..\source\interface\cArcadeInput.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCreditRoll.cpp" />
+    <ClCompile Include="..\..\..\source\interface\cFigure.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />
     <ClCompile Include="..\..\..\source\interface\cMsgBox.cpp" />
+    <ClCompile Include="..\..\..\source\interface\cMusicBox.cpp" />
+    <ClCompile Include="..\..\..\source\interface\cNewIndicator.cpp" />
     <ClCompile Include="..\..\..\source\interface\cScrollBox.cpp" />
     <ClCompile Include="..\..\..\source\interface\cTooltip.cpp" />
-    <ClCompile Include="..\..\..\source\interface\cWorldMap.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\01_cIntroMenu.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -409,30 +420,42 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\13_cBridgeMenu.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\interface\menu\cMenu.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\source\visual\cBlur.cpp" />
     <ClCompile Include="..\..\..\source\visual\cDistortion.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cExhaust.cpp" />
     <ClCompile Include="..\..\..\source\visual\cForeground.cpp" />
     <ClCompile Include="..\..\..\source\visual\cGlow.cpp" />
     <ClCompile Include="..\..\..\source\visual\cHeadlight.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cIcon.cpp" />
     <ClCompile Include="..\..\..\source\visual\cInk.cpp" />
     <ClCompile Include="..\..\..\source\visual\cOutline.cpp" />
     <ClCompile Include="..\..\..\source\visual\cPostProcessing.cpp" />
     <ClCompile Include="..\..\..\source\visual\cShadow.cpp" />
     <ClCompile Include="..\..\..\source\visual\cSnow.cpp" />
     <ClCompile Include="..\..\..\source\visual\cSpecialEffects.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cTurf.cpp" />
     <ClCompile Include="..\..\..\source\visual\cWindscreen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\source\additional\cAchievements.h" />
     <ClInclude Include="..\..\..\source\additional\cBindContainer.h" />
+    <ClInclude Include="..\..\..\source\additional\cMenuNavigator.h" />
     <ClInclude Include="..\..\..\source\additional\cLodObject.h" />
     <ClInclude Include="..\..\..\source\additional\cGuiObject.h" />
+    <ClInclude Include="..\..\..\source\additional\cPasswords.h" />
     <ClInclude Include="..\..\..\source\additional\cRotaCache.h" />
     <ClInclude Include="..\..\..\source\additional\cUtilities.h" />
     <ClInclude Include="..\..\..\source\environment\background\cBackground.h" />
@@ -454,36 +477,46 @@
     <ClInclude Include="..\..\..\source\game\cTable.h" />
     <ClInclude Include="..\..\..\source\game\cShield.h" />
     <ClInclude Include="..\..\..\source\game\cShip.h" />
+    <ClInclude Include="..\..\..\source\game\cTracker.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\game\mission\cMission.h" />
     <ClInclude Include="..\..\..\source\interface\cArcadeInput.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatText.h" />
     <ClInclude Include="..\..\..\source\interface\cCreditRoll.h" />
+    <ClInclude Include="..\..\..\source\interface\cFigure.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />
     <ClInclude Include="..\..\..\source\interface\cMsgBox.h" />
+    <ClInclude Include="..\..\..\source\interface\cMusicBox.h" />
+    <ClInclude Include="..\..\..\source\interface\cNewIndicator.h" />
     <ClInclude Include="..\..\..\source\interface\cScrollBox.h" />
     <ClInclude Include="..\..\..\source\interface\cTooltip.h" />
-    <ClInclude Include="..\..\..\source\interface\cWorldMap.h" />
     <ClInclude Include="..\..\..\source\interface\menu\cMenu.h" />
     <ClInclude Include="..\..\..\source\main.h" />
     <ClInclude Include="..\..\..\source\visual\cBlur.h" />
     <ClInclude Include="..\..\..\source\visual\cDistortion.h" />
+    <ClInclude Include="..\..\..\source\visual\cExhaust.h" />
     <ClInclude Include="..\..\..\source\visual\cForeground.h" />
     <ClInclude Include="..\..\..\source\visual\cGlow.h" />
     <ClInclude Include="..\..\..\source\visual\cHeadlight.h" />
+    <ClInclude Include="..\..\..\source\visual\cIcon.h" />
     <ClInclude Include="..\..\..\source\visual\cInk.h" />
     <ClInclude Include="..\..\..\source\visual\cOutline.h" />
     <ClInclude Include="..\..\..\source\visual\cPostProcessing.h" />
     <ClInclude Include="..\..\..\source\visual\cShadow.h" />
     <ClInclude Include="..\..\..\source\visual\cSnow.h" />
     <ClInclude Include="..\..\..\source\visual\cSpecialEffects.h" />
+    <ClInclude Include="..\..\..\source\visual\cTurf.h" />
     <ClInclude Include="..\..\..\source\visual\cWindscreen.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\executable\data\languages\brazilian.lng" />
     <None Include="..\..\..\executable\data\languages\english.lng" />
+    <None Include="..\..\..\executable\data\languages\french.lng" />
     <None Include="..\..\..\executable\data\languages\german.lng" />
     <None Include="..\..\..\executable\data\languages\japanese.lng" />
-    <None Include="..\..\..\executable\data\shaders\custom.glsl" />
+    <None Include="..\..\..\executable\data\languages\latam.lng" />
+    <None Include="..\..\..\executable\data\languages\schinese.lng" />
+    <None Include="..\..\..\executable\data\languages\tchinese.lng" />
     <None Include="..\..\..\executable\data\shaders\default_2d.frag" />
     <None Include="..\..\..\executable\data\shaders\default_2d.vert" />
     <None Include="..\..\..\executable\data\shaders\default_3d.frag" />
@@ -500,26 +533,47 @@
     <None Include="..\..\..\executable\data\shaders\effect_distortion.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_energy.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_energy.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_explosion.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_explosion.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_frame.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_frame.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_gust.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_gust.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_headlight.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_headlight.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_lightning.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_lightning.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_outline.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_outline.vert" />
-    <None Include="..\..\..\executable\data\shaders\effect_ink.frag" />
-    <None Include="..\..\..\executable\data\shaders\effect_ink.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_particle.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_color.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_dark.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_fire.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_smoke.frag" />
-    <None Include="..\..\..\executable\data\shaders\effect_weather.frag" />
-    <None Include="..\..\..\executable\data\shaders\effect_weather.vert" />
-    <None Include="..\..\..\executable\data\shaders\environment_vignette.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_shadow.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_shadow.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_shield.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_shield.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_snow.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_snow.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_track.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_track.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_weather.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_weather.vert" />
+    <None Include="..\..\..\executable\data\shaders\engine\data_ambient.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\data_transform_2d.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\data_transform_3d.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\global.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\shader_compute.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\shader_fragment.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\shader_geometry.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\shader_tess_control.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\shader_tess_evaluation.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\shader_vertex.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\util_base.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\util_color.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\util_matrix.glsl" />
+    <None Include="..\..\..\executable\data\shaders\engine\util_pack.glsl" />
     <None Include="..\..\..\executable\data\shaders\environment_clouds.frag" />
     <None Include="..\..\..\executable\data\shaders\environment_clouds.vert" />
     <None Include="..\..\..\executable\data\shaders\environment_ice.frag" />
@@ -532,6 +586,7 @@
     <None Include="..\..\..\executable\data\shaders\environment_rain.vert" />
     <None Include="..\..\..\executable\data\shaders\environment_under.frag" />
     <None Include="..\..\..\executable\data\shaders\environment_under.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_vignette.frag" />
     <None Include="..\..\..\executable\data\shaders\environment_water.frag" />
     <None Include="..\..\..\executable\data\shaders\environment_water.vert" />
     <None Include="..\..\..\executable\data\shaders\full.vert" />
@@ -539,30 +594,51 @@
     <None Include="..\..\..\executable\data\shaders\full_blur_2y.frag" />
     <None Include="..\..\..\executable\data\shaders\full_post.frag" />
     <None Include="..\..\..\executable\data\shaders\full_transition.frag" />
-    <None Include="..\..\..\executable\data\shaders\global.glsl" />
     <None Include="..\..\..\executable\data\shaders\menu_animate.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_animate.vert" />
     <None Include="..\..\..\executable\data\shaders\menu_border.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_border.vert" />
+    <None Include="..\..\..\executable\data\shaders\menu_color.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_fragment.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_fragment.vert" />
+    <None Include="..\..\..\executable\data\shaders\menu_free.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_free.vert" />
     <None Include="..\..\..\executable\data\shaders\menu_grey.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_helper.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_helper.vert" />
     <None Include="..\..\..\executable\data\shaders\menu_inner.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_inner.vert" />
+    <None Include="..\..\..\executable\data\shaders\menu_segment.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_segment.vert" />
     <None Include="..\..\..\executable\data\shaders\menu_single.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_swipe.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_swipe.vert" />
     <None Include="..\..\..\executable\data\shaders\object.vert" />
+    <None Include="..\..\..\executable\data\shaders\object_board.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_board.vert" />
     <None Include="..\..\..\executable\data\shaders\object_ground.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_ice.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_meteor.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_plate.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_plate.vert" />
     <None Include="..\..\..\executable\data\shaders\object_ship.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_tile.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_tile.vert" />
+    <None Include="..\..\..\executable\data\shaders\shared.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\..\executable\data\shaders\readme.txt" />
+    <ResourceCompile Include="windows\version.rc">
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="version.rc" />
+    <Text Include="..\..\..\executable\data\shaders\engine\readme.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{323E13E4-2099-4F61-B4D4-BC1612D1B6B0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CoreEngine</RootNamespace>
     <ProjectName>ProjectOne</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -599,18 +675,17 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\source;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\include;$(MSBuildProjectDirectory)\..\..\..\source;$(IncludePath)</IncludePath>
+    <IncludePath>$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\source;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\include;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\include\angle;$(MSBuildProjectDirectory)\..\..\..\source;$(IncludePath)</IncludePath>
     <LibraryPath>$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\bin\windows_x86_32;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\output\windows_x86_32;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\executable\bin\windows_x86_32\</OutDir>
     <IntDir>..\.tmp\$(Platform)\$(Configuration)\</IntDir>
@@ -624,7 +699,7 @@
     <TargetName>$(ProjectName)_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\source;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\include;$(MSBuildProjectDirectory)\..\..\..\source;$(IncludePath)</IncludePath>
+    <IncludePath>$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\source;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\include;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\include\angle;$(MSBuildProjectDirectory)\..\..\..\source;$(IncludePath)</IncludePath>
     <LibraryPath>$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\libraries\bin\windows_x86_32;$(MSBuildProjectDirectory)\..\..\..\..\CoreEngine\output\windows_x86_32;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\executable\bin\windows_x86_32\</OutDir>
     <IntDir>..\.tmp\$(Platform)\$(Configuration)\</IntDir>
@@ -640,7 +715,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>EnableAllWarnings</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;__ANGLE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
@@ -652,17 +727,18 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
       <CallingConvention>VectorCall</CallingConvention>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <ForceSymbolReferences>_wWinMain@16</ForceSymbolReferences>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalOptions>CoreEngine_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib OpenAL32.lib LibZstd.lib version.lib psapi.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib LibEGL.lib LibGLESv2.lib OpenAL32.lib LibZstd.lib OpusFile.lib version.lib psapi.lib %(AdditionalOptions)</AdditionalOptions>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>windows/manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -683,17 +759,18 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
       <CallingConvention>VectorCall</CallingConvention>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <ForceSymbolReferences>wWinMain</ForceSymbolReferences>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalOptions>CoreEngine_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib OpenAL32.lib LibZstd.lib version.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib OpenAL32.lib LibZstd.lib OpusFile.lib version.lib %(AdditionalOptions)</AdditionalOptions>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>windows/manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -702,7 +779,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>EnableAllWarnings</WarningLevel>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;__ANGLE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -721,13 +798,14 @@
       <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
       <CallingConvention>VectorCall</CallingConvention>
       <DisableSpecificWarnings>4577</DisableSpecificWarnings>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <ForceSymbolReferences>_wWinMain@16</ForceSymbolReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalOptions>CoreEngine.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib OpenAL32.lib LibZstd.lib version.lib psapi.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib LibEGL.lib LibGLESv2.lib OpenAL32.lib LibZstd.lib OpusFile.lib version.lib psapi.lib %(AdditionalOptions)</AdditionalOptions>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -739,7 +817,7 @@
       <Command>del $(IntDir)cMenu.obj</Command>
     </PreBuildEvent>
     <Manifest>
-      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>windows/manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -767,13 +845,14 @@
       <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
       <CallingConvention>VectorCall</CallingConvention>
       <DisableSpecificWarnings>4577</DisableSpecificWarnings>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <ForceSymbolReferences>wWinMain</ForceSymbolReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalOptions>CoreEngine.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib OpenAL32.lib LibZstd.lib version.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib OpenAL32.lib LibZstd.lib OpusFile.lib version.lib %(AdditionalOptions)</AdditionalOptions>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -785,7 +864,7 @@
       <Command>del $(IntDir)cMenu.obj</Command>
     </PreBuildEvent>
     <Manifest>
-      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>windows/manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
