@@ -1,0 +1,318 @@
+-------------------------------------------------------------------
+Eigengrau v1.3.4 (2024-03-27)
+
+- fixed an issue where the boss in stage 3-B could continue to take damage in the final phase after all players have already been defeated
+- fixed possible crash in all situations where a stage can be finished while all players have already been defeated (if both happens in the exact same frame, players survive and can continue)
+
+
+-------------------------------------------------------------------
+Eigengrau v1.3.3 (2024-03-23)
+
+- fixed an issue where destroying unprotected enemies too fast during a transition in stage 2-2 would not count towards badge progression
+- fixed sometimes getting stuck in stage 6-3 by adding a small bounce when colliding with the bullet-dungeon
+- fixed replay-menu being limited to 20 files on Windows and macOS due to a misconfiguration in the last update
+- fixed possible launch issues on Linux (and Steam Deck) due to a missing dependency
+
+
+-------------------------------------------------------------------
+Eigengrau v1.3.2 (2024-02-11)
+
+- fixed menu flickering when playing with more than 100% game speed
+- fixed text being vertically misaligned with some languages and resolutions
+- fixed occasional broken layout in the replay summary menu
+- fixed game running with only half the speed when playing with certain game speeds and update frequencies (e.g. 185% and 60Hz) due to rounding errors
+- also added a workaround for AMDGPU driver crashes on Linux (related to amdgpu_ctx_create and context sharing)
+
+
+-------------------------------------------------------------------
+Eigengrau v1.3.1 (2024-01-07)
+
+- fixed incomplete replay recording when using the right thumbstick to shoot
+- fixed incomplete replay playback when restoring scenes with screen rotation
+- fixed a very small rounding error when storing time values into savegame and replays
+
+
+-------------------------------------------------------------------
+Eigengrau v1.3.0 (2024-01-02)
+
+- added replay system
+- added jukebox unlock
+- added super-speed unlock (Switch only)
+- added new achievements
+- added rapid fire toggle button for twin-stick and mixed control mode
+- added a new option to configure water quality
+- added a new option to configure particle effects
+- added the missing amount of time for the next higher medal to the time-bonus screen
+- added a hard alternative way to fight the true last boss without collecting all the fragments (1CC without shield)
+- changed game speed to only affect actual gameplay situations (not transitions, summaries, or other events) to prevent timing and audio issues
+- changed keyboard movement keys to cancel each other out instead of prioritizing one direction per axis
+- fixed an issue where enemies would sometimes be attackable while not on screen
+- fixed best time on the classic summary screen displaying an incorrect value for a full play-through
+- fixed incorrect mission medal calculation for area 8
+- fixed rapid fire not working as intended when using certain temporary weapons
+- fixed occasional vegetation popping artifacts in the background
+- improved boss health clarity by splitting the health-bar into different phases to highlight important transitions (where it is possible and makes sense)
+- improved stability and performance when playing at any game speed other than 100% or any update frequency other than 60 Hz
+- improved overall gameplay precision, timing and determinism
+- improved overall gamepad menu navigation
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.7 (2023-11-04)
+
+- added area-selection to the classic mode for directly starting into an already visited area
+- added a new option to disable online leaderboard participation
+- changed shield granularity from 10 to 5
+- changed the menu flow and return directly to the stage-selection menu instead of the title screen after leaving a single stage (with some exceptions)
+- fixed online leaderboard upload getting stuck (Switch only)
+- fixed an issue where menu gamepad navigation would not work correctly in some situations with rotated HUD
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.6 (2023-10-15)
+
+- added online leaderboards (Switch only)
+- added a simple HUD indicator to show the trophy state of the current stage
+- fixed not being able to achieve X rank in stage 3-5 on easy difficulty
+- fixed one of the tasks being unsolvable in stage 5-4 if playing too fast (especially on easy difficulty)
+- improved and relaxed the summary medal calculations in classic mode to make it easier and fairer to achieve an appropriate rank
+- improved pacing in co-op mode by decreasing enemy and boss health by around 10%
+- improved visual quality and performance when playing with DirectX 9
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.5 (2023-10-06)
+
+- added separate online leaderboards for individual stages and standard settings only (Steam only)
+- added a launcher to the game folder for easily starting the DirectX version (on Windows)
+- fixed imprecise enemy collision detection in stage 4-B
+- fixed various issues when playing with DirectX 9
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.4 (2023-09-18)
+
+- added support for DirectX 11 and 9 (on Windows, for compatibility)
+- fixed another crash on startup (on some Intel GPUs)
+- improved stability when playing at over 100% game speed
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.3 (2023-09-13)
+
+- fixed a crash on startup (on some Intel GPUs)
+- fixed an issue where the game would run slower than intended when played on a display with a refresh rate below 60Hz
+- improved performance significantly on low render-quality setting (by slightly reducing the background resolution without affecting the foreground)
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.2 (2023-09-06)
+
+- added a new option to easily force standard settings (background rotation ON, background speed 100%, update frequency 60Hz, game speed 100%, shield OFF)
+- added a separate online leaderboard for entries created with standard settings only (Steam only)
+- added a new page to the classic summary screen that shows a score-breakdown of individual credits/continues
+- added a very small invincibility window for the surviving player in co-op mode when the other player explodes
+- changed the penalty for using a continue and completely reset the current player score (but still keeping track of individual credits/continues and the best score)
+- changed and reduced the duration of the time-bonus screen by 1.5 seconds
+- fixed an issue where the classic summary screen would always indicate that a new score-record was achieved
+- fixed a possible crash when the player ship is oriented exactly at a 45 degree angle (which can happen in some stages)
+- fixed a possible crash when changing certain graphics settings
+- fixed some strings from non-English languages not having enough space
+- improved input responsiveness when quickly tapping the fire button and when switching between normal fire and rapid fire
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.1 (2023-08-09)
+
+- added simple online leaderboards (Steam only)
+- fixed demo save data import missing some score values and medals
+
+
+-------------------------------------------------------------------
+Eigengrau v1.2.0 (2023-07-30)
+
+- added Wave Mortar player weapon
+- added single-button control mode
+- added rapid fire button for original, mixed and single-button control mode
+- added dialog to import demo save data on first launch
+- added a dummy HUD to the configuration menu outside of the game to show how some of the options affect the layout
+- added new localization for Simplified Chinese (简体中文) and Traditional Chinese (繁體中文)
+- changed damage immunity in the intro to be only active on the very first play-through
+- changed twin-stick input during screen rotation in stage 4-2 and 4-B to make shooting more intuitive
+- fixed an issue where the combo bonus and last chain at the end of a stage were not added to the stage highscore
+- improved loading performance with shader disk caching (especially on Intel GPUs)
+- improved player visibility by erasing distortion effects near player ships
+- improved boss movement during yellow attack in stage 0-B to make direct aiming easier
+- improved gimmick clarity in stage 3-2 by adding more visual and acoustic cues
+- improved the additional time bonus screen in stage 5-B to better communicate the meaning
+- improved enemy movement in last phase of stage 7-1 to prevent some annoying situations
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v1.1.2 (2023-07-14)
+
+- added autosave indicator
+- added katakana to game title, mission names and boss names
+- changed yellow attack in stage 4-B (to make it more fair and easier to understand)
+- improved background visuals and transitions in area 1 and 6
+
+
+-------------------------------------------------------------------
+Eigengrau v1.1.1 (2023-07-05)
+
+- fixed boss music getting stuck when skipping the summary screen too quickly after a boss fight
+- fixed player bullets going through barriers in stage 1-1 on certain refresh rates and distances
+
+
+-------------------------------------------------------------------
+Eigengrau v1.1.0 (2023-06-30)
+
+- added Pulse Cannon player weapon
+- added mixed control mode
+- added option to toggle vsync
+- added badges, trophies and best medals to the stage-selection menu
+- changed attack patterns in stage 3-2 on easy difficulty (to make it less boring and more fair)
+- fixed displaying the wrong text when remapping a button/key
+- fixed broken menu navigation if gamepad input is duplicated (e.g. when Steam Input injects virtual controllers)
+- fixed some animations getting stuck during a boss explosion at very high refresh rates
+- fixed enemy-objects created in stage 1-B not getting destroyed at the end and causing a crash when interacting with them
+- fixed yellow attack in stage 2-B on co-op mode not correctly targeting the second player
+- improved trophy menu navigation by making it possible to select and play a stage directly from that menu
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v1.0.5 (2023-06-14)
+
+- fixed a crash in co-op mode when a player gets resurrected by an event instead of the other player
+- fixed HUD fad-out not working correctly with game rotation
+
+
+-------------------------------------------------------------------
+Eigengrau v1.0.4 (2023-06-12)
+
+- added dynamic HUD fade-out when one of the player ships is close to a HUD element
+- fixed an issue where the game would run slower than intended when played on a display that supports higher refresh rates than currently selected
+- fixed showing an additional C medal in the classic summary when finishing a complete classic run including the true final boss
+- fixed music volume going up and down when skipping the area summary
+- fixed some animations getting stuck during transition to the final phase in stage 8-B
+- fixed and removed some unfair ship-collisions in stage 8-B
+- fixed bullet-collisions sometimes not working on the true final boss
+- improved clarity of hidden enemies in stage 4-2 by moving them into view after some time
+
+
+-------------------------------------------------------------------
+Eigengrau v1.0.3 (2023-06-09)
+
+- fixed another crash on startup (on some Intel GPUs)
+- fixed bullets in final phase of stage 8-B flying too far on certain game-speeds
+- fixed some sound-effects cutting off too early on certain game-speeds
+- fixed an issue where the blue Helper was sometimes invisible in stage 7-B
+- improved and restricted which keys and buttons can advance the various summary screens (to not accidentally blend-out the summary while taking a screenshot)
+- improved performance significantly on low render-quality setting (by skipping some very expensive special-effects)
+
+
+-------------------------------------------------------------------
+Eigengrau v1.0.2 (2023-06-07)
+
+- fixed a crash on startup (on some Intel CPUs)
+- fixed a crash when entering stage 6-1 or 6-2 (on some Nvidia GPUs and Apple Silicon)
+
+
+-------------------------------------------------------------------
+Eigengrau v1.0.1 (2023-06-07)
+
+- fixed a crash in stage 1-3 when the big enemy causes the players to spin around
+- fixed some enemies in stage 5-1 going out of screen and preventing the player from advancing
+- fixed gamepad-cursor in stage-selection menu skipping over an area if all stages of that area are not yet unlocked
+
+
+-------------------------------------------------------------------
+Eigengrau v1.0.0 (2023-06-05)
+
+
+-------------------------------------------------------------------
+Eigengrau v0.3.0 (2023-04-30)
+
+- added more color and background movement to all stages
+- added additional enemy-attacks and tasks when playing the intro after the first time
+- added simple enemy-attack to shield-phase of Torus on easy difficulty
+- changed and reduced delay between single-bullet player-attack and continuous player-attack
+- changed number of tasks per stage from 3 to 2 and adjusted them on all stages
+- changed last plate pattern in stage 2-2
+- changed last bomb pattern in stage 2-3 on easy difficulty
+- changed last arrow pattern in stage 2-4
+- changed various other enemy and attack patterns
+- fixed unresponsive twin-stick input when player gets hurled around
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v0.2.1 (2023-04-02)
+
+- added simple enemy-attacks to stage 2-2 and stage 2-4 on easy difficulty
+- fixed broken scoring for Leviathan
+- fixed twin-stick controls not working correctly with rotated HUD
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v0.2.0 (2023-03-12)
+
+- added the third boss Leviathan
+- added option to toggle background rotation
+- added option to change background speed
+- added option to change menu volume
+- added option to select audio quality
+- added option to select audio mode (Auto, Mono, Speakers, Headphones)
+- added support for mapping gamepad trigger buttons
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v0.1.4 (2023-02-12)
+
+- added option to toggle chromatic aberration effects
+- changed the default control mode to twin-stick for new players
+- fixed single-bullet player-attack doing more damage than intended
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v0.1.3 (2023-01-29)
+
+- added twin-stick control mode
+- added option to toggle gamepad rumble
+- added option to toggle floating text
+- improved gameplay related to the mysterious fragments
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v0.1.2 (2023-01-15)
+
+- added animations to menu buttons, tabs, and other elements
+- added description text to some settings
+- added credits button to main menu
+- added thruster effect to player ship when flying into current direction
+- improved menu gamepad navigation
+- fixed broken menu navigation and layout when playing with rotated HUD
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v0.1.1 (2023-01-01)
+
+- added level name, best time, boss medal countdown, badges, and chroma to HUD
+- added new HUD layout "Outside (near)"
+- added best score, new record indicator, and perfect bonus indicator to stage summary
+- added gamepad, mouse, and keyboard glyphs to menu, input configuration, and tutorial
+- added wave effect to player ship when combo/chain breaks
+- added option to equip a shield with 1000 hit-points
+- many other improvements and fixes
+
+
+-------------------------------------------------------------------
+Eigengrau v0.1.0 (2022-12-19)
