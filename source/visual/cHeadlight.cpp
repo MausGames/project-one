@@ -20,7 +20,7 @@ cHeadlight::cHeadlight()noexcept
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
 
     // 
-    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
+    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec, CORE_TEXTURE_MODE_DEFAULT);
     m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // load object resources

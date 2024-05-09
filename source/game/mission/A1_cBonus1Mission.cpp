@@ -43,7 +43,7 @@ cBonus1Mission::cBonus1Mission()noexcept
 
         // 
         m_aShelterBack1[i].DefineModel         ("object_cube_top.md3");
-        m_aShelterBack1[i].DefineTexture       (0u, "default_black.png");
+        m_aShelterBack1[i].DefineTexture       (0u, "default_black.webp");
         m_aShelterBack1[i].DefineProgram       ("object_ship_program");
         m_aShelterBack1[i].SetSize             (coreVector3(0.0f,50.0f,0.5f));
         m_aShelterBack1[i].SetCollisionModifier(coreVector3(1.1f, 1.1f,1.1f));
@@ -52,7 +52,7 @@ cBonus1Mission::cBonus1Mission()noexcept
 
         // 
         m_aShelterBack2[i].DefineModel  ("object_sphere.md3");
-        m_aShelterBack2[i].DefineTexture(0u, "default_black.png");
+        m_aShelterBack2[i].DefineTexture(0u, "default_black.webp");
         m_aShelterBack2[i].DefineProgram("object_ship_program");
         m_aShelterBack2[i].SetSize      (m_aShelter[i].GetSize());
         m_aShelterBack2[i].SetColor3    (coreVector3(0.0f,0.0f,0.0f));

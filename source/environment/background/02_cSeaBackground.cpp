@@ -42,7 +42,7 @@ cSeaBackground::cSeaBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineTexture(0u, "environment_sea.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < SEA_CORAL_NUM; ++i)
@@ -114,7 +114,7 @@ cSeaBackground::cSeaBackground()noexcept
         coreObject3D oBase;
         oBase.DefineModel  ("environment_sea_01.md3");
         oBase.DefineTexture(0u, "environment_sea.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_wave_program");
 
         for(coreUintW i = 0u; i < SEA_WEED_NUM; ++i)

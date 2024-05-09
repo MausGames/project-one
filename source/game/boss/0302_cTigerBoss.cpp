@@ -1918,7 +1918,7 @@ void cTigerBoss::__CreateTrail(const coreUintW iIndex, const coreVector3 vInters
                 // load object resources
                 coreObject3D* pObject = MANAGED_NEW(coreObject3D);
                 pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
-                pObject->DefineTexture(0u, "default_white.png");
+                pObject->DefineTexture(0u, "default_white.webp");
                 pObject->DefineProgram("effect_decal_single_program");   // TODO 1: own decal_color shader (similar to menu_color, without textur)
 
                 // set object properties

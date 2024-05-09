@@ -12,7 +12,7 @@
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
 const coreChar* const CoreApp::Settings::Version                       = "1.3.4";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
-const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
+const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.webp";
 const coreBool        CoreApp::Settings::UserManagement                = true;
 const coreUint8       CoreApp::Settings::Graphics::DepthSize           = 16u;
 const coreUint8       CoreApp::Settings::Graphics::StencilSize         = 0u;
@@ -25,6 +25,12 @@ const coreChar* const CoreApp::Settings::Platform::EpicSandboxID   [3] = {"p-5qg
 const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID[3] = {"2914ec61294d4649b13521053c4dfb11", "c5ca5a6eacc74bfdbd8471d4dd75a78f", "64c112ed4c9d4151a814a6cc93b98070"};
 const coreChar* const CoreApp::Settings::Platform::EpicClientID        = "";
 const coreChar* const CoreApp::Settings::Platform::EpicClientSecret    = "";
+
+coreBool CoreApp::Settings::IsDemo()
+{
+    static const coreBool s_bIsDemo = !coreData::FileExists("data/archives/pack2.cfa");
+    return s_bIsDemo;
+}
 
 
 // ****************************************************************

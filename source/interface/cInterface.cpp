@@ -40,7 +40,7 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oScore.Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     oScore.SetColor3(COLOR_MENU_INSIDE);
 
-    oCooldownBar.DefineTexture(0u, "default_white.png");
+    oCooldownBar.DefineTexture(0u, "default_white.webp");
     oCooldownBar.DefineTexture(1u, "menu_background_black.png");
     oCooldownBar.DefineProgram("menu_fragment_program");
 

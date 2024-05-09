@@ -32,7 +32,7 @@ cSnowBackground::cSnowBackground()noexcept
         coreObject3D oBase;
         oBase.DefineModel  ("environment_plant_03.md3");
         oBase.DefineTexture(0u, "environment_plant.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < SNOW_PLANT_NUM; ++i)
@@ -83,8 +83,8 @@ cSnowBackground::cSnowBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  ("object_sting.md3");
-        oBase.DefineTexture(0u, "default_white.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(0u, "default_white.webp");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < SNOW_STING_1_NUM; ++i)
@@ -137,8 +137,8 @@ cSnowBackground::cSnowBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  ("object_sting.md3");
-        oBase.DefineTexture(0u, "default_white.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(0u, "default_white.webp");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < SNOW_STING_2_NUM; ++i)

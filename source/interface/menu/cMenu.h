@@ -116,7 +116,7 @@
 STATIC_ASSERT(REPLAY_SLOTS <= MENU_REPLAY_ENTRIES)
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
-#define MENU_SWITCHBOX          "default_black.png", "default_black.png"
+#define MENU_SWITCHBOX          "default_black.webp", "default_black.webp"
 #define MENU_FONT_STANDARD      "keifont.ttf"
 #define MENU_FONT_DYNAMIC       "dynamic_font"
 #define MENU_FONT_ICON          "fontawesome.ttf"

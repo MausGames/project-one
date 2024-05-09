@@ -158,7 +158,7 @@ cFragmentItem::cFragmentItem(const coreUint8 iType, const coreUint8 iMissionInde
     // 
     this->DefineModel  (PRINT("fragment_%02zu.md3", g_aFragmentData[iType].iIndex));
     this->DefineVolume ("object_sphere.md3");
-    this->DefineTexture(0u, "default_white.png");
+    this->DefineTexture(0u, "default_white.webp");
     this->DefineProgram("effect_energy_rotated_program");
     this->SetColor3    (COLOR_ENERGY_WHITE * 0.05f);
     this->SetTexSize   (coreVector2(4.0f,4.0f));

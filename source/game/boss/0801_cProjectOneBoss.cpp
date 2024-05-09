@@ -226,7 +226,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i)
     {
         m_aFragment[i].DefineModel  (PRINT("fragment_%02zu.md3", g_aFragmentData[i].iIndex));
-        m_aFragment[i].DefineTexture(0u, "default_white.png");
+        m_aFragment[i].DefineTexture(0u, "default_white.webp");
         m_aFragment[i].DefineProgram("effect_energy_program");
         m_aFragment[i].SetColor3    (COLOR_ENERGY_WHITE * 0.05f);
         m_aFragment[i].SetTexSize   (coreVector2(4.0f,4.0f));

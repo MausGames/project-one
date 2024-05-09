@@ -48,7 +48,7 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
         const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
 
         // 
-        m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
+        m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec, CORE_TEXTURE_MODE_DEFAULT);
         m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
 
@@ -323,7 +323,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     this->DefineTexture(1u, PRINT("environment_%s_diff.png", pcTextureBottom));
 
     // unbind normal map to prevent concurrency problems
-    this->DefineTexture(2u, "default_normal.png");   // placeholder
+    this->DefineTexture(2u, "default_normal.webp");   // placeholder
 
     // delete sync object
     m_Sync.Delete();

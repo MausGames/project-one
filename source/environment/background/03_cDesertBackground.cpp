@@ -178,7 +178,7 @@ cDesertBackground::cDesertBackground()noexcept
         coreObject3D oBase;
         oBase.DefineModel  ("environment_desert_02.md3");
         oBase.DefineTexture(0u, "environment_desert.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < DESERT_PLANT_NUM; ++i)
@@ -234,7 +234,7 @@ cDesertBackground::cDesertBackground()noexcept
         coreObject3D oBase;
         oBase.DefineModel  ("environment_desert_01.md3");
         oBase.DefineTexture(0u, "environment_desert.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < DESERT_CACTUS_NUM; ++i)
@@ -491,7 +491,7 @@ void cDesertBackground::__CreateTrail(const coreUintW iIndex, const coreVector3 
                 // load object resources
                 coreObject3D* pObject = MANAGED_NEW(coreObject3D);
                 pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
-                pObject->DefineTexture(0u, "default_white.png");
+                pObject->DefineTexture(0u, "default_white.webp");
                 pObject->DefineProgram("effect_decal_single_program");   // TODO 1: own decal_color shader (similar to menu_color, without textur)
 
                 // set object properties

@@ -263,7 +263,7 @@ cNevoMission::cNevoMission()noexcept
         // 
         constexpr const coreChar* apcName[] =
         {
-            "default_normal.png",
+            "default_normal.webp",
             "environment_animal_diff.png",
             "environment_animal_norm.png",
             "environment_block_diff.png",

@@ -20,7 +20,7 @@ cDistortion::cDistortion()noexcept
     const coreTextureSpec oSpec = (CORE_GL_SUPPORT(EXT_texture_norm16) && CORE_GL_SUPPORT(ARB_texture_rg)) ? CORE_TEXTURE_SPEC_RG16 : (CORE_GL_SUPPORT(EXT_texture_type_2_10_10_10_rev) ? CORE_TEXTURE_SPEC_RGB10_A2 : CORE_TEXTURE_SPEC_RGB8);
 
     // create distortion frame buffer
-    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
+    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec, CORE_TEXTURE_MODE_DEFAULT);
     m_FrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 

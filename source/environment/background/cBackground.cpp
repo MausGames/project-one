@@ -46,7 +46,7 @@ cBackground::cBackground(const coreBool bEmpty)noexcept
     }
 
     // create resolved texture
-    m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+    m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8, CORE_TEXTURE_MODE_DEFAULT);
     m_ResolvedTexture.Create(bEmpty ? coreVector2(4.0f,4.0f) : (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR), CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 

@@ -87,7 +87,7 @@ cGrassBackground::cGrassBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineTexture(0u, "environment_plant.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < GRASS_PLANT_NUM; ++i)
@@ -151,7 +151,7 @@ cGrassBackground::cGrassBackground()noexcept
         coreObject3D oBase;
         oBase.DefineModel  ("ship_player_atk_high.md3");
         oBase.DefineTexture(0u, "ship_player.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < GRASS_SHIP_NUM; ++i)
@@ -219,7 +219,7 @@ cGrassBackground::cGrassBackground()noexcept
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D);
                     pObject->DefineModel  ("ship_boss_torus_high.md3");
                     pObject->DefineTexture(0u, "ship_enemy.png");
-                    pObject->DefineTexture(1u, "default_normal.png");
+                    pObject->DefineTexture(1u, "default_normal.webp");
                     pObject->DefineProgram("object_ground_program");
 
                     // set object properties

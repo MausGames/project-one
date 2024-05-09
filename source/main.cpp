@@ -65,7 +65,7 @@ void CoreApp::Init()
     LoadConfig();
 
     // check for demo version (game would crash otherwise anyway)
-    g_bDemoVersion = CoreApp::IsDemo();
+    g_bDemoVersion = CoreApp::Settings::IsDemo();
 
     // 
     g_bLeaderboards = !std::strcmp(Core::Platform->GetIdentifier(), "Steam") || DEFINED(_CORE_SWITCH_);
@@ -435,15 +435,6 @@ void CoreApp::Move()
 
     // debug and test game
     if(Core::Debug->IsEnabled()) DebugGame();
-}
-
-
-// ****************************************************************
-// 
-coreBool CoreApp::IsDemo()
-{
-    static const coreBool s_bIsDemo = !coreData::FileExists("data/archives/pack2.cfa");
-    return s_bIsDemo;
 }
 
 

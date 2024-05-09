@@ -20,13 +20,13 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
     if(sSkyTexture)
     {
         // create reflection frame buffer
-        m_Reflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+        m_Reflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8, CORE_TEXTURE_MODE_DEFAULT);
         m_Reflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
         m_Reflection.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
 
     // create refraction frame buffer
-    m_Refraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+    m_Refraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8, CORE_TEXTURE_MODE_DEFAULT);
     m_Refraction.Create(g_vGameResolution * ENVIRONMENT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     if(sSkyTexture)
@@ -34,7 +34,7 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
         if(CORE_GL_SUPPORT(ARB_depth_texture))
         {
             // create depth frame buffer
-            m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+            m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16, CORE_TEXTURE_MODE_DEFAULT);
             m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
         }
 
@@ -314,13 +314,8 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
 , m_fFallDelay (0.0f)
 {
     // 
-    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(EXT_texture_norm16) ? CORE_TEXTURE_SPEC_RGBA16 : CORE_TEXTURE_SPEC_RGBA8);
+    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(EXT_texture_norm16) ? CORE_TEXTURE_SPEC_RGBA16 : CORE_TEXTURE_SPEC_RGBA8, CORE_TEXTURE_MODE_REPEAT);
     m_WaveMap.Create(g_vGameResolution * RAIN_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
-
-    // 
-    glBindTexture  (GL_TEXTURE_2D, m_WaveMap.GetColorTarget(0u).pTexture->GetIdentifier());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // 
     m_WaveInjection.SetSize      (coreVector2(1.0f,1.0f) * RAIN_SCALE_FACTOR);
@@ -371,11 +366,6 @@ void cRainWater::Reshape()
     // 
     m_WaveMap.Delete();
     m_WaveMap.Create(g_vGameResolution * RAIN_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
-
-    // 
-    glBindTexture  (GL_TEXTURE_2D, m_WaveMap.GetColorTarget(0u).pTexture->GetIdentifier());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // 
     m_WaveInjection.DefineProgram("default_2d_program");

@@ -97,8 +97,8 @@ void cShadow::Reconfigure()
         const coreVector2     vRes  = g_vGameResolution * ((m_iLevel == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH) * ENVIRONMENT_SCALE_FACTOR;
 
         // create shadow map frame buffer
-        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
-        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec,                     CORE_TEXTURE_MODE_DEFAULT);
+        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16, CORE_TEXTURE_MODE_DEFAULT);
         m_FrameBuffer.Create(vRes, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison

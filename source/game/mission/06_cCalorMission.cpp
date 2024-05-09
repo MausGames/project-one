@@ -190,7 +190,7 @@ cCalorMission::cCalorMission()noexcept
             // load object resources
             coreObject3D* pStar = &m_aStarRaw[i];
             pStar->DefineModel  (iType ? "object_sphere.md3" : "object_star.md3");
-            pStar->DefineTexture(0u, "default_black.png");
+            pStar->DefineTexture(0u, "default_black.webp");
             pStar->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
@@ -241,8 +241,8 @@ cCalorMission::cCalorMission()noexcept
         // 
         constexpr const coreChar* apcName[] =
         {
-            "default_normal.png",
-            "default_white.png",
+            "default_normal.webp",
+            "default_white.webp",
             "environment_block_diff.png",
             "environment_block_norm.png",
             "environment_clouds_blue.png",

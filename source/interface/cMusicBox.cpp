@@ -75,7 +75,7 @@ cMusicBox::cMusicBox()noexcept
         m_aLine[i].SetFocusable (true);
 
         // 
-        m_aFocus[i].DefineTexture(0u, "default_black.png");   // invisible
+        m_aFocus[i].DefineTexture(0u, "default_black.webp");   // invisible
         m_aFocus[i].DefineProgram("menu_single_program");
         m_aFocus[i].SetPosition  (coreVector2(-0.025f, fHeight));
         m_aFocus[i].SetSize      (coreVector2(0.88f,0.06f));

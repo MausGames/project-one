@@ -23,7 +23,7 @@ cIcon::cIcon()noexcept
     m_FrameBuffer.Create(g_vGameResolution * ICON_SCALE_VECTOR, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
 
     // 
-    m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
+    m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8, CORE_TEXTURE_MODE_DEFAULT);
     m_ResolvedTexture.Create(g_vGameResolution * ICON_SCALE_VECTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 

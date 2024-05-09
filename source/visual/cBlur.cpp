@@ -20,7 +20,7 @@ cBlur::cBlur(const coreTextureSpec& oTextureSpec, const coreFloat fScale, const 
     // create blur frame buffers
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFrameBuffer); ++i)
     {
-        m_aFrameBuffer[i].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oTextureSpec);
+        m_aFrameBuffer[i].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oTextureSpec, CORE_TEXTURE_MODE_DEFAULT);
         m_aFrameBuffer[i].Create(vBlurResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
 

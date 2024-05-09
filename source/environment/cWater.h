@@ -16,7 +16,6 @@
 // TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)
 // TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
 // TODO 3: do not load default water shader and texture if not required (maybe create water-interface, NormalWater, Clean, Fresh)
-// TODO 2: glBindTexture has to reset internal texture-cache (or implement method to change in texture)
 // TODO 3: rain resolution is not affected by environment-scale-factor (check dynamically, textures might shift)
 
 

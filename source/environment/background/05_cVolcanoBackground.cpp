@@ -130,7 +130,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         // load object resources
         coreObject3D oBase;
         oBase.DefineTexture(0u, "environment_plant.png");
-        oBase.DefineTexture(1u, "default_normal.png");
+        oBase.DefineTexture(1u, "default_normal.webp");
         oBase.DefineProgram("object_ground_program");
 
         for(coreUintW i = 0u; i < VOLCANO_PLANT_NUM; ++i)

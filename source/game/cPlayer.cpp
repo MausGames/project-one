@@ -143,7 +143,7 @@ cPlayer::cPlayer()noexcept
     m_Circle.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_Flash.DefineTexture(0u, "default_white.png");
+    m_Flash.DefineTexture(0u, "default_white.webp");
     m_Flash.DefineProgram("effect_energy_spheric_program");
     m_Flash.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 

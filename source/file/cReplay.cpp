@@ -749,7 +749,8 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     }
 
     // 
-    if(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(&m_Header), sizeof(sHeader)) != CORE_OK)
+    coreUint32 iHeaderSize = sizeof(sHeader);
+    if(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(&m_Header), &iHeaderSize) != CORE_OK)
     {
         std::memcpy(&m_Header, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
     }
