@@ -95,6 +95,9 @@ private:
 
     // 
     template <typename F> void __ShowMessage(const coreChar* pcText, F&& nCallback);   // [](const corInt32 a, const corInt32 b) -> void
+
+    // 
+    static void __ClearInput();
 };
 
 
@@ -123,9 +126,6 @@ template <typename F> void cMsgBox::ShowQuestion(const coreChar* pcText, F&& nCa
     m_No    .SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
-    //m_Navigator.AssignBack(&m_No);
-
-    // 
     m_iMsgType = MSGBOX_TYPE_QUESTION;
     this->__ShowMessage(pcText, [nCallback = std::forward<F>(nCallback)](const coreInt32 a, const coreInt32 b) {nCallback(a);});
 }
@@ -142,9 +142,6 @@ template <typename F> void cMsgBox::ShowMapping(const coreChar* pcText, const co
     m_Delete.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_Yes   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_No    .SetEnabled(CORE_OBJECT_ENABLE_ALL);
-
-    // 
-    //m_Navigator.AssignBack(NULL);
 
     // 
     m_iMsgType = MSGBOX_TYPE_MAPPING;

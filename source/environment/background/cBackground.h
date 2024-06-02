@@ -287,11 +287,10 @@ private:
     coreFlow  m_fLeafTime;       // 
     coreUintW m_iLeafNum;        // 
 
-    coreFullscreen m_Cover;       // 
-    coreFlow       m_fOffset;     // 
+    coreFullscreen m_Cover;      // 
+    coreFlow       m_fOffset;    // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    //coreMusicPlayer m_Music;
 
 
 public:

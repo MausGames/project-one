@@ -954,13 +954,6 @@ void cEigengrauBoss::__MoveOwn()
 
             for(coreUintW i = 0u; i < EIGENGRAU_FOLLOWERS; ++i)
                 m_aFollower[i].Kill(false);
-
-            //g_pGame->GetInterface()->GetDialogText(0u)->SetPosition(coreVector2(0.0f,0.2f));
-            //g_pGame->GetInterface()->GetDialogText(0u)->SetColor3(COLOR_MENU_BLUE);
-            //g_pGame->GetInterface()->GetDialogText(0u)->SetText("I LOVE YOU");
-            //g_pGame->GetInterface()->GetDialogText(1u)->SetPosition(coreVector2(0.0f,-0.2f));
-            //g_pGame->GetInterface()->GetDialogText(1u)->SetColor3(COLOR_MENU_GREEN);
-            //g_pGame->GetInterface()->GetDialogText(1u)->SetText("I LOVE YOU TOO");
         }
 
         PHASE_CONTROL_PAUSE(0u, 0.1f)
@@ -977,8 +970,6 @@ void cEigengrauBoss::__MoveOwn()
         {
             m_fRangeSpeed = LERP(0.4f, 0.0f, fTime);
             m_Range.SetColor3(LERP(COLOR_PLAYER_BLUE, COLOR_ENERGY_WHITE * 0.2f, fTime));
-
-            //g_pGame->GetInterface()->GetDialogText(0u)->SetColor3(LERP(COLOR_MENU_BLUE, COLOR_MENU_WHITE * 0.5f, fTime));
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
@@ -1004,8 +995,6 @@ void cEigengrauBoss::__MoveOwn()
             const coreFloat fHeight = LERPH3(-0.2f, 0.15f, fTime) * FOREGROUND_AREA.y;
 
             m_RangePlayer.SetPosition(coreVector3(0.0f, fHeight, 0.0f));
-
-            //g_pGame->GetInterface()->GetDialogText(0u)->SetAlpha(LERPS(1.0f, 0.0f, fTime));
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC

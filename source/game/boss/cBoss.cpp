@@ -147,6 +147,8 @@ void cBoss::_StartBoss()
 // 
 void cBoss::_EndBoss()
 {
+    ASSERT(!HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
+
     // 
     m_bActive = false;
 

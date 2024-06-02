@@ -20,6 +20,7 @@
 // - intro:   phase
 
 // - boss should use absolutely all mechanics from the game (so far), a color for every mission and its mechanics, with new combinations and twists, this makes the fight extremely long (>12 min), but it is possible to scale by reducing the required number of colors the player has to beat
+// NOTE: even though P1 was originally Project One, it indeed became a reference to Player One, as the model was the original player ship from the first edition
 // TODO 1: (remove turf from base classes)
 // TODO 1: hard mode: add another mechanic to each sub-stage, player needs to attack in last phase
 // TODO 1: hard mode: turf

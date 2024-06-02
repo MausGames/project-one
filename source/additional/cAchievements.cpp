@@ -146,6 +146,7 @@ void CheckAchievements()
 
     case 9u:
         {
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 0u))
             {
                 if(HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiTrophy, TROPHY_ONECOLORCLEAR))
@@ -155,49 +156,52 @@ void CheckAchievements()
                 }
             }
 
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 3u))
             {
-                coreUint32 iBadges = 0u;
+                coreUint32 iCount = 0u;
                 for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
                 {
                     for(coreUintW j = 0u; j < 5u; ++j)
                     {
-                        if(HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u))      iBadges += 1u;
-                        if(HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u) && i) iBadges += 1u;
+                        if(HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u))      iCount += 1u;
+                        if(HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u) && i) iCount += 1u;
                     }
                 }
-                if(iBadges >= 75u)
+                if(iCount >= 75u)
                 {
                     Core::Platform->UnlockAchievement("challenge_04");
                     ADD_BIT(g_iChallengeUnlocked, 3u)
                 }
-                Core::Platform->ModifyStat("achievement_badge", iBadges);
+                Core::Platform->ModifyStat("achievement_badge", iCount);
             }
         }
         break;
 
     case 10u:
         {
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 1u))
             {
-                coreUint32 iMedal = 0u;
+                coreUint32 iCount = 0u;
                 for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
                 {
                     for(coreUintW j = 0u; j < 6u; ++j)
                     {
-                        if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[i][j] == MEDAL_DARK);})) iMedal += 1u;
+                        if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[i][j] == MEDAL_DARK);})) iCount += 1u;
                     }
                 }
-                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][5] == MEDAL_DARK);})) iMedal += 1u;
-                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][6] == MEDAL_DARK);})) iMedal += 1u;
-                if(iMedal >= 50u)
+                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][5] == MEDAL_DARK);})) iCount += 1u;
+                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][6] == MEDAL_DARK);})) iCount += 1u;
+                if(iCount >= 50u)
                 {
                     Core::Platform->UnlockAchievement("challenge_02");
                     ADD_BIT(g_iChallengeUnlocked, 1u)
                 }
-                Core::Platform->ModifyStat("achievement_stage_x", iMedal);
+                Core::Platform->ModifyStat("achievement_stage_x", iCount);
             }
 
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 2u))
             {
                 if(ALL_MEDAL_ARCADE(iMedal) {return (iMedal == MEDAL_DARK);}))
@@ -211,26 +215,28 @@ void CheckAchievements()
 
     case 11u:
         {
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 4u))
             {
-                coreUint32 iMedal = 0u;
+                coreUint32 iCount = 0u;
                 for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
                 {
                     for(coreUintW j = 0u; j < 6u; ++j)
                     {
-                        if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[i][j] >= MEDAL_PLATINUM);})) iMedal += 1u;
+                        if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[i][j] >= MEDAL_PLATINUM);})) iCount += 1u;
                     }
                 }
-                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][5] >= MEDAL_PLATINUM);})) iMedal += 1u;
-                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][6] >= MEDAL_PLATINUM);})) iMedal += 1u;
-                if(iMedal >= 50u)
+                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][5] >= MEDAL_PLATINUM);})) iCount += 1u;
+                if(ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][6] >= MEDAL_PLATINUM);})) iCount += 1u;
+                if(iCount >= 50u)
                 {
                     Core::Platform->UnlockAchievement("challenge_05");
                     ADD_BIT(g_iChallengeUnlocked, 4u)
                 }
-                Core::Platform->ModifyStat("achievement_stage_s", iMedal);
+                Core::Platform->ModifyStat("achievement_stage_s", iCount);
             }
 
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 5u))
             {
                 if(ALL_MEDAL_ARCADE(iMedal) {return (iMedal >= MEDAL_PLATINUM);}))
@@ -244,25 +250,27 @@ void CheckAchievements()
 
     case 12u:
         {
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 6u))
             {
-                coreUint32 iTrophies = 0u;
+                coreUint32 iCount = 0u;
                 for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
                 {
                     for(coreUintW j = 0u; j < 6u; ++j)
                     {
                         if(HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 3u))
-                            iTrophies += 1u;
+                            iCount += 1u;
                     }
                 }
-                if(iTrophies >= MENU_EXTRA_TROPHIES)
+                if(iCount >= MENU_EXTRA_TROPHIES)
                 {
                     Core::Platform->UnlockAchievement("challenge_07");
                     ADD_BIT(g_iChallengeUnlocked, 6u)
                 }
-                Core::Platform->ModifyStat("achievement_trophy", iTrophies);
+                Core::Platform->ModifyStat("achievement_trophy", iCount);
             }
 
+            // 
             if(!HAS_BIT(g_iChallengeUnlocked, 7u))
             {
                 coreUint32 iCount = 0u;
@@ -324,11 +332,13 @@ static void DeletePack(cSave::sScorePack* pPack)
 {
     const coreUint16 iReplayID = pPack->oData.iReplayID;
 
+    // 
     g_pSave->GetScoreQueue()->erase(pPack);
     MANAGED_DELETE(pPack)   // # after erase
 
     if(iReplayID)
     {
+        // 
         coreBool bStillUsed = false;
         FOR_EACH(it, *g_pSave->GetScoreQueue())
         {
@@ -339,6 +349,7 @@ static void DeletePack(cSave::sScorePack* pPack)
             }
         }
 
+        // 
         if(!bStillUsed)
         {
             FOR_EACH(it, *g_pSave->GetReplayQueue())
@@ -419,7 +430,8 @@ static void QueueScore(const coreUint8 iMissionIndex, const coreUint8 iSegmentIn
 // 
 static void QueueTime(const coreUint8 iMissionIndex, const coreUint8 iSegmentIndex, const coreUint32 iTimeShifted, const coreBool bPure, const sScoreData& oData)
 {
-#if 0
+#if 0   // # disable time leaderboards
+
     // 
     cSave::sScorePack* pPack = MANAGED_NEW(cSave::sScorePack);
 
@@ -446,6 +458,7 @@ static void QueueTime(const coreUint8 iMissionIndex, const coreUint8 iSegmentInd
 
     // 
     s_iTime = 0u;
+
 #endif
 }
 

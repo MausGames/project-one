@@ -997,7 +997,7 @@ void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2 vD
 
 // ****************************************************************
 // 
-coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
+coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)const
 {
     ASSERT(iIndex < DHARUK_BOOMERANGS)
 

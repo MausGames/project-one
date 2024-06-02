@@ -130,6 +130,7 @@ https://store-jp.nintendo.com/list/software/70010000071402.html (Japan)
 
 ## Additional Notes
 
+- This repository should not include any proprietary assets, confidential APIs, private keys or anything similar. This means that it does not provide (and open-source) the full playable game and it might not compile out-of-the-box due to missing features in engine and game code.
 - The source code contains many empty comments for structural and historical reasons. I don't want to remove them anymore.
-- This repository should not include any proprietary assets, confidential APIs, private keys or anything similar. Therefore, it does not contain the full playable game.
+- There were 3 different editions of Eigengrau. Here you can find mainly the third and final edition, which was started around 2014.
 - If you have any questions, please feel free to open an issue or [contact me](https://www.maus-games.at/) directly.

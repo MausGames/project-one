@@ -1122,10 +1122,7 @@ void cGeluMission::__UpdateCollisionFang()
                     else
                     {
                         const coreFloat fNewDistance = fHitDistance + coreVector2::Dot(vFangMove + vShift - pPlayer->GetMove(), vRayDir) - CORE_MATH_PRECISION;
-                        if(fNewDistance < afDistance[k])
-                        {
-                            afDistance[k] = fNewDistance;
-                        }
+                        afDistance[k] = MIN(afDistance[k], fNewDistance);
                     }
                 }
             }
@@ -1181,87 +1178,41 @@ void cGeluMission::__UpdateCollisionFang()
 
         m_abCrushInside[i] = bIntersect;
     });
-    
-    if(false)
+
+    coreUintW aiMap[GELU_FANGS];
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i) aiMap[i] = i;
+
     for(coreUintW i = 0u; i < GELU_FANGS; ++i)
     {
-        const cLodObject& oFang = m_aFangRaw[i];
-        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-        
-        
-        const coreVector2 vFangMove = oFang.GetPosition().xy() - m_avOldPos[i];
-        const coreBool    bMoving   = (!vFangMove.IsNull() && (vFangMove.LengthSq() < POW2(5.0f)));
-        
-        
-        if(bMoving)
+        if(!m_aFangRaw[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        for(coreUintW j = 0u; j < GELU_FANGS; ++j)
         {
-            for(coreUintW k = 0u; k < GELU_FANGS; ++k)
+            if(i == j) continue;
+            if(!m_aFangRaw[j].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            const coreVector2 vDiff = m_aFangRaw[i].GetPosition().xy() - m_avOldPos[j];
+            if(vDiff.LengthSq() < POW2(3.0f))
             {
-                if(i == k) continue;
-                
-                const cLodObject& oFang2 = m_aFangRaw[k];
-                if(!oFang2.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-                
-                const coreVector2 vDiff = oFang2.GetPosition().xy() - oFang.GetPosition().xy();
-                
-                
-                const coreVector2 vFangMove2 = oFang2.GetPosition().xy() - m_avOldPos[k];
-                //const coreBool    bMoving2   = (!vFangMove2.IsNull() && (vFangMove2.LengthSq() < POW2(5.0f)));
-                
-                if((ABS(vDiff.x) < oFang.GetVisualRange().x * 2.0f + 0.5f) &&
-                   (ABS(vDiff.y) < oFang.GetVisualRange().y * 2.0f + 0.5f) && ((vFangMove - vFangMove2).Length() > (0.1f * TIME)))
-                //for(coreUintW j = 0u; j < 4u; ++j)
-                {
-                    const coreVector2 vSide = AlongCrossNormal(vDiff);//StepRotated90(j);
-                    const coreVector2 vPos  = oFang.GetPosition().xy() + (vSide + vSide.Rotated90()*0.0f) * oFang.GetVisualRange().xy();
-                    
-                    //g_pSpecialEffects->CreateSplashSmoke(coreVector3(vPos, 0.0f), 3.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
-                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 1u, COLOR_ENERGY_WHITE * 0.8f);
-                }
+                const coreUint16 iFirst = i;
+
+                const coreUintW iNew = j;
+                const coreUintW iOld = aiMap[iFirst];
+
+                // find second map entry
+                coreUintW iSecond = iNew;
+                while(aiMap[iSecond] != iNew) iSecond = aiMap[iSecond];
+
+                // swap indices (in map)
+                aiMap[iFirst]  = iNew;
+                aiMap[iSecond] = iOld;
             }
         }
     }
-    
-    //m_iFangActive
-    //if(m_aFangRaw[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
-    {
-        coreUintW aiMap[GELU_FANGS];
-        for(coreUintW i = 0u; i < GELU_FANGS; ++i) aiMap[i] = i;
 
-        for(coreUintW i = 0u; i < GELU_FANGS; ++i)
-        {
-            if(!m_aFangRaw[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            for(coreUintW j = 0u; j < GELU_FANGS; ++j)
-            {
-                if(i == j) continue;
-                if(!m_aFangRaw[j].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-                const coreVector2 vDiff = m_aFangRaw[i].GetPosition().xy() - m_avOldPos[j];
-                if(vDiff.LengthSq() < POW2(3.0f))
-                {
-                    const coreUint16 iFirst = i;
-
-                    const coreUintW iNew = j;
-                    const coreUintW iOld = aiMap[iFirst];
-
-                    // find second map entry
-                    coreUintW iSecond = iNew;
-                    while(aiMap[iSecond] != iNew) iSecond = aiMap[iSecond];
-
-                    // swap indices (in map)
-                    aiMap[iFirst]  = iNew;
-                    aiMap[iSecond] = iOld;
-                }
-            }
-        }
-
-        coreVector2 avOffset[GELU_FANGS];
-        for(coreUintW i = 0u; i < GELU_FANGS; ++i) avOffset[i] = m_aFangRaw[i].GetTexOffset();
-
-        for(coreUintW i = 0u; i < GELU_FANGS; ++i)
-            m_aFangRaw[i].SetTexOffset(avOffset[aiMap[i]]);
-    }
+    coreVector2 avOffset[GELU_FANGS];
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i) avOffset[i] = m_aFangRaw[i].GetTexOffset();
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i) m_aFangRaw[i].SetTexOffset(avOffset[aiMap[i]]);
 }
 
 
@@ -1320,10 +1271,7 @@ void cGeluMission::__UpdateCollisionWay()
                     else
                     {
                         const coreFloat fNewDistance = fHitDistance + coreVector2::Dot(vWayMove + vShift - pPlayer->GetMove(), vRayDir) - CORE_MATH_PRECISION;
-                        if(fNewDistance < afDistance[k])
-                        {
-                            afDistance[k] = fNewDistance;
-                        }
+                        afDistance[k] = MIN(afDistance[k], fNewDistance);
                     }
                 }
             }

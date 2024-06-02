@@ -46,15 +46,6 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 {
     ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
 
-#if defined(_P1_DEBUG_RANDOM_)
-
-    // 
-    if(!this->IsMulti() && (CORE_RAND_RUNTIME & 0x01u))
-        m_aPlayer[0].Configure(PLAYER_SHIP_DEF);
-    else
-
-#endif
-
     // 
     const coreUint32 iContinue = (g_bDemoVersion || !REPLAY_WRAP_PROGRESS_FIRSTPLAY) ? GAME_CONTINUES : 0u;
     m_iContinuesLeft = iContinue;

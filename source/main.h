@@ -99,15 +99,11 @@
 
 #if defined(_CORE_DEBUG_)
     #define _P1_DEBUG_INPUT_ (1)
-    //#define _P1_DEBUG_RANDOM_ (1)
 #endif
 
 #if !defined(_CORE_DEBUG_)
     #if defined(_P1_DEBUG_INPUT_)
         #pragma message("Warning: Debug input enabled!")
-    #endif
-    #if defined(_P1_DEBUG_RANDOM_)
-        #pragma message("Warning: Debug randomization enabled!")
     #endif
 #endif
 
@@ -353,7 +349,7 @@ extern coreBool        g_bLeaderboards;     //
 extern coreBool        g_bSteamDeck;        // 
 extern coreBool        g_bHandheld;         // 
 extern coreBool        g_bDebugOutput;      // 
-extern coreMusicPlayer g_MusicPlayer;       // central music-player
+extern coreMusicPlayer g_MusicPlayer;       // default music-player
 
 #include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"

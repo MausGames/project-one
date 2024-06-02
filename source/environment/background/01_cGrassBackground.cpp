@@ -470,11 +470,6 @@ void cGrassBackground::__InitOwn()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
-    
-    
-    //m_Music.AddMusicFile("data/sounds/environment_grass.ogg");
-    //m_Music.GetMusic(0u)->SetLoop(true);
-    //m_Music.Play();
 }
 
 
@@ -491,8 +486,6 @@ void cGrassBackground::__ExitOwn()
         if(pResource->EnableRef(this))
             pResource->Stop();
     });
-    
-    //m_Music.Stop();
 }
 
 
@@ -569,9 +562,6 @@ void cGrassBackground::__MoveOwn()
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
-    
-    //m_Music.SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
-    //m_Music.Update();
     
     
     const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;

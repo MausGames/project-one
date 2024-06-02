@@ -162,7 +162,6 @@ void cIntroMenu::Move()
                     if(m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL) < 2.0f)
                     {
                         m_IntroTimer.SetValue(2.0f);
-                        //this->ChangeSurface(SURFACE_INTRO_EMPTY, 0.0f);
                     }
                 }
             }
@@ -213,7 +212,6 @@ void cIntroMenu::StartIntro()
     {
         // 
         const coreMap<coreString, coreString>& asLanguageList = cMenu::GetLanguageList();
-        ASSERT(asLanguageList.size() <= 10u)
 
         // 
         m_apLanguageButton.reserve(asLanguageList.size());

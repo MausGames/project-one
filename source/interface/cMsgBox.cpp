@@ -71,7 +71,7 @@ cMsgBox::cMsgBox()noexcept
     m_aDownloadText[0].Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_aDownloadText[0].SetPosition    (m_Box.GetPosition() + coreVector2(0.0f,0.032f));
     m_aDownloadText[0].SetColor3      (COLOR_MENU_WHITE);
-   // m_aDownloadText[0].SetTextLanguage("DOWNLOADING");
+    //m_aDownloadText[0].SetTextLanguage("DOWNLOADING");
 
     // 
     m_aDownloadText[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
@@ -130,19 +130,26 @@ void cMsgBox::Move()
     if(m_nCallback) m_fFade.UpdateMin( 10.0f, 1.0f);
                else m_fFade.UpdateMax(-10.0f, 0.0f);
 
-    // (before mouse-position override)   
+    // (before mouse-position override) 
     m_Navigator.SetAlpha(m_fFade);
     m_Navigator.Update();
     m_Navigator.Move();
 
     // 
     if(Core::Input->GetMousePosition() != MSGBOX_IGNORE_MOUSE)
+    {
         m_vCurMouse = Core::Input->GetMousePosition();
-    else Core::Input->SetMousePosition(m_vCurMouse);
+    }
+    else
+    {
+        Core::Input->SetMousePosition(m_vCurMouse);
+    }
 
     // only allow escape-button to cancel mapping
     if(m_iMsgType == MSGBOX_TYPE_MAPPING)
+    {
         g_MenuInput.bCancel = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
+    }
 
     // 
     this->SetSize     (coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
@@ -188,7 +195,7 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_Yes, this, m_Yes.IsFocused(), COLOR_MENU_BLUE);
 
         // 
-        if(m_Yes.IsClicked() /*|| g_MenuInput.bAccept*/)
+        if(m_Yes.IsClicked())
             this->__ExecuteCallback(MSGBOX_ANSWER_YES, 0);
     }
 
@@ -204,7 +211,7 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_No, this, m_No.IsFocused(), COLOR_MENU_RED);
 
         // 
-        if(m_No.IsClicked()    || ((m_iMsgType == MSGBOX_TYPE_MAPPING) && Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)))// || g_MenuInput.bCancel)
+        if(m_No.IsClicked() || ((m_iMsgType == MSGBOX_TYPE_MAPPING) && Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)))
             this->__ExecuteCallback(MSGBOX_ANSWER_NO, 0);
     }
 
@@ -279,13 +286,8 @@ void cMsgBox::Move()
     // 
     if(!cMenuNavigator::IsUsingJoystick() || m_nCallback || (m_iMsgType == MSGBOX_TYPE_MAPPING))
     {
-        Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
-        for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-        {
-            Core::Input->SetJoystickAxis(i, 0u, 0.0f);
-            Core::Input->SetJoystickAxis(i, 1u, 0.0f);
-        }
-        Core::Input->ClearButtonAll();
+        // 
+        cMsgBox::__ClearInput();
     }
 
     // 
@@ -339,18 +341,24 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
 
     // execute callback
     nLocal(a, b);
-    
-    
-    
-        Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
-        for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-        {
-            Core::Input->SetJoystickAxis(i, 0u, 0.0f);
-            Core::Input->SetJoystickAxis(i, 1u, 0.0f);
-        }
-        Core::Input->ClearButtonAll();
-        
+
+    // 
+    cMsgBox::__ClearInput();
 
     // 
     g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, (a == MSGBOX_ANSWER_NO) ? SOUND_MENU_MSGBOX_NO : SOUND_MENU_MSGBOX_YES);
+}
+
+
+// ****************************************************************
+// 
+void cMsgBox::__ClearInput()
+{
+    Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
+        Core::Input->SetJoystickAxis(i, 0u, 0.0f);
+        Core::Input->SetJoystickAxis(i, 1u, 0.0f);
+    }
+    Core::Input->ClearButtonAll();
 }

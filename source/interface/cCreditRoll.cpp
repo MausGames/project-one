@@ -53,7 +53,7 @@ cCreditRoll::cCreditRoll()noexcept
     {
         const coreFloat fHeight = I_TO_F(i) * -0.15f - fWait + 0.05f;
 
-        m_aName[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+        m_aName[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_BIG);
         m_aName[i].SetPosition(coreVector2(0.0f, fHeight));
         m_aName[i].SetColor3  (COLOR_MENU_INSIDE);
         m_aName[i].SetAlpha   (MENU_INSIDE_ALPHA);
@@ -87,7 +87,7 @@ cCreditRoll::cCreditRoll()noexcept
 
         const coreChar* pcFont = asFont.count_bs(g_aapcCreditEntry[i][2]) ? asFont.at_bs(g_aapcCreditEntry[i][2]).c_str() : NULL;
 
-        m_aDescription[i].Construct  (pcFont ? pcFont : MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+        m_aDescription[i].Construct  (pcFont ? pcFont : MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
         m_aDescription[i].SetPosition(coreVector2(0.0f, fHeight));
         m_aDescription[i].SetAlpha   (MENU_INSIDE_ALPHA);
         m_aDescription[i].SetEnabled (CORE_OBJECT_ENABLE_NOTHING);
@@ -103,7 +103,7 @@ cCreditRoll::cCreditRoll()noexcept
         iOffset += 1u;
         const coreFloat fHeight = I_TO_F(iOffset) * -0.05f - fWait;
 
-        m_aSupportText[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+        m_aSupportText[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
         m_aSupportText[i].SetPosition(coreVector2(0.0f, fHeight));
         m_aSupportText[i].SetColor3  (COLOR_MENU_INSIDE);
         m_aSupportText[i].SetAlpha   (MENU_INSIDE_ALPHA);
@@ -119,7 +119,7 @@ cCreditRoll::cCreditRoll()noexcept
         iOffset += 3u;
         const coreFloat fHeight = I_TO_F(iOffset) * -0.05f - fWait;
 
-        pHeader->Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+        pHeader->Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
         pHeader->SetPosition    (coreVector2(0.0f, fHeight));
         pHeader->SetAlpha       (MENU_INSIDE_ALPHA);
         pHeader->SetEnabled     (CORE_OBJECT_ENABLE_NOTHING);
@@ -133,7 +133,7 @@ cCreditRoll::cCreditRoll()noexcept
             iOffset += 1u;
             const coreFloat fHeight2 = I_TO_F(iOffset) * -0.05f - fWait;
 
-            pEntry[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+            pEntry[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_BIG);
             pEntry[i].SetPosition(coreVector2(0.0f, fHeight2));
             pEntry[i].SetColor3  (COLOR_MENU_INSIDE);
             pEntry[i].SetAlpha   (MENU_INSIDE_ALPHA);
@@ -151,7 +151,7 @@ cCreditRoll::cCreditRoll()noexcept
     nInitFunc(&m_aOtherHeader[5], m_aOtherLibraries, "CREDITS_LIBRARIES", g_apcCreditEntryLibraries, CREDIT_ENTRIES_LIBRARIES);
 
     // 
-    m_ThankYouText.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
+    m_ThankYouText.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_BIG);
     m_ThankYouText.SetPosition    (coreVector2(0.0f,0.0f));
     m_ThankYouText.SetColor3      (COLOR_MENU_INSIDE);
     m_ThankYouText.SetAlpha       (0.0f);
@@ -159,7 +159,7 @@ cCreditRoll::cCreditRoll()noexcept
     m_ThankYouText.SetTextLanguage("THANK_YOU");
 
     // 
-    m_EndText.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_EndText.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_BIG);
     m_EndText.SetPosition(coreVector2(0.0f,0.0f));
     m_EndText.SetColor3  (COLOR_MENU_INSIDE);
     m_EndText.SetAlpha   (0.0f);

@@ -391,15 +391,15 @@ void CoreApp::Move()
 
         // update the music-player
         g_MusicPlayer.Update();
+
+        // 
+        CheckAchievements();
+        CheckLeaderboards();
+
+        // 
+        UpdateListener();
     }
     Core::Debug->MeasureEnd("Move");
-
-    // 
-    CheckAchievements();
-    CheckLeaderboards();
-
-    // 
-    UpdateListener();
     
     
     cBackground* pCurBackground = g_pEnvironment->GetBackground();
@@ -969,9 +969,10 @@ static void DebugGame()
         //        g_pGame->GetItemManager()->AddItem<cFragmentItem>(coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.7f, (I_TO_F(i / 3u) - 1.0f) * 0.7f) * FOREGROUND_AREA     * 1.5f, i, 0u, 0u);
         //}
     }
-    Core::Debug->InspectValue("Queue", coreUint32(g_pSave->GetScoreQueue()->size()));
-    
-    Core::Debug->InspectValue("Fly Offset", g_pEnvironment->GetFlyOffset());
+
+    Core::Debug->InspectValue("Score Queue",  coreUint32(g_pSave->GetScoreQueue ()->size()));
+    Core::Debug->InspectValue("Replay Queue", coreUint32(g_pSave->GetReplayQueue()->size()));
+    Core::Debug->InspectValue("Fly Offset",   g_pEnvironment->GetFlyOffset());
 
 #endif
 }

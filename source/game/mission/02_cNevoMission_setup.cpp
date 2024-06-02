@@ -2133,6 +2133,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: they bounce once
     // TODO 1: hardmode: big bullets explode into many small ones
     // TODO 1: hardmode: 3 rotate from the center outwards
+    // TODO 1: hardmode: small bullets grow with damage
     // TODO 3: move stuff from here (and Leviathan) into grow-bullet ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {

@@ -102,8 +102,6 @@ enum eSaveState : coreUint8   // # never change bits after release
     STATE_FULL_ACCESS   = 12u
 };
 
-
-                  
 template <typename T, typename F> FORCE_INLINE coreBool AllVariants(T& tArray, F&& nFunction)
 {
     for(coreUintW i = 0u; i < SAVE_TYPES; ++i)
@@ -127,7 +125,6 @@ template <typename T, typename F> FORCE_INLINE coreBool AllVariants(T& tArray, F
 #define ALL_STATS_ARCADE(a)  AllVariants(g_pSave->GetHeader().aaaLocalStatsArcade,    [&](const cSave::sLocalStats&  a,                                const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
 #define ALL_STATS_MISSION(a) AllVariants(g_pSave->GetHeader().aaaaLocalStatsMission,  [&](const cSave::sLocalStats (&a)[SAVE_MISSIONS],                const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
 #define ALL_STATS_SEGMENT(a) AllVariants(g_pSave->GetHeader().aaaaaLocalStatsSegment, [&](const cSave::sLocalStats (&a)[SAVE_MISSIONS][SAVE_SEGMENTS], const coreUintW iType, const coreUintW iMode, const coreUintW iDifficulty)
-                     
 
 
 // ****************************************************************

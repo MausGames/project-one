@@ -28,49 +28,49 @@
 
 #define CONFIG_DEFAULT_VOLUME (0.7f)
 
-#define CONFIG_GRAPHICS_RENDER       "Graphics", "Render",                               (1)
-#define CONFIG_GRAPHICS_SHADOW       "Graphics", "Shadow",                               (2)
-#define CONFIG_GRAPHICS_REFLECTION   "Graphics", "Reflection",                           (1)
-#define CONFIG_GRAPHICS_GLOW         "Graphics", "Glow",                                 (1)
-#define CONFIG_GRAPHICS_DISTORTION   "Graphics", "Distortion",                           (1)
-#define CONFIG_GRAPHICS_PARTICLE     "Graphics", "Particle",                             (100)
-#define CONFIG_GRAPHICS_SHAKE        "Graphics", "Shake",                                (100)
-#define CONFIG_GRAPHICS_FLASH        "Graphics", "Flash",                                (1)
-#define CONFIG_GRAPHICS_HIT_STOP     "Graphics", "HitStop",                              (1)
-#define CONFIG_GRAPHICS_CHROMA       "Graphics", "Chroma",                               (1)
+#define CONFIG_GRAPHICS_RENDER       "Graphics", "Render",                                             (1)
+#define CONFIG_GRAPHICS_SHADOW       "Graphics", "Shadow",                                             (2)
+#define CONFIG_GRAPHICS_REFLECTION   "Graphics", "Reflection",                                         (1)
+#define CONFIG_GRAPHICS_GLOW         "Graphics", "Glow",                                               (1)
+#define CONFIG_GRAPHICS_DISTORTION   "Graphics", "Distortion",                                         (1)
+#define CONFIG_GRAPHICS_PARTICLE     "Graphics", "Particle",                                           (100)
+#define CONFIG_GRAPHICS_SHAKE        "Graphics", "Shake",                                              (100)
+#define CONFIG_GRAPHICS_FLASH        "Graphics", "Flash",                                              (1)
+#define CONFIG_GRAPHICS_HIT_STOP     "Graphics", "HitStop",                                            (1)
+#define CONFIG_GRAPHICS_CHROMA       "Graphics", "Chroma",                                             (1)
 
-#define CONFIG_AUDIO_EFFECT_VOLUME   "Audio",    "EffectVolume",                         (CONFIG_DEFAULT_VOLUME)
-#define CONFIG_AUDIO_AMBIENT_VOLUME  "Audio",    "AmbientVolume",                        (CONFIG_DEFAULT_VOLUME)
-#define CONFIG_AUDIO_MENU_VOLUME     "Audio",    "MenuVolume",                           (CONFIG_DEFAULT_VOLUME)
-#define CONFIG_AUDIO_QUALITY         "Audio",    "Quality",                              (1)
-#define CONFIG_AUDIO_3D_SOUND        "Audio",    "3DSound",                              (1)
+#define CONFIG_AUDIO_EFFECT_VOLUME   "Audio",    "EffectVolume",                                       (CONFIG_DEFAULT_VOLUME)
+#define CONFIG_AUDIO_AMBIENT_VOLUME  "Audio",    "AmbientVolume",                                      (CONFIG_DEFAULT_VOLUME)
+#define CONFIG_AUDIO_MENU_VOLUME     "Audio",    "MenuVolume",                                         (CONFIG_DEFAULT_VOLUME)
+#define CONFIG_AUDIO_QUALITY         "Audio",    "Quality",                                            (1)
+#define CONFIG_AUDIO_3D_SOUND        "Audio",    "3DSound",                                            (1)
 
-#define CONFIG_INPUT_TYPE(p)         "Input",    PRINT("P%zu_Type",        (p)),         (p + INPUT_SETS_KEYBOARD)
-#define CONFIG_INPUT_RUMBLE(p)       "Input",    PRINT("P%zu_Rumble",      (p)),         (0)
-#define CONFIG_INPUT_FIRE_MODE(p)    "Input",    PRINT("P%zu_FireMode",    (p)),         (0)
-#define CONFIG_INPUT_CONTROL_MODE(p) "Input",    PRINT("P%zu_ControlMode", (p)),         (1)
-#define CONFIG_INPUT_MOVE_UP(s)      "Input",    PRINT("S%zu_MoveUp",      (s))
-#define CONFIG_INPUT_MOVE_LEFT(s)    "Input",    PRINT("S%zu_MoveLeft",    (s))
-#define CONFIG_INPUT_MOVE_DOWN(s)    "Input",    PRINT("S%zu_MoveDown",    (s))
-#define CONFIG_INPUT_MOVE_RIGHT(s)   "Input",    PRINT("S%zu_MoveRight",   (s))
-#define CONFIG_INPUT_ACTION(s,n)     "Input",    PRINT("S%zu_Action%u",    (s), coreUint32((n) + 1u))
+#define CONFIG_INPUT_TYPE(p)         "Input",    PRINT("P%zu_Type",        (p)),                       (p + INPUT_SETS_KEYBOARD)
+#define CONFIG_INPUT_RUMBLE(p)       "Input",    PRINT("P%zu_Rumble",      (p)),                       (0)
+#define CONFIG_INPUT_FIRE_MODE(p)    "Input",    PRINT("P%zu_FireMode",    (p)),                       (0)
+#define CONFIG_INPUT_CONTROL_MODE(p) "Input",    PRINT("P%zu_ControlMode", (p)),                       (1)
+#define CONFIG_INPUT_MOVE_UP(s)      "Input",    PRINT("S%zu_MoveUp",      (s)),                       DEFAULT_MOVE_UP   (s)
+#define CONFIG_INPUT_MOVE_LEFT(s)    "Input",    PRINT("S%zu_MoveLeft",    (s)),                       DEFAULT_MOVE_LEFT (s)
+#define CONFIG_INPUT_MOVE_DOWN(s)    "Input",    PRINT("S%zu_MoveDown",    (s)),                       DEFAULT_MOVE_DOWN (s)
+#define CONFIG_INPUT_MOVE_RIGHT(s)   "Input",    PRINT("S%zu_MoveRight",   (s)),                       DEFAULT_MOVE_RIGHT(s)
+#define CONFIG_INPUT_ACTION(s,n)     "Input",    PRINT("S%zu_Action%u",    (s), coreUint32((n) + 1u)), DEFAULT_ACTION    (s, n)
 
-#define CONFIG_GAME_GAME_DIRECTION   "Game",     "GameDirection",                        (0)
-#define CONFIG_GAME_GAME_SPEED       "Game",     "GameSpeed",                            (100)
-#define CONFIG_GAME_MIRROR_MODE      "Game",     "MirrorMode",                           (0)
-#define CONFIG_GAME_HUD_DIRECTION    "Game",     "HudDirection",                         (0)
-#define CONFIG_GAME_HUD_TYPE         "Game",     "HudType",                              (0)
-#define CONFIG_GAME_COMBAT_TEXT      "Game",     "CombatText",                           (0xFF)
-#define CONFIG_GAME_BACK_ROTATION    "Game",     "BackRotation",                         (1)
-#define CONFIG_GAME_BACK_SPEED       "Game",     "BackSpeed",                            (100)
-#define CONFIG_GAME_UPDATE_FREQ      "Game",     "UpdateFreq",                           (0)
-#define CONFIG_GAME_PURE_MODE        "Game",     "PureMode",                             (0)
-#define CONFIG_GAME_LEADERBOARD      "Game",     "Leaderboard",                          (1)
-#define CONFIG_GAME_VERSION          "Game",     "Version",                              (0)
+#define CONFIG_GAME_GAME_DIRECTION   "Game",     "GameDirection",                                      (0)
+#define CONFIG_GAME_GAME_SPEED       "Game",     "GameSpeed",                                          (100)
+#define CONFIG_GAME_MIRROR_MODE      "Game",     "MirrorMode",                                         (0)
+#define CONFIG_GAME_HUD_DIRECTION    "Game",     "HudDirection",                                       (0)
+#define CONFIG_GAME_HUD_TYPE         "Game",     "HudType",                                            (0)
+#define CONFIG_GAME_COMBAT_TEXT      "Game",     "CombatText",                                         (0xFF)
+#define CONFIG_GAME_BACK_ROTATION    "Game",     "BackRotation",                                       (1)
+#define CONFIG_GAME_BACK_SPEED       "Game",     "BackSpeed",                                          (100)
+#define CONFIG_GAME_UPDATE_FREQ      "Game",     "UpdateFreq",                                         (0)
+#define CONFIG_GAME_PURE_MODE        "Game",     "PureMode",                                           (0)
+#define CONFIG_GAME_LEADERBOARD      "Game",     "Leaderboard",                                        (1)
+#define CONFIG_GAME_VERSION          "Game",     "Version",                                            (0)
 
-#define CONFIG_LEGACY_ROTATION_TURN  "Legacy",   "RotationTurn",                         (0)
-#define CONFIG_LEGACY_PRIORITY_MOVE  "Legacy",   "PriorityMove",                         (0)
-#define CONFIG_LEGACY_SLOT_SYSTEM    "Legacy",   "SlotSystem",                           (0)
+#define CONFIG_LEGACY_ROTATION_TURN  "Legacy",   "RotationTurn",                                       (0)
+#define CONFIG_LEGACY_PRIORITY_MOVE  "Legacy",   "PriorityMove",                                       (0)
+#define CONFIG_LEGACY_SLOT_SYSTEM    "Legacy",   "SlotSystem",                                         (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_KEYS_MOVE     (4u)                                          // number of move keys per set (left, right, down, up)
@@ -85,33 +85,33 @@
 STATIC_ASSERT(INPUT_TYPES       <= INPUT_SETS)
 STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint16)*8u)
 
-#define DEFAULT_KEYBOARD_1_MOVE_UP    (CORE_INPUT_KEY(W))
-#define DEFAULT_KEYBOARD_1_MOVE_LEFT  (CORE_INPUT_KEY(A))
-#define DEFAULT_KEYBOARD_1_MOVE_DOWN  (CORE_INPUT_KEY(S))
-#define DEFAULT_KEYBOARD_1_MOVE_RIGHT (CORE_INPUT_KEY(D))
-#define DEFAULT_KEYBOARD_1_ACTION(n)  (((n) == 0u) ? -CORE_INPUT_LEFT : ((n) == 1u) ? CORE_INPUT_KEY(Q) : ((n) == 2u) ? CORE_INPUT_KEY(E) : ((n) == 3u) ? CORE_INPUT_KEY(I) : ((n) == 4u) ? CORE_INPUT_KEY(J) : ((n) == 5u) ? CORE_INPUT_KEY(K) : ((n) == 6u) ? CORE_INPUT_KEY(L) : ((n) == 7u) ? 0 : ((n) == 8u) ? -CORE_INPUT_RIGHT : INPUT_KEY_INVALID)
+#define DEFAULT_KEYBOARD_1_MOVE_UP     (CORE_INPUT_KEY(W))
+#define DEFAULT_KEYBOARD_1_MOVE_LEFT   (CORE_INPUT_KEY(A))
+#define DEFAULT_KEYBOARD_1_MOVE_DOWN   (CORE_INPUT_KEY(S))
+#define DEFAULT_KEYBOARD_1_MOVE_RIGHT  (CORE_INPUT_KEY(D))
+#define DEFAULT_KEYBOARD_1_ACTION(n)   (((n) == 0u) ? -CORE_INPUT_LEFT : ((n) == 1u) ? CORE_INPUT_KEY(Q) : ((n) == 2u) ? CORE_INPUT_KEY(E) : ((n) == 3u) ? CORE_INPUT_KEY(I) : ((n) == 4u) ? CORE_INPUT_KEY(J) : ((n) == 5u) ? CORE_INPUT_KEY(K) : ((n) == 6u) ? CORE_INPUT_KEY(L) : ((n) == 7u) ? 0 : ((n) == 8u) ? -CORE_INPUT_RIGHT : INPUT_KEY_INVALID)
 
-#define DEFAULT_KEYBOARD_2_MOVE_UP    (CORE_INPUT_KEY(UP))
-#define DEFAULT_KEYBOARD_2_MOVE_LEFT  (CORE_INPUT_KEY(LEFT))
-#define DEFAULT_KEYBOARD_2_MOVE_DOWN  (CORE_INPUT_KEY(DOWN))
-#define DEFAULT_KEYBOARD_2_MOVE_RIGHT (CORE_INPUT_KEY(RIGHT))
-#define DEFAULT_KEYBOARD_2_ACTION(n)  (((n) == 0u) ? CORE_INPUT_KEY(SPACE) : ((n) == 1u) ? CORE_INPUT_KEY(Z) : ((n) == 2u) ? CORE_INPUT_KEY(X) : ((n) == 3u) ? CORE_INPUT_KEY(KP_8) : ((n) == 4u) ? CORE_INPUT_KEY(KP_4) : ((n) == 5u) ? CORE_INPUT_KEY(KP_2) : ((n) == 6u) ? CORE_INPUT_KEY(KP_6) : ((n) == 7u) ? 0 : ((n) == 8u) ? CORE_INPUT_KEY(C) : INPUT_KEY_INVALID)
+#define DEFAULT_KEYBOARD_2_MOVE_UP     (CORE_INPUT_KEY(UP))
+#define DEFAULT_KEYBOARD_2_MOVE_LEFT   (CORE_INPUT_KEY(LEFT))
+#define DEFAULT_KEYBOARD_2_MOVE_DOWN   (CORE_INPUT_KEY(DOWN))
+#define DEFAULT_KEYBOARD_2_MOVE_RIGHT  (CORE_INPUT_KEY(RIGHT))
+#define DEFAULT_KEYBOARD_2_ACTION(n)   (((n) == 0u) ? CORE_INPUT_KEY(SPACE) : ((n) == 1u) ? CORE_INPUT_KEY(Z) : ((n) == 2u) ? CORE_INPUT_KEY(X) : ((n) == 3u) ? CORE_INPUT_KEY(KP_8) : ((n) == 4u) ? CORE_INPUT_KEY(KP_4) : ((n) == 5u) ? CORE_INPUT_KEY(KP_2) : ((n) == 6u) ? CORE_INPUT_KEY(KP_6) : ((n) == 7u) ? 0 : ((n) == 8u) ? CORE_INPUT_KEY(C) : INPUT_KEY_INVALID)
 
-#define DEFAULT_JOYSTICK_MOVE_UP      (0)
-#define DEFAULT_JOYSTICK_MOVE_LEFT    (0)
-#define DEFAULT_JOYSTICK_MOVE_DOWN    (0)
-#define DEFAULT_JOYSTICK_MOVE_RIGHT   (0)
+#define DEFAULT_JOYSTICK_MOVE_UP       (0)
+#define DEFAULT_JOYSTICK_MOVE_LEFT     (0)
+#define DEFAULT_JOYSTICK_MOVE_DOWN     (0)
+#define DEFAULT_JOYSTICK_MOVE_RIGHT    (0)
 #if defined(_CORE_SWITCH_)
-#define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : INPUT_KEY_INVALID)))
+    #define DEFAULT_JOYSTICK_ACTION(n) (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : INPUT_KEY_INVALID)))
 #else
-#define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : INPUT_KEY_INVALID)))
+    #define DEFAULT_JOYSTICK_ACTION(n) (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 7u) ? SDL_CONTROLLER_BUTTON_START : ((n) == 8u) ? SDL_CONTROLLER_BUTTON_B : INPUT_KEY_INVALID)))
 #endif
 
-#define DEFAULT_MOVE_UP(x)            (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_UP    : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_UP    : DEFAULT_JOYSTICK_MOVE_UP)
-#define DEFAULT_MOVE_LEFT(x)          (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_LEFT  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_LEFT  : DEFAULT_JOYSTICK_MOVE_LEFT)
-#define DEFAULT_MOVE_DOWN(x)          (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_DOWN  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_DOWN  : DEFAULT_JOYSTICK_MOVE_DOWN)
-#define DEFAULT_MOVE_RIGHT(x)         (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_RIGHT : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_RIGHT : DEFAULT_JOYSTICK_MOVE_RIGHT)
-#define DEFAULT_ACTION(x,n)           (((x) == 0u) ? DEFAULT_KEYBOARD_1_ACTION(n)  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_ACTION(n)  : DEFAULT_JOYSTICK_ACTION(n))
+#define DEFAULT_MOVE_UP(x)             (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_UP    : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_UP    : DEFAULT_JOYSTICK_MOVE_UP)
+#define DEFAULT_MOVE_LEFT(x)           (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_LEFT  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_LEFT  : DEFAULT_JOYSTICK_MOVE_LEFT)
+#define DEFAULT_MOVE_DOWN(x)           (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_DOWN  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_DOWN  : DEFAULT_JOYSTICK_MOVE_DOWN)
+#define DEFAULT_MOVE_RIGHT(x)          (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_RIGHT : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_RIGHT : DEFAULT_JOYSTICK_MOVE_RIGHT)
+#define DEFAULT_ACTION(x,n)            (((x) == 0u) ? DEFAULT_KEYBOARD_1_ACTION(n)  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_ACTION(n)  : DEFAULT_JOYSTICK_ACTION(n))
 
 STATIC_ASSERT(INPUT_SETS_KEYBOARD == 2u)
 
@@ -192,20 +192,18 @@ struct sConfig final
 struct sGameInput final
 {
     coreVector2 vMove;            // movement input
+    coreUint8   iMoveStep;        // step-value of the movement input (for replay)
     coreUint16  iActionPress;     // action press (bitfields)
     coreUint16  iActionRelease;   // action release
     coreUint16  iActionHold;      // action hold
-
-    coreUint8   iMoveStep;        // 
 };
 
 struct sMenuInput final
 {
     coreUint8 iMove;         // 
-    coreBool  bAccept;       // 
     coreBool  bCancel;       // 
-    coreBool  bAny;          // 
     coreBool  bPause;        // 
+    coreBool  bAny;          // 
     coreBool  bScreenshot;   // 
 };
 

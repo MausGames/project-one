@@ -24,7 +24,7 @@ cFigure::cFigure()noexcept
     this->DefineProgram("default_2d_program");
 
     // 
-    m_Fallback.Construct(MENU_FONT_STANDARD_1, TOOLTIP_OUTLINE_SIZE);
+    m_Fallback.Construct(MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
     m_Fallback.SetColor3(COLOR_MENU_WHITE);
 }
 

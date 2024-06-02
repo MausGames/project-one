@@ -159,8 +159,7 @@ void cArcadeInput::Move()
         m_aButton[i].Interact();
 
         // 
-        // TODO 1: cannot use bAccept with RELEASE, gamepad does double-input
-        if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || /*(g_MenuInput.bAccept && (m_iCurGlyph == i)) || */(g_acArcadeGlyph[i] == cChar)))
+        if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || (g_acArcadeGlyph[i] == cChar)))
         {
             // 
             if(cChar) this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cChar));

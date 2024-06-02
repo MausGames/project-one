@@ -33,10 +33,9 @@ static void UpgradeConfig()
         if(__UPGRADE(0))
         {
             Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME, CONFIG_DEFAULT_VOLUME);   // # always
-            
-            
-        //Core::Config->SetInt (CORE_CONFIG_AUDIO_RESAMPLERINDEX,      g_OldConfig.Audio.iQuality ? 4 : 2);
-        //Core::Audio->Reconfigure();
+
+            //Core::Config->SetInt(CORE_CONFIG_AUDIO_RESAMPLERINDEX, g_OldConfig.Audio.iQuality ? 4 : 2);
+            //Core::Audio->Reconfigure();
 
             for(coreUintW i = 0u; i < INPUT_SETS; ++i)
             {
@@ -108,7 +107,7 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
     {
         pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);
 
-        //           without available device               
+        // reset without available device
         if((pConfig->Input.aiType[i] >= INPUT_SETS_KEYBOARD) && (pConfig->Input.aiType[i] - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
         {
             pConfig->Input.aiType[i] = iReset++;
@@ -219,13 +218,13 @@ void LoadConfig()
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
-        g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i), DEFAULT_MOVE_UP   (i));
-        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i), DEFAULT_MOVE_LEFT (i));
-        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i), DEFAULT_MOVE_DOWN (i));
-        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i), DEFAULT_MOVE_RIGHT(i));
+        g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i));
+        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i));
+        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i));
+        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i));
         for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
         {
-            g_OldConfig.Input.aSet[i].aiAction[j] = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j), DEFAULT_ACTION(i, j));
+            g_OldConfig.Input.aSet[i].aiAction[j] = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j));
         }
     }
 
@@ -419,50 +418,49 @@ void UpdateInput()
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
             }
-            
-            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
-            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
 
             if((iJoystickID < s_avOldStick.size()))
             {
                 if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
                 {
-                    coreVector2 vNewStick = Core::Input->GetJoystickStickR(iJoystickID);
-                    
                     const coreVector2 vOldStick = s_avOldStick[iJoystickID];
-                    
-                    const coreBool bValid    = (vNewStick.LengthSq() >= POW2(0.7f));
-                    const coreBool bValidOld = (vOldStick.LengthSq() >= POW2(0.7f));
+                    coreVector2       vNewStick = Core::Input->GetJoystickStickR(iJoystickID);
+
+                    const coreBool bOldValid = (vOldStick.LengthSq() >= POW2(0.7f));
+                    const coreBool bNewValid = (vNewStick.LengthSq() >= POW2(0.7f));
+
                     if(!vNewStick.IsNull()) vNewStick = vNewStick.Normalized();
-                    
+
                     coreBool bReset = true;
                     for(coreUintW j = 0u; j < 4u; ++j)
                     {
                         const coreVector2 vBase = StepRotated90(j);
-                        const coreBool bOldState = (!vOldStick.IsNull() && (coreVector2::Dot(vOldStick, vBase) >= (1.0f / SQRT2))) && bValidOld;
-                        const coreBool bNewState = (!vNewStick.IsNull() && (coreVector2::Dot(vNewStick, vBase) >= (bOldState ? 0.01f : (vOldStick.IsNull() ? (1.0f / SQRT2) : 0.8f))) && (bOldState || bValid));
-                        
-                        if(!bOldState &&  bNewState) 
-                            ADD_BIT(oMap.iActionPress,   PLAYER_ACTION_SHOOT_UP + j)
-                        if( bOldState && !bNewState) 
-                            ADD_BIT(oMap.iActionRelease, PLAYER_ACTION_SHOOT_UP + j)
-                        if( bNewState)
-                        {ADD_BIT(oMap.iActionHold,    PLAYER_ACTION_SHOOT_UP + j) bReset = false;}
-                        
-                        
+
+                        const coreBool bOldState = (!vOldStick.IsNull() && (coreVector2::Dot(vOldStick, vBase) >= (1.0f / SQRT2)) && bOldValid);
+                        const coreBool bNewState = (!vNewStick.IsNull() && (coreVector2::Dot(vNewStick, vBase) >= (bOldState ? 0.01f : (vOldStick.IsNull() ? (1.0f / SQRT2) : 0.8f))) && (bNewValid || bOldState));
+
+                             if(!bOldState &&  bNewState) ADD_BIT(oMap.iActionPress,   PLAYER_ACTION_SHOOT_UP + j)
+                        else if( bOldState && !bNewState) ADD_BIT(oMap.iActionRelease, PLAYER_ACTION_SHOOT_UP + j)
+
+                        if(bNewState)
+                        {
+                            ADD_BIT(oMap.iActionHold, PLAYER_ACTION_SHOOT_UP + j)
+                            bReset = false;
+                        }
+
                         if(!bOldState && bNewState) s_avOldStick[iJoystickID] = AlongCrossNormal(vNewStick);
                     }
-                       if(vNewStick.IsNull() || bReset)     s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
+
+                    if(vNewStick.IsNull() || bReset) s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
                 }
                 else
                 {
                     s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
                 }
             }
-            
-            
-            // TODO 1: es gibt keinen cancel-button mehr
-            //if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
+
+            // 
+            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
         }
 
         // 
@@ -487,9 +485,7 @@ void UpdateInput()
         // 
         if(i >= INPUT_SETS_KEYBOARD)
         {
-            //if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
-            //if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
-            if(HAS_BIT(oMap.iActionPress, 7u)) g_MenuInput.bPause  = true;
+            if(HAS_BIT(oMap.iActionPress, 7u)) g_MenuInput.bPause = true;
 
             // (ignore HUD rotations) 
                  if(!coreMath::IsNear(oMap.vMove.x, 0.0f)) g_MenuInput.iMove = (oMap.vMove.x > 0.0f) ? 4u : 2u;
@@ -498,9 +494,9 @@ void UpdateInput()
     }
 
     // 
-    const coreVector2 vFinal = CalcFinalDirection();
+    const coreVector2 vFinal  = CalcFinalDirection();
     const coreVector2 vFinal2 = MapToAxisInv(vFinal, g_pPostProcessing->GetDirectionGame() * coreVector2((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f, 1.0f));
-    const coreUint8   iShift = PackDirection(vFinal2) / 2u;
+    const coreUint8   iShift  = PackDirection(vFinal2) / 2u;
 
     // 
     const auto nDirectionFunc = [&](sGameInput* OUTPUT pInput)
@@ -533,8 +529,8 @@ void UpdateInput()
         if(g_CurConfig.Game.iMirrorMode == 1u)
         {
             // 
-            pInput->vMove     = pInput->vMove.InvertedX();
             pInput->iMoveStep = StepInvertedX(pInput->iMoveStep);
+            pInput->vMove     = pInput->vMove.InvertedX();
 
             // 
             const auto nFlipTurnFunc = [](coreUint16* OUTPUT piAction)
@@ -568,24 +564,26 @@ void UpdateInput()
     nDirectionFunc(&g_TotalInput);
 
     // 
-    const auto nControlModeFunc = [&](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iStateIndex)
+    const auto nControlModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iStateIndex)
     {
         constexpr coreUint16 iTurnBits   = BIT(PLAYER_ACTION_TURN_LEFT) | BIT(PLAYER_ACTION_TURN_RIGHT);
         constexpr coreUint16 iShootBits1 = BIT(PLAYER_ACTION_SHOOT_UP) | BIT(PLAYER_ACTION_SHOOT_LEFT) | BIT(PLAYER_ACTION_SHOOT_DOWN) | BIT(PLAYER_ACTION_SHOOT_RIGHT);
         constexpr coreUint16 iShootBits2 = iShootBits1 | BIT(PLAYER_ACTION_SHOOT_0);
 
         const coreUint8 iControlMode = g_CurConfig.Input.aiControlMode[iModeIndex];
+
         if((iControlMode == 1u) || (iControlMode == 2u))
         {
-            
             coreBool bAllowShoot  = true;
             coreBool bAllowToggle = false;
             coreBool bCurRapid    = false;
+
             if(STATIC_ISVALID(g_pGame))
             {
                 const cPlayer* pPlayer = g_pGame->GetPlayer(iModeIndex);
 
                 const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
+
                 if((iFireMode == 2u) && s_abFireToggle[iStateIndex] && !pPlayer->GetTilt())
                 {
                     const coreVector2 vDir = MapToAxis(pPlayer->GetDirection().xy(), g_pPostProcessing->GetDirectionGame());
@@ -602,8 +600,7 @@ void UpdateInput()
                 bAllowToggle = !pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_RAPID);
                 bCurRapid    =  pPlayer->HasStatus(PLAYER_STATUS_RAPID_FIRE);
             }
-            
-            
+
             // 
             SET_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0, (pInput->iActionPress   & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)) && !HAS_BIT(s_aiTwinState[iStateIndex], 1u) && bAllowShoot)
             SET_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0, (pInput->iActionHold    & ((iControlMode == 1u) ? iShootBits1 : iShootBits2)))
@@ -619,18 +616,19 @@ void UpdateInput()
 
             // 
             SET_BIT(s_aiTwinState[iStateIndex], 1u, HAS_BIT(pInput->iActionHold, PLAYER_ACTION_SHOOT_0))
-            
-            
+
             if(HAS_BIT(s_aiTwinState[iStateIndex], 2u) != bCurRapid)
             {
                 SET_BIT(s_aiTwinState[iStateIndex], 2u, bCurRapid)
                 s_abFireSpeed[iStateIndex] = bCurRapid;
             }
+
             if(HAS_BIT(pInput->iActionPress, PLAYER_ACTION_CHANGE_SPEED) && !g_pMenu->IsPaused() && bAllowToggle)
             {
                 SET_BIT(s_aiTwinState[iStateIndex], 2u, !bCurRapid)
                 s_abFireSpeed[iStateIndex] = !bCurRapid;
             }
+
             if(HAS_BIT(s_aiTwinState[iStateIndex], 2u))
             {
                 SET_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE, HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0) || HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE))
@@ -671,6 +669,7 @@ void UpdateInput()
         const coreBool bFireB = HAS_BIT(pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
 
         const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
+
         if(iFireMode == 1u)
         {
             // 
@@ -702,7 +701,7 @@ void UpdateInput()
             SET_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE, s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0)
             SET_BIT(pInput->iActionHold,    PLAYER_ACTION_RAPID_FIRE, s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionHold,    PLAYER_ACTION_SHOOT_0)
         }
-        
+
         if(STATIC_ISVALID(g_pGame))
         {
             const cPlayer* pPlayer = g_pGame->GetPlayer(iModeIndex);
@@ -758,18 +757,14 @@ void UpdateInput()
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_HOLD)) g_MenuInput.iMove = 4u;
 
     // 
-    //if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN),      CORE_INPUT_PRESS) ||
-    //   Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_ENTER),    CORE_INPUT_PRESS) ||
-    //   Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),       CORE_INPUT_PRESS)) g_MenuInput.bAccept     = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
        Core::Input->GetKeyboardButton(CORE_INPUT_KEY(BACKSPACE),   CORE_INPUT_PRESS) ||
        Core::Input->GetMouseButton   (CORE_INPUT_RIGHT,            CORE_INPUT_PRESS)) g_MenuInput.bCancel     = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS)) g_MenuInput.bPause      = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS)) g_MenuInput.bScreenshot = true;
-    
-    
-    
-    g_MenuInput.bAny = g_MenuInput.bAccept || g_MenuInput.bCancel || g_MenuInput.bPause || Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
+
+    // 
+    g_MenuInput.bAny = g_MenuInput.bCancel || g_MenuInput.bPause || Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
 }
 
 

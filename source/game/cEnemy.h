@@ -671,6 +671,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet::~sEnemySet()
 {
     // 
+    oMemoryPool.Shutdown();
     FOR_EACH(it, apEnemyPool) POOLED_DELETE(oMemoryPool, *it)
 
     // remove enemy set from global shadow and outline

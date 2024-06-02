@@ -61,7 +61,7 @@ inline FUNC_NOALIAS const coreFloat& cRotaCache::Angle(const coreVector2 vDirect
 // convert angle to direction
 inline FUNC_NOALIAS const coreVector2& cRotaCache::Direction(const coreFloat fAngle)
 {
-    // 
+    // wrap around angle
     const coreFloat fWrap = FmodRange(fAngle, -PI, PI);
 
     // refresh cached direction if required

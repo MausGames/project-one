@@ -208,6 +208,7 @@ coreBool cSave::LoadFile(const coreChar* pcPath)
 
 coreBool cSave::LoadFile()
 {
+    // 
     return this->LoadFile(m_sPath.c_str());
 }
 

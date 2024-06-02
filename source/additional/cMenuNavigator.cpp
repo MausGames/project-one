@@ -309,7 +309,7 @@ void cMenuNavigator::Update()
 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum() ? 1u : 0u; i < ie; ++i)
     {
-        const coreVector2 vMove = vRelative.IsNull() ? coreVector2(0.0f,0.0f) : AlongCross(vRelative);
+        const coreVector2 vMove = AlongCross(vRelative);
         const coreUint8   iPack = PackDirection(vMove);
 
         if(vRelative.IsNull() && !iCount)
@@ -480,18 +480,6 @@ void cMenuNavigator::Update()
                     pNewObject = A;
                 }
 
-                //if(!m_pCurObject && !pNewObject)
-                //{
-                //    FOR_EACH(it, m_aObject.get_keylist())
-                //    {
-                //        if((*it) && (*it)->GetAlpha())
-                //        {
-                //            pNewObject = (*it);
-                //            break;
-                //        }
-                //    }
-                //}
-                
                 // prevent automatic exit in scrollbox
                 if(bAuto)
                 {

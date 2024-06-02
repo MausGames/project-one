@@ -35,13 +35,14 @@
 // TODO 1: show mission summary for Ater before arcade summary on ?
 // TODO 1: show player separation for arcade summary
 // TODO 3: add auto-scroll for armory-segment-switch, for shoulder-buttons and arrow-keys
-// TODO 2: latam language, text in summary menu is etwas zu nah beinander
+// TODO 2: latam language, text in summary menu is a little too close together
 // TODO 1: optimize all menu render orderings, especially for shaders, especially in the game menu (also bind-object, in ALL menus and view-boxes)
 // TODO 1: (remove mission page in armory)
 // TODO 3: get rid of the additional interface object in config-menu
 // TODO 3: when switching resolution (AA change, engine reset), the next mouse click is not recognized (no press event is coming from SDL, only the release event) (nicht immer!)
 // TODO 3: support for chinese names in leaderboard (s+t)
 // TODO 3: hidden medals on arcade summary will blend in after 10000.0f
+// TODO 3: make use of coreTranslate in menus (inherited, like in interface) to simplyfy language-string updates
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
 // NOTE: every object in menu needs outline: weapons, medals, icons
@@ -1513,23 +1514,19 @@ private:
     
     coreFlow m_fVolume;
     
-    coreBool m_bStarted;
-    
     
     cInterface m_Interface;
     coreFlow   m_fInterfaceAlpha;
 
-    static coreVector3 m_vHighlightColor;       // 
-    static coreVector3 m_vButtonColor;       // 
+    static coreVector3 s_vHighlightColor;       // 
+    static coreVector3 s_vButtonColor;       // 
     
-    static coreButton* m_apCurButton[2];
-    static coreButton* m_apNewButton[2];
-    static coreMap<const void*, coreButton*> m_apCurButton2;
-    static coreMap<const void*, coreButton*> m_apNewButton2;
-    static cGuiButton* m_pCurTab;
-    static cGuiButton* m_pNewTab;
-    static cGuiObject* m_pCurLine;
-    static cGuiObject* m_pNewLine;
+    static coreMap<const void*, coreButton*> s_apCurButton;
+    static coreMap<const void*, coreButton*> s_apNewButton;
+    static cGuiButton* s_pCurTab;
+    static cGuiButton* s_pNewTab;
+    static cGuiObject* s_pCurLine;
+    static cGuiObject* s_pNewLine;
     
     static coreMap<const void*, sButtonData> s_aButtonData;
 
@@ -1569,8 +1566,8 @@ public:
     void SetButtonColor(const coreVector3 vColor);
    
     
-    inline const coreVector3& GetHighlightColor()const {return m_vHighlightColor;}
-    inline const coreVector3& GetButtonColor()const {return m_vButtonColor;}
+    inline const coreVector3& GetHighlightColor()const {return s_vHighlightColor;}
+    inline const coreVector3& GetButtonColor()const {return s_vButtonColor;}
     
     cInterface* GetInterface() {return &m_Interface;}
     

@@ -333,7 +333,7 @@ private:
     coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
     coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold);
     void        __EncodeDirection(const coreUintW iIndex, const coreVector2 vDirection);
-    coreVector2 __DecodeDirection(const coreUintW iIndex);
+    coreVector2 __DecodeDirection(const coreUintW iIndex)const;
 };
 
 
