@@ -138,7 +138,7 @@ void cFinishMenu::Move()
             
             if((fOldTimer < 0.0f) && (m_fIntroTimer >= 0.0f))
             {
-                g_MusicPlayer.SelectName("menu.ogg");
+                g_MusicPlayer.SelectName("menu");
                 g_MusicPlayer.Play();
             }
 

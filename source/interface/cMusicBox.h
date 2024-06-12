@@ -32,27 +32,27 @@ struct sMusicTrack final
 
 static constexpr sMusicTrack g_aMusicTrack[] =
 {
-    {"Tim Beek",       "Tech Background",                       "",             "menu.ogg",             cDarkBackground   ::Color, 0},
-    {"Isao Yamaguchi", "Melty",                                 "INTRO",        "mission_00_intro.ogg", cCloudBackground  ::Color, cCloudBackground  ::ID},
-    {"Isao Yamaguchi", "Lonesome Stranger",                     "VIRIDO",       "mission_01_intro.ogg", cGrassBackground  ::Color, cGrassBackground  ::ID},
-    {"Isao Yamaguchi", "2NEONS II",                             "NEVO",         "mission_02_intro.ogg", cSeaBackground    ::Color, cSeaBackground    ::ID},
-    {"Isao Yamaguchi", "Ready to kick your \u2217\u2217\u2217", "HARENA",       "mission_03_intro.ogg", cDesertBackground ::Color, cDesertBackground ::ID},
-    {"Isao Yamaguchi", "Eyes on Darkness",                      "RUTILUS",      "mission_04_intro.ogg", cSpaceBackground  ::Color, cSpaceBackground  ::ID},
-    {"Isao Yamaguchi", "The Reverse of Destruction",            "GELU",         "mission_05.ogg",       cVolcanoBackground::Color, cVolcanoBackground::ID},
-    {"Isao Yamaguchi", "Algebraic Love",                        "CALOR",        "mission_06_intro.ogg", cSnowBackground   ::Color, cSnowBackground   ::ID},
-    {"Isao Yamaguchi", "The Pale of World",                     "MUSCUS",       "mission_07_intro.ogg", cMossBackground   ::Color, cMossBackground   ::ID},
-    {"Andrew Sitkov",  "Be Faster",                             "SHINAI",       "boss_00.ogg",          cCloudBackground  ::Color, cCloudBackground  ::ID},
-    {"Andrew Sitkov",  "Time For Action",                       "TORUS",        "boss_01.ogg",          cGrassBackground  ::Color, cGrassBackground  ::ID},
-    {"Andrew Sitkov",  "No Way Back",                           "LEVIATHAN",    "boss_02.ogg",          cSeaBackground    ::Color, cSeaBackground    ::ID},
-    {"Andrew Sitkov",  "Can't Stop Me",                         "TIGER MK-III", "boss_03.ogg",          cDesertBackground ::Color, cDesertBackground ::ID},
-    {"Andrew Sitkov",  "Unbreakable",                           "MESSIER 87",   "boss_04.ogg",          cSpaceBackground  ::Color, cSpaceBackground  ::ID},
-    {"Andrew Sitkov",  "Let's Rock",                            "CHOL",         "boss_05.ogg",          cVolcanoBackground::Color, cVolcanoBackground::ID},
-    {"Andrew Sitkov",  "Rage Machine",                          "ZEROTH",       "boss_06.ogg",          cSnowBackground   ::Color, cSnowBackground   ::ID},
-    {"Andrew Sitkov",  "Heart of Warrior",                      "NAGUAL",       "boss_07.ogg",          cMossBackground   ::Color, cMossBackground   ::ID},
-    {"Isao Yamaguchi", "Blue Garnet",                           "P1",           "boss_08_intro.ogg",    cDarkBackground   ::Color, cDarkBackground   ::ID},
-    {"Isao Yamaguchi", "Red Sapphire",                          "EIGENGRAU",    "boss_99.ogg",          cDarkBackground   ::Color, cDarkBackground   ::ID},
-    {"WOW Sound",      "A Waltz",                               "",             "ending_normal.ogg",    cDarkBackground   ::Color, 0},
-    {"WOW Sound",      "Reminiscence",                          "",             "ending_secret.ogg",    cDarkBackground   ::Color, 0}
+    {"Tim Beek",       "Tech Background",                       "",             "menu",             cDarkBackground   ::Color, 0},
+    {"Isao Yamaguchi", "Melty",                                 "INTRO",        "mission_00_intro", cCloudBackground  ::Color, cCloudBackground  ::ID},
+    {"Isao Yamaguchi", "Lonesome Stranger",                     "VIRIDO",       "mission_01_intro", cGrassBackground  ::Color, cGrassBackground  ::ID},
+    {"Isao Yamaguchi", "2NEONS II",                             "NEVO",         "mission_02_intro", cSeaBackground    ::Color, cSeaBackground    ::ID},
+    {"Isao Yamaguchi", "Ready to kick your \u2217\u2217\u2217", "HARENA",       "mission_03_intro", cDesertBackground ::Color, cDesertBackground ::ID},
+    {"Isao Yamaguchi", "Eyes on Darkness",                      "RUTILUS",      "mission_04_intro", cSpaceBackground  ::Color, cSpaceBackground  ::ID},
+    {"Isao Yamaguchi", "The Reverse of Destruction",            "GELU",         "mission_05",       cVolcanoBackground::Color, cVolcanoBackground::ID},
+    {"Isao Yamaguchi", "Algebraic Love",                        "CALOR",        "mission_06_intro", cSnowBackground   ::Color, cSnowBackground   ::ID},
+    {"Isao Yamaguchi", "The Pale of World",                     "MUSCUS",       "mission_07_intro", cMossBackground   ::Color, cMossBackground   ::ID},
+    {"Andrew Sitkov",  "Be Faster",                             "SHINAI",       "boss_00",          cCloudBackground  ::Color, cCloudBackground  ::ID},
+    {"Andrew Sitkov",  "Time For Action",                       "TORUS",        "boss_01",          cGrassBackground  ::Color, cGrassBackground  ::ID},
+    {"Andrew Sitkov",  "No Way Back",                           "LEVIATHAN",    "boss_02",          cSeaBackground    ::Color, cSeaBackground    ::ID},
+    {"Andrew Sitkov",  "Can't Stop Me",                         "TIGER MK-III", "boss_03",          cDesertBackground ::Color, cDesertBackground ::ID},
+    {"Andrew Sitkov",  "Unbreakable",                           "MESSIER 87",   "boss_04",          cSpaceBackground  ::Color, cSpaceBackground  ::ID},
+    {"Andrew Sitkov",  "Let's Rock",                            "CHOL",         "boss_05",          cVolcanoBackground::Color, cVolcanoBackground::ID},
+    {"Andrew Sitkov",  "Rage Machine",                          "ZEROTH",       "boss_06",          cSnowBackground   ::Color, cSnowBackground   ::ID},
+    {"Andrew Sitkov",  "Heart of Warrior",                      "NAGUAL",       "boss_07",          cMossBackground   ::Color, cMossBackground   ::ID},
+    {"Isao Yamaguchi", "Blue Garnet",                           "P1",           "boss_08_intro",    cDarkBackground   ::Color, cDarkBackground   ::ID},
+    {"Isao Yamaguchi", "Red Sapphire",                          "EIGENGRAU",    "boss_99",          cDarkBackground   ::Color, cDarkBackground   ::ID},
+    {"WOW Sound",      "A Waltz",                               "",             "ending_normal",    cDarkBackground   ::Color, 0},
+    {"WOW Sound",      "Reminiscence",                          "",             "ending_secret",    cDarkBackground   ::Color, 0}
 };
 
 

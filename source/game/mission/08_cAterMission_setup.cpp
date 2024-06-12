@@ -163,7 +163,7 @@ void cAterMission::__SetupOwn()
                     g_pGame->StartOutro(GAME_OUTRO_SEGMENT);   // do not fade music
                 }
 
-                g_MusicPlayer.SelectName("ending_normal.ogg");
+                g_MusicPlayer.SelectName("ending_normal");
                 g_MusicPlayer.Play();
             }
         }

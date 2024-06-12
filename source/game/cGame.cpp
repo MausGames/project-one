@@ -154,7 +154,7 @@ cGame::~cGame()
     // 
     this->CancelFadeMusic();
     
-    if(g_bDemoVersion && (g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg")))   // TODO 1: condition for finale in demo
+    if(g_bDemoVersion && (g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu")))   // TODO 1: condition for finale in demo
         g_MusicPlayer.Stop();
     
 }

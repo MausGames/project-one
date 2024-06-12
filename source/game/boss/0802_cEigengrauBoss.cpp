@@ -1033,7 +1033,7 @@ void cEigengrauBoss::__MoveOwn()
         {
             PHASE_CHANGE_INC
 
-            g_MusicPlayer.SelectName("ending_secret.ogg");
+            g_MusicPlayer.SelectName("ending_secret");
             g_MusicPlayer.Play();
         });
     }

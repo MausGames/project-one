@@ -392,7 +392,7 @@ public:
     ASSIGN_EXTRA("トーラス")
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_01.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_01";}
 
 
 private:
@@ -570,7 +570,7 @@ public:
     void ResurrectDemo();
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_02.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_02";}
 
 
 private:
@@ -677,7 +677,7 @@ public:
     inline void     KillHelper     (const coreUint8 iElement, const coreBool bAnimated) {this->_KillHelper(iElement, bAnimated);}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_03.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_03";}
 
 
 private:
@@ -826,8 +826,8 @@ public:
     ASSIGN_EXTRA("メシエ 87")
 
     // get object properties
-    inline const coreChar* GetMusicName   ()const final {return "boss_04.ogg";}
-    inline const coreChar* GetMusicNameRev()const       {return "boss_04_reverse.ogg";}
+    inline const coreChar* GetMusicName   ()const final {return "boss_04";}
+    inline const coreChar* GetMusicNameRev()const       {return "boss_04_reverse";}
 
 
 private:
@@ -947,7 +947,7 @@ public:
     void ResurrectIntro(const coreUint8 iSub);
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_05.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_05";}
 
 
 private:
@@ -1070,7 +1070,7 @@ public:
     inline void HideTail() {for(coreUintW i = 0u; i < ZEROTH_LIMBS; ++i) this->__SetLimbValue(i, 1.0f);}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_06.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_06";}
 
 
 private:
@@ -1154,7 +1154,7 @@ public:
     void ResurrectIntro();
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_07.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_07";}
 
 
 private:
@@ -1284,7 +1284,7 @@ public:
     inline coreVector3     GetColor    ()const final {return m_vLevelColor;}
     inline coreVector3     GetColor2   ()const final {return m_vLevelColor;}
     inline coreVector2     GetIcon     ()const final {return cProjectOneBoss::Icon;}
-    inline const coreChar* GetMusicName()const final {return "boss_08_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_08_intro";}
 
     // 
     static void CalcColor    (const coreUintW iIndex, coreVector3* OUTPUT pvEnergyColor, coreVector3* OUTPUT pvBlockColor, coreVector3* OUTPUT pvLevelColor, coreVector3* OUTPUT pvBackColor, coreVector3* OUTPUT pvBackColor2, coreVector3* OUTPUT pvLedColor);
@@ -1411,7 +1411,7 @@ public:
     ASSIGN_EXTRA("アイゲングラウ")
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_99.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_99";}
 
 
 private:
@@ -1466,7 +1466,7 @@ public:
     void ResurrectIntro();
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "boss_00.ogg";}
+    inline const coreChar* GetMusicName()const final {return "boss_00";}
 
 
 private:

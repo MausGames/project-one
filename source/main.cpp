@@ -75,36 +75,36 @@ void CoreApp::Init()
     InitLeaderboards();
 
     // load available music files (manually ordered)
-    g_MusicPlayer.AddMusicFile("data/music/boss_00.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_01.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_02.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_03.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_04_reverse.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_04.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_05.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_06.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_07.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_08_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_08_loop.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/boss_99.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/ending_normal.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/ending_secret.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/menu.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_00_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_00_loop.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_01_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_01_loop.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_02_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_02_loop.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_03_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_03_loop.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_04_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_04_loop.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_05.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_06_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_06_loop.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_07_intro.ogg");
-    g_MusicPlayer.AddMusicFile("data/music/mission_07_loop.ogg");
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_00"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_01"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_02"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_03"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_04_reverse"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_04"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_05"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_06"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_07"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_08_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_08_loop"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/boss_99"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/ending_normal"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/ending_secret"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/menu"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_00_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_00_loop"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_01_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_01_loop"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_02_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_02_loop"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_03_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_03_loop"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_04_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_04_loop"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_05"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_06_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_06_loop"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_07_intro"));
+    g_MusicPlayer.AddMusicFile(__MUSIC_FILE("data/music/mission_07_loop"));
 
     for(coreUintW i = 0u, ie = g_MusicPlayer.GetNumMusic(); i < ie; ++i)
     {
@@ -380,7 +380,7 @@ void CoreApp::Move()
         {
             if(!s_bMenuMusic)
             {
-                g_MusicPlayer.SelectName("menu.ogg");
+                g_MusicPlayer.SelectName("menu");
                 s_bMenuMusic = true;
             }
             

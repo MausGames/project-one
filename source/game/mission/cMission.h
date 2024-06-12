@@ -665,7 +665,7 @@ public:
     inline coreObject3D* GetBean   (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BEANS)    return &m_aBeanRaw   [iIndex * 2u];}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_01_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_01_intro";}
 
 
 private:
@@ -832,7 +832,7 @@ public:
     inline cLodObject*   GetContainer()                       {return &m_Container;}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_02_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_02_intro";}
 
 
 private:
@@ -955,7 +955,7 @@ public:
     inline coreObject3D* GetFlummi    (const coreUintW iIndex) {ASSERT(iIndex < HARENA_FLUMMIS) return &m_aFlummiRaw[iIndex];}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_03_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_03_intro";}
 
 
 private:
@@ -1113,7 +1113,7 @@ public:
     inline coreObject3D* GetSlap(const coreUintW iIndex) {ASSERT(iIndex < RUTILUS_SLAPS) return &m_aSlapRaw[iIndex * 2u];}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_04_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_04_intro";}
 
 
 private:
@@ -1274,7 +1274,7 @@ public:
     inline coreObject3D* GetGap  (const coreUintW iIndex) {ASSERT(iIndex < GELU_GAPS)  return &m_aGapRaw [iIndex];}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_05.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_05";}
 
 
 private:
@@ -1435,7 +1435,7 @@ public:
     inline cCustomEnemy* GetBoulder    ()                            {return &m_Boulder;}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_06_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_06_intro";}
 
 
 private:
@@ -1556,7 +1556,7 @@ public:
     inline coreObject3D* GetPearl   (const coreUintW iIndex) {ASSERT(iIndex < MUSCUS_PEARLS)    return &m_aPearlRaw   [iIndex * 2u];}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_07_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_07_intro";}
 
 
 private:
@@ -1655,7 +1655,7 @@ public:
     inline const coreBool& GetFirstPlay()const {return m_bFirstPlay;}
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_00_intro.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_00_intro";}
 
     // 
     static coreVector3 RetrieveEnemyColor(const coreUintW iIndex);
@@ -1711,7 +1711,7 @@ public:
     void FadeBeam(const coreBool bEnable, const coreFloat fTime);
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_00_intro.ogg";} //{return "mission_09.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_00_intro";} //{return "mission_09";}
 
 
 private:
@@ -1738,7 +1738,7 @@ public:
     ASSIGN_EXTRA("")
 
     // get object properties
-    inline const coreChar* GetMusicName()const final {return "mission_10.ogg";}
+    inline const coreChar* GetMusicName()const final {return "mission_10";}
 
 
 private:

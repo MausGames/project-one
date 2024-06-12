@@ -385,7 +385,7 @@ void cBridgeMenu::ReturnMenu(const coreUint8 iTarget, const coreBool bPaused, co
     g_pGame->GetCombatText()->SetVisible(false);
 
     // 
-    if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg"))   // TODO 1: [also] condition for finale in demo
+    if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu"))   // TODO 1: [also] condition for finale in demo
         g_pGame->FadeMusic(1.0f);
 
     // 

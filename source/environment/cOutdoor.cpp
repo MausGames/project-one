@@ -342,8 +342,8 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         m_pNormalMap->Unload();
 
         // retrieve normal map files
-        coreFileScope pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
-        coreFileScope pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
+        coreFileScope pFile1 = Core::Manager::Resource->RetrieveFile(PRINT(__TEXTURE_FILE("data/textures/environment_%s_norm"), pcTextureTop));
+        coreFileScope pFile2 = Core::Manager::Resource->RetrieveFile(PRINT(__TEXTURE_FILE("data/textures/environment_%s_norm"), pcTextureBottom));
 
         // decompress files to plain pixel data
         coreSurfaceScope pSurface1 = IMG_LoadTyped_RW(pFile1->CreateReadStream(), 1, coreData::StrExtension(pFile1->GetPath()));

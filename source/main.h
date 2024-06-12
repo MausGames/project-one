@@ -220,6 +220,19 @@
 #define SHADER_VIGNETTE      "#define _P1_VIGNETTE_"    " (1) \n"        // grey
 #define SHADER_ROTATED       "#define _P1_ROTATED_"     " (1) \n"        // energy
 
+// use better resource file formats without affecting Nintendo Switch
+#if defined(_CORE_SWITCH_)
+    #define __MODEL_FILE(x)   (x ".md3")
+    #define __TEXTURE_FILE(x) (x ".png")
+    #define __SOUND_FILE(x)   (x ".wav")
+    #define __MUSIC_FILE(x)   (x ".ogg")
+#else
+    #define __MODEL_FILE(x)   (x ".md3z")
+    #define __TEXTURE_FILE(x) (x ".webp")
+    #define __SOUND_FILE(x)   (x ".opus")
+    #define __MUSIC_FILE(x)   (x ".opus")
+#endif
+
 // 
 struct sVersion final
 {
