@@ -69,7 +69,7 @@ void cHeadlight::Render()
 
 // ****************************************************************
 // 
-void cHeadlight::Update()
+void cHeadlight::Move()
 {
     if(m_Flicker.GetStatus())
     {
@@ -98,6 +98,15 @@ void cHeadlight::Update()
         m_Spot.SetAlpha(BLENDH3(2.0f - m_fBlend));
     }
 
+    // 
+    this->coreFullscreen::Move();
+}
+
+
+// ****************************************************************
+// 
+void cHeadlight::Update()
+{
     if(!m_aSpotCommand.empty() || !m_aPointCommand.empty())
     {
         // 

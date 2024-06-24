@@ -79,6 +79,7 @@ public:
 
     // 
     void Render()final;
+    void Move  ()final;
 
     // 
     void Update();

@@ -132,6 +132,9 @@ void cStomachBackground::__MoveOwn()
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
     }
     pList->MoveNormal();
+
+    // 
+    m_Headlight.Move();
 }
 
 

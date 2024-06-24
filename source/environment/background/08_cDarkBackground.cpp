@@ -264,6 +264,9 @@ void cDarkBackground::__MoveOwn()
 
     // 
     this->__UpdateLightning();
+
+    // 
+    if(m_Headlight.GetAlpha()) m_Headlight.Move();
 }
 
 
