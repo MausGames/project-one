@@ -556,6 +556,7 @@ void cReplay::Update()
         for(coreUintW i = 0u, ie = m_Header.iNumPlayers; i < ie; ++i)
         {
             const sGameInput* pNewInput = g_pGame->GetPlayer(i)->GetInput();
+            const sGameInput* pOldInput = &m_aInput[i];
 
             // 
             if(pNewInput->iMoveStep != m_aInput[i].iMoveStep)
@@ -580,10 +581,22 @@ void cReplay::Update()
                 }
             }
 
+            // handle hold-changes without actual button-events
+            if(!HAS_BIT(pNewInput->iActionPress,   PLAYER_ACTION_SHOOT_0)    &&  HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_SHOOT_0)    && !HAS_BIT(pOldInput->iActionHold, PLAYER_ACTION_SHOOT_0))    nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_SHOOT_ON);
+            if(!HAS_BIT(pNewInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE) &&  HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_RAPID_FIRE) && !HAS_BIT(pOldInput->iActionHold, PLAYER_ACTION_RAPID_FIRE)) nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_RAPID_ON);
+            if(!HAS_BIT(pNewInput->iActionRelease, PLAYER_ACTION_SHOOT_0)    && !HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_SHOOT_0)    &&  HAS_BIT(pOldInput->iActionHold, PLAYER_ACTION_SHOOT_0))    nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_SHOOT_OFF);
+            if(!HAS_BIT(pNewInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE) && !HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_RAPID_FIRE) &&  HAS_BIT(pOldInput->iActionHold, PLAYER_ACTION_RAPID_FIRE)) nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_RAPID_OFF);
+
+            // handle button-events without actual hold-changes
+            if(HAS_BIT(pNewInput->iActionPress,   PLAYER_ACTION_SHOOT_0)    && !HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_SHOOT_0))    nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_SHOOT_OFF);
+            if(HAS_BIT(pNewInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE) && !HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_RAPID_FIRE)) nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_RAPID_OFF);
+            if(HAS_BIT(pNewInput->iActionRelease, PLAYER_ACTION_SHOOT_0)    &&  HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_SHOOT_0))    nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_SHOOT_ON);
+            if(HAS_BIT(pNewInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE) &&  HAS_BIT(pNewInput->iActionHold, PLAYER_ACTION_RAPID_FIRE)) nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_RAPID_ON);
+
             // 
             if(!(m_iCurFrame & BITLINE(REPLAY_BITS_FRAME)))
             {
-                nNewPacketFunc(i, REPLAY_TYPE_MISC, 0u);   // needs to be the last package of a frame
+                nNewPacketFunc(i, REPLAY_TYPE_EVENT, REPLAY_EVENT_SYNC);   // needs to be the last package of a frame
             }
 
             // 
@@ -654,7 +667,19 @@ void cReplay::Update()
                         oCurInput.iActionHold    &= ~BIT(oPacketRaw.iValue);
                         break;
 
-                    case REPLAY_TYPE_MISC:
+                    case REPLAY_TYPE_EVENT:
+                        switch(oPacketRaw.iValue)
+                        {
+                        case REPLAY_EVENT_SYNC:                                                                      break;
+                        case REPLAY_EVENT_SHOOT_ON:  SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_SHOOT_0,    true)  break;
+                        case REPLAY_EVENT_SHOOT_OFF: SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_SHOOT_0,    false) break;
+                        case REPLAY_EVENT_RAPID_ON:  SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_RAPID_FIRE, true)  break;
+                        case REPLAY_EVENT_RAPID_OFF: SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_RAPID_FIRE, false) break;
+
+                        default:
+                            WARN_IF(true) {}
+                            break;
+                        }
                         break;
 
                     default:
@@ -666,7 +691,7 @@ void cReplay::Update()
                     m_aiCurPacket[i] = j + 1u;
 
                     // 
-                    if((oPacketRaw.iType == REPLAY_TYPE_MISC) && (oPacketRaw.iValue == 0u))
+                    if((oPacketRaw.iType == REPLAY_TYPE_EVENT) && (oPacketRaw.iValue == REPLAY_EVENT_SYNC))
                         break;
                 }
                 else
@@ -674,6 +699,24 @@ void cReplay::Update()
                     // 
                     m_aiCurPacket[i] = j;
                     break;
+                }
+            }
+
+            // repair incomplete recording of toggle events (might still not fix mixed control mode due to missing information)
+            if(m_Header.iConfigVersion <= 13u)
+            {
+                if(HAS_BIT(oCurInput.iActionPress, PLAYER_ACTION_CHANGE_SPEED))
+                {
+                    const sGameInput oCopy = oCurInput;
+
+                    SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_SHOOT_0,    (HAS_BIT(oCopy.iActionHold, PLAYER_ACTION_RAPID_FIRE) || HAS_BIT(oCopy.iActionPress, PLAYER_ACTION_SHOOT_0))    && !HAS_BIT(oCopy.iActionRelease, PLAYER_ACTION_SHOOT_0))
+                    SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_RAPID_FIRE, (HAS_BIT(oCopy.iActionHold, PLAYER_ACTION_SHOOT_0)    || HAS_BIT(oCopy.iActionPress, PLAYER_ACTION_RAPID_FIRE)) && !HAS_BIT(oCopy.iActionRelease, PLAYER_ACTION_RAPID_FIRE))
+                }
+
+                if(g_pGame->GetPlayer(i)->HasStatus(PLAYER_STATUS_NO_INPUT_RAPID))
+                {
+                    SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_SHOOT_0,    HAS_BIT(oCurInput.iActionHold, PLAYER_ACTION_SHOOT_0) || HAS_BIT(oCurInput.iActionHold, PLAYER_ACTION_RAPID_FIRE))
+                    SET_BIT(oCurInput.iActionHold, PLAYER_ACTION_RAPID_FIRE, false)
                 }
             }
 

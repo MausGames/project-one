@@ -669,10 +669,10 @@ void UpdateInput()
     // 
     const auto nFireModeFunc = [](sGameInput* OUTPUT pInput, const coreUintW iModeIndex, const coreUintW iToggleIndex)
     {
-        const coreBool bFireA = HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_0);
-        const coreBool bFireB = HAS_BIT(pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
-
         const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
+
+        const coreBool bFireA = HAS_BIT((iFireMode == 1u) ? pInput->iActionRelease : pInput->iActionPress, PLAYER_ACTION_SHOOT_0);
+        const coreBool bFireB = HAS_BIT((iFireMode == 1u) ? pInput->iActionRelease : pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
 
         if(iFireMode == 1u)
         {

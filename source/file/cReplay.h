@@ -76,7 +76,16 @@ enum eReplayType : coreUint8
     REPLAY_TYPE_MOVE    = 0u,   // 
     REPLAY_TYPE_PRESS   = 1u,   // 
     REPLAY_TYPE_RELEASE = 2u,   // 
-    REPLAY_TYPE_MISC    = 3u    // 
+    REPLAY_TYPE_EVENT   = 3u    // 
+};
+
+enum eReplayEvent : coreUint8
+{
+    REPLAY_EVENT_SYNC      = 0u,   // 
+    REPLAY_EVENT_SHOOT_ON  = 1u,   // 
+    REPLAY_EVENT_SHOOT_OFF = 2u,   // 
+    REPLAY_EVENT_RAPID_ON  = 3u,   // 
+    REPLAY_EVENT_RAPID_OFF = 4u    // 
 };
 
 enum eReplayMode : coreUint8
