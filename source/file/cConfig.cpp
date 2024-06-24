@@ -463,6 +463,7 @@ void UpdateInput()
             }
 
             // 
+            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
         }
 
@@ -767,7 +768,7 @@ void UpdateInput()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS)) g_MenuInput.bScreenshot = true;
 
     // 
-    g_MenuInput.bAny = g_MenuInput.bCancel || g_MenuInput.bPause || Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
+    g_MenuInput.bAny = g_MenuInput.bAccept || g_MenuInput.bCancel || g_MenuInput.bPause || Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
 }
 
 

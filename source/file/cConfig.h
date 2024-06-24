@@ -201,6 +201,7 @@ struct sGameInput final
 struct sMenuInput final
 {
     coreUint8 iMove;         // 
+    coreBool  bAccept;       // 
     coreBool  bCancel;       // 
     coreBool  bPause;        // 
     coreBool  bAny;          // 
