@@ -403,6 +403,9 @@ void UpdateInput()
         {
             const coreUintW iJoystickID = i - INPUT_SETS_KEYBOARD;
 
+            // 
+            if(iJoystickID >= Core::Input->GetJoystickNum()) continue;
+
             // map movement input
             oMap.vMove = Core::Input->GetJoystickStickL(iJoystickID);
 
