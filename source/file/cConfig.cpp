@@ -645,16 +645,16 @@ void UpdateInput()
         else if(iControlMode == 3u)
         {
             // 
-            REMOVE_FLAG(pInput->iActionPress,   iShootBits1 | iTurnBits)
-            REMOVE_FLAG(pInput->iActionHold,    iShootBits1 | iTurnBits)
-            REMOVE_FLAG(pInput->iActionRelease, iShootBits1 | iTurnBits)
+            REMOVE_FLAG(pInput->iActionPress,   iShootBits1 | BIT(PLAYER_ACTION_CHANGE_SPEED) | iTurnBits)
+            REMOVE_FLAG(pInput->iActionHold,    iShootBits1 | BIT(PLAYER_ACTION_CHANGE_SPEED) | iTurnBits)
+            REMOVE_FLAG(pInput->iActionRelease, iShootBits1 | BIT(PLAYER_ACTION_CHANGE_SPEED) | iTurnBits)
         }
         else
         {
             // 
-            REMOVE_FLAG(pInput->iActionPress,   iShootBits1)
-            REMOVE_FLAG(pInput->iActionHold,    iShootBits1)
-            REMOVE_FLAG(pInput->iActionRelease, iShootBits1)
+            REMOVE_FLAG(pInput->iActionPress,   iShootBits1 | BIT(PLAYER_ACTION_CHANGE_SPEED))
+            REMOVE_FLAG(pInput->iActionHold,    iShootBits1 | BIT(PLAYER_ACTION_CHANGE_SPEED))
+            REMOVE_FLAG(pInput->iActionRelease, iShootBits1 | BIT(PLAYER_ACTION_CHANGE_SPEED))
         }
 
         // 

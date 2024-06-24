@@ -661,7 +661,8 @@ void cInterface::Move()
         oView.oImmune.SetEnabled (oView.fImmuneTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
         // 
-        const coreBool bFireSpeed = bInGame && pPlayer->HasStatus(PLAYER_STATUS_RAPID_FIRE);
+        const coreUint8 iMode      = bInGame ? REPLAY_WRAP_CONFIG_CONTROL_MODE[g_pGame->GetPlayerIndex(pPlayer)] : 0u;
+        const coreBool  bFireSpeed = bInGame && pPlayer->HasStatus(PLAYER_STATUS_RAPID_FIRE) && ((iMode == 1u) || (iMode == 2u));
         if(bFireSpeed) oView.fSpeedTime.UpdateMin( 7.0f, 1.0f);
                   else oView.fSpeedTime.UpdateMax(-7.0f, 0.0f);
         const coreFloat fSpeedValue = BLENDH3(1.0f - oView.fSpeedTime);
