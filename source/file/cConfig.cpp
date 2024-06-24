@@ -591,10 +591,10 @@ void UpdateInput()
                 {
                     const coreVector2 vDir = MapToAxis(pPlayer->GetDirection().xy(), g_pPostProcessing->GetDirectionGame());
 
-                    if((SameDirection90(vDir, coreVector2( 0.0f, 1.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))   ||
-                       (SameDirection90(vDir, coreVector2(-1.0f, 0.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)) ||
-                       (SameDirection90(vDir, coreVector2( 0.0f,-1.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)) ||
-                       (SameDirection90(vDir, coreVector2( 1.0f, 0.0f)) && !HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)))
+                    if((!SameDirection90(vDir, coreVector2( 0.0f, 1.0f)) && HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))   ||
+                       (!SameDirection90(vDir, coreVector2(-1.0f, 0.0f)) && HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)) ||
+                       (!SameDirection90(vDir, coreVector2( 0.0f,-1.0f)) && HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)) ||
+                       (!SameDirection90(vDir, coreVector2( 1.0f, 0.0f)) && HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)))
                     {
                         bAllowShoot = false;
                     }
