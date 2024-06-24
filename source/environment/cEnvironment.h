@@ -77,6 +77,7 @@ public:
     void Move();
 
     // control active background
+    void InitBackground();
     void ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2 vTransitionDir = coreVector2(0.0f,-1.0f));
     inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
     inline cBackground*     GetOldBackground()const {return m_pOldBackground;}

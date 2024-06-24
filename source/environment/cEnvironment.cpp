@@ -50,9 +50,7 @@ cEnvironment::cEnvironment()noexcept
     m_afHeight   [1] = m_afHeight   [0] = ENVIRONMENT_DEFAULT_HEIGHT;
 
     // load first background
-    m_pBackground = new cNoBackground();
-    const coreInt32 iConfig = Core::Config->GetInt("Game", "Background", cCloudBackground::ID);
-    this->ChangeBackground((g_pSave->GetHeader().oProgress.bFirstPlay || !iConfig) ? cCloudBackground::ID : iConfig, ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
+    this->InitBackground();
 }
 
 
@@ -176,6 +174,23 @@ void cEnvironment::Move()
     
     const coreVector3 vColor2 = m_TransitionTime.GetStatus() ? LERPH3(m_pOldBackground->GetColor2(), m_pBackground->GetColor2(), m_TransitionTime.GetValuePct(CORE_TIMER_GET_NORMAL)) : m_pBackground->GetColor2();
     g_pMenu->SetButtonColor(vColor2);
+}
+
+
+// ****************************************************************
+// load first background
+void cEnvironment::InitBackground()
+{
+    // 
+    if(m_TransitionTime.GetStatus()) this->__ClearTransition();
+
+    // 
+    SAFE_DELETE(m_pBackground)
+    m_pBackground = new cNoBackground();
+
+    // 
+    const coreInt32 iConfig = Core::Config->GetInt("Game", "Background", cCloudBackground::ID);
+    this->ChangeBackground((g_pSave->GetHeader().oProgress.bFirstPlay || !iConfig) ? cCloudBackground::ID : iConfig, ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
 }
 
 
