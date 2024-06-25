@@ -136,6 +136,8 @@ void cDistortion::Update()
 }
 
 
+// ****************************************************************
+// 
 void cDistortion::Move()
 {
     // 
@@ -164,7 +166,6 @@ void cDistortion::Move()
         oBurst.SetAlpha(MAX0(oBurst.GetAlpha() - fSpeed * TIME));
     }
 }
-
 
 
 // ****************************************************************

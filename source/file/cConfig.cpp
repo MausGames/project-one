@@ -671,8 +671,8 @@ void UpdateInput()
     {
         const coreUint8 iFireMode = g_CurConfig.Input.aiFireMode[iModeIndex];
 
-        const coreBool bFireA = HAS_BIT((iFireMode == 1u) ? pInput->iActionRelease : pInput->iActionPress, PLAYER_ACTION_SHOOT_0);
-        const coreBool bFireB = HAS_BIT((iFireMode == 1u) ? pInput->iActionRelease : pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
+        const coreBool bToggleA = HAS_BIT((iFireMode == 1u) ? pInput->iActionRelease : pInput->iActionPress, PLAYER_ACTION_SHOOT_0);
+        const coreBool bToggleB = HAS_BIT((iFireMode == 1u) ? pInput->iActionRelease : pInput->iActionPress, PLAYER_ACTION_RAPID_FIRE);
 
         if(iFireMode == 1u)
         {
@@ -688,7 +688,7 @@ void UpdateInput()
         else if(iFireMode == 2u)
         {
             // 
-            const coreBool bPress = s_abFireToggle[iToggleIndex] ? (s_abFireSpeed[iToggleIndex] ? bFireB : bFireA) : (bFireA || bFireB);
+            const coreBool bPress = s_abFireToggle[iToggleIndex] ? (s_abFireSpeed[iToggleIndex] ? bToggleB : bToggleA) : (bToggleA || bToggleB);
             if(bPress) s_abFireToggle[iToggleIndex] = !s_abFireToggle[iToggleIndex];
 
             SET_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0,  s_abFireToggle[iToggleIndex] && bPress)
@@ -698,8 +698,8 @@ void UpdateInput()
 
         if((iFireMode == 1u) || (iFireMode == 2u))
         {
-                 if(bFireA) s_abFireSpeed[iToggleIndex] = false;
-            else if(bFireB) s_abFireSpeed[iToggleIndex] = true;
+                 if(bToggleA) s_abFireSpeed[iToggleIndex] = false;
+            else if(bToggleB) s_abFireSpeed[iToggleIndex] = true;
 
             SET_BIT(pInput->iActionPress,   PLAYER_ACTION_RAPID_FIRE, s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionPress,   PLAYER_ACTION_SHOOT_0)
             SET_BIT(pInput->iActionRelease, PLAYER_ACTION_RAPID_FIRE, s_abFireSpeed[iToggleIndex] && HAS_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0)) if(s_abFireSpeed[iToggleIndex]) REMOVE_BIT(pInput->iActionRelease, PLAYER_ACTION_SHOOT_0)

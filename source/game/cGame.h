@@ -240,8 +240,8 @@ private:
     coreFlow  m_fMusicFade;                 // 
     coreFloat m_fMusicSpeed;                // 
     coreFloat m_fMusicVolume;               // 
-    
-    coreFlow m_fHitDelay;
+
+    coreFlow m_fHitDelay;                   // 
     coreFlow m_fVanishDelay;                // 
     coreBool m_bDefeatDelay;                // 
 
@@ -365,7 +365,8 @@ public:
     inline coreBool IsTaskExtra()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_TASK_EXTRA);}
     inline coreBool IsFragment ()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_FRAGMENT);}
     inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
-    
+
+    // 
     inline coreUintW GetPlayerIndex(const cPlayer* pPlayer)const {ASSERT(pPlayer) return (pPlayer - &m_aPlayer[0]);}
     
     coreBool IsAlone()const;

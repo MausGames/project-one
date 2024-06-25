@@ -96,9 +96,9 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_VIDEO_RESOLUTION);
         aiSkip.insert(ENTRY_VIDEO_DISPLAYMODE);
         aiSkip.insert(ENTRY_VIDEO_VSYNC);
-        aiSkip.insert(ENTRY_VIDEO_ANTIALIASING);
         aiSkip.insert(ENTRY_AUDIO_QUALITY);
         aiSkip.insert(ENTRY_AUDIO_MODE);
+        aiSkip.insert(ENTRY_GAME_UPDATEFREQ);
     #elif defined(_CORE_SWITCH_)
         aiSkip.insert(ENTRY_VIDEO_MONITOR);
         aiSkip.insert(ENTRY_VIDEO_RESOLUTION);
@@ -130,20 +130,11 @@ cConfigMenu::cConfigMenu()noexcept
 #if defined(_CORE_SWITCH_)
         if(i == ENTRY_INPUT_RUMBLE) iOffset = 0u;
 #endif
-        if(i == ENTRY_VIDEO_ANTIALIASING)    ++iOffset;   // # new paragraph
-        if(i == ENTRY_VIDEO_RENDERQUALITY)   ++iOffset;
-#if !defined(_CORE_SWITCH_)
-        if(i == ENTRY_VIDEO_PARTICLEEFFECTS) ++iOffset;
-#endif
+
+        if(i == ENTRY_VIDEO_RENDERQUALITY)   ++iOffset;   // # new paragraph
         if(i == ENTRY_AUDIO_MUSICVOLUME)     ++iOffset;
         if(i == ENTRY_AUDIO_QUALITY)         ++iOffset;
-#if defined(_CORE_SWITCH_)
-        if(i == ENTRY_AUDIO_MODE)            ++iOffset;
-#endif
         if(i == ENTRY_AUDIO_3DSOUND)         ++iOffset;
-#if !defined(_CORE_SWITCH_)
-        if(i == ENTRY_INPUT_RUMBLE)          ++iOffset;
-#endif
         if(i == ENTRY_INPUT_MOVEUP)          ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)         ++iOffset;
         if(i == ENTRY_INPUT_ACTION4)         ++iOffset;
@@ -151,9 +142,17 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_GAME_GAMEDIRECTION)    ++iOffset;
         if(i == ENTRY_GAME_HUDDIRECTION)     ++iOffset;
         if(i == ENTRY_GAME_BACKROTATION)     ++iOffset;
-#if defined(_CORE_SWITCH_)
+#if defined(_CORE_EMSCRIPTEN_)
         if(i == ENTRY_GAME_PUREMODE)         ++iOffset;
 #else
+        if(i == ENTRY_VIDEO_ANTIALIASING)    ++iOffset;
+#endif
+#if defined(_CORE_SWITCH_)
+        if(i == ENTRY_AUDIO_MODE)            ++iOffset;
+        if(i == ENTRY_GAME_PUREMODE)         ++iOffset;
+#else
+        if(i == ENTRY_VIDEO_PARTICLEEFFECTS) ++iOffset;
+        if(i == ENTRY_INPUT_RUMBLE)          ++iOffset;
         if(i == ENTRY_GAME_UPDATEFREQ)       ++iOffset;
 #endif
 
@@ -228,7 +227,7 @@ cConfigMenu::cConfigMenu()noexcept
     }
     m_aCueLock[0].SetPosition(m_aLabel[ENTRY_GAME_BACKROTATION].GetPosition() + coreVector2(0.472f,0.0f));
     m_aCueLock[1].SetPosition(m_aLabel[ENTRY_GAME_BACKSPEED]   .GetPosition() + coreVector2(0.472f,0.0f));
-#if defined(_CORE_SWITCH_)
+#if defined(_CORE_EMSCRIPTEN_) || defined(_CORE_SWITCH_)
     m_aCueLock[2].SetPosition(HIDDEN_POS);
 #else
     m_aCueLock[2].SetPosition(m_aLabel[ENTRY_GAME_UPDATEFREQ]  .GetPosition() + coreVector2(0.472f,0.0f));
@@ -602,7 +601,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindScroll(&m_VideoBox);
     m_Navigator.BindScroll(&m_InputBox);
 
-    m_Navigator.AssignFirst(DEFINED(_CORE_EMSCRIPTEN_) ? &m_TextureFilter : (DEFINED(_CORE_SWITCH_) ? &m_ParticleEffects : &m_Monitor));
+    m_Navigator.AssignFirst(DEFINED(_CORE_EMSCRIPTEN_) ? &m_AntiAliasing : (DEFINED(_CORE_SWITCH_) ? &m_ParticleEffects : &m_Monitor));
     m_Navigator.AssignBack (&m_BackButton);
     m_Navigator.AssignMenu (this);
 

@@ -17,6 +17,7 @@
 // TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
 // TODO 3: do not load default water shader and texture if not required (maybe create water-interface, NormalWater, Clean, Fresh)
 // TODO 3: rain resolution is not affected by environment-scale-factor (check dynamically, textures might shift)
+// TODO 2: rain-water animation becomes slower on skipped frames because calculations are in the update routine
 
 
 // ****************************************************************

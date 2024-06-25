@@ -59,7 +59,7 @@ coreFloat cTurf::CalcPercent()const
     coreUint32 iCount = 0u;
 
     // 
-    coreUint64* piSnowData64 = r_cast<coreUint64*>(m_piSnowData);
+    const coreUint64* piSnowData64 = r_cast<coreUint64*>(m_piSnowData);
     for(coreUintW i = 0u; i < SNOW_SIZE * SNOW_SIZE / 8u; i += 4u)
     {
         const coreUint64 iQuad = ((piSnowData64[i+3u] & 0x8080808080808080u) >> 3u) |

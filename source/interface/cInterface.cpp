@@ -1599,7 +1599,7 @@ void cInterface::ShowWave(const coreChar* pcName)
     m_sSegmentString = pcName;
 
     // 
-    this->__Update();
+    this->__UpdateTranslate();
 }
 
 
@@ -2134,8 +2134,8 @@ coreFloat cInterface::CalcGameCover(const coreObject2D* pObject, const coreVecto
 
 
 // ****************************************************************
-// 
-void cInterface::__Update()
+// update object after modification
+void cInterface::__UpdateTranslate()
 {
     //m_aBannerText[2].SetText(pcSub);
     

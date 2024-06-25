@@ -34,13 +34,6 @@ coreBool CoreApp::Settings::IsDemo()
 
 
 // ****************************************************************
-// compile-time settings
-STATIC_ASSERT(DEFINED(_CORE_PRECISE_))
-
-// TODO: textures, lights etc.
-
-
-// ****************************************************************
 // setup the application
 void CoreApp::Setup()
 {

@@ -10,7 +10,7 @@ add_executable(ProjectOne)
 set_target_properties(
     ProjectOne PROPERTIES
     C_STANDARD 17
-    CXX_STANDARD 20
+    CXX_STANDARD 23
     DEBUG_POSTFIX _debug
     BUILD_WITH_INSTALL_RPATH TRUE
     INSTALL_RPATH $ORIGIN

@@ -212,8 +212,8 @@
 #define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define STAGE_COLL_BULLET_BULLET(a,b,i,f,...)  if(!m_nCollBulletBullet) m_nCollBulletBullet = ([__VA_ARGS__](cBullet* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
-#define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
-#define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
+#define COLL_VAL(x)                             x = s_cast<std::conditional_t<!std::is_reference_v<decltype(x)>, decltype(x), void>>(x)
+#define COLL_REF(x)                            &x = s_cast<std::conditional_t< std::is_reference_v<decltype(x)>, decltype(x), void>>(x)
 #define COLL_THIS                              this
 
 #define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT

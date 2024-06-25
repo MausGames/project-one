@@ -186,7 +186,7 @@ void cIntroMenu::Move()
 
                 // 
                 g_pEnvironment->Activate();
-                g_pPostProcessing->SetWallOpacity(CLAMP01(1.35f * (fTime2 - 2.0f)));
+                g_pPostProcessing->SetWallOpacity(BLENDH3(CLAMP01(1.35f * (fTime2 - 2.0f))));
             }
             if(fTime2 >= 1.0f)
             {
@@ -272,9 +272,6 @@ void cIntroMenu::StartIntro()
 // 
 void cIntroMenu::ActivateFirstPlay()
 {
-    // 
-    m_iIntroStatus = 0u;
-
     // 
     m_WelcomeText.SetText("");
 }

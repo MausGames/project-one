@@ -116,11 +116,12 @@ https://store-jp.nintendo.com/list/software/70010000071402.html (Japan)
   - Special Effects: [Source](source/visual/cSpecialEffects.cpp), [Header](source/visual/cSpecialEffects.h)
   - Post Processing, Viewport: [Source](source/visual/cPostProcessing.cpp), [Header](source/visual/cPostProcessing.h)
   - Shadow: [Source](source/visual/cShadow.cpp), [Header](source/visual/cShadow.h)
-- Main: [Source](source/main.cpp), [Header](source/main.h)
+- Main, Frame Lock: [Source](source/main.cpp), [Header](source/main.h)
 - Save System: [Source](source/file/cSave.cpp), [Header](source/file/cSave.h)
 - Replay System: [Source](source/file/cReplay.cpp), [Header](source/file/cReplay.h)
 - Input Handling, Configuration: [Source](source/file/cConfig.cpp), [Header](source/file/cConfig.h)
 - [Passwords](source/additional/cPasswords.cpp)
+- [Languages](executable/data/languages)
 
 ## Documentation
 

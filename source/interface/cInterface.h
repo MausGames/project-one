@@ -247,7 +247,7 @@ public:
 
 private:
     // update object after modification
-    void __Update()final;
+    void __UpdateTranslate()final;
 
     // 
     void __PrepareBanner();

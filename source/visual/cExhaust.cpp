@@ -86,7 +86,7 @@ void cExhaustManager::Move()
     // 
     FOR_EACH(it, m_aData)
     {
-        cEnemy*       OUTPUT pEnemy  = it->pEnemy;
+        const cEnemy*        pEnemy  = it->pEnemy;
         coreObject3D* OUTPUT pObject = it->pObject;
         ASSERT(pEnemy != pObject)
 
