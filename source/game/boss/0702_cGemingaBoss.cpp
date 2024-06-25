@@ -56,6 +56,8 @@ cGemingaBoss::cGemingaBoss()noexcept
 : m_fMouthAngle (0.0f)
 , m_SuckEffect  (g_pSpecialEffects->GetParticleColor())
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh(Core::Manager::Object->GetLowQuad());
     this->DefineModelLow (Core::Manager::Object->GetLowQuad());
@@ -147,41 +149,44 @@ cGemingaBoss::cGemingaBoss()noexcept
     // 
     //m_pVacuumSound = Core::Manager::Resource->Get<coreSound>("effect_vacuum.wav");
 
-    // 
-    constexpr const coreChar* apcName[] =
+    if(!g_pGame->SkipLoadingCache())
     {
-        "effect_rain.png",
-        "environment_blood_diff.png",
-        "environment_clouds_grey.png",
-        "environment_clouds_high.png",
-        "environment_clouds_mid.png",
-        "environment_grave_diff.png",
-        "environment_grave_norm.png",
-        "environment_moss_diff.png",
-        "environment_rock_diff.png",
-        "environment_tree_01_diff.png",
-        "environment_tree_01_norm.png",
-        "environment_tree_02_diff.png",
-        "environment_tree_02_norm.png",
-        "environment_tree_03_diff.png",
-        "environment_tree_03_norm.png",
+        // 
+        constexpr const coreChar* apcName[] =
+        {
+            "effect_rain.png",
+            "environment_blood_diff.png",
+            "environment_clouds_grey.png",
+            "environment_clouds_high.png",
+            "environment_clouds_mid.png",
+            "environment_grave_diff.png",
+            "environment_grave_norm.png",
+            "environment_moss_diff.png",
+            "environment_rock_diff.png",
+            "environment_tree_01_diff.png",
+            "environment_tree_01_norm.png",
+            "environment_tree_02_diff.png",
+            "environment_tree_02_norm.png",
+            "environment_tree_03_diff.png",
+            "environment_tree_03_norm.png",
 
-        "environment_tree_01.md3",
-        "environment_tree_02.md3",
-        "environment_tree_03.md3",
-        "environment_grave.md3",
+            "environment_tree_01.md3",
+            "environment_tree_02.md3",
+            "environment_tree_03.md3",
+            "environment_grave.md3",
 
-        "effect_weather_rain_moss_program",
-        "environment_clouds_program",
-        "environment_clouds_inst_program",
-        "environment_rain_program",
-        "object_ground_program",
-        "object_ground_inst_program"
-    };
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_apResCache); ++i)
-    {
-        m_apResCache[i] = Core::Manager::Resource->Get<coreResourceDummy>(apcName[i]);
-        STATIC_ASSERT(ARRAY_SIZE(m_apResCache) == ARRAY_SIZE(apcName))
+            "effect_weather_rain_moss_program",
+            "environment_clouds_program",
+            "environment_clouds_inst_program",
+            "environment_rain_program",
+            "object_ground_program",
+            "object_ground_inst_program"
+        };
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_apResCache); ++i)
+        {
+            m_apResCache[i] = Core::Manager::Resource->Get<coreResourceDummy>(apcName[i]);
+            STATIC_ASSERT(ARRAY_SIZE(m_apResCache) == ARRAY_SIZE(apcName))
+        }
     }
 
     STATIC_ASSERT(offsetof(cGemingaBoss, m_InsideTop)    < offsetof(cGemingaBoss, m_Top))   // initialization order for collision detection
@@ -193,6 +198,8 @@ cGemingaBoss::cGemingaBoss()noexcept
 // destructor
 cGemingaBoss::~cGemingaBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 }

@@ -72,6 +72,8 @@ cTorusBoss::cTorusBoss()noexcept
 , m_iWaverActive    (0u)
 , m_iDecalState     (0u)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh("ship_boss_torus_high.md3");
     this->DefineModelLow ("ship_boss_torus_low.md3");
@@ -307,6 +309,8 @@ cTorusBoss::cTorusBoss()noexcept
 // destructor
 cTorusBoss::~cTorusBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 

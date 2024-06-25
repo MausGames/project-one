@@ -27,6 +27,8 @@
 // constructor
 cVausBoss::cVausBoss()noexcept
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh("ship_boss_vaus_high.md3");
     this->DefineModelLow ("ship_boss_vaus_low.md3");
@@ -57,6 +59,8 @@ cVausBoss::cVausBoss()noexcept
 // destructor
 cVausBoss::~cVausBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 }

@@ -32,6 +32,8 @@ cNautilusBoss::cNautilusBoss()noexcept
 , m_fAnimation (0.0f)
 , m_fMovement  (0.0f)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh("ship_boss_nautilus_body_high.md3");
     this->DefineModelLow ("ship_boss_nautilus_body_low.md3");
@@ -70,6 +72,8 @@ cNautilusBoss::cNautilusBoss()noexcept
 // destructor
 cNautilusBoss::~cNautilusBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 

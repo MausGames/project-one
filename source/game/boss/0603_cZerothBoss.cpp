@@ -72,6 +72,8 @@ cZerothBoss::cZerothBoss()noexcept
 , m_vGlobalDir   (coreVector2(0.0f,1.0f))
 , m_fAnimation   (0.0f)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh(Core::Manager::Object->GetLowQuad());
     this->DefineModelLow (Core::Manager::Object->GetLowQuad());
@@ -164,6 +166,8 @@ cZerothBoss::cZerothBoss()noexcept
 // destructor
 cZerothBoss::~cZerothBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 

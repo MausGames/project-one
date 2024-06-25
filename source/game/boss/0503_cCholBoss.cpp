@@ -69,6 +69,8 @@ cCholBoss::cCholBoss()noexcept
 , m_fCountdown   (0.0f)
 , m_fAnimation   (0.0f)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh("ship_boss_chol_body_high.md3");
     this->DefineModelLow ("ship_boss_chol_body_low.md3");
@@ -114,6 +116,8 @@ cCholBoss::cCholBoss()noexcept
 // destructor
 cCholBoss::~cCholBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 

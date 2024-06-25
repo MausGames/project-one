@@ -62,6 +62,8 @@ cMessierBoss::cMessierBoss()noexcept
 , m_fMeteorRota   (0.0f)
 , m_fBossRota     (0.0f)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh("ship_boss_messier_core.md3");
     this->DefineModelLow ("ship_boss_messier_core.md3");
@@ -154,6 +156,8 @@ cMessierBoss::cMessierBoss()noexcept
 // destructor
 cMessierBoss::~cMessierBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 

@@ -64,6 +64,8 @@ cLeviathanBoss::cLeviathanBoss()noexcept
 , m_fAnimation  (0.0f)
 , m_fMovement   (-3.0f)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh(Core::Manager::Object->GetLowQuad());
     this->DefineModelLow (Core::Manager::Object->GetLowQuad());
@@ -166,6 +168,8 @@ cLeviathanBoss::cLeviathanBoss()noexcept
 // destructor
 cLeviathanBoss::~cLeviathanBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 

@@ -71,6 +71,8 @@ cTigerBoss::cTigerBoss()noexcept
 , m_iDecalState    (0u)
 , m_fAnimation     (0.0f)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh("ship_boss_tiger_body_high.md3");
     this->DefineModelLow ("ship_boss_tiger_body_low.md3");
@@ -203,6 +205,8 @@ cTigerBoss::cTigerBoss()noexcept
 // destructor
 cTigerBoss::~cTigerBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 

@@ -258,7 +258,7 @@ cNevoMission::cNevoMission()noexcept
     g_pGlow->BindList(&m_Chip);
     g_pGlow->BindList(&m_ChipWave);
 
-    if(m_bStory || g_bDemoVersion)
+    if((m_bStory || g_bDemoVersion) && !g_pGame->SkipLoadingCache())
     {
         // 
         constexpr const coreChar* apcName[] =
@@ -328,11 +328,8 @@ cNevoMission::~cNevoMission()
     this->DisableContainer(false);
     this->DisableRanges   (false);
 
-    if(m_bStory || g_bDemoVersion)
-    {
-        // 
-        if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
-    }
+    // 
+    if(m_pNightmareSound.IsUsable() && m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
 }
 
 

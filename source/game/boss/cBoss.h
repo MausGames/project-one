@@ -203,6 +203,7 @@ protected:
 
     coreBool m_bActive;                       // 
     coreBool m_bForeshadow;                   // 
+    coreBool m_bSkipped;                      // 
 
     static coreVector2 s_vPositionPoint;      // 
 

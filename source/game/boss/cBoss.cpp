@@ -31,6 +31,7 @@ cBoss::cBoss()noexcept
 , m_iHelperHit       (0u)
 , m_bActive          (false)
 , m_bForeshadow      (false)
+, m_bSkipped         (g_pGame->SkipLoadingBoss())
 {
     // 
     for(coreUintW i = 0u; i < BOSS_TIMERS; ++i)
@@ -172,6 +173,8 @@ void cBoss::_EndBoss()
 // 
 void cBoss::_UpdateBoss()
 {
+    ASSERT(!m_bSkipped)
+
     // 
     m_fPhaseTimeBefore = m_fPhaseTime;
     m_fPhaseTime.Update(1.0f);

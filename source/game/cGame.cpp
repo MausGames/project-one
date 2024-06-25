@@ -1094,6 +1094,21 @@ void cGame::PrefetchBoss()
 
 // ****************************************************************
 // 
+coreBool cGame::SkipLoadingBoss()const
+{
+    // 
+    return (m_pCurMission->GetID() == cAterMission::ID);
+}
+
+coreBool cGame::SkipLoadingCache()const
+{
+    // 
+    return (m_pCurMission->GetID() == cAterMission::ID);
+}
+
+
+// ****************************************************************
+// 
 RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2 vPosition)
 {
     STATIC_ASSERT(GAME_PLAYERS == 2u)

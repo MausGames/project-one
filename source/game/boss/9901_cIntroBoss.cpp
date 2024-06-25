@@ -36,6 +36,8 @@
 // constructor
 cIntroBoss::cIntroBoss()noexcept
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh(Core::Manager::Object->GetLowQuad());
     this->DefineModelLow (Core::Manager::Object->GetLowQuad());
@@ -88,6 +90,8 @@ cIntroBoss::cIntroBoss()noexcept
 // destructor
 cIntroBoss::~cIntroBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 }

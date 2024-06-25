@@ -236,7 +236,7 @@ cCalorMission::cCalorMission()noexcept
     g_pGlow->BindList(&m_Star);
     g_pGlow->BindList(&m_StarChain);
 
-    if(m_bStory)
+    if(m_bStory && !g_pGame->SkipLoadingCache())
     {
         // 
         constexpr const coreChar* apcName[] =
@@ -305,11 +305,8 @@ cCalorMission::~cCalorMission()
     for(coreUintW i = 0u; i < CALOR_CHESTS; ++i) this->DisableChest(i, false);
     for(coreUintW i = 0u; i < CALOR_STARS;  ++i) this->DisableStar (i, false);
 
-    if(m_bStory)
-    {
-        // 
-        if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
-    }
+    // 
+    if(m_pNightmareSound.IsUsable() && m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
 }
 
 

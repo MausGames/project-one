@@ -39,6 +39,8 @@ cDharukBoss::cDharukBoss()noexcept
 , m_iPackedDir       (0u)
 , m_fAnimation       (0.0f)
 {
+    if(m_bSkipped) return;
+
     // load models
     this->DefineModelHigh("ship_boss_dharuk_high.md3");
     this->DefineModelLow ("ship_boss_dharuk_low.md3");
@@ -131,6 +133,8 @@ cDharukBoss::cDharukBoss()noexcept
 // destructor
 cDharukBoss::~cDharukBoss()
 {
+    if(m_bSkipped) return;
+
     // 
     this->Kill(false);
 
