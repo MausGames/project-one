@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Eigengrau v1.3.5 (2024-06-24)
+
+- fixed incomplete replay recording when playing with inverted fire mode
+- fixed incomplete replay playback when the rapid fire toggle button was used during recording
+- fixed an issue where some gimmick transitions in stage 7-1 took much longer than intended with certain game speeds and update frequencies
+- fixed gamepad input remapping sometimes not working in single-player
+- fixed mono audio mode not working on Windows
+- fixed 8x anti-aliasing not working on Linux with AMD GPUs (since Mesa 24.1.0)
+- reduced disk space requirements of the game by around 25%
+
+
+-------------------------------------------------------------------
 Eigengrau v1.3.4 (2024-03-27)
 
 - fixed an issue where the boss in stage 3-B could continue to take damage in the final phase after all players have already been defeated

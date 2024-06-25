@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 set(BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(ENGINE_DIRECTORY ${BASE_DIRECTORY}/../CoreEngine)
 
-project(ProjectOne VERSION 1.3.4)
+project(ProjectOne VERSION 1.3.5)
 add_subdirectory(${ENGINE_DIRECTORY}/projects/cmake CoreEngine)
 add_executable(ProjectOne)
 
