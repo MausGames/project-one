@@ -744,7 +744,7 @@ void cReplayMenu::Move()
                 else if(m_DeleteButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName(Core::Language->GetString("QUESTION_REPLAY_DELETE"), oInfo.oHeader.acName), [this](const coreInt32 iAnswer1)
+                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_DELETE", oInfo.oHeader.acName), [this](const coreInt32 iAnswer1)
                     {
                         if(iAnswer1 == MSGBOX_ANSWER_YES)
                         {
@@ -758,7 +758,7 @@ void cReplayMenu::Move()
                 else if(m_RenameButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName(Core::Language->GetString("QUESTION_REPLAY_RENAME"), oInfo.oHeader.acName), [this](const coreInt32 iAnswer)
+                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_RENAME", oInfo.oHeader.acName), [this](const coreInt32 iAnswer)
                     {
                         if(iAnswer == MSGBOX_ANSWER_YES) m_bRename = true;
                     });
