@@ -18,6 +18,14 @@ flat varying vec2 v_v2Scale;      //
 
 void FragmentMain()
 {
+    // prepare texture coordinates
+    float v1Lerp = (coreLinearStep(0.0, v_v2Scale.x, v_av2TexCoord[0].y) +
+                    coreLinearStep(v_v2Scale.y, 1.0, v_av2TexCoord[0].y)) * 0.5;
+
+    // lookup textures
+    float v1Shape  = coreTexture2D(0, vec2(v_av2TexCoord[0].x, v1Lerp)).r;   // # AMD hotfix: fetch outside of branch to prevent border artifacts
+    float v1Detail = coreTexture2D(1, v_av2TexCoord[1]).r;
+
     // compare object coordinates with border values
     if(any(lessThan   (v_v2Interior.xy, v_v2Border.xx)) &&
        all(greaterThan(v_v2Interior.xy, v_v2Border.yy)))
@@ -27,14 +35,6 @@ void FragmentMain()
     }
     else
     {
-        // prepare texture coordinates
-        float v1Lerp = (coreLinearStep(0.0, v_v2Scale.x, v_av2TexCoord[0].y) +
-                        coreLinearStep(v_v2Scale.y, 1.0, v_av2TexCoord[0].y)) * 0.5;
-
-        // lookup textures
-        float v1Shape  = coreTexture2D(0, vec2(v_av2TexCoord[0].x, v1Lerp)).r;
-        float v1Detail = coreTexture2D(1, v_av2TexCoord[1]).r;
-
         // 
         vec2  v2ScreenCoord = (gl_FragCoord.xy - u_v4Resolution.xy * 0.5) * max(u_v4Resolution.z, u_v4Resolution.w);
         float v1Factor      = 1.1 - coreLengthSq(v2ScreenCoord) * 0.85;

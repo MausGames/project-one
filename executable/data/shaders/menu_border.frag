@@ -18,6 +18,9 @@ varying      vec2 v_v2Factor;     //
 
 void FragmentMain()
 {
+    // lookup texture
+    float v1Detail = coreTexture2D(0, v_av2TexCoord[0]).r;   // # AMD hotfix: fetch outside of branch to prevent border artifacts
+
     // 
 #if defined(_P1_DIRECT_)
     bool bBorder = (v_v2Factor.x > 0.5);
@@ -34,9 +37,6 @@ void FragmentMain()
     }
     else
     {
-        // lookup texture
-        float v1Detail = coreTexture2D(0, v_av2TexCoord[0]).r;
-
         // 
     #if defined(_P1_DIRECT_)
         float v1Factor = max(v_v2Factor.x, 0.0) * (1.0 - abs(v_v2Factor.y));
