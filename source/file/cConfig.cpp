@@ -398,6 +398,9 @@ void UpdateInput()
                 if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j)
                 if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
             }
+
+            // 
+            if(HAS_BIT(oMap.iActionPress, 0u)) g_MenuInput.bAccept = true;
         }
         else   // # joystick/gamepad
         {
@@ -486,14 +489,14 @@ void UpdateInput()
         // 
         if(!oMap.vMove.IsNull() || oMap.iActionPress) g_iTotalType = i;
 
+        // (ignore HUD rotations) 
+             if(!coreMath::IsNear(oMap.vMove.x, 0.0f)) g_MenuInput.iMove = (oMap.vMove.x > 0.0f) ? 4u : 2u;
+        else if(!coreMath::IsNear(oMap.vMove.y, 0.0f)) g_MenuInput.iMove = (oMap.vMove.y > 0.0f) ? 1u : 3u;
+
         // 
         if(i >= INPUT_SETS_KEYBOARD)
         {
             if(HAS_BIT(oMap.iActionPress, 7u)) g_MenuInput.bPause = true;
-
-            // (ignore HUD rotations) 
-                 if(!coreMath::IsNear(oMap.vMove.x, 0.0f)) g_MenuInput.iMove = (oMap.vMove.x > 0.0f) ? 4u : 2u;
-            else if(!coreMath::IsNear(oMap.vMove.y, 0.0f)) g_MenuInput.iMove = (oMap.vMove.y > 0.0f) ? 1u : 3u;
         }
     }
 
@@ -761,6 +764,9 @@ void UpdateInput()
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_HOLD)) g_MenuInput.iMove = 4u;
 
     // 
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN),      CORE_INPUT_PRESS) ||
+       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),       CORE_INPUT_PRESS) ||
+       Core::Input->GetMouseButton   (CORE_INPUT_LEFT,             CORE_INPUT_PRESS)) g_MenuInput.bAccept     = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
        Core::Input->GetKeyboardButton(CORE_INPUT_KEY(BACKSPACE),   CORE_INPUT_PRESS) ||
        Core::Input->GetMouseButton   (CORE_INPUT_RIGHT,            CORE_INPUT_PRESS)) g_MenuInput.bCancel     = true;
@@ -768,7 +774,7 @@ void UpdateInput()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS)) g_MenuInput.bScreenshot = true;
 
     // 
-    g_MenuInput.bAny = g_MenuInput.bAccept || g_MenuInput.bCancel || g_MenuInput.bPause || Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
+    g_MenuInput.bAny = g_MenuInput.bAccept || g_MenuInput.bCancel || g_MenuInput.bPause;
 }
 
 

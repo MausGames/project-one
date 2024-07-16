@@ -153,7 +153,7 @@ void cScrollBox::Move()
         m_fCurOffset = CLAMP(m_fCurOffset - fWheel*0.05f - fDrag, 0.0f, m_fMaxOffset);
         
         
-        if(cMenuNavigator::IsUsingJoystick())
+        if(cMenuNavigator::IsUsingAny())
         {
             coreObject2D* pFocus = cMenuNavigator::GetCurFocus();
             if(this->ContainsObject(pFocus) && cMenuNavigator::IsValid(pFocus))
@@ -171,7 +171,7 @@ void cScrollBox::Move()
 
         
         // 
-        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 4.0f : 10.0f) * m_fSpeed * fBoost * TIME))));
+        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingAny() ? 4.0f : 10.0f) * m_fSpeed * fBoost * TIME))));
 
         // 
         m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y * RCP(m_fMaxOffset))));

@@ -85,9 +85,9 @@ private:
     coreFlow    m_fGrabTime;                         // 
     coreVector3 m_vGrabColor;                        // 
 
-    coreList<coreUint8> m_aiLock;                    // 
-    coreList<coreUint8> m_aiLastPack;                // 
-    coreList<coreTimer> m_aAutomatic;                // 
+    coreUint8 m_iLock;                               // 
+    coreUint8 m_iLastPack;                           // 
+    coreTimer m_Automatic;                           // 
 
     coreVector2 m_vMouseOffset;                      // 
 
@@ -103,6 +103,8 @@ private:
     uShoulderType m_nShoulderRight;                  // 
     coreBool      m_bShoulder;                       // 
 
+    coreBool m_bIgnoreKeyboard;                      // 
+
     coreMap<coreObject2D*, uDynamicType> m_aDynamic;   // 
 
     cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];        // 
@@ -110,6 +112,7 @@ private:
     coreBool m_bActive;                              // 
 
     static coreVector2 s_vMouseMove;                 // 
+    static coreBool    s_bKeyboard;                  // 
     static coreBool    s_bJoystick;                  // 
     static coreUint8   s_iJoystickType;              // 
     
@@ -163,20 +166,21 @@ public:
     inline void ForceCurrent   (coreObject2D* pObject) {this->OverrideCurrent(pObject); m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f);}
 
     // 
-    inline void SetActive(const coreBool bActive) {m_bActive = bActive;}
+    inline void SetGrabColor     (const coreVector3 vGrabColor)      {m_vGrabColor      = vGrabColor;}
+    inline void SetIgnoreKeyboard(const coreBool    bIgnoreKeyboard) {m_bIgnoreKeyboard = bIgnoreKeyboard;}
+    inline void SetActive        (const coreBool    bActive)         {m_bActive         = bActive;}
 
     // 
     inline coreObject2D* GetCurObject()const {return m_pCurObject;}
-
-    // 
-    inline void SetGrabColor(const coreVector3 vGrabColor) {m_vGrabColor = vGrabColor;}
 
     // 
     static void GlobalInit();
     static void GlobalUpdate();
 
     // 
+    static inline const coreBool& IsUsingKeyboard() {return s_bKeyboard;}
     static inline const coreBool& IsUsingJoystick() {return s_bJoystick;}
+    static inline       coreBool  IsUsingAny     () {return s_bKeyboard || s_bJoystick;}
 
     // 
     static inline coreBool IsValid(const coreObject2D* pObject) {ASSERT(pObject) return (pObject->GetAlpha() && pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL));}

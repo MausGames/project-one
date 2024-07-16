@@ -88,6 +88,9 @@ cArcadeInput::cArcadeInput()noexcept
     m_State.Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
     m_State.SetPosition(coreVector2(0.0f,0.12f));
     m_State.SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+
+    // 
+    m_Navigator.SetIgnoreKeyboard(true);
 }
 
 
@@ -140,17 +143,7 @@ void cArcadeInput::Move()
     m_Navigator.Update();
 
     // 
-    const coreChar cChar = TO_UPPER(Core::Input->GetKeyboardChar());
-    
-    
-    if(g_MenuInput.bCancel && (cChar != ARCADE_COMMAND_DEL))
-    {
-        // 
-        if(!m_sTextValue.empty()) {this->__PopCharacter(); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);}
-        this->__SetText(m_sTextValue.c_str());
-    }
-    
-
+    const coreChar cChar = g_MenuInput.bCancel ? ARCADE_COMMAND_DEL : TO_UPPER(Core::Input->GetKeyboardChar());
 
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
@@ -161,13 +154,11 @@ void cArcadeInput::Move()
         // 
         if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || (g_acArcadeGlyph[i] == cChar)))
         {
-            // 
-            if(cChar) this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cChar));
-
             if(g_acArcadeGlyph[i] == ARCADE_COMMAND_DEL)
             {
                 // 
-                if(!m_sTextValue.empty()) this->__PopCharacter();
+                if(m_sTextValue.empty()) m_bFinished = true;
+                this->__PopCharacter();
                 this->__SetText(m_sTextValue.c_str());
             }
             else if(g_acArcadeGlyph[i] == ARCADE_COMMAND_END)
@@ -180,6 +171,9 @@ void cArcadeInput::Move()
                 // 
                 m_sTextValue += g_acArcadeGlyph[i];
                 this->__SetText(m_sTextValue.c_str());
+
+                // 
+                if(cChar) this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cChar));
 
                 // 
                 //if(g_MenuInput.bAccept && m_sTextTemplate.starts_with(m_sTextValue))
@@ -198,6 +192,7 @@ void cArcadeInput::Move()
         if(m_aButton[i].IsFocused() && (m_iCurGlyph != i))
         {
             this->__MoveCursor(i);
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
             break;
         }
     }
@@ -212,7 +207,7 @@ void cArcadeInput::Move()
     }
 
     // 
-    if(!cMenuNavigator::IsUsingJoystick() && !g_pMenu->GetMsgBox()->IsVisible()) m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
+    if(!cMenuNavigator::IsUsingAny() && !g_pMenu->GetMsgBox()->IsVisible()) m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
 
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].Move();
@@ -300,9 +295,6 @@ void cArcadeInput::__MoveCursor(const coreUintW iNewGylph)
 
     // 
     m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
-
-    // 
-    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
 }
 
 

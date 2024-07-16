@@ -196,7 +196,7 @@ void cMenu::Render()
         {
             g_MenuInput = {};
             Core::Input->ClearMouseButton(CORE_INPUT_LEFT);
-            if(cMenuNavigator::IsUsingJoystick()) Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
+            if(cMenuNavigator::IsUsingAny()) Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
             
             Timeless([&]()
             {
@@ -1001,7 +1001,7 @@ void cMenu::Move()
     if(s_pCurLine != s_pNewLine)
     {
         s_pCurLine = s_pNewLine;
-        if(s_pCurLine && cMenuNavigator::IsUsingJoystick())
+        if(s_pCurLine && cMenuNavigator::IsUsingAny())
         {
             g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 0.9f, 1.0f, SOUND_MENU_CHANGE_LINE);
         }

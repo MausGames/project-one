@@ -284,7 +284,7 @@ void cMsgBox::Move()
     }
 
     // 
-    if(!cMenuNavigator::IsUsingJoystick() || m_nCallback || (m_iMsgType == MSGBOX_TYPE_MAPPING))
+    if(!cMenuNavigator::IsUsingAny() || m_nCallback || (m_iMsgType == MSGBOX_TYPE_MAPPING))
     {
         // 
         cMsgBox::__ClearInput();

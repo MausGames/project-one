@@ -9,6 +9,7 @@
 #include "main.h"
 
 coreVector2   cMenuNavigator::s_vMouseMove    = coreVector2(0.0f,0.0f);
+coreBool      cMenuNavigator::s_bKeyboard     = false;
 coreBool      cMenuNavigator::s_bJoystick     = false;
 coreUint8     cMenuNavigator::s_iJoystickType = SDL_CONTROLLER_TYPE_UNKNOWN;
 coreObject2D* cMenuNavigator::s_pCurFocus     = NULL;
@@ -17,24 +18,28 @@ coreObject2D* cMenuNavigator::s_pCurFocus     = NULL;
 // ****************************************************************
 // constructor
 cMenuNavigator::cMenuNavigator()noexcept
-: m_pCurObject     (NULL)
-, m_iStore         (MENUNAVIGATOR_INVALID)
-, m_iFirst         (MENUNAVIGATOR_INVALID)
-, m_iBack          (MENUNAVIGATOR_INVALID)
-, m_bPressed       (false)
-, m_bGrabbed       (false)
-, m_dPressTime     (0.0)
-, m_fGrabTime      (1.0f)
-, m_vGrabColor     (coreVector3(0.0f,0.0f,0.0f))
-, m_vMouseOffset   (coreVector2(0.0f,0.0f))
-, m_vCurPos        (HIDDEN_POS)
-, m_vCurSize       (coreVector2(0.0f,0.0f))
-, m_bShowIcon      (false)
-, m_pMenu          (NULL)
-, m_nShoulderLeft  (NULL)
-, m_nShoulderRight (NULL)
-, m_bShoulder      (true)
-, m_bActive        (true)
+: m_pCurObject      (NULL)
+, m_iStore          (MENUNAVIGATOR_INVALID)
+, m_iFirst          (MENUNAVIGATOR_INVALID)
+, m_iBack           (MENUNAVIGATOR_INVALID)
+, m_bPressed        (false)
+, m_bGrabbed        (false)
+, m_dPressTime      (0.0)
+, m_fGrabTime       (1.0f)
+, m_vGrabColor      (coreVector3(0.0f,0.0f,0.0f))
+, m_iLock           (0xFFu)
+, m_iLastPack       (8u)
+, m_Automatic       (coreTimer(1.0f, 10.0f, 0u))
+, m_vMouseOffset    (coreVector2(0.0f,0.0f))
+, m_vCurPos         (HIDDEN_POS)
+, m_vCurSize        (coreVector2(0.0f,0.0f))
+, m_bShowIcon       (false)
+, m_pMenu           (NULL)
+, m_nShoulderLeft   (NULL)
+, m_nShoulderRight  (NULL)
+, m_bShoulder       (true)
+, m_bIgnoreKeyboard (false)
+, m_bActive         (true)
 {
     // 
     this->DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
@@ -182,7 +187,7 @@ void cMenuNavigator::Move()
 
         m_iStore = this->__ToIndex(m_pCurObject);
     }
-    else if(s_bJoystick)
+    else if(s_bKeyboard || s_bJoystick)
     {
         Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
     }
@@ -269,7 +274,7 @@ void cMenuNavigator::Update()
 
     if(!m_bActive) return;
 
-    if(!s_bJoystick)
+    if(!s_bKeyboard && !s_bJoystick)
     {
         m_pCurObject = NULL;
     }
@@ -280,17 +285,12 @@ void cMenuNavigator::Update()
     const auto nPressFunc = [&]()
     {
         if(!g_pMenu->IsShifting() || (g_pMenu->GetShifting().GetValue(CORE_TIMER_GET_NORMAL) > 0.7f))
+        {
             if(!m_bPressed && !bNewPressed) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, true);
+        }
         bNewPressed = true;
     };
 
-    if(m_aiLock.size() != Core::Input->GetJoystickNum())
-    {
-        m_aiLock    .resize(Core::Input->GetJoystickNum(), 0xFFu);
-        m_aiLastPack.resize(Core::Input->GetJoystickNum(), 8u);
-        m_aAutomatic.resize(Core::Input->GetJoystickNum(), coreTimer(1.0f, 10.0f, 0u));
-    }
-    
     coreVector2 vRelative      = coreVector2(0.0f,0.0f);
     coreUint8   iCount         = 0u;
     coreBool    bButtonA       = false;
@@ -307,22 +307,34 @@ void cMenuNavigator::Update()
         bShoulderRight = bShoulderRight || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER, CORE_INPUT_PRESS);
     }
 
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum() ? 1u : 0u; i < ie; ++i)
+    if(s_bKeyboard && !m_bIgnoreKeyboard)
+    {
+        if(vRelative.IsNull())
+        {
+                 if(g_MenuInput.iMove == 1u) vRelative.y =  1.0f;
+            else if(g_MenuInput.iMove == 2u) vRelative.x = -1.0f;
+            else if(g_MenuInput.iMove == 3u) vRelative.y = -1.0f;
+            else if(g_MenuInput.iMove == 4u) vRelative.x =  1.0f;
+        }
+        iCount   = MAX(iCount, Core::Input->GetCountKeyboard(CORE_INPUT_HOLD));
+        bButtonA = bButtonA || g_MenuInput.bAccept;
+    }
+
     {
         const coreVector2 vMove = AlongCross(vRelative);
         const coreUint8   iPack = PackDirection(vMove);
 
         if(vRelative.IsNull() && !iCount)
         {
-            REMOVE_BIT(m_aiLock[i], 0u)
+            REMOVE_BIT(m_iLock, 0u)
         }
 
-        if(s_bJoystick && !m_pCurObject && (m_iFirst == MENUNAVIGATOR_INVALID))
+        if((s_bKeyboard || s_bJoystick) && !m_pCurObject && (m_iFirst == MENUNAVIGATOR_INVALID))
         {
-            REMOVE_BIT(m_aiLock[i], 0u)
+            REMOVE_BIT(m_iLock, 0u)
         }
 
-        if(!HAS_BIT(m_aiLock[i], 0u))
+        if(!HAS_BIT(m_iLock, 0u))
         {
             if(bButtonA) nPressFunc();
 
@@ -409,15 +421,15 @@ void cMenuNavigator::Update()
                 }
             }
 
-            if((iPack != m_aiLastPack[i]) || (iPack == 8u) || m_bGrabbed)
+            if((iPack != m_iLastPack) || (iPack == 8u) || m_bGrabbed)
             {
-                m_aAutomatic[i].Pause();
-                m_aAutomatic[i].SetValue(CORE_SWITCHBOX_DELAY);
+                m_Automatic.Pause();
+                m_Automatic.SetValue(CORE_SWITCHBOX_DELAY);
             }
 
-            const coreBool bAuto = m_aAutomatic[i].Update(1.0f);
+            const coreBool bAuto = m_Automatic.Update(1.0f);
 
-            if((iPack != 8u) && !m_bGrabbed && (bAuto || !m_aAutomatic[i].GetStatus()))
+            if((iPack != 8u) && !m_bGrabbed && (bAuto || !m_Automatic.GetStatus()))
             {
                 coreObject2D* pNewObject = NULL;
 
@@ -507,14 +519,14 @@ void cMenuNavigator::Update()
                     }
                 }
                 
-                m_aAutomatic[i].Play(CORE_TIMER_PLAY_CURRENT);
+                m_Automatic.Play(CORE_TIMER_PLAY_CURRENT);
             }
 
-            m_aiLastPack[i] = iPack;
+            m_iLastPack = iPack;
         }
     }
 
-    if(s_bJoystick && !m_pCurObject && ((m_iStore != MENUNAVIGATOR_INVALID) || (m_iFirst != MENUNAVIGATOR_INVALID)))
+    if((s_bKeyboard || s_bJoystick) && !m_pCurObject && ((m_iStore != MENUNAVIGATOR_INVALID) || (m_iFirst != MENUNAVIGATOR_INVALID)))
     {
         m_pCurObject = this->__ToObject((m_iStore != MENUNAVIGATOR_INVALID) ? m_iStore : m_iFirst);
 
@@ -531,17 +543,17 @@ void cMenuNavigator::Update()
         }
     }
 
-    if(!s_bJoystick && (m_iFirst == MENUNAVIGATOR_INVALID))
+    if(!s_bKeyboard && !s_bJoystick && (m_iFirst == MENUNAVIGATOR_INVALID))
     {
         m_iStore = MENUNAVIGATOR_INVALID;
     }
 
     if(m_pMenu && !m_pMenu->GetAlpha())
     {
-        if(!m_aiLock.empty()) std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
+        m_iLock = 0xFF;
     }
 
-    if(!s_bJoystick && !m_aiLock.empty()) std::memset(m_aiLock.data(), 0xFF, m_aiLock.size() * sizeof(coreUint8));
+    if(!s_bKeyboard && !s_bJoystick) m_iLock = 0xFF;
 
     if(m_pCurObject && cMenuNavigator::IsValid(m_pCurObject))
     {
@@ -561,7 +573,7 @@ void cMenuNavigator::Update()
 
         if((m_pCurObject->GetAlpha() >= 1.0f) && bNewPressed) m_dPressTime = Core::System->GetTotalTime() + 1.0;
     }
-    else if(s_bJoystick)
+    else if(s_bKeyboard || s_bJoystick)
     {
         Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
     }
@@ -674,29 +686,43 @@ void cMenuNavigator::GlobalInit()
 // 
 void cMenuNavigator::GlobalUpdate()
 {
-    if(s_bJoystick)
+    if(s_bKeyboard || s_bJoystick)
     {
         // 
         s_vMouseMove += Core::Input->GetMouseRelative().xy() * Core::System->GetResolution();
         if(s_vMouseMove.LengthSq() > POW2(50.0f))
         {
+            s_bKeyboard = false;
             s_bJoystick = false;
         }
 
         // 
         if(Core::Input->GetLastMouse() != CORE_INPUT_INVALID_MOUSE)
         {
+            s_bKeyboard = false;
             s_bJoystick = false;
             Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
         }
     }
 
     // 
+    const coreBool bAllowButtons = (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING));
+
+    // 
+    if(g_MenuInput.iMove && (g_pMenu->GetCurSurface() != SURFACE_EMPTY) && bAllowButtons)   // # before joystick handling
+    {
+        s_vMouseMove = coreVector2(0.0f,0.0f);
+        s_bKeyboard  = true;
+        s_bJoystick  = false;
+    }
+
+    // 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
-        if(!Core::Input->GetJoystickStickL(i).IsNull() || !Core::Input->GetJoystickStickR(i).IsNull() || (Core::Input->GetCountJoystick(i, CORE_INPUT_PRESS) && (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING))))
+        if(!Core::Input->GetJoystickStickL(i).IsNull() || !Core::Input->GetJoystickStickR(i).IsNull() || (Core::Input->GetCountJoystick(i, CORE_INPUT_PRESS) && bAllowButtons))
         {
             s_vMouseMove    = coreVector2(0.0f,0.0f);
+            s_bKeyboard     = false;
             s_bJoystick     = true;
             s_iJoystickType = Core::Input->GetJoystickGamepadType(i);
             break;
@@ -704,5 +730,5 @@ void cMenuNavigator::GlobalUpdate()
     }
 
     // 
-    Core::Input->ShowCursor(!s_bJoystick && g_pMenu->NeedsCursor());
+    Core::Input->ShowCursor(!s_bKeyboard && !s_bJoystick && g_pMenu->NeedsCursor());
 }

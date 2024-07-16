@@ -201,7 +201,10 @@ void cCreditRoll::Move()
     }
 
     // 
-    const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || bButtonA || (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? ((m_fOffset < m_fMaxOffset) ? 6.0f : 2.0f) : 1.0f;
+    const coreFloat fSpeed = (Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN), CORE_INPUT_HOLD) ||
+                              Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),  CORE_INPUT_HOLD) ||
+                              Core::Input->GetMouseButton   (CORE_INPUT_LEFT,        CORE_INPUT_HOLD) ||
+                              bButtonA || (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? ((m_fOffset < m_fMaxOffset) ? 6.0f : 2.0f) : 1.0f;
     m_fOffset.Update(CREDIT_SPEED * fSpeed);
 
     // 

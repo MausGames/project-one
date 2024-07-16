@@ -414,7 +414,7 @@ void cExtraMenu::Move()
             }
 
             // 
-            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateLine(&m_aTrophyLine[i], false, false, coreVector3(1.0f,1.0f,1.0f), false);//cMenuNavigator::IsUsingJoystick());
+            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateLine(&m_aTrophyLine[i], false, false, coreVector3(1.0f,1.0f,1.0f), false);//cMenuNavigator::IsUsingAny());
 
             // 
             for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateButton(&m_aTrophyArrow[i], this, m_aTrophyLine[i].IsFocused() || m_aTrophyArrow[i].IsFocused(), m_aTrophyTile[i].GetColor3(), true, false);
@@ -497,7 +497,7 @@ void cExtraMenu::Move()
             cMenu::UpdateButton(&m_Music,    &m_Navigator, m_Music   .IsFocused());
 
             // 
-            for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true, true, g_pMenu->GetButtonColor(), !cMenuNavigator::IsUsingJoystick());
+            for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true, true, g_pMenu->GetButtonColor(), !cMenuNavigator::IsUsingAny());
         }
         break;
 
