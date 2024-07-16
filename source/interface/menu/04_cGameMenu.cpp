@@ -2078,6 +2078,8 @@ void cGameMenu::SelectTrophy(const coreUintW iMissionIndex, const coreUintW iSeg
     this->__SelectSegment (iMissionIndex, iSegmentIndex);
     this->__PrepareSegment(iMissionIndex, iSegmentIndex);
 
+    m_aiSegmentSelection[0] = m_aiCurIndex[1];
+    m_aiSegmentSelection[1] = m_aiCurIndex[2];
     m_NavigatorMain.ForceCurrent(&m_aaSegmentTile[m_aiCurIndex[1]][m_aiCurIndex[2]]);
     m_SegmentBox.ScrollToObject(&m_aaSegmentTile[m_aiCurIndex[1]][m_aiCurIndex[2]], true);
     

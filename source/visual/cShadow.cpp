@@ -232,8 +232,8 @@ void cShadow::RenderSingle(const coreMatrix4& mTransform, const coreList<coreBat
         cShadow::__SendTransform(s_pProgramSingle, mTransform);
 
         // render single objects
-        FOR_EACH(it, apObject) (*it)->Render(s_pProgramSingle, false);
-        FOR_EACH(it, apList)   {if(!(*it)->IsInstanced()) (*it)->Render(NULL, s_pProgramSingle, false);}
+        FOR_EACH(it, apObject) (*it)->Render(s_pProgramSingle);
+        FOR_EACH(it, apList)   {if(!(*it)->IsInstanced()) (*it)->Render(NULL, s_pProgramSingle);}
     }
 }
 
@@ -256,7 +256,7 @@ void cShadow::RenderInstanced(const coreMatrix4& mTransform, const coreList<core
         cShadow::__SendTransform(s_pProgramInstanced, mTransform);
 
         // render lists with objects
-        FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL, false);}
+        FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
     }
 }
 

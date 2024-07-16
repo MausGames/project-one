@@ -1063,8 +1063,8 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
 
         Timeless([&]()
         {
-            coreSet<coreObject2D*>* pObjectSet = pMenu->GetObjectSet(iNewSurface);
-            FOR_EACH(it, *pObjectSet) (*it)->Move();
+            const coreSet<coreObject2D*>* pList = pMenu->List(iNewSurface);
+            FOR_EACH(it, *pList) (*it)->Move();
         });
 
         g_MenuInput = oSave;

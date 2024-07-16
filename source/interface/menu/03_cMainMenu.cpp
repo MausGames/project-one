@@ -117,10 +117,10 @@ cMainMenu::cMainMenu()noexcept
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_Navigator);
 
     // 
-    const coreSet<coreObject2D*>* pObjectSet = this->GetObjectSet(SURFACE_MAIN_DEFAULT);
-    for(coreUintW i = 0u, ie = pObjectSet->size() - ((!g_bDemoVersion && g_bLeaderboards) ? 1u : 0u) - 5u; i < ie; ++i)
+    const coreSet<coreObject2D*>* pList = this->List(SURFACE_MAIN_DEFAULT);
+    for(coreUintW i = 0u, ie = pList->size() - ((!g_bDemoVersion && g_bLeaderboards) ? 1u : 0u) - 5u; i < ie; ++i)
     {
-        (*pObjectSet)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
+        (*pList)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
     }
 
     m_StartNew.SetPosition(m_StartButton.GetPosition() + m_StartButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
