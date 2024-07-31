@@ -8,6 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "engine/data_transform_2d.glsl"
 #include "engine/util_matrix.glsl"
+#include "shared.glsl"
 
 
 // constant values
@@ -21,14 +22,12 @@ flat varying vec2 v_v2Scale;      //
 
 void VertexMain()
 {
-    vec2 v2Aspect = u_v4Resolution.xy * u_v4Resolution.wz;
-
     // calculate non-uniform size-factor and offset
-    vec2 v2Size   = abs(max(v2Aspect, 1.0) * coreMat3to2(u_m3ScreenView));
+    vec2 v2Size   = AspectSize();
     vec2 v2Offset = u_v2TexOffset * 2.0;
 
     // 
-    float v1Pixel = abs(u_v4Resolution.xy * coreMat3to2(u_m3ScreenView)).x * 0.5;
+    float v1Pixel = u_v2TwoSize.x;
 
     // transform position and texture coordinates
     gl_Position      = coreObject2DPosition();

@@ -8,6 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "engine/data_transform_2d.glsl"
 #include "engine/util_matrix.glsl"
+#include "shared.glsl"
 
 
 // shader output
@@ -22,7 +23,6 @@ void VertexMain()
     v_av2TexCoord[1] = a_v2LowTexCoord * 2.0 - 1.0;
 
     // 
-    vec2 v2Aspect = u_v4Resolution.xy * u_v4Resolution.wz;
-    vec2 v2Size   = abs(max(v2Aspect, 1.0) * coreMat3to2(u_m3ScreenView));
+    vec2 v2Size   = AspectSize();
     v_v1Threshold = 1.0 - 0.15 / (1.0 + length(v2Size));
 }

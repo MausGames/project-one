@@ -8,6 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "engine/data_transform_2d.glsl"
 #include "engine/util_matrix.glsl"
+#include "shared.glsl"
 
 
 // constant values
@@ -16,10 +17,8 @@ const float c_v1TileRate = 2.0;   //
 
 void VertexMain()
 {
-    vec2 v2Aspect = u_v4Resolution.xy * u_v4Resolution.wz;
-
     // calculate non-uniform size-factor
-    vec2 v2Size = abs(max(v2Aspect, 1.0) * coreMat3to2(u_m3ScreenView));
+    vec2 v2Size = AspectSize();
 
     // transform position and texture coordinates
     gl_Position      = coreObject2DPosition();
