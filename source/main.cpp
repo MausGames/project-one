@@ -400,6 +400,9 @@ void CoreApp::Move()
         UpdateListener();
     }
     Core::Debug->MeasureEnd("Move");
+
+    // 
+    Core::Platform->SetGameState(STATIC_ISVALID(g_pGame) ? ((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && !g_pMenu->IsPaused()) ? CORE_PLATFORM_STATE_ACTIVE : CORE_PLATFORM_STATE_INACTIVE) : CORE_PLATFORM_STATE_MENU);
     
     
     cBackground* pCurBackground = g_pEnvironment->GetBackground();

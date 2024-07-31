@@ -1547,6 +1547,9 @@ void cGame::__HandleDefeat()
 
             // 
             g_MusicPlayer.Stop();
+
+            // 
+            Core::Platform->MarkEvent("steam_death", Core::Language->GetString("DEFEAT_GAMEOVER"), 0.0f);
         }
         else
         {
