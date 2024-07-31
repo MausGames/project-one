@@ -140,17 +140,18 @@ void cMenuNavigator::Move()
         else
         {
             const coreVector2 vDiff = vNewPos - m_vCurPos;
-            if(!vDiff.IsNull())
+            if(vDiff.LengthSq() < POW2(CORE_MATH_PRECISION))
+            {
+                m_vCurPos  = vNewPos;
+                m_vCurSize = vNewSize;
+            }
+            else
             {
                 const coreVector2 vOldPos = m_vCurPos;
                 const coreFloat   fLen    = vDiff.Length();
 
                 m_vCurPos  = m_vCurPos  + vDiff.Normalized() * (10.0f * TIME * SmoothTowards(fLen, 0.5f));
                 m_vCurSize = m_vCurSize + (vNewSize - m_vCurSize) * ((vOldPos - m_vCurPos).Length() * RCP(fLen));
-            }
-            else
-            {
-                m_vCurSize = vNewSize;
             }
         }
 
