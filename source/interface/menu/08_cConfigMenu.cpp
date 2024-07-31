@@ -1463,6 +1463,9 @@ void cConfigMenu::SaveValues()
         }
 
         // 
+        Core::Manager::Resource->UpdateWait();
+
+        // 
         this->__LoadMonitors();
         this->__LoadResolutions(Core::System->GetDisplayIndex());
         this->__LoadFrequencies(Core::System->GetDisplayIndex());

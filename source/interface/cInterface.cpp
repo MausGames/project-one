@@ -2081,17 +2081,17 @@ coreFloat cInterface::CalcGameCover(const coreObject2D** ppObject, const coreVec
         if(!pObject->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) continue;
 
         const coreVector2 vPosition = pObject->GetScreenPosition();
-        const coreVector2 vSize     = pObject->GetScreenSize90() * 0.5f;
+        const coreVector2 vBound    = pObject->GetScreenBound90() * 0.5f;
 
-        const coreVector2 vLowerLeftPre  = vPosition - vSize;
-        const coreVector2 vUpperRightPre = vPosition + vSize;
+        const coreVector2 vLowerLeftPre  = vPosition - vBound;
+        const coreVector2 vUpperRightPre = vPosition + vBound;
         if(((vLowerLeftPre .x >  vResolutionHalf.x) || (vLowerLeftPre .y >  vResolutionHalf.y) ||
             (vUpperRightPre.x < -vResolutionHalf.x) || (vUpperRightPre.y < -vResolutionHalf.y)) && !g_bTiltMode)
             continue;
 
         const coreVector2 vScale      = bHorizontal ? pvScale[i].yx() : pvScale[i];
-        const coreVector2 vLowerLeft  = (vPosition - vSize * vScale) * vResolutionInv;
-        const coreVector2 vUpperRight = (vPosition + vSize * vScale) * vResolutionInv;
+        const coreVector2 vLowerLeft  = (vPosition - vBound * vScale) * vResolutionInv;
+        const coreVector2 vUpperRight = (vPosition + vBound * vScale) * vResolutionInv;
 
         g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW j)
         {

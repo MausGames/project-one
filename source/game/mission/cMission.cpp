@@ -352,8 +352,7 @@ void cMission::ActivateWave(const coreUintW iIndex, const coreChar* pcName)
 
     // 
     g_pGame->GetInterface()->ShowWave(pcName);
-    
-    
+
     if(!g_pGame->IsTask())
     {
         // 
