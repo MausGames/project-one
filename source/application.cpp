@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.3.5";
+const coreChar* const CoreApp::Settings::Version                       = "1.3.6";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.webp";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.webp";
 const coreBool        CoreApp::Settings::UserManagement                = true;

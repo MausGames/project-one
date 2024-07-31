@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Eigengrau v1.3.6 (2024-07-10)
+
+- added keyboard menu navigation
+- added basic Steam Timeline support for the new game recording feature
+- fixed an issue that sometimes caused the trophy text in the extra menu to be displaced
+- fixed incorrect button glyphs when using a controller with Steam Input enabled
+- improved loading times for starting and restarting a game
+
+
+-------------------------------------------------------------------
 Eigengrau v1.3.5 (2024-06-24)
 
 - fixed incomplete replay recording when playing with inverted fire mode
