@@ -122,10 +122,10 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
         auto&           oSet  = pConfig->Input.aSet[i];
 
         // clamp movement keys
-        oSet.iMoveUp    = CLAMP(oSet.iMoveUp,    iFrom, iTo);
-        oSet.iMoveLeft  = CLAMP(oSet.iMoveLeft,  iFrom, iTo);
-        oSet.iMoveDown  = CLAMP(oSet.iMoveDown,  iFrom, iTo);
-        oSet.iMoveRight = CLAMP(oSet.iMoveRight, iFrom, iTo);
+        if(oSet.iMoveUp    != INPUT_KEY_INVALID) oSet.iMoveUp    = CLAMP(oSet.iMoveUp,    iFrom, iTo);
+        if(oSet.iMoveLeft  != INPUT_KEY_INVALID) oSet.iMoveLeft  = CLAMP(oSet.iMoveLeft,  iFrom, iTo);
+        if(oSet.iMoveDown  != INPUT_KEY_INVALID) oSet.iMoveDown  = CLAMP(oSet.iMoveDown,  iFrom, iTo);
+        if(oSet.iMoveRight != INPUT_KEY_INVALID) oSet.iMoveRight = CLAMP(oSet.iMoveRight, iFrom, iTo);
 
         // clamp action keys
         for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)

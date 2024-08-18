@@ -707,7 +707,7 @@ void cMenuNavigator::GlobalUpdate()
     }
 
     // 
-    const coreBool bAllowButtons = (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING));
+    const coreBool bAllowButtons = (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING)) && !Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) && !Core::Input->GetMouseButton(CORE_INPUT_RIGHT, CORE_INPUT_HOLD);
 
     // 
     if(g_MenuInput.iMove && (g_pMenu->GetCurSurface() != SURFACE_EMPTY) && bAllowButtons)   // # before joystick handling
