@@ -11,7 +11,6 @@
 #define _P1_GUARD_MUSICBOX_H_
 
 // TODO 3: volume control
-// TODO 5: artist display
 
 
 // ****************************************************************
