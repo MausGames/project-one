@@ -2432,6 +2432,9 @@ void cCalorMission::__SetupOwn()
                 {
                     STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
                 }
+
+                // destroy possible remaining enemy
+                pSquad2->ClearEnemies(true);
             }
         }
 

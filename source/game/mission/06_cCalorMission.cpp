@@ -212,7 +212,7 @@ cCalorMission::cCalorMission()noexcept
     m_Boulder.DefineProgram       ("object_meteor_blink_program");
     m_Boulder.SetSize             (coreVector3(1.0f,1.0f,1.0f) * 6.0f);
     m_Boulder.SetCollisionModifier(coreVector3(1.0f,1.0f,0.1f));
-    m_Boulder.Configure           (50, coreVector3(1.0f,1.0f,1.0f));
+    m_Boulder.Configure           (30, coreVector3(1.0f,1.0f,1.0f));
     m_Boulder.AddStatus           (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_GHOST | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET | ENEMY_STATUS_KEEPVOLUME);
 
     // 
