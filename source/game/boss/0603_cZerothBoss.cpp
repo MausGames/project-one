@@ -15,7 +15,7 @@
 // - in first phase, CW around, CCW around, 042513, the tail should pop out the head
 // - in infinity phase, pattern shouldn't be too dense, otherwise the player won't be able to navigate through it ans then keeps the boss too far away
 // - in infinity phase, since bullets now also move, global move should be slower so that the maximum speed it not too high, though bullets can then just stand still if both movements cancel each other (which is ok)
-// - if all limbas ar outside for (regular) attacks, the shell invulnerability should also be removed
+// - if all limbs ar outside for (regular) attacks, the shell invulnerability should also be removed
 // - in infinity phase, the switch from 2-shot to 4-shot is not noticeable if there is no additional change in rotation
 // - in ice-cube phase, the player should basically be prevented from getting to the boss with the cube
 // - push-effect in the drag phase should not be too strong, otherwise the player has little room for movement

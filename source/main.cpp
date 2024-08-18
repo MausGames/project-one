@@ -450,8 +450,6 @@ void InitResolution(const coreVector2 vResolution)
 
     // 
     if(F_TO_UI(vResolution.x + vResolution.y) & 0x01u) g_vGameResolution.arr(IsHorizontal(vResolution) ? 0u : 1u) -= 1.0f;
-    
-    
 
     // 
     g_bSteamDeck = (vResolution == coreVector2(1280.0f,800.0f));

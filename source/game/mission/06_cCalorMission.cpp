@@ -1110,8 +1110,6 @@ void cCalorMission::__MoveOwnMiddle()
 
                                 // 
                                 if(bOther) this->UncatchObject(1u - i);
-                                
-                                //g_pSpecialEffects->RumblePlayer(pPlayer, SPECIAL_RUMBLE_SMALL, 250u);
 
                                 // 
                                 if(bInvincible) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);

@@ -98,12 +98,11 @@ inline coreUint8 GetSystemCpuIndex()
 {
     static const coreUint8 s_iCpuIndex = []()
     {
-        const coreChar* pcVendor = coreData::StrToLower(coreData::SystemCpuVendor());
-        const coreChar* pcBrand  = coreData::StrToLower(coreData::SystemCpuBrand());
+        const coreChar* pcBrand = coreData::StrToLower(coreData::SystemCpuBrand());
 
-        if(std::strstr(pcBrand,  "amd"))   return 1u;
-        if(std::strstr(pcBrand,  "intel")) return 2u;
-        if(std::strstr(pcVendor, "apple")) return 3u;
+        if(std::strstr(pcBrand, "amd"))   return 1u;
+        if(std::strstr(pcBrand, "intel")) return 2u;
+        if(std::strstr(pcBrand, "apple")) return 3u;
 
         return 0xFFu;
     }();
@@ -121,6 +120,7 @@ inline coreUint8 GetSystemGpuIndex()
         const coreChar* pcVendor = coreData::StrToLower(PRINT("%s", glGetString(GL_VENDOR)));   // to handle NULL
 
         if(std::strstr(pcVendor, "amd"))    return 1u;
+        if(std::strstr(pcVendor, "ati"))    return 1u;
         if(std::strstr(pcVendor, "nvidia")) return 2u;
         if(std::strstr(pcVendor, "intel"))  return 3u;
         if(std::strstr(pcVendor, "apple"))  return 4u;

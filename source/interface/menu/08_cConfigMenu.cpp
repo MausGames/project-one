@@ -97,7 +97,6 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_VIDEO_DISPLAYMODE);
         aiSkip.insert(ENTRY_VIDEO_VSYNC);
         aiSkip.insert(ENTRY_AUDIO_QUALITY);
-        aiSkip.insert(ENTRY_AUDIO_MODE);
         aiSkip.insert(ENTRY_GAME_UPDATEFREQ);
     #elif defined(_CORE_SWITCH_)
         aiSkip.insert(ENTRY_VIDEO_MONITOR);
@@ -127,9 +126,10 @@ cConfigMenu::cConfigMenu()noexcept
         if(aiSkip.count(i)) continue;
 
         if(i == ENTRY_VIDEO || i == ENTRY_AUDIO || i == ENTRY_INPUT) iOffset = 0u;
-#if defined(_CORE_SWITCH_)
+
+    #if defined(_CORE_SWITCH_)
         if(i == ENTRY_INPUT_RUMBLE) iOffset = 0u;
-#endif
+    #endif
 
         if(i == ENTRY_VIDEO_RENDERQUALITY)   ++iOffset;   // # new paragraph
         if(i == ENTRY_AUDIO_MUSICVOLUME)     ++iOffset;
@@ -142,19 +142,22 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_GAME_GAMEDIRECTION)    ++iOffset;
         if(i == ENTRY_GAME_HUDDIRECTION)     ++iOffset;
         if(i == ENTRY_GAME_BACKROTATION)     ++iOffset;
-#if defined(_CORE_EMSCRIPTEN_)
-        if(i == ENTRY_GAME_PUREMODE)         ++iOffset;
-#else
-        if(i == ENTRY_VIDEO_ANTIALIASING)    ++iOffset;
-#endif
-#if defined(_CORE_SWITCH_)
+
+    #if defined(_CORE_EMSCRIPTEN_)
         if(i == ENTRY_AUDIO_MODE)            ++iOffset;
         if(i == ENTRY_GAME_PUREMODE)         ++iOffset;
-#else
+    #else
+        if(i == ENTRY_VIDEO_ANTIALIASING)    ++iOffset;
+    #endif
+
+    #if defined(_CORE_SWITCH_)
+        if(i == ENTRY_AUDIO_MODE)            ++iOffset;
+        if(i == ENTRY_GAME_PUREMODE)         ++iOffset;
+    #else
         if(i == ENTRY_VIDEO_PARTICLEEFFECTS) ++iOffset;
         if(i == ENTRY_INPUT_RUMBLE)          ++iOffset;
         if(i == ENTRY_GAME_UPDATEFREQ)       ++iOffset;
-#endif
+    #endif
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -500,7 +503,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Vsync          .AddEntryLanguage("VALUE_OFF",              0u);
     m_Vsync          .AddEntryLanguage("VALUE_AUTO",             1u);
     m_AntiAliasing   .AddEntryLanguage("VALUE_OFF",              0u);
-         if(CORE_GL_SUPPORT(INTEL_framebuffer_CMAA))               for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 1u)                       ? "CMAA" : "MSAA"), i);
+         if(CORE_GL_SUPPORT(INTEL_framebuffer_CMAA))               for(coreUintW i = 1u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 1u)                       ? "CMAA" : "MSAA"), i);
     else if(CORE_GL_SUPPORT(AMD_framebuffer_multisample_advanced)) for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 2u || i == 4u || i == 8u) ? "EQAA" : "MSAA"), i);
     else if(CORE_GL_SUPPORT(NV_framebuffer_multisample_coverage))  for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 4u || i == 8u)            ? "CSAA" : "MSAA"), i);
     else                                                           for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (MSAA)", i),                                                    i);
@@ -536,7 +539,9 @@ cConfigMenu::cConfigMenu()noexcept
     m_AudioQuality   .AddEntryLanguage("VALUE_LOW",              0u);
     m_AudioQuality   .AddEntryLanguage("VALUE_HIGH",             1u);
     m_AudioMode      .AddEntryLanguage("VALUE_AUTO",             CORE_AUDIO_MODE_AUTO);
+#if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
     m_AudioMode      .AddEntryLanguage("AUDIOMODE_MONO",         CORE_AUDIO_MODE_MONO);
+#endif
     m_AudioMode      .AddEntryLanguage("AUDIOMODE_SPEAKERS",     CORE_AUDIO_MODE_SPEAKERS);
     m_AudioMode      .AddEntryLanguage("AUDIOMODE_HEADPHONES",   CORE_AUDIO_MODE_HEADPHONES);
     m_3DSound        .AddEntryLanguage("VALUE_OFF",              0u);

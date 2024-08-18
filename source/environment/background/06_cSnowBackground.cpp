@@ -324,7 +324,7 @@ void cSnowBackground::__RenderOwnAfter()
 
     // 
     coreProgram* pLocal = m_Snow.GetProgram().GetResource();
-    for(coreUintW i = 0u, ie = CORE_GL_SUPPORT(ES2_restriction) ? SNOW_SNOW_NUM_LOW : SNOW_SNOW_NUM; i < ie; ++i)
+    for(coreUintW i = 0u, ie = CORE_GL_SUPPORT(CORE_es2_restriction) ? SNOW_SNOW_NUM_LOW : SNOW_SNOW_NUM; i < ie; ++i)
     {
         const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(POW2(i)) + coreVector2(0.13f * SIN(m_fSnowWave * (0.125f*PI) + I_TO_F(POW2(i))), 0.0f);
         const coreFloat   fNewScale     = 0.8f - 0.06f * I_TO_F(i);
