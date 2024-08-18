@@ -1697,7 +1697,11 @@ void cMuscusMission::__SetupOwn()
                     if((m_iStageSub == 6u) && !bHidden)
                     {
                         iPearlSpawn += 1u;
-                        if(iPearlSpawn < 31u) this->EnablePearl(iPearlSpawn);
+                        if(iPearlSpawn < 31u)
+                        {
+                            this->EnablePearl(iPearlSpawn);
+                            this->GetPearl   (iPearlSpawn)->SetPosition(coreVector3(HIDDEN_POS, 0.0f));   // real position is set on next iteration
+                        }
                     }
                 }
             }
