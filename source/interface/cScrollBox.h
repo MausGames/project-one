@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_SCROLLBOX_H_
 #define _P1_GUARD_SCROLLBOX_H_
 
-// TODO 1: add animations to force player-focus (pulsating arrows when scrolling possible ?)
+// TODO 1: add animations to show the player that scrolling is possible (pulsating arrows ?)
 
 
 // ****************************************************************
@@ -35,7 +35,7 @@ private:
     coreFloat m_fDragValue;   // 
 
     coreFlow m_fSpeed;        // 
-    coreBool m_bInverted;     // 
+    coreBool m_bInside;       // 
 
     coreTimer m_Automatic;    // 
 
@@ -58,7 +58,7 @@ public:
     // 
     inline void SetCurOffset(const coreFloat fCurOffset) {m_fCurOffset = fCurOffset; this->SetOffset(coreVector2(0.0f, m_fCurOffset));}
     inline void SetMaxOffset(const coreFloat fMaxOffset) {m_fMaxOffset = fMaxOffset;}
-    inline void SetInverted (const coreBool  bInverted)  {m_bInverted  = bInverted;}
+    inline void SetInside   (const coreBool  bInside)    {m_bInside    = bInside;}
 };
 
 

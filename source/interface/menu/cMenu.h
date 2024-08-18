@@ -43,6 +43,7 @@
 // TODO 3: support for chinese names in leaderboard (s+t)
 // TODO 3: hidden medals on arcade summary will blend in after 10000.0f
 // TODO 3: make use of coreTranslate in menus (inherited, like in interface) to simplyfy language-string updates
+// TODO 3: entering a menu with option-lines will always trigger a sound-effect (with gamepad), even though it's unnecessary, TIME+GetAlpha changes did not help
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
 // NOTE: every object in menu needs outline: weapons, medals, icons
@@ -138,6 +139,15 @@ STATIC_ASSERT(REPLAY_SLOTS <= MENU_REPLAY_ENTRIES)
 #define MENU_FONT_ICON_4        MENU_FONT_ICON,     (44u)
 #define MENU_OUTLINE_SMALL      (3u)
 #define MENU_OUTLINE_BIG        (4u)
+
+enum eMenuUpdate : coreUint8
+{
+    MENU_UPDATE_DEFAULT  = 0x00u,
+    MENU_UPDATE_NO_GROW  = 0x01u,
+    MENU_UPDATE_NO_SOUND = 0x02u,
+    MENU_UPDATE_STATIC   = 0x04u
+};
+ENABLE_BITWISE(eMenuUpdate)
 
 
 // ****************************************************************
@@ -957,98 +967,99 @@ private:
     // 
     struct sPlayerInput final
     {
-        cGuiLabel     oHeader;
-        cGuiSwitchBox oType;
-        cGuiSwitchBox oRumble;
-        cGuiSwitchBox oFireMode;
-        cGuiSwitchBox oControlMode;
-        cGuiButton    oMoveUp;
-        cGuiButton    oMoveLeft;
-        cGuiButton    oMoveDown;
-        cGuiButton    oMoveRight;
-        cGuiButton    aAction[INPUT_KEYS_ACTION];
-        cFigure       oFigureMoveUp;
-        cFigure       oFigureMoveLeft;
-        cFigure       oFigureMoveDown;
-        cFigure       oFigureMoveRight;
-        cFigure       aFigureAction[INPUT_KEYS_ACTION];
-        cFigure       oFigureStickL;
-        cFigure       oFigureStickR;
+        cGuiLabel     oHeader;                            // 
+        cGuiSwitchBox oType;                              // 
+        cGuiSwitchBox oRumble;                            // 
+        cGuiSwitchBox oFireMode;                          // 
+        cGuiSwitchBox oControlMode;                       // 
+        cGuiButton    oMoveUp;                            // 
+        cGuiButton    oMoveLeft;                          // 
+        cGuiButton    oMoveDown;                          // 
+        cGuiButton    oMoveRight;                         // 
+        cGuiButton    aAction[INPUT_KEYS_ACTION];         // 
+        cFigure       oFigureMoveUp;                      // 
+        cFigure       oFigureMoveLeft;                    // 
+        cFigure       oFigureMoveDown;                    // 
+        cFigure       oFigureMoveRight;                   // 
+        cFigure       aFigureAction[INPUT_KEYS_ACTION];   // 
+        cFigure       oFigureStickL;                      // 
+        cFigure       oFigureStickR;                      // 
     };
 
 
 private:
-    cGuiObject m_Background;                   // 
+    cGuiObject m_Background;                             // 
 
-    cGuiButton m_VideoTab;                     // 
-    cGuiButton m_AudioTab;                     // 
-    cGuiButton m_InputTab;                     // 
-    cGuiButton m_GameTab;                      // 
+    cGuiButton m_VideoTab;                               // 
+    cGuiButton m_AudioTab;                               // 
+    cGuiButton m_InputTab;                               // 
+    cGuiButton m_GameTab;                                // 
 
-    cGuiButton m_SaveButton;                   // save button
-    cGuiButton m_DiscardButton;                // discard button
-    cGuiButton m_InputButton;                  // input button
-    cGuiButton m_BackButton;                   // back button
+    cGuiButton m_SaveButton;                             // save button
+    cGuiButton m_DiscardButton;                          // discard button
+    cGuiButton m_InputButton;                            // input button
+    cGuiButton m_BackButton;                             // back button
 
-    cGuiLabel  m_aLabel   [ENTRY_MAX];         // 
-    cGuiObject m_aLine    [ENTRY_MAX];         // 
-    cGuiLabel  m_aCueInput[INPUT_KEYS];        // 
-    cGuiLabel  m_aCueRota [2];                 // 
-    cGuiLabel  m_aCueLock [5];                 // 
+    cGuiLabel  m_aLabel[ENTRY_MAX];                      // 
+    cGuiObject m_aLine [ENTRY_MAX];                      // 
 
-    cGuiLabel       m_Description;             // 
-    const coreChar* m_apcDescKey[ENTRY_MAX];   // 
+    cGuiLabel       m_Description;                       // 
+    const coreChar* m_apcDescKey[ENTRY_MAX];             // 
 
-    cGuiSwitchBox m_Monitor;
-    cGuiSwitchBox m_Resolution;
-    cGuiSwitchBox m_DisplayMode;
-    cGuiSwitchBox m_Vsync;
-    cGuiSwitchBox m_AntiAliasing;
-    cGuiSwitchBox m_TextureFilter;
-    cGuiSwitchBox m_RenderQuality;
-    cGuiSwitchBox m_ShadowQuality;
-    cGuiSwitchBox m_WaterQuality;
-    cGuiSwitchBox m_ParticleEffects;
-    cGuiSwitchBox m_ShakeEffects;
-    cGuiSwitchBox m_FlashEffects;
-    cGuiSwitchBox m_HitStopEffects;
-    cGuiSwitchBox m_ChromaEffects;
-    cGuiSwitchBox m_GlobalVolume;
-    cGuiSwitchBox m_MusicVolume;
-    cGuiSwitchBox m_EffectVolume;
-    cGuiSwitchBox m_AmbientVolume;
-    cGuiSwitchBox m_MenuVolume;
-    cGuiSwitchBox m_AudioQuality;
-    cGuiSwitchBox m_AudioMode;
-    cGuiSwitchBox m_3DSound;
-    cGuiSwitchBox m_Language;
-    cGuiSwitchBox m_GameDirection;
-    cGuiSwitchBox m_MirrorMode;
-    cGuiSwitchBox m_HudDirection;
-    cGuiSwitchBox m_HudType;
-    cGuiSwitchBox m_CombatText;
-    cGuiSwitchBox m_BackRotation;
-    cGuiSwitchBox m_BackSpeed;
-    cGuiSwitchBox m_UpdateFreq;
-    cGuiSwitchBox m_PureMode;
-    cGuiSwitchBox m_Leaderboard;
-    cGuiSwitchBox m_Version;
+    cGuiSwitchBox m_Monitor;                             // 
+    cGuiSwitchBox m_Resolution;                          // 
+    cGuiSwitchBox m_DisplayMode;                         // 
+    cGuiSwitchBox m_Vsync;                               // 
+    cGuiSwitchBox m_AntiAliasing;                        // 
+    cGuiSwitchBox m_TextureFilter;                       // 
+    cGuiSwitchBox m_RenderQuality;                       // 
+    cGuiSwitchBox m_ShadowQuality;                       // 
+    cGuiSwitchBox m_WaterQuality;                        // 
+    cGuiSwitchBox m_ParticleEffects;                     // 
+    cGuiSwitchBox m_ShakeEffects;                        // 
+    cGuiSwitchBox m_FlashEffects;                        // 
+    cGuiSwitchBox m_HitStopEffects;                      // 
+    cGuiSwitchBox m_ChromaEffects;                       // 
+    cGuiSwitchBox m_GlobalVolume;                        // 
+    cGuiSwitchBox m_MusicVolume;                         // 
+    cGuiSwitchBox m_EffectVolume;                        // 
+    cGuiSwitchBox m_AmbientVolume;                       // 
+    cGuiSwitchBox m_MenuVolume;                          // 
+    cGuiSwitchBox m_AudioQuality;                        // 
+    cGuiSwitchBox m_AudioMode;                           // 
+    cGuiSwitchBox m_3DSound;                             // 
+    cGuiSwitchBox m_Language;                            // 
+    cGuiSwitchBox m_GameDirection;                       // 
+    cGuiSwitchBox m_MirrorMode;                          // 
+    cGuiSwitchBox m_HudDirection;                        // 
+    cGuiSwitchBox m_HudType;                             // 
+    cGuiSwitchBox m_CombatText;                          // 
+    cGuiSwitchBox m_BackRotation;                        // 
+    cGuiSwitchBox m_BackSpeed;                           // 
+    cGuiSwitchBox m_UpdateFreq;                          // 
+    cGuiSwitchBox m_PureMode;                            // 
+    cGuiSwitchBox m_Leaderboard;                         // 
+    cGuiSwitchBox m_Version;                             // 
 
-    sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
-    cGuiButton   m_SwapInput;
+    sPlayerInput m_aInput[MENU_CONFIG_INPUTS];           // 
+    cGuiButton   m_SwapInput;                            //
 
-    cScrollBox m_VideoBox;
-    cScrollBox m_InputBox;
+    cGuiLabel m_aCueInput[INPUT_KEYS];                   // 
+    cGuiLabel m_aCueRota [2];                            // 
+    cGuiLabel m_aCueLock [5];                            // 
 
-    coreUintW                      m_iCurMonitorIndex;
-    coreMap<coreUintW, coreString> m_asCurResolution;
+    cScrollBox m_VideoBox;                               // 
+    cScrollBox m_InputBox;                               // 
 
-    coreUintW m_iJoystickNum;
+    coreUintW                      m_iCurMonitorIndex;   // 
+    coreMap<coreUintW, coreString> m_asCurResolution;    // 
 
-    cNewIndicator m_GameNew;
-    cNewIndicator m_MirrorModeNew;
+    coreUintW m_iJoystickNum;                            // 
 
-    cMenuNavigator m_Navigator;
+    cNewIndicator m_GameNew;                             // 
+    cNewIndicator m_MirrorModeNew;                       // 
+
+    cMenuNavigator m_Navigator;                          // 
 
 
 public:
@@ -1580,8 +1591,6 @@ public:
     static void UpdateLanguageFont();
     static const coreMap<coreString, coreString>& GetLanguageList();
     
-    static void ChangeTab(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface);
-    
     static void ClearScreen();
     
     static const coreChar* GetMissionLetters(const coreUintW iMissionIndex);
@@ -1591,16 +1600,16 @@ public:
     static void            OpenStoreLink();
 
     // menu helper routines
-    static void UpdateButton        (coreButton*    OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow = true, const coreBool bSound = true);
-    static void UpdateButton        (coreButton*    OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreBool bGrow = true);
-    static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor);
-    static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused);
-    static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSound = true, const coreBool bStatic = false);
-    static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract, const coreBool bChangeColor, const coreVector3 vFocusColor, const coreBool bSound = true);
-    static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract, const coreBool bChangeColor);
-    static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract);
+    static void UpdateButton        (coreButton*    OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreVector3 vFocusColor,   const eMenuUpdate eUpdate = MENU_UPDATE_DEFAULT);
+    static void UpdateButton        (coreButton*    OUTPUT pButton, const void* pMenu, const coreBool bFocused,                                  const eMenuUpdate eUpdate = MENU_UPDATE_DEFAULT);
+    static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor, const eMenuUpdate eUpdate = MENU_UPDATE_DEFAULT);
+    static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused,                                const eMenuUpdate eUpdate = MENU_UPDATE_DEFAULT);
+    static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox,                                                                           const eMenuUpdate eUpdate = MENU_UPDATE_DEFAULT);
+    static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract, const coreVector3 vFocusColor,                       const eMenuUpdate eUpdate = MENU_UPDATE_DEFAULT);
+    static void UpdateLine          (cGuiObject*    OUTPUT pLine, const coreBool bInteract,                                                      const eMenuUpdate eUpdate = MENU_UPDATE_DEFAULT);
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
     static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType, const coreBool bHide);
+    static void ChangeTab           (coreMenu*      OUTPUT pMenu, const coreUint8 iNewSurface);
     
     static void ClearButtonTime(cGuiButton* OUTPUT pButton);
 

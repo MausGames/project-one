@@ -1165,21 +1165,6 @@ const coreMap<coreString, coreString>& cMenu::GetLanguageList()
 
 // ****************************************************************
 // 
-void cMenu::ChangeTab(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface)
-{
-    ASSERT(pMenu)
-
-    // 
-    if(pMenu->ChangeSurface(iNewSurface, 0.0f))
-    {
-        // 
-        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_TAB);
-    }
-}
-
-
-// ****************************************************************
-// 
 void cMenu::ClearScreen()
 {
     // 
@@ -1241,7 +1226,7 @@ void cMenu::OpenStoreLink()
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow, const coreBool bSound)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreVector3 vFocusColor, const eMenuUpdate eUpdate)
 {
     ASSERT(pButton)
 
@@ -1276,7 +1261,7 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const co
                               pButton              ->SetColor3(vColor * fLight);
     if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * fLight);
 
-    if(bGrow)
+    if(!HAS_FLAG(eUpdate, MENU_UPDATE_NO_GROW))
     {
         // 
         const coreVector2 vBasePos = coreVector2(pButton->GetAlignment().x ? oData.vPosition.x : pButton->GetPosition().x, pButton->GetAlignment().y ? oData.vPosition.y : pButton->GetPosition().y);
@@ -1293,27 +1278,29 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const co
     // 
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
 
-    if(bFocused)
-    {
-        s_apNewButton[pMenu] = pButton;
-    }
+    // 
+    if(bFocused) s_apNewButton[pMenu] = pButton;
 
-    if(pButton->IsClicked())
+    // 
+    if(!HAS_FLAG(eUpdate, MENU_UPDATE_NO_SOUND))
     {
-        if(bSound) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
+        if(pButton->IsClicked())
+        {
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
+        }
     }
 }
 
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const coreBool bFocused, const coreBool bGrow)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const void* pMenu, const coreBool bFocused, const eMenuUpdate eUpdate)
 {
     // 
-    cMenu::UpdateButton(pButton, pMenu, bFocused, s_vButtonColor, bGrow);
+    cMenu::UpdateButton(pButton, pMenu, bFocused, s_vButtonColor, eUpdate);
 }
 
 
 // ****************************************************************
 // 
-void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor)
+void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor, const eMenuUpdate eUpdate)
 {
     ASSERT(pTab)
 
@@ -1360,28 +1347,26 @@ void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const cor
     // 
     if(pTab->GetOverride() < 0) pTab->SetAlpha(pTab->GetAlpha() * 0.5f);
 
-    if(!bLocked && bFocused)
-    {
-        s_pNewTab = pTab;
-    }
+    // 
+    if(!bLocked && bFocused) s_pNewTab = pTab;
 }
 
-void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const coreBool bFocused)
+void cMenu::UpdateTab(cGuiButton* OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const eMenuUpdate eUpdate)
 {
     // 
-    cMenu::UpdateTab(pTab, bLocked, bFocused, s_vButtonColor);
+    cMenu::UpdateTab(pTab, bLocked, bFocused, s_vButtonColor, eUpdate);
 }
 
 
 // ****************************************************************
 // 
-void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSound, const coreBool bStatic)
+void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const eMenuUpdate eUpdate)
 {
     ASSERT(pSwitchBox)
 
     const auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEndIndex)
     {
-        const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEndIndex) || bStatic;
+        const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEndIndex) || HAS_FLAG(eUpdate, MENU_UPDATE_STATIC);
 
         // 
         const coreFloat fAlpha = bEnd ? 0.25f           : (pArrow->IsFocused() ? 1.0f              : 0.75f);
@@ -1394,53 +1379,59 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSo
     };
 
     // 
-    if((pSwitchBox->GetOverride() < 0) && !bStatic) pSwitchBox->SetAlpha(pSwitchBox->GetAlpha() * 0.5f);
+    if((pSwitchBox->GetOverride() < 0) && !HAS_FLAG(eUpdate, MENU_UPDATE_STATIC)) pSwitchBox->SetAlpha(pSwitchBox->GetAlpha() * 0.5f);
 
     // 
     UpdateArrowFunc(pSwitchBox->GetArrow(0u), pSwitchBox->GetEndless() ? ~0u : 0u);
     UpdateArrowFunc(pSwitchBox->GetArrow(1u), pSwitchBox->GetEndless() ? ~0u : (pSwitchBox->GetNumEntries() - 1u));
 
     // 
-    const coreInt8 iUserSwitch = pSwitchBox->GetUserSwitch();
-    const coreBool bArrowLeft  = pSwitchBox->GetArrow(0u)->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
-    const coreBool bArrowRight = pSwitchBox->GetArrow(1u)->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
-    if(iUserSwitch)
+    if(!HAS_FLAG(eUpdate, MENU_UPDATE_NO_SOUND))
     {
-        // 
-        if(bSound) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);
-    }
-    else if(bArrowLeft || bArrowRight)
-    {
-        // 
-        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_DISABLED);
+        const coreInt8 iUserSwitch = pSwitchBox->GetUserSwitch();
+        const coreBool bArrowLeft  = pSwitchBox->GetArrow(0u)->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
+        const coreBool bArrowRight = pSwitchBox->GetArrow(1u)->IsClicked(CORE_INPUT_LEFT, CORE_INPUT_PRESS);
+
+        if(iUserSwitch)
+        {
+            // 
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);
+        }
+        else if(bArrowLeft || bArrowRight)
+        {
+            // 
+            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_DISABLED);
+        }
     }
 }
 
 
 // ****************************************************************
 // 
-void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const coreBool bChangeColor, const coreVector3 vFocusColor, const coreBool bSound)
+void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const coreVector3 vFocusColor, const eMenuUpdate eUpdate)
 {
     if(!TIME) return;   // for transitions
     if(!pLine->GetAlpha()) return;
 
+    // 
     if(bInteract) pLine->Interact();
-    if(bChangeColor) pLine->SetColor3(pLine->IsFocused() ? vFocusColor : coreVector3(1.0f,1.0f,1.0f));
-    
-    if(pLine->IsFocused() && bSound)
+
+    // 
+    if(!HAS_FLAG(eUpdate, MENU_UPDATE_STATIC))
     {
-        s_pNewLine = pLine;
+        pLine->SetColor3(pLine->IsFocused() ? vFocusColor : coreVector3(1.0f,1.0f,1.0f));
+    }
+
+    // 
+    if(!HAS_FLAG(eUpdate, MENU_UPDATE_NO_SOUND))
+    {
+        if(pLine->IsFocused()) s_pNewLine = pLine;
     }
 }
 
-void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const coreBool bChangeColor)
+void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract, const eMenuUpdate eUpdate)
 {
-    cMenu::UpdateLine(pLine, bInteract, bChangeColor, s_vButtonColor);
-}
-
-void cMenu::UpdateLine(cGuiObject* OUTPUT pLine, const coreBool bInteract)
-{
-    cMenu::UpdateLine(pLine, bInteract, true, s_vButtonColor);
+    cMenu::UpdateLine(pLine, bInteract, s_vButtonColor, eUpdate);
 }
 
 
@@ -1486,6 +1477,21 @@ void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal
 
 // ****************************************************************
 // 
+void cMenu::ChangeTab(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface)
+{
+    ASSERT(pMenu)
+
+    // 
+    if(pMenu->ChangeSurface(iNewSurface, 0.0f))
+    {
+        // 
+        g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_TAB);
+    }
+}
+
+
+// ****************************************************************
+// 
 void cMenu::ClearButtonTime(cGuiButton* OUTPUT pButton)
 {
     if(s_aButtonData.count_bs(pButton))
@@ -1497,10 +1503,8 @@ void cMenu::ClearButtonTime(cGuiButton* OUTPUT pButton)
 
         pButton->SetSize(oData.vSize);
 
-        const coreFloat   fLight = MENU_LIGHT_IDLE;
-        const coreVector3 vColor = COLOR_MENU_WHITE;
-                                  pButton              ->SetColor3(vColor * fLight);
-        if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * fLight);
+                                  pButton              ->SetColor3(COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+        if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
     }
 }
 

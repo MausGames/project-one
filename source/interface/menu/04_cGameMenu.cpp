@@ -1361,7 +1361,7 @@ void cGameMenu::Move()
             case 1u: vMenuColor = g_aMissionData[m_aiCurIndex[1]].vColor2; break;
             case 2u: vMenuColor = g_aMissionData[MISSION_ATER]   .vColor2; break;
             }
-            for(coreUintW i = 0u; i < MENU_GAME_ARMORIES; ++i) cMenu::UpdateLine(&m_aArmoryLine[i], true, true, vMenuColor);
+            for(coreUintW i = 0u; i < MENU_GAME_ARMORIES; ++i) cMenu::UpdateLine(&m_aArmoryLine[i], true, vMenuColor);
             
             
 
@@ -1370,8 +1370,8 @@ void cGameMenu::Move()
             cMenu::UpdateButton(&m_InputButtonArmory, &m_NavigatorArmory, m_InputButtonArmory.IsFocused(), vMenuColor);
             cMenu::UpdateButton(&m_BackButtonArmory,  &m_NavigatorArmory, m_BackButtonArmory .IsFocused(), vMenuColor);
             
-            cMenu::UpdateButton(m_ArmorySelection.GetArrow(0u), &m_NavigatorArmory, m_ArmorySelection.GetArrow(0u)->IsFocused(), vMenuColor, true, false);
-            cMenu::UpdateButton(m_ArmorySelection.GetArrow(1u), &m_NavigatorArmory, m_ArmorySelection.GetArrow(1u)->IsFocused(), vMenuColor, true, false);
+            cMenu::UpdateButton(m_ArmorySelection.GetArrow(0u), &m_NavigatorArmory, m_ArmorySelection.GetArrow(0u)->IsFocused(), vMenuColor, MENU_UPDATE_NO_SOUND);
+            cMenu::UpdateButton(m_ArmorySelection.GetArrow(1u), &m_NavigatorArmory, m_ArmorySelection.GetArrow(1u)->IsFocused(), vMenuColor, MENU_UPDATE_NO_SOUND);
 
             m_NavigatorArmory.SetGrabColor(vMenuColor);
             

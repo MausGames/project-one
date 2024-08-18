@@ -549,8 +549,8 @@ void cReplayMenu::Move()
                 }
 
                 // 
-                cMenu::UpdateButton(m_PageSelection.GetArrow(0u), &m_NavigatorOverview, m_PageSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
-                cMenu::UpdateButton(m_PageSelection.GetArrow(1u), &m_NavigatorOverview, m_PageSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
+                cMenu::UpdateButton(m_PageSelection.GetArrow(0u), &m_NavigatorOverview, m_PageSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), MENU_UPDATE_NO_SOUND);
+                cMenu::UpdateButton(m_PageSelection.GetArrow(1u), &m_NavigatorOverview, m_PageSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), MENU_UPDATE_NO_SOUND);
             }
 
             // 
@@ -854,11 +854,11 @@ void cReplayMenu::Move()
             cMenu::UpdateButton(&m_BackButtonDetails, &m_NavigatorDetails, m_BackButtonDetails.IsFocused());
 
             // 
-            cMenu::UpdateSwitchBox(&m_DetailType,       true, true);
-            cMenu::UpdateSwitchBox(&m_DetailDifficulty, true, true);
-            cMenu::UpdateSwitchBox(&m_DetailSpeed,      true, true);
-            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aDetailShield[i], true, true);
-            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aDetailWeapon[i], true, true);
+            cMenu::UpdateSwitchBox(&m_DetailType,       MENU_UPDATE_STATIC);
+            cMenu::UpdateSwitchBox(&m_DetailDifficulty, MENU_UPDATE_STATIC);
+            cMenu::UpdateSwitchBox(&m_DetailSpeed,      MENU_UPDATE_STATIC);
+            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aDetailShield[i], MENU_UPDATE_STATIC);
+            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) cMenu::UpdateSwitchBox(&m_aDetailWeapon[i], MENU_UPDATE_STATIC);
 
             // 
             for(coreUintW i = 0u; i < MENU_REPLAY_DETAILS; ++i) cMenu::UpdateLine(&m_aDetailLine[i], false);
@@ -867,8 +867,8 @@ void cReplayMenu::Move()
             
             //m_DetailSelection.GetArrow(0u)->SetOverride((m_aInfoList.size() > 1u) ? 0 : -1);
             //m_DetailSelection.GetArrow(1u)->SetOverride((m_aInfoList.size() > 1u) ? 0 : -1);
-            cMenu::UpdateButton(m_DetailSelection.GetArrow(0u), &m_NavigatorDetails, m_DetailSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
-            cMenu::UpdateButton(m_DetailSelection.GetArrow(1u), &m_NavigatorDetails, m_DetailSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
+            cMenu::UpdateButton(m_DetailSelection.GetArrow(0u), &m_NavigatorDetails, m_DetailSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), MENU_UPDATE_NO_SOUND);
+            cMenu::UpdateButton(m_DetailSelection.GetArrow(1u), &m_NavigatorDetails, m_DetailSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), MENU_UPDATE_NO_SOUND);
             
 
             const coreFloat fRotation = Core::System->GetTotalTimeFloat(20.0);

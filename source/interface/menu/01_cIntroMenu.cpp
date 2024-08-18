@@ -96,7 +96,7 @@ void cIntroMenu::Move()
             case 7u: vColor = COLOR_MENU_GREEN;   break;
             }
 
-            cMenu::UpdateButton((*it), &m_Navigator, (*it)->IsFocused(), vColor, true, bAllow);
+            cMenu::UpdateButton((*it), &m_Navigator, (*it)->IsFocused(), vColor, bAllow ? MENU_UPDATE_DEFAULT : MENU_UPDATE_NO_SOUND);
         }
     }
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)   // # old surface

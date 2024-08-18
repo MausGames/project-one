@@ -124,11 +124,11 @@ void cMsgBox::Render()
 // move the message box
 void cMsgBox::Move()
 {
-    if(!m_fFade && !m_nCallback) return;
+    if(!m_fFade && !this->IsVisible()) return;
 
     // 
-    if(m_nCallback) m_fFade.UpdateMin( 10.0f, 1.0f);
-               else m_fFade.UpdateMax(-10.0f, 0.0f);
+    if(this->IsVisible()) m_fFade.UpdateMin( 10.0f, 1.0f);
+                     else m_fFade.UpdateMax(-10.0f, 0.0f);
 
     // (before mouse-position override) 
     m_Navigator.SetAlpha(m_fFade);
@@ -143,12 +143,6 @@ void cMsgBox::Move()
     else
     {
         Core::Input->SetMousePosition(m_vCurMouse);
-    }
-
-    // only allow escape-button to cancel mapping
-    if(m_iMsgType == MSGBOX_TYPE_MAPPING)
-    {
-        g_MenuInput.bCancel = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
     }
 
     // 
@@ -180,7 +174,9 @@ void cMsgBox::Move()
 
         // 
         if(m_Delete.IsClicked())
+        {
             this->__ExecuteCallback(MSGBOX_ANSWER_KEY, INPUT_KEY_INVALID);
+        }
     }
 
     // 
@@ -196,7 +192,9 @@ void cMsgBox::Move()
 
         // 
         if(m_Yes.IsClicked())
+        {
             this->__ExecuteCallback(MSGBOX_ANSWER_YES, 0);
+        }
     }
 
     // 
@@ -212,7 +210,9 @@ void cMsgBox::Move()
 
         // 
         if(m_No.IsClicked() || ((m_iMsgType == MSGBOX_TYPE_MAPPING) && Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)))
+        {
             this->__ExecuteCallback(MSGBOX_ANSWER_NO, 0);
+        }
     }
 
     // 
@@ -222,11 +222,15 @@ void cMsgBox::Move()
         {
             // detect keyboard input
             if(Core::Input->GetLastKeyboard() != CORE_INPUT_INVALID_KEYBOARD)
+            {
                 this->__ExecuteCallback(MSGBOX_ANSWER_KEY, coreInt16(Core::Input->GetLastKeyboard()));
+            }
 
             // detect mouse input
             if(Core::Input->GetLastMouse() != CORE_INPUT_INVALID_MOUSE)
+            {
                 this->__ExecuteCallback(MSGBOX_ANSWER_KEY, -coreInt16(Core::Input->GetLastMouse()));
+            }
         }
         else   // # joystick/gamepad
         {
@@ -234,7 +238,9 @@ void cMsgBox::Move()
 
             // detect joystick input
             if(Core::Input->GetLastJoystick(iJoystickID) != CORE_INPUT_INVALID_JOYSTICK)
+            {
                 this->__ExecuteCallback(MSGBOX_ANSWER_KEY, coreInt16(Core::Input->GetLastJoystick(iJoystickID)));
+            }
         }
     }
 
@@ -284,7 +290,7 @@ void cMsgBox::Move()
     }
 
     // 
-    if(!cMenuNavigator::IsUsingAny() || m_nCallback || (m_iMsgType == MSGBOX_TYPE_MAPPING))
+    if(!cMenuNavigator::IsUsingAny() || this->IsVisible() || (m_iMsgType == MSGBOX_TYPE_MAPPING))
     {
         // 
         cMsgBox::__ClearInput();

@@ -100,7 +100,7 @@ cMusicBox::cMusicBox()noexcept
     m_ScrollBox.SetSize     (coreVector2(1.0f,0.69f));
     m_ScrollBox.SetAlpha    (0.0f);   // due to late initialization
     m_ScrollBox.SetMaxOffset(0.06f * I_TO_F(MUSIC_TRACKS) - m_ScrollBox.GetSize().y);
-    m_ScrollBox.SetInverted (true);
+    m_ScrollBox.SetInside   (true);
     for(coreUintW i = 0u; i < MUSIC_TRACKS; ++i) m_ScrollBox.BindObject(&m_aFocus    [i]);
     for(coreUintW i = 0u; i < MUSIC_TRACKS; ++i) m_ScrollBox.BindObject(&m_aLine     [i]);
     for(coreUintW i = 0u; i < MUSIC_TRACKS; ++i) m_ScrollBox.BindObject(&m_aTitle    [i]);
@@ -176,7 +176,7 @@ void cMusicBox::Move()
         {
             // 
             if(m_ScrollBox.IsBarFocused()) m_aLine[i].SetFocused(false);
-            cMenu::UpdateLine(&m_aLine[i], false, true, g_aMusicTrack[i].vColor);
+            cMenu::UpdateLine(&m_aLine[i], false, g_aMusicTrack[i].vColor);
 
             if(m_aLine[i].IsClicked())
             {

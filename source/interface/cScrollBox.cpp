@@ -17,7 +17,7 @@ cScrollBox::cScrollBox()noexcept
 , m_bDrag      (false)
 , m_fDragValue (0.0f)
 , m_fSpeed     (0.0f)
-, m_bInverted  (false)
+, m_bInside    (false)
 , m_Automatic  (coreTimer(1.0f, 10.0f, 0u))
 {
     // 
@@ -79,8 +79,8 @@ void cScrollBox::Move()
 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i)
         {
-            const coreFloat fSide = i           ? -0.5f : 0.5f;
-            const coreFloat fFlip = m_bInverted ? -0.5f : 0.5f;
+            const coreFloat fSide = i         ? -0.5f : 0.5f;
+            const coreFloat fFlip = m_bInside ? -0.5f : 0.5f;
 
             // 
             m_aArrow[i].SetPosition(this->GetPosition() + this->GetSize() * coreVector2(0.5f, fSide) + SCROLL_WIDTH * coreVector2(fFlip, -fSide));
@@ -151,8 +151,8 @@ void cScrollBox::Move()
 
         // 
         m_fCurOffset = CLAMP(m_fCurOffset - fWheel*0.05f - fDrag, 0.0f, m_fMaxOffset);
-        
-        
+
+        // 
         if(cMenuNavigator::IsUsingAny())
         {
             coreObject2D* pFocus = cMenuNavigator::GetCurFocus();
@@ -161,15 +161,18 @@ void cScrollBox::Move()
                 this->ScrollToObject(pFocus, false);
             }
         }
-        
-        const coreFloat fBoost = LERP(6.0f, 1.0f, STEP(0.0f, 0.002f, ABS(m_fCurOffset - this->GetOffset().y)));
 
-        if(coreMath::IsNear((m_fCurOffset - this->GetOffset().y), 0.0f, 0.001f)) m_fSpeed = 0.0f;
-        m_fSpeed.UpdateMin(10.0f, 1.0f);
-        
-        if(ABS(m_fCurOffset - this->GetOffset().y) > 0.7f) this->SetOffset(coreVector2(0.0f, m_fCurOffset));   // quick change      
+        // 
+        const coreFloat fAbsDiff = ABS(m_fCurOffset - this->GetOffset().y);
+        const coreFloat fBoost   = LERP(6.0f, 1.0f, STEP(0.0f, 0.002f, fAbsDiff));   // to snap into place
 
-        
+        // gradually increase speed (until the end)
+        if(fAbsDiff < 0.001f) m_fSpeed = 0.0f;
+        m_fSpeed.UpdateMin(10.0f, 1.0f);   // always update
+
+        // jump directly to offset (on big difference)
+        if(fAbsDiff > 0.7f) this->SetOffset(coreVector2(0.0f, m_fCurOffset));
+
         // 
         this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingAny() ? 4.0f : 10.0f) * m_fSpeed * fBoost * TIME))));
 
@@ -178,7 +181,7 @@ void cScrollBox::Move()
         m_Cursor.Move();
 
         // 
-        cMenu::UpdateButton(&m_Cursor, this, m_Cursor.IsFocused(), false);
+        cMenu::UpdateButton(&m_Cursor, this, m_Cursor.IsFocused(), MENU_UPDATE_NO_GROW);
 
         // 
         if(bMouseWheel && (fOldOffset != m_fCurOffset)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SCROLL);

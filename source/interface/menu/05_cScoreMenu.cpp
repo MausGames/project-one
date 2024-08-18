@@ -401,8 +401,8 @@ void cScoreMenu::Move()
                  if((m_PageSelection.GetUserSwitch() < 0) || bLeft)  {m_bPageChanged = true; if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateScores(false); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
             else if((m_PageSelection.GetUserSwitch() > 0) || bRight) {m_bPageChanged = true; if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateScores(false); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
 
-            cMenu::UpdateButton(m_PageSelection.GetArrow(0u), &m_Navigator, m_PageSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
-            cMenu::UpdateButton(m_PageSelection.GetArrow(1u), &m_Navigator, m_PageSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
+            cMenu::UpdateButton(m_PageSelection.GetArrow(0u), &m_Navigator, m_PageSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), MENU_UPDATE_NO_SOUND);
+            cMenu::UpdateButton(m_PageSelection.GetArrow(1u), &m_Navigator, m_PageSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), MENU_UPDATE_NO_SOUND);
         }
         break;
 
