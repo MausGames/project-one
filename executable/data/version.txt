@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Eigengrau v1.3.7 (2024-08-21)
+
+- added subtle highlighting of changes in the configuration menu
+- fixed an issue where enemies in stage 6-5 were not properly destroyed in co-op mode (and also made sure a possible surviving enemy no longer prevents progression)
+- fixed menu navigation not working anymore when mouse buttons were assigned to player movement keys
+
+
+-------------------------------------------------------------------
 Eigengrau v1.3.6 (2024-07-10)
 
 - added keyboard menu navigation
