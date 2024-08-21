@@ -11,7 +11,6 @@
 #define _P1_GUARD_MENU_H_
 
 // TODO 3: unload fonts currently not used (e.g. from score-menu)
-// TODO 3: options menu: highlight changed options with star or own icon (so that text doesn't always have to be renewed) (or color change)
 // TODO 3: options menu: 15 second on video change, yes, no
 // TODO 5: display unattached joysticks and joystick names somehow
 // TODO 3: display gamepad/device name in options description
