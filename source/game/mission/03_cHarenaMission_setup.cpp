@@ -2194,7 +2194,7 @@ void cHarenaMission::__SetupOwn()
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
         }
 
-        g_pSpecialEffects->OverrideShake(0.5f);
+        g_pSpecialEffects->ShakeOverride(0.5f);
 
         if(m_iStageSub == 1u)
         {

@@ -73,7 +73,7 @@ cReplayMenu::cReplayMenu()noexcept
     m_DeleteButton.SetPosition(m_RenameButton     .GetPosition() - coreVector2(m_RenameButton     .GetSize().x + 0.02f, 0.0f));
     m_SaveButton  .SetPosition(m_RenameButton     .GetPosition());
 
-    m_PageSelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_PageSelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_PageSelection.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.08f));
     m_PageSelection.SetSize    (coreVector2(0.73f,0.065f));
     m_PageSelection.SetEndless (true);
@@ -133,7 +133,7 @@ cReplayMenu::cReplayMenu()noexcept
     m_Nothing.SetColor3      (COLOR_MENU_WHITE);
     m_Nothing.SetTextLanguage("GAME_WEAPON_NOTHING");
 
-    m_DetailSelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_DetailSelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DetailSelection.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.08f));
     m_DetailSelection.SetSize    (coreVector2(0.73f,0.065f));
     m_DetailSelection.SetEndless (true);
@@ -266,21 +266,21 @@ cReplayMenu::cReplayMenu()noexcept
     m_aDetailTime[1].SetPosition(m_aDetailTime[0].GetPosition() + coreVector2(0.0f,-0.036f));
     m_aDetailTime[1].SetColor3  (COLOR_MENU_WHITE);
 
-    m_DetailType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_DetailType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DetailType.SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[0].GetPosition());
     m_DetailType.SetSize     (coreVector2( 0.47f,0.03f));
     m_DetailType.SetAlignment(coreVector2(-1.00f,0.00f));
     m_DetailType.SetOverride (-1);
     m_DetailType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_DetailDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_DetailDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DetailDifficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[2].GetPosition());
     m_DetailDifficulty.SetSize     (m_DetailType.GetSize());
     m_DetailDifficulty.SetAlignment(m_DetailType.GetAlignment());
     m_DetailDifficulty.SetOverride (-1);
     m_DetailDifficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_DetailSpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_DetailSpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DetailSpeed.SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[1].GetPosition());
     m_DetailSpeed.SetSize     (m_DetailType.GetSize());
     m_DetailSpeed.SetAlignment(m_DetailType.GetAlignment());
@@ -291,14 +291,14 @@ cReplayMenu::cReplayMenu()noexcept
     {
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
-        m_aDetailShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aDetailShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
         m_aDetailShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[3].GetPosition() - vOffset);
         m_aDetailShield[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aDetailShield[i].SetAlignment(coreVector2(-1.00f,0.00f));
         m_aDetailShield[i].SetOverride (-1);
         m_aDetailShield[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-        m_aDetailWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aDetailWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
         m_aDetailWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[4].GetPosition() - vOffset);
         m_aDetailWeapon[i].SetSize     (m_aDetailShield[i].GetSize());
         m_aDetailWeapon[i].SetAlignment(m_aDetailShield[i].GetAlignment());

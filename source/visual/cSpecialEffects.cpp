@@ -28,6 +28,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_iCurGust         (0u)
 , m_iCurBlast        (0u)
 , m_iCurExplosion    (0u)
+, m_aSoundData       {}
 , m_aiSoundGuard     {}
 , m_afRumbleTime     {}
 , m_afRumbleStrength {}
@@ -188,17 +189,12 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_EFFECT_WOOSH_02,      "effect_woosh_02.wav");
 
     // 
-    m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
-
-    // 
     m_ShakeTimer.SetTimeID(0);
+    m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
 
     // 
     for(coreUintW i = 0u; i < SPECIAL_ICONS; ++i)
         m_aIcon[i].SetIndex(i);
-    
-    
-    m_aSoundData.resize(SOUND_MAX);
 }
 
 
@@ -469,6 +465,9 @@ void cSpecialEffects::Move()
     m_fShakeOverride = 1.0f;
 }
 
+
+// ****************************************************************
+// 
 void cSpecialEffects::MoveAlways()
 {
     // reset sound-guard
@@ -1181,8 +1180,8 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     // 
     if(!g_CurConfig.Audio.i3DSound) bRelative = true;
 
-    
-    cSoundData& oData = m_aSoundData[eSoundIndex];
+    // 
+    sSoundData& oData = m_aSoundData[eSoundIndex];
 
     // 
     if(HAS_BIT_EX(m_aiSoundGuard, eSoundIndex))
@@ -1261,14 +1260,14 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
     ASSERT(fStrength && iLengthMs)
     if(!STATIC_ISVALID(g_pGame)) return;
 
+    const coreFloat fTime = I_TO_F(iLengthMs) * 0.001f;
+
     // loop through all active players
     g_pGame->ForEachPlayerAll([&](const cPlayer* pCurPlayer, const coreUintW i)
     {
         if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
         if(pCurPlayer->HasStatus(PLAYER_STATUS_DEAD) && !pCurPlayer->ReachedDeath()) return;
-        
-        if(fStrength < m_afRumbleStrength[i]) return;
-        if(fStrength == m_afRumbleStrength[i] && I_TO_F(iLengthMs) * 0.001f < m_afRumbleTime[i]) return;
+        if((fStrength < m_afRumbleStrength[i]) || ((fStrength == m_afRumbleStrength[i]) && (fTime < m_afRumbleTime[i]))) return;
 
         const coreUint8   iRumble     = g_CurConfig.Input.aiRumble[i];
         const coreUint8   iType       = g_pGame->IsMulti() ? g_CurConfig.Input.aiType[i] : g_iTotalType;
@@ -1286,7 +1285,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
                 Core::Input->JoystickRumble(iJoystickID, fFinal, fFinal, iLengthMs);
 
                 // 
-                m_afRumbleTime    [i] = I_TO_F(iLengthMs) * 0.001f;
+                m_afRumbleTime    [i] = fTime;
                 m_afRumbleStrength[i] = fStrength;
             }
         }
@@ -1303,6 +1302,15 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 
     // 
     if(m_fShakeStrength >= SPECIAL_SHAKE_BIG) m_iShakeType = 1u;
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::ShakeOverride(const coreFloat fOverride)
+{
+    ASSERT((fOverride >= 0.0f) && (fOverride <= 1.0f))
+    m_fShakeOverride = fOverride;
 }
 
 

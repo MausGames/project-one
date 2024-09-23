@@ -366,7 +366,8 @@ void CoreApp::Move()
             // move special-effects
             g_pSpecialEffects->Move();
         }
-        
+
+        // 
         g_pSpecialEffects->MoveAlways();
 
         // 

@@ -36,6 +36,7 @@
 // TODO 3: background object replication bug (where objects are too close together on the replication line) (at fly offset 145 in center), is almost not noticeable, only with sting-only snow background
 // TODO 2: during background-density interpolation, when infinity jump is performed, objects still pop in/out
 // TODO 3: shadow-flickering on 45 degree pyramids on intel and amd slightly
+// TODO 3: water is already deleted through Exit when moving a background to the temp-background
 
 
 // ****************************************************************

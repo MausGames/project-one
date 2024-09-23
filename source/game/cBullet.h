@@ -97,11 +97,6 @@ public:
     inline cBullet* ChangeTexSize          (const coreFloat   fFactor) {this->SetTexSize          (this->GetTexSize() * fFactor);                  return this;}
     inline cBullet* ChangeCollisionModifier(const coreVector3 vValue)  {this->SetCollisionModifier(vValue);                                        return this;}   // # unhandled/absolute change
 
-    // 
-    inline void     AddStatus   (const coreInt32 iStatus)      {ADD_FLAG       (m_iStatus, iStatus)}
-    inline void     RemoveStatus(const coreInt32 iStatus)      {REMOVE_FLAG    (m_iStatus, iStatus)}
-    inline coreBool HasStatus   (const coreInt32 iStatus)const {return HAS_FLAG(m_iStatus, iStatus);}
-
     // set object properties
     inline void SetDamage (const coreInt32   iDamage)  {m_iDamage  = iDamage;}
     inline void SetSpeed  (const coreFloat   fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}

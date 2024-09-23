@@ -190,21 +190,21 @@ cConfigMenu::cConfigMenu()noexcept
     m_Description.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f,0.045f));
     m_Description.SetColor3  (COLOR_MENU_WHITE);
 
-    #define __SET_OPTION(x,n,s)                                                                    \
-    {                                                                                              \
-        cGuiLabel& oLabel = m_aLabel[ENTRY_ ## n];                                                 \
-        oLabel.SetTextLanguage("CONFIG_" #n);                                                      \
-                                                                                                   \
-        x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL); \
-        x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());                          \
-        x.SetSize     (coreVector2((s),   0.03f));                                                 \
-        x.SetAlignment(coreVector2(-1.00f,0.00f));                                                 \
-        x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                                          \
-        x.GetCaption()->ChangeLanguage(Core::Language);                                            \
-                                                                                                   \
-        m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                          \
-                                                                                                   \
-        if(aiSkip.count(ENTRY_ ## n)) x.SetStatus(1);                                              \
+    #define __SET_OPTION(x,n,s)                                                                                          \
+    {                                                                                                                    \
+        cGuiLabel& oLabel = m_aLabel[ENTRY_ ## n];                                                                       \
+        oLabel.SetTextLanguage("CONFIG_" #n);                                                                            \
+                                                                                                                         \
+        x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL); \
+        x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());                                                \
+        x.SetSize     (coreVector2((s),   0.03f));                                                                       \
+        x.SetAlignment(coreVector2(-1.00f,0.00f));                                                                       \
+        x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                                                                \
+        x.GetCaption()->ChangeLanguage(Core::Language);                                                                  \
+                                                                                                                         \
+        m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                                                \
+                                                                                                                         \
+        if(aiSkip.count(ENTRY_ ## n)) x.SetStatus(1);                                                                    \
     }
     {
         __SET_OPTION(m_Monitor,         VIDEO_MONITOR,         0.31f)
@@ -283,21 +283,21 @@ cConfigMenu::cConfigMenu()noexcept
     }
     #undef __SET_OPTION
 
-    #define __SET_INPUT_SWITCH(x,n)                                                                            \
-    {                                                                                                          \
-        cGuiLabel& oLabel = m_aLabel[ENTRY_ ## n];                                                             \
-        oLabel.SetTextLanguage("CONFIG_" #n);                                                                  \
-                                                                                                               \
-        m_aInput[i].x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL); \
-        m_aInput[i].x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition() - vOffset);                \
-        m_aInput[i].x.SetSize     (coreVector2( 0.26f,0.03f));                                                 \
-        m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                                 \
-        m_aInput[i].x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                                          \
-        m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                                            \
-                                                                                                               \
-        m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                                      \
-                                                                                                               \
-        if(aiSkip.count(ENTRY_ ## n)) m_aInput[i].x.SetStatus(1);                                              \
+    #define __SET_INPUT_SWITCH(x,n)                                                                                                  \
+    {                                                                                                                                \
+        cGuiLabel& oLabel = m_aLabel[ENTRY_ ## n];                                                                                   \
+        oLabel.SetTextLanguage("CONFIG_" #n);                                                                                        \
+                                                                                                                                     \
+        m_aInput[i].x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL); \
+        m_aInput[i].x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition() - vOffset);                                      \
+        m_aInput[i].x.SetSize     (coreVector2( 0.26f,0.03f));                                                                       \
+        m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                                                       \
+        m_aInput[i].x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                                                                \
+        m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                                                                  \
+                                                                                                                                     \
+        m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                                                            \
+                                                                                                                                     \
+        if(aiSkip.count(ENTRY_ ## n)) m_aInput[i].x.SetStatus(1);                                                                    \
     }
     #define __SET_INPUT_BUTTON(x,n,f)                                                                                      \
     {                                                                                                                      \

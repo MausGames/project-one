@@ -487,7 +487,7 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryBack.DefineProgram("menu_color_program");
     m_ArmoryBack.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.1f);
 
-    m_ArmorySelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_ArmorySelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_ArmorySelection.SetPosition(m_BackgroundArmory.GetPosition() + m_BackgroundArmory.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.08f));
     m_ArmorySelection.SetSize    (coreVector2(0.73f,0.065f));
     m_ArmorySelection.SetEndless (true);
@@ -514,25 +514,25 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryStartBack.SetSize      (coreVector2(0.1f,0.05f));
     m_ArmoryStartBack.SetColor3    (coreVector3(0.0f,0.0f,0.0f));
 
-    m_ArmoryType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_ArmoryType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_ArmoryType.SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[0].GetPosition());
     m_ArmoryType.SetSize     (coreVector2( 0.47f,0.03f));
     m_ArmoryType.SetAlignment(coreVector2(-1.00f,0.00f));
     m_ArmoryType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_ArmoryMode.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_ArmoryMode.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_ArmoryMode.SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[1].GetPosition());
     m_ArmoryMode.SetSize     (m_ArmoryType.GetSize());
     m_ArmoryMode.SetAlignment(m_ArmoryType.GetAlignment());
     m_ArmoryMode.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_ArmoryDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_ArmoryDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_ArmoryDifficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[3].GetPosition());
     m_ArmoryDifficulty.SetSize     (m_ArmoryType.GetSize());
     m_ArmoryDifficulty.SetAlignment(m_ArmoryType.GetAlignment());
     m_ArmoryDifficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_ArmorySpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_ArmorySpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_ArmorySpeed.SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[2].GetPosition());
     m_ArmorySpeed.SetSize     (m_ArmoryType.GetSize());
     m_ArmorySpeed.SetAlignment(m_ArmoryType.GetAlignment());
@@ -542,13 +542,13 @@ cGameMenu::cGameMenu()noexcept
     {
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
-        m_aArmoryShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aArmoryShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
         m_aArmoryShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[4].GetPosition() - vOffset);
         m_aArmoryShield[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aArmoryShield[i].SetAlignment(coreVector2(-1.00f,0.00f));
         m_aArmoryShield[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-        m_aArmoryWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aArmoryWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
         m_aArmoryWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[5].GetPosition() - vOffset);
         m_aArmoryWeapon[i].SetSize     (m_aArmoryShield[i].GetSize());
         m_aArmoryWeapon[i].SetAlignment(m_aArmoryShield[i].GetAlignment());
@@ -618,19 +618,19 @@ cGameMenu::cGameMenu()noexcept
     m_aFirstName[2].SetTextLanguage("GAME_DIFFICULTY");
     m_aFirstName[3].SetTextLanguage("GAME_SHIELD");
 
-    m_FirstType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_FirstType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_FirstType.SetPosition (coreVector2(-1.00f,1.00f) * m_aFirstName[0].GetPosition());
     m_FirstType.SetSize     (coreVector2( 0.47f,0.03f));
     m_FirstType.SetAlignment(coreVector2(-1.00f,0.00f));
     m_FirstType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_FirstDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_FirstDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_FirstDifficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aFirstName[2].GetPosition());
     m_FirstDifficulty.SetSize     (m_FirstType.GetSize());
     m_FirstDifficulty.SetAlignment(m_FirstType.GetAlignment());
     m_FirstDifficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_FirstSpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_FirstSpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_FirstSpeed.SetPosition (coreVector2(-1.00f,1.00f) * m_aFirstName[1].GetPosition());
     m_FirstSpeed.SetSize     (m_FirstType.GetSize());
     m_FirstSpeed.SetAlignment(m_FirstType.GetAlignment());
@@ -640,7 +640,7 @@ cGameMenu::cGameMenu()noexcept
     {
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
-        m_aFirstShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aFirstShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
         m_aFirstShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aFirstName[3].GetPosition() - vOffset);
         m_aFirstShield[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aFirstShield[i].SetAlignment(coreVector2(-1.00f,0.00f));
@@ -705,25 +705,25 @@ cGameMenu::cGameMenu()noexcept
     m_aDemoName[3].SetTextLanguage("GAME_STAGE");
     m_aDemoName[4].SetTextLanguage("GAME_SHIELD");
 
-    m_DemoType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_DemoType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DemoType.SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[0].GetPosition());
     m_DemoType.SetSize     (coreVector2( 0.47f,0.03f));
     m_DemoType.SetAlignment(coreVector2(-1.00f,0.00f));
     m_DemoType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_DemoDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_DemoDifficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DemoDifficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[2].GetPosition());
     m_DemoDifficulty.SetSize     (m_DemoType.GetSize());
     m_DemoDifficulty.SetAlignment(m_DemoType.GetAlignment());
     m_DemoDifficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_DemoSpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_DemoSpeed.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DemoSpeed.SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[1].GetPosition());
     m_DemoSpeed.SetSize     (m_DemoType.GetSize());
     m_DemoSpeed.SetAlignment(m_DemoType.GetAlignment());
     m_DemoSpeed.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_DemoStage.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_DemoStage.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DemoStage.SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[3].GetPosition());
     m_DemoStage.SetSize     (m_DemoType.GetSize());
     m_DemoStage.SetAlignment(m_DemoType.GetAlignment());
@@ -740,7 +740,7 @@ cGameMenu::cGameMenu()noexcept
     {
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
-        m_aDemoShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+        m_aDemoShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
         m_aDemoShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aDemoName[4].GetPosition() - vOffset);
         m_aDemoShield[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aDemoShield[i].SetAlignment(coreVector2(-1.00f,0.00f));

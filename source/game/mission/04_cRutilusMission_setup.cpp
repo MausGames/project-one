@@ -2382,7 +2382,7 @@ void cRutilusMission::__SetupOwn()
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_CYAN);
 
-        g_pSpecialEffects->OverrideShake(0.5f);
+        g_pSpecialEffects->ShakeOverride(0.5f);
 
         if(STAGE_BEGINNING)
         {

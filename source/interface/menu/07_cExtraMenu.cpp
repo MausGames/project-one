@@ -149,25 +149,25 @@ cExtraMenu::cExtraMenu()noexcept
         m_aFilterLine[i].SetFocusable (true);
     }
 
-    m_FilterMission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_FilterMission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_FilterMission.SetPosition(m_aFilterLine[0].GetPosition());
     m_FilterMission.SetSize    (coreVector2(0.47f,0.03f));
     m_FilterMission.SetEndless (true);
     m_FilterMission.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_FilterSegment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_FilterSegment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_FilterSegment.SetPosition(m_aFilterLine[1].GetPosition());
     m_FilterSegment.SetSize    (m_FilterMission.GetSize());
     m_FilterSegment.SetEndless (true);
     m_FilterSegment.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_FilterType.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_FilterType.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_FilterType.SetPosition(m_aFilterLine[2].GetPosition() + coreVector2(-0.125f,0.0f));
     m_FilterType.SetSize    (coreVector2(0.22f,0.03f));
     m_FilterType.SetEndless (true);
     m_FilterType.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_FilterDifficulty.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
+    m_FilterDifficulty.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_FilterDifficulty.SetPosition(m_aFilterLine[2].GetPosition() + coreVector2(0.125f,0.0f));
     m_FilterDifficulty.SetSize    (m_FilterType.GetSize());
     m_FilterDifficulty.SetEndless (true);

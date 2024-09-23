@@ -1093,7 +1093,7 @@ void cMenu::UpdateLanguageFont()
 {
     // 
     const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_STANDARD;
-    Core::Manager::Resource->AssignProxy("dynamic_font", pcName);
+    Core::Manager::Resource->AssignProxy(MENU_FONT_DYNAMIC, pcName);
 
     // 
     Core::Manager::Resource->UpdateWait();

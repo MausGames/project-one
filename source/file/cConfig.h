@@ -126,8 +126,8 @@ struct sConfig final
         coreUint8 iRender;       // render level
         coreUint8 iShadow;       // shadow level
         coreUint8 iReflection;   // water reflection level
-        coreUint8 iGlow;         // fullscreen glow level
-        coreUint8 iDistortion;   // fullscreen distortion level
+        coreUint8 iGlow;         // glow level
+        coreUint8 iDistortion;   // distortion level
         coreUint8 iParticle;     // 
         coreUint8 iShake;        // 
         coreUint8 iFlash;        // 

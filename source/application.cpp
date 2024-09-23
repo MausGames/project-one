@@ -663,7 +663,7 @@ void CoreApp::Setup()
     }
 
     const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_STANDARD;
-    Core::Manager::Resource->AssignProxy(Core::Manager::Resource->LoadProxy("dynamic_font"), pcInit);
+    Core::Manager::Resource->AssignProxy(Core::Manager::Resource->LoadProxy(MENU_FONT_DYNAMIC), pcInit);
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_decal.vert")

@@ -165,7 +165,7 @@ class cSpecialEffects final
 {
 private:
     // 
-    struct cSoundData final
+    struct sSoundData final
     {
         coreVector3 vPosition;   // 
         coreUint16  iCount;      // 
@@ -200,9 +200,9 @@ private:
     coreObject3D m_aExplosionWave[SPECIAL_EXPLOSION];       // 
     coreUintW    m_iCurExplosion;                           // 
 
-    coreSoundPtr         m_apSound[SOUND_MAX];              // 
-    coreUint64           m_aiSoundGuard[2];                 // (to reduce multiple same sound-effects within one frame) 
-    coreList<cSoundData> m_aSoundData;                      // 
+    coreSoundPtr m_apSound   [SOUND_MAX];                   // 
+    sSoundData   m_aSoundData[SOUND_MAX];                   // 
+    coreUint64   m_aiSoundGuard[2];                         // (to reduce multiple same sound-effects within one frame) 
 
     coreFlow  m_afRumbleTime    [SPECIAL_PLAYERS];          // 
     coreFloat m_afRumbleStrength[SPECIAL_PLAYERS];          // 
@@ -297,10 +297,9 @@ public:
     void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs);
 
     // 
-    void ShakeScreen(const coreFloat fStrength);
+    void ShakeScreen  (const coreFloat fStrength);
+    void ShakeOverride(const coreFloat fOverride);
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
-    
-    inline void OverrideShake(const coreFloat fOverride) {ASSERT((fOverride >= 0.0f) && (fOverride <= 1.0f)) m_fShakeOverride = fOverride;}
 
     // 
     void FreezeScreen(const coreFloat fTime);

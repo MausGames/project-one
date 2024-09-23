@@ -119,7 +119,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 
     // construct player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    {
         m_aView[i].Construct(i);
+    }
 
     // create interface objects
     m_aBossHealthBar[0].DefineTexture(0u, "menu_detail_03.png");
