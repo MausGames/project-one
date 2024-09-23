@@ -55,14 +55,6 @@ cMenu::cMenu()noexcept
     m_NoticeSave.SetStyle       (m_NoticeSave.GetStyle() & ~CORE_OBJECT2D_STYLE_ALTCENTER);
     m_NoticeSave.SetTextLanguage("SAVING");
 
-    // 
-    m_NoticeSaveIcon.Construct   (MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
-    m_NoticeSaveIcon.SetCenter   (m_NoticeSave.GetCenter());
-    m_NoticeSaveIcon.SetAlignment(m_NoticeSave.GetAlignment());
-    m_NoticeSaveIcon.SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
-    m_NoticeSaveIcon.SetText     (ICON_GEAR);
-    m_NoticeSaveIcon.SetStyle    (m_NoticeSave.GetStyle() & ~CORE_OBJECT2D_STYLE_ALTCENTER);
-
     // bind menu objects
     this->BindObject(SURFACE_INTRO,   &m_IntroMenu);
     this->BindObject(SURFACE_TITLE,   &m_IntroMenu);
@@ -260,8 +252,7 @@ void cMenu::Render()
     // 
     if(m_fNoticeSaveTime)
     {
-        m_NoticeSave    .Render();
-        //m_NoticeSaveIcon.Render();
+        m_NoticeSave.Render();
     }
 }
 
@@ -899,28 +890,19 @@ void cMenu::Move()
         break;
     }
 
-
-    const coreFloat fSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
-    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
-         m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*TIME, 0.25f));
-    else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*TIME, 0.0f));
-    
-    m_PauseLayer.SetEnabled(m_PauseLayer.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_RENDER);
+    coreFloat       fPauseAlpha = m_PauseLayer.GetAlpha();
+    const coreFloat fPauseSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
 
     // 
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
-    {
-        //m_PauseLayer.SetAlpha    (0.25f);
-        m_PauseLayer.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
-        //m_PauseLayer.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
-    }
-    else
-    {
-        //m_PauseLayer.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
-    }
+         fPauseAlpha = MIN(fPauseAlpha + TIME * fPauseSpeed, 0.25f);
+    else fPauseAlpha = MAX(fPauseAlpha - TIME * fPauseSpeed, 0.0f);
 
     // 
-    m_PauseLayer.SetSize(coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
+    m_PauseLayer.SetSize     (coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
+    m_PauseLayer.SetAlpha    (fPauseAlpha);
+    m_PauseLayer.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
+    m_PauseLayer.SetEnabled  (fPauseAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 
     // 
     m_Tooltip   .Move();
@@ -935,20 +917,9 @@ void cMenu::Move()
     // 
     m_NoticeSave.SetPosition(coreVector2(-0.033f - 0.02f * BLENDB(1.0f - m_fNoticeSaveTime), 0.023f));
     m_NoticeSave.SetAlpha   (BLENDBR(m_fNoticeSaveTime));
-    m_NoticeSave.SetEnabled (m_NoticeSave.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_RENDER);
+    m_NoticeSave.SetEnabled (m_NoticeSave.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
     m_NoticeSave.Move();
-    
-    //if(m_fNoticeSaveTime) m_NoticeSave.RetrieveDesiredSize([this](const coreVector2 vSize)
-    //{
-    //    const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTimeFloat());
-    //    const coreVector2 vDirection = coreVector2::Direction(fRotation * (0.5f*PI));
-//
-    //    m_NoticeSaveIcon.SetPosition (m_NoticeSave.GetPosition() + coreVector2(vSize.x * -1.0f - 0.005f, 0.0f));
-    //    m_NoticeSaveIcon.SetDirection(vDirection);
-    //    m_NoticeSaveIcon.SetAlpha    (m_NoticeSave.GetAlpha());
-    //    m_NoticeSaveIcon.Move();
-    //});
-    
+
     if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)) && (!STATIC_ISVALID(g_pGame) || (g_pGame->GetCurMission()->GetID() != cAterMission::ID)))
     {
         m_fVolume.UpdateMax(-0.5f, 0.0f);

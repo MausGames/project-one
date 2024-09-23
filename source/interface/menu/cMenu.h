@@ -1508,7 +1508,6 @@ private:
     coreUint32     m_iPauseFrame;        // 
 
     cGuiLabel m_NoticeSave;              // 
-    cGuiLabel m_NoticeSaveIcon;          // 
     coreFlow  m_fNoticeSaveTime;         // 
     coreBool  m_bNoticeSavePrevent;      // 
 
