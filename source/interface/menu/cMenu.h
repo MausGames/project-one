@@ -539,8 +539,8 @@ private:
     cGuiSwitchBox m_ArmorySpeed;                                  // 
     cGuiSwitchBox m_aArmoryShield    [MENU_GAME_PLAYERS];         // 
     cGuiSwitchBox m_aArmoryWeapon    [MENU_GAME_PLAYERS];         // 
-    cGuiLabel     m_aArmoryPlayer    [MENU_GAME_PLAYERS];         // 
     cGuiObject    m_aArmoryWeaponIcon[MENU_GAME_PLAYERS];         // 
+    cGuiLabel     m_aArmoryPlayer    [MENU_GAME_PLAYERS];         // 
     cGuiLabel     m_aArmoryRaise     [3];                         // 
     cGuiLabel     m_ArmoryRaiseText;                              // 
     cGuiLabel     m_aArmoryCueLock[2];                            // 
@@ -794,10 +794,11 @@ private:
     cGuiSwitchBox m_DetailType;                                   // 
     cGuiSwitchBox m_DetailDifficulty;                             // 
     cGuiSwitchBox m_DetailSpeed;                                  // 
-    cGuiSwitchBox m_aDetailShield[MENU_REPLAY_PLAYERS];           // 
-    cGuiSwitchBox m_aDetailWeapon[MENU_REPLAY_PLAYERS];           // 
-    cGuiLabel     m_aDetailData  [MENU_REPLAY_DETAIL_DATAS];      // 
-    cGuiLabel     m_aaDetailRun  [MENU_REPLAY_MISSIONS][MENU_REPLAY_DETAIL_RUNS];
+    cGuiSwitchBox m_aDetailShield    [MENU_REPLAY_PLAYERS];       // 
+    cGuiSwitchBox m_aDetailWeapon    [MENU_REPLAY_PLAYERS];       // 
+    cGuiObject    m_aDetailWeaponIcon[MENU_REPLAY_PLAYERS];       // 
+    cGuiLabel     m_aDetailData[MENU_REPLAY_DETAIL_DATAS];        // 
+    cGuiLabel     m_aaDetailRun[MENU_REPLAY_MISSIONS][MENU_REPLAY_DETAIL_RUNS];
 
     cGuiObject m_aDetailStartArrow[2];                            // 
     cGuiLabel  m_DetailStartLabel;                                // 

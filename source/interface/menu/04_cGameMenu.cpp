@@ -296,7 +296,7 @@ cGameMenu::cGameMenu()noexcept
     m_aArmoryName[1].SetTextLanguage("GAME_MODE");
     m_aArmoryName[2].SetTextLanguage("GAME_GAMESPEED");
     m_aArmoryName[3].SetTextLanguage("GAME_DIFFICULTY");
-    m_aArmoryName[4].SetTextLanguage("GAME_SHIELD");
+    m_aArmoryName[5].SetTextLanguage("GAME_SHIELD");
     
     m_aArmoryName[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aArmoryLine[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -543,26 +543,26 @@ cGameMenu::cGameMenu()noexcept
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
         m_aArmoryShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
-        m_aArmoryShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[4].GetPosition() - vOffset);
+        m_aArmoryShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[5].GetPosition() - vOffset);
         m_aArmoryShield[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aArmoryShield[i].SetAlignment(coreVector2(-1.00f,0.00f));
         m_aArmoryShield[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
         m_aArmoryWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
-        m_aArmoryWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[5].GetPosition() - vOffset);
+        m_aArmoryWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aArmoryName[4].GetPosition() - vOffset);
         m_aArmoryWeapon[i].SetSize     (m_aArmoryShield[i].GetSize());
         m_aArmoryWeapon[i].SetAlignment(m_aArmoryShield[i].GetAlignment());
         m_aArmoryWeapon[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-        m_aArmoryPlayer[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-        m_aArmoryPlayer[i].SetPosition(m_aArmoryWeapon[i].GetPosition() + coreVector2(m_aArmoryWeapon[i].GetSize().x * -0.5f, -0.05f));
-        m_aArmoryPlayer[i].SetColor3  (COLOR_MENU_WHITE);
-
         m_aArmoryWeaponIcon[i].DefineTexture(0u, "menu_weapon.png");
         m_aArmoryWeaponIcon[i].DefineProgram("default_2d_program");
-        m_aArmoryWeaponIcon[i].SetPosition  (m_aArmoryWeapon[i].GetPosition() + coreVector2(m_aArmoryWeapon[i].GetSize().x * -0.5f, 0.0f));
+        m_aArmoryWeaponIcon[i].SetPosition  (m_aArmoryWeapon[i].GetPosition() + coreVector2(m_aArmoryWeapon[i].GetSize().x * -0.5f, 0.025f));
         m_aArmoryWeaponIcon[i].SetSize      (coreVector2(1.0f, 1.0f) * 0.085f);
         m_aArmoryWeaponIcon[i].SetTexSize   (coreVector2(0.25f,0.5f));
+
+        m_aArmoryPlayer[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+        m_aArmoryPlayer[i].SetPosition(m_aArmoryShield[i].GetPosition() + coreVector2(m_aArmoryShield[i].GetSize().x * -0.5f, -0.05f));
+        m_aArmoryPlayer[i].SetColor3  (COLOR_MENU_WHITE);
     }
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryRaise); ++i)
@@ -847,14 +847,14 @@ cGameMenu::cGameMenu()noexcept
     m_NavigatorArmory.BindObject(&m_ArmoryType,        NULL,                 NULL,                 &m_ArmoryMode,        NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     m_NavigatorArmory.BindObject(&m_ArmoryMode,        &m_ArmoryType,        NULL,                 &m_ArmorySpeed,       NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
     m_NavigatorArmory.BindObject(&m_ArmorySpeed,       &m_ArmoryMode,        NULL,                 &m_ArmoryDifficulty,  NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    m_NavigatorArmory.BindObject(&m_ArmoryDifficulty,  &m_ArmorySpeed,       NULL,                 &m_aArmoryShield[0],  NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    m_NavigatorArmory.BindObject(&m_aArmoryShield[0],  &m_ArmoryDifficulty,  &m_aArmoryShield[1],  &m_aArmoryWeapon[0],  &m_aArmoryShield[1],  MENU_TYPE_SWITCH_PRESS);
-    m_NavigatorArmory.BindObject(&m_aArmoryShield[1],  &m_ArmoryDifficulty,  &m_aArmoryShield[0],  &m_aArmoryWeapon[1],  &m_aArmoryShield[0],  MENU_TYPE_SWITCH_PRESS);
-    m_NavigatorArmory.BindObject(&m_aArmoryWeapon[0],  &m_aArmoryShield[0],  &m_aArmoryWeapon[1],  &m_StartButtonArmory, &m_aArmoryWeapon[1],  MENU_TYPE_SWITCH_PRESS);
-    m_NavigatorArmory.BindObject(&m_aArmoryWeapon[1],  &m_aArmoryShield[1],  &m_aArmoryWeapon[0],  &m_StartButtonArmory, &m_aArmoryWeapon[0],  MENU_TYPE_SWITCH_PRESS);
-    m_NavigatorArmory.BindObject(&m_StartButtonArmory, &m_aArmoryWeapon[0],  &m_BackButtonArmory,  &m_ArmorySelection,   &m_InputButtonArmory, MENU_TYPE_DEFAULT);
-    m_NavigatorArmory.BindObject(&m_InputButtonArmory, &m_aArmoryWeapon[0],  &m_StartButtonArmory, &m_ArmorySelection,   &m_BackButtonArmory,  MENU_TYPE_DEFAULT);
-    m_NavigatorArmory.BindObject(&m_BackButtonArmory,  &m_aArmoryWeapon[0],  &m_InputButtonArmory, &m_ArmorySelection,   &m_StartButtonArmory, MENU_TYPE_DEFAULT);
+    m_NavigatorArmory.BindObject(&m_ArmoryDifficulty,  &m_ArmorySpeed,       NULL,                 &m_aArmoryWeapon[0],  NULL,                 MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+    m_NavigatorArmory.BindObject(&m_aArmoryWeapon[0],  &m_ArmoryDifficulty,  &m_aArmoryWeapon[1],  &m_aArmoryShield[0],  &m_aArmoryWeapon[1],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_aArmoryWeapon[1],  &m_ArmoryDifficulty,  &m_aArmoryWeapon[0],  &m_aArmoryShield[1],  &m_aArmoryWeapon[0],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_aArmoryShield[0],  &m_aArmoryWeapon[0],  &m_aArmoryShield[1],  &m_StartButtonArmory, &m_aArmoryShield[1],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_aArmoryShield[1],  &m_aArmoryWeapon[1],  &m_aArmoryShield[0],  &m_StartButtonArmory, &m_aArmoryShield[0],  MENU_TYPE_SWITCH_PRESS);
+    m_NavigatorArmory.BindObject(&m_StartButtonArmory, &m_aArmoryShield[0],  &m_BackButtonArmory,  &m_ArmorySelection,   &m_InputButtonArmory, MENU_TYPE_DEFAULT);
+    m_NavigatorArmory.BindObject(&m_InputButtonArmory, &m_aArmoryShield[0],  &m_StartButtonArmory, &m_ArmorySelection,   &m_BackButtonArmory,  MENU_TYPE_DEFAULT);
+    m_NavigatorArmory.BindObject(&m_BackButtonArmory,  &m_aArmoryShield[0],  &m_InputButtonArmory, &m_ArmorySelection,   &m_StartButtonArmory, MENU_TYPE_DEFAULT);
 
     for(coreUintW i = 1u; i < MENU_GAME_ARMORY_MEDALS; ++i)
     {
@@ -930,17 +930,15 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ICONS;      ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryIcon      [i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeWave [i]);
     for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadge     [i]);
-#if defined(_CORE_DEBUG_)
-    //for(coreUintW i = 0u; i < MENU_GAME_PLAYERS;           ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryWeaponIcon[i]);
-#endif
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryArrow    [i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedal    [i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedalBest[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS;           ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryWeaponIcon[i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_ARROWS;     ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryArrow     [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS;     ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedal     [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_MEDALS;     ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryMedalBest [i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryStartBack);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryStartArrow); ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryStartArrow[i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;    ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc[i]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;    ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc2[i][j]);
-    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;         ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryName     [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;         ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc [i]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES;         ++i) for(coreUintW j = 0u; j < ARRAY_SIZE(m_aArmoryBadgeDesc2[0]); ++j) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryBadgeDesc2[i][j]);
+    for(coreUintW i = 0u; i < MENU_GAME_ARMORIES;              ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryName      [i]);
 #if 0
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArmoryRaise); ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aArmoryRaise    [i]);
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryRaiseText);
@@ -1413,7 +1411,7 @@ void cGameMenu::Move()
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 coreVector3 vColor     = COLOR_MENU_WHITE;
-                coreVector2 vTexOffset = coreVector2(0.5f,0.0f);
+                coreVector2 vTexOffset = coreVector2(0.75f,0.5f);
                 if(!m_aArmoryWeapon[0].GetOverride())
                 {
                     switch(m_aArmoryWeapon[i].GetCurValue())
@@ -1430,10 +1428,8 @@ void cGameMenu::Move()
                 m_aArmoryWeapon[i].GetCaption()->SetColor3(vColor);
 
                 m_aArmoryWeaponIcon[i].SetColor3   (vColor);
+                m_aArmoryWeaponIcon[i].SetAlpha    (m_aArmoryWeapon[i].GetAlpha());
                 m_aArmoryWeaponIcon[i].SetTexOffset(vTexOffset);
-
-                //m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.6f * m_aArmoryWeapon[i].GetAlpha());
-                m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.8f * m_aArmoryWeapon[i].GetAlpha());
             }
             
             //const coreUint8 iRaiseSpeed   = cGame::CalcRaiseSpeed (m_ArmorySpeed     .GetCurValue());
@@ -2156,8 +2152,8 @@ void cGameMenu::__LoadUnlocks()
     }
 
     // 
-    m_aArmoryName[5].SetColor3      (COLOR_MENU_WHITE * (bAnyWeapons ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
-    m_aArmoryName[5].SetTextLanguage(bAnyWeapons ? "GAME_WEAPON" : "UNKNOWN");
+    m_aArmoryName[4].SetColor3      (COLOR_MENU_WHITE * (bAnyWeapons ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
+    m_aArmoryName[4].SetTextLanguage(bAnyWeapons ? "GAME_WEAPON" : "UNKNOWN");
 }
 
 

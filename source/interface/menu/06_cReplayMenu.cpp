@@ -172,7 +172,7 @@ cReplayMenu::cReplayMenu()noexcept
     m_aDetailName[0].SetTextLanguage("GAME_TYPE");
     m_aDetailName[1].SetTextLanguage("GAME_GAMESPEED");
     m_aDetailName[2].SetTextLanguage("GAME_DIFFICULTY");
-    m_aDetailName[3].SetTextLanguage("GAME_SHIELD");
+    m_aDetailName[4].SetTextLanguage("GAME_SHIELD");
     m_aDetailName[5].SetTextLanguage("CONFIG_GAME_BACKROTATION");
     m_aDetailName[6].SetTextLanguage("CONFIG_GAME_BACKSPEED");
     m_aDetailName[7].SetTextLanguage("CONFIG_GAME_UPDATEFREQ");
@@ -297,18 +297,24 @@ cReplayMenu::cReplayMenu()noexcept
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
         m_aDetailShield[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
-        m_aDetailShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[3].GetPosition() - vOffset);
+        m_aDetailShield[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[4].GetPosition() - vOffset);
         m_aDetailShield[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aDetailShield[i].SetAlignment(coreVector2(-1.00f,0.00f));
         m_aDetailShield[i].SetOverride (-1);
         m_aDetailShield[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
         m_aDetailWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
-        m_aDetailWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[4].GetPosition() - vOffset);
+        m_aDetailWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[3].GetPosition() - vOffset);
         m_aDetailWeapon[i].SetSize     (m_aDetailShield[i].GetSize());
         m_aDetailWeapon[i].SetAlignment(m_aDetailShield[i].GetAlignment());
         m_aDetailWeapon[i].SetOverride (-1);
         m_aDetailWeapon[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
+
+        m_aDetailWeaponIcon[i].DefineTexture(0u, "menu_weapon.png");
+        m_aDetailWeaponIcon[i].DefineProgram("default_2d_program");
+        m_aDetailWeaponIcon[i].SetPosition  (m_aDetailWeapon[i].GetPosition() + coreVector2(m_aDetailWeapon[i].GetSize().x * -0.5f, 0.025f));
+        m_aDetailWeaponIcon[i].SetSize      (coreVector2(1.0f, 1.0f) * 0.085f);
+        m_aDetailWeaponIcon[i].SetTexSize   (coreVector2(0.25f,0.5f));
     }
 
     for(coreUintW i = 0u; i < MENU_REPLAY_DETAIL_DATAS; ++i)
@@ -354,8 +360,9 @@ cReplayMenu::cReplayMenu()noexcept
     m_DetailBox.BindObject(&m_DetailType);
     m_DetailBox.BindObject(&m_DetailDifficulty);
     m_DetailBox.BindObject(&m_DetailSpeed);
-    for(coreUintW i = 0u; i < MENU_REPLAY_PLAYERS; ++i) m_DetailBox.BindObject(&m_aDetailShield[i]);
-    for(coreUintW i = 0u; i < MENU_REPLAY_PLAYERS; ++i) m_DetailBox.BindObject(&m_aDetailWeapon[i]);
+    for(coreUintW i = 0u; i < MENU_REPLAY_PLAYERS; ++i) m_DetailBox.BindObject(&m_aDetailWeaponIcon[i]);
+    for(coreUintW i = 0u; i < MENU_REPLAY_PLAYERS; ++i) m_DetailBox.BindObject(&m_aDetailShield    [i]);
+    for(coreUintW i = 0u; i < MENU_REPLAY_PLAYERS; ++i) m_DetailBox.BindObject(&m_aDetailWeapon    [i]);
 
     m_RenameHeader.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
     m_RenameHeader.SetPosition    (coreVector2(0.0f,0.35f));
@@ -376,6 +383,7 @@ cReplayMenu::cReplayMenu()noexcept
         m_aDetailShield[i].AddEntryLanguage("VALUE_NO", 0u);
         for(coreUintW j = 5u, je = 100u; j <= je; j += 5u) m_aDetailShield[i].AddEntry(PRINT("%zu", j), j);
         m_aDetailShield[i].AddEntry(coreData::ToChars(SHIELD_INVINCIBLE), SHIELD_MAX);
+        m_aDetailShield[i].AddEntry("-",                                  0xFFu);
 
         m_aDetailWeapon[i].AddEntryLanguage("GAME_WEAPON_RAY",   1u);
         m_aDetailWeapon[i].AddEntryLanguage("GAME_WEAPON_PULSE", 2u);
@@ -383,6 +391,7 @@ cReplayMenu::cReplayMenu()noexcept
         m_aDetailWeapon[i].AddEntryLanguage("GAME_WEAPON_TESLA", 4u);
         m_aDetailWeapon[i].AddEntryLanguage("GAME_WEAPON_ANTI",  5u);
         m_aDetailWeapon[i].AddEntryLanguage("UNKNOWN",           0xFFu);
+        m_aDetailWeapon[i].AddEntry        ("-",                 0xFFu);
     }
 
     // 
@@ -905,22 +914,27 @@ void cReplayMenu::Move()
 
                 m_aDetailShield[i].GetCaption()->SetColor3(bValid ? (m_aDetailShield[i].GetCurValue() ? (i ? COLOR_MENU_YELLOW : COLOR_MENU_BLUE) : COLOR_MENU_RED) : COLOR_MENU_WHITE);
 
-                coreVector3 vColor = COLOR_MENU_WHITE;
+                coreVector3 vColor     = COLOR_MENU_WHITE;
+                coreVector2 vTexOffset = coreVector2(0.75f,0.5f);
                 if(bValid)
                 {
                     switch(m_aDetailWeapon[i].GetCurValue())
                     {
                     default:    UNREACHABLE
-                    case 1u:    vColor = COLOR_MENU_YELLOW; break;
-                    case 2u:    vColor = COLOR_MENU_PURPLE; break;
-                    case 3u:    vColor = COLOR_MENU_GREEN;  break;
-                    case 4u:    vColor = COLOR_MENU_BLUE;   break;
-                    case 5u:    vColor = COLOR_MENU_RED;    break;
-                    case 0xFFu: vColor = COLOR_MENU_WHITE;  break;
+                    case 1u:    vColor = COLOR_MENU_YELLOW; vTexOffset = coreVector2(0.0f, 0.0f); break;
+                    case 2u:    vColor = COLOR_MENU_PURPLE; vTexOffset = coreVector2(0.25f,0.0f); break;
+                    case 3u:    vColor = COLOR_MENU_GREEN;  vTexOffset = coreVector2(0.5f, 0.0f); break;
+                    case 4u:    vColor = COLOR_MENU_BLUE;   vTexOffset = coreVector2(0.75f,0.0f); break;
+                    case 5u:    vColor = COLOR_MENU_RED;    vTexOffset = coreVector2(0.0f, 0.5f); break;
+                    case 0xFFu: vColor = COLOR_MENU_WHITE;  vTexOffset = coreVector2(0.75f,0.5f); break;
                     }
                 }
 
                 m_aDetailWeapon[i].GetCaption()->SetColor3(vColor);
+
+                m_aDetailWeaponIcon[i].SetColor3   (vColor);
+                m_aDetailWeaponIcon[i].SetAlpha    (m_aDetailWeapon[i].GetAlpha());
+                m_aDetailWeaponIcon[i].SetTexOffset(vTexOffset);
             }
             
             
@@ -1090,14 +1104,14 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
     const coreBool bWeaponAnti  = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_ANTI);
     const coreBool bAnyWeapons  = bWeaponPulse || bWeaponWave || bWeaponTesla || bWeaponAnti;
     
-    m_aDetailName[4].SetColor3      (COLOR_MENU_WHITE * (bAnyWeapons ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
-    m_aDetailName[4].SetTextLanguage(bAnyWeapons ? "GAME_WEAPON" : "UNKNOWN");
+    m_aDetailName[3].SetColor3      (COLOR_MENU_WHITE * (bAnyWeapons ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
+    m_aDetailName[3].SetTextLanguage(bAnyWeapons ? "GAME_WEAPON" : "UNKNOWN");
     if(!bAnyWeapons) for(coreUintW i = 0u; i < MENU_REPLAY_PLAYERS; ++i) m_aDetailWeapon[i].SelectValue(0xFFu);
 
     if(!oInfo.oHeader.iOptionType)   // after overriding weapon text
     {
-        m_aDetailShield[1].GetCaption()->SetText("-");
-        m_aDetailWeapon[1].GetCaption()->SetText("-");
+        m_aDetailShield[1].SelectLast();
+        m_aDetailWeapon[1].SelectLast();
     }
 
     // 
@@ -1144,12 +1158,14 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
     for(coreUintW i = 0u; i < MENU_REPLAY_MISSIONS; ++i)
     {
         const coreUintW        iMissionIndex = MIN(iMissionIndexStart + i, iMissionIndexEnd);
-        const coreObjectEnable eEnabled      = (i <= iMissionIndexEnd - iMissionIndexStart) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+        const coreBool         bVisible      = (i <= iMissionIndexEnd - iMissionIndexStart);
+        const coreObjectEnable eEnabled      = bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
-        m_aDetailName[i + iOffset].SetColor3 (g_aMissionData[iMissionIndex].vColor);
-        m_aDetailName[i + iOffset].SetText   (g_aMissionData[iMissionIndex].pcName);
-        m_aDetailName[i + iOffset].SetEnabled(eEnabled);
-        m_aDetailLine[i + iOffset].SetEnabled(eEnabled);
+        m_aDetailName[i + iOffset].SetColor3   (g_aMissionData[iMissionIndex].vColor);
+        m_aDetailName[i + iOffset].SetText     (g_aMissionData[iMissionIndex].pcName);
+        m_aDetailName[i + iOffset].SetEnabled  (eEnabled);
+        m_aDetailLine[i + iOffset].SetEnabled  (eEnabled);
+        m_aDetailLine[i + iOffset].SetFocusable(bVisible);
 
         for(coreUintW j = 0u; j < MENU_REPLAY_DETAIL_RUNS; ++j)
         {
@@ -1161,9 +1177,10 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
     }
 
 #if defined(_CORE_SWITCH_)
-    m_aDetailName[7].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    m_aDetailLine[7].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    m_aDetailData[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_aDetailName[7].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
+    m_aDetailLine[7].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
+    m_aDetailLine[7].SetFocusable(false);
+    m_aDetailData[2].SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
 #endif
 
     // 
