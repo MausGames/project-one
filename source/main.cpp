@@ -403,6 +403,23 @@ void CoreApp::Move()
     Core::Debug->MeasureEnd("Move");
 
     // 
+    if(STATIC_ISVALID(g_pGame))
+    {
+        const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+        const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();
+
+        if(iSegmentIndex != MISSION_NO_SEGMENT)
+        {
+            Core::Platform->SetRichValue("SEGMENT", cMenu::GetSegmentLetters(iMissionIndex, iSegmentIndex));
+            Core::Platform->SetRichText ("Having fun!", "#game");
+        }
+    }
+    else
+    {
+        Core::Platform->SetRichText("Getting ready!", "#menu");
+    }
+
+    // 
     Core::Platform->SetGameState(STATIC_ISVALID(g_pGame) ? ((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && !g_pMenu->IsPaused()) ? CORE_PLATFORM_STATE_ACTIVE : CORE_PLATFORM_STATE_INACTIVE) : CORE_PLATFORM_STATE_MENU);
     
     
