@@ -204,7 +204,7 @@ void cScrollBox::ScrollToObject(const coreObject2D* pObject, const coreBool bNow
 {
     // 
     const coreVector2 vDiff  = pObject->GetPosition() - this->GetPosition();
-    const coreFloat   fShift = MAX0(ABS(vDiff.y) - (this->GetSize().y - SCROLL_FOCUS_SIZE) * 0.5f) * SIGN(vDiff.y);
+    const coreFloat   fShift = MAX0(ABS(vDiff.y) - MAX0(this->GetSize().y - SCROLL_FOCUS_SIZE) * 0.5f) * SIGN(vDiff.y);
 
     // 
     m_fCurOffset = CLAMP(this->GetOffset().y - fShift, 0.0f, m_fMaxOffset);
