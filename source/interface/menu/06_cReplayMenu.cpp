@@ -31,6 +31,11 @@ cReplayMenu::cReplayMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.045f));
     m_Background.SetSize      (coreVector2(0.9f,0.82f));
 
+    m_Header.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_Header.SetPosition    (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.045f));
+    m_Header.SetColor3      (COLOR_MENU_WHITE);
+    m_Header.SetTextLanguage("REPLAYS");
+
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StartButton.DefineProgram("menu_border_program");
     m_StartButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f) + MENU_BUTTON_SHIFT);
@@ -74,7 +79,7 @@ cReplayMenu::cReplayMenu()noexcept
     m_SaveButton  .SetPosition(m_RenameButton     .GetPosition());
 
     m_PageSelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
-    m_PageSelection.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.08f));
+    m_PageSelection.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.1f));
     m_PageSelection.SetSize    (coreVector2(0.73f,0.065f));
     m_PageSelection.SetEndless (true);
     m_PageSelection.GetArrow(0u)->DefineProgram("menu_border_program");
@@ -88,7 +93,7 @@ cReplayMenu::cReplayMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i)
     {
-        const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f - (REPLAY_SLOTSYSTEM ? 0.05f : 0.17f) - 0.05f*I_TO_F(i);
+        const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f - (REPLAY_SLOTSYSTEM ? 0.1f : 0.17f) - 0.05f*I_TO_F(i);
 
         m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.04f,0.0f));
@@ -115,8 +120,8 @@ cReplayMenu::cReplayMenu()noexcept
 
     if(REPLAY_SLOTSYSTEM)
     {
-        m_ReplayBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.0f));
-        m_ReplayBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.77f));
+        m_ReplayBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.025f));
+        m_ReplayBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.72f));
     }
     else
     {
@@ -432,6 +437,7 @@ cReplayMenu::cReplayMenu()noexcept
         this->BindObject(i, &m_Background);
     }
 
+    this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_Header);
     this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_BackButtonOverview);
     if(!REPLAY_SLOTSYSTEM)
     {
@@ -442,6 +448,7 @@ cReplayMenu::cReplayMenu()noexcept
     this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_ReplayBox);
     this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_NavigatorOverview);
 
+    this->BindObject(SURFACE_REPLAY_SLOTS, &m_Header);
     this->BindObject(SURFACE_REPLAY_SLOTS, &m_BackButtonOverview);
     this->BindObject(SURFACE_REPLAY_SLOTS, &m_ReplayBox);
     this->BindObject(SURFACE_REPLAY_SLOTS, &m_NavigatorOverview);

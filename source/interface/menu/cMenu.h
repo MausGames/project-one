@@ -662,6 +662,8 @@ class cScoreMenu final : public coreMenu
 private:
     cGuiObject m_Background;                        // 
 
+    cGuiLabel m_Header;                             // 
+
     cGuiButton m_BackButton;                        // back button
 
     cGuiObject m_aFilterLine[MENU_SCORE_FILTERS];   // 
@@ -750,6 +752,8 @@ class cReplayMenu final : public coreMenu
 {
 private:
     cGuiObject m_Background;                    // 
+
+    cGuiLabel m_Header;                         // 
 
     cGuiButton m_StartButton;                   // 
     cGuiButton m_DeleteButton;                  // 

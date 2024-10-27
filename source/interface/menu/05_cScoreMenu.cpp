@@ -31,6 +31,11 @@ cScoreMenu::cScoreMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.045f));
     m_Background.SetSize      (coreVector2(0.9f,0.82f));
 
+    m_Header.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_Header.SetPosition    (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.045f));
+    m_Header.SetColor3      (COLOR_MENU_WHITE);
+    m_Header.SetTextLanguage("LEADERBOARDS");
+
     m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
@@ -43,7 +48,7 @@ cScoreMenu::cScoreMenu()noexcept
         m_aFilterLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aFilterLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aFilterLine[i].DefineProgram("menu_inner_program");
-        m_aFilterLine[i].SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f, -0.05f - 0.05f*I_TO_F(i)));
+        m_aFilterLine[i].SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f, -0.1f - 0.05f*I_TO_F(i)));
         m_aFilterLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
         m_aFilterLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
         m_aFilterLine[i].SetFocusable (true);
@@ -83,7 +88,7 @@ cScoreMenu::cScoreMenu()noexcept
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
     {
         m_aRank[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-        m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.145f - 0.05f*I_TO_F(i + MENU_SCORE_FILTERS)));
+        m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.195f - 0.05f*I_TO_F(i + MENU_SCORE_FILTERS)));
         m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aRank[i].SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
         m_aRank[i].SetText     (coreData::ToChars(i + 1u));
@@ -129,8 +134,8 @@ cScoreMenu::cScoreMenu()noexcept
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i + MENU_SCORE_FILTERS)*0.09f, 0.0f));
     }
 
-    m_ScoreBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.11f));
-    m_ScoreBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.4f));
+    m_ScoreBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.135f));
+    m_ScoreBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.35f));
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aLine [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aRank [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aName [i]);
@@ -245,6 +250,8 @@ cScoreMenu::cScoreMenu()noexcept
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
     }
+
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_Header);
 
     for(coreUintW i = 0u; i < MENU_SCORE_FILTERS; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aFilterLine[i]);
 
