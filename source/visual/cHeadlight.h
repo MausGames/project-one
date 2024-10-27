@@ -46,8 +46,8 @@ private:
     // 
     struct sPointCommand final
     {
-        coreVector2 vPosition;    // 
-        coreVector2 vSize;        // 
+        coreVector2 vPosition;   // 
+        coreVector2 vSize;       // 
     };
 
 
@@ -95,18 +95,19 @@ public:
     void PlayFlickerNow(const coreUint8 iShatter);
     void StopFlicker   ();
     void ResetFlicker  ();
+    inline coreBool IsFlickering()const {return m_Flicker.GetStatus();}
 
     // 
     inline void BlendOut() {ASSERT(!m_fBlend) m_fBlend = 1.0f;}
-    
-    inline coreBool IsFlickering()const {return m_Flicker.GetStatus();}
-    
-    inline void SetDefault(const coreUintW iIndex, const coreBool bState) {ASSERT(iIndex < sizeof(m_iDefault)*8u) SET_BIT(m_iDefault, iIndex, bState)}
-    
-    inline coreBool GetDefault(const coreUintW iIndex)const {ASSERT(iIndex < sizeof(m_iDefault)*8u) return HAS_BIT(m_iDefault, iIndex);}
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
+
+    // 
+    inline void SetDefault(const coreUintW iIndex, const coreBool bState) {ASSERT(iIndex < sizeof(m_iDefault)*8u) SET_BIT(m_iDefault, iIndex, bState)}
+
+    // 
+    inline coreBool GetDefault(const coreUintW iIndex)const {ASSERT(iIndex < sizeof(m_iDefault)*8u) return HAS_BIT(m_iDefault, iIndex);}
 
 
 private:

@@ -337,27 +337,25 @@ void cMessierBoss::__MoveOwn()
     {
         m_bTimeMusic = true;
 
-        g_MusicPlayer.Lock();
+        g_MusicPlayer.Lock([this](coreMusicPlayer* OUTPUT pMusicPlayer)
         {
-            const coreDouble fFactor = g_MusicPlayer.GetCurMusic()->TellFactor();
+            const coreDouble fFactor = pMusicPlayer->GetCurMusic()->TellFactor();
 
-            g_MusicPlayer.SelectName(this->GetMusicNameRev());
-            g_MusicPlayer.GetCurMusic()->SeekFactor(1.0 - fFactor);
-        }
-        g_MusicPlayer.Unlock();
+            pMusicPlayer->SelectName(this->GetMusicNameRev());
+            pMusicPlayer->GetCurMusic()->SeekFactor(1.0 - fFactor);
+        });
     }
     else if(m_bTimeMusic && (fTotalSpeed >= 0.0f))
     {
         m_bTimeMusic = false;
 
-        g_MusicPlayer.Lock();
+        g_MusicPlayer.Lock([this](coreMusicPlayer* OUTPUT pMusicPlayer)
         {
-            const coreDouble fFactor = g_MusicPlayer.GetCurMusic()->TellFactor();
+            const coreDouble fFactor = pMusicPlayer->GetCurMusic()->TellFactor();
 
-            g_MusicPlayer.SelectName(this->GetMusicName());
-            g_MusicPlayer.GetCurMusic()->SeekFactor(1.0 - fFactor);
-        }
-        g_MusicPlayer.Unlock();
+            pMusicPlayer->SelectName(this->GetMusicName());
+            pMusicPlayer->GetCurMusic()->SeekFactor(1.0 - fFactor);
+        });
     }
 
     const coreBool bIntro = (m_iPhase < 2u);

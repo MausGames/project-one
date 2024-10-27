@@ -267,10 +267,10 @@ void cPostProcessing::Recompile()
     const auto nUpdateFunc = [](const coreHashString& sName, const coreChar* pcConfig)
     {
         coreResourceHandle* pHandle = Core::Manager::Resource->Get<coreShader>(sName);
-
-        pHandle->UpdateStart();
-        d_cast<coreShader*>(pHandle->GetRawResource())->SetCustomCode(pcConfig);
-        pHandle->UpdateEnd();
+        pHandle->LockResource([&](coreShader* OUTPUT pShader)
+        {
+            pShader->SetCustomCode(pcConfig);
+        });
     };
 
     // change configuration of post-processing shaders

@@ -117,11 +117,11 @@ public:
     inline       coreVector2  GetFlyMove()const {return m_vFlyDir * (m_fSpeed * TIME);}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {UNREACHABLE return "";}
-    static inline coreUintW       ConfigOutlineStyle        () {UNREACHABLE return OUTLINE_STYLE_FULL;}
-    static inline coreBool        ConfigShadow              () {UNREACHABLE return false;}
-    static inline coreBool        ConfigGlow                () {UNREACHABLE return false;}
-    static inline coreUintW       ConfigReserve             () {UNREACHABLE return 0u;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {UNREACHABLE return "";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {UNREACHABLE return OUTLINE_STYLE_FULL;}
+    static constexpr coreBool        ConfigShadow              () {UNREACHABLE return false;}
+    static constexpr coreBool        ConfigGlow                () {UNREACHABLE return false;}
+    static constexpr coreUintW       ConfigReserve             () {UNREACHABLE return 0u;}
 
     // 
     static void GlobalInit() {}

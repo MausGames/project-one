@@ -391,11 +391,10 @@ void cGemingaBoss::__MoveOwn()
         {
             PHASE_CHANGE_INC
 
-            g_MusicPlayer.Lock();
+            g_MusicPlayer.Lock([](coreMusicPlayer* OUTPUT pMusicPlayer)
             {
-                g_MusicPlayer.GetCurMusic()->SeekTime(6.2f);   // guitar: 11.0f
-            }
-            g_MusicPlayer.Unlock();
+                pMusicPlayer->GetCurMusic()->SeekTime(6.2f);   // guitar: 11.0f
+            });
 
             g_MusicPlayer.Play();
         });

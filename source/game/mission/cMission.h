@@ -1837,7 +1837,7 @@ template <typename T, typename F> RETURN_RESTRICT cEnemySquad* cMission::_AddSqu
 {
     if(!m_aSquad.count(iCodeLine))
     {
-        ASSERT(m_aPath.size() < MISSION_MAP_SQUADS)
+        ASSERT(m_aSquad.size() < MISSION_MAP_SQUADS)
 
         // 
         cEnemySquad oNewSquad;

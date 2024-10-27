@@ -511,8 +511,8 @@ void cMission::__OpenSegment()
     g_pSave->EditLocalStatsSegment()->iCountStart += 1u;
 
     // 
-    const coreChar* pcName = PRINT("%s %s", Core::Language->GetString("SEGMENT"), g_pMenu->GetSegmentLetters(iMissionIndex, m_iCurSegmentIndex));
-    Core::Platform->MarkEvent(MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? "steam_combat" : "steam_flag", pcName, 0.0f);
+    const coreChar* pcName = PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iMissionIndex, m_iCurSegmentIndex));
+    Core::Platform->MarkEvent(MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? "steam_combat" : "steam_flag", pcName);
 }
 
 

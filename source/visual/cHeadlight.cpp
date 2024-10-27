@@ -29,7 +29,6 @@ cHeadlight::cHeadlight()noexcept
 
     // set object properties
     this->SetSize(coreVector2(1.0f,1.0f) * ENVIRONMENT_SCALE_FACTOR);
-    this->Move();
 
     // 
     m_Spot .DefineTexture(0u, "effect_headlight_spot.png");
