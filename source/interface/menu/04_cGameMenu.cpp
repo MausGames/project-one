@@ -588,7 +588,7 @@ cGameMenu::cGameMenu()noexcept
         m_aArmoryCueLock[i].SetText  (ICON_LOCK);
     }
     m_aArmoryCueLock[0].SetPosition(m_aArmoryName[2].GetPosition() + coreVector2(0.312f,0.0f));
-    m_aArmoryCueLock[1].SetPosition(m_aArmoryName[4].GetPosition() + coreVector2(0.312f,0.0f));
+    m_aArmoryCueLock[1].SetPosition(m_aArmoryName[5].GetPosition() + coreVector2(0.312f,0.0f));
 
     m_FirstHeader.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_FirstHeader.SetPosition    (m_BackgroundFirst.GetPosition() + m_BackgroundFirst.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.06f));

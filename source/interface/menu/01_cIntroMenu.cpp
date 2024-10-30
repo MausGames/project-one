@@ -18,7 +18,7 @@ cIntroMenu::cIntroMenu()noexcept
 , m_fDelayTimer  (0.0f)
 {
     // create menu objects
-    m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_BIG);
     m_WelcomeText.SetPosition    (coreVector2(0.0f,0.0f));
     m_WelcomeText.SetColor3      (COLOR_MENU_INSIDE);
     m_WelcomeText.SetTextLanguage("WELCOME");

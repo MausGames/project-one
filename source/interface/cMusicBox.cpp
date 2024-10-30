@@ -172,7 +172,7 @@ void cMusicBox::Move()
         {
             // 
             if(m_ScrollBox.IsBarFocused()) m_aLine[i].SetFocused(false);
-            cMenu::UpdateLine(&m_aLine[i], false, g_aMusicTrack[i].vColor);
+            cMenu::UpdateLine(&m_aLine[i], true, g_aMusicTrack[i].vColor);   // # requires interaction for transition
 
             if(m_aLine[i].IsClicked())
             {

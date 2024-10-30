@@ -513,8 +513,8 @@ void cExtraMenu::Move()
                     const coreBool bSuccess = ApplyPassword(pcText);
 
                     // 
-                         if(!std::strcmp(pcText, "PASSWORD")) pArcadeInput->OverrideText("NICE-TRY");
-                    else if(!std::strcmp(pcText, "PASSWORT")) pArcadeInput->OverrideText("SO-NICHT");
+                         if(!std::strcmp(pcText, "PASSWORD")) pArcadeInput->OverrideText("NICE TRY");
+                    else if(!std::strcmp(pcText, "PASSWORT")) pArcadeInput->OverrideText("SO NICHT");
                     else
                     {
                         // 
