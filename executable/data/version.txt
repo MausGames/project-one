@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Eigengrau v1.3.8 (2024-10-30)
+
+- fixed an issue where the rendering performance deteriorated permanently after entering the pause menu
+- fixed the configuration menu always reporting pending changes when Standard Mode was enabled
+- improved the in-game text writer and added many new characters
+
+
+-------------------------------------------------------------------
 Eigengrau v1.3.7 (2024-08-21)
 
 - added subtle highlighting of changes in the configuration menu
