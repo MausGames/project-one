@@ -206,6 +206,7 @@ struct sMenuInput final
     coreBool  bCancel;       // 
     coreBool  bPause;        // 
     coreBool  bAny;          // 
+    coreBool  bToggle;       // 
     coreBool  bScreenshot;   // 
 };
 

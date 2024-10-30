@@ -15,43 +15,46 @@
 // TODO 3: cancel feature CORE_INPUT_CHAR(ESCAPE) (check coreTextBox issues) (with message box "do you really want to ...", but makes only sense in volatile situations)
 // TODO 3: add blinking label-cursor | (also to engine textbox) (separate object on pos+size.x)
 // TODO 3: check if template longer than expected length can cause issues (or shorter)
+// TODO 3: \ ^ ° < >
 
 
 // ****************************************************************
 // arcade input definitions
-#define ARCADE_GLYPHS        (ARRAY_SIZE(g_acArcadeGlyph))                   // 
-#define ARCADE_COLUMNS       (9u)                                            // 
-#define ARCADE_ROWS          (ARCADE_GLYPHS / ARCADE_COLUMNS)                // 
-#define ARCADE_TEXTS         (1u)                                            // 
+#define ARCADE_PAGES           (ARRAY_SIZE(g_aacArcadeGlyph))                      // 
+#define ARCADE_GLYPHS          (ARRAY_SIZE(g_aacArcadeGlyph[0]))                   // 
+#define ARCADE_COLUMNS         (9u)                                                // 
+#define ARCADE_ROWS            (ARCADE_GLYPHS / ARCADE_COLUMNS)                    // 
+#define ARCADE_TEXTS           (1u)                                                // 
 
-#define ARCADE_IS_COMMAND(x) (std::iscntrl(coreUint8(g_acArcadeGlyph[x])))   // 
-#define ARCADE_COMMAND_DEL   (CORE_INPUT_CHAR(BACKSPACE))                    // 
-#define ARCADE_COMMAND_END   (CORE_INPUT_CHAR(RETURN))                       // 
+#define ARCADE_IS_COMMAND(x,y) (std::iscntrl(coreUint8(g_aacArcadeGlyph[x][y])))   // 
+#define ARCADE_COMMAND_ALT     ('\t')                                              // 
+#define ARCADE_COMMAND_DEL     (CORE_INPUT_CHAR(BACKSPACE))                        // 
+#define ARCADE_COMMAND_END     (CORE_INPUT_CHAR(RETURN))                           // 
 
 // 
-alignas(ALIGNMENT_CACHE) static constexpr coreChar g_acArcadeGlyph[] =
+alignas(ALIGNMENT_CACHE) static constexpr coreChar g_aacArcadeGlyph[][9 * 5] =
 {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
-    'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-    'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0',
-    '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    '!', '?', '+', '-', '*', '/', '=', '&', '#',
-    '.', ':', ',', ';', '(', ')', ' ',
-    ARCADE_COMMAND_DEL,
-    ARCADE_COMMAND_END
+    {
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+        'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        '.', ',', '(', ')', '~', ' ',
+        ARCADE_COMMAND_ALT,
+        ARCADE_COMMAND_DEL,
+        ARCADE_COMMAND_END
+    },
+    {
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+        'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+        's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '#',
+        '!', '?', '+', '-', '*', '/', '$', '%', '&',
+        ':', ';', '[', ']', '=', '_',
+        ARCADE_COMMAND_ALT,
+        ARCADE_COMMAND_DEL,
+        ARCADE_COMMAND_END
+    }
 };
-
-//alignas(ALIGNMENT_CACHE) static constexpr coreChar g_acArcadeGlyph2[] =
-//{
-//    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-//    'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-//    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0',
-//    '1', '2', '3', '4', '5', '6', '7', '8', '9',
-//    '!', '?', '+', '-', '*', '/', '=', '&', '#',
-//    '.', ':', ',', ';', '[', ']', ' ',
-//    ARCADE_COMMAND_DEL,
-//    ARCADE_COMMAND_END
-//};
 
 STATIC_ASSERT(ARCADE_COLUMNS * ARCADE_ROWS == ARCADE_GLYPHS)
 
@@ -61,24 +64,25 @@ STATIC_ASSERT(ARCADE_COLUMNS * ARCADE_ROWS == ARCADE_GLYPHS)
 class cArcadeInput final : public cGuiObject
 {
 private:
-    cGuiObject m_Background;               // 
+    cGuiObject m_Background;                  // 
 
-    cGuiObject m_aButton[ARCADE_GLYPHS];   // 
-    cGuiLabel  m_aGlyph [ARCADE_GLYPHS];   // 
+    cGuiObject m_aButton   [ARCADE_GLYPHS];   // 
+    cGuiLabel  m_aaGlyph[2][ARCADE_GLYPHS];   // 
 
-    cGuiLabel  m_aText[ARCADE_TEXTS];      // 
-    coreString m_sTextValue;               // 
-    coreString m_sTextTemplate;            // 
-    coreUint8  m_iTextLength;              // 
+    cGuiLabel  m_aText[ARCADE_TEXTS];         // 
+    coreString m_sTextValue;                  // 
+    coreString m_sTextTemplate;               // 
+    coreUint8  m_iTextLength;                 // 
 
-    cGuiLabel m_State;                     // 
+    cGuiLabel m_State;                        // 
 
-    coreFlow m_fFlashTime;                 // 
+    coreFlow m_fFlashTime;                    // 
 
-    coreUint8 m_iCurGlyph;                 // 
-    coreBool  m_bFinished;                 // 
+    coreUint8 m_iCurPage;                     // 
+    coreUint8 m_iCurGlyph;                    // 
+    coreBool  m_bFinished;                    // 
 
-    cMenuNavigator m_Navigator;            // 
+    cMenuNavigator m_Navigator;               // 
 
 
 public:
@@ -107,7 +111,7 @@ public:
 
 private:
     // 
-    void __MoveCursor(const coreUintW iNewGylph);
+    void __MoveCursor(const coreUint8 iNewPage, const coreUint8 iNewGylph);
 
     // 
     void __SetText(const coreChar* pcText);
@@ -116,16 +120,8 @@ private:
     void __PopCharacter();
 
     // 
-    static constexpr coreUintW __RetrieveGlyphIndex(const coreChar cGlyph);
+    static void __RetrieveIndex(const coreChar cChar, coreUint8* OUTPUT piPageIndex, coreUint8* OUTPUT piGylphIndex);
 };
-
-
-// ****************************************************************
-// 
-constexpr coreUintW cArcadeInput::__RetrieveGlyphIndex(const coreChar cGlyph)
-{
-    return std::find(g_acArcadeGlyph, g_acArcadeGlyph + ARRAY_SIZE(g_acArcadeGlyph), cGlyph) - g_acArcadeGlyph;
-}
 
 
 #endif // _P1_GUARD_ARCADEINPUT_H_

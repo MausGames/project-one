@@ -14,6 +14,7 @@
 cArcadeInput::cArcadeInput()noexcept
 : m_iTextLength (0u)
 , m_fFlashTime  (0.0f)
+, m_iCurPage    (0u)
 , m_iCurGlyph   (0u)
 , m_bFinished   (false)
 {
@@ -36,8 +37,8 @@ cArcadeInput::cArcadeInput()noexcept
         const coreFloat Y = I_TO_F(iRow) * -1.0f;
 
         m_aButton[i].DefineProgram   ("menu_color_program");
-        m_aButton[i].SetPosition     (coreVector2(X, Y)      *  0.08f + coreVector2(0.0f,0.05f));
-        m_aButton[i].SetSize         (coreVector2(1.0f,1.0f) *  0.07f);
+        m_aButton[i].SetPosition     (coreVector2(X, Y)      * 0.08f);
+        m_aButton[i].SetSize         (coreVector2(1.0f,1.0f) * 0.07f);
         m_aButton[i].SetColor3       (COLOR_MENU_BLACK);
         m_aButton[i].SetFocusModifier(coreVector2(1.0f,1.0f) * (0.08f/0.07f));
         m_aButton[i].SetFocusable    (true);
@@ -47,33 +48,37 @@ cArcadeInput::cArcadeInput()noexcept
     }
 
     // 
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
+    for(coreUintW j = 0u; j < ARCADE_PAGES; ++j)
     {
-        if(ARCADE_IS_COMMAND(i))
+        for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
         {
-            // 
-            const coreChar* pcText;
-            switch(g_acArcadeGlyph[i])
+            if(ARCADE_IS_COMMAND(j, i))
             {
-            default: UNREACHABLE
-            case ARCADE_COMMAND_DEL: pcText = "DEL"; break;
-            case ARCADE_COMMAND_END: pcText = "END"; break;
+                // 
+                const coreChar* pcText;
+                switch(g_aacArcadeGlyph[j][i])
+                {
+                default: UNREACHABLE
+                case ARCADE_COMMAND_ALT: pcText = "ALT"; break;
+                case ARCADE_COMMAND_DEL: pcText = "DEL"; break;
+                case ARCADE_COMMAND_END: pcText = "END"; break;
+                }
+
+                m_aaGlyph[j][i].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+                m_aaGlyph[j][i].SetText  (pcText);
+            }
+            else
+            {
+                // 
+                const coreChar acText[2] = {g_aacArcadeGlyph[j][i]};
+
+                m_aaGlyph[j][i].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+                m_aaGlyph[j][i].SetText  (acText);
             }
 
-            m_aGlyph[i].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-            m_aGlyph[i].SetText  (pcText);
+            m_aaGlyph[j][i].SetPosition(m_aButton[i].GetPosition());
+            m_aaGlyph[j][i].SetColor3  (COLOR_MENU_WHITE);
         }
-        else
-        {
-            // 
-            const coreChar acText[2] = {g_acArcadeGlyph[i]};
-
-            m_aGlyph[i].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
-            m_aGlyph[i].SetText  (acText);
-        }
-
-        m_aGlyph[i].SetPosition(m_aButton[i].GetPosition());
-        m_aGlyph[i].SetColor3  (COLOR_MENU_WHITE);
     }
 
     // 
@@ -86,7 +91,7 @@ cArcadeInput::cArcadeInput()noexcept
 
     // 
     m_State.Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_State.SetPosition(coreVector2(0.0f,0.12f));
+    m_State.SetPosition(coreVector2(0.0f,0.07f));
     m_State.SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
 
     // 
@@ -112,8 +117,8 @@ void cArcadeInput::Render()
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
     {
-        m_aGlyph[i].SetAlpha(this->GetAlpha());
-        m_aGlyph[i].Render();
+        m_aaGlyph[m_iCurPage][i].SetAlpha(this->GetAlpha());
+        m_aaGlyph[m_iCurPage][i].Render();
     }
 
     // 
@@ -143,76 +148,98 @@ void cArcadeInput::Move()
     m_Navigator.Update();
 
     // 
-    const coreChar cChar = g_MenuInput.bCancel ? ARCADE_COMMAND_DEL : TO_UPPER(Core::Input->GetKeyboardChar());
+    const coreChar cChar = g_MenuInput.bToggle ? ARCADE_COMMAND_ALT : g_MenuInput.bCancel ? ARCADE_COMMAND_DEL : Core::Input->GetKeyboardChar();
 
     // 
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
+    for(coreUintW j = 0u; j < ARCADE_PAGES; ++j)
     {
         // 
-        m_aButton[i].Interact();
+        if(!cChar && (m_iCurPage != j)) continue;
 
-        // 
-        if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || (g_acArcadeGlyph[i] == cChar)))
+        for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
         {
-            if(g_acArcadeGlyph[i] == ARCADE_COMMAND_DEL)
+            // 
+            m_aButton[i].Interact();
+
+            // 
+            if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || (g_aacArcadeGlyph[j][i] == cChar)))
             {
-                // 
-                if(m_sTextValue.empty()) m_bFinished = true;
-                this->__PopCharacter();
-                this->__SetText(m_sTextValue.c_str());
-            }
-            else if(g_acArcadeGlyph[i] == ARCADE_COMMAND_END)
-            {
-                // 
-                m_bFinished = true;
-            }
-            else if(m_sTextValue.length() < m_iTextLength)
-            {
-                // 
-                m_sTextValue += g_acArcadeGlyph[i];
-                this->__SetText(m_sTextValue.c_str());
+                if(g_aacArcadeGlyph[j][i] == ARCADE_COMMAND_ALT)
+                {
+                    // 
+                    m_iCurPage = (m_iCurPage + 1u) % ARCADE_PAGES;
+                }
+                else if(g_aacArcadeGlyph[j][i] == ARCADE_COMMAND_DEL)
+                {
+                    // 
+                    if(m_sTextValue.empty()) m_bFinished = true;
+                    this->__PopCharacter();
+                    this->__SetText(m_sTextValue.c_str());
+                }
+                else if(g_aacArcadeGlyph[j][i] == ARCADE_COMMAND_END)
+                {
+                    // 
+                    m_bFinished = true;
+                }
+                else if(m_sTextValue.length() < m_iTextLength)
+                {
+                    // 
+                    m_sTextValue += g_aacArcadeGlyph[j][i];
+                    this->__SetText(m_sTextValue.c_str());
+
+                    // 
+                    if(cChar)
+                    {
+                        coreUint8 iNewPage, iNewGlyph;
+                        cArcadeInput::__RetrieveIndex(cChar, &iNewPage, &iNewGlyph);
+
+                        this->__MoveCursor(iNewPage, iNewGlyph);
+                    }
+
+                    // 
+                    //if(g_MenuInput.bAccept && m_sTextTemplate.starts_with(m_sTextValue))
+                    //{
+                    //  coreUint8 iNewPage, iNewGlyph;
+                    //  cArcadeInput::__RetrieveIndex((m_sTextTemplate == m_sTextValue) ? ARCADE_COMMAND_END : m_sTextTemplate[m_sTextValue.length()], &iNewPage, &iNewGlyph);
+                    //
+                    //  this->__MoveCursor(iNewPage, iNewGlyph);
+                    //}
+                }
 
                 // 
-                if(cChar) this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cChar));
+                if(!m_bFinished) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
 
                 // 
-                //if(g_MenuInput.bAccept && m_sTextTemplate.starts_with(m_sTextValue))
-                //{
-                //    const coreChar cGlyph = (m_sTextTemplate == m_sTextValue) ? ARCADE_COMMAND_END : m_sTextTemplate[m_sTextValue.length()];
-                //    this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cGlyph));
-                //}
+                j = ARCADE_PAGES;
+                break;
             }
 
             // 
-            if(!m_bFinished) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
-            break;
-        }
-
-        // 
-        if(m_aButton[i].IsFocused() && (m_iCurGlyph != i))
-        {
-            this->__MoveCursor(i);
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
-            break;
+            if(m_aButton[i].IsFocused() && (m_iCurPage == j) && (m_iCurGlyph != i))
+            {
+                this->__MoveCursor(j, i);
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_BUTTON);
+                break;
+            }
         }
     }
 
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
     {
-        const coreFloat   fLight = ((g_acArcadeGlyph[i] != ARCADE_COMMAND_END) && ((g_acArcadeGlyph[i] == ARCADE_COMMAND_DEL) ? m_sTextValue.empty() : (m_sTextValue.length() >= m_iTextLength))) ? MENU_LIGHT_IDLE : MENU_LIGHT_ACTIVE;
+        const coreFloat   fLight = (ARCADE_IS_COMMAND(m_iCurPage, i) || (m_sTextValue.length() < m_iTextLength)) ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
         const coreVector3 vColor = (m_iCurGlyph == i) ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE;
 
-        m_aGlyph[i].SetColor3(vColor * fLight);
+        m_aaGlyph[m_iCurPage][i].SetColor3(vColor * fLight);
     }
 
     // 
     if(!cMenuNavigator::IsUsingAny() && !g_pMenu->GetMsgBox()->IsVisible()) m_Navigator.OverrideCurrent(&m_aButton[m_iCurGlyph]);
 
     // 
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].Move();
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aGlyph [i].Move();
-    for(coreUintW i = 0u; i < ARCADE_TEXTS;  ++i) m_aText  [i].Move();
+    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton            [i].Move();
+    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aaGlyph[m_iCurPage][i].Move();
+    for(coreUintW i = 0u; i < ARCADE_TEXTS;  ++i) m_aText              [i].Move();
 
     // 
     m_State.SetText(PRINT("%zu / %u", m_sTextValue.length(), m_iTextLength));
@@ -246,14 +273,22 @@ void cArcadeInput::Start(const coreChar* pcTemplate, const coreUint8 iLength)
 
     // 
     m_sTextValue    = "";
-    m_sTextTemplate = coreData::StrToUpper(pcTemplate);
+    m_sTextTemplate = pcTemplate;
     m_iTextLength   = iLength;
 
     // 
     this->__SetText("");
 
-    // 
-    m_iCurGlyph = m_sTextTemplate.empty() ? 0u : cArcadeInput::__RetrieveGlyphIndex(m_sTextTemplate[0]);
+    //
+    if(m_sTextTemplate.empty())
+    {
+        m_iCurPage  = 0u;
+        m_iCurGlyph = 0u;
+    }
+    else
+    {
+        cArcadeInput::__RetrieveIndex(m_sTextTemplate[0], &m_iCurPage, &m_iCurGlyph);
+    }
 
     // 
     m_Navigator.ForceCurrent(&m_aButton[m_iCurGlyph]);
@@ -286,11 +321,12 @@ void cArcadeInput::OverrideText(const coreChar* pcText)
 
 // ****************************************************************
 // 
-void cArcadeInput::__MoveCursor(const coreUintW iNewGylph)
+void cArcadeInput::__MoveCursor(const coreUint8 iNewPage, const coreUint8 iNewGylph)
 {
     ASSERT(iNewGylph < ARCADE_GLYPHS)
 
-    // 
+    //
+    m_iCurPage  = iNewPage;
     m_iCurGlyph = iNewGylph;
 
     // 
@@ -324,4 +360,29 @@ void cArcadeInput::__PopCharacter()
         }
         m_sTextValue.pop_back();
     }
+}
+
+
+// ****************************************************************
+// 
+void cArcadeInput::__RetrieveIndex(const coreChar cChar, coreUint8* OUTPUT piPageIndex, coreUint8* OUTPUT piGylphIndex)
+{
+    ASSERT(piPageIndex && piGylphIndex)
+
+    // 
+    for(coreUintW j = 0u; j < ARCADE_PAGES; ++j)
+    {
+        const coreUintW iIndex = std::find(g_aacArcadeGlyph[j], g_aacArcadeGlyph[j] + ARCADE_GLYPHS, cChar) - g_aacArcadeGlyph[j];
+        if(iIndex < ARCADE_GLYPHS)
+        {
+            // 
+            (*piPageIndex)  = j;
+            (*piGylphIndex) = iIndex;
+            return;
+        }
+    }
+
+    // 
+    (*piPageIndex)  = 0u;
+    (*piGylphIndex) = 0u;
 }

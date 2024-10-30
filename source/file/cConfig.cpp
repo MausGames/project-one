@@ -468,6 +468,8 @@ void UpdateInput()
             // 
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
+            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_X, CORE_INPUT_PRESS)) g_MenuInput.bToggle = true;
+            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_Y, CORE_INPUT_PRESS)) g_MenuInput.bToggle = true;
         }
 
         // 

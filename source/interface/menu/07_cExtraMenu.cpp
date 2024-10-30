@@ -506,7 +506,7 @@ void cExtraMenu::Move()
             if(pArcadeInput->GetFinished())
             {
                 // 
-                const coreChar* pcText = pArcadeInput->GetText();
+                const coreChar* pcText = coreData::StrToUpper(pArcadeInput->GetText());
                 if(pcText[0])
                 {
                     // 
