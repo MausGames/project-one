@@ -13,10 +13,11 @@
 
 // ****************************************************************
 // distortion definitions
-#define DISTORTION_SCALE_FACTOR (SCALE_FACTOR)   // frame buffer resolution factor
-#define DISTORTION_WAVES        (8u)             // number of distortion-waves
-#define DISTORTION_BURSTS       (4u)             // number of distortion-bursts
-#define DISTORTION_ERASERS      (PLAYERS)        // 
+#define DISTORTION_SCALE_FACTOR (SCALE_FACTOR)    // frame buffer resolution factor
+#define DISTORTION_WAVES        (8u)              // number of distortion-waves
+#define DISTORTION_BURSTS       (4u)              // number of distortion-bursts
+#define DISTORTION_ERASERS      (PLAYERS)         // 
+#define DISTORTION_CLEAR        (127.0f/255.0f)   // 
 
 #define DISTORTION_WAVE_TINY    ( 1.2f), (3.0f)
 #define DISTORTION_WAVE_SMALL   ( 2.5f), (3.0f)

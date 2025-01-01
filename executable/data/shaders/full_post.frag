@@ -40,17 +40,7 @@ void FragmentMain()
     vec2 v2Distortion = coreTextureBase2D(3, v_av2TexCoord[1]).rg;   // # low-res
 
     // move texture coordinates
-    #if (CORE_GL_VERSION >= 110) || (CORE_GL_ES_VERSION >= 300)
-        const float A = 127.35;
-        const float B = 127.65;
-    #else
-        const float A = 127.0;
-        const float B = 128.0;
-    #endif
-    if(any(bvec4(lessThan(v2Distortion, vec2(A / 255.0)), greaterThan(v2Distortion, vec2(B / 255.0)))))
-    {
-        v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.4, 0.4);
-    }
+    v2TexCoord += (v2Distortion * 2.0 - 1.0 + (1.0/255.0)) * vec2(-0.1, 0.1);
 
 #endif
 
