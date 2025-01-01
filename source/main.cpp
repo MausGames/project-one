@@ -41,11 +41,11 @@ static coreProtect<coreDouble> s_dPhysicalTime = 0.0;     // physical frame time
 static coreBool                s_bUseLogical   = false;   // 
 static coreBool                s_bMenuMusic    = false;   // 
 
-static void LockFramerate();                              // lock frame rate
-static void ForceFramerate(const coreBool bFull, const coreBool bUpdate);         // override frame time
-static void UpdateListener();                             // 
-static void ReshapeGame();                                // reshape and resize game
-static void DebugGame();                                  // debug and test game
+static void LockFramerate();                                                // lock frame rate
+static void ForceFramerate(const coreBool bFull, const coreBool bUpdate);   // override frame time
+static void UpdateListener();                                               // 
+static void ReshapeGame();                                                  // reshape and resize game
+static void DebugGame();                                                    // debug and test game
 
 
 // ****************************************************************
@@ -470,7 +470,7 @@ void InitResolution(const coreVector2 vResolution)
     if(F_TO_UI(vResolution.x + vResolution.y) & 0x01u) g_vGameResolution.arr(IsHorizontal(vResolution) ? 0u : 1u) -= 1.0f;
 
     // 
-    g_bSteamDeck = (vResolution == coreVector2(1280.0f,800.0f));
+    g_bSteamDeck = coreMath::IsNear(vResolution.AspectRatio(), coreVector2(1280.0f,800.0f).AspectRatio());
 }
 
 

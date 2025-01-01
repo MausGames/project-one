@@ -34,9 +34,9 @@ public:
     inline void DefineModelHigh(std::nullptr_t)               {m_pModelHigh = NULL;}
     inline void DefineModelHigh(const coreModelPtr&   pModel) {m_pModelHigh = pModel;}
     inline void DefineModelHigh(const coreHashString& sName)  {m_pModelHigh = Core::Manager::Resource->Get<coreModel>(sName);}
-    inline void DefineModelLow (std::nullptr_t)               {m_pModelLow  = NULL;                                            this->coreObject3D::DefineModel(m_pModelLow);}
-    inline void DefineModelLow (const coreModelPtr&   pModel) {m_pModelLow  = pModel;                                          this->coreObject3D::DefineModel(m_pModelLow);}
-    inline void DefineModelLow (const coreHashString& sName)  {m_pModelLow  = Core::Manager::Resource->Get<coreModel>(sName);  this->coreObject3D::DefineModel(m_pModelLow);}
+    inline void DefineModelLow (std::nullptr_t)               {m_pModelLow  = NULL;                                           this->coreObject3D::DefineModel(m_pModelLow);}
+    inline void DefineModelLow (const coreModelPtr&   pModel) {m_pModelLow  = pModel;                                         this->coreObject3D::DefineModel(m_pModelLow);}
+    inline void DefineModelLow (const coreHashString& sName)  {m_pModelLow  = Core::Manager::Resource->Get<coreModel>(sName); this->coreObject3D::DefineModel(m_pModelLow);}
 
     // 
     inline void ActivateModelHigh() {if(s_bAllowHigh) this->coreObject3D::DefineModel(m_pModelHigh);}

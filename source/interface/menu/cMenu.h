@@ -58,6 +58,9 @@
 #define MENU_INSIDE_ALPHA             (0.95f)                       // 
 #define MENU_BUTTON_SHIFT             (coreVector2(0.0001f,0.0f))   // prevent rounding-issue and rectify-shift of caption on focus on 720p
 
+#define MENU_RESOLUTION_DESKTOP       (0xEEu)
+#define MENU_RESOLUTION_CUSTOM        (0xFFu)
+
 #define MENU_LAYER_TEXOFFSET          (FRACT(-0.04f * Core::System->GetTotalTimeFloat(100.0)))
 
 #define MENU_GAME_PLAYERS             (PLAYERS)
@@ -1585,7 +1588,7 @@ public:
     inline const coreVector3& GetHighlightColor()const {return s_vHighlightColor;}
     inline const coreVector3& GetButtonColor()const {return s_vButtonColor;}
     
-    cInterface* GetInterface() {return &m_Interface;}
+    inline cInterface* GetInterface() {return &m_Interface;}
     
     inline void PreventSaveText() {m_bNoticeSavePrevent = true;}
     

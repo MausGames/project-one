@@ -945,7 +945,7 @@ void cReplayMenu::Move()
                 m_aDetailArrow[i].SetAlpha(m_aDetailArrow[i].GetAlpha() * ((i < m_iDetailStartIndex) ? 0.3f : 1.0f));
             }
             
-            const coreFloat   fHeight     = SIN(Core::System->GetTotalTimeFloat(2.0f*PI) * 10.0f) * 0.002f;
+            const coreFloat   fHeight     = SIN(Core::System->GetTotalTimeFloat(2.0*PI_D) * 10.0f) * 0.002f;
             const coreVector2 vTargetPos  = m_aDetailMedal[m_iDetailStartIndex + 1u].GetPosition() + coreVector2(0.0f,0.075f + fHeight);
             const coreVector2 vTargetPos2 = m_aDetailMedal[m_iDetailStartIndex + 1u].GetPosition() + coreVector2(0.0f,0.075f);
             m_aDetailStartArrow[0].SetPosition(vTargetPos  + coreVector2(0.0f,-0.0015f));

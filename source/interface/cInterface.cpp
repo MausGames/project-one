@@ -288,14 +288,14 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBannerLogo[1].SetPosition  (m_aBannerLogo[0].GetPosition() + coreVector2(0.0f,-0.1f) * (0.8f/1.0f));
     m_aBannerLogo[1].SetSize      (coreVector2(2.0f, 0.25f) * 0.3f * (0.8f/1.0f));
 
-    m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
     m_aStoryText[0].SetColor3(COLOR_MENU_INSIDE);
-    m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
     m_aStoryText[1].SetColor3(COLOR_MENU_INSIDE);
 
-    m_aDialogText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aDialogText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
     m_aDialogText[0].SetColor3(COLOR_MENU_INSIDE);
-    m_aDialogText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aDialogText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
     m_aDialogText[1].SetColor3(COLOR_MENU_INSIDE);
 
     m_ReplayWatermark.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -1258,6 +1258,11 @@ void cInterface::Move()
             
             m_aBannerLogo[0].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
             m_aBannerLogo[1].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
+        }
+        else
+        {
+            m_aBannerText[2].SetTexOffset(coreVector2(0.0f,0.0f));
+            m_aBannerText[3].SetTexOffset(coreVector2(0.0f,0.0f));
         }
 
         // 

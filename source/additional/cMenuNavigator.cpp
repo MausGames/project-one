@@ -158,7 +158,7 @@ void cMenuNavigator::Move()
         const coreVector2 vOffset = coreVector2(m_vCurSize.x * -0.5f - 0.03f, 0.0f);
 
         this->SetPosition (m_vCurPos + vOffset);
-        this->SetDirection(coreVector2::Direction(1.2f * Core::System->GetTotalTimeFloat(20.0f*PI) - BLENDBR(MAX0(coreFloat(m_dPressTime - Core::System->GetTotalTime()))) * (2.0f*PI) * 0.0f));
+        this->SetDirection(coreVector2::Direction(1.2f * Core::System->GetTotalTimeFloat(20.0*PI_D) - BLENDBR(MAX0(coreFloat(m_dPressTime - Core::System->GetTotalTime()))) * (2.0f*PI) * 0.0f));
 
         // 
         const coreFloat fMove = LERP(0.002f, 0.005f, (0.5f + 0.5f * SIN(Core::System->GetTotalTimeFloat(1.0) * (2.0f*PI)))) * m_fGrabTime;

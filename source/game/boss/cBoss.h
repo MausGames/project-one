@@ -21,6 +21,7 @@
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
 // TODO 4: remove counters and vectors (first remove usage)
 // TODO 1: remove leviathan demo code + in-mission
+// TODO 4: _RoundHealth and BOSS_HEALTH are not used anymore
 
 
 // ****************************************************************
@@ -163,13 +164,13 @@
 
 // ****************************************************************
 // 
-#define LERP_LINEAR     (&LERP         <coreFloat>)
-#define LERP_SMOOTH     (&LERPS        <coreFloat>)
+#define LERP_LINEAR     (&LERP         <coreFloat, coreFloat>)
+#define LERP_SMOOTH     (&LERPS        <coreFloat, coreFloat>)
 #define LERP_SMOOTH_REV (&LerpSmoothRev<coreFloat>)
-#define LERP_BREAK      (&LERPB        <coreFloat>)
-#define LERP_BREAK_REV  (&LERPBR       <coreFloat>)
-#define LERP_HERMITE3   (&LERPH3       <coreFloat>)
-#define LERP_HERMITE5   (&LERPH5       <coreFloat>)
+#define LERP_BREAK      (&LERPB        <coreFloat, coreFloat>)
+#define LERP_BREAK_REV  (&LERPBR       <coreFloat, coreFloat>)
+#define LERP_HERMITE3   (&LERPH3       <coreFloat, coreFloat>)
+#define LERP_HERMITE5   (&LERPH5       <coreFloat, coreFloat>)
 
 
 // ****************************************************************

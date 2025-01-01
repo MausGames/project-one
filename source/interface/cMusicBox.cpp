@@ -216,7 +216,7 @@ void cMusicBox::Move()
     {
         for(coreUintW i = 0u; i < MUSIC_ICONS; ++i)
         {
-            const coreFloat fHeight = 0.006f * SIN(Core::System->GetTotalTimeFloat(2.0f*PI) * 5.0f + I_TO_F(i));
+            const coreFloat fHeight = 0.006f * SIN(Core::System->GetTotalTimeFloat(2.0*PI_D) * 5.0f + I_TO_F(i));
 
             // 
             m_aMusicIcon[i].SetPosition(coreVector2(0.375f - 0.06f * I_TO_F(i), m_aLine[m_iSelection].GetPosition().y + fHeight));

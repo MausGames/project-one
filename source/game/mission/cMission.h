@@ -34,6 +34,7 @@
 // TODO 4: there are multiple "Aim" objects (mission + boss)
 // TODO 3: also wrap all object-iterations in g_pGame->IsTask()
 // TODO 3: display sticks in manual
+// TODO 4: m_iStageNum is never used
 
 
 // ****************************************************************
@@ -817,7 +818,7 @@ public:
     inline void SetContainerOverdraw(const coreBool    bOverdraw) {m_bOverdraw = bOverdraw;}
 
     // 
-    inline       coreFloat    GetBombTime       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS)  return m_afBombTime[iIndex];}
+    inline const coreFloat&   GetBombTime       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS)  return m_afBombTime[iIndex];}
     inline       coreBool     GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS)  return HAS_BIT(m_iBombGone,  iIndex);}
     inline const coreUint8&   GetArrowDir       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_ARROWS) return m_aiArrowDir[iIndex];}
     inline       coreBool     GetArrowFake      (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_ARROWS) return HAS_BIT(m_iArrowFake, iIndex);}

@@ -1235,7 +1235,7 @@ void cGameMenu::Move()
             
 
 
-            const coreFloat fRotation = Core::System->GetTotalTimeFloat(2.0f*PI);
+            const coreFloat fRotation = Core::System->GetTotalTimeFloat(2.0*PI_D);
 
             for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i)
             {
@@ -1488,7 +1488,7 @@ void cGameMenu::Move()
             }
             
             
-            const coreFloat   fHeight     = SIN(Core::System->GetTotalTimeFloat(2.0f*PI) * 10.0f) * 0.002f;
+            const coreFloat   fHeight     = SIN(Core::System->GetTotalTimeFloat(2.0*PI_D) * 10.0f) * 0.002f;
             const coreVector2 vTargetPos  = m_aArmoryMedal[m_iArmoryStartIndex + 1u].GetPosition() + coreVector2(0.0f,0.075f + fHeight);
             const coreVector2 vTargetPos2 = m_aArmoryMedal[m_iArmoryStartIndex + 1u].GetPosition() + coreVector2(0.0f,0.075f);
             m_aArmoryStartArrow[0].SetPosition(vTargetPos  + coreVector2(0.0f,-0.0015f));
@@ -1499,7 +1499,7 @@ void cGameMenu::Move()
             m_ArmoryStartBack .SetAlpha (m_ArmoryStartBack.GetAlpha() * 0.7f);
             m_ArmoryStartLabel.SetColor3(g_aMissionData[m_iArmoryStartIndex].vColor);
             
-            const coreFloat fRotation1 = Core::System->GetTotalTimeFloat(4.0f*PI);
+            const coreFloat fRotation1 = Core::System->GetTotalTimeFloat(4.0*PI_D);
             const coreFloat fRotation2 = Core::System->GetTotalTimeFloat(20.0);
 
             for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i)

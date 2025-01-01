@@ -632,7 +632,8 @@ void cMission::__CloseSegment()
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        ADD_FLAG(g_pSave->EditProgress()->aaiBadge[iMissionIndex][m_iCurSegmentIndex], pPlayer->GetDataTable()->GetBadgeAll(iMissionIndex, m_iCurSegmentIndex))
+        const coreUint8 iBadgeAll = pPlayer->GetDataTable()->GetBadgeAll(iMissionIndex, m_iCurSegmentIndex);
+        if(iBadgeAll) ADD_FLAG(g_pSave->EditProgress()->aaiBadge[iMissionIndex][m_iCurSegmentIndex], iBadgeAll)
     });
 
     // 

@@ -163,7 +163,7 @@ private:
     coreViewBox m_ViewBox;                                   // 
 
     cGuiObject m_GameLogo;                                   // 
-    cGuiObject m_GameLogoDemo;
+    cGuiObject m_GameLogoDemo;                               // 
     cGuiObject m_GameLogoKana;                               // 
 
     cGuiLabel m_aName       [CREDIT_ENTRIES];                // 

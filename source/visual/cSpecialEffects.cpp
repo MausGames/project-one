@@ -102,13 +102,9 @@ cSpecialEffects::cSpecialEffects()noexcept
     // 
     for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
     {
-        //m_aExplosionWave[i].DefineModel  (Core::Manager::Resource->Load<coreModel>("effect_torus.md3", CORE_RESOURCE_UPDATE_AUTO, "data/models/effect_torus.md3"));//   "object_ring.md3");
         m_aExplosionWave[i].DefineModel  ("object_ring.md3");
         m_aExplosionWave[i].DefineProgram("effect_explosion_program");
         m_aExplosionWave[i].SetAlpha     (0.0f);
-        
-        //m_aExplosionWave[i].SetDirection  (coreVector3(0.0f,0.0f,1.0f));
-        //m_aExplosionWave[i].SetOrientation(coreVector3(0.0f,1.0f,0.0f));
     }
 
     // 
@@ -391,41 +387,37 @@ void cSpecialEffects::Move()
             oBlast.SetTexOffset(coreVector2(0.0f,0.1f) * oBlast.GetAlpha());
             oBlast.Move();
         }
-        
-        
-        
 
         // 
         for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
         {
-            coreObject3D& oExplosion = m_aExplosionBody[i];
-            if(!oExplosion.GetAlpha()) continue;
+            coreObject3D& oBody = m_aExplosionBody[i];
+            if(!oBody.GetAlpha()) continue;
 
             // 
-            const coreFloat fScale = oExplosion.GetCollisionModifier().x;
-            const coreFloat fSpeed = oExplosion.GetCollisionModifier().y;
+            const coreFloat fScale = oBody.GetCollisionModifier().x;
+            const coreFloat fSpeed = oBody.GetCollisionModifier().y;
 
             // 
-            oExplosion.SetAlpha(MAX0(oExplosion.GetAlpha() - fSpeed * (2.3f) * TIME));
-            oExplosion.SetSize (coreVector3(0.25f,0.25f,0.1f) * (fScale * 40.0f * 10.0f * SIN((0.5f*PI) * MAX0((1.0f - oExplosion.GetAlpha())))));
-            oExplosion.Move();
+            oBody.SetAlpha(MAX0(oBody.GetAlpha() - fSpeed * 2.3f * TIME));
+            oBody.SetSize (coreVector3(100.0f,100.0f,40.0f) * (fScale * SIN((0.5f*PI) * MAX0(1.0f - oBody.GetAlpha()))));
+            oBody.Move();
         }
-        
 
         // 
         for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
         {
-            coreObject3D& oExplosion = m_aExplosionWave[i];
-            if(!oExplosion.GetAlpha()) continue;
+            coreObject3D& oWave = m_aExplosionWave[i];
+            if(!oWave.GetAlpha()) continue;
 
             // 
-            const coreFloat fScale = oExplosion.GetCollisionModifier().x;
-            const coreFloat fSpeed = oExplosion.GetCollisionModifier().y;
+            const coreFloat fScale = oWave.GetCollisionModifier().x;
+            const coreFloat fSpeed = oWave.GetCollisionModifier().y;
 
             // 
-            oExplosion.SetAlpha(MAX0(oExplosion.GetAlpha() - fSpeed * (2.2f) * TIME));
-            oExplosion.SetSize (coreVector3(0.2f,0.2f,0.2f) * (fScale * 50.0f * SIN((0.6f*PI) * (1.0f - oExplosion.GetAlpha()))));
-            oExplosion.Move();
+            oWave.SetAlpha(MAX0(oWave.GetAlpha() - fSpeed * 2.2f * TIME));
+            oWave.SetSize (coreVector3(10.0f,10.0f,10.0f) * (fScale * SIN((0.6f*PI) * (1.0f - oWave.GetAlpha()))));
+            oWave.Move();
         }
     }
 
@@ -1053,38 +1045,29 @@ void cSpecialEffects::CreateExplosion(const coreVector3 vPosition)
 {
     // 
     if(++m_iCurExplosion >= SPECIAL_EXPLOSION) m_iCurExplosion = 0u;
-    coreObject3D& oExplosion = m_aExplosionBody[m_iCurExplosion];
+    coreObject3D& oBody = m_aExplosionBody[m_iCurExplosion];
+    coreObject3D& oWave = m_aExplosionWave[m_iCurExplosion];
 
-    ASSERT(!oExplosion.GetAlpha())
-    
-    const coreFloat fScale = 1.0f;
-    const coreFloat fSpeed = 1.0f;
-    const coreVector3 vColor = coreVector3(1.0f, 0.3f, 0.1f);
+    ASSERT(!oBody.GetAlpha())
 
-    // 
-    //oExplosion.DefineModel         (m_apBlastModel[0]);
-    oExplosion.SetPosition         (vPosition);
-    oExplosion.SetSize             (coreVector3(0.0f,0.0f,0.0f));
-    //oExplosion.SetDirection        (coreVector3(coreVector2::Rand(), 0.0f));
-    oExplosion.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
-    //oExplosion.SetColor4           (coreVector4(vColor, 1.4f));
-    oExplosion.SetColor4           (coreVector4(vColor, 1.0f));
-    //oExplosion.SetTexSize          (coreVector2(12.0f,12.0f));
-    
-    
-
-    coreObject3D& oExplosion2 = m_aExplosionWave[m_iCurExplosion];
+    constexpr coreFloat   fScale = 1.0f;
+    constexpr coreFloat   fSpeed = 1.0f;
+    constexpr coreVector3 vColor = coreVector3(1.0f, 0.3f, 0.1f);
 
     // 
-    oExplosion2.SetPosition         (vPosition);
-    oExplosion2.SetSize             (coreVector3(0.0f,0.0f,0.0f));
-    oExplosion2.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
-    oExplosion2.SetColor4           (coreVector4(vColor, 1.0f));
-    
-    
-    
-    this->ShakeScreen(SPECIAL_SHAKE_BIG);
-                
+    oBody.SetPosition         (vPosition);
+    oBody.SetSize             (coreVector3(0.0f,0.0f,0.0f));
+    oBody.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
+    oBody.SetColor4           (coreVector4(vColor, 1.0f));
+
+    // 
+    oWave.SetPosition         (vPosition);
+    oWave.SetSize             (coreVector3(0.0f,0.0f,0.0f));
+    oWave.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
+    oWave.SetColor4           (coreVector4(vColor, 1.0f));
+
+    // 
+    this->ShakeScreen (SPECIAL_SHAKE_BIG);
     this->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 2000u);
 }
 
@@ -1178,7 +1161,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     }
 
     // 
-    if(!g_CurConfig.Audio.i3DSound) bRelative = true;
+    if(!g_CurConfig.Audio.i3DSound || (vPosition == SPECIAL_RELATIVE)) bRelative = true;
 
     // 
     sSoundData& oData = m_aSoundData[eSoundIndex];
@@ -1265,8 +1248,8 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
     // loop through all active players
     g_pGame->ForEachPlayerAll([&](const cPlayer* pCurPlayer, const coreUintW i)
     {
-        if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
-        if(pCurPlayer->HasStatus(PLAYER_STATUS_DEAD) && !pCurPlayer->ReachedDeath()) return;
+        if((pPlayer != pCurPlayer) && (pPlayer != NULL))                                                                 return;
+        if(pCurPlayer->HasStatus(PLAYER_STATUS_DEAD) && !pCurPlayer->ReachedDeath())                                     return;
         if((fStrength < m_afRumbleStrength[i]) || ((fStrength == m_afRumbleStrength[i]) && (fTime < m_afRumbleTime[i]))) return;
 
         const coreUint8   iRumble     = g_CurConfig.Input.aiRumble[i];

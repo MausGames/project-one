@@ -62,7 +62,7 @@
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
-#define SPECIAL_RELATIVE            (coreVector3(0.0f,0.0f,0.0f))
+#define SPECIAL_RELATIVE            (coreVector3(0.0f,0.0f,1000.0f))
 #define SPECIAL_SOUND_MEDAL(x)      (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
 #define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.2f, STEP(1.0f, I_TO_F((y) - 1u), I_TO_F(x))))
 

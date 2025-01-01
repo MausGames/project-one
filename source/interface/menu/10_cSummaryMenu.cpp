@@ -712,7 +712,7 @@ void cSummaryMenu::Move()
             
             
             const coreFloat fRotation1 = Core::System->GetTotalTimeFloat(20.0);
-            const coreFloat fRotation2 = Core::System->GetTotalTimeFloat(2.0f*PI);
+            const coreFloat fRotation2 = Core::System->GetTotalTimeFloat(2.0*PI_D);
 
             for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
             {
@@ -1098,7 +1098,7 @@ void cSummaryMenu::Move()
             cMenu::UpdateButton(&m_AgainButton, &m_Navigator, m_AgainButton.IsFocused());
             cMenu::UpdateButton(&m_ExitButton,  &m_Navigator, m_ExitButton .IsFocused());
             
-            const coreFloat fRotation = Core::System->GetTotalTimeFloat(2.0f*PI);
+            const coreFloat fRotation = Core::System->GetTotalTimeFloat(2.0*PI_D);
 
             for(coreUintW i = 0u; i < MENU_SUMMARY_BADGES; ++i)
             {

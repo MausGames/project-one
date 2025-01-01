@@ -286,7 +286,6 @@ void cCreditRoll::Move()
             {
                 g_pGame->GetInterface()->ShowFragment(INTERFACE_FRAGMENT_TYPE_HIDE);
 
-                //m_fOffset   = 0.0f;
                 m_bFinished = true;
             }
         }
@@ -302,7 +301,6 @@ void cCreditRoll::Move()
 
             if(fFactor2 >= 2.0f)
             {
-                //m_fOffset   = 0.0f;
                 m_bFinished = true;
             }
         }

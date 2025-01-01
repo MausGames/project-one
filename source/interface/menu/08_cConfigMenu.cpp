@@ -1177,7 +1177,7 @@ void cConfigMenu::CheckValues()
 {
     const coreUint8   iCurMonitor    = m_Monitor   .GetCurValue();
     const coreUint8   iCurValue      = m_Resolution.GetCurValue();
-    const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : ((iCurValue == 0xEEu) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
+    const coreVector2 vCurResolution = (iCurValue == MENU_RESOLUTION_CUSTOM) ? Core::System->GetResolution() : ((iCurValue == MENU_RESOLUTION_DESKTOP) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
 
     coreBool bSave = false;
 
@@ -1186,7 +1186,7 @@ void cConfigMenu::CheckValues()
     #define __CHECK_INPUT(n,a,c) {coreBool A = false; for(coreUintW i = 0u; i < (c); ++i) A = A || (a); bSave = bSave || A; m_aLabel[ENTRY_ ## n].SetColor3(A ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE);}
     {
         __CHECK_VALUE(VIDEO_MONITOR,         m_Monitor               .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))
-        __CHECK_VALUE(VIDEO_RESOLUTION,      vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
+        __CHECK_VALUE(VIDEO_RESOLUTION,      vCurResolution                           != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
         __CHECK_VALUE(VIDEO_DISPLAYMODE,     m_DisplayMode           .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))
         __CHECK_VALUE(VIDEO_VSYNC,           m_Vsync                 .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))
         __CHECK_VALUE(VIDEO_ANTIALIASING,    m_AntiAliasing          .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))
@@ -1276,11 +1276,11 @@ void cConfigMenu::LoadValues()
     // 
     if((Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH) <= 0) && (Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT) <= 0))
     {
-        m_Resolution.SelectValue(0xEEu);
+        m_Resolution.SelectValue(MENU_RESOLUTION_DESKTOP);
     }
     else if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
     {
-        m_Resolution.SelectValue(0xFFu);
+        m_Resolution.SelectValue(MENU_RESOLUTION_CUSTOM);
     }
 
     // 
@@ -1359,11 +1359,11 @@ void cConfigMenu::SaveValues()
 {
     const coreUint8   iCurMonitor    = m_Monitor   .GetCurValue();
     const coreUint8   iCurValue      = m_Resolution.GetCurValue();
-    const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : ((iCurValue == 0xEEu) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
+    const coreVector2 vCurResolution = (iCurValue == MENU_RESOLUTION_CUSTOM) ? Core::System->GetResolution() : ((iCurValue == MENU_RESOLUTION_DESKTOP) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
 
     // 
     const coreBool bReset   = (m_AntiAliasing .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
-    const coreBool bReshape = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
+    const coreBool bReshape = (vCurResolution                != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
                               (m_Monitor      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
                               (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))          ||
                               (m_RenderQuality.GetCurValue() != g_CurConfig.Graphics.iRender);
@@ -1707,10 +1707,10 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
 
     // 
-    m_Resolution.AddEntryLanguage("RESOLUTION_DESKTOP", 0xEEu);
+    m_Resolution.AddEntryLanguage("RESOLUTION_DESKTOP", MENU_RESOLUTION_DESKTOP);
     if((iMonitorIndex == Core::System->GetDisplayIndex()) && !avResolutionList.count(Core::System->GetResolution()))
     {
-        m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", 0xFFu);
+        m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", MENU_RESOLUTION_CUSTOM);
     }
 
     // 

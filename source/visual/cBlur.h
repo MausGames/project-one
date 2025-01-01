@@ -10,7 +10,6 @@
 #ifndef _P1_GUARD_BLUR_H_
 #define _P1_GUARD_BLUR_H_
 
-// TODO 5: use shader subroutines
 // TODO 3: attenuation and kernel-size should be affected by update-rate
 
 

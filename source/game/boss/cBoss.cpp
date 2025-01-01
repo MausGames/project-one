@@ -165,7 +165,7 @@ void cBoss::_EndBoss()
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
-    ADD_FLAG(g_pSave->EditProgress()->aiHelper[iMissionIndex], m_iHelperHit)
+    if(m_iHelperHit) ADD_FLAG(g_pSave->EditProgress()->aiHelper[iMissionIndex], m_iHelperHit)
 }
 
 
