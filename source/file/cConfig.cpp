@@ -32,10 +32,10 @@ static void UpgradeConfig()
     {
         if(__UPGRADE(0))
         {
-            Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME, CONFIG_DEFAULT_VOLUME);   // # always
+            Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,    CONFIG_DEFAULT_VOLUME);   // # always
+            Core::Config->SetInt  (CORE_CONFIG_AUDIO_RESAMPLERINDEX, CONFIG_RESAMPLER_HIGH);
 
-            //Core::Config->SetInt(CORE_CONFIG_AUDIO_RESAMPLERINDEX, g_OldConfig.Audio.iQuality ? 4 : 2);
-            //Core::Audio->Reconfigure();
+            Core::Audio->Reconfigure();
 
             for(coreUintW i = 0u; i < INPUT_SETS; ++i)
             {
@@ -329,7 +329,7 @@ void SaveConfig()
     // 
     Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,          g_OldConfig.Graphics.iRender);
     Core::Config->SetBool(CORE_CONFIG_GRAPHICS_TEXTURETRILINEAR, g_OldConfig.Graphics.iRender ? true : false);
-    Core::Config->SetInt (CORE_CONFIG_AUDIO_RESAMPLERINDEX,      g_OldConfig.Audio.iQuality ? 4 : 2);
+    Core::Config->SetInt (CORE_CONFIG_AUDIO_RESAMPLERINDEX,      g_OldConfig.Audio.iQuality   ? CONFIG_RESAMPLER_HIGH : -1);
 
     // save configuration file
     Core::Config->Save();

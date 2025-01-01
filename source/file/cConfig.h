@@ -19,7 +19,6 @@
 // TODO 3: last-used input type might get disconnected, without reset
 // TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized to 0, but gets set to the set with the mouse-button when navigating menu with mouse
 // TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> though you need so seee all buttons, so you understand fire-up, fire-down etc. (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
-// TODO 3: on very first startup, lowest resampler is selected, even when high sound quality is default (also do for quality settings, currently default value is just identical)
 // TODO 2: all explicit keyboard-keys manipulating g_MenuInput can cause issues when they are also assigned to movement buttons (which can enable keyboard menu-navigation)
 
 
@@ -28,6 +27,7 @@
 #define CONFIG_FORCE   // # force specific settings (for fairness)
 
 #define CONFIG_DEFAULT_VOLUME (0.7f)
+#define CONFIG_RESAMPLER_HIGH (5u)
 
 #define CONFIG_GRAPHICS_RENDER       "Graphics", "Render",                                             (1)
 #define CONFIG_GRAPHICS_SHADOW       "Graphics", "Shadow",                                             (2)
