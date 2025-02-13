@@ -499,15 +499,15 @@ void InitDirection()
 void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
 {
     // get current display mode
-    SDL_DisplayMode oMode = {};
-    SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
+    const SDL_DisplayMode* pMode     = SDL_GetCurrentDisplayMode(Core::System->GetDisplayData(Core::System->GetDisplayIndex()).iDisplayID);
+    coreUint16             iModeRate = pMode ? F_TO_UI(ROUND(pMode->refresh_rate)) : 0u;
 
 #if defined(_CORE_EMSCRIPTEN_) || defined(_CORE_SWITCH_)
-    if(!oMode.refresh_rate) oMode.refresh_rate = 60;
+    if(!iModeRate) iModeRate = 60;
 #endif
 
     // 
-    const coreUint32 iRefreshRate = (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
+    const coreUint32 iRefreshRate = (iModeRate >= F_TO_UI(FRAMERATE_MIN)) ? iModeRate : SCORE_PURE_UPDATEFREQ;
 
     // calculate logical and physical frame time
     if(!STATIC_ISVALID(g_pGame))
@@ -522,7 +522,7 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
         s_fLogicalTime  = coreFloat(1.0 / dFixedRate);
         s_dPhysicalTime = 1.0 / ROUND(dFixedRate * dGameSpeed);
 
-        const coreUint8 iSkip = oMode.refresh_rate ? (F_TO_UI(ROUND(dFixedRate * dGameSpeed)) / oMode.refresh_rate) : 0u;
+        const coreUint8 iSkip = iModeRate ? (F_TO_UI(ROUND(dFixedRate * dGameSpeed)) / iModeRate) : 0u;
         Core::Graphics->SetSkipFrame(iSkip ? (iSkip - 1u) : 0u);
 
         g_adGameTime[0] = 1.0 / dFixedRate;
@@ -531,7 +531,7 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
 
     // override vertical synchronization
     ASSERT(s_dPhysicalTime)
-    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC) && (oMode.refresh_rate * (1 + Core::Graphics->GetSkipFrame()) == F_TO_SI(1.0 / s_dPhysicalTime)))
+    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC) && (iModeRate * (1u + Core::Graphics->GetSkipFrame()) == F_TO_UI(1.0 / s_dPhysicalTime)))
     {
         SDL_GL_SetSwapInterval(1);
     }
@@ -923,7 +923,7 @@ static void DebugGame()
     }
 
     // keep noise low
-    if(SDL_GL_GetSwapInterval())
+    if(SDL_GL_GetSwapIntervalInline())
         SDL_Delay(1u);
 
     if(STATIC_ISVALID(g_pGame))

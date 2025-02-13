@@ -11,6 +11,10 @@
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
 const coreChar* const CoreApp::Settings::Version                       = "1.3.8";
+const coreChar* const CoreApp::Settings::Identifier                    = "at.maus-games.eigengrau";
+const coreChar* const CoreApp::Settings::Creator                       = "Martin Mauersics";
+const coreChar* const CoreApp::Settings::Year                          = "2010, 2023";
+const coreChar* const CoreApp::Settings::Website                       = "https://www.maus-games.at/eigengrau";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.webp";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.webp";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -659,7 +663,7 @@ void CoreApp::Setup()
         coreString sFilename = coreData::StrFilename(it->c_str());
         if(DEFINED(_CORE_EMSCRIPTEN_)) sFilename.replace(".woff", ".ttf");
 
-        Core::Manager::Resource->Load<coreFont>(sFilename.c_str(), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), iHinting, bKerning);
+        Core::Manager::Resource->Load<coreFont>(sFilename.c_str(), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), TTF_HintingFlags(iHinting), bKerning);
     }
 
     const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_STANDARD;

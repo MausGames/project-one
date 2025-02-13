@@ -1731,12 +1731,12 @@ void cConfigMenu::__LoadFrequencies(const coreUintW iMonitorIndex)
     const coreUintW iOldEntry = m_UpdateFreq.GetNumEntries() ? m_UpdateFreq.GetCurValue() : 0u;
     m_UpdateFreq.ClearEntries();
 
-    // 
-    SDL_DisplayMode oMode = {};
-    SDL_GetCurrentDisplayMode(iMonitorIndex, &oMode);
+    // get current display mode
+    const SDL_DisplayMode* pMode     = SDL_GetCurrentDisplayMode(Core::System->GetDisplayData(iMonitorIndex).iDisplayID);
+    const coreUint16       iModeRate = pMode ? F_TO_UI(ROUND(pMode->refresh_rate)) : 0u;
 
     // 
-    const coreUint32 iRefreshRate = (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
+    const coreUint32 iRefreshRate = (iModeRate >= F_TO_UI(FRAMERATE_MIN)) ? iModeRate : SCORE_PURE_UPDATEFREQ;
 
     // 
     m_UpdateFreq.AddEntry(PRINT("%s (%u Hz)", Core::Language->GetString("VALUE_AUTO"), iRefreshRate), 0u);
@@ -1796,11 +1796,11 @@ void cConfigMenu::__LoadInputs()
 
         // 
         const coreBool bKeyboard = (g_CurConfig.Input.aiType[i] < INPUT_SETS_KEYBOARD);
-        nLockFunc(!bKeyboard, &oInput.oMoveUp,    &oInput.oFigureMoveUp,    SDL_CONTROLLER_BUTTON_DPAD_UP,    false);
-        nLockFunc(!bKeyboard, &oInput.oMoveLeft,  &oInput.oFigureMoveLeft,  SDL_CONTROLLER_BUTTON_DPAD_LEFT,  false);
-        nLockFunc(!bKeyboard, &oInput.oMoveDown,  &oInput.oFigureMoveDown,  SDL_CONTROLLER_BUTTON_DPAD_DOWN,  false);
-        nLockFunc(!bKeyboard, &oInput.oMoveRight, &oInput.oFigureMoveRight, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, false);
-        nLockFunc( bKeyboard, &oInput.aAction[7], &oInput.aFigureAction[7], SDL_SCANCODE_ESCAPE,              false);
+        nLockFunc(!bKeyboard, &oInput.oMoveUp,    &oInput.oFigureMoveUp,    SDL_GAMEPAD_BUTTON_DPAD_UP,    false);
+        nLockFunc(!bKeyboard, &oInput.oMoveLeft,  &oInput.oFigureMoveLeft,  SDL_GAMEPAD_BUTTON_DPAD_LEFT,  false);
+        nLockFunc(!bKeyboard, &oInput.oMoveDown,  &oInput.oFigureMoveDown,  SDL_GAMEPAD_BUTTON_DPAD_DOWN,  false);
+        nLockFunc(!bKeyboard, &oInput.oMoveRight, &oInput.oFigureMoveRight, SDL_GAMEPAD_BUTTON_DPAD_RIGHT, false);
+        nLockFunc( bKeyboard, &oInput.aAction[7], &oInput.aFigureAction[7], CORE_INPUT_KEY(ESCAPE),        false);
 
         // 
         const coreBool bOriginal  = (g_CurConfig.Input.aiControlMode[i] == 0u);
@@ -1822,8 +1822,8 @@ void cConfigMenu::__LoadInputs()
         const coreBool bStickyR = (!bKeyboard && (bTwinstick || bMixed));
         oInput.oFigureStickL.SetEnabled(bStickyL ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
         oInput.oFigureStickR.SetEnabled(bStickyR ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
-        if(bStickyL) cConfigMenu::PrintFigure(&oInput.oFigureStickL, g_CurConfig.Input.aiType[i], FIGURE_KEY_LEFTSTICK);
-        if(bStickyR) cConfigMenu::PrintFigure(&oInput.oFigureStickR, g_CurConfig.Input.aiType[i], FIGURE_KEY_RIGHTSTICK);
+        if(bStickyL) cConfigMenu::PrintFigure(&oInput.oFigureStickL, g_CurConfig.Input.aiType[i], FIGURE_KEY_LEFT_STICK);
+        if(bStickyR) cConfigMenu::PrintFigure(&oInput.oFigureStickR, g_CurConfig.Input.aiType[i], FIGURE_KEY_RIGHT_STICK);
 
         #if defined(_CORE_SWITCH_)
             if(bHideSecond) oInput.oFigureStickL.SetEnabled(CORE_OBJECT_ENABLE_MOVE);

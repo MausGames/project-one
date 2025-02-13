@@ -11,7 +11,7 @@
 coreVector2   cMenuNavigator::s_vMouseMove    = coreVector2(0.0f,0.0f);
 coreBool      cMenuNavigator::s_bKeyboard     = false;
 coreBool      cMenuNavigator::s_bJoystick     = false;
-coreUint8     cMenuNavigator::s_iJoystickType = SDL_CONTROLLER_TYPE_UNKNOWN;
+coreUint8     cMenuNavigator::s_iJoystickType = SDL_GAMEPAD_TYPE_UNKNOWN;
 coreObject2D* cMenuNavigator::s_pCurFocus     = NULL;
 
 
@@ -59,9 +59,9 @@ cMenuNavigator::cMenuNavigator()noexcept
     }
 
     // 
-    m_aPrompt[0].SetKey(SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
-    m_aPrompt[1].SetKey(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-    m_aPrompt[2].SetKey(SDL_CONTROLLER_BUTTON_B);
+    m_aPrompt[0].SetKey(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER);
+    m_aPrompt[1].SetKey(SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
+    m_aPrompt[2].SetKey(CORE_INPUT_BUTTON_CANCEL);
 }
 
 
@@ -228,11 +228,11 @@ void cMenuNavigator::Move()
         coreBool abPress[MENUNAVIGATOR_PROMPTS] = {};
         for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
         {
-            if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_HOLD)) abPress[0] = true;
-            if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_HOLD)) abPress[1] = true;
-            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,       CORE_INPUT_HOLD)) abPress[0] = true;
-            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER,      CORE_INPUT_HOLD)) abPress[1] = true;
-            if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_B,             CORE_INPUT_HOLD)) abPress[2] = true;
+            if(Core::Input->GetJoystickButton(i, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,  CORE_INPUT_HOLD)) abPress[0] = true;
+            if(Core::Input->GetJoystickButton(i, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, CORE_INPUT_HOLD)) abPress[1] = true;
+            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFT_TRIGGER,    CORE_INPUT_HOLD)) abPress[0] = true;
+            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHT_TRIGGER,   CORE_INPUT_HOLD)) abPress[1] = true;
+            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_CANCEL,          CORE_INPUT_HOLD)) abPress[2] = true;
         }
 
         // 
@@ -292,21 +292,12 @@ void cMenuNavigator::Update()
         bNewPressed = true;
     };
 
-    coreVector2 vRelative      = coreVector2(0.0f,0.0f);
-    coreUint8   iCount         = 0u;
-    coreBool    bButtonA       = false;
-    coreBool    bButtonB       = false;
-    coreBool    bShoulderLeft  = false;
-    coreBool    bShoulderRight = false;
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-    {
-        if(vRelative.IsNull()) vRelative = Core::Input->GetJoystickStickL(i);
-        iCount         = MAX(iCount, Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD));
-        bButtonA       = bButtonA       || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS);
-        bButtonB       = bButtonB       || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS);
-        bShoulderLeft  = bShoulderLeft  || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS);
-        bShoulderRight = bShoulderRight || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER, CORE_INPUT_PRESS);
-    }
+    coreVector2 vRelative      = Core::Input->GetJoystickStickL(CORE_INPUT_JOYSTICK_ANY);
+    coreUint8   iCount         = Core::Input->GetCountJoystick (CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_HOLD);
+    coreBool    bButtonA       = Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_ACCEPT,          CORE_INPUT_PRESS);
+    coreBool    bButtonB       = Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_CANCEL,          CORE_INPUT_PRESS);
+    coreBool    bShoulderLeft  = Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,  CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_LEFT_TRIGGER,  CORE_INPUT_PRESS);
+    coreBool    bShoulderRight = Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_RIGHT_TRIGGER, CORE_INPUT_PRESS);
 
     if(s_bKeyboard && !m_bIgnoreKeyboard)
     {

@@ -466,10 +466,10 @@ void UpdateInput()
             }
 
             // 
-            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
-            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
-            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_X, CORE_INPUT_PRESS)) g_MenuInput.bToggle = true;
-            if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_Y, CORE_INPUT_PRESS)) g_MenuInput.bToggle = true;
+            if(Core::Input->GetJoystickButton(iJoystickID, CORE_INPUT_BUTTON_ACCEPT, CORE_INPUT_PRESS)) g_MenuInput.bAccept = true;
+            if(Core::Input->GetJoystickButton(iJoystickID, CORE_INPUT_BUTTON_CANCEL, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
+            if(Core::Input->GetJoystickButton(iJoystickID, CORE_INPUT_BUTTON_X,      CORE_INPUT_PRESS)) g_MenuInput.bToggle = true;
+            if(Core::Input->GetJoystickButton(iJoystickID, CORE_INPUT_BUTTON_Y,      CORE_INPUT_PRESS)) g_MenuInput.bToggle = true;
         }
 
         // 
@@ -796,9 +796,9 @@ coreUint16 GetCurUpdateFreqReal()
     if(GetCurUpdateFreq()) return GetCurUpdateFreq();
 
     // get current display mode
-    SDL_DisplayMode oMode = {};
-    SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
+    const SDL_DisplayMode* pMode     = SDL_GetCurrentDisplayMode(Core::System->GetDisplayData(Core::System->GetDisplayIndex()).iDisplayID);
+    const coreUint16       iModeRate = pMode ? F_TO_UI(ROUND(pMode->refresh_rate)) : 0u;
 
     // 
-    return (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
+    return (iModeRate >= F_TO_UI(FRAMERATE_MIN)) ? iModeRate : SCORE_PURE_UPDATEFREQ;
 }

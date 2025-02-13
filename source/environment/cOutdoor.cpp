@@ -346,10 +346,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         coreFileScope pFile2 = Core::Manager::Resource->RetrieveFile(PRINT(__TEXTURE_FILE("data/textures/environment_%s_norm"), pcTextureBottom));
 
         // decompress files to plain pixel data
-        coreSurfaceScope pSurface1 = IMG_LoadTyped_RW(pFile1->CreateReadStream(), 1, coreData::StrExtension(pFile1->GetPath()));
-        coreSurfaceScope pSurface2 = IMG_LoadTyped_RW(pFile2->CreateReadStream(), 1, coreData::StrExtension(pFile2->GetPath()));
-        WARN_IF(!pSurface1 || (pSurface1->format->BitsPerPixel != 24u) || SDL_MUSTLOCK(pSurface1)) return CORE_OK;
-        WARN_IF(!pSurface2 || (pSurface2->format->BitsPerPixel != 24u) || SDL_MUSTLOCK(pSurface2)) return CORE_OK;
+        coreSurfaceScope pSurface1 = IMG_LoadTyped_IO(pFile1->CreateReadStream(), true, coreData::StrExtension(pFile1->GetPath()));
+        coreSurfaceScope pSurface2 = IMG_LoadTyped_IO(pFile2->CreateReadStream(), true, coreData::StrExtension(pFile2->GetPath()));
+        WARN_IF(!pSurface1 || (SDL_BITSPERPIXEL(pSurface1->format) != 24u) || SDL_MUSTLOCK(pSurface1)) return CORE_OK;
+        WARN_IF(!pSurface2 || (SDL_BITSPERPIXEL(pSurface2->format) != 24u) || SDL_MUSTLOCK(pSurface2)) return CORE_OK;
 
         // allocate required memory
         const coreUintW iSize   = pSurface1->w * pSurface1->h * 4u;

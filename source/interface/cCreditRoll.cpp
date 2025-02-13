@@ -194,17 +194,11 @@ void cCreditRoll::Move()
     for(coreUintW i = 0u; i < CREDIT_HEADERS; ++i) m_aOtherHeader[i].SetColor3(vColor);
 
     // 
-    coreBool bButtonA = false;
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-    {
-        bButtonA = bButtonA || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_HOLD);
-    }
-
-    // 
-    const coreFloat fSpeed = (Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN), CORE_INPUT_HOLD) ||
-                              Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),  CORE_INPUT_HOLD) ||
-                              Core::Input->GetMouseButton   (CORE_INPUT_LEFT,        CORE_INPUT_HOLD) ||
-                              bButtonA || (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? ((m_fOffset < m_fMaxOffset) ? 6.0f : 2.0f) : 1.0f;
+    const coreFloat fSpeed = (Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN),                            CORE_INPUT_HOLD) ||
+                              Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),                             CORE_INPUT_HOLD) ||
+                              Core::Input->GetMouseButton   (CORE_INPUT_LEFT,                                   CORE_INPUT_HOLD) ||
+                              Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_ACCEPT, CORE_INPUT_HOLD) ||
+                              (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? ((m_fOffset < m_fMaxOffset) ? 6.0f : 2.0f) : 1.0f;
     m_fOffset.Update(CREDIT_SPEED * fSpeed);
 
     // 

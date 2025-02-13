@@ -84,11 +84,11 @@ void cIntroMission::__MoveOwnAfter()
         const coreUint8 iMode = REPLAY_WRAP_CONFIG_CONTROL_MODE[i];
 
         // 
-        cConfigMenu::PrintFigure(&m_aaManual[i][0],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveUp    : SDL_CONTROLLER_BUTTON_DPAD_UP);
-        cConfigMenu::PrintFigure(&m_aaManual[i][1],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveLeft  : SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-        cConfigMenu::PrintFigure(&m_aaManual[i][2],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-        cConfigMenu::PrintFigure(&m_aaManual[i][3],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_CONTROLLER_BUTTON_DPAD_DOWN);   // #
-        cConfigMenu::PrintFigure(&m_aaManual[i][4],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveRight : SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+        cConfigMenu::PrintFigure(&m_aaManual[i][0],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveUp    : SDL_GAMEPAD_BUTTON_DPAD_UP);
+        cConfigMenu::PrintFigure(&m_aaManual[i][1],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveLeft  : SDL_GAMEPAD_BUTTON_DPAD_LEFT);
+        cConfigMenu::PrintFigure(&m_aaManual[i][2],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_GAMEPAD_BUTTON_DPAD_DOWN);
+        cConfigMenu::PrintFigure(&m_aaManual[i][3],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveDown  : SDL_GAMEPAD_BUTTON_DPAD_DOWN);   // #
+        cConfigMenu::PrintFigure(&m_aaManual[i][4],  iType, (iType < INPUT_SETS_KEYBOARD) ? oSet.iMoveRight : SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
         cConfigMenu::PrintFigure(&m_aaManual[i][5],  iType, oSet.aiAction[0]);
         cConfigMenu::PrintFigure(&m_aaManual[i][6],  iType, oSet.aiAction[0]);   // #
         cConfigMenu::PrintFigure(&m_aaManual[i][7],  iType, oSet.aiAction[1]);

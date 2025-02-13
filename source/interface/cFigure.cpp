@@ -15,9 +15,9 @@ coreList<coreUint8>      cFigure::s_apTexBase  = {};
 // ****************************************************************
 // constructor
 cFigure::cFigure()noexcept
-: m_iBase    (SDL_CONTROLLER_TYPE_UNKNOWN)
+: m_iBase    (SDL_GAMEPAD_TYPE_UNKNOWN)
 , m_iBaseRef (UINT8_MAX)
-, m_iKey     (SDL_CONTROLLER_BUTTON_INVALID)
+, m_iKey     (SDL_GAMEPAD_BUTTON_INVALID)
 , m_iKeyRef  (INT16_MAX)
 {
     // 
@@ -74,13 +74,27 @@ void cFigure::Move()
             }
             else if(m_iBase == FIGURE_BASE_KEYBOARD)
             {
-                pcText = (m_iKey <= 0) ? coreData::ToChars(-m_iKey) : SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(m_iKey)));
+                if(m_iKey <= 0)
+                {
+                    // 
+                    pcText = coreData::ToChars(-m_iKey);
 
-                this->SetTexOffset(((m_iKey <= 0) ? coreVector2(3.0f,9.0f) : ((std::strlen(pcText) > 3u) ? coreVector2(9.0f,4.0f) : coreVector2(8.0f,4.0f))) * FIGURE_SCALE_KEYBOARD);
+                    // 
+                    this->SetTexOffset(coreVector2(3.0f,9.0f) * FIGURE_SCALE_KEYBOARD);
+                }
+                else
+                {
+                    // 
+                    pcText = SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(m_iKey), SDL_KMOD_NONE, true));
+
+                    // 
+                    this->SetTexOffset(((std::strlen(pcText) > 3u) ? coreVector2(9.0f,4.0f) : coreVector2(8.0f,4.0f)) * FIGURE_SCALE_KEYBOARD);
+                }
             }
             else
             {
-                pcText = SDL_GameControllerGetStringForButton(SDL_GameControllerButton(m_iKey));
+                // 
+                pcText = SDL_GetGamepadStringForButton(SDL_GamepadButton(m_iKey));
                 pcText = pcText ? coreData::StrToUpper(pcText) : coreData::ToChars(m_iKey);
 
                 this->SetTexOffset(coreVector2(4.0f,0.0f) * FIGURE_SCALE_GAMEPAD);
@@ -169,31 +183,31 @@ coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
 
     switch(iBase)
     {
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:          return "input_gamepad_switch_full.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:  return "input_gamepad_switch_left.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: return "input_gamepad_switch_right.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:  return "input_gamepad_switch_full.png";
-    default:                                               return "input_gamepad_switch_full.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO:          return "input_gamepad_switch_full.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:  return "input_gamepad_switch_left.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: return "input_gamepad_switch_right.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:  return "input_gamepad_switch_full.png";
+    default:                                            return "input_gamepad_switch_full.png";
     }
 
 #else
 
     switch(iBase)
     {
-    case FIGURE_BASE_KEYBOARD:                             return "input_keyboard.png";
-    case SDL_CONTROLLER_TYPE_XBOX360:                      return "input_gamepad_xbox360.png";
-    case SDL_CONTROLLER_TYPE_XBOXONE:                      return "input_gamepad_xboxone.png";
-    case SDL_CONTROLLER_TYPE_PS3:                          return "input_gamepad_ps3.png";
-    case SDL_CONTROLLER_TYPE_PS4:                          return "input_gamepad_ps4.png";
-    case SDL_CONTROLLER_TYPE_PS5:                          return "input_gamepad_ps5.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:          return "input_gamepad_switch.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:  return "input_gamepad_switch.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: return "input_gamepad_switch.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:  return "input_gamepad_switch.png";
-    case SDL_CONTROLLER_TYPE_AMAZON_LUNA:                  return "input_gamepad_luna.png";
-    case SDL_CONTROLLER_TYPE_GOOGLE_STADIA:                return "input_gamepad_stadia.png";
-    case CORE_INPUT_TYPE_STEAM:                            return "input_gamepad_steamdeck.png";
-    default:                                               return "input_gamepad_xboxone.png";
+    case FIGURE_BASE_KEYBOARD:                          return "input_keyboard.png";
+    case SDL_GAMEPAD_TYPE_XBOX360:                      return "input_gamepad_xbox360.png";
+    case SDL_GAMEPAD_TYPE_XBOXONE:                      return "input_gamepad_xboxone.png";
+    case SDL_GAMEPAD_TYPE_PS3:                          return "input_gamepad_ps3.png";
+    case SDL_GAMEPAD_TYPE_PS4:                          return "input_gamepad_ps4.png";
+    case SDL_GAMEPAD_TYPE_PS5:                          return "input_gamepad_ps5.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO:          return "input_gamepad_switch.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:  return "input_gamepad_switch.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: return "input_gamepad_switch.png";
+    case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:  return "input_gamepad_switch.png";
+    case CORE_INPUT_TYPE_LUNA:                          return "input_gamepad_luna.png";
+    case CORE_INPUT_TYPE_STADIA:                        return "input_gamepad_stadia.png";
+    case CORE_INPUT_TYPE_STEAM:                         return "input_gamepad_steamdeck.png";
+    default:                                            return "input_gamepad_xboxone.png";
     }
 
 #endif
@@ -223,88 +237,88 @@ coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 i
         }
         else
         {
-            switch(SDL_GetKeyFromScancode(SDL_Scancode(iKey)))
+            switch(SDL_GetKeyFromScancode(SDL_Scancode(iKey), SDL_KMOD_NONE, true))
             {
-            case SDLK_0:            return coreVector2(0.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_1:            return coreVector2(1.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_2:            return coreVector2(2.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_3:            return coreVector2(3.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_4:            return coreVector2(4.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_5:            return coreVector2(5.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_6:            return coreVector2(6.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_7:            return coreVector2(7.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_8:            return coreVector2(8.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_9:            return coreVector2(9.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_a:            return coreVector2(0.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_b:            return coreVector2(1.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_c:            return coreVector2(2.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_d:            return coreVector2(3.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_e:            return coreVector2(4.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_f:            return coreVector2(5.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_g:            return coreVector2(6.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_h:            return coreVector2(7.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_i:            return coreVector2(8.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_j:            return coreVector2(9.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_k:            return coreVector2(0.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_l:            return coreVector2(1.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_m:            return coreVector2(2.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_n:            return coreVector2(3.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_o:            return coreVector2(4.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_p:            return coreVector2(5.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_q:            return coreVector2(6.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_r:            return coreVector2(7.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_s:            return coreVector2(8.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_t:            return coreVector2(9.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_u:            return coreVector2(0.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_v:            return coreVector2(1.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_w:            return coreVector2(2.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_x:            return coreVector2(3.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_y:            return coreVector2(4.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_z:            return coreVector2(5.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F1:           return coreVector2(6.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F2:           return coreVector2(7.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F3:           return coreVector2(8.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F4:           return coreVector2(9.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F5:           return coreVector2(0.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F6:           return coreVector2(1.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F7:           return coreVector2(2.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F8:           return coreVector2(3.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F9:           return coreVector2(4.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F10:          return coreVector2(5.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F11:          return coreVector2(6.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_F12:          return coreVector2(7.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_UP:           return coreVector2(0.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_LEFT:         return coreVector2(1.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_DOWN:         return coreVector2(2.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_RIGHT:        return coreVector2(3.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_PLUS:         return coreVector2(4.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_MINUS:        return coreVector2(5.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_ASTERISK:     return coreVector2(6.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_BACKSLASH:    return coreVector2(7.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_LESS:         return coreVector2(0.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_GREATER:      return coreVector2(1.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_LEFTBRACKET:  return coreVector2(2.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_RIGHTBRACKET: return coreVector2(3.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_QUESTION:     return coreVector2(4.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_QUOTEDBL:     return coreVector2(5.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_SEMICOLON:    return coreVector2(6.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_ESCAPE:       return coreVector2(0.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_LGUI:         return (DEFINED(_CORE_MACOS_) ? coreVector2(2.0f,7.0f) : coreVector2(1.0f,7.0f)) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_INSERT:       return coreVector2(3.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_DELETE:       return coreVector2(4.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_HOME:         return coreVector2(5.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_END:          return coreVector2(6.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_PAGEUP:       return coreVector2(7.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_PAGEDOWN:     return coreVector2(8.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_PRINTSCREEN:  return coreVector2(9.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_TAB:          return coreVector2(0.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_LSHIFT:       return coreVector2(1.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_LCTRL:        return coreVector2(2.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_LALT:         return coreVector2(3.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_BACKSPACE:    return coreVector2(4.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_RETURN:       return coreVector2(5.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
-            case SDLK_SPACE:        return coreVector2(6.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
-            default:                return FIGURE_INVALID;
+            case CORE_INPUT_CHAR(0):             return coreVector2(0.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(1):             return coreVector2(1.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(2):             return coreVector2(2.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(3):             return coreVector2(3.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(4):             return coreVector2(4.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(5):             return coreVector2(5.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(6):             return coreVector2(6.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(7):             return coreVector2(7.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(8):             return coreVector2(8.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(9):             return coreVector2(9.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(A):             return coreVector2(0.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(B):             return coreVector2(1.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(C):             return coreVector2(2.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(D):             return coreVector2(3.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(E):             return coreVector2(4.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F):             return coreVector2(5.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(G):             return coreVector2(6.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(H):             return coreVector2(7.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(I):             return coreVector2(8.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(J):             return coreVector2(9.0f,1.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(K):             return coreVector2(0.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(L):             return coreVector2(1.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(M):             return coreVector2(2.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(N):             return coreVector2(3.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(O):             return coreVector2(4.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(P):             return coreVector2(5.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(Q):             return coreVector2(6.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(R):             return coreVector2(7.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(S):             return coreVector2(8.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(T):             return coreVector2(9.0f,2.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(U):             return coreVector2(0.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(V):             return coreVector2(1.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(W):             return coreVector2(2.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(X):             return coreVector2(3.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(Y):             return coreVector2(4.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(Z):             return coreVector2(5.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F1):            return coreVector2(6.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F2):            return coreVector2(7.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F3):            return coreVector2(8.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F4):            return coreVector2(9.0f,3.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F5):            return coreVector2(0.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F6):            return coreVector2(1.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F7):            return coreVector2(2.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F8):            return coreVector2(3.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F9):            return coreVector2(4.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F10):           return coreVector2(5.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F11):           return coreVector2(6.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(F12):           return coreVector2(7.0f,4.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(UP):            return coreVector2(0.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(LEFT):          return coreVector2(1.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(DOWN):          return coreVector2(2.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(RIGHT):         return coreVector2(3.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(PLUS):          return coreVector2(4.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(MINUS):         return coreVector2(5.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(ASTERISK):      return coreVector2(6.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(BACKSLASH):     return coreVector2(7.0f,5.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(LESS):          return coreVector2(0.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(GREATER):       return coreVector2(1.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(LEFTBRACKET):   return coreVector2(2.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(RIGHTBRACKET):  return coreVector2(3.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(QUESTION):      return coreVector2(4.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(DBLAPOSTROPHE): return coreVector2(5.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(SEMICOLON):     return coreVector2(6.0f,6.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(ESCAPE):        return coreVector2(0.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(LGUI):          return (DEFINED(_CORE_MACOS_) ? coreVector2(2.0f,7.0f) : coreVector2(1.0f,7.0f)) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(INSERT):        return coreVector2(3.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(DELETE):        return coreVector2(4.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(HOME):          return coreVector2(5.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(END):           return coreVector2(6.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(PAGEUP):        return coreVector2(7.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(PAGEDOWN):      return coreVector2(8.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(PRINTSCREEN):   return coreVector2(9.0f,7.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(TAB):           return coreVector2(0.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(LSHIFT):        return coreVector2(1.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(LCTRL):         return coreVector2(2.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(LALT):          return coreVector2(3.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(BACKSPACE):     return coreVector2(4.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(RETURN):        return coreVector2(5.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
+            case CORE_INPUT_CHAR(SPACE):         return coreVector2(6.0f,8.0f) * FIGURE_SCALE_KEYBOARD;
+            default:                             return FIGURE_INVALID;
             }
         }
     }
@@ -312,32 +326,32 @@ coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 i
     {
         switch(iKey)
         {
-        case SDL_CONTROLLER_BUTTON_A:             return coreVector2(0.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_B:             return coreVector2(1.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_X:             return coreVector2(2.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_Y:             return coreVector2(3.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_BACK:          return coreVector2(4.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_GUIDE:         return FIGURE_INVALID;
-        case SDL_CONTROLLER_BUTTON_START:         return coreVector2(5.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_LEFTSTICK:     return coreVector2(2.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_RIGHTSTICK:    return coreVector2(3.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:  return coreVector2(0.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: return coreVector2(1.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_DPAD_UP:       return coreVector2(0.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:     return coreVector2(2.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:     return coreVector2(1.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:    return coreVector2(3.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_MISC1:         return coreVector2(4.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
-        case SDL_CONTROLLER_BUTTON_PADDLE1:       return FIGURE_INVALID;
-        case SDL_CONTROLLER_BUTTON_PADDLE2:       return FIGURE_INVALID;
-        case SDL_CONTROLLER_BUTTON_PADDLE3:       return FIGURE_INVALID;
-        case SDL_CONTROLLER_BUTTON_PADDLE4:       return FIGURE_INVALID;
-        case SDL_CONTROLLER_BUTTON_TOUCHPAD:      return coreVector2(5.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
-        case CORE_INPUT_BUTTON_LEFTTRIGGER:       return coreVector2(2.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
-        case CORE_INPUT_BUTTON_RIGHTTRIGGER:      return coreVector2(3.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
-        case FIGURE_KEY_LEFTSTICK:                return coreVector2(0.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
-        case FIGURE_KEY_RIGHTSTICK:               return coreVector2(1.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
-        default:                                  return FIGURE_INVALID;
+        case CORE_INPUT_BUTTON_A:               return coreVector2(0.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_B:               return coreVector2(1.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_X:               return coreVector2(2.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_Y:               return coreVector2(3.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_BACK:           return coreVector2(4.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_GUIDE:          return FIGURE_INVALID;
+        case SDL_GAMEPAD_BUTTON_START:          return coreVector2(5.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_LEFT_STICK:     return coreVector2(2.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_RIGHT_STICK:    return coreVector2(3.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:  return coreVector2(0.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER: return coreVector2(1.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_DPAD_UP:        return coreVector2(0.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN:      return coreVector2(2.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT:      return coreVector2(1.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:     return coreVector2(3.0f,1.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_MISC1:          return coreVector2(4.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1:  return FIGURE_INVALID;
+        case SDL_GAMEPAD_BUTTON_LEFT_PADDLE1:   return FIGURE_INVALID;
+        case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2:  return FIGURE_INVALID;
+        case SDL_GAMEPAD_BUTTON_LEFT_PADDLE2:   return FIGURE_INVALID;
+        case SDL_GAMEPAD_BUTTON_TOUCHPAD:       return coreVector2(5.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_LEFT_TRIGGER:    return coreVector2(2.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_RIGHT_TRIGGER:   return coreVector2(3.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case FIGURE_KEY_LEFT_STICK:             return coreVector2(0.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
+        case FIGURE_KEY_RIGHT_STICK:            return coreVector2(1.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
+        default:                                return FIGURE_INVALID;
         }
     }
 }

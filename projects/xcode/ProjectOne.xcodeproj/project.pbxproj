@@ -136,17 +136,17 @@
 		5B18B1B52A2DD34400C189C3 /* cBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DE8B27CAAA260036BB19 /* cBlur.cpp */; };
 		5B18B1B62A2DD34400C189C3 /* cScrollBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DEB127CAAA260036BB19 /* cScrollBox.cpp */; };
 		5B18B1B82A2DD34400C189C3 /* libCoreEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B06DFB827CAB3320036BB19 /* libCoreEngine.a */; };
-		5B18B1B92A2DD34400C189C3 /* libSDL2_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; };
+		5B18B1B92A2DD34400C189C3 /* libSDL3_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; };
 		5B18B1BA2A2DD34400C189C3 /* libopenal.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; };
 		5B18B1BB2A2DD34400C189C3 /* libzstd.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; };
-		5B18B1BC2A2DD34400C189C3 /* libSDL2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; };
-		5B18B1BD2A2DD34400C189C3 /* libSDL2_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; };
+		5B18B1BC2A2DD34400C189C3 /* libSDL3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; };
+		5B18B1BD2A2DD34400C189C3 /* libSDL3_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; };
 		5B18B1BF2A2DD34400C189C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B42D8E827D3A01F0075F2A6 /* Assets.xcassets */; };
 		5B18B1C02A2DD34400C189C3 /* data in Resources */ = {isa = PBXBuildFile; fileRef = 5B5B801E27D2A4BA003FD836 /* data */; };
-		5B18B1C22A2DD34400C189C3 /* libSDL2_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B18B1C32A2DD34400C189C3 /* libSDL2_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B18B1C22A2DD34400C189C3 /* libSDL3_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B18B1C32A2DD34400C189C3 /* libSDL3_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B18B1C42A2DD34400C189C3 /* libzstd.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B18B1C52A2DD34400C189C3 /* libSDL2.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B18B1C52A2DD34400C189C3 /* libSDL3.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B18B1C62A2DD34400C189C3 /* libopenal.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B18B1CD2A2DD34F00C189C3 /* cPasswords.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B6A6FD52998FE12000925EF /* cPasswords.cpp */; };
 		5B18B1CE2A2DD34F00C189C3 /* cNewIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5BEBF1432987D76C0012A467 /* cNewIndicator.cpp */; };
@@ -213,19 +213,19 @@
 		5B18B20D2A2DD34F00C189C3 /* cBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DE8B27CAAA260036BB19 /* cBlur.cpp */; };
 		5B18B20E2A2DD34F00C189C3 /* cScrollBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DEB127CAAA260036BB19 /* cScrollBox.cpp */; };
 		5B18B2102A2DD34F00C189C3 /* libCoreEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B06DFB827CAB3320036BB19 /* libCoreEngine.a */; };
-		5B18B2112A2DD34F00C189C3 /* libSDL2_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; };
+		5B18B2112A2DD34F00C189C3 /* libSDL3_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; };
 		5B18B2122A2DD34F00C189C3 /* libopenal.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; };
 		5B18B2132A2DD34F00C189C3 /* libzstd.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; };
-		5B18B2142A2DD34F00C189C3 /* libSDL2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; };
+		5B18B2142A2DD34F00C189C3 /* libSDL3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; };
 		5B18B2152A2DD34F00C189C3 /* libsteam_api.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BF701C0293E098D00EC1762 /* libsteam_api.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
-		5B18B2162A2DD34F00C189C3 /* libSDL2_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; };
+		5B18B2162A2DD34F00C189C3 /* libSDL3_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; };
 		5B18B2182A2DD34F00C189C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B42D8E827D3A01F0075F2A6 /* Assets.xcassets */; };
 		5B18B2192A2DD34F00C189C3 /* data in Resources */ = {isa = PBXBuildFile; fileRef = 5B5B801E27D2A4BA003FD836 /* data */; };
 		5B18B21B2A2DD34F00C189C3 /* libsteam_api.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BF701C0293E098D00EC1762 /* libsteam_api.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B18B21C2A2DD34F00C189C3 /* libSDL2_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B18B21D2A2DD34F00C189C3 /* libSDL2_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B18B21C2A2DD34F00C189C3 /* libSDL3_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B18B21D2A2DD34F00C189C3 /* libSDL3_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B18B21E2A2DD34F00C189C3 /* libzstd.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B18B21F2A2DD34F00C189C3 /* libSDL2.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B18B21F2A2DD34F00C189C3 /* libSDL3.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B18B2202A2DD34F00C189C3 /* libopenal.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B42D8EA27D3A01F0075F2A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B42D8E827D3A01F0075F2A6 /* Assets.xcassets */; };
 		5B5B7C8627D2A146003FD836 /* libzstd.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; };
@@ -298,17 +298,17 @@
 		5B627A0C29FE88D900AD5B3C /* cBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DE8B27CAAA260036BB19 /* cBlur.cpp */; };
 		5B627A0D29FE88D900AD5B3C /* cScrollBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DEB127CAAA260036BB19 /* cScrollBox.cpp */; };
 		5B627A0F29FE88D900AD5B3C /* libCoreEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B06DFB827CAB3320036BB19 /* libCoreEngine.a */; };
-		5B627A1029FE88D900AD5B3C /* libSDL2_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; };
+		5B627A1029FE88D900AD5B3C /* libSDL3_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; };
 		5B627A1129FE88D900AD5B3C /* libopenal.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; };
 		5B627A1229FE88D900AD5B3C /* libzstd.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; };
-		5B627A1329FE88D900AD5B3C /* libSDL2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; };
-		5B627A1529FE88D900AD5B3C /* libSDL2_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; };
+		5B627A1329FE88D900AD5B3C /* libSDL3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; };
+		5B627A1529FE88D900AD5B3C /* libSDL3_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; };
 		5B627A1729FE88D900AD5B3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B42D8E827D3A01F0075F2A6 /* Assets.xcassets */; };
 		5B627A1829FE88D900AD5B3C /* data in Resources */ = {isa = PBXBuildFile; fileRef = 5B5B801E27D2A4BA003FD836 /* data */; };
-		5B627A1B29FE88D900AD5B3C /* libSDL2_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B627A1C29FE88D900AD5B3C /* libSDL2_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B627A1B29FE88D900AD5B3C /* libSDL3_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B627A1C29FE88D900AD5B3C /* libSDL3_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B627A1D29FE88D900AD5B3C /* libzstd.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B627A1E29FE88D900AD5B3C /* libSDL2.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B627A1E29FE88D900AD5B3C /* libSDL3.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B627A1F29FE88D900AD5B3C /* libopenal.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B6A0956292C35F200C2F8A4 /* cTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B6A0954292C35F100C2F8A4 /* cTracker.cpp */; };
 		5B6A0959292C360F00C2F8A4 /* cExhaust.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B6A0958292C360F00C2F8A4 /* cExhaust.cpp */; };
@@ -383,24 +383,24 @@
 		5B979FAE2A3C668100C5292D /* cBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DE8B27CAAA260036BB19 /* cBlur.cpp */; };
 		5B979FAF2A3C668100C5292D /* cScrollBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DEB127CAAA260036BB19 /* cScrollBox.cpp */; };
 		5B979FB12A3C668100C5292D /* libCoreEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B06DFB827CAB3320036BB19 /* libCoreEngine.a */; };
-		5B979FB22A3C668100C5292D /* libSDL2_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; };
+		5B979FB22A3C668100C5292D /* libSDL3_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; };
 		5B979FB32A3C668100C5292D /* libopenal.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; };
 		5B979FB42A3C668100C5292D /* libzstd.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; };
-		5B979FB52A3C668100C5292D /* libSDL2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; };
-		5B979FB72A3C668100C5292D /* libSDL2_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; };
+		5B979FB52A3C668100C5292D /* libSDL3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; };
+		5B979FB72A3C668100C5292D /* libSDL3_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; };
 		5B979FB92A3C668100C5292D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B42D8E827D3A01F0075F2A6 /* Assets.xcassets */; };
 		5B979FBA2A3C668100C5292D /* data in Resources */ = {isa = PBXBuildFile; fileRef = 5B5B801E27D2A4BA003FD836 /* data */; };
-		5B979FBD2A3C668100C5292D /* libSDL2_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B979FBE2A3C668100C5292D /* libSDL2_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B979FBD2A3C668100C5292D /* libSDL3_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B979FBE2A3C668100C5292D /* libSDL3_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B979FBF2A3C668100C5292D /* libzstd.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5B979FC02A3C668100C5292D /* libSDL2.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5B979FC02A3C668100C5292D /* libSDL3.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5B979FC12A3C668100C5292D /* libopenal.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5BB417A5293DF23E006F0B6E /* libSDL2_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; };
-		5BB417A6293DF23E006F0B6E /* libSDL2_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5BB417A7293DF23E006F0B6E /* libSDL2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; };
-		5BB417A8293DF23E006F0B6E /* libSDL2.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5BB417A9293DF23E006F0B6E /* libSDL2_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; };
-		5BB417AA293DF23E006F0B6E /* libSDL2_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5BB417A5293DF23E006F0B6E /* libSDL3_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; };
+		5BB417A6293DF23E006F0B6E /* libSDL3_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5BB417A7293DF23E006F0B6E /* libSDL3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; };
+		5BB417A8293DF23E006F0B6E /* libSDL3.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5BB417A9293DF23E006F0B6E /* libSDL3_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; };
+		5BB417AA293DF23E006F0B6E /* libSDL3_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5BB417B0293DFB02006F0B6E /* cBullet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DF2E27CAAA260036BB19 /* cBullet.cpp */; };
 		5BB417B1293DFB02006F0B6E /* cOutline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DE9427CAAA260036BB19 /* cOutline.cpp */; };
 		5BB417B2293DFB02006F0B6E /* cMsgBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DEB227CAAA260036BB19 /* cMsgBox.cpp */; };
@@ -461,17 +461,17 @@
 		5BB417EB293DFB02006F0B6E /* cBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DE8B27CAAA260036BB19 /* cBlur.cpp */; };
 		5BB417EC293DFB02006F0B6E /* cScrollBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B06DEB127CAAA260036BB19 /* cScrollBox.cpp */; };
 		5BB417EE293DFB02006F0B6E /* libCoreEngine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B06DFB827CAB3320036BB19 /* libCoreEngine.a */; };
-		5BB417EF293DFB02006F0B6E /* libSDL2_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; };
+		5BB417EF293DFB02006F0B6E /* libSDL3_ttf.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; };
 		5BB417F0293DFB02006F0B6E /* libopenal.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; };
 		5BB417F1293DFB02006F0B6E /* libzstd.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; };
-		5BB417F3293DFB02006F0B6E /* libSDL2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; };
-		5BB417F4293DFB02006F0B6E /* libSDL2_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; };
+		5BB417F3293DFB02006F0B6E /* libSDL3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; };
+		5BB417F4293DFB02006F0B6E /* libSDL3_image.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; };
 		5BB417F6293DFB02006F0B6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B42D8E827D3A01F0075F2A6 /* Assets.xcassets */; };
 		5BB417F7293DFB02006F0B6E /* data in Resources */ = {isa = PBXBuildFile; fileRef = 5B5B801E27D2A4BA003FD836 /* data */; };
-		5BB417F9293DFB02006F0B6E /* libSDL2_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5BB417FA293DFB02006F0B6E /* libSDL2_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5BB417F9293DFB02006F0B6E /* libSDL3_ttf.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5BB417FA293DFB02006F0B6E /* libSDL3_image.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5BB417FC293DFB02006F0B6E /* libzstd.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7C27D2A145003FD836 /* libzstd.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5BB417FD293DFB02006F0B6E /* libSDL2.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5BB417FD293DFB02006F0B6E /* libSDL3.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB417A3293DF23E006F0B6E /* libSDL3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5BB417FE293DFB02006F0B6E /* libopenal.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5B5B7C7F27D2A146003FD836 /* libopenal.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		5BB6C9492BB0477D0074B9A2 /* libopusfile.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB6C9482BB0477D0074B9A2 /* libopusfile.dylib */; };
 		5BB6C94A2BB0477D0074B9A2 /* libopusfile.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5BB6C9482BB0477D0074B9A2 /* libopusfile.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -502,11 +502,11 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				5B18B1C22A2DD34400C189C3 /* libSDL2_ttf.dylib in Embed Frameworks */,
-				5B18B1C32A2DD34400C189C3 /* libSDL2_image.dylib in Embed Frameworks */,
+				5B18B1C22A2DD34400C189C3 /* libSDL3_ttf.dylib in Embed Frameworks */,
+				5B18B1C32A2DD34400C189C3 /* libSDL3_image.dylib in Embed Frameworks */,
 				5B18B1C42A2DD34400C189C3 /* libzstd.dylib in Embed Frameworks */,
 				5BB6C9502BB047C50074B9A2 /* libopusfile.dylib in Embed Frameworks */,
-				5B18B1C52A2DD34400C189C3 /* libSDL2.dylib in Embed Frameworks */,
+				5B18B1C52A2DD34400C189C3 /* libSDL3.dylib in Embed Frameworks */,
 				5B18B1C62A2DD34400C189C3 /* libopenal.dylib in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -519,11 +519,11 @@
 			dstSubfolderSpec = 10;
 			files = (
 				5B18B21B2A2DD34F00C189C3 /* libsteam_api.dylib in Embed Frameworks */,
-				5B18B21C2A2DD34F00C189C3 /* libSDL2_ttf.dylib in Embed Frameworks */,
-				5B18B21D2A2DD34F00C189C3 /* libSDL2_image.dylib in Embed Frameworks */,
+				5B18B21C2A2DD34F00C189C3 /* libSDL3_ttf.dylib in Embed Frameworks */,
+				5B18B21D2A2DD34F00C189C3 /* libSDL3_image.dylib in Embed Frameworks */,
 				5B18B21E2A2DD34F00C189C3 /* libzstd.dylib in Embed Frameworks */,
 				5BB6C9522BB047D90074B9A2 /* libopusfile.dylib in Embed Frameworks */,
-				5B18B21F2A2DD34F00C189C3 /* libSDL2.dylib in Embed Frameworks */,
+				5B18B21F2A2DD34F00C189C3 /* libSDL3.dylib in Embed Frameworks */,
 				5B18B2202A2DD34F00C189C3 /* libopenal.dylib in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -535,11 +535,11 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				5BB417A6293DF23E006F0B6E /* libSDL2_ttf.dylib in Embed Frameworks */,
-				5BB417AA293DF23E006F0B6E /* libSDL2_image.dylib in Embed Frameworks */,
+				5BB417A6293DF23E006F0B6E /* libSDL3_ttf.dylib in Embed Frameworks */,
+				5BB417AA293DF23E006F0B6E /* libSDL3_image.dylib in Embed Frameworks */,
 				5B5B7C8727D2A146003FD836 /* libzstd.dylib in Embed Frameworks */,
 				5BB6C94A2BB0477D0074B9A2 /* libopusfile.dylib in Embed Frameworks */,
-				5BB417A8293DF23E006F0B6E /* libSDL2.dylib in Embed Frameworks */,
+				5BB417A8293DF23E006F0B6E /* libSDL3.dylib in Embed Frameworks */,
 				5B5B7C8D27D2A146003FD836 /* libopenal.dylib in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -551,10 +551,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				5B627A1B29FE88D900AD5B3C /* libSDL2_ttf.dylib in Embed Frameworks */,
-				5B627A1C29FE88D900AD5B3C /* libSDL2_image.dylib in Embed Frameworks */,
+				5B627A1B29FE88D900AD5B3C /* libSDL3_ttf.dylib in Embed Frameworks */,
+				5B627A1C29FE88D900AD5B3C /* libSDL3_image.dylib in Embed Frameworks */,
 				5B627A1D29FE88D900AD5B3C /* libzstd.dylib in Embed Frameworks */,
-				5B627A1E29FE88D900AD5B3C /* libSDL2.dylib in Embed Frameworks */,
+				5B627A1E29FE88D900AD5B3C /* libSDL3.dylib in Embed Frameworks */,
 				5BB6C94E2BB047B10074B9A2 /* libopusfile.dylib in Embed Frameworks */,
 				5B627A1F29FE88D900AD5B3C /* libopenal.dylib in Embed Frameworks */,
 				5BB940F229FE896000F06994 /* libEOSSDK-Mac-Shipping.dylib in Embed Frameworks */,
@@ -568,11 +568,11 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				5B979FBD2A3C668100C5292D /* libSDL2_ttf.dylib in Embed Frameworks */,
-				5B979FBE2A3C668100C5292D /* libSDL2_image.dylib in Embed Frameworks */,
+				5B979FBD2A3C668100C5292D /* libSDL3_ttf.dylib in Embed Frameworks */,
+				5B979FBE2A3C668100C5292D /* libSDL3_image.dylib in Embed Frameworks */,
 				5B979FBF2A3C668100C5292D /* libzstd.dylib in Embed Frameworks */,
 				5BB6C9542BB047E70074B9A2 /* libopusfile.dylib in Embed Frameworks */,
-				5B979FC02A3C668100C5292D /* libSDL2.dylib in Embed Frameworks */,
+				5B979FC02A3C668100C5292D /* libSDL3.dylib in Embed Frameworks */,
 				5B979FC12A3C668100C5292D /* libopenal.dylib in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -585,11 +585,11 @@
 			dstSubfolderSpec = 10;
 			files = (
 				5BF701C2293E098D00EC1762 /* libsteam_api.dylib in Embed Frameworks */,
-				5BB417F9293DFB02006F0B6E /* libSDL2_ttf.dylib in Embed Frameworks */,
-				5BB417FA293DFB02006F0B6E /* libSDL2_image.dylib in Embed Frameworks */,
+				5BB417F9293DFB02006F0B6E /* libSDL3_ttf.dylib in Embed Frameworks */,
+				5BB417FA293DFB02006F0B6E /* libSDL3_image.dylib in Embed Frameworks */,
 				5BB417FC293DFB02006F0B6E /* libzstd.dylib in Embed Frameworks */,
 				5BB6C94C2BB047A40074B9A2 /* libopusfile.dylib in Embed Frameworks */,
-				5BB417FD293DFB02006F0B6E /* libSDL2.dylib in Embed Frameworks */,
+				5BB417FD293DFB02006F0B6E /* libSDL3.dylib in Embed Frameworks */,
 				5BB417FE293DFB02006F0B6E /* libopenal.dylib in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -786,9 +786,9 @@
 		5B6CED6C2961DDED0057D158 /* cFigure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cFigure.cpp; sourceTree = "<group>"; };
 		5B6CED6D2961DDED0057D158 /* cFigure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cFigure.h; sourceTree = "<group>"; };
 		5B979FC52A3C668100C5292D /* EigengrauDemo_Epic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EigengrauDemo_Epic.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSDL2_ttf.dylib; path = ../../../CoreEngine/libraries/bin/macos/libSDL2_ttf.dylib; sourceTree = "<group>"; };
-		5BB417A3293DF23E006F0B6E /* libSDL2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSDL2.dylib; path = ../../../CoreEngine/libraries/bin/macos/libSDL2.dylib; sourceTree = "<group>"; };
-		5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSDL2_image.dylib; path = ../../../CoreEngine/libraries/bin/macos/libSDL2_image.dylib; sourceTree = "<group>"; };
+		5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSDL3_ttf.dylib; path = ../../../CoreEngine/libraries/bin/macos/libSDL3_ttf.dylib; sourceTree = "<group>"; };
+		5BB417A3293DF23E006F0B6E /* libSDL3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSDL3.dylib; path = ../../../CoreEngine/libraries/bin/macos/libSDL3.dylib; sourceTree = "<group>"; };
+		5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSDL3_image.dylib; path = ../../../CoreEngine/libraries/bin/macos/libSDL3_image.dylib; sourceTree = "<group>"; };
 		5BB41802293DFB02006F0B6E /* Eigengrau_Steam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eigengrau_Steam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BB6C9482BB0477D0074B9A2 /* libopusfile.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopusfile.dylib; path = ../../../CoreEngine/libraries/bin/macos/libopusfile.dylib; sourceTree = "<group>"; };
 		5BB940F029FE894100F06994 /* libEOSSDK-Mac-Shipping.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libEOSSDK-Mac-Shipping.dylib"; path = "../../../CoreEngine/libraries/bin/macos/optional/libEOSSDK-Mac-Shipping.dylib"; sourceTree = "<group>"; };
@@ -805,12 +805,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B06DFB927CAB3320036BB19 /* libCoreEngine.a in Frameworks */,
-				5BB417A5293DF23E006F0B6E /* libSDL2_ttf.dylib in Frameworks */,
+				5BB417A5293DF23E006F0B6E /* libSDL3_ttf.dylib in Frameworks */,
 				5B5B7C8C27D2A146003FD836 /* libopenal.dylib in Frameworks */,
 				5B5B7C8627D2A146003FD836 /* libzstd.dylib in Frameworks */,
 				5BB6C9492BB0477D0074B9A2 /* libopusfile.dylib in Frameworks */,
-				5BB417A7293DF23E006F0B6E /* libSDL2.dylib in Frameworks */,
-				5BB417A9293DF23E006F0B6E /* libSDL2_image.dylib in Frameworks */,
+				5BB417A7293DF23E006F0B6E /* libSDL3.dylib in Frameworks */,
+				5BB417A9293DF23E006F0B6E /* libSDL3_image.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -819,12 +819,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B18B1B82A2DD34400C189C3 /* libCoreEngine.a in Frameworks */,
-				5B18B1B92A2DD34400C189C3 /* libSDL2_ttf.dylib in Frameworks */,
+				5B18B1B92A2DD34400C189C3 /* libSDL3_ttf.dylib in Frameworks */,
 				5B18B1BA2A2DD34400C189C3 /* libopenal.dylib in Frameworks */,
 				5B18B1BB2A2DD34400C189C3 /* libzstd.dylib in Frameworks */,
 				5BB6C94F2BB047C50074B9A2 /* libopusfile.dylib in Frameworks */,
-				5B18B1BC2A2DD34400C189C3 /* libSDL2.dylib in Frameworks */,
-				5B18B1BD2A2DD34400C189C3 /* libSDL2_image.dylib in Frameworks */,
+				5B18B1BC2A2DD34400C189C3 /* libSDL3.dylib in Frameworks */,
+				5B18B1BD2A2DD34400C189C3 /* libSDL3_image.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -834,12 +834,12 @@
 			files = (
 				5B18B2102A2DD34F00C189C3 /* libCoreEngine.a in Frameworks */,
 				5BB6C9512BB047D90074B9A2 /* libopusfile.dylib in Frameworks */,
-				5B18B2112A2DD34F00C189C3 /* libSDL2_ttf.dylib in Frameworks */,
+				5B18B2112A2DD34F00C189C3 /* libSDL3_ttf.dylib in Frameworks */,
 				5B18B2122A2DD34F00C189C3 /* libopenal.dylib in Frameworks */,
 				5B18B2132A2DD34F00C189C3 /* libzstd.dylib in Frameworks */,
-				5B18B2142A2DD34F00C189C3 /* libSDL2.dylib in Frameworks */,
+				5B18B2142A2DD34F00C189C3 /* libSDL3.dylib in Frameworks */,
 				5B18B2152A2DD34F00C189C3 /* libsteam_api.dylib in Frameworks */,
-				5B18B2162A2DD34F00C189C3 /* libSDL2_image.dylib in Frameworks */,
+				5B18B2162A2DD34F00C189C3 /* libSDL3_image.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -849,11 +849,11 @@
 			files = (
 				5B627A0F29FE88D900AD5B3C /* libCoreEngine.a in Frameworks */,
 				5BB6C94D2BB047B10074B9A2 /* libopusfile.dylib in Frameworks */,
-				5B627A1029FE88D900AD5B3C /* libSDL2_ttf.dylib in Frameworks */,
+				5B627A1029FE88D900AD5B3C /* libSDL3_ttf.dylib in Frameworks */,
 				5B627A1129FE88D900AD5B3C /* libopenal.dylib in Frameworks */,
 				5B627A1229FE88D900AD5B3C /* libzstd.dylib in Frameworks */,
-				5B627A1329FE88D900AD5B3C /* libSDL2.dylib in Frameworks */,
-				5B627A1529FE88D900AD5B3C /* libSDL2_image.dylib in Frameworks */,
+				5B627A1329FE88D900AD5B3C /* libSDL3.dylib in Frameworks */,
+				5B627A1529FE88D900AD5B3C /* libSDL3_image.dylib in Frameworks */,
 				5BB940F129FE894100F06994 /* libEOSSDK-Mac-Shipping.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -863,12 +863,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B979FB12A3C668100C5292D /* libCoreEngine.a in Frameworks */,
-				5B979FB22A3C668100C5292D /* libSDL2_ttf.dylib in Frameworks */,
+				5B979FB22A3C668100C5292D /* libSDL3_ttf.dylib in Frameworks */,
 				5B979FB32A3C668100C5292D /* libopenal.dylib in Frameworks */,
 				5B979FB42A3C668100C5292D /* libzstd.dylib in Frameworks */,
 				5BB6C9532BB047E70074B9A2 /* libopusfile.dylib in Frameworks */,
-				5B979FB52A3C668100C5292D /* libSDL2.dylib in Frameworks */,
-				5B979FB72A3C668100C5292D /* libSDL2_image.dylib in Frameworks */,
+				5B979FB52A3C668100C5292D /* libSDL3.dylib in Frameworks */,
+				5B979FB72A3C668100C5292D /* libSDL3_image.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -878,12 +878,12 @@
 			files = (
 				5BB417EE293DFB02006F0B6E /* libCoreEngine.a in Frameworks */,
 				5BB6C94B2BB047A40074B9A2 /* libopusfile.dylib in Frameworks */,
-				5BB417EF293DFB02006F0B6E /* libSDL2_ttf.dylib in Frameworks */,
+				5BB417EF293DFB02006F0B6E /* libSDL3_ttf.dylib in Frameworks */,
 				5BB417F0293DFB02006F0B6E /* libopenal.dylib in Frameworks */,
 				5BB417F1293DFB02006F0B6E /* libzstd.dylib in Frameworks */,
-				5BB417F3293DFB02006F0B6E /* libSDL2.dylib in Frameworks */,
+				5BB417F3293DFB02006F0B6E /* libSDL3.dylib in Frameworks */,
 				5BF701C1293E098D00EC1762 /* libsteam_api.dylib in Frameworks */,
-				5BB417F4293DFB02006F0B6E /* libSDL2_image.dylib in Frameworks */,
+				5BB417F4293DFB02006F0B6E /* libSDL3_image.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1185,9 +1185,9 @@
 				5BB6C9482BB0477D0074B9A2 /* libopusfile.dylib */,
 				5BB940F029FE894100F06994 /* libEOSSDK-Mac-Shipping.dylib */,
 				5BF701C0293E098D00EC1762 /* libsteam_api.dylib */,
-				5BB417A4293DF23E006F0B6E /* libSDL2_image.dylib */,
-				5BB417A2293DF23E006F0B6E /* libSDL2_ttf.dylib */,
-				5BB417A3293DF23E006F0B6E /* libSDL2.dylib */,
+				5BB417A4293DF23E006F0B6E /* libSDL3_image.dylib */,
+				5BB417A2293DF23E006F0B6E /* libSDL3_ttf.dylib */,
+				5BB417A3293DF23E006F0B6E /* libSDL3.dylib */,
 				5B5B7C7F27D2A146003FD836 /* libopenal.dylib */,
 				5B5B7C7C27D2A145003FD836 /* libzstd.dylib */,
 				5B06DFCA27CAB5C30036BB19 /* OpenGL.framework */,
