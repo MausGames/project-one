@@ -37,10 +37,10 @@ cMainMenu::cMainMenu()noexcept
     m_ConfigButton.SetSize      (m_StartButton.GetSize());
     m_ConfigButton.GetCaption()->SetTextLanguage("SETTINGS");
 
-    m_SteamButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_SteamButton.DefineProgram("menu_border_program");
-    m_SteamButton.SetSize      (m_StartButton.GetSize());
-    m_SteamButton.GetCaption()->SetTextLanguage(cMenu::GetStoreText());
+    m_StoreButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_StoreButton.DefineProgram("menu_border_program");
+    m_StoreButton.SetSize      (m_StartButton.GetSize());
+    m_StoreButton.GetCaption()->SetTextLanguage(cMenu::GetStoreText());
 
     m_CreditsButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_CreditsButton.DefineProgram("menu_border_program");
@@ -56,9 +56,9 @@ cMainMenu::cMainMenu()noexcept
     if(g_bDemoVersion)
     {
         m_Navigator.BindObject(&m_StartButton,   &m_ExitButton,    NULL, &m_ConfigButton,  NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_ConfigButton,  &m_StartButton,   NULL, &m_SteamButton,   NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_SteamButton,   &m_ConfigButton,  NULL, &m_CreditsButton, NULL, MENU_TYPE_DEFAULT);
-        m_Navigator.BindObject(&m_CreditsButton, &m_SteamButton,   NULL, &m_ExitButton,    NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ConfigButton,  &m_StartButton,   NULL, &m_StoreButton,   NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_StoreButton,   &m_ConfigButton,  NULL, &m_CreditsButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_CreditsButton, &m_StoreButton,   NULL, &m_ExitButton,    NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExitButton,    &m_CreditsButton, NULL, &m_StartButton,   NULL, MENU_TYPE_DEFAULT);
     }
     else if(g_bLeaderboards || DEFINED(_CORE_DEBUG_))
@@ -88,7 +88,7 @@ cMainMenu::cMainMenu()noexcept
     if(g_bDemoVersion)
     {
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
-        this->BindObject(SURFACE_MAIN_DEFAULT, &m_SteamButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_StoreButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_CreditsButton);
     }
     else if(g_bLeaderboards || DEFINED(_CORE_DEBUG_))
@@ -202,7 +202,7 @@ void cMainMenu::Move()
                 // 
                 m_ConfigNew.Resolve();
             }
-            else if(m_SteamButton.IsClicked())
+            else if(m_StoreButton.IsClicked())
             {
                 // 
                 cMenu::OpenStoreLink();
@@ -235,7 +235,7 @@ void cMainMenu::Move()
             cMenu::UpdateButton(&m_ReplayButton,  &m_Navigator, m_ReplayButton .IsFocused());
             cMenu::UpdateButton(&m_ExtraButton,   &m_Navigator, m_ExtraButton  .IsFocused());
             cMenu::UpdateButton(&m_ConfigButton,  &m_Navigator, m_ConfigButton .IsFocused());
-            cMenu::UpdateButton(&m_SteamButton,   &m_Navigator, m_SteamButton  .IsFocused());
+            cMenu::UpdateButton(&m_StoreButton,   &m_Navigator, m_StoreButton  .IsFocused());
             cMenu::UpdateButton(&m_CreditsButton, &m_Navigator, m_CreditsButton.IsFocused());
             cMenu::UpdateButton(&m_ExitButton,    &m_Navigator, m_ExitButton   .IsFocused());
         }

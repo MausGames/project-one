@@ -913,7 +913,7 @@ void cMenu::Move()
     // 
     if(g_pSave->GetActive()) {m_fNoticeSaveTime = m_bNoticeSavePrevent ? 0.0f : 1.0f; g_pSave->ResetActive();}
     else                     {m_fNoticeSaveTime.UpdateMax(-1.0f, 0.0f);}
-    
+
     // 
     m_NoticeSave.SetPosition(coreVector2(-0.033f - 0.02f * BLENDB(1.0f - m_fNoticeSaveTime), 0.023f));
     m_NoticeSave.SetAlpha   (BLENDBR(m_fNoticeSaveTime));

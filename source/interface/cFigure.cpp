@@ -51,16 +51,20 @@ void cFigure::Move()
 
     if((m_iBase != m_iBaseRef) || (m_iKey != m_iKeyRef))
     {
+        // 
         const coreHashString pcTexture  = cFigure::DetermineTexture  (m_iBase);
         const coreVector2    vTexOffset = cFigure::DetermineTexOffset(m_iBase, m_iKey);
 
+        // 
         this->DefineTexture(0u, pcTexture);
         this->SetTexSize   ((m_iBase == FIGURE_BASE_KEYBOARD) ? FIGURE_SCALE_KEYBOARD : FIGURE_SCALE_GAMEPAD);
 
         if(vTexOffset != FIGURE_INVALID)
         {
+                // 
             this->SetTexOffset(vTexOffset);
 
+            // 
             m_Fallback.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         }
         else
@@ -68,8 +72,10 @@ void cFigure::Move()
             const coreChar* pcText;
             if(m_iKey == INPUT_KEY_INVALID)
             {
+                // 
                 pcText = "-";
 
+                // 
                 this->SetTexOffset(coreVector2(1.0f,1.0f) - this->GetTexSize());
             }
             else if(m_iBase == FIGURE_BASE_KEYBOARD)
@@ -97,9 +103,11 @@ void cFigure::Move()
                 pcText = SDL_GetGamepadStringForButton(SDL_GamepadButton(m_iKey));
                 pcText = pcText ? coreData::StrToUpper(pcText) : coreData::ToChars(m_iKey);
 
+                // 
                 this->SetTexOffset(coreVector2(4.0f,0.0f) * FIGURE_SCALE_GAMEPAD);
             }
 
+            // 
             m_Fallback.SetText   (pcText);
             m_Fallback.SetEnabled(CORE_OBJECT_ENABLE_ALL);
         }
@@ -181,6 +189,7 @@ coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
 {
 #if defined(_CORE_SWITCH_)
 
+    // 
     switch(iBase)
     {
     case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO:          return "input_gamepad_switch_full.png";
@@ -192,6 +201,7 @@ coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
 
 #else
 
+    // 
     switch(iBase)
     {
     case FIGURE_BASE_KEYBOARD:                          return "input_keyboard.png";
@@ -218,15 +228,18 @@ coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
 // 
 coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 iKey)
 {
+    // 
     if(iKey == INPUT_KEY_INVALID)
     {
         return FIGURE_INVALID;
     }
 
+    // 
     if(iBase == FIGURE_BASE_KEYBOARD)
     {
         if(iKey <= 0)
         {
+            // 
             switch(-iKey)
             {
             case CORE_INPUT_LEFT:   return coreVector2(0.0f,9.0f) * FIGURE_SCALE_KEYBOARD;
@@ -237,6 +250,7 @@ coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 i
         }
         else
         {
+            // 
             switch(SDL_GetKeyFromScancode(SDL_Scancode(iKey), SDL_KMOD_NONE, true))
             {
             case CORE_INPUT_CHAR(0):             return coreVector2(0.0f,0.0f) * FIGURE_SCALE_KEYBOARD;
@@ -324,6 +338,7 @@ coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 i
     }
     else
     {
+        // 
         switch(iKey)
         {
         case CORE_INPUT_BUTTON_A:               return coreVector2(0.0f,0.0f) * FIGURE_SCALE_GAMEPAD;

@@ -707,7 +707,7 @@ void cSummaryMenu::Move()
             nBlendMedalFunc(&m_ArcadeTotalMedal, 0.13f, fThreshold3, SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]));
 
             // 
-            m_ArcadeLayer.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
+            m_ArcadeLayer.SetTexOffset(MENU_LAYER_TEXOFFSET);
             
             
             

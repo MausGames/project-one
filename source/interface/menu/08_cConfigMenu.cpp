@@ -15,6 +15,7 @@ cConfigMenu::cConfigMenu()noexcept
 : coreMenu           (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
 , m_apcDescKey       {}
 , m_iCurMonitorIndex (Core::System->GetDisplayIndex())
+, m_iMonitorNum      (0u)
 , m_iJoystickNum     (0u)
 {
     // create menu objects
@@ -23,13 +24,18 @@ cConfigMenu::cConfigMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.01f));
     m_Background.SetSize      (coreVector2(0.9f,0.75f));
 
+    const coreFloat fSplitNum     = 4.0f;
+    const coreFloat fSplitPadding = 0.024f;
+    const coreFloat fSplitWidth   = (m_Background.GetSize().x - (fSplitPadding * (fSplitNum + 1.0f))) / fSplitNum;
+    const coreFloat fSplitOffset  = fSplitPadding + fSplitWidth * 0.5f;
+
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
-    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.1275f,-0.0125f));
-    m_VideoTab.SetSize      (coreVector2(0.195f,0.07f));
+    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(fSplitOffset, -0.0125f));
+    m_VideoTab.SetSize      (coreVector2(fSplitWidth, 0.07f));
     m_VideoTab.SetAlignment (coreVector2(0.0f, 1.0f));
     m_VideoTab.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.1275f,0.0125f));
+    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(fSplitOffset, 0.0125f));
     m_VideoTab.GetCaption()->SetTextLanguage("CONFIG_VIDEO");
 
     m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -72,7 +78,6 @@ cConfigMenu::cConfigMenu()noexcept
     m_DiscardButton.SetPosition  (m_SaveButton.GetPosition() + coreVector2(m_SaveButton.GetSize().x + 0.02f, 0.0f));
     m_DiscardButton.SetSize      (m_SaveButton.GetSize());
     m_DiscardButton.SetAlignment (m_SaveButton.GetAlignment());
-    m_DiscardButton.SetOverride  (-1);
     m_DiscardButton.GetCaption()->SetTextLanguage("DISCARD");
 
     m_InputButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
@@ -199,8 +204,7 @@ cConfigMenu::cConfigMenu()noexcept
         x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());                                                \
         x.SetSize     (coreVector2((s),   0.03f));                                                                       \
         x.SetAlignment(coreVector2(-1.00f,0.00f));                                                                       \
-        x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                                                                \
-        x.GetCaption()->ChangeLanguage(Core::Language);                                                                  \
+        x.GetCaption()->SetColor3(COLOR_MENU_WHITE);                                                                     \
                                                                                                                          \
         m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                                                \
                                                                                                                          \
@@ -292,8 +296,7 @@ cConfigMenu::cConfigMenu()noexcept
         m_aInput[i].x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition() - vOffset);                                      \
         m_aInput[i].x.SetSize     (coreVector2( 0.26f,0.03f));                                                                       \
         m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                                                       \
-        m_aInput[i].x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                                                                \
-        m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                                                                  \
+        m_aInput[i].x.GetCaption()->SetColor3(COLOR_MENU_WHITE);                                                                     \
                                                                                                                                      \
         m_apcDescKey[ENTRY_ ## n] = "CONFIG_" #n "_DESC";                                                                            \
                                                                                                                                      \
@@ -386,6 +389,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_SwapInput.SetPosition(LERP(m_aInput[0].oHeader.GetPosition(), m_aInput[1].oHeader.GetPosition(), 0.5f));
     m_SwapInput.SetSize    (coreVector2(0.06f,0.03f));
     m_SwapInput.GetCaption()->SetText("< >");
+
     STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueInput); ++i)
@@ -444,6 +448,7 @@ cConfigMenu::cConfigMenu()noexcept
 #if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
     m_VideoBox.SetMaxOffset(0.05f * 15.5f - m_VideoBox.GetSize().y);
 #endif
+
     for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLine [i]);}
     for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLabel[i]);}
     if(!m_Monitor        .GetStatus()) m_VideoBox.BindObject(&m_Monitor);
@@ -468,17 +473,18 @@ cConfigMenu::cConfigMenu()noexcept
 #else
     m_InputBox.SetMaxOffset(0.05f * 20.5f - m_InputBox.GetSize().y);
 #endif
-    for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLine [i]);}
-    for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLabel[i]);}
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueInput); ++i) m_InputBox.BindObject(&m_aCueInput[i]);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oType       .GetStatus()) m_InputBox.BindObject(&m_aInput[i].oType);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oRumble     .GetStatus()) m_InputBox.BindObject(&m_aInput[i].oRumble);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oFireMode   .GetStatus()) m_InputBox.BindObject(&m_aInput[i].oFireMode);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oControlMode.GetStatus()) m_InputBox.BindObject(&m_aInput[i].oControlMode);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputButton(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputButton(i, j));
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputFigure(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputFigure(i, j));
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) m_InputBox.BindObject(&m_aInput[i].oFigureStickL);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) m_InputBox.BindObject(&m_aInput[i].oFigureStickR);
+
+    for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT;             ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLine [i]);}
+    for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT;             ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLabel[i]);}
+    for(coreUintW i = 0u;          i < ARRAY_SIZE(m_aCueInput); ++i) m_InputBox.BindObject(&m_aCueInput[i]);
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oType       .GetStatus()) m_InputBox.BindObject(&m_aInput[i].oType);
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oRumble     .GetStatus()) m_InputBox.BindObject(&m_aInput[i].oRumble);
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oFireMode   .GetStatus()) m_InputBox.BindObject(&m_aInput[i].oFireMode);
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) if(!m_aInput[i].oControlMode.GetStatus()) m_InputBox.BindObject(&m_aInput[i].oControlMode);
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputButton(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputButton(i, j));
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputFigure(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputFigure(i, j));
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) m_InputBox.BindObject(&m_aInput[i].oFigureStickL);
+    for(coreUintW i = 0u;          i < MENU_CONFIG_INPUTS;      ++i) m_InputBox.BindObject(&m_aInput[i].oFigureStickR);
 
     m_Navigator.BindObject(&m_SwapInput, &m_aInput[0].oMoveRight, NULL, &m_SaveButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_CONFIG_INPUT);
 
@@ -887,6 +893,7 @@ void cConfigMenu::Move()
                     cFigure&    oFigure   = this->__RetrieveInputFigure  (i, j);
                     coreInt16&  iCurValue = this->__RetrieveInputCurValue(i, j);
 
+                    // 
                     if(oButton.IsClicked())
                     {
                         constexpr coreUintW aiText[] =
@@ -1005,7 +1012,7 @@ void cConfigMenu::Move()
 
                     // 
                     cMenu::UpdateButton(&oButton, &m_Navigator, oButton.IsFocused());
-                    oButton.SetAlpha(oButton.GetAlpha() * (oButton.IsFocused() ? 1.0f : 0.75f));
+                    oButton.SetAlpha (oButton.GetAlpha () * (oButton.IsFocused() ? 1.0f : 0.75f));
                     oFigure.SetColor3(oButton.IsFocused() ? g_pMenu->GetButtonColor() : coreVector3(1.0f,1.0f,1.0f));
                 }
             }
@@ -1139,35 +1146,61 @@ void cConfigMenu::Move()
     cMenu::UpdateButton(&m_InputButton,   &m_Navigator, m_InputButton  .IsFocused());
     cMenu::UpdateButton(&m_BackButton,    &m_Navigator, m_BackButton   .IsFocused());
 
-    
+    // 
     m_Description.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    m_Description.SetColor3(g_pMenu->GetHighlightColor());
 
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
         const coreBool bInteract = m_VideoBox.ContainsObject(&m_aLine[i]) ? m_VideoBox.IsFocused() :
                                    m_InputBox.ContainsObject(&m_aLine[i]) ? m_InputBox.IsFocused() : true;
 
+        // 
         cMenu::UpdateLine(&m_aLine[i], bInteract);
 
         if(m_aLine[i].IsFocused() && TIME)
         {
+            // 
+            m_Description.SetColor3 (g_pMenu->GetHighlightColor());
             m_Description.SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_Description.SetTextLanguage(m_apcDescKey[i]);
 
+            // 
             if((i == ENTRY_GAME_MIRRORMODE) && (m_MirrorMode.GetOverride() < 0))
                 m_Description.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         }
     }
 
 
+#if defined(_CORE_SWITCH_)
+
+    // 
     if(m_iJoystickNum != Core::Input->GetJoystickNum())
     {
-    #if defined(_CORE_SWITCH_)
+        // 
         this->__LoadInputs();
         this->__RefreshManual();
-    #endif
     }
+
+#else
+
+    // 
+    if(Core::System->GetWinSizeChanged())
+    {
+        // 
+        this->__LoadResolutions(m_Monitor.GetCurValue());
+    }
+
+    // 
+    if((m_iMonitorNum != Core::System->GetDisplayCount()) || (m_iJoystickNum != Core::Input->GetJoystickNum()))
+    {
+        // 
+        this->LoadValues();
+
+        // 
+        m_iStatus = 1;
+    }
+
+#endif
 }
 
 
@@ -1175,18 +1208,19 @@ void cConfigMenu::Move()
 // 
 void cConfigMenu::CheckValues()
 {
-    const coreUint8   iCurMonitor    = m_Monitor   .GetCurValue();
-    const coreUint8   iCurValue      = m_Resolution.GetCurValue();
-    const coreVector2 vCurResolution = (iCurValue == MENU_RESOLUTION_CUSTOM) ? Core::System->GetResolution() : ((iCurValue == MENU_RESOLUTION_DESKTOP) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
+    const coreVector2 vCurResolution = this->__RetrieveCurResolution();
 
     coreBool bSave = false;
+
+    // 
+    const coreVector2 vConfigResolution = coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)));
 
     // 
     #define __CHECK_VALUE(n,a)   {const coreBool A = (a);                                               bSave = bSave || A; m_aLabel[ENTRY_ ## n].SetColor3(A ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE);}
     #define __CHECK_INPUT(n,a,c) {coreBool A = false; for(coreUintW i = 0u; i < (c); ++i) A = A || (a); bSave = bSave || A; m_aLabel[ENTRY_ ## n].SetColor3(A ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE);}
     {
         __CHECK_VALUE(VIDEO_MONITOR,         m_Monitor               .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))
-        __CHECK_VALUE(VIDEO_RESOLUTION,      vCurResolution                           != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
+        __CHECK_VALUE(VIDEO_RESOLUTION,      vCurResolution                           != vConfigResolution)
         __CHECK_VALUE(VIDEO_DISPLAYMODE,     m_DisplayMode           .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))
         __CHECK_VALUE(VIDEO_VSYNC,           m_Vsync                 .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))
         __CHECK_VALUE(VIDEO_ANTIALIASING,    m_AntiAliasing          .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))
@@ -1357,13 +1391,14 @@ void cConfigMenu::LoadValues()
 // 
 void cConfigMenu::SaveValues()
 {
-    const coreUint8   iCurMonitor    = m_Monitor   .GetCurValue();
-    const coreUint8   iCurValue      = m_Resolution.GetCurValue();
-    const coreVector2 vCurResolution = (iCurValue == MENU_RESOLUTION_CUSTOM) ? Core::System->GetResolution() : ((iCurValue == MENU_RESOLUTION_DESKTOP) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
+    const coreVector2 vCurResolution = this->__RetrieveCurResolution();
+
+    // 
+    const coreVector2 vSystemResolution = coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)));
 
     // 
     const coreBool bReset   = (m_AntiAliasing .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
-    const coreBool bReshape = (vCurResolution                != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
+    const coreBool bReshape = (vCurResolution                != vSystemResolution)                                            ||
                               (m_Monitor      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
                               (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))          ||
                               (m_RenderQuality.GetCurValue() != g_CurConfig.Graphics.iRender);
@@ -1428,23 +1463,28 @@ void cConfigMenu::SaveValues()
 
     if(bReset || bReshape || bManager)
     {
-        Core::System->SetWindowAll(iCurMonitor, vCurResolution, coreSystemMode(m_DisplayMode.GetCurValue()));
+        // 
+        Core::System->SetWindowAll(m_Monitor.GetCurValue(), vCurResolution, 0.0f, coreSystemMode(m_DisplayMode.GetCurValue()));
 
+        // 
         InitResolution(Core::System->GetResolution());
 
         if(bReset)
         {
+            // 
             Core::Reset();
         }
         else
         {
             if(bReshape)
             {
+                // 
                 Core::Reshape();
             }
 
             if(bManager)
             {
+                // 
                 Core::Manager::Resource->Reset();
             }
         }
@@ -1583,9 +1623,6 @@ void cConfigMenu::__UpdateLanguage()
 
     // invalidate unbound language-strings
     g_pMenu->GetTooltip()->Invalidate();    // TODO 1: not needed anymore (?)
-    this->__LoadMonitors();
-    this->__LoadFrequencies(Core::System->GetDisplayIndex());
-    this->__LoadInputs();
 
     // 
     this->__RefreshTabs();
@@ -1685,12 +1722,15 @@ void cConfigMenu::__LoadMonitors()
     {
         for(coreUintW i = 1u, ie = Core::System->GetDisplayCount(); i < ie; ++i)
         {
-            m_Monitor.AddEntry(PRINT("%s %zu", Core::Language->GetString("MONITOR_SECONDARY"), i), i);
+            m_Monitor.AddEntryLanguage("MONITOR_SECONDARY", i, [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", i));});
         }
     }
 
     // 
     if(!m_Monitor.SelectValue(iOldEntry)) m_Monitor.SelectFirst();
+
+    // 
+    m_iMonitorNum = Core::System->GetDisplayCount();
 }
 
 
@@ -1707,8 +1747,11 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
 
     // 
+    const coreVector2 vSystemResolution = coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)));
+
+    // 
     m_Resolution.AddEntryLanguage("RESOLUTION_DESKTOP", MENU_RESOLUTION_DESKTOP);
-    if((iMonitorIndex == Core::System->GetDisplayIndex()) && !avResolutionList.count(Core::System->GetResolution()))
+    if((iMonitorIndex == Core::System->GetDisplayIndex()) && !vSystemResolution.IsNull() && !avResolutionList.count(vSystemResolution))
     {
         m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", MENU_RESOLUTION_CUSTOM);
     }
@@ -1739,7 +1782,7 @@ void cConfigMenu::__LoadFrequencies(const coreUintW iMonitorIndex)
     const coreUint32 iRefreshRate = (iModeRate >= F_TO_UI(FRAMERATE_MIN)) ? iModeRate : SCORE_PURE_UPDATEFREQ;
 
     // 
-    m_UpdateFreq.AddEntry(PRINT("%s (%u Hz)", Core::Language->GetString("VALUE_AUTO"), iRefreshRate), 0u);
+    m_UpdateFreq.AddEntryLanguage("VALUE_AUTO", 0u, [=](coreString* OUTPUT pString) {pString->append(PRINT(" (%u Hz)", iRefreshRate));});
     for(coreUintW i = 0u; i < ARRAY_SIZE(aiDefault); ++i) m_UpdateFreq.AddEntry(PRINT("%u Hz", aiDefault[i]), aiDefault[i]);
 
     // 
@@ -1760,9 +1803,9 @@ void cConfigMenu::__LoadInputs()
         oInput.oType.ClearEntries();
 
         // 
-        oInput.oHeader.SetText(PRINT("%s %zu", Core::Language->GetString("PLAYER"), i + 1u));
-        for(coreUintW j = 0u; j < INPUT_SETS_KEYBOARD; ++j) oInput.oType.AddEntry(PRINT("%s %zu", Core::Language->GetString("INPUT_KEYBOARD"), j + 1u), j + 0u);
-        for(coreUintW j = 0u; j < INPUT_SETS_JOYSTICK; ++j) oInput.oType.AddEntry(PRINT("%s %zu", Core::Language->GetString("INPUT_JOYSTICK"), j + 1u), j + INPUT_SETS_KEYBOARD);
+        oInput.oHeader.SetTextLanguage("PLAYER", [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", i + 1u));});
+        for(coreUintW j = 0u; j < INPUT_SETS_KEYBOARD; ++j) oInput.oType.AddEntryLanguage("INPUT_KEYBOARD", j + 0u,                  [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", j + 1u));});
+        for(coreUintW j = 0u; j < INPUT_SETS_JOYSTICK; ++j) oInput.oType.AddEntryLanguage("INPUT_JOYSTICK", j + INPUT_SETS_KEYBOARD, [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", j + 1u));});
 
         // 
         if(!oInput.oType.SelectValue(iOldEntry)) oInput.oType.SelectFirst();
@@ -1770,8 +1813,8 @@ void cConfigMenu::__LoadInputs()
         // 
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
         {
-            cFigure&   oFigure   = this->__RetrieveInputFigure  (i, j);
-            coreInt16& iCurValue = this->__RetrieveInputCurValue(i, j);
+            cFigure&         oFigure   = this->__RetrieveInputFigure  (i, j);
+            const coreInt16& iCurValue = this->__RetrieveInputCurValue(i, j);
 
             cConfigMenu::PrintFigure(&oFigure, g_CurConfig.Input.aiType[i], iCurValue);
         }
@@ -1905,6 +1948,22 @@ void cConfigMenu::__RefreshTabs()
     m_AudioTab.DefineProgram("menu_border_program");
     m_InputTab.DefineProgram("menu_border_program");
     m_GameTab .DefineProgram("menu_border_program");
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cConfigMenu::__RetrieveCurResolution()const
+{
+    const coreUint8 iCurMonitor    = m_Monitor   .GetCurValue();
+    const coreUint8 iCurResolution = m_Resolution.GetCurValue();
+
+    // 
+    if(iCurResolution == MENU_RESOLUTION_CUSTOM)  return Core::System->GetResolution();
+    if(iCurResolution == MENU_RESOLUTION_DESKTOP) return coreVector2(0.0f,0.0f);
+
+    // 
+    return Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurResolution];
 }
 
 

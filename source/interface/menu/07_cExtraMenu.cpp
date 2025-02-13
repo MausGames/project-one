@@ -18,22 +18,24 @@ cExtraMenu::cExtraMenu()noexcept
 , m_iTrophyMission (0u)
 , m_iTrophySegment (0u)
 {
-    constexpr coreFloat fSplit  = 1.0f/300.0f;   // 0.00333...
-    constexpr coreFloat fSplit2 = 1.0f/60.0f;    // 0.01666...
-
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.01f));
     m_Background.SetSize      (coreVector2(0.9f,0.75f));
 
+    const coreFloat fSplitNum     = 3.0f;
+    const coreFloat fSplitPadding = 0.024f;
+    const coreFloat fSplitWidth   = (m_Background.GetSize().x - (fSplitPadding * (fSplitNum + 1.0f))) / fSplitNum;
+    const coreFloat fSplitOffset  = fSplitPadding + fSplitWidth * 0.5f;
+
     m_TrophyTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_TrophyTab.DefineProgram("menu_border_program");
-    m_TrophyTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.15f - fSplit + fSplit2, -0.0125f));
-    m_TrophyTab.SetSize      (coreVector2(0.23f + fSplit + fSplit2*2.0f, 0.07f));
+    m_TrophyTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(fSplitOffset, -0.0125f));
+    m_TrophyTab.SetSize      (coreVector2(fSplitWidth, 0.07f));
     m_TrophyTab.SetAlignment (coreVector2(0.0f, 1.0f));
     m_TrophyTab.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_TrophyTab.SetTexOffset (m_TrophyTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.15f - fSplit + fSplit2, 0.0125f));
+    m_TrophyTab.SetTexOffset (m_TrophyTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(fSplitOffset, 0.0125f));
     m_TrophyTab.GetCaption()->SetTextLanguage("EXTRA_TROPHY");
 
     m_StatsTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);

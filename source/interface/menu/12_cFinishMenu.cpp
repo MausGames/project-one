@@ -51,22 +51,22 @@ cFinishMenu::cFinishMenu()noexcept
         m_aTotalPart[i].SetColor3  (COLOR_MENU_WHITE);
     }
 
-    m_SteamButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_SteamButton.DefineProgram("menu_border_program");
-    m_SteamButton.SetPosition  (coreVector2(0.0f,-0.15f));
-    m_SteamButton.SetSize      (coreVector2(0.4f,0.07f));
-    m_SteamButton.GetCaption()->SetTextLanguage(cMenu::GetStoreText());
+    m_StoreButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_StoreButton.DefineProgram("menu_border_program");
+    m_StoreButton.SetPosition  (coreVector2(0.0f,-0.15f));
+    m_StoreButton.SetSize      (coreVector2(0.4f,0.07f));
+    m_StoreButton.GetCaption()->SetTextLanguage(cMenu::GetStoreText());
 
     m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ExitButton.DefineProgram("menu_border_program");
-    m_ExitButton.SetPosition  (m_SteamButton.GetPosition() + coreVector2(0.0f,-0.09f));
-    m_ExitButton.SetSize      (m_SteamButton.GetSize());
+    m_ExitButton.SetPosition  (m_StoreButton.GetPosition() + coreVector2(0.0f,-0.09f));
+    m_ExitButton.SetSize      (m_StoreButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
     // 
-    m_Navigator.BindObject(NULL,           &m_SteamButton,  NULL, &m_SteamButton,  NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_SteamButton, &m_ExitButton,   NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,  &m_SteamButton,  NULL, &m_SteamButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(NULL,           &m_StoreButton,  NULL, &m_StoreButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_StoreButton, &m_ExitButton,   NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,  &m_StoreButton,  NULL, &m_StoreButton,  NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.AssignMenu(this);
     m_Navigator.ShowIcon  (true);
@@ -79,7 +79,7 @@ cFinishMenu::cFinishMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) this->BindObject(SURFACE_FINISH_DEFAULT, &m_aTotalPart[i]);
 
-    this->BindObject(SURFACE_FINISH_DEFAULT, &m_SteamButton);
+    this->BindObject(SURFACE_FINISH_DEFAULT, &m_StoreButton);
     this->BindObject(SURFACE_FINISH_DEFAULT, &m_ExitButton);
 
     this->BindObject(SURFACE_FINISH_DEFAULT, &m_Navigator);
@@ -121,7 +121,7 @@ void cFinishMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= MENU_FINISH_BANNER_SPEED_REV))// && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
-                if(m_SteamButton.IsClicked())
+                if(m_StoreButton.IsClicked())
                 {
                     // 
                     cMenu::OpenStoreLink();
@@ -179,13 +179,13 @@ void cFinishMenu::Move()
                 for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) m_aTotalPart[i].SetAlpha(fVisibility);
 
                 // 
-                m_SteamButton.SetAlpha(fVisibility);
+                m_StoreButton.SetAlpha(fVisibility);
                 m_ExitButton .SetAlpha(fVisibility);
                 m_Navigator  .SetAlpha(fVisibility);
             }
 
             // 
-            cMenu::UpdateButton(&m_SteamButton, &m_Navigator, m_SteamButton.IsFocused());
+            cMenu::UpdateButton(&m_StoreButton, &m_Navigator, m_StoreButton.IsFocused());
             cMenu::UpdateButton(&m_ExitButton,  &m_Navigator, m_ExitButton .IsFocused());
         }
         break;

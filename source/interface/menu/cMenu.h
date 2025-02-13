@@ -19,15 +19,11 @@
 // TODO 3: swapping controls should swap buttons visually
 // TODO 3: load replay number only on first entry, load headers async on demand, handle changes during runtime
 // TODO 4: locked config input buttons are set with dummy values before getting locked
-// TODO 2: [MF] handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
 // TODO 3: add small text movement if switch-box changes
 // TODO 1: click-wave when clicking on active button or tab (not for switch-box), what about stage tile ?
 // TODO 3: whole menu wobbles/shifts when you change tab
 // TODO 3: menu sound response is super-confused with gamepad-input, related to having focus on multiple sub-menus (unnecessary button-fokus sound -> catch initial focusing), and being able to focus disabled buttons (active tab, save button)
 // TODO 3: de-couple interface-class and display in options when game is not running (for HUD type option)
-// TODO 3: if you switch between borderless and windowed with Desktop resolution, the 0:0 is overwritten in the size change event and the save button remains active
-// TODO 3: if the resolution is too big in windowed mode, it will be clamped and the save button remains active
-// TODO 4: why do I have ChangeLanguage for switch-boxes, what does it do, should I add it to the engine instead?
 // TODO 4: switch more menus to SetHighlightColor, which is more efficient
 // TODO 2: this->ChangeSurface(XXX, 0.0f) wrap with timeless
 // TODO 4: remove unnecessary tiles, medals, and others related to the missing Ater segments (and possible second bosses everywhere else)
@@ -350,7 +346,7 @@ class cIntroMenu final : public coreMenu
 private:
     cGuiLabel m_WelcomeText;                               // 
 
-    coreTimer m_IntroTimer;                                // intro animation 
+    coreFlow  m_fIntroTimer;                               // intro animation timer
     coreUint8 m_iIntroStatus;                              // 
 
     coreFlow m_fDelayTimer;                                // 
@@ -419,7 +415,7 @@ private:
     cGuiButton m_ReplayButton;    // replay button
     cGuiButton m_ExtraButton;     // extra button
     cGuiButton m_ConfigButton;    // config button
-    cGuiButton m_SteamButton;     // steam button
+    cGuiButton m_StoreButton;     // store button
     cGuiButton m_CreditsButton;   // credits button
     cGuiButton m_ExitButton;      // exit button
 
@@ -1062,6 +1058,7 @@ private:
     coreUintW                      m_iCurMonitorIndex;   // 
     coreMap<coreUintW, coreString> m_asCurResolution;    // 
 
+    coreUintW m_iMonitorNum;                             // 
     coreUintW m_iJoystickNum;                            // 
 
     cNewIndicator m_GameNew;                             // 
@@ -1112,6 +1109,9 @@ private:
     // 
     void __RefreshManual();
     void __RefreshTabs();
+
+    // 
+    coreVector2 __RetrieveCurResolution()const;
 
     // 
     coreBool __SetupInput();
@@ -1384,7 +1384,7 @@ private:
     cGuiLabel m_TotalValue;                      // 
     cGuiLabel m_aTotalPart[MENU_FINISH_PARTS];   // 
 
-    cGuiButton m_SteamButton;                    // steam button
+    cGuiButton m_StoreButton;                    // store button
     cGuiButton m_ExitButton;                     // exit button
 
     coreFlow m_fIntroTimer;                      // 
@@ -1431,7 +1431,7 @@ private:
     cGuiObject m_UnlockIcon;       // 
     cGuiObject m_UnlockBack;       // 
 
-    coreFlow m_fReturnTimer;       // 
+    coreFlow m_fReturnTime;        // 
     coreBool m_bReturnState;       // 
 
     coreUint8 m_iTarget;           // 

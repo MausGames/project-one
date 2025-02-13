@@ -13,7 +13,7 @@
 // constructor
 cIntroMenu::cIntroMenu()noexcept
 : coreMenu       (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
-, m_IntroTimer   (coreTimer(3.0f, 0.5f, 1u))
+, m_fIntroTimer  (0.0f)
 , m_iIntroStatus (0xFFu)
 , m_fDelayTimer  (0.0f)
 {
@@ -83,7 +83,7 @@ void cIntroMenu::Move()
         FOR_EACH(it, m_apLanguageButton)
         {
             coreVector3 vColor;
-            switch(m_apLanguageButton.get_valuelist().index(it) % 8u)
+            switch(m_apLanguageButton.index(it) % 8u)
             {
             default: UNREACHABLE
             case 0u: vColor = COLOR_MENU_YELLOW;  break;
@@ -101,16 +101,17 @@ void cIntroMenu::Move()
     }
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)   // # old surface
     {
-        // 
         if(!this->GetTransition().GetStatus())
         {
             if(g_pSave->CanImportDemo())
             {
+                // 
                 this->ChangeSurface(SURFACE_INTRO_IMPORT, 0.0f);
             }
             else
             {
-                g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f, 0u);
+                // 
+                g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 0.75f, 0u);
             }
         }
     }
@@ -120,6 +121,7 @@ void cIntroMenu::Move()
         {
             // 
             m_fDelayTimer.UpdateMax(-1.0f, 0.0f);
+
             if(!m_fDelayTimer)
             {
                 // 
@@ -140,55 +142,35 @@ void cIntroMenu::Move()
                 else
                 {
                     // 
-                    g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f, 0u);
+                    g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 0.75f, 0u);
                 }
             });
         }
     }
     else
     {
-        // 
-        m_IntroTimer.Update(1.0f);
-
-        if(m_IntroTimer.GetStatus())
+        if(m_fIntroTimer)
         {
-            if(m_iIntroStatus == 1u)
+            // 
+            m_fIntroTimer.UpdateMax(-0.5f, 0.0f);
+
+            // 
+            if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
-                // 
-                if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
-                {
-                    // 
-                    m_iIntroStatus = 2u;
-                    if(m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL) < 2.0f)
-                    {
-                        m_IntroTimer.SetValue(2.0f);
-                    }
-                }
-            }
-            else if(m_iIntroStatus == 2u)
-            {
-                // 
-                const coreFloat fTime1 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
-                if(((fTime1 >= 0.7f) && (fTime1 < 1.0f)) ||
-                   ((fTime1 >= 1.7f) && (fTime1 < 2.0f)))
-                {
-                    // 
-                    m_IntroTimer.SetValue(2.0f);
-                }
+                m_fIntroTimer = MIN(m_fIntroTimer, 1.0f);
             }
 
             // 
-            const coreFloat fTime2 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
-            if(fTime2 >= 2.0f)
+            if(m_fIntroTimer <= 1.0f)
             {
                 // 
                 m_iStatus = 1;
 
                 // 
                 g_pEnvironment->Activate();
-                g_pPostProcessing->SetWallOpacity(BLENDH3(CLAMP01(1.35f * (fTime2 - 2.0f))));
+                g_pPostProcessing->SetWallOpacity(BLENDH3(CLAMP01(1.35f * (1.0f - m_fIntroTimer))));
             }
-            if(fTime2 >= 1.0f)
+            if(m_fIntroTimer <= 2.0f)
             {
                 // 
                 g_pMenu->ShiftSurface(this, SURFACE_INTRO_EMPTY, 0.75f, 0u);
@@ -203,7 +185,7 @@ void cIntroMenu::Move()
 void cIntroMenu::StartIntro()
 {
     // 
-    m_IntroTimer.Play(CORE_TIMER_PLAY_RESET);
+    m_fIntroTimer  = 3.0f;
     m_iIntroStatus = 1u;
 
     // 

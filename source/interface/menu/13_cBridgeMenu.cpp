@@ -13,7 +13,7 @@
 // constructor
 cBridgeMenu::cBridgeMenu()noexcept
 : coreMenu       (SURFACE_BRIDGE_MAX, SURFACE_BRIDGE_ENTER)
-, m_fReturnTimer (0.0f)
+, m_fReturnTime  (0.0f)
 , m_bReturnState (false)
 , m_iTarget      (0u)
 , m_bPaused      (false)
@@ -86,12 +86,12 @@ void cBridgeMenu::Move()
     case SURFACE_BRIDGE_RETURN_1:
         {
             // 
-            m_fReturnTimer.Update(1.0f);
+            m_fReturnTime.Update(1.0f);
 
             // 
-            g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
+            g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTime)));
 
-            if(m_fReturnTimer >= 1.5f)
+            if(m_fReturnTime >= 1.5f)
             {
                 pArcadeInput->Start(g_pSave->GetHeader().oOptions.acName, 16u);
 
@@ -103,14 +103,14 @@ void cBridgeMenu::Move()
     case SURFACE_BRIDGE_RETURN_2:
         {
             // 
-            m_fReturnTimer.Update(1.0f);
+            m_fReturnTime.Update(1.0f);
 
             if(m_bReturnState)
             {
                 if(m_bFade)
                 {
                     // 
-                    const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                    const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTime));
                     g_pPostProcessing->SetValueAll   (fBlend);
                     g_pPostProcessing->SetSoundVolume(fBlend);
 
@@ -122,7 +122,7 @@ void cBridgeMenu::Move()
                     }
                 }
 
-                if(m_fReturnTimer >= (m_bFade ? 1.5f : 0.5f))
+                if(m_fReturnTime >= (m_bFade ? 1.5f : 0.5f))
                 {
                     // 
                     m_iStatus = 2;
@@ -239,16 +239,16 @@ void cBridgeMenu::Move()
     case SURFACE_BRIDGE_CONTINUE:
         {
             // 
-            m_fReturnTimer.Update(1.0f);
+            m_fReturnTime.Update(1.0f);
 
             if(m_bReturnState)
             {
                 // 
-                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTime));
                 g_pPostProcessing->SetValueAll   (fBlend);
                 g_pPostProcessing->SetSoundVolume(fBlend);
 
-                if(m_fReturnTimer >= 1.0f)
+                if(m_fReturnTime >= 1.0f)
                 {
                     // 
                     m_iStatus = 3;
@@ -270,16 +270,16 @@ void cBridgeMenu::Move()
     case SURFACE_BRIDGE_NEXT:
         {
             // 
-            m_fReturnTimer.Update(1.0f);
+            m_fReturnTime.Update(1.0f);
 
             if(m_bReturnState)
             {
                 // 
-                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTime));
                 g_pPostProcessing->SetValueAll   (fBlend);
                 g_pPostProcessing->SetSoundVolume(fBlend);
 
-                if(m_fReturnTimer >= 1.0f)
+                if(m_fReturnTime >= 1.0f)
                 {
                     // 
                     m_iStatus = 4;
@@ -301,12 +301,12 @@ void cBridgeMenu::Move()
     case SURFACE_BRIDGE_RESTART:
         {
             // 
-            m_fReturnTimer.Update(2.0f);
+            m_fReturnTime.Update(2.0f);
 
             if(m_bReturnState)
             {
                 // 
-                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTimer));
+                const coreFloat fBlend = BLENDH3(CLAMP01(1.0f - m_fReturnTime));
                 g_pPostProcessing->SetValueAll   (fBlend);
                 g_pPostProcessing->SetSoundVolume(fBlend);
 
@@ -317,7 +317,7 @@ void cBridgeMenu::Move()
                     ASSERT(g_pMenu->IsPaused())      
                 }
 
-                if(m_fReturnTimer >= 1.0f)
+                if(m_fReturnTime >= 1.0f)
                 {
                     // 
                     m_iStatus = 5;
@@ -343,7 +343,7 @@ void cBridgeMenu::Move()
 
     if(m_iStatus == 10)
     {
-        m_fReturnTimer = 0.0f;
+        m_fReturnTime = 0.0f;
         g_pMenu->ShiftSurface(this, SURFACE_BRIDGE_RETURN_2, 1.0f, 0u);
     }
 }
@@ -591,7 +591,7 @@ void cBridgeMenu::SetHighlightColor(const coreVector3 vColor)
 void cBridgeMenu::__ResetState()
 {
     // 
-    m_fReturnTimer = 0.0f;
+    m_fReturnTime  = 0.0f;
     m_bReturnState = true;
     m_iTarget      = 0u;
     m_bPaused      = false;
