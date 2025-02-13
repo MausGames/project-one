@@ -912,9 +912,9 @@ void cConfigMenu::Move()
                         const coreUint8& iType  = oInput.oType.GetCurValue();   // # referenced in lambda
 
                         // 
-                        g_pMenu->GetMsgBox()->ShowMapping(pcText, iType, [&, j](const coreInt32 iAnswer, const coreInt16 iKey)
+                        g_pMenu->GetMsgBox()->ShowMapping(pcText, iType, [&, j](const eMsgAnswer eAnswer, const coreInt16 iKey)
                         {
-                            if(iAnswer != MSGBOX_ANSWER_KEY) return;
+                            if(eAnswer != MSGBOX_ANSWER_KEY) return;
 
                             // handle delete
                             if(iKey != INPUT_KEY_INVALID)
@@ -1101,10 +1101,10 @@ void cConfigMenu::Move()
         if(m_SaveButton.GetOverride() >= 0)
         {
             // 
-            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_CONFIG_SAVE"), [this](const coreInt32 iAnswer)
+            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_CONFIG_SAVE"), [this](const eMsgAnswer eAnswer)
             {
                 // 
-                if(iAnswer == MSGBOX_ANSWER_YES)
+                if(eAnswer == MSGBOX_ANSWER_YES)
                      this->SaveValues();
                 else this->LoadValues();
 

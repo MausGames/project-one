@@ -215,9 +215,9 @@ void cMainMenu::Move()
             else if(m_ExitButton.IsClicked())
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT"), [](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT"), [](const eMsgAnswer eAnswer)
                 {
-                    if(iAnswer == MSGBOX_ANSWER_YES)
+                    if(eAnswer == MSGBOX_ANSWER_YES)
                         Core::System->Quit();
                 });
             }

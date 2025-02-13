@@ -1276,9 +1276,9 @@ void cGameMenu::Move()
                 this->__SetupInput(false);
 
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const eMsgAnswer eAnswer)
                 {
-                    if(iAnswer == MSGBOX_ANSWER_YES)
+                    if(eAnswer == MSGBOX_ANSWER_YES)
                     {
                         // 
                         this->SaveValues();
@@ -1567,9 +1567,9 @@ void cGameMenu::Move()
                 this->__SetupInput(false);
 
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const eMsgAnswer eAnswer)
                 {
-                    if(iAnswer == MSGBOX_ANSWER_YES)
+                    if(eAnswer == MSGBOX_ANSWER_YES)
                         m_iStatus = 101;
                 });
 
@@ -1653,9 +1653,9 @@ void cGameMenu::Move()
                 this->__SetupInput(false);
 
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_READY"), [this](const eMsgAnswer eAnswer)
                 {
-                    if(iAnswer == MSGBOX_ANSWER_YES)
+                    if(eAnswer == MSGBOX_ANSWER_YES)
                         m_iStatus = 101;
                 });
 

@@ -85,9 +85,9 @@ void cPauseMenu::Move()
             else if(m_RestartButton.IsClicked())
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_RESTART"), [this](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_RESTART"), [this](const eMsgAnswer eAnswer)
                 {
-                    if(iAnswer == MSGBOX_ANSWER_YES)
+                    if(eAnswer == MSGBOX_ANSWER_YES)
                         m_iStatus = 102;
                 });
             }
@@ -99,9 +99,9 @@ void cPauseMenu::Move()
             else if(m_ExitButton.IsClicked())
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT"), [this](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT"), [this](const eMsgAnswer eAnswer)
                 {
-                    if(iAnswer == MSGBOX_ANSWER_YES)
+                    if(eAnswer == MSGBOX_ANSWER_YES)
                         m_iStatus = 104;
                 });
             }

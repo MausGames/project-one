@@ -17,7 +17,7 @@ cMsgBox::cMsgBox()noexcept
 , m_vCurMouse       (coreVector2(0.0f,0.0f))
 , m_vBoxSize        (coreVector2(0.0f,0.0f))
 , m_fFade           (0.0f)
-, m_iMsgType        (0u)
+, m_eMsgType        (MSGBOX_TYPE_INFORMATION)
 , m_iInputType      (0u)
 {
     // 
@@ -209,14 +209,14 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_No, this, m_No.IsFocused(), COLOR_MENU_RED);
 
         // 
-        if(m_No.IsClicked() || ((m_iMsgType == MSGBOX_TYPE_MAPPING) && Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)))
+        if(m_No.IsClicked() || ((m_eMsgType == MSGBOX_TYPE_MAPPING) && Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)))
         {
             this->__ExecuteCallback(MSGBOX_ANSWER_NO, 0);
         }
     }
 
     // 
-    if(m_iMsgType == MSGBOX_TYPE_MAPPING)
+    if(m_eMsgType == MSGBOX_TYPE_MAPPING)
     {
         if(m_iInputType < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
         {
@@ -245,7 +245,7 @@ void cMsgBox::Move()
     }
 
     // 
-    if(m_iMsgType == MSGBOX_TYPE_DOWNLOAD)
+    if(m_eMsgType == MSGBOX_TYPE_DOWNLOAD)
     {
         // 
         coreUint32 iCurrent, iTotal;
@@ -290,7 +290,7 @@ void cMsgBox::Move()
     }
 
     // 
-    if(!cMenuNavigator::IsUsingAny() || this->IsVisible() || (m_iMsgType == MSGBOX_TYPE_MAPPING))
+    if(!cMenuNavigator::IsUsingAny() || this->IsVisible() || (m_eMsgType == MSGBOX_TYPE_MAPPING))
     {
         // 
         cMsgBox::__ClearInput();
@@ -315,8 +315,8 @@ void cMsgBox::StartDownload(const corePlatformFileHandle iHandle)
     m_fDownloadValue  = 0.0f;
 
     // 
-    m_iMsgType = MSGBOX_TYPE_DOWNLOAD;
-    this->__ShowMessage("", [](const coreInt32 a, const coreInt32 b) {});
+    m_eMsgType = MSGBOX_TYPE_DOWNLOAD;
+    this->__ShowMessage("", [](const eMsgAnswer a, const coreInt16 b) {});
 }
 
 
@@ -324,7 +324,7 @@ void cMsgBox::StartDownload(const corePlatformFileHandle iHandle)
 // 
 void cMsgBox::EndDownload()
 {
-    ASSERT(m_iMsgType == MSGBOX_TYPE_DOWNLOAD)
+    ASSERT(m_eMsgType == MSGBOX_TYPE_DOWNLOAD)
 
     // 
     m_iDownloadHandle = 0u;
@@ -337,7 +337,7 @@ void cMsgBox::EndDownload()
 
 // ****************************************************************
 // 
-void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
+void cMsgBox::__ExecuteCallback(const eMsgAnswer a, const coreInt16 b)
 {
     if(!m_nCallback) return;
 
@@ -360,11 +360,16 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
 // 
 void cMsgBox::__ClearInput()
 {
+    // 
     Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
+
+    // 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
         Core::Input->SetJoystickAxis(i, 0u, 0.0f);
         Core::Input->SetJoystickAxis(i, 1u, 0.0f);
     }
+
+    // 
     Core::Input->ClearButtonAll();
 }

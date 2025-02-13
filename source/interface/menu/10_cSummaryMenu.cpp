@@ -553,9 +553,9 @@ void cSummaryMenu::Move()
                             if(m_bHasReplay)
                             {
                                 m_eState = SUMMARY_WAIT;
-                                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_SAVE"), [this](const coreInt32 iAnswer)
+                                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_SAVE"), [this](const eMsgAnswer eAnswer)
                                 {
-                                    if(iAnswer == MSGBOX_ANSWER_YES)
+                                    if(eAnswer == MSGBOX_ANSWER_YES)
                                     {
                                         if(REPLAY_SLOTSYSTEM)
                                         {

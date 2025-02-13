@@ -130,9 +130,9 @@ void cIntroMenu::Move()
         else
         {
             // 
-            if(!g_pMenu->GetMsgBox()->IsVisible()) g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_IMPORT"), [this](const coreInt32 iAnswer)
+            if(!g_pMenu->GetMsgBox()->IsVisible()) g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_IMPORT"), [this](const eMsgAnswer eAnswer)
             {
-                if(iAnswer == MSGBOX_ANSWER_YES)
+                if(eAnswer == MSGBOX_ANSWER_YES)
                 {
                     // 
                     m_fDelayTimer = 1.5f;

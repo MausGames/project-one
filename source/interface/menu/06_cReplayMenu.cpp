@@ -610,9 +610,9 @@ void cReplayMenu::Move()
                 }
                 else
                 {
-                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_SAVE"), [=](const coreInt32 iAnswer)
+                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_SAVE"), [=](const eMsgAnswer eAnswer)
                     {
-                        if(iAnswer != MSGBOX_ANSWER_YES)
+                        if(eAnswer != MSGBOX_ANSWER_YES)
                         {
                             // 
                             nReturnFunc(103, false);
@@ -649,13 +649,13 @@ void cReplayMenu::Move()
                     if(oInfo.oHeader.iMagic)
                     {
                         // 
-                        g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_OVERWRITE", oInfo.oHeader.acName), [=, this](const coreInt32 iAnswer1)
+                        g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_OVERWRITE", oInfo.oHeader.acName), [=, this](const eMsgAnswer eAnswer1)
                         {
-                            if(iAnswer1 == MSGBOX_ANSWER_YES)
+                            if(eAnswer1 == MSGBOX_ANSWER_YES)
                             {
-                                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SURE"), [=, this](const coreInt32 iAnswer2)
+                                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SURE"), [=, this](const eMsgAnswer eAnswer2)
                                 {
-                                    if(iAnswer2 == MSGBOX_ANSWER_YES)
+                                    if(eAnswer2 == MSGBOX_ANSWER_YES)
                                     {
                                         // 
                                         if(!m_bDownloaded)
@@ -740,9 +740,9 @@ void cReplayMenu::Move()
                 if(m_StartButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_LOAD"), [=, this](const coreInt32 iAnswer)
+                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_LOAD"), [=, this](const eMsgAnswer eAnswer)
                     {
-                        if(iAnswer == MSGBOX_ANSWER_YES)
+                        if(eAnswer == MSGBOX_ANSWER_YES)
                         {
                             if(m_bDownloaded || (g_pReplay->LoadFile(oInfo.sPath.c_str(), false) && g_pReplay->HasData()))
                             {
@@ -760,13 +760,13 @@ void cReplayMenu::Move()
                 else if(m_DeleteButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_DELETE", oInfo.oHeader.acName), [this](const coreInt32 iAnswer1)
+                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_DELETE", oInfo.oHeader.acName), [this](const eMsgAnswer eAnswer1)
                     {
-                        if(iAnswer1 == MSGBOX_ANSWER_YES)
+                        if(eAnswer1 == MSGBOX_ANSWER_YES)
                         {
-                            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SURE"), [this](const coreInt32 iAnswer2)
+                            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SURE"), [this](const eMsgAnswer eAnswer2)
                             {
-                                if(iAnswer2 == MSGBOX_ANSWER_YES) m_bDelete = true;
+                                if(eAnswer2 == MSGBOX_ANSWER_YES) m_bDelete = true;
                             });
                         }
                     });
@@ -774,17 +774,17 @@ void cReplayMenu::Move()
                 else if(m_RenameButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_RENAME", oInfo.oHeader.acName), [this](const coreInt32 iAnswer)
+                    g_pMenu->GetMsgBox()->ShowQuestion(cReplayMenu::__PrintWithName("QUESTION_REPLAY_RENAME", oInfo.oHeader.acName), [this](const eMsgAnswer eAnswer)
                     {
-                        if(iAnswer == MSGBOX_ANSWER_YES) m_bRename = true;
+                        if(eAnswer == MSGBOX_ANSWER_YES) m_bRename = true;
                     });
                 }
                 else if(m_SaveButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_SAVE"), [this](const coreInt32 iAnswer)
+                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_SAVE"), [this](const eMsgAnswer eAnswer)
                     {
-                        if(iAnswer == MSGBOX_ANSWER_YES)
+                        if(eAnswer == MSGBOX_ANSWER_YES)
                         {
                             if(REPLAY_SLOTSYSTEM)
                             {
@@ -1260,9 +1260,9 @@ void cReplayMenu::HandleSaveError(const std::function<void(coreInt32)> nCallback
     const eSaveStatus eStatus = g_pReplay->GetStatus();
     if((eStatus != SAVE_STATUS_OK) && !g_pMenu->GetMsgBox()->IsVisible())
     {
-        g_pMenu->GetMsgBox()->ShowQuestion(PRINT("%s (%s)", Core::Language->GetString("QUESTION_ERROR_SAVE"), Core::Language->GetString(PRINT("ERROR_SAVE_%02u", eStatus))), [=](const coreInt32 iAnswer)
+        g_pMenu->GetMsgBox()->ShowQuestion(PRINT("%s (%s)", Core::Language->GetString("QUESTION_ERROR_SAVE"), Core::Language->GetString(PRINT("ERROR_SAVE_%02u", eStatus))), [=](const eMsgAnswer eAnswer)
         {
-            nCallback(iAnswer);
+            nCallback(eAnswer);
         });
     }
 }

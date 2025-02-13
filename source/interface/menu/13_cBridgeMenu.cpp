@@ -153,9 +153,9 @@ void cBridgeMenu::Move()
             {
                 if(!pArcadeInput->GetText()[0])
                 {
-                    g_pMenu->GetMsgBox()->ShowQuestion("SKIP NAME ?", [&](const coreInt32 iAnswer)     
+                    g_pMenu->GetMsgBox()->ShowQuestion("SKIP NAME ?", [&](const eMsgAnswer eAnswer)     
                     {
-                        if(iAnswer == MSGBOX_ANSWER_YES)
+                        if(eAnswer == MSGBOX_ANSWER_YES)
                         {
                             m_iStatus = 110;
                         }
@@ -163,9 +163,9 @@ void cBridgeMenu::Move()
                 }
                 else
                 {
-                    g_pMenu->GetMsgBox()->ShowQuestion("SAVE REPLAY ?", [&](const coreInt32 iAnswer)     
+                    g_pMenu->GetMsgBox()->ShowQuestion("SAVE REPLAY ?", [&](const eMsgAnswer eAnswer)     
                     {
-                        if(iAnswer == MSGBOX_ANSWER_YES)
+                        if(eAnswer == MSGBOX_ANSWER_YES)
                         {
                         }
                         m_iStatus = 110;

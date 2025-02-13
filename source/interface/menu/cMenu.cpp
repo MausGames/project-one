@@ -924,9 +924,9 @@ void cMenu::Move()
     const eSaveStatus eStatus = g_pSave->GetStatus();
     if((eStatus != SAVE_STATUS_OK) && !STATIC_ISVALID(g_pGame) && !m_MsgBox.IsVisible())
     {
-        m_MsgBox.ShowQuestion(PRINT("%s (%s)", Core::Language->GetString("QUESTION_ERROR_SAVE"), Core::Language->GetString(PRINT("ERROR_SAVE_%02u", eStatus))), [](const coreInt32 iAnswer)
+        m_MsgBox.ShowQuestion(PRINT("%s (%s)", Core::Language->GetString("QUESTION_ERROR_SAVE"), Core::Language->GetString(PRINT("ERROR_SAVE_%02u", eStatus))), [](const eMsgAnswer eAnswer)
         {
-            if(iAnswer == MSGBOX_ANSWER_YES)
+            if(eAnswer == MSGBOX_ANSWER_YES)
                  g_pSave->SaveFile();
             else g_pSave->ResetStatus();
         });

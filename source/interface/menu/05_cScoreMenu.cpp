@@ -304,9 +304,9 @@ void cScoreMenu::Move()
                     if(m_aLine[i].IsClicked() && m_aiFileHandle[i])
                     {
                         // 
-                        g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_DOWNLOAD"), [=, this](const coreInt32 iAnswer)
+                        g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_REPLAY_DOWNLOAD"), [=, this](const eMsgAnswer eAnswer)
                         {
-                            if(iAnswer == MSGBOX_ANSWER_YES)
+                            if(eAnswer == MSGBOX_ANSWER_YES)
                             {
                                 // 
                                 g_pMenu->GetMsgBox()->StartDownload(m_aiFileHandle[i]);
