@@ -150,15 +150,15 @@ void cBackground::Render()
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
-            glEnable (GL_BLEND);
             glDisable(GL_DEPTH_TEST);
+            glEnable (GL_BLEND);
             {
                 // render all transparent ground objects
                 FOR_EACH(it, m_apDecalObjectList) (*it)->Render();
                 FOR_EACH(it, m_apDecalAddList)    (*it)->Render();
             }
-            glDisable(GL_BLEND);
             glEnable (GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_FrameBuffer);

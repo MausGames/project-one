@@ -45,9 +45,13 @@ cScrollBox::cScrollBox()noexcept
 void cScrollBox::Render()
 {
     // 
+    const coreBool bOverflow = (m_fMaxOffset > 0.0f);
+    this->SetScissor(bOverflow);
+
+    // 
     this->coreViewBox::Render();
 
-    if(m_fMaxOffset > 0.0f)
+    if(bOverflow)
     {
         // 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i)

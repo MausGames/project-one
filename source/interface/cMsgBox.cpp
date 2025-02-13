@@ -148,7 +148,7 @@ void cMsgBox::Move()
     // 
     this->SetSize     (coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
     this->SetAlpha    (m_fFade * 0.5f);
-    this->SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
+    this->SetTexOffset(MENU_LAYER_TEXOFFSET);
     this->coreFullscreen::Move();
 
     // 

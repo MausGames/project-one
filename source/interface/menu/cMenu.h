@@ -38,10 +38,10 @@
 // TODO 1: optimize all menu render orderings, especially for shaders, especially in the game menu (also bind-object, in ALL menus and view-boxes)
 // TODO 1: (remove mission page in armory)
 // TODO 3: get rid of the additional interface object in config-menu
-// TODO 3: when switching resolution (AA change, engine reset), the next mouse click is not recognized (no press event is coming from SDL, only the release event) (nicht immer!)
+// TODO 3: when switching resolution (AA change, engine reset), the next mouse click is not recognized (no press event is coming from SDL, only the release event) (not always!)
 // TODO 3: support for chinese names in leaderboard (s+t)
 // TODO 3: hidden medals on arcade summary will blend in after 10000.0f
-// TODO 3: make use of coreTranslate in menus (inherited, like in interface) to simplyfy language-string updates
+// TODO 3: make use of coreTranslate in menus (inherited, like in interface) to simplify language-string updates
 // TODO 3: entering a menu with option-lines will always trigger a sound-effect (with gamepad), even though it's unnecessary, TIME+GetAlpha changes did not help
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
@@ -61,7 +61,7 @@
 #define MENU_RESOLUTION_DESKTOP       (0xEEu)
 #define MENU_RESOLUTION_CUSTOM        (0xFFu)
 
-#define MENU_LAYER_TEXOFFSET          (FRACT(-0.04f * Core::System->GetTotalTimeFloat(100.0)))
+#define MENU_LAYER_TEXOFFSET          (coreVector2(0.0f, FRACT(-0.04f * Core::System->GetTotalTimeFloat(100.0))))
 
 #define MENU_GAME_PLAYERS             (PLAYERS)
 #define MENU_GAME_MISSIONS            (11u)

@@ -25,21 +25,21 @@ public:
 
 // ****************************************************************
 // 
+template <typename T> cGuiObjectGen<T>::cGuiObjectGen()noexcept
+{
+    // 
+    this->SetStyle(CORE_OBJECT2D_STYLE_VIEWDIR | CORE_OBJECT2D_STYLE_ALTCENTER);
+}
+
+
+// ****************************************************************
+// 
 using cGuiObject    = cGuiObjectGen<coreObject2D>;
 using cGuiLabel     = cGuiObjectGen<coreLabel>;
 using cGuiButton    = cGuiObjectGen<coreButton>;
 using cGuiCheckBox  = cGuiObjectGen<coreCheckBox>;
 using cGuiTextBox   = cGuiObjectGen<coreTextBox>;
 using cGuiSwitchBox = cGuiObjectGen<coreSwitchBoxU8>;
-
-
-// ****************************************************************
-// 
-template <typename T> cGuiObjectGen<T>::cGuiObjectGen()noexcept
-{
-    // 
-    this->SetStyle(CORE_OBJECT2D_STYLE_VIEWDIR | CORE_OBJECT2D_STYLE_ALTCENTER);
-}
 
 
 #endif // _P1_GUARD_GUIOBJECT_H_

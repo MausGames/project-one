@@ -187,8 +187,8 @@ void cGame::Render()
         
         Core::Graphics->SetCamera(vCamPos, CAMERA_DIRECTION, vCamOri);   // do not reset at the end
             
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 51.0f, 500.0f);    // invoke transform-update
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);    // TODO 1: optimize
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 51.0f, 500.0f, 0.0f);    // invoke transform-update
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f, 0.0f);    // TODO 1: optimize
         nFlipFunc();
         if(g_CurConfig.Game.iMirrorMode) glCullFace(GL_FRONT);
 
@@ -225,7 +225,7 @@ void cGame::Render()
         {
             
             
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for bullets flying towards screen
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f, 0.0f);   // TODO 1: to make it possible for bullets flying towards screen
         nFlipFunc();
 
             m_EnemyManager.RenderUnder();
@@ -253,7 +253,7 @@ void cGame::Render()
             //if(!g_bTiltMode) m_EnemyManager.RenderUnder();
             //if(!g_bTiltMode) m_pCurMission->RenderUnder();
 
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f, 0.0f);
         nFlipFunc();
 
             DEPTH_PUSH
@@ -279,7 +279,7 @@ void cGame::Render()
             // apply deferred outline-layer
             g_pOutline->Apply();
 
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for bullets flying towards screen
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f, 0.0f);   // TODO 1: to make it possible for bullets flying towards screen
         nFlipFunc();
             
             m_BulletManagerPlayerTop.Render();
@@ -287,7 +287,7 @@ void cGame::Render()
 
         m_BulletManagerEnemy.RenderAfter();
             
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f, 0.0f);
         nFlipFunc();
         }
 
@@ -319,7 +319,7 @@ void cGame::Render()
         {
             DEPTH_PUSH_DOUBLE
             
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for ENEMIES and special effects near screen
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f, 0.0f);   // TODO 1: to make it possible for ENEMIES and special effects near screen
         nFlipFunc();
 
             // render special-effects
@@ -333,7 +333,7 @@ void cGame::Render()
             m_EnemyManager.RenderTop();
             m_pCurMission->RenderTop();
             
-        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+        Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f, 0.0f);
         nFlipFunc();
 
             glDisable(GL_DEPTH_TEST);

@@ -241,7 +241,7 @@ void cMusicBox::Move()
     cMenu::UpdateButton(&m_BackButton, &m_Navigator, m_BackButton.IsFocused());
 
     // 
-    m_Background.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
+    m_Background.SetTexOffset(MENU_LAYER_TEXOFFSET);
     m_Background.Move();
 
     // 

@@ -385,7 +385,7 @@ static void QueueReplay(coreUint16* OUTPUT piReplayID, coreByte** OUTPUT ppRepla
     // ...
 
     // 
-    g_pSave->GetReplayQueue()->push_back(pPack);
+    g_pSave->GetReplayQueue()->insert(pPack);
 
     // 
     (*piReplayID)   = pPack->iID;
@@ -419,7 +419,7 @@ static void QueueScore(const coreUint8 iMissionIndex, const coreUint8 iSegmentIn
     }
 
     // 
-    g_pSave->GetScoreQueue()->push_back(pPack);
+    g_pSave->GetScoreQueue()->insert(pPack);
 
     // 
     s_iTime = 0u;
@@ -454,7 +454,7 @@ static void QueueTime(const coreUint8 iMissionIndex, const coreUint8 iSegmentInd
     }
 
     // 
-    g_pSave->GetScoreQueue()->push_back(pPack);
+    g_pSave->GetScoreQueue()->insert(pPack);
 
     // 
     s_iTime = 0u;

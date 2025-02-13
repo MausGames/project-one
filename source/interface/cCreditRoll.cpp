@@ -240,6 +240,14 @@ void cCreditRoll::Move()
         const coreFloat fFactor1 = m_fOffset * RCP(m_fMaxOffset);
         const coreFloat fFactor2 = m_fOffset - m_fMaxOffset;
 
+        if(fFactor2 >= 0.0f)
+        {
+            const coreFloat fAlpha = STEPH3(0.0f, 0.15f, fFactor2 - 0.0f) - STEPH3(0.0f, 0.15f, fFactor2 - 0.5f);
+
+            m_ThankYouText.SetAlpha  (fAlpha * MENU_INSIDE_ALPHA);
+            m_ThankYouText.SetEnabled(fAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        }
+
         if(m_eType == CREDIT_TYPE_NORMAL)
         {
             constexpr coreInt32 aiBackground[] =
@@ -297,14 +305,6 @@ void cCreditRoll::Move()
             {
                 m_bFinished = true;
             }
-        }
-
-        if(fFactor2 >= 0.0f)
-        {
-            const coreFloat fAlpha = STEPH3(0.0f, 0.15f, fFactor2 - 0.0f) - STEPH3(0.0f, 0.15f, fFactor2 - 0.5f);
-
-            m_ThankYouText.SetAlpha  (fAlpha * MENU_INSIDE_ALPHA);
-            m_ThankYouText.SetEnabled(fAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         }
     }
 }

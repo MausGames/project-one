@@ -55,7 +55,7 @@ void cShadow::Update()
                     cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
 
                     // reduce current view frustum
-                    Core::Graphics->SetView(m_FrameBuffer.GetResolution() * SHADOW_TEST_FACTOR, m_FrameBuffer.GetFOV(), m_FrameBuffer.GetNearClip(), m_FrameBuffer.GetFarClip());
+                    Core::Graphics->SetView(m_FrameBuffer.GetResolution() * SHADOW_TEST_FACTOR, m_FrameBuffer.GetFOV(), m_FrameBuffer.GetNearClip(), m_FrameBuffer.GetFarClip(), 0.0f);
 
                     // 
                     Core::Graphics->StartConservativeRaster();
@@ -288,5 +288,7 @@ void cShadow::__SendTransform(const coreProgramPtr& pProgram, const coreMatrix4&
 {
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
+
+    // 
     pProgram->SendUniform("u_m4ShadowMatrix", mTransform, false);
 }

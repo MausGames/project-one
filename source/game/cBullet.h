@@ -1114,7 +1114,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
                 {
                     coreSet<coreObject3D*>* pList = pSet->oBulletActive.List();
                     pList->pop_back();
-                    pList->push_front(pBullet);
+                    pList->insert(pList->begin(), pBullet);
                 }
 
                 return pBullet;

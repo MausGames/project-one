@@ -901,7 +901,7 @@ void cMenu::Move()
     // 
     m_PauseLayer.SetSize     (coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
     m_PauseLayer.SetAlpha    (fPauseAlpha);
-    m_PauseLayer.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
+    m_PauseLayer.SetTexOffset(MENU_LAYER_TEXOFFSET);
     m_PauseLayer.SetEnabled  (fPauseAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 
     // 
@@ -917,19 +917,10 @@ void cMenu::Move()
     // 
     m_NoticeSave.SetPosition(coreVector2(-0.033f - 0.02f * BLENDB(1.0f - m_fNoticeSaveTime), 0.023f));
     m_NoticeSave.SetAlpha   (BLENDBR(m_fNoticeSaveTime));
-    m_NoticeSave.SetEnabled (m_NoticeSave.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+    m_NoticeSave.SetEnabled (m_fNoticeSaveTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
     m_NoticeSave.Move();
 
-    if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)) && (!STATIC_ISVALID(g_pGame) || (g_pGame->GetCurMission()->GetID() != cAterMission::ID)))
-    {
-        m_fVolume.UpdateMax(-0.5f, 0.0f);
-    }
-    else
-    {
-        m_fVolume.UpdateMin(0.5f, 1.0f);
-    }
-    
-    
+    // 
     const eSaveStatus eStatus = g_pSave->GetStatus();
     if((eStatus != SAVE_STATUS_OK) && !STATIC_ISVALID(g_pGame) && !m_MsgBox.IsVisible())
     {
@@ -939,6 +930,16 @@ void cMenu::Move()
                  g_pSave->SaveFile();
             else g_pSave->ResetStatus();
         });
+    }
+
+    // 
+    if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)) && (!STATIC_ISVALID(g_pGame) || (g_pGame->GetCurMission()->GetID() != cAterMission::ID)))
+    {
+        m_fVolume.UpdateMax(-0.5f, 0.0f);
+    }
+    else
+    {
+        m_fVolume.UpdateMin(0.5f, 1.0f);
     }
     
     

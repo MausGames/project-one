@@ -866,9 +866,9 @@ coreBool cReplay::SaveFile(const coreUint8 iSlot)
         coreUint64 iAvailable;
         coreData::SystemSpace(&iAvailable, NULL);
 
-             if(iAvailable < 1u * 1024u * 1024u)                           m_eStatus = SAVE_STATUS_ERROR_SPACE;
-        else if(!coreData::FolderWritable(coreData::StrDirectory(pcPath))) m_eStatus = SAVE_STATUS_ERROR_ACCESS;
-        else                                                               m_eStatus = SAVE_STATUS_ERROR_UNKNOWN;
+             if(iAvailable < 1u * 1024u * 1024u)                              m_eStatus = SAVE_STATUS_ERROR_SPACE;
+        else if(!coreData::DirectoryWritable(coreData::StrDirectory(pcPath))) m_eStatus = SAVE_STATUS_ERROR_ACCESS;
+        else                                                                  m_eStatus = SAVE_STATUS_ERROR_UNKNOWN;
 
         Core::Log->Warning("Replay (%s) could not be saved (status %u)", pcPath, coreUint32(m_eStatus));
         return false;
@@ -1056,7 +1056,7 @@ void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
 
     // 
     coreList<coreString> asFile;
-    coreData::FolderScan(coreData::UserFolderPrivate(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
+    coreData::DirectoryScan(coreData::UserFolderPrivate(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
 
     // 
     paInfoList->reserve(asFile.size());

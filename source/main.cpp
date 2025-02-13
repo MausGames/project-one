@@ -56,7 +56,7 @@ void CoreApp::Init()
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
 
     // set view frustum to default values
-    Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+    Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f, 0.0f);
 
     // set listener to default values
     Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
@@ -716,11 +716,11 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
             sGameOptions oOptions = {};
-            oOptions.iKind       = GAME_KIND_ALL;
-            oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
-            oOptions.iMode       = GAME_MODE_STANDARD;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(S), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_NORMAL;
-            oOptions.iFlags      = GAME_FLAG_TASK | GAME_FLAG_FRAGMENT;
+            oOptions.iKind        = GAME_KIND_ALL;
+            oOptions.iType        = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
+            oOptions.iMode        = GAME_MODE_STANDARD;
+            oOptions.iDifficulty  = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(S), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_NORMAL;
+            oOptions.iFlags       = GAME_FLAG_TASK | GAME_FLAG_FRAGMENT;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;

@@ -250,7 +250,7 @@ void cArcadeInput::Move()
 
     // 
     m_Background.SetColor3   (coreVector3(1.0f,1.0f,1.0f) * LERPH3(1.0f, 3.0f, m_fFlashTime));
-    m_Background.SetTexOffset(coreVector2(0.0f, MENU_LAYER_TEXOFFSET));
+    m_Background.SetTexOffset(MENU_LAYER_TEXOFFSET);
     m_Background.Move();
 
     // 

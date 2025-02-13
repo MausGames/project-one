@@ -13,8 +13,8 @@
 // constructor
 cSave::cSave()noexcept
 : m_Header    {}
-, m_sPath     (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save."      SAVE_FILE_EXTENSION)))
-, m_sPathDemo (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save_demo." SAVE_FILE_EXTENSION)))
+, m_sPath     (coreData::UserFolderPrivate(SAVE_FILE_FOLDER "save."      SAVE_FILE_EXTENSION))
+, m_sPathDemo (coreData::UserFolderPrivate(SAVE_FILE_FOLDER "save_demo." SAVE_FILE_EXTENSION))
 , m_iToken    (0u)
 , m_bIgnore   (false)
 , m_eStatus   (SAVE_STATUS_OK)
@@ -244,7 +244,7 @@ void cSave::SaveFile()
 
     m_iToken = Core::Manager::Resource->AttachFunction([this]()
     {
-    #if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
+    #if defined(CORE_FILE_SAFEWRITE)
 
         // 
         coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));
@@ -290,9 +290,9 @@ void cSave::SaveFile()
             coreUint64 iAvailable;
             coreData::SystemSpace(&iAvailable, NULL);
 
-                 if(iAvailable < 1u * 1024u * 1024u)                                    m_eStatus = SAVE_STATUS_ERROR_SPACE;
-            else if(!coreData::FolderWritable(coreData::StrDirectory(m_sPath.c_str()))) m_eStatus = SAVE_STATUS_ERROR_ACCESS;
-            else                                                                        m_eStatus = SAVE_STATUS_ERROR_UNKNOWN;
+                 if(iAvailable < 1u * 1024u * 1024u)                                       m_eStatus = SAVE_STATUS_ERROR_SPACE;
+            else if(!coreData::DirectoryWritable(coreData::StrDirectory(m_sPath.c_str()))) m_eStatus = SAVE_STATUS_ERROR_ACCESS;
+            else                                                                           m_eStatus = SAVE_STATUS_ERROR_UNKNOWN;
 
             // 
             m_iActive = 2u;
@@ -363,6 +363,7 @@ void cSave::ImportDemo()
 // 
 coreBool cSave::CanImportDemo()const
 {
+    // 
     if(g_bDemoVersion || coreData::FileExists(m_sPath.c_str()) || coreData::FileExists(PRINT("%s.backup", m_sPath.c_str())))
     {
         return false;
@@ -627,7 +628,7 @@ coreBool cSave::__RestoreScoreQueueData(coreSet<sScorePack*>* OUTPUT pQueue, con
 
         pPack->iStatus = 0u;
 
-        pQueue->push_back(pPack);
+        pQueue->insert(pPack);
     }
 
     ASSERT(iSize == coreUint32(pCursor - pData))
@@ -697,7 +698,7 @@ coreBool cSave::__RestoreReplayQueueData(coreSet<sReplayPack*>* OUTPUT pQueue, c
         pPack->pData = new coreByte[pPack->iSize];
         std::memcpy(pPack->pData, pCursor, pPack->iSize); pCursor += pPack->iSize;
 
-        pQueue->push_back(pPack);
+        pQueue->insert(pPack);
     }
 
     ASSERT(iSize == coreUint32(pCursor - pData))

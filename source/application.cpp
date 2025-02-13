@@ -18,6 +18,7 @@ const coreChar* const CoreApp::Settings::Website                       = "https:
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.webp";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.webp";
 const coreBool        CoreApp::Settings::UserManagement                = true;
+const coreDouble      CoreApp::Settings::System::AspectRatio           = 1.0;
 const coreUint8       CoreApp::Settings::Graphics::DepthSize           = 16u;
 const coreUint8       CoreApp::Settings::Graphics::StencilSize         = 0u;
 const coreBool        CoreApp::Settings::Graphics::AlphaChannel        = false;
@@ -650,9 +651,9 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>  ("weapon_ray.wav",                         CORE_RESOURCE_UPDATE_AUTO,   __SOUND_FILE("data/sounds/weapon_ray"));
 
     coreList<coreString> asPath;
-    coreData::FolderScan("data/fonts", "*.ttf",  &asPath);
-    coreData::FolderScan("data/fonts", "*.otf",  &asPath);
-    coreData::FolderScan("data/fonts", "*.woff", &asPath);
+    coreData::DirectoryScan("data/fonts", "*.ttf",  &asPath);
+    coreData::DirectoryScan("data/fonts", "*.otf",  &asPath);
+    coreData::DirectoryScan("data/fonts", "*.woff", &asPath);
 
     FOR_EACH(it, asPath)   // # config for default font is ignored, because it was already loaded
     {
