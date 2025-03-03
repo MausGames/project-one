@@ -138,18 +138,18 @@ public:
     void LoadProgram (const coreBool bGlow);
 
     // retrieve geometric data
-    FUNC_PURE coreFloat   RetrieveHeight    (const coreVector2 vPosition)const;
-    FUNC_PURE coreFloat   RetrieveBackHeight(const coreVector2 vPosition)const;
-    FUNC_PURE coreVector3 RetrieveNormal    (const coreVector2 vPosition)const;
-    FUNC_PURE coreVector3 RetrieveBackNormal(const coreVector2 vPosition)const;
-    FUNC_PURE coreVector3 RetrieveIntersect (const coreVector3 vRayPosition, const coreVector3 vRayDirection)const;
+    coreFloat   RetrieveHeight    (const coreVector2 vPosition)const;
+    coreFloat   RetrieveBackHeight(const coreVector2 vPosition)const;
+    coreVector3 RetrieveNormal    (const coreVector2 vPosition)const;
+    coreVector3 RetrieveBackNormal(const coreVector2 vPosition)const;
+    coreVector3 RetrieveIntersect (const coreVector3 vRayPosition, const coreVector3 vRayDirection)const;
 
     // 
-    void                   LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 100u);
-    void                   LerpHeightNow (const coreFloat fMul, const coreFloat fAdd);
-    FUNC_LOCAL coreVector2 CalcLerpVector(const coreFloat fPositionY)const;
-    inline coreBool  IsLerping()const {return (m_aiLerpRange[0] != m_aiLerpRange[1]);}
-    inline coreFloat GetLerp  ()const {return (m_aiLerpRange[1] ? (I_TO_F(m_aiLerpRange[0]) * RCP(I_TO_F(m_aiLerpRange[1]))) : 1.0f);}
+    void             LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 100u);
+    void             LerpHeightNow (const coreFloat fMul, const coreFloat fAdd);
+    coreVector2      CalcLerpVector(const coreFloat fPositionY)const;
+    inline coreBool  IsLerping     ()const {return (m_aiLerpRange[0] != m_aiLerpRange[1]);}
+    inline coreFloat GetLerp       ()const {return (m_aiLerpRange[1] ? (I_TO_F(m_aiLerpRange[0]) * RCP(I_TO_F(m_aiLerpRange[1]))) : 1.0f);}
 
     // access shadow and light map object
     inline cShadow*         GetShadowMap() {return &m_ShadowMap;}

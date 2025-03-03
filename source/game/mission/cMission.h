@@ -473,7 +473,7 @@ protected:
     static inline coreBool _Tick(const coreFloat fTime, const coreFloat fTimeOld, const coreFloat fFactor, const coreFloat fOffset) {return (s_iTick = F_TO_UI(fTime * (fFactor + CORE_MATH_PRECISION) - fOffset) - 1u) != coreUint16(F_TO_UI(fTimeOld * (fFactor + CORE_MATH_PRECISION) - fOffset) - 1u);}
 
     // 
-    static constexpr FUNC_LOCAL coreBool _TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize);
+    static constexpr coreBool _TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize);
 
 
 private:
@@ -1855,7 +1855,7 @@ template <typename T, typename F> RETURN_RESTRICT cEnemySquad* cMission::_AddSqu
 
 // ****************************************************************
 // 
-constexpr FUNC_LOCAL coreBool cMission::_TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize)
+constexpr coreBool cMission::_TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize)
 {
     ASSERT((iFrom <= iTo) && piIndexList && iSize)
 

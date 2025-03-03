@@ -547,7 +547,7 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
 
 // ****************************************************************
 // 
-FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq)
+coreFloat RoundFreq(const coreFloat fFreq)
 {
     ASSERT((fFreq > 0.0f) && (fFreq <= FRAMERATE_MIN))
 

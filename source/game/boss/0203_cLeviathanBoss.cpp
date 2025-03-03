@@ -2442,7 +2442,7 @@ void cLeviathanBoss::__RefreshHealth(const coreInt32 iHead, const coreInt32 iBod
 
 // ****************************************************************
 // 
-FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection)
+void cLeviathanBoss::__CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection)
 {
     ASSERT(vAxis.IsNormalized() && vPosition && vDirection)
 
@@ -2459,7 +2459,7 @@ FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3 vAxis, con
 
 // ****************************************************************
 // 
-FUNC_CONST coreFloat cLeviathanBoss::__CalcAngle(const coreFloat fDistance, const coreFloat fRadius)
+coreFloat cLeviathanBoss::__CalcAngle(const coreFloat fDistance, const coreFloat fRadius)
 {
     return (fDistance * RCP(fRadius) * (2.0f*PI));
 }
@@ -2480,7 +2480,7 @@ cEnemy* cLeviathanBoss::__GetPart(const coreUintW iIndex)
 
 // ****************************************************************
 // 
-FUNC_CONST coreFloat cLeviathanBoss::__GetPartDistance(const coreUintW iIndex)
+coreFloat cLeviathanBoss::__GetPartDistance(const coreUintW iIndex)
 {
     ASSERT(iIndex < LEVIATHAN_PARTS)
 

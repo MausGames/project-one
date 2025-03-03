@@ -254,7 +254,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
 
 // ****************************************************************
 // 
-FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pBackground)const
+coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pBackground)const
 {
     return BLENDH3(CLAMP01(m_TransitionTime.GetValue((m_pBackground == pBackground) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED)));
 }
@@ -262,7 +262,7 @@ FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pB
 
 // ****************************************************************
 // retrieve safe height value
-FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition, const coreFloat fFallbackHeight)const
+coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition, const coreFloat fFallbackHeight)const
 {
     // check for available outdoor-surface
     const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
@@ -275,7 +275,7 @@ FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition
 
 // ****************************************************************
 // retrieve safe ray intersection point
-FUNC_PURE coreVector3 cEnvironment::RetrieveSafeIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection, const coreFloat fFallbackHeight)const
+coreVector3 cEnvironment::RetrieveSafeIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection, const coreFloat fFallbackHeight)const
 {
     ASSERT(vRayDirection.z < 0.0f)
 

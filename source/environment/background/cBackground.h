@@ -226,9 +226,9 @@ protected:
     static void _BindSorted     (coreBatchList* OUTPUT pObjectList, coreObject3D* pObject);
 
     // check for intersection with other objects
-    static FUNC_PURE coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
-    static FUNC_PURE coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
-    static FUNC_PURE coreBool _CheckIntersectionQuick3(const coreBatchList* pObjectList, const coreVector3 vNewPos, const coreFloat fDistanceSq);
+    static coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
+    static coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
+    static coreBool _CheckIntersectionQuick3(const coreBatchList* pObjectList, const coreVector3 vNewPos, const coreFloat fDistanceSq);
 
 
 private:

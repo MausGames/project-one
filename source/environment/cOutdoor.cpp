@@ -415,14 +415,14 @@ void cOutdoor::LoadProgram(const coreBool bGlow)
 
 // ****************************************************************
 // retrieve height value
-FUNC_PURE coreFloat cOutdoor::RetrieveHeight(const coreVector2 vPosition)const
+coreFloat cOutdoor::RetrieveHeight(const coreVector2 vPosition)const
 {
     // 
     const coreMatrix2 mRota = coreMatrix3::Rotation(this->GetDirection().xy()).m12();
     return this->RetrieveBackHeight(vPosition * mRota - this->GetPosition().xy());
 }
 
-FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2 vPosition)const
+coreFloat cOutdoor::RetrieveBackHeight(const coreVector2 vPosition)const
 {
     // convert real position to block position
     const coreFloat fX = vPosition.x / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH / 2u);
@@ -455,14 +455,14 @@ FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2 vPosition)con
 
 // ****************************************************************
 // 
-FUNC_PURE coreVector3 cOutdoor::RetrieveNormal(const coreVector2 vPosition)const
+coreVector3 cOutdoor::RetrieveNormal(const coreVector2 vPosition)const
 {
     // 
     const coreMatrix2 mRota = coreMatrix3::Rotation(this->GetDirection().xy()).m12();
     return this->RetrieveBackNormal(vPosition * mRota - this->GetPosition().xy());
 }
 
-FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2 vPosition)const
+coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2 vPosition)const
 {
     constexpr coreFloat fWidth = OUTDOOR_DETAIL * 0.35f;
 
@@ -480,7 +480,7 @@ FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2 vPosition)c
 
 // ****************************************************************
 // retrieve ray intersection point
-FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection)const
+coreVector3 cOutdoor::RetrieveIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection)const
 {
     ASSERT(vRayDirection.z < 0.0f)
 
@@ -553,7 +553,7 @@ void cOutdoor::LerpHeightNow(const coreFloat fMul, const coreFloat fAdd)
 
 // ****************************************************************
 // 
-FUNC_LOCAL coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
+coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
 {
     if(this->IsLerping())
     {

@@ -564,7 +564,7 @@ void cBackground::_BindSorted(coreBatchList* OUTPUT pObjectList, coreObject3D* p
 
 // ****************************************************************
 // check for intersection with other objects
-FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
+coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
 {
     const coreSet<coreObject3D*>* pList = pObjectList->List();
 
@@ -588,7 +588,7 @@ FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectL
     return false;
 }
 
-FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
+coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
 {
     const coreSet<coreObject3D*>* pList = pObjectList->List();
 
@@ -608,7 +608,7 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
     return false;
 }
 
-FUNC_PURE coreBool cBackground::_CheckIntersectionQuick3(const coreBatchList* pObjectList, const coreVector3 vNewPos, const coreFloat fDistanceSq)
+coreBool cBackground::_CheckIntersectionQuick3(const coreBatchList* pObjectList, const coreVector3 vNewPos, const coreFloat fDistanceSq)
 {
     const coreSet<coreObject3D*>* pList = pObjectList->List();
 

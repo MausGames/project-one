@@ -599,12 +599,12 @@ private:
     void __RefreshHealth(const coreInt32 iHead, const coreInt32 iBody, const coreInt32 iTail);
 
     // 
-    static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
-    static FUNC_CONST   coreFloat __CalcAngle      (const coreFloat fDistance, const coreFloat fRadius);
+    static void      __CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+    static coreFloat __CalcAngle      (const coreFloat fDistance, const coreFloat fRadius);
 
     // 
-    cEnemy*                     __GetPart        (const coreUintW iIndex);
-    static FUNC_CONST coreFloat __GetPartDistance(const coreUintW iIndex);
+    cEnemy*          __GetPart        (const coreUintW iIndex);
+    static coreFloat __GetPartDistance(const coreUintW iIndex);
 };
 
 

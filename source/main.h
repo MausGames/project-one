@@ -340,7 +340,7 @@ extern void InitResolution(const coreVector2 vResolution);                      
 extern void InitDirection();                                                                     // 
 extern void InitFramerate(const coreUint16 iUpdateFreq = 0u, const coreUint8 iGameSpeed = 0u);   // init frame rate properties (lock)
 
-extern FUNC_PURE coreFloat RoundFreq(const coreFloat fFreq);
+extern coreFloat RoundFreq(const coreFloat fFreq);
 
 extern coreVector2 CalcFinalDirection();
 

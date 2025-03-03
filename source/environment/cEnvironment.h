@@ -87,11 +87,11 @@ public:
     inline void UpdateTransitionSpeed(const coreFloat fTransitionSpeed) {m_TransitionTime.SetSpeed(ENVIRONMENT_TRANSITION_FACTOR * fTransitionSpeed);}
 
     // 
-    FUNC_LOCAL coreFloat RetrieveTransitionBlend(const cBackground* pBackground)const;
+    coreFloat RetrieveTransitionBlend(const cBackground* pBackground)const;
 
     // retrieve safe geometric value
-    FUNC_PURE coreFloat   RetrieveSafeHeight   (const coreVector2 vPosition,                                     const coreFloat fFallbackHeight = WATER_HEIGHT)const;
-    FUNC_PURE coreVector3 RetrieveSafeIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection, const coreFloat fFallbackHeight = WATER_HEIGHT)const;
+    coreFloat   RetrieveSafeHeight   (const coreVector2 vPosition,                                     const coreFloat fFallbackHeight = WATER_HEIGHT)const;
+    coreVector3 RetrieveSafeIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection, const coreFloat fFallbackHeight = WATER_HEIGHT)const;
 
     // 
     inline void OverrideFlyOffset(const coreFloat fFlyOffset) {m_fFlyOffset = fFlyOffset;}
