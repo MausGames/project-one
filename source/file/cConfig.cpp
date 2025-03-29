@@ -82,6 +82,20 @@ static void UpgradeConfig()
                 Core::Config->SetInt(CONFIG_INPUT_ACTION(i, 9u), DEFAULT_ACTION(i, 9u));
             }
         }
+
+        if(__UPGRADE(5))
+        {
+            for(coreUintW i = INPUT_SETS_KEYBOARD; i < INPUT_SETS; ++i)
+            {
+                for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
+                {
+                    const coreInt32 iOldValue = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j));
+
+                         if(iOldValue == 21) Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), CORE_INPUT_BUTTON_LEFT_TRIGGER);
+                    else if(iOldValue == 22) Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), CORE_INPUT_BUTTON_RIGHT_TRIGGER);
+                }
+            }
+        }
     }
     #undef __UPGRADE
 
