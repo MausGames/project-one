@@ -740,7 +740,7 @@ void cProjectOneBoss::__MoveOwn()
 
         if(PHASE_MAINTIME_POINT(INTERFACE_FRAGMENT_DURATION_2))
         {
-            m_pNightmareSound->PlayRelative(this, 0.5f, 1.0f, false, SOUND_EFFECT);
+            m_pNightmareSound->PlayRelative(this, 0.4f, 1.0f, false, SOUND_EFFECT);
         }
 
         cPlayer* pPlayer = g_pGame->GetPlayer(0u);

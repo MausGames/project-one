@@ -226,14 +226,11 @@ void cMenuNavigator::Move()
 
         // 
         coreBool abPress[MENUNAVIGATOR_PROMPTS] = {};
-        for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-        {
-            if(Core::Input->GetJoystickButton(i, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,  CORE_INPUT_HOLD)) abPress[0] = true;
-            if(Core::Input->GetJoystickButton(i, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, CORE_INPUT_HOLD)) abPress[1] = true;
-            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFT_TRIGGER,    CORE_INPUT_HOLD)) abPress[0] = true;
-            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHT_TRIGGER,   CORE_INPUT_HOLD)) abPress[1] = true;
-            if(Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_CANCEL,          CORE_INPUT_HOLD)) abPress[2] = true;
-        }
+        if(Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,  CORE_INPUT_HOLD)) abPress[0] = true;
+        if(Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, CORE_INPUT_HOLD)) abPress[1] = true;
+        if(Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_LEFT_TRIGGER,    CORE_INPUT_HOLD)) abPress[0] = true;
+        if(Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_RIGHT_TRIGGER,   CORE_INPUT_HOLD)) abPress[1] = true;
+        if(Core::Input->GetJoystickButton(CORE_INPUT_JOYSTICK_ANY, CORE_INPUT_BUTTON_CANCEL,          CORE_INPUT_HOLD)) abPress[2] = true;
 
         // 
         if((m_aTab.size() >= 2u) || (m_bShoulder && m_nShoulderLeft))

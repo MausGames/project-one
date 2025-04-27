@@ -357,7 +357,7 @@ void cEnemy::ResetProperties()
 
 // ****************************************************************
 // 
-void cEnemy::ApplyScore(cPlayer* pPlayer)
+void cEnemy::ApplyScore(cPlayer* OUTPUT pPlayer)
 {
     ASSERT(STATIC_ISVALID(g_pGame))
     ASSERT(!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))

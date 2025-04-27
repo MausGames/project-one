@@ -93,8 +93,8 @@
 #if defined(_CORE_MSVC_)
     #pragma warning(disable : 4189)   // local variable is initialized but not referenced
 #else
-    #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
-    #pragma GCC diagnostic ignored "-Winvalid-offsetof"
+    #pragma clang diagnostic ignored "-Winconsistent-missing-override"
+    #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #endif
 
 #if defined(_CORE_DEBUG_)

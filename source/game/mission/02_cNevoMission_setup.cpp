@@ -3013,7 +3013,7 @@ void cNevoMission::__SetupOwn()
         {
             g_pGame->FadeMusic(0.35f);
 
-            m_pNightmareSound->PlayRelative(this, 0.5f, 1.0f, false, SOUND_EFFECT);
+            m_pNightmareSound->PlayRelative(this, 0.4f, 1.0f, false, SOUND_EFFECT);
         }
 
         if(STAGE_TIME_BEFORE(5.0f))
@@ -3099,7 +3099,7 @@ void cNevoMission::__SetupOwn()
         {
             g_pGame->FadeMusic(0.35f);
 
-            m_pNightmareSound->PlayRelative(this, 0.5f, 1.0f, false, SOUND_EFFECT);
+            m_pNightmareSound->PlayRelative(this, 0.4f, 1.0f, false, SOUND_EFFECT);
         }
 
         if(STAGE_TIME_POINT(3.0f))

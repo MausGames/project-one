@@ -512,7 +512,7 @@ void UpdateInput()
         // 
         if(i >= INPUT_SETS_KEYBOARD)
         {
-            if(HAS_BIT(oMap.iActionPress, 7u)) g_MenuInput.bPause = true;
+            if(HAS_BIT(oMap.iActionPress, PLAYER_ACTION_PAUSE)) g_MenuInput.bPause = true;
         }
     }
 

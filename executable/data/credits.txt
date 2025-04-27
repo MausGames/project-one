@@ -12,7 +12,7 @@ People
 - Chris Soukup : Special Thanks
 - Christoph Lang : Tester
 - Claire Deiller (Loc3 Ltd.) : Localization - Français
-- Clément Sonntag : Localization - 简体中文 繁體中文
+- Clément Sonntag (Active Gaming Media Inc.) : Localization - 简体中文 繁體中文
 - Damian Hiltebrand : Special Thanks
 - Daniel Rubio (Pinknoise) : Localization - Español (Latinoamérica)
 - David Portisch : Tester
@@ -20,7 +20,7 @@ People
 - Etel Baglietto (Pinknoise) : Localization - Español (Latinoamérica)
 - Henry Buckley (DICO Co., Ltd.) : Localization - 日本語
 - Iris Kuppen (Local Heroes Worldwide B.V.) : Localization
-- Jingwen Wu : Localization - 简体中文
+- Jingwen Wu (Active Gaming Media Inc.) : Localization - 简体中文
 - Jochen Leopold : Tester
 - Johnny Marques (Locsmiths) : Localization - Português (Brasil)
 - Lara Cecilia Garau (Pinknoise) : Localization - Español (Latinoamérica)
@@ -39,7 +39,7 @@ People
 - Ricardo Nakaoka (Locsmiths) : Localization - Português (Brasil)
 - Robert Glashüttner : Special Thanks
 - Stefan Karner : Tester
-- Tetsugen Ryo : Localization - 繁體中文
+- Tetsugen Ryo (Active Gaming Media Inc.) : Localization - 繁體中文
 - Tova Bele : Adviser, Tester
 - Vanesa Potenzoni (Pinknoise) : Localization - Español (Latinoamérica)
 - Ziya Sarper Ekim (DICO Co., Ltd.) : Localization - 日本語

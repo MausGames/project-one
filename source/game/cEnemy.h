@@ -103,7 +103,7 @@ public:
     void ResetProperties();
 
     // 
-    void ApplyScore(cPlayer* pPlayer);
+    void ApplyScore(cPlayer* OUTPUT pPlayer);
     void ApplyScore();
 
     // 
@@ -588,7 +588,7 @@ public:
     ASSIGN_ID(666, "Custom")
 
     // 
-    inline void SetParent(cEnemy* OUTPUT pParent) {this->_SetParent(pParent);}
+    inline void SetParent(cEnemy* pParent) {this->_SetParent(pParent);}
 };
 
 

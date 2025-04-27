@@ -2006,7 +2006,7 @@ void cGemingaBoss::__MoveOwn()
 
     if(!m_aiCounter[BULLET_REFLECT])
     {
-        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pBullet)
         {
             if(pBullet->HasStatus(BULLET_STATUS_REFLECTED))
             {

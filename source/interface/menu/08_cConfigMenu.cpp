@@ -1160,8 +1160,8 @@ void cConfigMenu::Move()
         if(m_aLine[i].IsFocused() && TIME)
         {
             // 
-            m_Description.SetColor3 (g_pMenu->GetHighlightColor());
-            m_Description.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_Description.SetColor3      (g_pMenu->GetHighlightColor());
+            m_Description.SetEnabled     (CORE_OBJECT_ENABLE_ALL);
             m_Description.SetTextLanguage(m_apcDescKey[i]);
 
             // 
@@ -1722,7 +1722,7 @@ void cConfigMenu::__LoadMonitors()
     {
         for(coreUintW i = 1u, ie = Core::System->GetDisplayCount(); i < ie; ++i)
         {
-            m_Monitor.AddEntryLanguage("MONITOR_SECONDARY", i, [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", i));});
+            m_Monitor.AddEntryLanguage("MONITOR_SECONDARY", i, [=](coreString* OUTPUT psString) {psString->append(PRINT(" %zu", i));});
         }
     }
 
@@ -1782,7 +1782,7 @@ void cConfigMenu::__LoadFrequencies(const coreUintW iMonitorIndex)
     const coreUint32 iRefreshRate = (iModeRate >= F_TO_UI(FRAMERATE_MIN)) ? iModeRate : SCORE_PURE_UPDATEFREQ;
 
     // 
-    m_UpdateFreq.AddEntryLanguage("VALUE_AUTO", 0u, [=](coreString* OUTPUT pString) {pString->append(PRINT(" (%u Hz)", iRefreshRate));});
+    m_UpdateFreq.AddEntryLanguage("VALUE_AUTO", 0u, [=](coreString* OUTPUT psString) {psString->append(PRINT(" (%u Hz)", iRefreshRate));});
     for(coreUintW i = 0u; i < ARRAY_SIZE(aiDefault); ++i) m_UpdateFreq.AddEntry(PRINT("%u Hz", aiDefault[i]), aiDefault[i]);
 
     // 
@@ -1803,9 +1803,9 @@ void cConfigMenu::__LoadInputs()
         oInput.oType.ClearEntries();
 
         // 
-        oInput.oHeader.SetTextLanguage("PLAYER", [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", i + 1u));});
-        for(coreUintW j = 0u; j < INPUT_SETS_KEYBOARD; ++j) oInput.oType.AddEntryLanguage("INPUT_KEYBOARD", j + 0u,                  [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", j + 1u));});
-        for(coreUintW j = 0u; j < INPUT_SETS_JOYSTICK; ++j) oInput.oType.AddEntryLanguage("INPUT_JOYSTICK", j + INPUT_SETS_KEYBOARD, [=](coreString* OUTPUT pString) {pString->append(PRINT(" %zu", j + 1u));});
+        oInput.oHeader.SetTextLanguage("PLAYER", [=](coreString* OUTPUT psString) {psString->append(PRINT(" %zu", i + 1u));});
+        for(coreUintW j = 0u; j < INPUT_SETS_KEYBOARD; ++j) oInput.oType.AddEntryLanguage("INPUT_KEYBOARD", j + 0u,                  [=](coreString* OUTPUT psString) {psString->append(PRINT(" %zu", j + 1u));});
+        for(coreUintW j = 0u; j < INPUT_SETS_JOYSTICK; ++j) oInput.oType.AddEntryLanguage("INPUT_JOYSTICK", j + INPUT_SETS_KEYBOARD, [=](coreString* OUTPUT psString) {psString->append(PRINT(" %zu", j + 1u));});
 
         // 
         if(!oInput.oType.SelectValue(iOldEntry)) oInput.oType.SelectFirst();

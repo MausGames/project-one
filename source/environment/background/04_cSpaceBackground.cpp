@@ -87,7 +87,7 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover.DefineProgram("menu_grey_vignette_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);
-    m_Cover.SetDepth     (255u);
+    m_Cover.SetDepth     (CORE_OBJECT2D_DEPTH_MAX);
 
     // 
     m_Cover2.DefineTexture(0u, "environment_space_outside.png");
@@ -96,7 +96,7 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover2.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.15f) * 1.3f);
     m_Cover2.SetAlpha     (0.7f);
     m_Cover2.SetTexSize   (coreVector2(1.0f,1.0f) * 4.2f);
-    m_Cover2.SetDepth     (255u);
+    m_Cover2.SetDepth     (CORE_OBJECT2D_DEPTH_MAX);
 
     // 
     m_Nebula.DefineTexture(0u, "environment_clouds_low.png");
