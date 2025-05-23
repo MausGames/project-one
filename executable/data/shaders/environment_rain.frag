@@ -23,15 +23,15 @@ void FragmentMain()
     vec2 v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
 
     // lookup normal map (multiple times) and depth map
-    vec3  v3BumpNormalDrop1 = coreUnpackNormalMap(coreTexture2D(0, v_av2TexCoord[0]).xy);
-    vec3  v3BumpNormalDrop2 = coreUnpackNormalMap(coreTexture2D(0, v_av2TexCoord[1]).xy);
+    vec3  v3BumpNormalDrop1 = coreUnpackNormalMap(coreTexture2D(0, v_av2TexCoord[0]).xy + (0.5/255.0));
+    vec3  v3BumpNormalDrop2 = coreUnpackNormalMap(coreTexture2D(0, v_av2TexCoord[1]).xy + (0.5/255.0));
     vec3  v3BumpNormal1     = coreUnpackNormalMap(coreTexture2D(0, v_av2TexCoord[2]).zw);
     vec3  v3BumpNormal2     = coreUnpackNormalMap(coreTexture2D(0, v_av2TexCoord[3]).zw);
     float v1Depth           = coreTextureBase2D(3, v2ScreenCoord).r;
 
     // 
     vec3 v3BumpNormalDrop = v3BumpNormalDrop1 + v3BumpNormalDrop2;
-         v3BumpNormalDrop = normalize(vec3(v3BumpNormalDrop.xy, v3BumpNormalDrop.z / 20.0));
+         v3BumpNormalDrop = normalize(vec3(v3BumpNormalDrop.xy, v3BumpNormalDrop.z / 5.0));
 
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_v4Lighting.xyz);

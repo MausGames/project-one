@@ -418,7 +418,7 @@ void cRainWater::__UpdateOwn()
 
             // 
             glColorMask (true, true, false, false);
-            glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
+            glClearColor(DISTORTION_CLEAR, DISTORTION_CLEAR, DISTORTION_CLEAR, DISTORTION_CLEAR);
             {
                 // 
                 m_WaveMap.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
