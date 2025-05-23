@@ -46,6 +46,6 @@ void FragmentMain()
     #endif
 
         // draw interior with detail map
-        gl_FragColor = vec4(vec3((v1Detail + c_v1Black) * v1Factor), u_v4Color.a);
+        gl_FragColor = vec4(vec3((v1Detail + c_v1Black) * (v1Factor + (coreDither() / 255.0))), u_v4Color.a);
     }
 }

@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-cRotaCache cShip::s_RotaCache = {};
+cRotaCache cShip::s_RotaCache = cRotaCache();
 
 
 // ****************************************************************

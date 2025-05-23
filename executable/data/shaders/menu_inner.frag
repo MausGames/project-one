@@ -40,6 +40,6 @@ void FragmentMain()
         float v1Factor      = 1.1 - coreLengthSq(v2ScreenCoord) * 0.85;
 
         // draw shape with detail map and subtle white glow
-        gl_FragColor = vec4(mix(vec3(1.0), vec3(v1Detail + c_v1Black + 0.1), v1Shape) * v1Factor, v1Shape) * vec4(mix(vec3(1.0), u_v4Color.rgb, 0.5), u_v4Color.a);
+        gl_FragColor = vec4(mix(vec3(1.0), vec3(v1Detail + c_v1Black + 0.1), v1Shape) * (v1Factor + (coreDither() / 255.0)), v1Shape) * vec4(mix(vec3(1.0), u_v4Color.rgb, 0.5), u_v4Color.a);
     }
 }

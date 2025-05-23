@@ -81,8 +81,7 @@ public:
 
     // control status
     void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection, const coreInt32 iType);
-    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact, const coreVector2 vForce);
-    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact);
+    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact, const coreVector2 vForce = coreVector2(0.0f,0.0f));
     void Deactivate(const coreBool bAnimated);
 
     // 
@@ -168,8 +167,7 @@ private:
     {
         coreBatchList oBulletActive;   // list with active bullets
         coreUintW     iCurBullet;      // current bullet (next one to check in pool)
-        
-        coreUintW iOutline;
+        coreUintW     iOutlineStyle;   // 
 
         sBulletSetGen()noexcept;
         virtual ~sBulletSetGen() = default;
@@ -204,9 +202,9 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection);
-    void ClearBullets(const coreBool bAnimated);
-    template <typename T> void ClearBulletsTyped(const coreBool bAnimated);
+    template <typename T> RETURN_RESTRICT T* AddBullet        (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection);
+    void                                     ClearBullets     (const coreBool bAnimated);
+    template <typename T> void               ClearBulletsTyped(const coreBool bAnimated);
 
     // 
     inline cBullet*          FindBullet     (const coreVector2 vPosition)const;
@@ -1056,12 +1054,11 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
 
     // add bullet set to outline (will be cleared entirely)
     pOutline->GetStyle(T::ConfigOutlineStyle())->BindList(&oBulletActive);
+    iOutlineStyle = T::ConfigOutlineStyle();
 
-    // set bullet pool to initial size       
+    // init list and pool size
     oBulletActive.Reallocate(T::ConfigReserve());
     aBulletPool  .resize    (T::ConfigReserve());
-    
-    iOutline = T::ConfigOutlineStyle();
 }
 
 
@@ -1141,7 +1138,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     {
         (*it) = s_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
 
-        if(HAS_FLAG((*it)->GetStatus(), BULLET_STATUS_ACTIVE)) (*it)->ChangeType(m_iType);
+        if((*it)->HasStatus(BULLET_STATUS_ACTIVE)) (*it)->ChangeType(m_iType);
     }
 
     // execute again with first new bullet
@@ -1167,7 +1164,7 @@ template <typename T> void cBulletManager::ClearBulletsTyped(const coreBool bAni
             cBullet* pBullet = d_cast<cBullet*>(*it);
 
             const coreVector2 vImpact = pBullet->GetPosition().xy();
-            const coreVector2 vForce  = pBullet->GetPosition().xy().Normalized();
+            const coreVector2 vForce  = vImpact.IsNull() ? coreVector2(0.0f,1.0f) : vImpact.Normalized();
 
             pBullet->Deactivate(bAnimated, vImpact, vForce);
         }

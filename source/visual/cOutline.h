@@ -38,8 +38,8 @@
 class cOutlineStyle final : public cBindContainerIn
 {
 private:
-    coreProgramPtr s_pProgramSingle;      // shader-program for single outlined objects
-    coreProgramPtr s_pProgramInstanced;   // shader-program for instanced outlined objects
+    coreProgramPtr m_pProgramSingle;      // shader-program for single outlined objects
+    coreProgramPtr m_pProgramInstanced;   // shader-program for instanced outlined objects
 
 
 public:
@@ -57,7 +57,7 @@ public:
     void ApplyObject(coreObject3D*  pObject)const;
     void ApplyList  (coreBatchList* pList)const;
     
-    inline const coreProgramPtr& GetProgramSingle()const {return s_pProgramSingle;}
+    inline const coreProgramPtr& GetProgramSingle()const {return m_pProgramSingle;}
 };
 
 

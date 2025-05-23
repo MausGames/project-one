@@ -8,9 +8,9 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-cRotaCache   cBullet      ::s_RotaCache = {};
-coreObject3D cDebrisBullet::s_Wave      = {};
-coreObject3D cMineBullet  ::s_Wave      = {};
+cRotaCache   cBullet      ::s_RotaCache = cRotaCache();
+coreObject3D cDebrisBullet::s_Wave      = coreObject3D();
+coreObject3D cMineBullet  ::s_Wave      = coreObject3D();
 
 
 // ****************************************************************
@@ -39,25 +39,30 @@ cBullet::cBullet()noexcept
 // move the bullet
 void cBullet::Move()
 {
+    // 
     if(m_fFlyTime) REMOVE_FLAG(m_iStatus, BULLET_STATUS_FRESH)
-    
+
     // 
     m_fFlyTime.Update(1.0f);
 
     // call individual move routine
     this->__MoveOwn();
-    
+
+    // 
     const coreBool bVisible = g_pForeground->IsVisibleObject(this);
 
     // deactivate bullet when leaving the visible area
     if((m_fFlyTime >= 0.5f) && !HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) && !bVisible)
+    {
         this->Deactivate(false);
-    
+    }
+
+    // 
     if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE))
     {
         this->SetEnabled((bVisible && this->GetAlpha()) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);   // alpha-check is only optimization for cTiltBullet
     }
-    
+
     // move the 3d-object
     this->coreObject3D::Move();
 }
@@ -79,7 +84,8 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
     // 
     m_fFlyTime = 0.0f;
     m_vFlyDir  = vDirection;
-    
+
+    // 
     m_fAnimSpeed = 1.0f;
 
     // reset bullet properties
@@ -105,19 +111,15 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact, co
 
     // 
     if(bAnimated && (!HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) || this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)))
+    {
         this->__ImpactOwn(vImpact, vForce);
+    }
 
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // disable collision
     this->ChangeType(0);
-}
-
-void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact)
-{
-    // 
-    this->Deactivate(bAnimated, vImpact, coreVector2(0.0f,0.0f));
 }
 
 void cBullet::Deactivate(const coreBool bAnimated)
@@ -224,8 +226,7 @@ void cBullet::_EnableDepth()const
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 : oBulletActive ()
 , iCurBullet    (0u)
-
-, iOutline (0u)
+, iOutlineStyle (0u)
 {
 }
 
@@ -267,7 +268,9 @@ void cBulletManager::Render()
 
         // call individual preceding render routines
         FOR_EACH(it, *pBulletActive->List())
+        {
             d_cast<cBullet*>(*it)->__RenderOwnBefore();
+        }
     }
     for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
     {
@@ -276,8 +279,9 @@ void cBulletManager::Render()
 
         // render bullet set
         pBulletActive->Render();
-        
-        m_Outline.GetStyle(m_apBulletSet[m_aiOrder[i]]->iOutline)->ApplyList(pBulletActive);
+
+        // 
+        m_Outline.GetStyle(m_apBulletSet[m_aiOrder[i]]->iOutlineStyle)->ApplyList(pBulletActive);
     }
 
     // 
@@ -294,7 +298,9 @@ void cBulletManager::RenderAfter()
 
         // call individual subsequent render routines
         FOR_EACH(it, *pBulletActive->List())
+        {
             d_cast<cBullet*>(*it)->__RenderOwnAfter();
+        }
         
         /*
         FOR_EACH(it, *pBulletActive->List())
@@ -415,21 +421,27 @@ void cBulletManager::OverrideOrder(const coreUint8* piNewOrder, const coreUintW 
 
     // 
     for(coreUintW i = 0u; i < iSize; ++i)
+    {
         for(coreUintW j = i+1u; j < iSize; ++j)
-            ASSERT((piNewOrder[i] != piNewOrder[j]) &&
-                   (piNewOrder[i] < BULLET_SET_COUNT))
+        {
+            ASSERT((piNewOrder[i] != piNewOrder[j]) && (piNewOrder[i] < BULLET_SET_COUNT))
+        }
+    }
 
 #endif
 
     // 
     for(coreUintW i = 0u, j = 0u; i < BULLET_SET_COUNT; ++i)
+    {
         if(!std::memchr(piNewOrder, i, iSize)) m_aiOrder[j++] = i;
+        STATIC_ASSERT(sizeof(*piNewOrder) == 1u)
+    }
 
     // 
     for(coreUintW i = 0u; i < iSize; ++i)
+    {
         m_aiOrder[BULLET_SET_COUNT - 1u - i] = piNewOrder[i];
-
-    STATIC_ASSERT(sizeof(*piNewOrder) == 1u)
+    }
 }
 
 
@@ -439,7 +451,9 @@ void cBulletManager::ResetOrder()
 {
     // 
     for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
+    {
         m_aiOrder[i] = i;
+    }
 }
 
 

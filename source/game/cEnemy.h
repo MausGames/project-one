@@ -222,7 +222,7 @@ public:
 
     // add and remove enemies
     template <typename T> RETURN_RESTRICT T* AllocateEnemy();
-    void FreeEnemy(cEnemy** OUTPUT ppEnemy);
+    void FreeEnemy   (cEnemy** OUTPUT ppEnemy);
     void ClearEnemies(const coreBool bAnimated);
 
     // 
@@ -659,7 +659,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     // 
     oMemoryPool.Configure(sizeof(T), T::ConfigReserve());
 
-    // set enemy pool to initial size        
+    // init list and pool size
     oEnemyActive.Reallocate(T::ConfigReserve());
     apEnemyPool .resize    (T::ConfigReserve());
     apEnemyPool[0] = POOLED_NEW(oMemoryPool, T);   // already request resources
@@ -762,9 +762,9 @@ template <typename T> void cEnemyManager::ReserveEnemy(const coreUintW iNumEnemi
     this->PrefetchEnemy<T>();
     sEnemySet<T>* pSet = d_cast<sEnemySet<T>*>(m_apEnemySet[T::ID]);
 
-    if(pSet->apEnemyPool.size() < iNumEnemies)
+    if(pSet->apEnemyPool.size() < pSet->iTopEnemy + iNumEnemies)
     {
-        const coreUintW iNumPot = coreMath::CeilPot(iNumEnemies);
+        const coreUintW iNumPot = coreMath::CeilPot(pSet->iTopEnemy + iNumEnemies);
 
         // increase list and pool size by power of two
         pSet->oEnemyActive.Reallocate(iNumPot);

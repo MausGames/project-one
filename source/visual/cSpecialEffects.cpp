@@ -495,7 +495,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreF
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(bLock);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -516,7 +516,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(bLock);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -537,7 +537,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreF
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 2u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -558,7 +558,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 3u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -579,7 +579,7 @@ void cSpecialEffects::CreateSplashDot(const coreVector3 vPosition, const coreFlo
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 4u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -605,7 +605,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3 vPosition, const coreVec
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -628,7 +628,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVect
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -651,7 +651,7 @@ void cSpecialEffects::CreateBlowSmoke(const coreVector3 vPosition, const coreVec
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 2u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -674,7 +674,7 @@ void cSpecialEffects::CreateBlowFire(const coreVector3 vPosition, const coreVect
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 3u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -698,7 +698,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreF
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -719,7 +719,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -743,7 +743,7 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -765,7 +765,7 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3 vPosition, const coreFlo
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = 2.0f*PI * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
 
     // 
     coreUintW i = 0u;
@@ -1194,8 +1194,8 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     if(pSound->EnableRef(this)) pSound->Stop();
 
     // 
-    if(bRelative) pSound->PlayRelative(this, fVolume * fBaseVolume, fPitch * fBasePitch, false, iType);
-             else pSound->PlayPosition(this, fVolume * fBaseVolume, fPitch * fBasePitch, false, iType, vPosition * 0.1f);
+    if(bRelative) pSound->PlayRelative(this, CLAMP(fVolume * fBaseVolume, CORE_AUDIO_MIN_GAIN, CORE_AUDIO_MAX_GAIN), CLAMP(fPitch * fBasePitch, CORE_AUDIO_MIN_PITCH, CORE_AUDIO_MAX_PITCH), false, iType);
+             else pSound->PlayPosition(this, CLAMP(fVolume * fBaseVolume, CORE_AUDIO_MIN_GAIN, CORE_AUDIO_MAX_GAIN), CLAMP(fPitch * fBasePitch, CORE_AUDIO_MIN_PITCH, CORE_AUDIO_MAX_PITCH), false, iType, vPosition * 0.1f);
 }
 
 
@@ -1489,6 +1489,8 @@ coreFloat cSpecialEffects::__GetEffectBase(const coreBool bLock)
         m_iEffectFrame = Core::System->GetCurFrame();
         m_iEffectCount = (m_iEffectCount + 1u) % 144u;  // loop at (110.00621124003 * PI)
     }
+
+    // 
     return GA * I_TO_F(m_iEffectCount);
 }
 
@@ -1510,8 +1512,10 @@ coreUintW cSpecialEffects::__CalcParticleNum(const coreUintW iValue, const coreU
     ASSERT(iIndex < ARRAY_SIZE(m_aiParticleFract))
     coreUint8& iFract = m_aiParticleFract[iIndex];
 
+    // 
     const coreUintW iTotal = iFract + iValue * g_CurConfig.Graphics.iParticle;
 
+    // 
     iFract = iTotal % 100u;
     return iTotal / 100u;
 }

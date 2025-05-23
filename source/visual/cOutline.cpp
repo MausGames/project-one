@@ -14,8 +14,8 @@
 void cOutlineStyle::Construct(const coreHashString& sProgramSingleName, const coreHashString& sProgramInstancedName)
 {
     // load shader-programs for outlined objects
-    s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(sProgramSingleName);
-    s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>(sProgramInstancedName);
+    m_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(sProgramSingleName);
+    m_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>(sProgramInstancedName);
 }
 
 
@@ -25,11 +25,11 @@ void cOutlineStyle::Apply()
 {
     // render single objects
     FOR_EACH(it, this->GetObjectSet())
-        (*it)->Render(s_pProgramSingle);
+        (*it)->Render(m_pProgramSingle);
 
     // render lists with objects
     FOR_EACH(it, this->GetListSet())
-        (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
+        (*it)->Render(m_pProgramInstanced, m_pProgramSingle);
 }
 
 
@@ -37,7 +37,7 @@ void cOutlineStyle::Apply()
 // apply immediate outline-style to single object
 void cOutlineStyle::ApplyObject(coreObject3D* pObject)const
 {
-    pObject->Render(s_pProgramSingle);
+    pObject->Render(m_pProgramSingle);
 }
 
 
@@ -45,7 +45,7 @@ void cOutlineStyle::ApplyObject(coreObject3D* pObject)const
 // apply immediate outline-style to list with objects
 void cOutlineStyle::ApplyList(coreBatchList* pList)const
 {
-    pList->Render(s_pProgramInstanced, s_pProgramSingle);
+    pList->Render(m_pProgramInstanced, m_pProgramSingle);
 }
 
 

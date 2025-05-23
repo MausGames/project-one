@@ -1044,7 +1044,7 @@ void cReplay::SetName(const coreChar* pcName)
 void cReplay::SetNameDefault(const coreUint8 iSlot)
 {
     // 
-    this->SetName(REPLAY_SLOTSYSTEM ? PRINT("REPLAY %u", iSlot + 1u) : PRINT("REPLAY-%u", g_pSave->NextReplayFileNum()));
+    this->SetName(PRINT("REPLAY %u", REPLAY_SLOTSYSTEM ? (iSlot + 1u) : g_pSave->NextReplayFileNum()));
 }
 
 
