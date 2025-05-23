@@ -259,8 +259,6 @@ void cMenuNavigator::Move()
 
     // 
     this->cGuiObject::Move();
-
-    if(!this->GetAlpha()) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, false);
 }
 
 
