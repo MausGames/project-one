@@ -28,6 +28,8 @@ static void UpgradeConfig()
 {
     coreInt32 iVersion = Core::Config->GetInt(CORE_CONFIG_BASE_VERSION);
 
+    UNUSED const coreInt32 iOriginal = iVersion;
+
     #define __UPGRADE(x) ((iVersion == (x)) && [&]() {iVersion = (x) + 1; return true;}())
     {
         if(__UPGRADE(0))
@@ -95,6 +97,26 @@ static void UpgradeConfig()
                     else if(iOldValue == 22) Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), CORE_INPUT_BUTTON_RIGHT_TRIGGER);
                 }
             }
+
+            #if defined(_CORE_SWITCH_)
+
+            if(iOriginal > 0)
+            {
+                for(coreUintW i = INPUT_SETS_KEYBOARD; i < INPUT_SETS; ++i)
+                {
+                    for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
+                    {
+                        const coreInt32 iOldValue = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j));
+
+                             if(iOldValue == SDL_GAMEPAD_BUTTON_SOUTH) Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), SDL_GAMEPAD_BUTTON_EAST);
+                        else if(iOldValue == SDL_GAMEPAD_BUTTON_EAST)  Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), SDL_GAMEPAD_BUTTON_SOUTH);
+                        else if(iOldValue == SDL_GAMEPAD_BUTTON_WEST)  Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), SDL_GAMEPAD_BUTTON_NORTH);
+                        else if(iOldValue == SDL_GAMEPAD_BUTTON_NORTH) Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), SDL_GAMEPAD_BUTTON_WEST);
+                    }
+                }
+            }
+
+            #endif
         }
     }
     #undef __UPGRADE
@@ -358,7 +380,7 @@ void UpdateInput()
     s_avOldStick.resize(Core::Input->GetJoystickNum(), coreVector2(0.0f,0.0f));
 
     // forward hat input to stick input
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNumAll(); i < ie; ++i)
     {
         Core::Input->ForwardHatToStick(i);
     }

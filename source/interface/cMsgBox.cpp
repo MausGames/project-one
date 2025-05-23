@@ -364,7 +364,7 @@ void cMsgBox::__ClearInput()
     Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
 
     // 
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNumAll(); i < ie; ++i)
     {
         Core::Input->SetJoystickAxis(i, 0u, 0.0f);
         Core::Input->SetJoystickAxis(i, 1u, 0.0f);

@@ -39,6 +39,7 @@ void cFigure::Render()
     this->cGuiObject::Render();
 
     // 
+    m_Fallback.SetAlpha(this->GetAlpha());
     m_Fallback.Render();
 }
 
@@ -122,7 +123,6 @@ void cFigure::Move()
     m_Fallback.SetCenter   (this->GetCenter   ());
     m_Fallback.SetAlignment(this->GetAlignment());
     m_Fallback.SetColor3   (this->GetColor3   () * COLOR_MENU_WHITE);
-    m_Fallback.SetAlpha    (this->GetAlpha    ());
     m_Fallback.SetScale    (this->GetSize     ().Processed(SIGN));
     m_Fallback.Move();
 
@@ -214,9 +214,9 @@ coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
     case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:  return "input_gamepad_switch.png";
     case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: return "input_gamepad_switch.png";
     case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:  return "input_gamepad_switch.png";
+    case CORE_INPUT_TYPE_STEAM:                         return "input_gamepad_steamdeck.png";
     case CORE_INPUT_TYPE_LUNA:                          return "input_gamepad_luna.png";
     case CORE_INPUT_TYPE_STADIA:                        return "input_gamepad_stadia.png";
-    case CORE_INPUT_TYPE_STEAM:                         return "input_gamepad_steamdeck.png";
     default:                                            return "input_gamepad_xboxone.png";
     }
 
@@ -339,12 +339,19 @@ coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 i
     else
     {
         // 
+        const SDL_GamepadButtonLabel eLabel = SDL_GetGamepadButtonLabelForType(SDL_GamepadType(iBase), SDL_GamepadButton(iKey));
+        if((eLabel == SDL_GAMEPAD_BUTTON_LABEL_A) || (eLabel == SDL_GAMEPAD_BUTTON_LABEL_CROSS))    return coreVector2(0.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        if((eLabel == SDL_GAMEPAD_BUTTON_LABEL_B) || (eLabel == SDL_GAMEPAD_BUTTON_LABEL_CIRCLE))   return coreVector2(1.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        if((eLabel == SDL_GAMEPAD_BUTTON_LABEL_X) || (eLabel == SDL_GAMEPAD_BUTTON_LABEL_SQUARE))   return coreVector2(2.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        if((eLabel == SDL_GAMEPAD_BUTTON_LABEL_Y) || (eLabel == SDL_GAMEPAD_BUTTON_LABEL_TRIANGLE)) return coreVector2(3.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+
+        // 
         switch(iKey)
         {
-        case CORE_INPUT_BUTTON_A:               return coreVector2(0.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
-        case CORE_INPUT_BUTTON_B:               return coreVector2(1.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
-        case CORE_INPUT_BUTTON_X:               return coreVector2(2.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
-        case CORE_INPUT_BUTTON_Y:               return coreVector2(3.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_SOUTH:          return coreVector2(0.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_EAST:           return coreVector2(1.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_WEST:           return coreVector2(2.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case SDL_GAMEPAD_BUTTON_NORTH:          return coreVector2(3.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
         case SDL_GAMEPAD_BUTTON_BACK:           return coreVector2(4.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
         case SDL_GAMEPAD_BUTTON_GUIDE:          return FIGURE_INVALID;
         case SDL_GAMEPAD_BUTTON_START:          return coreVector2(5.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
@@ -364,6 +371,10 @@ coreVector2 cFigure::DetermineTexOffset(const coreUint8 iBase, const coreInt16 i
         case SDL_GAMEPAD_BUTTON_TOUCHPAD:       return coreVector2(5.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
         case CORE_INPUT_BUTTON_LEFT_TRIGGER:    return coreVector2(2.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
         case CORE_INPUT_BUTTON_RIGHT_TRIGGER:   return coreVector2(3.0f,3.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_A:               return coreVector2(0.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_B:               return coreVector2(1.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_X:               return coreVector2(2.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
+        case CORE_INPUT_BUTTON_Y:               return coreVector2(3.0f,0.0f) * FIGURE_SCALE_GAMEPAD;
         case FIGURE_KEY_LEFT_STICK:             return coreVector2(0.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
         case FIGURE_KEY_RIGHT_STICK:            return coreVector2(1.0f,2.0f) * FIGURE_SCALE_GAMEPAD;
         default:                                return FIGURE_INVALID;
