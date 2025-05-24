@@ -838,7 +838,7 @@ void cReplayMenu::Move()
 
                     // 
                     pArcadeInput->Start("", REPLAY_NAME_INPUT);
-                    pArcadeInput->OverrideText(oInfo.oHeader.acName);
+                    pArcadeInput->OverrideText(g_pMenu->CheckTextWithStandardFont(oInfo.oHeader.acName) ? oInfo.oHeader.acName : "");
 
                     // 
                     g_pMenu->ShiftSurface(this, SURFACE_REPLAY_RENAME, 3.0f, 1u);
@@ -1034,11 +1034,13 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
     }
 
     // 
-    m_DetailTitle      .SetText(oInfo.oHeader.acName);
-    m_DetailTitleSmall .SetText(oInfo.oHeader.acName);
-    m_DetailTitleSmall2.SetText(oInfo.oHeader.acName);
-    m_aDetailScore[1]  .SetText(PRINT("%'u",      iTotalScore));
-    m_aDetailTime [1]  .SetText(PRINT("%.1f %+d", fTime, iShift));
+    g_pMenu->SetTextWithFont(&m_DetailTitle,       oInfo.oHeader.acName);
+    g_pMenu->SetTextWithFont(&m_DetailTitleSmall,  oInfo.oHeader.acName);
+    g_pMenu->SetTextWithFont(&m_DetailTitleSmall2, oInfo.oHeader.acName);
+
+    // 
+    m_aDetailScore[1].SetText(PRINT("%'u",      iTotalScore));
+    m_aDetailTime [1].SetText(PRINT("%.1f %+d", fTime, iShift));
 
     m_DetailTitle.RetrieveDesiredSize([this](const coreVector2 vSize)
     {
@@ -1295,9 +1297,11 @@ void cReplayMenu::__UpdateList(const coreBool bReset)
     {
         const cReplay::sHeader& oHeader = m_aInfoList[i + iStart].oHeader;
 
-        const coreUintW iLen = std::strlen(oHeader.acName);
-        
-        m_aName [i].SetText((iLen <= REPLAY_NAME_INPUT) ? oHeader.acName : PRINT("%.*s~", REPLAY_NAME_INPUT, oHeader.acName));
+        const coreUintW iLen   = std::strlen(oHeader.acName);
+        const coreChar* pcName = (iLen <= REPLAY_NAME_INPUT) ? oHeader.acName : PRINT("%.*s~", REPLAY_NAME_INPUT, oHeader.acName);
+
+        g_pMenu->SetTextWithFont(&m_aName[i], pcName);
+
         m_aTime [i].SetText(oHeader.iMagic ? coreData::DateTimePrint("%Y-%m-%d %H:%M", TIMEMAP_LOCAL(oHeader.iViewTimestamp)) : "-");
         m_aScore[i].SetText(oHeader.iMagic ? PRINT("%'u", cReplayMenu::__GetTotalScore(oHeader))                              : "");
     }
@@ -1447,7 +1451,7 @@ const coreChar* cReplayMenu::__PrintWithName(const coreHashString sLanguageKey, 
 
     // 
     s_sString = Core::Language->GetString(sLanguageKey);
-    s_sString.replace("{NAME}", pcName);
+    s_sString.replace("{NAME}", g_pMenu->CheckTextWithDynamicFont(pcName) ? pcName : Core::Language->GetString("REPLAY_WATERMARK"));
 
     return s_sString.c_str();
 }

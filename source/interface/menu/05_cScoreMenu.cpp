@@ -638,10 +638,11 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
                 fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), GAME_GOAL_FACTOR);
             }
 
-            m_aRank [i].SetText(PRINT("%u.", pScore[i].iRank));
-            m_aName [i].SetText(pScore[i].pcName);
+            g_pMenu->SetTextWithFont(&m_aName[i], pScore[i].pcName);
+
+            m_aRank [i].SetText(PRINT("%u.",      pScore[i].iRank));
             m_aTime [i].SetText(PRINT("%.1f %+d", fTime, iShift));
-            m_aScore[i].SetText(PRINT("%'u", pScore[i].iValue));
+            m_aScore[i].SetText(PRINT("%'u",      pScore[i].iValue));
 
             cScoreMenu::__SetWeaponIcon(&m_aIcon[i], pData->aaiOptionWeapon[0][0]);
 
@@ -706,10 +707,11 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
                     fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), GAME_GOAL_FACTOR);
                 }
 
-                m_PlayerRank .SetText(PRINT("%u.", pScore->iRank));
-                m_PlayerName .SetText(pScore->pcName);
+                g_pMenu->SetTextWithFont(&m_PlayerName, pScore->pcName);
+
+                m_PlayerRank .SetText(PRINT("%u.",      pScore->iRank));
                 m_PlayerTime .SetText(PRINT("%.1f %+d", fTime, iShift));
-                m_PlayerScore.SetText(PRINT("%'u", pScore->iValue));
+                m_PlayerScore.SetText(PRINT("%'u",      pScore->iValue));
 
                 cScoreMenu::__SetWeaponIcon(&m_PlayerIcon, pData->aaiOptionWeapon[0][0]);
 

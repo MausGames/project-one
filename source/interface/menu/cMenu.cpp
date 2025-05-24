@@ -94,6 +94,24 @@ cMenu::cMenu()noexcept
     m_TransitionTime.SetTimeID(0);
 
     // 
+    const coreMap<coreString, coreString>& asLanguageList = cMenu::GetLanguageList();
+
+    // 
+    m_apFontMap.emplace(MENU_FONT_DYNAMIC,  Core::Manager::Resource->Get<coreFont>(MENU_FONT_DYNAMIC));
+    m_apFontMap.emplace(MENU_FONT_STANDARD, Core::Manager::Resource->Get<coreFont>(MENU_FONT_STANDARD));
+
+    // 
+    FOR_EACH(it, asLanguageList)
+    {
+        // 
+        coreString sFont;
+        if(coreLanguage::FindString(it->c_str(), "FONT", &sFont))
+        {
+            if(!m_apFontMap.count(sFont.c_str())) m_apFontMap.emplace(sFont.c_str(), Core::Manager::Resource->Get<coreFont>(sFont.c_str()));
+        }
+    }
+
+    // 
     m_Interface.ShowWave("1-1");
     m_Interface.UpdateLayout();
     m_Interface.UpdateEnabled();
@@ -1077,6 +1095,55 @@ void cMenu::SetButtonColor(const coreVector3 vColor)
 {
     // 
     s_vButtonColor = vColor;
+}
+
+
+// ****************************************************************
+// 
+coreBool cMenu::SetTextWithFont(coreLabel* OUTPUT pLabel, const coreChar* pcText)
+{
+    ASSERT(m_apFontMap.size() >= 2u)
+
+    coreUintW iTarget = 0u;   // fallback to dynamic font
+    coreBool  bFound  = false;
+
+    // 
+    for(coreUintW i = 1u, ie = m_apFontMap.size(); i < ie; ++i)
+    {
+        if(m_apFontMap[i]->AreGlyphsProvided(pcText))
+        {
+            iTarget = i;
+            bFound  = true;
+            break;
+        }
+    }
+
+    // 
+    if(pLabel->SetText(pcText))
+    {
+        // 
+        pLabel->Construct(m_apFontMap[iTarget].GetHandle()->GetName(), pLabel->GetHeight(), pLabel->GetOutline());
+    }
+
+    return bFound;
+}
+
+
+// ****************************************************************
+// 
+coreBool cMenu::CheckTextWithDynamicFont(const coreChar* pcText)
+{
+    ASSERT(m_apFontMap.size() >= 2u)
+    return m_apFontMap[0]->AreGlyphsProvided(pcText);
+}
+
+
+// ****************************************************************
+// 
+coreBool cMenu::CheckTextWithStandardFont(const coreChar* pcText)
+{
+    ASSERT(m_apFontMap.size() >= 2u)
+    return m_apFontMap[1]->AreGlyphsProvided(pcText);
 }
 
 

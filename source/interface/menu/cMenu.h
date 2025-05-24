@@ -1530,6 +1530,8 @@ private:
     coreTimer m_TransitionTime;          // 
     coreUint8 m_iTransitionState;        // 
     coreMenu* m_pTransitionMenu;         // 
+
+    coreMapStr<coreFontPtr> m_apFontMap;
     
     coreFlow m_fVolume;
     
@@ -1591,7 +1593,12 @@ public:
     inline cInterface* GetInterface() {return &m_Interface;}
     
     inline void PreventSaveText() {m_bNoticeSavePrevent = true;}
-    
+
+    // 
+    coreBool SetTextWithFont          (coreLabel* OUTPUT pLabel, const coreChar* pcText);
+    coreBool CheckTextWithDynamicFont (const coreChar* pcText);
+    coreBool CheckTextWithStandardFont(const coreChar* pcText);
+
     // 
     coreFloat GetVolume()const;
 
