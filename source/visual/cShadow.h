@@ -23,15 +23,16 @@
 
 // ****************************************************************
 // shadow definitions
-#define SHADOW_VIEW_DISTANCE (90.0f)    // distance from origin to light source
-#define SHADOW_CLIP_NEAR     (1.0f)     // near clipping plane
-#define SHADOW_CLIP_FAR      (145.0f)   // far clipping plane
-#define SHADOW_RANGE_X       (56.0f)    // view range of the shadow map (smaller = sharper, but more artifacts)
-#define SHADOW_RANGE_Y       (62.0f)    // same for Y
-#define SHADOW_HEIGHT_FACTOR (2.5f)     // height correction factor (to reduce shadow length)
-#define SHADOW_TEST_FACTOR   (0.2f)     // 
-#define SHADOW_RES_LOW       (1.0f)     // 
-#define SHADOW_RES_HIGH      (1.5f)     // 
+#define SHADOW_VIEW_DISTANCE (90.0f)     // distance from origin to light source
+#define SHADOW_CLIP_NEAR     (1.0f)      // near clipping plane
+#define SHADOW_CLIP_FAR      (145.0f)    // far clipping plane
+#define SHADOW_RANGE_X       (56.0f)     // view range of the shadow map (smaller = sharper, but more artifacts)
+#define SHADOW_RANGE_Y       (62.0f)     // same for Y
+#define SHADOW_HEIGHT_FACTOR (2.5f)      // height correction factor (to reduce shadow length)
+#define SHADOW_TEST_FACTOR   (0.2f)      // 
+#define SHADOW_RES_LOW       (1.0f)      // 
+#define SHADOW_RES_HIGH      (1.5f)      // 
+#define SHADOW_MAX_PIXELS    (1024.0f)   // 
 
 #define SHADOW_HANDLE_OUTDOOR            (0u)   // outdoor-surface handle
 #define SHADOW_HANDLE_OUTDOOR_GLOW       (1u)   // 
