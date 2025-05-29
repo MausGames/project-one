@@ -122,6 +122,12 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact, co
     this->ChangeType(0);
 }
 
+void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact)
+{
+    // 
+    this->Deactivate(bAnimated, vImpact, coreVector2(0.0f,0.0f));
+}
+
 void cBullet::Deactivate(const coreBool bAnimated)
 {
     // 

@@ -1213,14 +1213,14 @@ void cConfigMenu::CheckValues()
     coreBool bSave = false;
 
     // 
-    const coreVector2 vConfigResolution = coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)));
+    const coreVector2 vSystemResolution = coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)));
 
     // 
     #define __CHECK_VALUE(n,a)   {const coreBool A = (a);                                               bSave = bSave || A; m_aLabel[ENTRY_ ## n].SetColor3(A ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE);}
     #define __CHECK_INPUT(n,a,c) {coreBool A = false; for(coreUintW i = 0u; i < (c); ++i) A = A || (a); bSave = bSave || A; m_aLabel[ENTRY_ ## n].SetColor3(A ? g_pMenu->GetHighlightColor() : COLOR_MENU_WHITE);}
     {
         __CHECK_VALUE(VIDEO_MONITOR,         m_Monitor               .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))
-        __CHECK_VALUE(VIDEO_RESOLUTION,      vCurResolution                           != vConfigResolution)
+        __CHECK_VALUE(VIDEO_RESOLUTION,      vCurResolution                           != vSystemResolution)
         __CHECK_VALUE(VIDEO_DISPLAYMODE,     m_DisplayMode           .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))
         __CHECK_VALUE(VIDEO_VSYNC,           m_Vsync                 .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))
         __CHECK_VALUE(VIDEO_ANTIALIASING,    m_AntiAliasing          .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))

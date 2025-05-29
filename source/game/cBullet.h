@@ -81,7 +81,8 @@ public:
 
     // control status
     void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection, const coreInt32 iType);
-    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact, const coreVector2 vForce = coreVector2(0.0f,0.0f));
+    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact, const coreVector2 vForce);
+    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact);
     void Deactivate(const coreBool bAnimated);
 
     // 
