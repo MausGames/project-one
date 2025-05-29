@@ -415,11 +415,20 @@ void cExtraMenu::Move()
                 m_iStatus = 2;
             }
 
-            // 
-            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateLine(&m_aTrophyLine[i], false, coreVector3(1.0f,1.0f,1.0f), MENU_UPDATE_NO_SOUND | MENU_UPDATE_STATIC);//cMenuNavigator::IsUsingAny());
+            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i)
+            {
+                const coreBool bFocused = (m_aTrophyLine[i].IsFocused() || m_aTrophyArrow[i].IsFocused());
 
-            // 
-            for(coreUintW i = 0u; i < MENU_EXTRA_TROPHIES; ++i) cMenu::UpdateButton(&m_aTrophyArrow[i], this, m_aTrophyLine[i].IsFocused() || m_aTrophyArrow[i].IsFocused(), m_aTrophyTile[i].GetColor3(), MENU_UPDATE_NO_SOUND);
+                // 
+                cMenu::UpdateLine(&m_aTrophyLine[i], false, coreVector3(1.0f,1.0f,1.0f), MENU_UPDATE_NO_SOUND | MENU_UPDATE_STATIC);//cMenuNavigator::IsUsingAny());
+
+                // 
+                cMenu::UpdateButton(&m_aTrophyArrow[i], this, bFocused, m_aTrophyTile[i].GetColor3(), MENU_UPDATE_NO_SOUND);
+
+                // 
+                m_aTrophyTile[i].SetSize(coreVector2(0.05f,0.05f) * 1.4f * (bFocused ? 1.1f : 1.0f));
+                m_aTrophyBack[i].SetSize(m_aTrophyTile[i].GetSize() + coreVector2(0.01f,0.01f));
+            }
         }
         break;
 
