@@ -271,6 +271,17 @@ cReplayMenu::cReplayMenu()noexcept
     m_aDetailTime[1].SetPosition(m_aDetailTime[0].GetPosition() + coreVector2(0.0f,-0.036f));
     m_aDetailTime[1].SetColor3  (COLOR_MENU_WHITE);
 
+    m_DetailOneColorClear.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_DetailOneColorClear.SetPosition(m_aDetailMedal[0].GetPosition() + coreVector2(0.0f,-0.06f));
+    m_DetailOneColorClear.SetColor3  (COLOR_MENU_WHITE);
+    m_DetailOneColorClear.SetText    ("1CC");
+
+    m_DetailOneColorClearBack.DefineTexture(0u, "effect_headlight_point.png");
+    m_DetailOneColorClearBack.DefineProgram("menu_single_program");
+    m_DetailOneColorClearBack.SetPosition  (m_DetailOneColorClear.GetPosition());
+    m_DetailOneColorClearBack.SetSize      (coreVector2(0.1f,0.05f));
+    m_DetailOneColorClearBack.SetColor3    (coreVector3(0.0f,0.0f,0.0f));
+
     m_DetailType.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
     m_DetailType.SetPosition (coreVector2(-1.00f,1.00f) * m_aDetailName[0].GetPosition());
     m_DetailType.SetSize     (coreVector2( 0.47f,0.03f));
@@ -474,6 +485,7 @@ cReplayMenu::cReplayMenu()noexcept
     for(coreUintW i = 0u; i < MENU_REPLAY_DETAIL_ICONS;   ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailIconBack [i]);
     for(coreUintW i = 0u; i < MENU_REPLAY_DETAIL_ICONS;   ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailIcon     [i]);
     for(coreUintW i = 0u; i < MENU_REPLAY_DETAIL_MEDALS;  ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailMedal    [i]);
+    this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailOneColorClearBack);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailStartBack);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDetailStartArrow); ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailStartArrow[i]);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailSelection);   // # before title
@@ -483,6 +495,7 @@ cReplayMenu::cReplayMenu()noexcept
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailStartLabel);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDetailScore); ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailScore[i]);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDetailTime);  ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailTime [i]);
+    this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailOneColorClear);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailBox);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_NavigatorDetails);
 
@@ -1054,6 +1067,11 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
             m_DetailTitleSmall2.SetEnabled(bBig2 ? CORE_OBJECT_ENABLE_ALL     : CORE_OBJECT_ENABLE_NOTHING);
         });
     });
+
+    // 
+    const coreBool bOneColorClear = HAS_BIT(oInfo.oHeader.iStatus, REPLAY_STATUS_ONECOLORCLEAR);
+    m_DetailOneColorClear    .SetEnabled(bOneColorClear ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_DetailOneColorClearBack.SetEnabled(bOneColorClear ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     cMenu::ApplyMedalTexture(&m_aDetailMedal[0], oInfo.oHeader.iMedalArcade, MEDAL_TYPE_ARCADE, false);

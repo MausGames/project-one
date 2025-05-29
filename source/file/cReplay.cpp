@@ -1359,6 +1359,13 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
 
     // 
     if(pHeader->iNumPlayers == 1u) pHeader->iOptionType = GAME_TYPE_SOLO;
+
+    // 
+    const coreBool bNearComplete = (pHeader->aaiMedalSegment[MISSION_INTRO][0] != MEDAL_NONE) && (pHeader->aaiMedalSegment[MISSION_ATER][5] != MEDAL_NONE);
+    if(bNearComplete && !pHeader->aiDataContinuesUsed[0] && std::all_of(pHeader->aiOptionShield, pHeader->aiOptionShield + pHeader->iNumPlayers, [](const coreUint8 A) {return !A;}))
+    {
+        ADD_BIT(pHeader->iStatus, REPLAY_STATUS_ONECOLORCLEAR)
+    }
 }
 
 

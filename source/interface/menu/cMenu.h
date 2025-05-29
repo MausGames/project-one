@@ -789,6 +789,8 @@ private:
     cGuiLabel  m_DetailTitleSmall2;                               // 
     cGuiLabel  m_aDetailScore[2];                                 // 
     cGuiLabel  m_aDetailTime [2];                                 // 
+    cGuiLabel  m_DetailOneColorClear;                             // 
+    cGuiObject m_DetailOneColorClearBack;                         // 
 
     cGuiSwitchBox m_DetailType;                                   // 
     cGuiSwitchBox m_DetailDifficulty;                             // 
