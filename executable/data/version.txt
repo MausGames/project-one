@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Eigengrau v1.3.9 (2025-05-28)
+
+- fixed a graphics driver crash on Linux with AMD GPUs, including Steam Deck (since Mesa 24.3.X)
+- fixed not using the correct font for leaderboard and replay names, especially for names in Simplified Chinese and Traditional Chinese
+- fixed wrong default buttons when using a gamepad with reversed button layout, like Nintendo Switch™ Pro Controller or Joy-Cons™
+- fixed auto-fire sometimes getting canceled when leaving the pause menu
+- fixed visual glitches in some of the backgrounds
+- improved texture sharpness
+- improved overall performance
+- updated engine backend from SDL2 to SDL3, which should improve system compatibility, controller support and application responsiveness
+
+
+-------------------------------------------------------------------
 Eigengrau v1.3.8 (2024-10-30)
 
 - fixed an issue where the rendering performance deteriorated permanently after entering the pause menu

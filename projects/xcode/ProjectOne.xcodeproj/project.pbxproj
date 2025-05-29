@@ -1902,7 +1902,7 @@
 					../../../core-engine/libraries/bin/macos/optional,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.3.8;
+				MARKETING_VERSION = 1.3.9;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-ftrivial-auto-var-init=pattern";
 				OTHER_LDFLAGS = (
@@ -1977,7 +1977,7 @@
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.3.8;
+				MARKETING_VERSION = 1.3.9;
 				OTHER_CFLAGS = (
 					"-fno-strict-overflow",
 					"-ffinite-math-only",
