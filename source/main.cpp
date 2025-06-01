@@ -573,7 +573,9 @@ coreVector2 CalcFinalDirection()
 // lock frame rate
 static void LockFramerate()
 {
-    if(!Core::Debug->IsEnabled())
+#if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
+
+    if(!Core::Debug->IsEnabled() && !SDL_GL_GetSwapIntervalInline())
     {
         coreUint64 iNewPerfTime;
         coreDouble dDifference;
@@ -608,6 +610,12 @@ static void LockFramerate()
         // save last high-precision time value
         s_iOldPerfTime = iNewPerfTime;
     }
+
+#else
+
+    (void)s_iOldPerfTime;
+
+#endif
 }
 
 
