@@ -1363,7 +1363,7 @@ void cNevoMission::__SetupOwn()
                         coreUint8 aiOrder[5];
                         for(coreUintW i = 0u; i < ARRAY_SIZE(aiOrder); ++i) aiOrder[i] = i;
 
-                        coreData::Shuffle(&*aiOrder, aiOrder + ARRAY_SIZE(aiOrder), iWallCount);
+                        ShuffleRange(&*aiOrder, aiOrder + ARRAY_SIZE(aiOrder), iWallCount);
 
                         for(coreUintW i = 0u; i < 5u; ++i)
                         {
@@ -1389,7 +1389,7 @@ void cNevoMission::__SetupOwn()
                         coreUint8 aiOrder[11];
                         for(coreUintW i = 0u; i < ARRAY_SIZE(aiOrder); ++i) aiOrder[i] = i;
 
-                        coreData::Shuffle(&*aiOrder, aiOrder + ARRAY_SIZE(aiOrder), iWallCount);
+                        ShuffleRange(&*aiOrder, aiOrder + ARRAY_SIZE(aiOrder), iWallCount);
                         std::swap(*(s_cast<coreUint8*>(std::memchr(aiOrder, iX, ARRAY_SIZE(aiOrder)))), aiOrder[iY]);
 
                         for(coreUintW i = 0u; i < 11u; ++i)

@@ -89,6 +89,7 @@
 // engine headers
 #include "Core.h"
 #include <numeric>   // std::accumulate
+#include <random>    // std::minstd_rand
 
 #if defined(_CORE_MSVC_)
     #pragma warning(disable : 4189)   // local variable is initialized but not referenced

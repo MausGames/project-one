@@ -160,6 +160,14 @@ inline coreFloat RoundFactor(const coreFloat fValue, const coreFloat fFactor)
 
 // ****************************************************************
 // 
+template <typename T> inline void ShuffleRange(const T& tBegin, const T& tEnd, const coreUint32 iSeed)
+{
+    std::shuffle(tBegin, tEnd, std::minstd_rand(iSeed));   // different to engine function
+}
+
+
+// ****************************************************************
+// 
 inline coreFloat TriangleWave(const coreFloat x)
 {
     const coreFloat A = FRACT(x);
