@@ -975,6 +975,7 @@ void cGeluMission::__SetupOwn()
                 {
                     pBullet->Deactivate(false);
                     iOutsideHit += 1u;
+                    STAGE_FAILTROPHY
                 }
 
                 if(((iOrderWall == 0u) && A) ||
