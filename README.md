@@ -67,7 +67,8 @@ https://store-jp.nintendo.com/list/software/70010000071402.html (Japan)
 
 ## Highlights
 
-**Areas:**
+### Areas
+
 - Intro: [Stages](source/game/mission/99_cIntroMission_setup.cpp), [Base](source/game/mission/99_cIntroMission.cpp)
 - Virido: [Stages](source/game/mission/01_cViridoMission_setup.cpp), [Base](source/game/mission/01_cViridoMission.cpp)
 - Nevo: [Stages](source/game/mission/02_cNevoMission_setup.cpp), [Base](source/game/mission/02_cNevoMission.cpp)
@@ -78,7 +79,8 @@ https://store-jp.nintendo.com/list/software/70010000071402.html (Japan)
 - Muscus: [Stages](source/game/mission/07_cMuscusMission_setup.cpp), [Base](source/game/mission/07_cMuscusMission.cpp) (Darkness: [Source](source/visual/cHeadlight.cpp), [Header](source/visual/cHeadlight.h))
 - Ater: [Stages](source/game/mission/08_cAterMission_setup.cpp), [Base](source/game/mission/08_cAterMission.cpp)
 
-**Bosses:**
+### Bosses
+
 - [Shinai](source/game/boss/9901_cIntroBoss.cpp)
 - [Torus](source/game/boss/0102_cTorusBoss.cpp)
 - [Leviathan](source/game/boss/0203_cLeviathanBoss.cpp)
@@ -91,7 +93,8 @@ https://store-jp.nintendo.com/list/software/70010000071402.html (Japan)
 - [P1](source/game/boss/0801_cProjectOneBoss.cpp)
 - [???](source/game/boss/0802_cEigengrauBoss.cpp)
 
-**Other:**
+### Other
+
 - Game: [Source](source/game/cGame.cpp), [Header](source/game/cGame.h)
   - Player: [Source](source/game/cPlayer.cpp), [Header](source/game/cPlayer.h)
   - Enemies: [Source](source/game/cEnemy.cpp), [Header](source/game/cEnemy.h)
