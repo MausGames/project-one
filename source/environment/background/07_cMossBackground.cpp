@@ -19,6 +19,7 @@ cMossBackground::cMossBackground()noexcept
 , m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
 , m_fThunderDelay    (0.0f)
 , m_iThunderIndex    (Core::Rand->Uint(ARRAY_SIZE(m_apThunder) - 1u))
+, m_iToken           (0u)
 , m_bEnableLightning (true)
 {
     coreBatchList* pList1;
@@ -237,7 +238,7 @@ void cMossBackground::__InitOwn()
 
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_moss.wav");
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
@@ -252,11 +253,14 @@ void cMossBackground::__ExitOwn()
     SAFE_DELETE(m_pWater)
 
     // stop base sound-effect
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    if(!Core::Manager::Resource->DetachFunction(m_iToken))
     {
-        if(pResource->EnableRef(this))
-            pResource->Stop();
-    });
+        m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+        {
+            if(pResource->EnableRef(this))
+                pResource->Stop();
+        });
+    }
 }
 
 

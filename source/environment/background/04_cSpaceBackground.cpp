@@ -19,6 +19,7 @@ cSpaceBackground::cSpaceBackground()noexcept
 , m_iCopyLower   (0u)
 , m_iCopyUpper   (0u)
 , m_vNebulaMove  (coreVector2(0.0f,0.0f))
+, m_iToken       (0u)
 {
     coreBatchList* pList1;
 
@@ -121,7 +122,7 @@ void cSpaceBackground::__InitOwn()
 {
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_space.wav");
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
@@ -133,11 +134,14 @@ void cSpaceBackground::__InitOwn()
 void cSpaceBackground::__ExitOwn()
 {
     // stop base sound-effect
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    if(!Core::Manager::Resource->DetachFunction(m_iToken))
     {
-        if(pResource->EnableRef(this))
-            pResource->Stop();
-    });
+        m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+        {
+            if(pResource->EnableRef(this))
+                pResource->Stop();
+        });
+    }
 }
 
 

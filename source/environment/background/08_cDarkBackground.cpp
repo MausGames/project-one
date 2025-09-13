@@ -22,6 +22,7 @@ cDarkBackground::cDarkBackground()noexcept
 , m_afFade          {}
 , m_vColor          (cDarkBackground::Color)
 , m_vColor2         (cDarkBackground::Color2)
+, m_iToken          (0u)
 , m_fLightningFlash (0.0f)
 {
     // 
@@ -116,7 +117,7 @@ void cDarkBackground::__InitOwn()
 {
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_dark.wav");
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
@@ -128,11 +129,14 @@ void cDarkBackground::__InitOwn()
 void cDarkBackground::__ExitOwn()
 {
     // stop base sound-effect
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    if(!Core::Manager::Resource->DetachFunction(m_iToken))
     {
-        if(pResource->EnableRef(this))
-            pResource->Stop();
-    });
+        m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+        {
+            if(pResource->EnableRef(this))
+                pResource->Stop();
+        });
+    }
 }
 
 

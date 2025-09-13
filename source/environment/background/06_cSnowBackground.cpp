@@ -15,6 +15,7 @@ cSnowBackground::cSnowBackground()noexcept
 : cBackground (false)
 , m_vSnowMove (coreVector2(0.0f,0.0f))
 , m_fSnowWave (0.0f)
+, m_iToken    (0u)
 {
     coreBatchList* pList1;
 
@@ -291,7 +292,7 @@ void cSnowBackground::__InitOwn()
 
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_snow.wav");
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
@@ -306,11 +307,14 @@ void cSnowBackground::__ExitOwn()
     SAFE_DELETE(m_pWater)
 
     // stop base sound-effect
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    if(!Core::Manager::Resource->DetachFunction(m_iToken))
     {
-        if(pResource->EnableRef(this))
-            pResource->Stop();
-    });
+        m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+        {
+            if(pResource->EnableRef(this))
+                pResource->Stop();
+        });
+    }
 }
 
 

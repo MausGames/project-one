@@ -15,6 +15,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 : cBackground  (false)
 , m_Smoke      (256u)
 , m_fSparkTime (Core::Rand->Float(10.0f))
+, m_iToken     (0u)
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -309,7 +310,7 @@ void cVolcanoBackground::__InitOwn()
 {
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_volcano.wav");
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
@@ -321,11 +322,14 @@ void cVolcanoBackground::__InitOwn()
 void cVolcanoBackground::__ExitOwn()
 {
     // stop base sound-effect
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    if(!Core::Manager::Resource->DetachFunction(m_iToken))
     {
-        if(pResource->EnableRef(this))
-            pResource->Stop();
-    });
+        m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+        {
+            if(pResource->EnableRef(this))
+                pResource->Stop();
+        });
+    }
 }
 
 

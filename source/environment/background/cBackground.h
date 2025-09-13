@@ -292,6 +292,7 @@ private:
     coreFlow       m_fOffset;    // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreUint32   m_iToken;       // 
 
 
 public:
@@ -332,7 +333,7 @@ private:
     coreBool  m_bOverdrive;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    //coreMusicPlayer m_Music;
+    coreUint32   m_iToken;       // 
 
 
 public:
@@ -375,6 +376,7 @@ private:
     coreVector2 m_vGroundPos;
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreUint32   m_iToken;        // 
 
 
 public:
@@ -423,6 +425,7 @@ private:
     coreVector2  m_vNebulaMove;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreUint32   m_iToken;        // 
 
 
 public:
@@ -466,6 +469,7 @@ private:
     coreUintW m_iSparkNum;          // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreUint32   m_iToken;       // 
 
 
 public:
@@ -495,6 +499,7 @@ private:
     coreFlow       m_fSnowWave;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreUint32   m_iToken;        // 
 
 
 public:
@@ -535,6 +540,7 @@ private:
     coreUint8    m_iThunderIndex;       // 
 
     coreSoundPtr m_pBaseSound;          // base sound-effect
+    coreUint32   m_iToken;              // 
 
     cHeadlight m_Headlight;             // 
 
@@ -606,6 +612,7 @@ private:
     coreVector3 m_vColor2;                    // 
 
     coreSoundPtr m_pBaseSound;                // base sound-effect
+    coreUint32   m_iToken;                    // 
 
     coreFullscreen m_Lightning;               // 
     coreFlow       m_fLightningFlash;         // 
@@ -673,6 +680,7 @@ private:
     cHeadlight m_Headlight;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreUint32   m_iToken;       // 
 
 
 public:
@@ -708,6 +716,7 @@ private:
     coreFlow       m_fOffset;     // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreUint32   m_iToken;        // 
 
 
 public:

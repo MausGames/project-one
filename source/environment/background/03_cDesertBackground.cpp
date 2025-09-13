@@ -20,6 +20,7 @@ cDesertBackground::cDesertBackground()noexcept
 , m_fTrailBlend (0.0f)
 , m_bTrail      (false)
 , m_vGroundPos  (coreVector2(0.0f,0.0f))
+, m_iToken      (0u)
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -313,7 +314,7 @@ void cDesertBackground::__InitOwn()
 {
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_desert.wav");
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
@@ -325,11 +326,14 @@ void cDesertBackground::__InitOwn()
 void cDesertBackground::__ExitOwn()
 {
     // stop base sound-effect
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    if(!Core::Manager::Resource->DetachFunction(m_iToken))
     {
-        if(pResource->EnableRef(this))
-            pResource->Stop();
-    });
+        m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+        {
+            if(pResource->EnableRef(this))
+                pResource->Stop();
+        });
+    }
 }
 
 

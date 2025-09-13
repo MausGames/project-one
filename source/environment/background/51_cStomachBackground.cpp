@@ -13,6 +13,7 @@
 // constructor
 cStomachBackground::cStomachBackground()noexcept
 : cBackground (false)
+, m_iToken    (0u)
 {
     coreBatchList* pList1;
 
@@ -78,7 +79,7 @@ void cStomachBackground::__InitOwn()
 {
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_stomach.wav");
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
@@ -90,11 +91,14 @@ void cStomachBackground::__InitOwn()
 void cStomachBackground::__ExitOwn()
 {
     // stop base sound-effect
-    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    if(!Core::Manager::Resource->DetachFunction(m_iToken))
     {
-        if(pResource->EnableRef(this))
-            pResource->Stop();
-    });
+        m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+        {
+            if(pResource->EnableRef(this))
+                pResource->Stop();
+        });
+    }
 }
 
 
