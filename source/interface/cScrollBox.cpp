@@ -150,7 +150,7 @@ void cScrollBox::Move()
         if(m_bDrag)
         {
             const coreFloat fNewDragValue = fMousePos - m_Cursor.GetPosition().y;
-            fDrag += (fNewDragValue - m_fDragValue) * RCP(fPosUp - fPosDown) * m_fMaxOffset;
+            fDrag += (fNewDragValue - m_fDragValue) / (fPosUp - fPosDown) * m_fMaxOffset;
         }
 
         // 
@@ -181,7 +181,7 @@ void cScrollBox::Move()
         this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingAny() ? 4.0f : 10.0f) * m_fSpeed * fBoost * TIME))));
 
         // 
-        m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y * RCP(m_fMaxOffset))));
+        m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y / m_fMaxOffset)));
         m_Cursor.Move();
 
         // 

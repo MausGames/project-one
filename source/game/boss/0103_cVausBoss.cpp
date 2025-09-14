@@ -213,7 +213,7 @@ void cVausBoss::__MoveOwn()
                 m_avVector[0].z = pBall->GetDirection().x;
             }
 
-            const coreFloat fDrop   = (fSpeed / FRAMERATE_MIN) * RCP(BLENDB(fSpeed / FRAMERATE_MIN)) * 0.5f / fSpeed; // TODO 1: wtf, get rid of time value if necessary  
+            const coreFloat fDrop   = (fSpeed / FRAMERATE_MIN) / (BLENDB(fSpeed / FRAMERATE_MIN)) * 0.5f / fSpeed; // TODO 1: wtf, get rid of time value if necessary  
             const coreFloat fNewPos = m_avVector[0].x + pBall->GetDirection().x * VIRIDO_BALL_SPEED * fDrop;
 
             this->DefaultMoveLerp(m_avVector[0].xy(), coreVector2(fNewPos, -0.95f), fTime);

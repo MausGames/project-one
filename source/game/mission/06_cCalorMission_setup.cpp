@@ -2844,7 +2844,7 @@ void cCalorMission::__SetupOwn()
         {
             if(!bFirstHit || (pEnemy->GetID() != cWarriorEnemy::ID)) return;
 
-            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.03f * RCP(I_TO_F(g_pGame->GetNumPlayers())));
+            this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.03f / (I_TO_F(g_pGame->GetNumPlayers())));
 
             pBullet->Deactivate(true, vIntersection.xy());
         });

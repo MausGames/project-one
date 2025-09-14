@@ -1398,7 +1398,7 @@ void cRutilusMission::__TeleporterEffect(const coreUintW iIndex)const
     const coreUintW   iNum   = MAX(F_TO_UI(fLen * 2.0f / 1.7f), 2u);
 
     // 
-    for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, vColor);
+    for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) / I_TO_F(iNum - 1u)), 10.0f, 1u, vColor);
 
 #endif
 }

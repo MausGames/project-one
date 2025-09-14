@@ -276,7 +276,7 @@ public:
     // 
     inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
     inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !pEnemy->HasStatus(ENEMY_STATUS_DEAD);});}
-    inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) * RCP(I_TO_F(this->GetNumEnemies()));}
+    inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) / I_TO_F(this->GetNumEnemies());}
     inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !pEnemy->HasStatus(ENEMY_STATUS_DEAD);});}
 
 
@@ -526,7 +526,7 @@ public:
 
     // get object properties
     inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_07;}
-    inline coreFloat    GetExplosionPitch()const final {return 0.5f + 0.5f * RCP(this->GetSize().x / 4.5f);}
+    inline coreFloat    GetExplosionPitch()const final {return 0.5f + 0.5f * (4.5f / this->GetSize().x);}
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_blink_inst_program";}

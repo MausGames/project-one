@@ -237,7 +237,7 @@ void cCreditRoll::Move()
     {
         ASSERT(STATIC_ISVALID(g_pGame))
 
-        const coreFloat fFactor1 = m_fOffset * RCP(m_fMaxOffset);
+        const coreFloat fFactor1 = m_fOffset / m_fMaxOffset;
         const coreFloat fFactor2 = m_fOffset - m_fMaxOffset;
 
         if(fFactor2 >= 0.0f)

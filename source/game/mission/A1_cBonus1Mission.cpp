@@ -185,7 +185,7 @@ void cBonus1Mission::FadeBeam(const coreBool bEnable, const coreFloat fTime)
     {
         m_fBeamTime = -1.0f;
     }
-    m_fBeamSpeed = RCP(fTime);
+    m_fBeamSpeed = 1.0f / fTime;
 }
 
 
@@ -285,7 +285,7 @@ void cBonus1Mission::__MoveOwnAfter()
         {
             fAlpha = 1.0f;
             fScale = 1.0f;//LERP(0.0f, 1.0f, MIN1((m_fBeamTime - 2.0f) * 5.0f));
-            fScale2 = 1.0f;//LERP(1.0f, 1.0f, MIN1((m_fBeamTime - 2.0f) * 6.0f * RCP(m_fBeamSpeed)));
+            fScale2 = 1.0f;//LERP(1.0f, 1.0f, MIN1((m_fBeamTime - 2.0f) * 6.0f / m_fBeamSpeed));
             fSign  = 1.0f;
         }
         else if(m_fBeamTime >= 1.0f)
@@ -320,7 +320,7 @@ void cBonus1Mission::__MoveOwnAfter()
         m_Beam.SetSize     (coreVector3(m_fBeamWidth * fScale2, fLen, 1.0f));
         m_Beam.SetDirection(coreVector3(m_vBeamDir, 0.0f));
         m_Beam.SetTexSize  (coreVector2(m_fBeamWidth * fScale2 * 0.2f, fTexScale * 2.0f));
-        m_Beam.SetTexOffset(coreVector2(0.0f, FRACT(m_Beam.GetTexOffset().y - 2.0f * TIME * fSign * RCP(fTexScale))));
+        m_Beam.SetTexOffset(coreVector2(0.0f, FRACT(m_Beam.GetTexOffset().y - 2.0f * TIME * fSign / fTexScale)));
         m_Beam.Move();
         
         if(!InBetween(m_fBeamTime, 1.0f, 2.0f))
@@ -333,7 +333,7 @@ void cBonus1Mission::__MoveOwnAfter()
                 const coreVector2 vTan = m_Beam.GetDirection().xy().Rotated90();
                 
                 const coreVector3 vRayDir = coreVector3(m_Beam.GetDirection().xy(), 0.0f);
-                const coreVector3 vRayPos = coreVector3(m_Beam.GetPosition ().xy() + vTan * ((I_TO_F(i) * RCP(fHalf) - 1.0f)) * m_Beam.GetSize().x * 0.5f, 0.0f) - vRayDir * 50.0f;
+                const coreVector3 vRayPos = coreVector3(m_Beam.GetPosition ().xy() + vTan * ((I_TO_F(i) / fHalf - 1.0f)) * m_Beam.GetSize().x * 0.5f, 0.0f) - vRayDir * 50.0f;
     
                 coreFloat fHit = 1000.0f;
                 for(coreUintW j = 0u; j < BONUS1_SHELTERS; ++j)

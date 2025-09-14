@@ -876,7 +876,7 @@ void cInterface::Move()
     {
         const coreInt32 iMaxHealth = pBoss->GetMaxHealth();
         const coreInt32 iCurHealth = MIN(pBoss->GetCurHealth(), pBoss->GetMaxHealthGoal());
-        const coreFloat fBase      = I_TO_F(iCurHealth) * RCP(I_TO_F(iMaxHealth));
+        const coreFloat fBase      = I_TO_F(iCurHealth) / I_TO_F(iMaxHealth);
         const coreFloat fPerCur    = I_TO_F(iCurHealth) * m_fBossSpin;
 
         if(*piHealthGoal) piHealthGoal++;
@@ -885,7 +885,7 @@ void cInterface::Move()
         {
             if(*piHealthGoal)
             {
-                //const coreFloat   fAlong = (m_aBossHealthBar[0].GetSize().x - 0.01f) * LERP(-0.5f, 0.5f, I_TO_F(*piHealthGoal) * RCP(I_TO_F(iMaxHealth)));
+                //const coreFloat   fAlong = (m_aBossHealthBar[0].GetSize().x - 0.01f) * LERP(-0.5f, 0.5f, I_TO_F(*piHealthGoal) / I_TO_F(iMaxHealth));
                 const coreFloat   fAlong = m_aBossHealthBar[0].GetSize().x * 0.5f + I_TO_F(i) * -0.025f - 0.1f;
                 const coreVector2 vPos   = MapToAxis(GetTranslationArea(m_aBossHealthBar[0]), g_vHudDirection) + coreVector2(fAlong, 0.0f);
 
@@ -1217,7 +1217,7 @@ void cInterface::Move()
     if((fBanner <= m_fBannerDuration) && (fBanner >= 0.0f))
     {
         // calculate visibility and animation value
-        const coreFloat fVisibility = MIN(fBanner, m_fBannerDuration - fBanner, RCP(m_fBannerSpeed)) * m_fBannerSpeed;
+        const coreFloat fVisibility = MIN(fBanner, m_fBannerDuration - fBanner, 1.0f / m_fBannerSpeed) * m_fBannerSpeed;
         const coreFloat fAnimation  = BLENDB(MIN1(fBanner / INTERFACE_BANNER_ANIMATION)) * INTERFACE_BANNER_ANIMATION;
 
         // slash banner bar across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
@@ -1309,7 +1309,7 @@ void cInterface::Move()
     if((fStory <= m_fStoryDuration) && (fStory >= 0.0f))
     {
         // 
-        const coreFloat fVisibility = MIN(fStory, m_fStoryDuration - fStory, RCP(m_fStorySpeed)) * m_fStorySpeed;
+        const coreFloat fVisibility = MIN(fStory, m_fStoryDuration - fStory, 1.0f / m_fStorySpeed) * m_fStorySpeed;
 
         // set story transparency
         const coreFloat fStoryAlpha = BLENDH3(fVisibility) * MENU_INSIDE_ALPHA;

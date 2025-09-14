@@ -495,7 +495,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreF
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(bLock);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -516,7 +516,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(bLock);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -537,7 +537,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreF
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 2u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -558,7 +558,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 3u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -579,7 +579,7 @@ void cSpecialEffects::CreateSplashDot(const coreVector3 vPosition, const coreFlo
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 4u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -605,7 +605,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3 vPosition, const coreVec
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -628,7 +628,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVect
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -651,7 +651,7 @@ void cSpecialEffects::CreateBlowSmoke(const coreVector3 vPosition, const coreVec
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 2u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -674,7 +674,7 @@ void cSpecialEffects::CreateBlowFire(const coreVector3 vPosition, const coreVect
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 3u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -698,7 +698,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreF
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -719,7 +719,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -743,7 +743,7 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFl
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 0u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -765,7 +765,7 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3 vPosition, const coreFlo
     // 
     const coreUintW iNum2 = this->__CalcParticleNum(iNum, 1u); if(!iNum2) return;
     const coreFloat fBase = this->__GetEffectBase(false);
-    const coreFloat fStep = (2.0f*PI) * RCP(I_TO_F(iNum2));
+    const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
     coreUintW i = 0u;
@@ -1458,8 +1458,8 @@ void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const c
 
     // 
     g_pDistortion->CreateWave        (vPosition, 2.5f * fPower, 3.0f);
-    this         ->CreateBreakupColor(pObject,   52.0f,         F_TO_UI(32.0f * RCP(fPower)), vColor);
-    this         ->CreateSplashFire  (vPosition, 5.0f * fPower, F_TO_UI(7.0f  *    (fPower)), vColor);
+    this         ->CreateBreakupColor(pObject,   52.0f,         F_TO_UI(32.0f / fPower), vColor);
+    this         ->CreateSplashFire  (vPosition, 5.0f * fPower, F_TO_UI(7.0f  * fPower), vColor);
     this         ->ShakeScreen       (SPECIAL_SHAKE_TINY * fPower);
 }
 
@@ -1473,8 +1473,8 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 
     // (# more particles than color) 
     g_pDistortion->CreateWave       (vPosition, 2.5f * fPower, 3.0f);
-    this         ->CreateBreakupDark(pObject,   52.0f,         F_TO_UI(30.0f * RCP(fPower)));
-    this         ->CreateSplashFire (vPosition, 5.0f * fPower, F_TO_UI(14.0f *    (fPower)), COLOR_FIRE_WHITE);
+    this         ->CreateBreakupDark(pObject,   52.0f,         F_TO_UI(30.0f / fPower));
+    this         ->CreateSplashFire (vPosition, 5.0f * fPower, F_TO_UI(14.0f * fPower), COLOR_FIRE_WHITE);
     this         ->ShakeScreen      (SPECIAL_SHAKE_TINY * fPower);
 }
 

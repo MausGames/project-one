@@ -1837,7 +1837,7 @@ void cTigerBoss::__ShootWeapon()
         const coreVector3 vDiff  = coreVector3(vHit, 0.0f) - vStart;
         const coreUintW   iNum   = MAX(F_TO_UI(vDiff.Length() / 1.7f), 2u);
 
-        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, COLOR_ENERGY_WHITE * 0.8f);
+        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) / I_TO_F(iNum - 1u)), 10.0f, 1u, COLOR_ENERGY_WHITE * 0.8f);
 
         g_pSpecialEffects->CreateSplashColor(coreVector3(vHit, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE * 0.8f);
         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);

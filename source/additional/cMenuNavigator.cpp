@@ -120,7 +120,7 @@ void cMenuNavigator::Move()
         const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
         const coreVector2 vResolution = Core::System->GetResolution();
 
-        coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) * RCP(vResolution.Min());
+        coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) / vResolution.Min();
         const coreVector2 vNewSize = m_pCurObject->GetSize() * (HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_BIG) ? 1.5f : 1.0f);
 
         const coreObject2D* pScroll = this->GetCurScroll();
@@ -151,7 +151,7 @@ void cMenuNavigator::Move()
                 const coreFloat   fLen    = vDiff.Length();
 
                 m_vCurPos  = m_vCurPos  + vDiff.Normalized() * (10.0f * TIME * SmoothTowards(fLen, 0.5f));
-                m_vCurSize = m_vCurSize + (vNewSize - m_vCurSize) * ((vOldPos - m_vCurPos).Length() * RCP(fLen));
+                m_vCurSize = m_vCurSize + (vNewSize - m_vCurSize) * ((vOldPos - m_vCurPos).Length() / fLen);
             }
         }
 

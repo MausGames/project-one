@@ -1489,7 +1489,7 @@ void cMenu::UpdateAnimateProgram(cGuiObject* OUTPUT pObject)
 
     // 
     const coreFloat fSize = pObject->GetSize().y;
-    const coreFloat fLerp = ((fSize - 0.2f) * RCP(fSize)) * 0.5f;
+    const coreFloat fLerp = ((fSize - 0.2f) / fSize) * 0.5f;
 
     // 
     pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.0f, 2.0f * fSize));

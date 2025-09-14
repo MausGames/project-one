@@ -382,7 +382,7 @@ void cBonus1Mission::__SetupOwn()
             //const coreFloat fLen = 1.7f;
             //STAGE_REPEAT(fLen)
             //
-            //pEnemy->DefaultMoveLerp(vRawBeamPos, vRawBeamPos + m_vBeamDir * fLen, fLifeTime * RCP(fLen));
+            //pEnemy->DefaultMoveLerp(vRawBeamPos, vRawBeamPos + m_vBeamDir * fLen, fLifeTime / fLen);
             //pEnemy->SetPosition(coreVector3((vRawBeamPos + m_vBeamDir * 0.8f) * FOREGROUND_AREA, 0.0f));
             
             if(i < 20u)

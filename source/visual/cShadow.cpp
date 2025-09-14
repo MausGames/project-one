@@ -174,7 +174,7 @@ void cShadow::GlobalUpdate()
 
     // clamp camera movement (to reduce flickering)
     const coreFloat   fClampFactor = MIN(g_vGameResolution.x, SHADOW_MAX_PIXELS) * ((g_CurConfig.Graphics.iShadow == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH) * ENVIRONMENT_SCALE_FACTOR * 0.007274395f;
-    const coreVector2 vClampPos    = (g_pEnvironment->GetCameraPos().xy() * fClampFactor).Processed(FLOOR) * RCP(fClampFactor);
+    const coreVector2 vClampPos    = (g_pEnvironment->GetCameraPos().xy() * fClampFactor).Processed(FLOOR) / fClampFactor;
 
     // assemble camera matrix (viewed from light source)
     const coreMatrix4 mCamera = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(vClampPos, WATER_HEIGHT),

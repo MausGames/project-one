@@ -2210,7 +2210,7 @@ void cMuscusMission::__SetupOwn()
                     const coreVector3 vDiff = vNewPos - vPos;
                     const coreUintW   iNum  = MAX(F_TO_UI(vDiff.Length() / 1.7f), 2u);
 
-                    for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, pPlayer->GetEnergyColor());
+                    for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDiff * (I_TO_F(j) / I_TO_F(iNum - 1u)), 10.0f, 1u, pPlayer->GetEnergyColor());
                 }
             }
             else
