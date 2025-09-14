@@ -259,6 +259,12 @@ void cMenuNavigator::Move()
 
     // 
     this->cGuiObject::Move();
+
+    if(!this->GetAlpha() && m_bPressed)    // when exiting the pause menu
+    {
+        Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, false);
+        m_bPressed = false;
+    }
 }
 
 
