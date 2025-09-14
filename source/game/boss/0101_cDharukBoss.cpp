@@ -995,7 +995,7 @@ void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2 vD
          ADD_BIT   (m_iPackedDir, 1u + 2u*iIndex)
     else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex)
 
-    STATIC_ASSERT(DHARUK_BOOMERANGS*2u <= sizeof(m_iPackedDir)*8u)
+    STATIC_ASSERT(DHARUK_BOOMERANGS * 2u <= BITSOF(m_iPackedDir))
 }
 
 

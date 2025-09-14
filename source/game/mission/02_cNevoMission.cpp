@@ -364,7 +364,7 @@ void cNevoMission::DisableBomb(const coreUintW iIndex, const coreBool bAnimated)
 
     // 
     ADD_BIT(m_iBombGone, iIndex)
-    STATIC_ASSERT(NEVO_BOMBS <= sizeof(m_iBombGone)*8u)
+    STATIC_ASSERT(NEVO_BOMBS <= BITSOF(m_iBombGone))
 
     // 
     oBomb.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -502,7 +502,7 @@ void cNevoMission::EnableArrow(const coreUintW iIndex, const cShip* pOwner, cons
 
     // 
     REMOVE_BIT(m_iArrowFake, iIndex)
-    STATIC_ASSERT(NEVO_ARROWS <= sizeof(m_iArrowFake)*8u)
+    STATIC_ASSERT(NEVO_ARROWS <= BITSOF(m_iArrowFake))
 
     // 
     oArrow.SetAlpha  (0.0f);

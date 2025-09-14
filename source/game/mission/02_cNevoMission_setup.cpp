@@ -684,7 +684,7 @@ void cNevoMission::__SetupOwn()
 
                 std::memset(aiRemember, 0, sizeof(coreUint32) * GAME_PLAYERS);
 
-                STATIC_ASSERT(NEVO_TILES <= sizeof(coreUint32)*8u)
+                STATIC_ASSERT(NEVO_TILES <= BITSOF(coreUint32))
             }
         }
         else

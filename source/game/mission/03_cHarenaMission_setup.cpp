@@ -147,7 +147,7 @@ void cHarenaMission::__SetupOwn()
             });
         });
 
-        constexpr coreUintW  iRange      = sizeof(coreUint32) * 8u;
+        constexpr coreUintW  iRange      = BITSOF(coreUint32);
         constexpr coreUint32 iSnakeCount = 6u;
         constexpr coreFloat  fQuickDelay = 1.8f;
 

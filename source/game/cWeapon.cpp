@@ -58,7 +58,7 @@ Tesla
 coreBool cWeapon::Update(const coreUint8 iShootStatus, const coreFloat fShootSpeed)
 {
     ASSERT(m_pOwner)
-    STATIC_ASSERT(WEAPON_MODES <= sizeof(iShootStatus)*8u)
+    STATIC_ASSERT(WEAPON_MODES <= BITSOF(iShootStatus))
 
     // call individual update routine
     this->__UpdateOwn(iShootStatus, fShootSpeed);

@@ -1249,7 +1249,7 @@ void cMuscusMission::__SetupOwn()
         {
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
-                ASSERT(GAME_PLAYERS*2u <= sizeof(iAroundState)*8u)
+                ASSERT(GAME_PLAYERS * 2u <= BITSOF(iAroundState))
 
                 const coreObject3D* pCenter = this->GetGenerate(iCenterIndex);
 

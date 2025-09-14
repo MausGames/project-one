@@ -296,12 +296,12 @@ cTorusBoss::cTorusBoss()noexcept
     m_pRumbleSound = Core::Manager::Resource->Get<coreSound>("effect_rumble.wav");
     m_pWooshSound  = Core::Manager::Resource->Get<coreSound>("effect_woosh_01.wav");
 
-    STATIC_ASSERT(sizeof(m_iTurretActive) *8u >= TORUS_TURRETS)
-    STATIC_ASSERT(sizeof(m_iTurretMove)   *8u >= TORUS_TURRETS)
-    STATIC_ASSERT(sizeof(m_iGunnerActive) *8u >= TORUS_GUNNERS)
-    STATIC_ASSERT(sizeof(m_iChargerActive)*8u >= TORUS_CHARGERS)
-    STATIC_ASSERT(sizeof(m_iDriverActive) *8u >= TORUS_DRIVERS)
-    STATIC_ASSERT(sizeof(m_iWaverActive)  *8u >= TORUS_WAVERS)
+    STATIC_ASSERT(TORUS_TURRETS  <= BITSOF(m_iTurretActive))
+    STATIC_ASSERT(TORUS_TURRETS  <= BITSOF(m_iTurretMove))
+    STATIC_ASSERT(TORUS_GUNNERS  <= BITSOF(m_iGunnerActive))
+    STATIC_ASSERT(TORUS_CHARGERS <= BITSOF(m_iChargerActive))
+    STATIC_ASSERT(TORUS_DRIVERS  <= BITSOF(m_iDriverActive))
+    STATIC_ASSERT(TORUS_WAVERS   <= BITSOF(m_iWaverActive))
 }
 
 

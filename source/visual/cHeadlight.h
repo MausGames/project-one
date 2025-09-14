@@ -104,10 +104,10 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
     // 
-    inline void SetDefault(const coreUintW iIndex, const coreBool bState) {ASSERT(iIndex < sizeof(m_iDefault)*8u) SET_BIT(m_iDefault, iIndex, bState)}
+    inline void SetDefault(const coreUintW iIndex, const coreBool bState) {ASSERT(iIndex < BITSOF(m_iDefault)) SET_BIT(m_iDefault, iIndex, bState)}
 
     // 
-    inline coreBool GetDefault(const coreUintW iIndex)const {ASSERT(iIndex < sizeof(m_iDefault)*8u) return HAS_BIT(m_iDefault, iIndex);}
+    inline coreBool GetDefault(const coreUintW iIndex)const {ASSERT(iIndex < BITSOF(m_iDefault)) return HAS_BIT(m_iDefault, iIndex);}
 
 
 private:

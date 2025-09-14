@@ -253,7 +253,7 @@ void cGeluMission::__SetupOwn()
             STAGE_GET_UINT      (iShakeState)
         STAGE_GET_END
 
-        ASSERT(pSquad1->GetNumEnemiesAlive() <= sizeof(iHitField)*8u)
+        ASSERT(pSquad1->GetNumEnemiesAlive() <= BITSOF(iHitField))
 
         STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_THIS, COLL_VAL(pSquad1), COLL_VAL(avForce), COLL_REF(fBounceForce), COLL_REF(fMillForce), COLL_REF(fDragForce), COLL_REF(iMarkState), COLL_REF(iMarkCount), COLL_REF(iHitField), COLL_REF(iHitCount), COLL_VAL(nIsMarkFunc), COLL_VAL(nGetMarkIndex))
         {
@@ -300,9 +300,9 @@ void cGeluMission::__SetupOwn()
                 g_pGame->PlayHitSound(vIntersection);
             }
 
-            if(!HAS_BIT(iHitField, i % (sizeof(iHitField)*8u)))
+            if(!HAS_BIT(iHitField, i % BITSOF(iHitField)))
             {
-                ADD_BIT(iHitField, i % (sizeof(iHitField)*8u))
+                ADD_BIT(iHitField, i % BITSOF(iHitField))
                 if(++iHitCount >= 96u + /*iDungeonTotal*/55u) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())   // TODO 1: MSVC wants to capture this constexpr variable (async lambda)
             }
 
@@ -331,7 +331,7 @@ void cGeluMission::__SetupOwn()
         {
             if(pEnemy->ReachedDeath())
             {
-                if(!HAS_BIT(iHitField, i % (sizeof(iHitField)*8u)))
+                if(!HAS_BIT(iHitField, i % BITSOF(iHitField)))
                     STAGE_FAILTROPHY
             }
         });
@@ -416,7 +416,7 @@ void cGeluMission::__SetupOwn()
                         pEnemy->SetPosition (coreVector3(vPos * FOREGROUND_AREA + vCorr, 0.0f));
                         pEnemy->RemoveStatus(ENEMY_STATUS_SKIPEXPLOSION);
 
-                        REMOVE_BIT(iHitField, iIndex % (sizeof(iHitField)*8u))
+                        REMOVE_BIT(iHitField, iIndex % BITSOF(iHitField))
                     }
 
                     if(HAS_BIT(iLevelCoin, j))
@@ -1489,7 +1489,7 @@ void cGeluMission::__SetupOwn()
         STAGE_GET_END
 
         coreUint32 iShakeState = 0u;
-        STATIC_ASSERT(GELU_FANGS <= sizeof(iShakeState)*8u)
+        STATIC_ASSERT(GELU_FANGS <= BITSOF(iShakeState))
 
         const auto nFangPositionFunc = [](const coreUintW iIndex)
         {

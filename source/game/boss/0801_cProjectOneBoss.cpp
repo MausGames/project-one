@@ -3121,7 +3121,7 @@ void cProjectOneBoss::__MoveMagenta()
         pEnemy->DefaultRotate(-m_fAnimation * (0.4f*PI) + I_TO_F(i));
     });
 
-    STATIC_ASSERT(PROJECTONE_ENEMIES_METEOR <= sizeof(m_iMeteorDir)*8u)
+    STATIC_ASSERT(PROJECTONE_ENEMIES_METEOR <= BITSOF(m_iMeteorDir))
 }
 
 
@@ -3972,8 +3972,8 @@ void cProjectOneBoss::__MoveCyan()
         static coreUint32 iTileState = 0u;
         static coreUint32 aiRemember[GAME_PLAYERS + 1u] = {};
 
-        STATIC_ASSERT(LEVIATHAN_TILES <= sizeof(iTileState)   *8u)
-        STATIC_ASSERT(LEVIATHAN_TILES <= sizeof(aiRemember[0])*8u)
+        STATIC_ASSERT(LEVIATHAN_TILES <= BITSOF(iTileState))
+        STATIC_ASSERT(LEVIATHAN_TILES <= BITSOF(aiRemember[0]))
         STATIC_ASSERT(LEVIATHAN_TILES <= NEVO_TILES)
 
         if(PHASE_BEGINNING2)

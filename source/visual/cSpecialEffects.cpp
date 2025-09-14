@@ -464,7 +464,7 @@ void cSpecialEffects::MoveAlways()
 {
     // reset sound-guard
     std::memset(m_aiSoundGuard, 0, sizeof(m_aiSoundGuard));
-    STATIC_ASSERT(SOUND_MAX <= sizeof(m_aiSoundGuard)*8u)
+    STATIC_ASSERT(SOUND_MAX <= BITSOF(m_aiSoundGuard))
 
     // 
     for(coreUintW i = 0u; i < SPECIAL_PLAYERS; ++i)

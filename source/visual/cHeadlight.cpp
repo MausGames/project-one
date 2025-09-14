@@ -174,7 +174,7 @@ void cHeadlight::UpdateDefault(const coreUint8 iType)
             });
         }
 
-        STATIC_ASSERT(GAME_PLAYERS <= sizeof(m_iDefault)*8u)
+        STATIC_ASSERT(GAME_PLAYERS <= BITSOF(m_iDefault))
     }
 
     // 

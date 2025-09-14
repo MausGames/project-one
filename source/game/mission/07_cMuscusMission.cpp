@@ -183,8 +183,8 @@ void cMuscusMission::EnableGenerate(const coreUintW iIndex)
     // 
     ADD_BIT   (m_iGenerateTest, iIndex)
     REMOVE_BIT(m_iGenerateHit,  iIndex)
-    STATIC_ASSERT(MUSCUS_GENERATES <= sizeof(m_iGenerateTest)*8u)
-    STATIC_ASSERT(MUSCUS_GENERATES <= sizeof(m_iGenerateHit) *8u)
+    STATIC_ASSERT(MUSCUS_GENERATES <= BITSOF(m_iGenerateTest))
+    STATIC_ASSERT(MUSCUS_GENERATES <= BITSOF(m_iGenerateHit))
 
     // 
     pGenerate->SetAlpha  (0.0f);
@@ -233,8 +233,8 @@ void cMuscusMission::EnablePearl(const coreUintW iIndex)
     // 
     ADD_BIT   (m_iPearlActive, iIndex)
     REMOVE_BIT(m_iPearlHidden, iIndex)
-    STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iPearlActive)*8u)
-    STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iPearlHidden)*8u)
+    STATIC_ASSERT(MUSCUS_PEARLS <= BITSOF(m_iPearlActive))
+    STATIC_ASSERT(MUSCUS_PEARLS <= BITSOF(m_iPearlHidden))
 
     // 
     m_afStrikeTime  [iIndex] = 0.0f;
@@ -655,7 +655,7 @@ void cMuscusMission::__MoveOwnAfter()
 
                 // 
                 ADD_BIT(m_iStrikeState, i)
-                STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iStrikeState)*8u)
+                STATIC_ASSERT(MUSCUS_PEARLS <= BITSOF(m_iStrikeState))
             }
         }
 

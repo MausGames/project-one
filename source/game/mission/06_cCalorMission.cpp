@@ -274,8 +274,8 @@ cCalorMission::cCalorMission()noexcept
         m_pNightmareSound = Core::Manager::Resource->Get<coreSound>("effect_nightmare.wav");
     }
 
-    STATIC_ASSERT(CALOR_STARS <= sizeof(m_iStarSwing)  *8u)
-    STATIC_ASSERT(CALOR_STARS <= sizeof(m_iStarAnimate)*8u)
+    STATIC_ASSERT(CALOR_STARS <= BITSOF(m_iStarSwing))
+    STATIC_ASSERT(CALOR_STARS <= BITSOF(m_iStarAnimate))
 }
 
 

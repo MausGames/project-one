@@ -264,7 +264,7 @@ void cMission::SkipStage()
 
     // 
     m_iBadgeGiven = 0u;
-    STATIC_ASSERT(BADGES <= sizeof(m_iBadgeGiven)*8u)
+    STATIC_ASSERT(BADGES <= BITSOF(m_iBadgeGiven))
 
     // 
     m_bTrophyFailed = false;

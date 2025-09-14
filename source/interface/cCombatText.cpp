@@ -462,11 +462,11 @@ void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, c
     
     // 
     SET_BIT(m_iMarkerCover, iIndex, bCover)
-    STATIC_ASSERT(COMBAT_MARKERS <= sizeof(m_iMarkerCover)*8u)
+    STATIC_ASSERT(COMBAT_MARKERS <= BITSOF(m_iMarkerCover))
 
     // 
     ADD_BIT(m_iMarkerState, iIndex)
-    STATIC_ASSERT(COMBAT_MARKERS <= sizeof(m_iMarkerState)*8u)
+    STATIC_ASSERT(COMBAT_MARKERS <= BITSOF(m_iMarkerState))
 }
 
 

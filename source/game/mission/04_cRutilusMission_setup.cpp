@@ -2339,7 +2339,7 @@ void cRutilusMission::__SetupOwn()
                     afMeteorRotation[iCurMeteorIndex] = I_TO_F(iIndex) * (0.25f*PI);   // needs to be a deterministic offset
 
                     SET_BIT(iTypeMap, iCurMeteorIndex, (iType == 2u))
-                    STATIC_ASSERT(iNumMeteors <= sizeof(coreUint32)*8u)
+                    STATIC_ASSERT(iNumMeteors <= BITSOF(coreUint32))
 
                     return;
                 }

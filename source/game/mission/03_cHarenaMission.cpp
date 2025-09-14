@@ -661,8 +661,8 @@ void cHarenaMission::__MoveOwnAfter()
                 }
             }
 
-            STATIC_ASSERT(HARENA_SPIKES <= sizeof(m_iSpikeGood)*8u)
-            STATIC_ASSERT(HARENA_SPIKES <= sizeof(m_iSpikeBad) *8u)
+            STATIC_ASSERT(HARENA_SPIKES <= BITSOF(m_iSpikeGood))
+            STATIC_ASSERT(HARENA_SPIKES <= BITSOF(m_iSpikeBad))
         }
 
         // 

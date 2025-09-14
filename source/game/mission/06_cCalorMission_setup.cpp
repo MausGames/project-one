@@ -1534,7 +1534,7 @@ void cCalorMission::__SetupOwn()
         if(m_iStageSub < 6u)
         {
             constexpr coreUintW iBullets = 18u;
-            STATIC_ASSERT(iBullets <= sizeof(iBulletField)*8u)
+            STATIC_ASSERT(iBullets <= BITSOF(iBulletField))
 
             for(coreUintW i = 0u; i < iBullets; ++i)
             {

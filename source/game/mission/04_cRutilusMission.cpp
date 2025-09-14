@@ -301,8 +301,8 @@ void cRutilusMission::EnablePlate(const coreUintW iIndex, const coreFloat fOffse
 
     // 
     ADD_BIT(m_iPlateActive, iIndex)
-    STATIC_ASSERT(RUTILUS_PLATES <= sizeof(m_iPlateActive) *8u)
-    STATIC_ASSERT(RUTILUS_PLATES <= sizeof(m_iPlateRotated)*8u)
+    STATIC_ASSERT(RUTILUS_PLATES <= BITSOF(m_iPlateActive))
+    STATIC_ASSERT(RUTILUS_PLATES <= BITSOF(m_iPlateRotated))
 
     // 
     oPlate.SetEnabled(CORE_OBJECT_ENABLE_ALL);

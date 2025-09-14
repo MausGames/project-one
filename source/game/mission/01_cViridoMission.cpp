@@ -521,7 +521,7 @@ void cViridoMission::EnableShadow(const coreUintW iIndex, const cShip* pOwner, c
 
     // 
     SET_BIT(m_iShadowType, iIndex, bQuad)
-    STATIC_ASSERT(VIRIDO_SHADOWS < sizeof(m_iShadowType)*8u)
+    STATIC_ASSERT(VIRIDO_SHADOWS < BITSOF(m_iShadowType))
 
     // 
     oShadow.SetPosition (coreVector3(vPosition,0.0f));
@@ -566,7 +566,7 @@ void cViridoMission::EnableHint(const coreUintW iIndex, const coreUintW iBarrier
 
     // 
     REMOVE_BIT(m_iHintActive, iIndex)
-    STATIC_ASSERT(VIRIDO_HINTS <= sizeof(m_iHintActive)*8u)
+    STATIC_ASSERT(VIRIDO_HINTS <= BITSOF(m_iHintActive))
 
     // 
     oHint.SetAlpha  (0.0f);
@@ -1189,7 +1189,7 @@ void cViridoMission::__MoveOwnAfter()
         pWave->SetAlpha    (1.0f - BLENDH3(fValue));
         pWave->SetTexOffset(pLaser->GetTexOffset());
         
-        STATIC_ASSERT(VIRIDO_LASERS <= sizeof(m_iLaserIgnore)*8u)
+        STATIC_ASSERT(VIRIDO_LASERS <= BITSOF(m_iLaserIgnore))
         
         if(HAS_BIT(m_iLaserIgnore, i)) continue;
         if((m_avLaserPos[i] - pLaser->GetPosition().xy()).LengthSq() >= POW2(20.0f)) continue;
@@ -1272,7 +1272,7 @@ void cViridoMission::__MoveOwnAfter()
             
             // 
             ADD_BIT(m_iLaserTouch, i)
-            STATIC_ASSERT(VIRIDO_LASERS <= sizeof(m_iLaserTouch)*8u)
+            STATIC_ASSERT(VIRIDO_LASERS <= BITSOF(m_iLaserTouch))
 
             // 
             const coreUintW iIndex = g_pGame->GetPlayerIndex(pPlayer);
@@ -1488,7 +1488,7 @@ void cViridoMission::__MoveOwnAfter()
 
     // 
     m_iBounceState = 0u;
-    STATIC_ASSERT(VIRIDO_PADDLES+1u <= sizeof(m_iBounceState)*8u)
+    STATIC_ASSERT(VIRIDO_PADDLES + 1u <= BITSOF(m_iBounceState))
 
     // 
     if(!HAS_BIT(m_iStickyState, 1u))

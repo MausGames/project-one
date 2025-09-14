@@ -562,8 +562,8 @@ void cLeviathanBoss::__MoveOwn()
         static coreUint32 iTileScore = 0u;
         static coreUint32 aiRemember[GAME_PLAYERS] = {};
 
-        STATIC_ASSERT(LEVIATHAN_TILES <= sizeof(iTileState)   *8u)
-        STATIC_ASSERT(LEVIATHAN_TILES <= sizeof(aiRemember[0])*8u)
+        STATIC_ASSERT(LEVIATHAN_TILES <= BITSOF(iTileState))
+        STATIC_ASSERT(LEVIATHAN_TILES <= BITSOF(aiRemember[0]))
         STATIC_ASSERT(LEVIATHAN_TILES <= NEVO_TILES)
 
         if(PHASE_BEGINNING2)
@@ -2246,7 +2246,7 @@ void cLeviathanBoss::__BeginRay(const coreUintW iIndex)
 
     // 
     ADD_BIT(m_iRayState, iIndex)
-    STATIC_ASSERT(LEVIATHAN_RAYS <= sizeof(m_iRayState)*8u)
+    STATIC_ASSERT(LEVIATHAN_RAYS <= BITSOF(m_iRayState))
 }
 
 
@@ -2283,7 +2283,7 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
             if(((ABS(vOldOnScreen.x) < 0.55f) && (ABS(vOldOnScreen.y) < 0.55f)) ||
                ((ABS(vNewOnScreen.x) < 0.55f) && (ABS(vNewOnScreen.y) < 0.55f)))
             {
-                STATIC_ASSERT(sizeof(m_iDecalState)*8u >= LEVIATHAN_RAYS*2u)
+                STATIC_ASSERT(LEVIATHAN_RAYS * 2u <= BITSOF(m_iDecalState))
 
                 // 
                 if(HAS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)

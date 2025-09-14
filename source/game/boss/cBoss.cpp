@@ -45,8 +45,8 @@ cBoss::cBoss()noexcept
     // 
     g_pGame->GetEnemyManager()->BindEnemy(this);
 
-    STATIC_ASSERT(BOSS_HELPERS <= sizeof(m_iHelperSpawn)*8u)
-    STATIC_ASSERT(BOSS_HELPERS <= sizeof(m_iHelperHit)  *8u)
+    STATIC_ASSERT(BOSS_HELPERS <= BITSOF(m_iHelperSpawn))
+    STATIC_ASSERT(BOSS_HELPERS <= BITSOF(m_iHelperHit))
 }
 
 

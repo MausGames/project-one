@@ -281,7 +281,7 @@ void cGeluMission::EnableFang(const coreUintW iIndex)
 
     // 
     ADD_BIT(m_iFangActive, iIndex)
-    STATIC_ASSERT(GELU_FANGS <= sizeof(m_iFangActive)*8u)
+    STATIC_ASSERT(GELU_FANGS <= BITSOF(m_iFangActive))
 
     // 
     m_avOldPos[iIndex] = coreVector2(0.0f,0.0f);
@@ -335,10 +335,10 @@ void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2 vPosition
     ADD_BIT   (m_iWayVisible, iIndex)
     REMOVE_BIT(m_iWayGhost,   iIndex)
     REMOVE_BIT(m_iWayFree,    iIndex)
-    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayActive) *8u)
-    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayVisible)*8u)
-    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayGhost)  *8u)
-    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayFree)   *8u)
+    STATIC_ASSERT(GELU_WAYS <= BITSOF(m_iWayActive))
+    STATIC_ASSERT(GELU_WAYS <= BITSOF(m_iWayVisible))
+    STATIC_ASSERT(GELU_WAYS <= BITSOF(m_iWayGhost))
+    STATIC_ASSERT(GELU_WAYS <= BITSOF(m_iWayFree))
 
     // 
     m_avOldPos[iIndex] = coreVector2(0.0f,0.0f);
@@ -523,7 +523,7 @@ void cGeluMission::EnableGap(const coreUintW iIndex)
 
     // 
     ADD_BIT(m_iGapActive, iIndex)
-    STATIC_ASSERT(GELU_GAPS <= sizeof(m_iGapActive)*8u)
+    STATIC_ASSERT(GELU_GAPS <= BITSOF(m_iGapActive))
 
     // 
     m_afGapTime[iIndex] = 0.0f;
@@ -564,7 +564,7 @@ void cGeluMission::EnableShine(const coreUintW iIndex)
 
     // 
     ADD_BIT(m_iShineActive, iIndex)
-    STATIC_ASSERT(GELU_SHINES <= sizeof(m_iShineActive)*8u)
+    STATIC_ASSERT(GELU_SHINES <= BITSOF(m_iShineActive))
 
     // 
     m_afShineTime[iIndex] = 0.0f;
@@ -1141,7 +1141,7 @@ void cGeluMission::__UpdateCollisionFang()
                 if((iHitIndex != 255u) && (iHitIndex != j) && !HAS_BIT(m_iCrushState, 2u)) bCrush = true;
 
                 ADD_BIT(m_iTouchState, j)
-                STATIC_ASSERT(GELU_FANGS <= sizeof(m_iTouchState)*8u)
+                STATIC_ASSERT(GELU_FANGS <= BITSOF(m_iTouchState))
             }
         }
 
@@ -1290,7 +1290,7 @@ void cGeluMission::__UpdateCollisionWay()
                 if((iHitIndex != 255u) && (iHitIndex != j) && !HAS_BIT(m_iCrushState, 2u)) bCrush = true;
 
                 ADD_BIT(m_iTouchState, j)
-                STATIC_ASSERT(GELU_WAYS <= sizeof(m_iTouchState)*8u)
+                STATIC_ASSERT(GELU_WAYS <= BITSOF(m_iTouchState))
             }
         }
 

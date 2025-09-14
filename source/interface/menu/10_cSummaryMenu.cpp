@@ -469,7 +469,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     this->BindObject(SURFACE_SUMMARY_TITLE, &m_aTitle[0]);
     this->BindObject(SURFACE_SUMMARY_TITLE, &m_aTitle[1]);
 
-    STATIC_ASSERT(ARRAY_SIZE(m_aPerfect) + ARRAY_SIZE(m_aRecord) <= sizeof(m_iSignalActive)*8u)
+    STATIC_ASSERT(ARRAY_SIZE(m_aPerfect) + ARRAY_SIZE(m_aRecord) <= BITSOF(m_iSignalActive))
 }
 
 
