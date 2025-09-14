@@ -24,7 +24,6 @@ cMsgBox::cMsgBox()noexcept
     this->DefineTexture(0u, "menu_background_black.png");
     this->DefineProgram("menu_grey_vignette_program");
     this->SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
-    this->SetTexSize   (coreVector2(1.2f,1.2f));
     this->SetStyle     (CORE_OBJECT2D_STYLE_VIEWDIR);
 
     // 
@@ -146,8 +145,9 @@ void cMsgBox::Move()
     }
 
     // 
-    this->SetSize     (coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
+    this->SetSize     (Core::System->GetCanonSize());
     this->SetAlpha    (m_fFade * 0.5f);
+    this->SetTexSize  (Core::System->GetCanonSize() * 1.2f);
     this->SetTexOffset(MENU_LAYER_TEXOFFSET);
     this->coreFullscreen::Move();
 

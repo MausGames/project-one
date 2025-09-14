@@ -44,7 +44,6 @@ cMenu::cMenu()noexcept
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
     m_PauseLayer.DefineProgram("menu_grey_vignette_program");
     m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
-    m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
     m_PauseLayer.SetStyle     (CORE_OBJECT2D_STYLE_VIEWDIR);
 
     // 
@@ -917,8 +916,9 @@ void cMenu::Move()
     else fPauseAlpha = MAX(fPauseAlpha - TIME * fPauseSpeed, 0.0f);
 
     // 
-    m_PauseLayer.SetSize     (coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
+    m_PauseLayer.SetSize     (Core::System->GetCanonSize());
     m_PauseLayer.SetAlpha    (fPauseAlpha);
+    m_PauseLayer.SetTexSize  (Core::System->GetCanonSize() * 1.2f);
     m_PauseLayer.SetTexOffset(MENU_LAYER_TEXOFFSET);
     m_PauseLayer.SetEnabled  (fPauseAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 

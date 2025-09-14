@@ -78,8 +78,6 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_ArcadeLayer.DefineTexture(0u, "menu_background_black.png");
     m_ArcadeLayer.DefineProgram("menu_grey_vignette_program");
     m_ArcadeLayer.SetColor3    (coreVector3(0.6f,0.6f,0.6f));
-    m_ArcadeLayer.SetSize      (coreVector2(1.0f,1.0f));
-    m_ArcadeLayer.SetTexSize   (coreVector2(1.2f,1.2f));
     m_ArcadeLayer.SetStyle     (CORE_OBJECT2D_STYLE_VIEWDIR);
 
     m_ArcadeHeader.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
@@ -707,6 +705,8 @@ void cSummaryMenu::Move()
             nBlendMedalFunc(&m_ArcadeTotalMedal, 0.13f, fThreshold3, SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]));
 
             // 
+            m_ArcadeLayer.SetSize     (Core::System->GetCanonSize());
+            m_ArcadeLayer.SetTexSize  (Core::System->GetCanonSize() * 1.2f);
             m_ArcadeLayer.SetTexOffset(MENU_LAYER_TEXOFFSET);
             
             
