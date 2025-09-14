@@ -353,7 +353,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
 
         // allocate required memory
         const coreUintW iSize   = pSurface1->w * pSurface1->h * 4u;
-        coreByte*       pOutput = new coreByte[iSize];
+        coreByte*       pOutput = TEMP_NEW(coreByte, iSize);
         const coreByte* pInput1 = s_cast<const coreByte*>(pSurface1->pixels);
         const coreByte* pInput2 = s_cast<const coreByte*>(pSurface2->pixels);
 
@@ -388,7 +388,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         m_pNormalMap->Modify(0u, 0u, pSurface1->w, pSurface1->h, iSize, pOutput);
 
         // free required memory
-        SAFE_DELETE_ARRAY(pOutput)
+        TEMP_DELETE(pOutput)
 
         // create sync object
         const coreBool bSync = m_Sync.Create(CORE_SYNC_CREATE_FLUSHED);

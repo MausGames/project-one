@@ -428,7 +428,7 @@ void cMenuNavigator::Update()
 
                 // TODO 1: allow diagonal input here, for arcade input
 
-                if(m_aDynamic.count(m_pCurObject)) m_aDynamic.at(m_pCurObject)(m_pCurObject, iPack);
+                if(m_anDynamic.count(m_pCurObject)) m_anDynamic.at(m_pCurObject)(m_pCurObject, iPack);
                 switch(iPack)
                 {
                 default: UNREACHABLE
@@ -472,7 +472,7 @@ void cMenuNavigator::Update()
                     
                     if(!A || A == m_pCurObject)
                     {
-                        if(m_aDynamic.count(pNewObject)) m_aDynamic.at(pNewObject)(pNewObject, iPack);
+                        if(m_anDynamic.count(pNewObject)) m_anDynamic.at(pNewObject)(pNewObject, iPack);
                         switch(iPack)
                         {
                         default: UNREACHABLE

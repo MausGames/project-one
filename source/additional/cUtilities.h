@@ -56,11 +56,6 @@
 // 
 #define HIDDEN_POS (coreVector2(1000.0f,1000.0f))
 
-// 
-#define ADD_BIT_EX(o,n)    {ADD_BIT   ((o)[(n) / (sizeof((o)[0]) * 8u)], (n) % (sizeof((o)[0]) * 8u)) ASSERT((n) < ARRAY_SIZE(o) * (sizeof((o)[0]) * 8u))}
-#define REMOVE_BIT_EX(o,n) {REMOVE_BIT((o)[(n) / (sizeof((o)[0]) * 8u)], (n) % (sizeof((o)[0]) * 8u)) ASSERT((n) < ARRAY_SIZE(o) * (sizeof((o)[0]) * 8u))}
-#define HAS_BIT_EX(o,n)    (HAS_BIT   ((o)[(n) / (sizeof((o)[0]) * 8u)], (n) % (sizeof((o)[0]) * 8u)))
-
 
 // ****************************************************************
 // 
@@ -170,6 +165,8 @@ template <typename T> inline void ShuffleRange(const T& tBegin, const T& tEnd, c
 // 
 inline coreFloat TriangleWave(const coreFloat x)
 {
+    ASSERT(x >= 0.0f)
+
     const coreFloat A = FRACT(x);
     return MIN(A, 1.0f - A) * 2.0f;
 }
@@ -371,27 +368,27 @@ constexpr coreVector2 MapStepRotatedInv90X(const coreVector2 vDirection, const c
 
 // ****************************************************************
 // 
-inline coreBool IsHorizontal(const coreVector2 v)
+constexpr coreBool IsHorizontal(const coreVector2 v)
 {
     return v.IsHorizontal();
 }
 
-inline coreVector2 AlongCross(const coreVector2 v)
+constexpr coreVector2 AlongCross(const coreVector2 v)
 {
     return v.AlongWay4();
 }
 
-inline coreVector2 AlongCrossNormal(const coreVector2 v)
+constexpr coreVector2 AlongCrossNormal(const coreVector2 v)
 {
     return v.AlongWay4Normal();
 }
 
-inline coreVector2 AlongCrossX(const coreVector2 v)
+constexpr coreVector2 AlongCrossX(const coreVector2 v)
 {
     return v.AlongWay4X();
 }
 
-inline coreVector2 AlongCrossXNormal(const coreVector2 v)
+constexpr coreVector2 AlongCrossXNormal(const coreVector2 v)
 {
     return v.AlongWay4XNormal();
 }

@@ -224,13 +224,13 @@
 
 #define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ALIGNED_DELETE(m_piData) STATIC_ASSERT((c) <= 0xFFu) m_iDataSize = (c); m_piData = ALIGNED_NEW(coreUint32, m_iDataSize, ALIGNMENT_CACHE); std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
 #define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
-#define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}} ASSERT(coreMath::IsAligned(iDataIndex, 2u))
-#define STAGE_GET_FLOAT(n,...)                 coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2(n,...)                  coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3(n,...)                  coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4(n,...)                  coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_INT(n,...)                   coreInt32&         OUTPUT n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT(n,...)                  coreUint32&        OUTPUT n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64(n,...)                coreUint64&        OUTPUT n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}} ASSERT(coreMath::IsAligned(iDataIndex, 2u))
+#define STAGE_GET_FLOAT(n,...)                 coreFloat&         OUTPUT n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2(n,...)                  coreVector2&       OUTPUT n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3(n,...)                  coreVector3&       OUTPUT n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4(n,...)                  coreVector4&       OUTPUT n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_INT_ARRAY(n,c,...)           coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT_ARRAY(n,c,...)          coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}} ASSERT(coreMath::IsAligned(iDataIndex, 2u))

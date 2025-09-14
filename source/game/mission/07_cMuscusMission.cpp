@@ -406,9 +406,11 @@ void cMuscusMission::EndDiamond(const coreBool bAnimated)
 // 
 coreFloat cMuscusMission::RetrievePearlPitch()
 {
+    // 
     const coreUint8 iValue = m_iPearlPitch;
     if(++m_iPearlPitch >= 5u) m_iPearlPitch = 0u;
 
+    // 
     switch(iValue)
     {
     default: UNREACHABLE
@@ -733,7 +735,7 @@ void cMuscusMission::__MoveOwnAfter()
     if(m_Diamond.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         ASSERT(m_iDiamondIndex != UINT8_MAX)
-        coreObject3D* pGenerate = (*m_Generate.List())[m_iDiamondIndex];
+        const coreObject3D* pGenerate = (*m_Generate.List())[m_iDiamondIndex];
 
         // 
         if(m_fDiamondSpin) m_fDiamondSpin.UpdateMin(3.0f, 2.0f);

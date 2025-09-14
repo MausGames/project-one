@@ -36,7 +36,7 @@ shields on sides to force attacks from certain directions | reflect into vulnera
 ## whac-a-mole
 ## enemies form a tower and fall over
 # mothership spawns enemies
-## spikes from the ground and such | running sushi conveyer belt
+## spikes from the ground and such | running sushi conveyor belt
 
 ## force rotation #############
 # screen rotation and rotated shooting

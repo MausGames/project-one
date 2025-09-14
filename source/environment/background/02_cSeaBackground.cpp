@@ -377,7 +377,7 @@ void cSeaBackground::__MoveOwn()
     pList->MoveNormal();   // TODO 1: only update on actual changes
 
     // 
-    m_fWaveTime.Update(1.4f);
+    m_fWaveTime.UpdateMod(1.4f, 2.0f*PI);
 
     // adjust volume of the base sound-effect
     if(m_pBaseSound.IsUsable() && m_pBaseSound->EnableRef(this))

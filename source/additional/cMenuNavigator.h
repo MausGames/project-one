@@ -70,52 +70,52 @@ private:
 
 
 private:
-    coreMap<coreObject2D*, sMenuEntry> m_aObject;      // 
-    coreMap<coreObject2D*, sMenuTab>   m_aTab;         // 
-    coreSet<coreObject2D*>             m_apScroll;     // 
+    coreMap<coreObject2D*, sMenuEntry> m_aObject;       // 
+    coreMap<coreObject2D*, sMenuTab>   m_aTab;          // 
+    coreSet<coreObject2D*>             m_apScroll;      // 
 
-    coreObject2D* m_pCurObject;                        // 
-    coreUint8 m_iStore;                                // 
-    coreUint8 m_iFirst;                                // 
-    coreUint8 m_iBack;                                 // 
+    coreObject2D* m_pCurObject;                         // 
+    coreUint8 m_iStore;                                 // 
+    coreUint8 m_iFirst;                                 // 
+    coreUint8 m_iBack;                                  // 
 
-    coreBool    m_bPressed;                            // 
-    coreBool    m_bGrabbed;                            // 
-    coreDouble  m_dPressTime;                          // 
-    coreFlow    m_fGrabTime;                           // 
-    coreVector3 m_vGrabColor;                          // 
+    coreBool    m_bPressed;                             // 
+    coreBool    m_bGrabbed;                             // 
+    coreDouble  m_dPressTime;                           // 
+    coreFlow    m_fGrabTime;                            // 
+    coreVector3 m_vGrabColor;                           // 
 
-    coreUint8 m_iLock;                                 // 
-    coreUint8 m_iLastPack;                             // 
-    coreTimer m_Automatic;                             // 
+    coreUint8 m_iLock;                                  // 
+    coreUint8 m_iLastPack;                              // 
+    coreTimer m_Automatic;                              // 
 
-    coreVector2 m_vMouseOffset;                        // 
+    coreVector2 m_vMouseOffset;                         // 
 
-    coreVector2 m_vCurPos;                             // 
-    coreVector2 m_vCurSize;                            // 
-    coreBool    m_bShowIcon;                           // 
+    coreVector2 m_vCurPos;                              // 
+    coreVector2 m_vCurSize;                             // 
+    coreBool    m_bShowIcon;                            // 
 
-    cGuiObject m_aCursor[4];                           // 
+    cGuiObject m_aCursor[4];                            // 
 
-    coreMenu* m_pMenu;                                 // 
+    coreMenu* m_pMenu;                                  // 
 
-    uShoulderType m_nShoulderLeft;                     // 
-    uShoulderType m_nShoulderRight;                    // 
-    coreBool      m_bShoulder;                         // 
+    uShoulderType m_nShoulderLeft;                      // 
+    uShoulderType m_nShoulderRight;                     // 
+    coreBool      m_bShoulder;                          // 
 
-    coreBool m_bIgnoreKeyboard;                        // 
+    coreBool m_bIgnoreKeyboard;                         // 
 
-    coreMap<coreObject2D*, uDynamicType> m_aDynamic;   // 
+    coreMap<coreObject2D*, uDynamicType> m_anDynamic;   // 
 
-    cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];          // 
+    cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];           // 
 
-    coreBool m_bActive;                                // 
+    coreBool m_bActive;                                 // 
 
-    static coreVector2   s_vMouseMove;                 // 
-    static coreBool      s_bKeyboard;                  // 
-    static coreBool      s_bJoystick;                  // 
-    static coreUint8     s_iJoystickType;              // 
-    static coreObject2D* s_pCurFocus;                  // 
+    static coreVector2   s_vMouseMove;                  // 
+    static coreBool      s_bKeyboard;                   // 
+    static coreBool      s_bJoystick;                   // 
+    static coreUint8     s_iJoystickType;               // 
+    static coreObject2D* s_pCurFocus;                   // 
 
 
 public:
@@ -148,7 +148,7 @@ public:
     inline void SetShoulder(const coreBool bShoulder) {m_bShoulder = bShoulder;}
 
     // 
-    template <typename F> inline void BindDynamic(coreObject2D* pObject, F&& nDynamicFunc) {m_aDynamic.emplace(pObject, std::forward<F>(nDynamicFunc));}   // [](coreObject2D*, const coreUint8) -> void
+    template <typename F> inline void BindDynamic(coreObject2D* pObject, F&& nDynamicFunc) {m_anDynamic.emplace(pObject, std::forward<F>(nDynamicFunc));}   // [](coreObject2D*, const coreUint8) -> void
     inline void RebindUp   (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveUp    = this->__ToIndex(pNew);}
     inline void RebindLeft (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveLeft  = this->__ToIndex(pNew);}
     inline void RebindDown (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveDown  = this->__ToIndex(pNew);}

@@ -545,7 +545,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_AudioQuality   .AddEntryLanguage("VALUE_LOW",              0u);
     m_AudioQuality   .AddEntryLanguage("VALUE_HIGH",             1u);
     m_AudioMode      .AddEntryLanguage("VALUE_AUTO",             CORE_AUDIO_MODE_AUTO);
-#if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
+#if !defined(_CORE_EMSCRIPTEN_)
     m_AudioMode      .AddEntryLanguage("AUDIOMODE_MONO",         CORE_AUDIO_MODE_MONO);
 #endif
     m_AudioMode      .AddEntryLanguage("AUDIOMODE_SPEAKERS",     CORE_AUDIO_MODE_SPEAKERS);

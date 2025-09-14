@@ -149,8 +149,8 @@ void cRutilusMission::__SetupOwn()
             STAGE_GET_UINT      (iAlternate)
             STAGE_GET_UINT      (iTransitionState)
             STAGE_GET_FLOAT     (fTransitionTime)
-            STAGE_GET_FLOAT     (fConveyerTime)
-            STAGE_GET_FLOAT     (fConveyerSpeed)
+            STAGE_GET_FLOAT     (fConveyorTime)
+            STAGE_GET_FLOAT     (fConveyorSpeed)
         STAGE_GET_END
 
         if(pSquad1->IsFinished())
@@ -328,17 +328,17 @@ void cRutilusMission::__SetupOwn()
         }
         else if(m_iStageSub >= 16u)
         {
-            fConveyerSpeed = MIN1(fConveyerSpeed + 0.5f * TIME);
-            fConveyerTime  = FmodRange(fConveyerTime - fConveyerSpeed * TIME * ((m_iStageSub >= 20u) ? -1.0f : 1.0f), 0.0f, 4.0f);
+            fConveyorSpeed = MIN1(fConveyorSpeed + 0.5f * TIME);
+            fConveyorTime  = FmodRange(fConveyorTime - fConveyorSpeed * TIME * ((m_iStageSub >= 20u) ? -1.0f : 1.0f), 0.0f, 4.0f);
 
             for(coreUintW i = 0u; i < 4u; ++i)
             {
-                m_avPlateData[i].xy(coreVector2(1.0f,1.0f) * FmodRange((I_TO_F(i) - 1.5f - fConveyerTime) * 0.25f, -0.625f, 0.375f));
+                m_avPlateData[i].xy(coreVector2(1.0f,1.0f) * FmodRange((I_TO_F(i) - 1.5f - fConveyorTime) * 0.25f, -0.625f, 0.375f));
             }
 
-            m_aPlateRaw[4].SetDirection(m_aPlateRaw[F_TO_UI(fConveyerTime)].GetDirection());   // without wrapper
-            m_aPlateRaw[4].SetColor3   (m_aPlateRaw[F_TO_UI(fConveyerTime)].GetColor3());
-            m_avPlateData[4].xy(coreVector2(1.0f,1.0f) * LERP(0.625f, 0.375f, FRACT(fConveyerTime)));
+            m_aPlateRaw[4].SetDirection(m_aPlateRaw[F_TO_UI(fConveyorTime)].GetDirection());   // without wrapper
+            m_aPlateRaw[4].SetColor3   (m_aPlateRaw[F_TO_UI(fConveyorTime)].GetColor3());
+            m_avPlateData[4].xy(coreVector2(1.0f,1.0f) * LERP(0.625f, 0.375f, FRACT(fConveyorTime)));
         }
 
         coreBool bPostpone = false;
