@@ -9,9 +9,9 @@
 
 
 // shader input
-flat varying vec4  v_v4ShipLight;    // simplified light vector (w = base blink intensity (to highlight successful hits))
-varying      vec3  v_v3ShipView;     // simplified view vector
-varying      vec4  v_v4ShipNormal;   // simplified normal vector (w = depth darkening)
+flat   varying vec4 v_v4ShipLight;    // simplified light vector (w = base blink intensity (to highlight successful hits))
+smooth varying vec3 v_v3ShipView;     // simplified view vector
+smooth varying vec4 v_v4ShipNormal;   // simplified normal vector (w = depth darkening)
 
 
 void FragmentMain()

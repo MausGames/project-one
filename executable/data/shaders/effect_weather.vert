@@ -10,10 +10,10 @@
 
 
 // shader uniforms
-uniform vec3 u_av3OverlayTransform[_P1_OVERLAYS_];   // 
+uniform mediump vec3 u_av3OverlayTransform[_P1_OVERLAYS_];   // 
 
 // shader output
-varying vec2 v_av2OverlayCoord[_P1_OVERLAYS_];       // 
+smooth varying vec2 v_av2OverlayCoord[_P1_OVERLAYS_];        // 
 
 
 void VertexMain()

@@ -12,12 +12,12 @@
 
 
 // constant values
-const float c_v1TileRate = 2.0;   // 
+const float c_v1TileRate = 2.0;     // 
 
 // shader output
-varying      vec2 v_v2Interior;   // raw object coordinates (x = normal, y = inverse)
-flat varying vec2 v_v2Border;     // border distance values (x = inner, y = outer)
-flat varying vec2 v_v2Scale;      // 
+smooth varying vec2 v_v2Interior;   // raw object coordinates (x = normal, y = inverse)
+flat   varying vec2 v_v2Border;     // border distance values (x = inner, y = outer)
+flat   varying vec2 v_v2Scale;      // 
 
 
 void VertexMain()

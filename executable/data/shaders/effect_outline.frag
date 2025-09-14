@@ -11,7 +11,7 @@
 #if defined(_P1_DIRECT_)
 
     // shader input
-    varying float v_v1Strength;   // outline intensity
+    smooth varying float v_v1Strength;   // outline intensity
 
 #else
 

@@ -10,15 +10,15 @@
 
 
 // shader uniforms
-uniform float u_v1Depth;        // 
+uniform highp float u_v1Depth;         // 
 
 // vertex attributes
-attribute float a_v1Depth;      // 
+attribute float a_v1Depth;             // 
 
 // shader output
-varying float v_v1Strength;     // light and color intensity
-varying vec3  v_v3ShipView;     // simplified view vector
-varying vec3  v_v3ShipNormal;   // simplified normal vector
+smooth varying float v_v1Strength;     // light and color intensity
+smooth varying vec3  v_v3ShipView;     // simplified view vector
+smooth varying vec3  v_v3ShipNormal;   // simplified normal vector
 
 
 void VertexMain()

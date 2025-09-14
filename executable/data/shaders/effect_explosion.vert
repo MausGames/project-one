@@ -10,7 +10,7 @@
 
 
 // shader output
-varying float v_v1Light;   // 
+smooth varying float v_v1Light;   // 
 
 
 void VertexMain()

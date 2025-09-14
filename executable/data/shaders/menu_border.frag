@@ -11,9 +11,9 @@
 
 
 // shader input
-varying      vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
-flat varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
-varying      vec2 v_v2Factor;     // 
+smooth varying vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
+flat   varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
+smooth varying vec2 v_v2Factor;     // 
 
 
 void FragmentMain()

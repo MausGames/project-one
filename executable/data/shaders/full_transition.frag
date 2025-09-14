@@ -9,8 +9,8 @@
 
 
 // shader uniforms
-uniform float u_v1TransitionTime;   // current transition time
-uniform vec2  u_v2TransitionDir;    // 
+uniform mediump float u_v1TransitionTime;   // current transition time
+uniform mediump vec2  u_v2TransitionDir;    // 
 
 
 void FragmentMain()

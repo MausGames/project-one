@@ -13,8 +13,8 @@
 const float c_v1MapResolution = 0.42;   // normal map resolution
 
 // shader uniforms
-uniform float u_v1Time;                 // current animation value
-uniform float u_v1Offset;               // current y-position offset
+uniform highp float u_v1Time;           // current animation value
+uniform highp float u_v1Offset;         // current y-position offset
 
 
 void VertexMain()

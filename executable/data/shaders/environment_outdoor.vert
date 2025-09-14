@@ -11,22 +11,22 @@
 
 
 // constant values
-const float c_v1Size     = 31.0;   // number of vertices per axis
-const float c_v1SizeHalf = 15.0;   // half number of vertices per axis (manually)
-const float c_v1Detail   = 6.0;    // size of a block
+const float c_v1Size     = 31.0;       // number of vertices per axis
+const float c_v1SizeHalf = 15.0;       // half number of vertices per axis (manually)
+const float c_v1Detail   = 6.0;        // size of a block
 
 // shader uniforms
-uniform mat4 u_m4ShadowMatrix;     // own shadow view-projection matrix (with coordinate adjustment)
-uniform vec4 u_v4LerpData1;        // 
-uniform vec3 u_v3LerpData2;        // 
+uniform highp mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix (with coordinate adjustment)
+uniform highp vec4 u_v4LerpData1;      // 
+uniform highp vec3 u_v3LerpData2;      // 
 
 // vertex attributes
-attribute float a_v1Height;        // vertex height (full position is deduced from the vertex-ID)
-attribute vec2  a_v2Position;      // 
+attribute float a_v1Height;            // vertex height (full position is deduced from the vertex-ID)
+attribute vec2  a_v2Position;          // 
 
 // shader output
-varying vec4 v_v4ShadowCoord;      // pixel coordinates viewed from the light source
-varying vec3 v_v3Border;           // (z = mix value between both outdoor textures) 
+smooth varying vec4 v_v4ShadowCoord;   // pixel coordinates viewed from the light source
+smooth varying vec3 v_v3Border;        // (z = mix value between both outdoor textures) 
 
 
 void LerpLightingTransform(const in vec3 v3Position, const in float v1Lerp)

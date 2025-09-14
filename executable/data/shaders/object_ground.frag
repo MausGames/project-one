@@ -9,11 +9,11 @@
 
 
 // constant values
-const float c_v1TestFactor = 0.2;   // 
+const float c_v1TestFactor = 0.2;      // 
 
 // shader input
-varying vec4 v_v4ShadowCoord;       // pixel coordinates viewed from the light source
-varying vec2 v_v2Border;            // 
+smooth varying vec4 v_v4ShadowCoord;   // pixel coordinates viewed from the light source
+smooth varying vec2 v_v2Border;        // 
 
 
 void FragmentMain()

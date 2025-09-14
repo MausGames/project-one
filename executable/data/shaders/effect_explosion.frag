@@ -9,7 +9,7 @@
 
 
 // shader input
-varying float v_v1Light;   // 
+smooth varying float v_v1Light;   // 
 
 
 void FragmentMain()

@@ -10,10 +10,10 @@
 
 
 // shader uniforms
-uniform mediump vec4 u_v4Scale;   // 
+uniform mediump vec4 u_v4Scale;      // 
 
 // shader output
-varying vec3 v_v3AnimCoord;       // 
+smooth varying vec3 v_v3AnimCoord;   // 
 
 
 void VertexMain()

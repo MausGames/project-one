@@ -10,7 +10,7 @@
 
 
 // shader input
-varying vec2 v_v2CenterCoord;   // 
+smooth varying vec2 v_v2CenterCoord;   // 
 
 
 void FragmentMain()

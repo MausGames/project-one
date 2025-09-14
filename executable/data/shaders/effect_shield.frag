@@ -9,8 +9,8 @@
 
 
 // shader input
-varying      float v_v1Strength;   // 
-flat varying float v_v1Blink;      // 
+smooth varying float v_v1Strength;   // 
+flat   varying float v_v1Blink;      // 
 
 
 void FragmentMain()

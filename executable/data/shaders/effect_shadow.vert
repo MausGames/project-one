@@ -10,7 +10,7 @@
 
 
 // shader uniforms
-uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix
+uniform highp mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix
 
 
 void VertexMain()

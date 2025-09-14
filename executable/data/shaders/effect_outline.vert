@@ -10,13 +10,13 @@
 
 
 // shader uniforms
-uniform float u_v1Depth;      // 
+uniform highp float u_v1Depth;       // 
 
 // vertex attributes
-attribute float a_v1Depth;    // 
+attribute float a_v1Depth;           // 
 
 // shader output
-varying float v_v1Strength;   // outline intensity
+smooth varying float v_v1Strength;   // outline intensity
 
 
 void VertexMain()
