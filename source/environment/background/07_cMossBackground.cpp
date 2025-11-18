@@ -308,7 +308,7 @@ void cMossBackground::__MoveOwn()
 
     // 
     m_Rain.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
-    m_Rain.SetDirection(MapToAxisInv(-m_vRainMove.InvertedX().Normalized(), g_pEnvironment->GetDirection()));
+    m_Rain.SetDirection(MapToAxis(-m_vRainMove.Normalized(), g_pEnvironment->GetDirection()));
     m_Rain.SetTexSize  (vTexSize);
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Rain.Move();

@@ -348,7 +348,7 @@ cGameMenu::cGameMenu()noexcept
 
     m_ArmoryFragment.DefineTexture(1u, "menu_background_black.png");
     m_ArmoryFragment.DefineProgram("menu_fragment_program");
-    m_ArmoryFragment.SetDirection (coreVector2(1.0f,1.0f).Normalized());
+    m_ArmoryFragment.SetDirection (FRAGMENT_DIRECTION);
 
     m_ArmoryFragmentBack.DefineTexture(0u, "menu_detail_05.png");
     m_ArmoryFragmentBack.DefineTexture(1u, "menu_background_black.png");
@@ -425,7 +425,7 @@ cGameMenu::cGameMenu()noexcept
         m_aArmoryIcon[i].DefineTexture(0u, "menu_helper.png");
         m_aArmoryIcon[i].DefineProgram("menu_helper_program");
         //m_aArmoryIcon[i].SetSize      (coreVector2(1.0f,1.0f) * 0.065f);
-        //m_aArmoryIcon[i].SetDirection (coreVector2(1.0f,1.0f).Normalized());
+        //m_aArmoryIcon[i].SetDirection (HELPER_DIRECTION);
         m_aArmoryIcon[i].SetColor3    (g_aMissionData[i].vColor * 1.0f);
         m_aArmoryIcon[i].SetTexSize   (coreVector2(0.25f,0.25f));
         m_aArmoryIcon[i].SetTexOffset (g_aMissionData[i].vIcon);
@@ -475,7 +475,7 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryIconBig.DefineProgram("menu_helper_program");
     //m_ArmoryIconBig.SetPosition  (m_aArmoryTitle[0].GetPosition() + coreVector2(0.0f,0.018f));
     m_ArmoryIconBig.SetSize      (coreVector2(0.2f,0.2f));
-    m_ArmoryIconBig.SetDirection (coreVector2(1.0f,1.0f).Normalized());
+    m_ArmoryIconBig.SetDirection (HELPER_DIRECTION);
     m_ArmoryIconBig.SetTexSize   (coreVector2(0.25f,0.25f));
 
     m_ArmoryTrophy.Construct(MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
@@ -500,8 +500,8 @@ cGameMenu::cGameMenu()noexcept
     {
         m_aArmoryStartArrow[i].DefineTexture(0u, "menu_arrow.png");
         m_aArmoryStartArrow[i].DefineProgram("menu_single_program");
-        m_aArmoryStartArrow[i].SetSize      (coreVector2( 1.0f,1.0f) * (i ? 0.021f : 0.034f));
-        m_aArmoryStartArrow[i].SetDirection (coreVector2(-1.0f,0.0f));
+        m_aArmoryStartArrow[i].SetSize      (coreVector2(1.0f,1.0f) * (i ? 0.021f : 0.034f));
+        m_aArmoryStartArrow[i].SetDirection (coreVector2(1.0f,0.0f));
         m_aArmoryStartArrow[i].SetColor3    (i ? COLOR_MENU_WHITE : coreVector3( 0.1f,0.1f,0.1f));
     }
 
@@ -733,7 +733,7 @@ cGameMenu::cGameMenu()noexcept
     m_DemoStageIcon.DefineProgram("menu_helper_program");
     m_DemoStageIcon.SetPosition  (m_DemoStage.GetPosition() + m_DemoStage.GetSize() * coreVector2(-0.5f,0.0f));
     m_DemoStageIcon.SetSize      (coreVector2(0.1f,0.1f));
-    m_DemoStageIcon.SetDirection (coreVector2(1.0f,1.0f).Normalized());
+    m_DemoStageIcon.SetDirection (HELPER_DIRECTION);
     m_DemoStageIcon.SetTexSize   (coreVector2(0.25f,0.25f));
 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
@@ -1077,7 +1077,7 @@ void cGameMenu::Move()
             for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
             {
                 m_aSegmentIcon[i].SetSize     (coreVector2(0.1f,0.1f) * 1.1f);
-                m_aSegmentIcon[i].SetDirection(coreVector2(1.0f,1.0f).Normalized());
+                m_aSegmentIcon[i].SetDirection(HELPER_DIRECTION);
                 //m_aSegmentIcon[i].Move();
 
                 m_aSegmentIconBack[i].SetSize     (m_aSegmentIcon[i].GetSize() * 1.2f);
@@ -1188,8 +1188,8 @@ void cGameMenu::Move()
                 
                 m_fSegmentTime.Update(1.0f);
 
-                m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.2f*PI) - (0.25f*PI)));
-                m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.1f*PI)));
+                m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.2f*PI) + (0.25f*PI)));
+                m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.1f*PI)));
             }
             else
             {
@@ -1215,8 +1215,8 @@ void cGameMenu::Move()
                 {
                     m_fSegmentTime.Update(1.0f);
 
-                    m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.2f*PI) - (0.25f*PI)));
-                    m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.1f*PI)));
+                    m_aSegmentIcon    [m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime * (-0.2f*PI) + (0.25f*PI)));
+                    m_aSegmentIconBack[m_aiSegmentSelection[0]].SetDirection(coreVector2::Direction(m_fSegmentTime *  (0.1f*PI)));
 
                     for(coreUintW j = 0u; j < MENU_GAME_SEGMENTS; ++j)
                     {
@@ -1241,7 +1241,7 @@ void cGameMenu::Move()
             {
                 if(m_aSegmentBadgeWave[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
-                    m_aSegmentBadge[i].SetDirection(coreVector2::Direction(fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
+                    m_aSegmentBadge[i].SetDirection(coreVector2::Direction(fRotation * -1.0f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
                 }
                 else
                 {
@@ -1506,7 +1506,7 @@ void cGameMenu::Move()
             {
                 if(m_aArmoryBadgeWave[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
-                    m_aArmoryBadge[i].SetDirection(coreVector2::Direction(fRotation1 + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
+                    m_aArmoryBadge[i].SetDirection(coreVector2::Direction(fRotation1 * -1.0f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
                 }
                 else
                 {
@@ -1519,8 +1519,8 @@ void cGameMenu::Move()
             {
                 if(m_aArmoryHelperWave[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
-                    m_aArmoryHelper    [i].SetDirection(coreVector2::Direction(fRotation1         + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS))));
-                    m_aArmoryHelperWave[i].SetDirection(coreVector2::Direction(fRotation1 * -0.5f + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS))));
+                    m_aArmoryHelper    [i].SetDirection(coreVector2::Direction(fRotation1 * -1.0f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS))));
+                    m_aArmoryHelperWave[i].SetDirection(coreVector2::Direction(fRotation1 *  0.5f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS))));
                 }
                 else
                 {
@@ -1537,8 +1537,8 @@ void cGameMenu::Move()
             {
                 if(m_aArmoryIcon[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
-                    m_aArmoryIcon    [i].SetDirection(coreVector2::Direction(fRotation2 *  (0.2f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
-                    m_aArmoryIconBack[i].SetDirection(coreVector2::Direction(fRotation2 * (-0.1f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
+                    m_aArmoryIcon    [i].SetDirection(coreVector2::Direction(fRotation2 * (-0.2f*PI) - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
+                    m_aArmoryIconBack[i].SetDirection(coreVector2::Direction(fRotation2 *  (0.1f*PI) - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
                 }
                 else
                 {

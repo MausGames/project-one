@@ -1011,10 +1011,10 @@ void cMessierBoss::__MoveOwn()
             PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
             {
                 m_avVector[COVER_ROTATION].x += TIME * 0.5f * (1.0f - BLENDH3(fTime)) * fBackSpeed;
-                pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x));
+                pBackground->SetCoverDir(coreVector2::Direction(-m_avVector[COVER_ROTATION].x));
 
                 m_avVector[COVER_ROTATION].y += TIME * 1.0f * (1.0f - BLENDH3(fTime)) * fBackSpeed;
-                g_pPostProcessing->SetDirectionGame(coreVector2::Direction(m_avVector[COVER_ROTATION].y));
+                g_pPostProcessing->SetDirectionGame(coreVector2::Direction(-m_avVector[COVER_ROTATION].y));
             });
         }
         else
@@ -1056,9 +1056,9 @@ void cMessierBoss::__MoveOwn()
 
             if(GetCurBackRotation())
             {
-                pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x + BLENDBR(fTime) * (3.0f*PI)));
+                pBackground->SetCoverDir(coreVector2::Direction(-m_avVector[COVER_ROTATION].x - BLENDBR(fTime) * (3.0f*PI)));
 
-                g_pPostProcessing->SetDirectionGame(PHASE_FINISHED ? coreVector2(0.0f,1.0f) : coreVector2::Direction(LERPBR(m_avVector[COVER_ROTATION].y, m_avVector[COVER_ROTATION].z, fTime)));
+                g_pPostProcessing->SetDirectionGame(PHASE_FINISHED ? coreVector2(0.0f,1.0f) : coreVector2::Direction(-LERPBR(m_avVector[COVER_ROTATION].y, m_avVector[COVER_ROTATION].z, fTime)));
             }
 
             pBackground->SetCoverScale(1.0f - STEPBR(0.1f, 1.0f, fTime));
@@ -1264,16 +1264,16 @@ void cMessierBoss::__MoveOwn()
 
         // 
         m_avVector[COVER_ROTATION].x += TIME * 0.5f * STEPH3(0.0f, 10.0f, m_fRingTime) * fBackSpeed;
-        pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x));
+        pBackground->SetCoverDir(coreVector2::Direction(-m_avVector[COVER_ROTATION].x));
 
         // 
         m_avVector[COVER_ROTATION].y += TIME * 1.0f * STEPH3(0.0f, 10.0f, m_fRingScreen) * fBackSpeed;
-        g_pPostProcessing->SetDirectionGame(coreVector2::Direction(m_avVector[COVER_ROTATION].y));
+        g_pPostProcessing->SetDirectionGame(coreVector2::Direction(-m_avVector[COVER_ROTATION].y));
     }
 
     if(!GetCurBackRotation())
     {
-        d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverDir(g_pPostProcessing->GetDirectionGame().InvertedX());
+        d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverDir(g_pPostProcessing->GetDirectionGame());
     }
 
     // 

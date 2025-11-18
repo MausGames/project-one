@@ -482,9 +482,9 @@ void InitDirection()
     switch(g_CurConfig.Game.iHudDirection)
     {
     default: g_vHudDirection = coreVector2( 0.0f, 1.0f); break;
-    case 1u: g_vHudDirection = coreVector2(-1.0f, 0.0f); break;
+    case 1u: g_vHudDirection = coreVector2( 1.0f, 0.0f); break;
     case 2u: g_vHudDirection = coreVector2( 0.0f,-1.0f); break;
-    case 3u: g_vHudDirection = coreVector2( 1.0f, 0.0f); break;
+    case 3u: g_vHudDirection = coreVector2(-1.0f, 0.0f); break;
     }
 
     // 

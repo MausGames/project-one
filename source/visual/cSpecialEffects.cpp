@@ -433,12 +433,12 @@ void cSpecialEffects::Move()
         if(m_iShakeType)
         {
             // 
-            vBase = MapToAxisInv(coreVector2::Direction(I_TO_F(m_iShakeCount) * GA), g_vHudDirection);
+            vBase = MapToAxis(coreVector2::Direction(I_TO_F(m_iShakeCount) * GA), g_vHudDirection);
         }
         else
         {
             // 
-            vBase = g_vHudDirection.InvertedX() * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f);
+            vBase = g_vHudDirection * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f);
         }
 
         // 

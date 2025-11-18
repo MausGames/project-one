@@ -227,7 +227,7 @@ void cPostProcessing::Move()
         coreVector2 vPos = coreVector2(0.0f,0.0f);
         if(STATIC_ISVALID(g_pGame) && g_fShiftMode)
         {
-            vPos = MapToAxisInv(g_pGame->CalculateCamShift().xy() * this->GetSize(), this->GetDirection()) * 0.3f;
+            vPos = MapToAxis(g_pGame->CalculateCamShift().xy() * this->GetSize(), this->GetDirection()) * 0.3f;
         }
     
         // 
@@ -326,9 +326,9 @@ void cPostProcessing::UpdateLayout()
     switch(g_CurConfig.Game.iGameDirection)
     {
     default: m_vDirectionConfig = coreVector2( 0.0f, 1.0f); break;
-    case 1u: m_vDirectionConfig = coreVector2(-1.0f, 0.0f); break;
+    case 1u: m_vDirectionConfig = coreVector2( 1.0f, 0.0f); break;
     case 2u: m_vDirectionConfig = coreVector2( 0.0f,-1.0f); break;
-    case 3u: m_vDirectionConfig = coreVector2( 1.0f, 0.0f); break;
+    case 3u: m_vDirectionConfig = coreVector2(-1.0f, 0.0f); break;
     }
 
     // 
@@ -430,7 +430,7 @@ void cPostProcessing::__UpdateWall()
     // change ordering depending on game-rotation and mirror-mode
     const coreVector2 vBaseDir  = m_vDirectionConfig;//this->GetDirection();
     const coreVector2 vBaseSize = this->GetSize();
-    const coreVector2 vSwap     = (vBaseDir.yx() + vBaseDir.InvertedX()) * (IsHorizontal(vBaseDir) ? vBaseSize.yx() : vBaseSize).Processed(SIGN);
+    const coreVector2 vSwap     = (vBaseDir.yx() + vBaseDir) * (IsHorizontal(vBaseDir) ? vBaseSize.yx() : vBaseSize).Processed(SIGN);
     const coreUintW   iAdd2     = IsHorizontal(vBaseDir) ? POST_WALLS_BASE : 0u;
 
     // 
@@ -441,7 +441,7 @@ void cPostProcessing::__UpdateWall()
 
         m_aWall[i].SetPosition (vTurn *  fMove);
         m_aWall[i].SetSize     (vSize);
-        m_aWall[i].SetDirection(vTurn *  coreVector2(-1.0f,1.0f));
+        m_aWall[i].SetDirection(vTurn);
         m_aWall[i].SetCenter   (vTurn *  0.5f);
         m_aWall[i].SetAlignment(vTurn * -1.0f);
         m_aWall[i].Move();

@@ -261,7 +261,7 @@ void cCombatText::Move()
         // 
         const coreVector2 vPosition  = coreVector2(m_BadgeIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fBadgeTime));
         const coreVector2 vSize      = coreVector2(1.0f,1.0f) * 0.12f * LERPB(0.5f, 1.0f, MIN1((1.0f - m_fBadgeTime) * 10.0f));
-        const coreVector2 vDirection = coreVector2::Direction(LERPB(-0.5f*PI, -2.0f*PI, MIN1((1.0f - m_fBadgeTime) * 1.5f)));
+        const coreVector2 vDirection = coreVector2::Direction(LERPB(0.5f*PI, 2.0f*PI, MIN1((1.0f - m_fBadgeTime) * 1.5f)));
         const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, m_BadgeIcon.GetSize(), m_BadgeIcon.GetCenter());
         const coreFloat   fAlpha     = BLENDH3(MIN1(m_fBadgeTime * 8.0f)) * fAlphaFull;
 
@@ -293,11 +293,11 @@ void cCombatText::Move()
         m_fTrophyTime.UpdateMax(-0.8f, 0.0f);
 
         // 
-        const coreVector2 vPosition = coreVector2(m_TrophyIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fTrophyTime));
-        const coreVector2 vSize     = coreVector2(1.0f,1.0f) * 0.12f * LERPB (0.5f, 1.0f, MIN1((1.0f - m_fTrophyTime) * 10.0f));
-        const coreVector2 vDirection = coreVector2::Direction(LERPB(1.0f*PI, -2.0f*PI, MIN1((1.0f - m_fTrophyTime) * 1.5f)));
-        const coreVector2 vCenter   = cCombatText::__RestrictCenter(vPosition, m_TrophyIcon.GetSize(), m_TrophyIcon.GetCenter());
-        const coreFloat   fAlpha    = BLENDH3(MIN1(m_fTrophyTime * 8.0f)) * fAlphaFull;
+        const coreVector2 vPosition  = coreVector2(m_TrophyIcon.GetPosition().x, LERPB(0.0f, 0.05f, 1.0f - m_fTrophyTime));
+        const coreVector2 vSize      = coreVector2(1.0f,1.0f) * 0.12f * LERPB (0.5f, 1.0f, MIN1((1.0f - m_fTrophyTime) * 10.0f));
+        const coreVector2 vDirection = coreVector2::Direction(LERPB(-1.0f*PI, 2.0f*PI, MIN1((1.0f - m_fTrophyTime) * 1.5f)));
+        const coreVector2 vCenter    = cCombatText::__RestrictCenter(vPosition, m_TrophyIcon.GetSize(), m_TrophyIcon.GetCenter());
+        const coreFloat   fAlpha     = BLENDH3(MIN1(m_fTrophyTime * 8.0f)) * fAlphaFull;
 
         // 
         m_TrophyIcon.SetPosition (vPosition);
@@ -488,7 +488,7 @@ void cCombatText::UpdateLayout()
             vCurCenter.arr(IsHorizontal(m_vOldDirection) ? 1u : 0u) *= -1.0f;
         }
 
-        vCurCenter = MapToAxisInv(MapToAxis(vCurCenter, m_vOldDirection), vFinal);
+        vCurCenter = MapToAxis(MapToAxisInv(vCurCenter, m_vOldDirection), vFinal);
 
         pObject->SetCenter(vCurCenter);
         pObject->Move();
@@ -633,7 +633,7 @@ coreVector2 cCombatText::__TransformPosition(const coreVector3 vPosition)
     const coreVector2 vFinal = CalcFinalDirection();
 
     // 
-    return MapToAxisInv(g_pForeground->Project2D(vPosition - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * coreVector2(fSide, 1.0f), vFinal);
+    return MapToAxis(g_pForeground->Project2D(vPosition - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * coreVector2(fSide, 1.0f), vFinal);
 }
 
 

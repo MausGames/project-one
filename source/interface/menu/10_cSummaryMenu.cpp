@@ -36,7 +36,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_BackgroundMain.DefineTexture(0u, "menu_detail_04.png");
     m_BackgroundMain.DefineTexture(1u, "menu_background_black.png");
     m_BackgroundMain.DefineProgram("menu_animate_program");
-    m_BackgroundMain.SetDirection (coreVector2(-1.0f,0.0f));
+    m_BackgroundMain.SetDirection (coreVector2(1.0f,0.0f));
 
     m_BackgroundCoop.DefineTexture(0u, "menu_detail_04.png");
     m_BackgroundCoop.DefineTexture(1u, "menu_background_black.png");
@@ -208,7 +208,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_Icon.DefineTexture(0u, "menu_helper.png");
     m_Icon.DefineProgram("menu_helper_program");
     m_Icon.SetPosition  (coreVector2(0.0f, m_aHeader[1].GetPosition().y + 0.02f));
-    m_Icon.SetDirection (coreVector2(1.0f,1.0f).Normalized());
+    m_Icon.SetDirection (HELPER_DIRECTION);
     m_Icon.SetTexSize   (coreVector2(0.25f,0.25f));
 
     m_MedalMission.DefineTexture(0u, "menu_medal.png");
@@ -716,16 +716,16 @@ void cSummaryMenu::Move()
 
             for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
             {
-                m_aArcadeIcon    [i].SetDirection(coreVector2::Direction(fRotation1 *  (0.2f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
+                m_aArcadeIcon    [i].SetDirection(coreVector2::Direction(fRotation1 * (-0.2f*PI) - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
                 m_aArcadeIcon    [i].Move();
-                m_aArcadeIconBack[i].SetDirection(coreVector2::Direction(fRotation1 * (-0.1f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
+                m_aArcadeIconBack[i].SetDirection(coreVector2::Direction(fRotation1 *  (0.1f*PI) - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_ARCADES))));
                 m_aArcadeIconBack[i].Move();
             }
             
     
             for(coreUintW i = 0u; i < MENU_SUMMARY_RUNS; ++i)
             {
-                m_aContinueImage[i].SetDirection(coreVector2::Direction(fRotation2 + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_RUNS))));
+                m_aContinueImage[i].SetDirection(coreVector2::Direction(fRotation2 * -1.0f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_SUMMARY_RUNS))));
                 m_aContinueImage[i].SetAlpha    (m_aContinueImage[i].GetAlpha() * fBlendOut);
             }
         }
@@ -859,7 +859,7 @@ void cSummaryMenu::Move()
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
                 const coreBool bLeftRight = m_fOutroTimer ? true : false;
-                m_BackgroundMain.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BackgroundMain.GetDirection().yx());
+                m_BackgroundMain.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BackgroundMain.GetDirection().Rotated90());
                 m_BackgroundMain.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
                 // animate background
@@ -1058,7 +1058,7 @@ void cSummaryMenu::Move()
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
                 const coreBool bLeftRight = m_fOutroTimer ? true : false;
-                m_BackgroundMain.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BackgroundMain.GetDirection().yx());
+                m_BackgroundMain.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BackgroundMain.GetDirection().Rotated90());
                 m_BackgroundMain.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
                 // animate background
@@ -1104,7 +1104,7 @@ void cSummaryMenu::Move()
             {
                 if(m_aSegmentBadgeWave[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
-                    m_aSegmentBadge[i].SetDirection(coreVector2::Direction(fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
+                    m_aSegmentBadge[i].SetDirection(coreVector2::Direction(fRotation * -1.0f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
                 }
                 else
                 {

@@ -561,7 +561,7 @@ void cReplay::Update()
             // 
             if(pNewInput->iMoveStep != m_aInput[i].iMoveStep)
             {
-                ASSERT(pNewInput->vMove == MapToAxis(UnpackDirection(pNewInput->iMoveStep), g_pPostProcessing->GetDirectionGame()))
+                ASSERT(pNewInput->vMove == MapToAxisInv(UnpackDirection(pNewInput->iMoveStep), g_pPostProcessing->GetDirectionGame()))
                 nNewPacketFunc(i, REPLAY_TYPE_MOVE, pNewInput->iMoveStep);
             }
 
@@ -721,7 +721,7 @@ void cReplay::Update()
             }
 
             // 
-            oCurInput.vMove = MapToAxis(UnpackDirection(oCurInput.iMoveStep), g_pPostProcessing->GetDirectionGame());
+            oCurInput.vMove = MapToAxisInv(UnpackDirection(oCurInput.iMoveStep), g_pPostProcessing->GetDirectionGame());
         }
 
         for(coreUintW j = m_iCurChange, je = m_aChange.size(); j < je; ++j)   // multiple package on the same frame

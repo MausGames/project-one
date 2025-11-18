@@ -348,8 +348,8 @@ cReplayMenu::cReplayMenu()noexcept
     {
         m_aDetailStartArrow[i].DefineTexture(0u, "menu_arrow.png");
         m_aDetailStartArrow[i].DefineProgram("menu_single_program");
-        m_aDetailStartArrow[i].SetSize      (coreVector2( 1.0f,1.0f) * (i ? 0.021f : 0.034f));
-        m_aDetailStartArrow[i].SetDirection (coreVector2(-1.0f,0.0f));
+        m_aDetailStartArrow[i].SetSize      (coreVector2(1.0f,1.0f) * (i ? 0.021f : 0.034f));
+        m_aDetailStartArrow[i].SetDirection (coreVector2(1.0f,0.0f));
         m_aDetailStartArrow[i].SetColor3    (i ? COLOR_MENU_WHITE : coreVector3( 0.1f,0.1f,0.1f));
     }
 
@@ -906,8 +906,8 @@ void cReplayMenu::Move()
             {
                 if(m_aDetailIcon[i].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
-                    m_aDetailIcon    [i].SetDirection(coreVector2::Direction(fRotation *  (0.2f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
-                    m_aDetailIconBack[i].SetDirection(coreVector2::Direction(fRotation * (-0.1f*PI) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
+                    m_aDetailIcon    [i].SetDirection(coreVector2::Direction(fRotation * (-0.2f*PI) - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
+                    m_aDetailIconBack[i].SetDirection(coreVector2::Direction(fRotation *  (0.1f*PI) - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_GAME_ARMORY_ICONS))));
                 }
                 else
                 {

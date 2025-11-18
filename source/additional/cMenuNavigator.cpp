@@ -54,7 +54,7 @@ cMenuNavigator::cMenuNavigator()noexcept
     {
         m_aCursor[i].DefineTexture(0u, "menu_cursor.png");
         m_aCursor[i].DefineProgram("default_2d_program");
-        m_aCursor[i].SetDirection (StepRotated90(i).InvertedX());
+        m_aCursor[i].SetDirection (StepRotated90(i));
         m_aCursor[i].SetSize      (coreVector2(1.0f,1.0f) * 0.035f);
     }
 
@@ -120,13 +120,13 @@ void cMenuNavigator::Move()
         const coreVector2 vPosition   = GetTranslation(*m_pCurObject);
         const coreVector2 vResolution = Core::System->GetResolution();
 
-        coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) / vResolution.Min();
+        coreVector2 vNewPos  = MapToAxisInv(vPosition, g_vHudDirection) / vResolution.Min();
         const coreVector2 vNewSize = m_pCurObject->GetSize() * (HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_BIG) ? 1.5f : 1.0f);
 
         const coreObject2D* pScroll = this->GetCurScroll();
         if(pScroll)
         {
-            const coreVector2 vPos  = MapToAxis(GetTranslationArea(*pScroll), g_vHudDirection);
+            const coreVector2 vPos  = MapToAxisInv(GetTranslationArea(*pScroll), g_vHudDirection);
             const coreVector2 vSize = pScroll->GetSize();
             vNewPos.x = CLAMP(vNewPos.x, vPos.x - vSize.x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + vSize.x * 0.5f - m_vCurSize.x * 0.5f);
             vNewPos.y = CLAMP(vNewPos.y, vPos.y - vSize.y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + vSize.y * 0.5f - m_vCurSize.y * 0.5f);
@@ -158,7 +158,7 @@ void cMenuNavigator::Move()
         const coreVector2 vOffset = coreVector2(m_vCurSize.x * -0.5f - 0.03f, 0.0f);
 
         this->SetPosition (m_vCurPos + vOffset);
-        this->SetDirection(coreVector2::Direction(1.2f * Core::System->GetTotalTimeFloat(20.0*PI_D) - BLENDBR(MAX0(coreFloat(m_dPressTime - Core::System->GetTotalTime()))) * (2.0f*PI) * 0.0f));
+        this->SetDirection(coreVector2::Direction(Core::System->GetTotalTimeFloat(20.0*PI_D) * -1.2f + BLENDBR(MAX0(coreFloat(m_dPressTime - Core::System->GetTotalTime()))) * (2.0f*PI) * 0.0f));
 
         // 
         const coreFloat fMove = LERP(0.002f, 0.005f, (0.5f + 0.5f * SIN(Core::System->GetTotalTimeFloat(1.0) * (2.0f*PI)))) * m_fGrabTime;
@@ -251,7 +251,7 @@ void cMenuNavigator::Move()
         // 
         if(m_iBack != MENUNAVIGATOR_INVALID)
         {
-            m_aPrompt[2].SetPosition(MapToAxis(GetTranslationArea(*this->__ToObject(m_iBack)), g_vHudDirection) + coreVector2(0.03f,-0.03f));
+            m_aPrompt[2].SetPosition(MapToAxisInv(GetTranslationArea(*this->__ToObject(m_iBack)), g_vHudDirection) + coreVector2(0.03f,-0.03f));
             m_aPrompt[2].SetSize    (coreVector2(0.07f,0.07f) * (abPress[2] ? 0.8f : 1.0f));
             m_aPrompt[2].Move();
         }

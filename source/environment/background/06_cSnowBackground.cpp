@@ -356,7 +356,7 @@ void cSnowBackground::__MoveOwn()
 
     // 
     m_Snow.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
-    m_Snow.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    m_Snow.SetDirection(g_pEnvironment->GetDirection());
     m_Snow.SetTexSize  (vTexSize);
     m_Snow.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Snow.Move();

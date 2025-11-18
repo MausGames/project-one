@@ -82,7 +82,7 @@ template <typename... A> void cTooltip::ShowText(const coreVector2 vTarget, cons
 {
     // show tooltip at target position
     m_bDisplay = true;
-    this->SetCenter(MapToAxis(vTarget, g_vHudDirection));
+    this->SetCenter(MapToAxisInv(vTarget, g_vHudDirection));
 
     // check and save last reference-pointer (to prevent redundant update)
     if(m_pLastRef == pRef) return;

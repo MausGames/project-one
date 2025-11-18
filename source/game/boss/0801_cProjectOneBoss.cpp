@@ -755,7 +755,7 @@ void cProjectOneBoss::__MoveOwn()
             const coreFloat fTime = CLAMP01((m_fPhaseTime - INTERFACE_FRAGMENT_DURATION_EXT - I_TO_F(g_aiFragmentOrder[i]) * 0.3f) * 0.7f);
 
             const coreVector2 vDir2 = FRAGMENT_DIRECTION;
-            const coreVector2 vPos2 = MapToAxisInv(FRAGMENT_POSITION(i), vDir2) * FOREGROUND_AREA;
+            const coreVector2 vPos2 = MapToAxis(FRAGMENT_POSITION(i), vDir2) * FOREGROUND_AREA;
 
             const coreVector2 vPos   = pPlayer->GetPosition().xy() + vPos2 * LERPBR(6.0f, 0.0f, fTime);
             const coreFloat   fScale = LERPBR(3.0f, 1.5f, fTime);
@@ -2987,7 +2987,7 @@ void cProjectOneBoss::__MoveMagenta()
         const coreVector2 vOldAxis = coreVector2::Direction(fOldGameAngle);
         const coreVector2 vNewAxis = coreVector2::Direction(m_fGameAngle);
 
-        g_pPostProcessing->SetDirectionGame(vNewAxis);
+        g_pPostProcessing->SetDirectionGame(vNewAxis.InvertedX());
 
         this->ToAxis(vNewAxis);
 
@@ -3053,7 +3053,7 @@ void cProjectOneBoss::__MoveMagenta()
             {
                 const coreVector2 vNewAxis = PHASE_FINISHED ? coreVector2(0.0f,1.0f) : coreVector2::Direction(AngleLerp(m_fGameAngle, 0.0f, BLENDB(fTime)));
 
-                g_pPostProcessing->SetDirectionGame(vNewAxis);
+                g_pPostProcessing->SetDirectionGame(vNewAxis.InvertedX());
             });
         }
         else
@@ -5103,7 +5103,7 @@ void cProjectOneBoss::__DisableFragment(const coreUintW iIndex, const coreBool b
     // 
     if(bAnimated)
     {
-        const coreVector2 vDir = MapToAxisInv(FRAGMENT_POSITION(iIndex), FRAGMENT_DIRECTION).Normalized();
+        const coreVector2 vDir = MapToAxis(FRAGMENT_POSITION(iIndex), FRAGMENT_DIRECTION).Normalized();
 
         g_pSpecialEffects->MacroEruptionDarkBig(oFragment.GetPosition(), vDir);
         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);

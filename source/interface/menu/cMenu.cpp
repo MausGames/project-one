@@ -249,7 +249,7 @@ void cMenu::Render()
             {
                 // set transition uniforms
                 m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
-                m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  g_vHudDirection.InvertedX().Rotated90());
+                m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  g_vHudDirection.Rotated90());
 
                 glBlendFunc(FOREGROUND_BLEND_ALPHA);
                 {

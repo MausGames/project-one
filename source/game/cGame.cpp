@@ -183,7 +183,7 @@ void cGame::Render()
             vCamPos += this->CalculateCamShift() * 0.5f + vShake;
         }
         
-        const coreVector3 vCamOri = MapToAxis(CAMERA_ORIENTATION, g_pPostProcessing->GetDirection());
+        const coreVector3 vCamOri = MapToAxisInv(CAMERA_ORIENTATION, g_pPostProcessing->GetDirection());
         
         Core::Graphics->SetCamera(vCamPos, CAMERA_DIRECTION, vCamOri);   // do not reset at the end
             

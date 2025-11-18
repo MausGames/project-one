@@ -161,7 +161,7 @@ void cFinishMenu::Move()
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
                 const coreBool bLeftRight = m_fOutroTimer ? true : false;
-                m_Background.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_Background.GetDirection().yx());
+                m_Background.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_Background.GetDirection().Rotated90());
                 m_Background.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
                 // animate background

@@ -26,7 +26,7 @@ cScrollBox::cScrollBox()noexcept
         m_aArrow[i].Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
         m_aArrow[i].DefineProgram("menu_border_program");
         m_aArrow[i].SetSize      (coreVector2(1.0f,1.0f) * SCROLL_WIDTH);
-        m_aArrow[i].SetDirection (coreVector2(i ? 1.0f : -1.0f, 0.0f));
+        m_aArrow[i].SetDirection (coreVector2(i ? -1.0f : 1.0f, 0.0f));
         m_aArrow[i].GetCaption()->SetText("<");
     }
 
@@ -100,7 +100,7 @@ void cScrollBox::Move()
         const coreFloat fPosDown = m_aArrow[1].GetPosition().y + fHeight;
 
         // 
-        const coreFloat fMousePos = MapToAxis(Core::Input->GetMousePosition() * (Core::System->GetResolution() / g_vGameResolution), g_vHudDirection).y;
+        const coreFloat fMousePos = MapToAxisInv(Core::Input->GetMousePosition() * (Core::System->GetResolution() / g_vGameResolution), g_vHudDirection).y;
 
         // 
         coreFloat fWheel = TIME ? Core::Input->GetMouseWheel() : 0.0f;

@@ -227,7 +227,7 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     m_Cover.SetSize     (vSize);
-    m_Cover.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
+    m_Cover.SetDirection(MapToAxis(g_pEnvironment->GetDirection(), m_vCoverDir));
     m_Cover.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Cover.Move();
 
@@ -244,7 +244,7 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     m_Nebula.SetSize     (vSize);
-    m_Nebula.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
+    m_Nebula.SetDirection(MapToAxis(g_pEnvironment->GetDirection(), m_vCoverDir));
     m_Nebula.SetColor3   (m_Cover.GetColor3().LowRatio());
     m_Nebula.SetTexSize  (vTexSize);
     m_Nebula.SetTexOffset(vTexOffset3.Processed(FRACT));

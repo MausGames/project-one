@@ -928,11 +928,11 @@ void cRutilusMission::__SetupOwn()
         fRotationValue = FmodRange(fRotationValue + fRotationSpeed * TIME * fBackSpeed, 0.0f*PI, 2.0f*PI);
         const coreVector2 vDirection = STAGE_CLEARED ? coreVector2(0.0f,1.0f) : coreVector2::Direction(fRotationValue);
 
-        g_pPostProcessing->SetDirectionGame(vDirection);
+        g_pPostProcessing->SetDirectionGame(vDirection.InvertedX());
 
         if(!GetCurBackRotation())
         {
-            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverDir(g_pPostProcessing->GetDirectionGame().InvertedX());
+            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverDir(g_pPostProcessing->GetDirectionGame());
         }
 
         if(fRotationValue != fRotationValueOld)

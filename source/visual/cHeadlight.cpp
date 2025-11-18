@@ -190,7 +190,7 @@ void cHeadlight::DrawSpot(const coreVector3 vPosition, const coreVector2 vSize, 
     sSpotCommand oCommand;
     oCommand.vPosition  = (g_pForeground->Project2D(vPosition) + g_pForeground->Project2D(coreVector3(vOffset, 0.0f))) * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;   // separate
     oCommand.vSize      = (g_pForeground->Project2D(coreVector3(vSize, 0.0f)))                                         * HEADLIGHT_SCALE_FACTOR * ENVIRONMENT_SCALE_FACTOR;
-    oCommand.vDirection = vOffset.Normalized().InvertedX();
+    oCommand.vDirection = vOffset.Normalized();
 
     // 
     m_aSpotCommand.push_back(oCommand);

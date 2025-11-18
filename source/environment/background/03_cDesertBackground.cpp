@@ -388,7 +388,7 @@ void cDesertBackground::__MoveOwn()
 
     // 
     m_Sand.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
-    m_Sand.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    m_Sand.SetDirection(g_pEnvironment->GetDirection());
     m_Sand.SetTexSize  (vTexSize);
     m_Sand.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Sand.Move();
@@ -398,7 +398,7 @@ void cDesertBackground::__MoveOwn()
 
     // 
     m_Veil.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
-    m_Veil.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    m_Veil.SetDirection(g_pEnvironment->GetDirection());
     m_Veil.SetEnabled  (m_Veil.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Veil.Move();
 

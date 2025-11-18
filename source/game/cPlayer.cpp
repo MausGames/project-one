@@ -411,7 +411,7 @@ void cPlayer::Move()
 
                 const coreBool bArrange = HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE);
 
-                switch(PackDirection(MapToAxisInv(m_pInput->vMove, vDirGame)))
+                switch(PackDirection(MapToAxis(m_pInput->vMove, vDirGame)))
                 {
                 default: UNREACHABLE
                 case 0u: m_iLastHold = 0u; break;
@@ -455,17 +455,17 @@ void cPlayer::Move()
 
             // 
             const coreVector2 vDirGame     = g_pPostProcessing->GetDirectionGame();
-            const coreVector2 vOldDirCross = AlongCrossNormal(MapToAxisInv(vOldDir, vDirGame));
+            const coreVector2 vOldDirCross = AlongCrossNormal(MapToAxis(vOldDir, vDirGame));
             
             const coreBool bLegacyRota = REPLAY_WRAP_CONFIG_ROTATION_TURN;
             
             if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !bLegacyRota)
             {
                 // 
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))    vNewDir = MapToAxis(coreVector2( 0.0f, 1.0f), vDirGame);
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  vNewDir = MapToAxis(coreVector2(-1.0f, 0.0f), vDirGame);
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  vNewDir = MapToAxis(coreVector2( 0.0f,-1.0f), vDirGame);
-                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) vNewDir = MapToAxis(coreVector2( 1.0f, 0.0f), vDirGame);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))    vNewDir = MapToAxisInv(coreVector2( 0.0f, 1.0f), vDirGame);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  vNewDir = MapToAxisInv(coreVector2(-1.0f, 0.0f), vDirGame);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  vNewDir = MapToAxisInv(coreVector2( 0.0f,-1.0f), vDirGame);
+                if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) vNewDir = MapToAxisInv(coreVector2( 1.0f, 0.0f), vDirGame);
             }
             else
             {
@@ -490,7 +490,7 @@ void cPlayer::Move()
 
                     if(HAS_FLAG(m_iStatus, PLAYER_STATUS_ARRANGE) && !bLegacyRota)
                     {
-                        vNewDir = MapToAxis(vStepDir, vDirGame);
+                        vNewDir = MapToAxisInv(vStepDir, vDirGame);
                     }
                     else
                     {

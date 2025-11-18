@@ -82,7 +82,7 @@ cScoreMenu::cScoreMenu()noexcept
     m_FilterIcon.DefineProgram("menu_helper_program");
     m_FilterIcon.SetPosition  (m_FilterMission.GetPosition());
     m_FilterIcon.SetSize      (coreVector2(0.1f,0.1f));
-    m_FilterIcon.SetDirection (coreVector2(1.0f,1.0f).Normalized());
+    m_FilterIcon.SetDirection (HELPER_DIRECTION);
     m_FilterIcon.SetTexSize   (coreVector2(0.25f,0.25f));
 
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)

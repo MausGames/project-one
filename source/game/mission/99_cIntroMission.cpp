@@ -104,7 +104,7 @@ void cIntroMission::__MoveOwnAfter()
         const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
         ASSERT(vFinal.IsNormalized())
         
-        const coreUintW iShift = PackDirection(vFinal)  / 2u;
+        const coreUintW iShift = PackDirection(vFinal.InvertedX()) / 2u;
         
         const coreUintW iSwapX = (!IsHorizontal(vFinal) && (g_CurConfig.Game.iMirrorMode == 1u)) ? 2u : 0u;
         const coreUintW iSwapY = ( IsHorizontal(vFinal) && (g_CurConfig.Game.iMirrorMode == 1u)) ? 2u : 0u;
@@ -188,10 +188,10 @@ void cIntroMission::__MoveOwnAfter()
                 fTime.UpdateMax(-1.0f, 0.0f);
 
                 // 
-                m_aaManual[i][j].SetPosition (MapToAxis(avOffset[j] * 0.1f, vGame) * vFlip);
+                m_aaManual[i][j].SetPosition (MapToAxisInv(avOffset[j] * 0.1f, vGame) * vFlip);
                 m_aaManual[i][j].SetSize     (coreVector2(0.1f,0.1f) * (abPress[j] ? 0.8f : 1.0f) * vFlip2);
                 m_aaManual[i][j].SetDirection(MapToAxisInv(coreVector2(0.0f,1.0f), vGame));
-                m_aaManual[i][j].SetCenter   (MapToAxis(g_pForeground->Project2D(pPlayer->GetPosition()), vHud));
+                m_aaManual[i][j].SetCenter   (MapToAxisInv(g_pForeground->Project2D(pPlayer->GetPosition()), vHud));
                 m_aaManual[i][j].SetAlpha    (BLENDH3(MIN1(fTime)));
                 m_aaManual[i][j].SetEnabled  ((fTime && HAS_BIT(aiModeBits[j], iMode) && !pPlayer->HasStatus(PLAYER_STATUS_DEAD)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
                 m_aaManual[i][j].Move();

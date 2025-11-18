@@ -149,7 +149,7 @@ void cWater::UpdateReflection()
         {
             // move and render the sky-plane
             m_Sky.SetSize     (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
-            m_Sky.SetDirection(vOldCamOri.xy());
+            m_Sky.SetDirection(vOldCamOri.xy().InvertedX());
             m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * (0.008f * WATER_SKY_SIZE), m_fFlyOffset * (-0.05f * WATER_SKY_SIZE)));
             m_Sky.Move();
             m_Sky.Render(m_apSkyProgram[0]);

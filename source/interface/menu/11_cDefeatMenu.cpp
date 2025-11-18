@@ -232,7 +232,7 @@ void cDefeatMenu::Move()
 
         // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = m_fOutroTimer ? true : false;
-        m_Background.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_Background.GetDirection().yx());
+        m_Background.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_Background.GetDirection().Rotated90());
         m_Background.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
         // animate background
@@ -252,7 +252,7 @@ void cDefeatMenu::Move()
     
     const coreFloat fRotation = Core::System->GetTotalTimeFloat(2.0*PI_D);
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
-        m_aContinueImage[i].SetDirection(coreVector2::Direction(fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_DEFEAT_CONTINUES))));
+        m_aContinueImage[i].SetDirection(coreVector2::Direction(fRotation * -1.0f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(MENU_DEFEAT_CONTINUES))));
 
     // 
     g_pPostProcessing->SetSaturationAll(MIN1(m_fOutroTimer * MENU_DEFEAT_BANNER_SPEED));

@@ -153,6 +153,8 @@ static constexpr sMissionData g_aMissionData[] =
     {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Color2, cDarkBackground   ::Icon, cNautilusBoss  ::Name}    // #
 };
 
+#define HELPER_DIRECTION (coreVector2(-1.0f,1.0f).Normalized())
+
 
 // ****************************************************************
 // 
@@ -183,7 +185,7 @@ static constexpr sFragmentData g_aFragmentData[] =
 static constexpr coreUintW g_aiFragmentOrder[] = {7u, 3u, 6u, 0u, 4u, 5u, 1u, 2u};
 
 #define FRAGMENT_POSITION(x) (g_aFragmentData[x].vOffset + g_aFragmentData[x].vSize * 0.5f - 0.5f)
-#define FRAGMENT_DIRECTION   (coreVector2(1.0f,1.0f).Normalized())
+#define FRAGMENT_DIRECTION   (coreVector2(-1.0f,1.0f).Normalized())
 
 STATIC_ASSERT(ARRAY_SIZE(g_aFragmentData) >= FRAGMENTS)
 STATIC_ASSERT(ARRAY_SIZE(g_aFragmentData) == ARRAY_SIZE(g_aMissionData))

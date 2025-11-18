@@ -541,7 +541,7 @@ void UpdateInput()
     // 
     const coreVector2 vFinal  = CalcFinalDirection();
     const coreVector2 vFinal2 = MapToAxisInv(vFinal, g_pPostProcessing->GetDirectionGame() * coreVector2((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f, 1.0f));
-    const coreUint8   iShift  = PackDirection(vFinal2) / 2u;
+    const coreUint8   iShift  = PackDirection(vFinal2.InvertedX()) / 2u;
 
     // 
     const auto nDirectionFunc = [&](sGameInput* OUTPUT pInput)
@@ -550,8 +550,8 @@ void UpdateInput()
         if(!pInput->vMove.IsNull())
         {
             // 
-            pInput->iMoveStep = PackDirection(MapToAxis(pInput->vMove, vFinal2));
-            pInput->vMove     = MapToAxis(UnpackDirection(pInput->iMoveStep), g_pPostProcessing->GetDirectionGame());   // make sure the lookup and calculation is identical to the replay
+            pInput->iMoveStep = PackDirection(MapToAxisInv(pInput->vMove, vFinal2));
+            pInput->vMove     = MapToAxisInv(UnpackDirection(pInput->iMoveStep), g_pPostProcessing->GetDirectionGame());   // make sure the lookup and calculation is identical to the replay
         }
 
         // 
@@ -575,7 +575,7 @@ void UpdateInput()
         {
             // 
             pInput->iMoveStep = StepInvertedX(pInput->iMoveStep);
-            pInput->vMove     = pInput->vMove.InvertedX();
+            pInput->vMove     = MapToAxisInv(UnpackDirection(pInput->iMoveStep), g_pPostProcessing->GetDirectionGame());
 
             // 
             const auto nFlipTurnFunc = [](coreUint16* OUTPUT piAction)
@@ -631,7 +631,7 @@ void UpdateInput()
 
                 if((iFireMode == 2u) && s_abFireToggle[iStateIndex] && !pPlayer->GetTilt())
                 {
-                    const coreVector2 vDir = MapToAxis(pPlayer->GetDirection().xy(), g_pPostProcessing->GetDirectionGame());
+                    const coreVector2 vDir = MapToAxisInv(pPlayer->GetDirection().xy(), g_pPostProcessing->GetDirectionGame());
 
                     if((!SameDirection90(vDir, coreVector2( 0.0f, 1.0f)) && HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_UP))   ||
                        (!SameDirection90(vDir, coreVector2(-1.0f, 0.0f)) && HAS_BIT(pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)) ||

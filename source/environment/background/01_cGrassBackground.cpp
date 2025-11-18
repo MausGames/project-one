@@ -555,7 +555,7 @@ void cGrassBackground::__MoveOwn()
 
     // 
     m_Cover.SetSize     (coreVector2(1.0f,1.0f) * SQRT2 * ENVIRONMENT_SCALE_FACTOR);
-    m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    m_Cover.SetDirection(g_pEnvironment->GetDirection());
     m_Cover.SetColor3   (coreVector3(1.0f,1.0f,1.0f) * LERP(0.9f, 0.5f, m_Cover.GetAlpha()));
     m_Cover.SetTexOffset(coreVector2(0.005f * g_pEnvironment->GetSideOffset(), FRACT(m_fOffset)));
     m_Cover.SetEnabled  (m_Cover.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);

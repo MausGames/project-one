@@ -320,7 +320,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
         m_aFragmentTable[i].DefineProgram("menu_single_program");
         m_aFragmentTable[i].SetPosition  (coreVector2(0.0f,0.0f));
         m_aFragmentTable[i].SetSize      (coreVector2(1.0f,1.0f) * INTERFACE_FRAGMENT_SCALE);
-        m_aFragmentTable[i].SetDirection (coreVector2(1.0f,1.0f).Normalized());
+        m_aFragmentTable[i].SetDirection (FRAGMENT_DIRECTION);
         m_aFragmentTable[i].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.0f);
     }
 
@@ -618,7 +618,7 @@ void cInterface::Move()
             const coreFloat   fCurSpin = CLAMP01(oView.fSpin - I_TO_F(j));
             const coreVector2 vNewSize = vSize * (1.5f - 0.5f * fCurSpin);
             const coreVector2 vNewPos  = nFlipFunc(vPos, &oView.aLife[j]) + 0.5f * (vSize - vNewSize) * oView.aLife[j].GetAlignment();
-            const coreVector2 vNewDir  = coreVector2::Direction(m_fRotation + (0.8f*PI) * (I_TO_F(j) / I_TO_F(INTERFACE_LIVES)));
+            const coreVector2 vNewDir  = coreVector2::Direction(m_fRotation * -1.0f - (0.8f*PI) * (I_TO_F(j) / I_TO_F(INTERFACE_LIVES)));
 
             // 
             oView.aLife[j].SetPosition (vNewPos);
@@ -659,7 +659,7 @@ void cInterface::Move()
         const coreFloat fImmuneValue = BLENDB(1.0f - oView.fImmuneTime);
 
         // 
-        oView.oImmune.SetPosition(MapToAxis(GetTranslationArea(oView.aLife[2]), g_vHudDirection) + coreVector2(0.0f, 0.05f * fImmuneValue));
+        oView.oImmune.SetPosition(MapToAxisInv(GetTranslationArea(oView.aLife[2]), g_vHudDirection) + coreVector2(0.0f, 0.05f * fImmuneValue));
         oView.oImmune.SetEnabled (oView.fImmuneTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
         // 
@@ -887,7 +887,7 @@ void cInterface::Move()
             {
                 //const coreFloat   fAlong = (m_aBossHealthBar[0].GetSize().x - 0.01f) * LERP(-0.5f, 0.5f, I_TO_F(*piHealthGoal) / I_TO_F(iMaxHealth));
                 const coreFloat   fAlong = m_aBossHealthBar[0].GetSize().x * 0.5f + I_TO_F(i) * -0.025f - 0.1f;
-                const coreVector2 vPos   = MapToAxis(GetTranslationArea(m_aBossHealthBar[0]), g_vHudDirection) + coreVector2(fAlong, 0.0f);
+                const coreVector2 vPos   = MapToAxisInv(GetTranslationArea(m_aBossHealthBar[0]), g_vHudDirection) + coreVector2(fAlong, 0.0f);
 
                 m_aaBossMarker[i][0].SetPosition(vPos);
                 m_aaBossMarker[i][0].SetEnabled (CORE_OBJECT_ENABLE_ALL);
@@ -1063,7 +1063,7 @@ void cInterface::Move()
         // 
         m_aHelper[i].SetPosition (nFlipFunc(vBasePos, &m_aHelper[i]));
         m_aHelper[i].SetSize     (coreVector2(1.0f,1.0f) * 0.045f);
-        m_aHelper[i].SetDirection(coreVector2::Direction((bRealState ? (m_fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS))) : 0.0f) + fBump * (-1.0f*PI)));
+        m_aHelper[i].SetDirection(coreVector2::Direction((bRealState ? (m_fRotation * -1.0f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS))) : 0.0f) + fBump * (1.0f*PI)));
         m_aHelper[i].SetColor3   (bRealState ? vColor : coreVector3(1.0f,1.0f,1.0f));
         m_aHelper[i].SetAlpha    (fAlphaBossFull * (bRealState ? 1.0f : 0.5f) * fHelperCover);
         m_aHelper[i].Move();
@@ -1071,7 +1071,7 @@ void cInterface::Move()
         // 
         m_aHelperWave[i].SetPosition (m_aHelper[i].GetPosition() - m_aHelperWave[i].GetAlignment() * m_aHelper[i].GetSize() * (bRealState ? (0.2f + fBump) : 0.0f) * 0.5f);
         m_aHelperWave[i].SetSize     (m_aHelper[i].GetSize() * (1.2f + fBump));
-        m_aHelperWave[i].SetDirection(coreVector2::Direction(m_fRotation * -0.5f + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS)) + fBump * (1.0f*PI)));
+        m_aHelperWave[i].SetDirection(coreVector2::Direction(m_fRotation * 0.5f - (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS)) - fBump * (1.0f*PI)));
         m_aHelperWave[i].SetColor3   (m_aHelper[i].GetColor3());
         m_aHelperWave[i].SetAlpha    (fAlphaBossFull * (bRealState ? (0.5f * (1.0f - fBump)) : 0.0f) * fHelperCover);
         m_aHelperWave[i].Move();
@@ -1131,7 +1131,7 @@ void cInterface::Move()
         
         m_aBadge[i].SetPosition (nFlipFunc(coreVector2(fOffset, 0.005f), &m_aBadge[i]) - m_aBadge[i].GetAlignment() * (vNewSize - 0.063f) * 0.5f);
         m_aBadge[i].SetSize     (vNewSize);
-        m_aBadge[i].SetDirection(coreVector2::Direction(m_fRotation + (2.0f*PI) * fBump + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
+        m_aBadge[i].SetDirection(coreVector2::Direction(m_fRotation * -1.0f - (2.0f*PI) * fBump - (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
         m_aBadge[i].SetTexOffset(coreVector2(bRealState ? 0.0f : 0.5f, 0.0f));
         m_aBadge[i].SetAlpha    (fAlphaBadgeFull * (bRealState ? 1.0f : 0.5f) * fBadgeCover);
         m_aBadge[i].Move();
@@ -1202,7 +1202,7 @@ void cInterface::Move()
     m_Trophy.SetAlpha   (fAlphaTrophyFull * (m_bTrophyState ? 1.0f : 0.5f));
     m_Trophy.Move();
 
-    m_TrophyMark.SetPosition(MapToAxis(GetTranslationArea(m_Trophy), g_vHudDirection));
+    m_TrophyMark.SetPosition(MapToAxisInv(GetTranslationArea(m_Trophy), g_vHudDirection));
     m_TrophyMark.SetScale   (coreVector2(1.0f,1.0f) * LERP(0.5f, 1.0f, fTrophyLerp));
     m_TrophyMark.SetAlpha   (fAlphaTrophyFull * fTrophyLerp);
     m_TrophyMark.Move();
@@ -1222,7 +1222,7 @@ void cInterface::Move()
 
         // slash banner bar across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = (fBanner < (m_fBannerDuration * 0.5f)) ? false : true;
-        m_BannerBar.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BannerBar.GetDirection().yx());
+        m_BannerBar.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BannerBar.GetDirection().Rotated90());
         m_BannerBar.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
         // animate banner bar
@@ -1268,8 +1268,8 @@ void cInterface::Move()
         // 
         m_aBannerIcon[0].SetSize     (coreVector2(1.0f,1.0f) * 0.45f * LERPB(0.85f, 1.0f, fVisibility));
         m_aBannerIcon[1].SetSize     (coreVector2(1.0f,1.0f) * 0.35f * LERPB(0.85f, 1.0f, fVisibility));
-        m_aBannerIcon[0].SetDirection(coreVector2::Direction(fBanner *  (0.2f*PI)));
-        m_aBannerIcon[1].SetDirection(coreVector2::Direction(fBanner * (-0.1f*PI)));
+        m_aBannerIcon[0].SetDirection(coreVector2::Direction(fBanner * (-0.2f*PI)));
+        m_aBannerIcon[1].SetDirection(coreVector2::Direction(fBanner *  (0.1f*PI)));
 
         // 
         m_Medal.SetPosition(coreVector2(0.0f, LERPB(-0.07f, -0.04f, MIN1(fBanner * 0.6f))));
@@ -1357,7 +1357,7 @@ void cInterface::Move()
             }
 
             const coreVector2 vDir = FRAGMENT_DIRECTION;
-            const coreVector2 vPos = MapToAxisInv(FRAGMENT_POSITION(m_iFragmentNew), vDir) * INTERFACE_FRAGMENT_SCALE;
+            const coreVector2 vPos = MapToAxis(FRAGMENT_POSITION(m_iFragmentNew), vDir) * INTERFACE_FRAGMENT_SCALE;
 
             m_aFragment[m_iFragmentNew].SetPosition(vPos + ((m_iFragmentNew == 8u) ? coreVector2(0.0f,1.0f) : vPos.Normalized()) * LERP(1.5f, 0.0f, fAnimation) + m_aFragmentTable[0].GetPosition());
 
@@ -1371,14 +1371,14 @@ void cInterface::Move()
             for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS - 1u; ++i)
             {
                 const coreVector2 vDir = FRAGMENT_DIRECTION;
-                const coreVector2 vPos = MapToAxisInv(FRAGMENT_POSITION(i), vDir) * INTERFACE_FRAGMENT_SCALE;
+                const coreVector2 vPos = MapToAxis(FRAGMENT_POSITION(i), vDir) * INTERFACE_FRAGMENT_SCALE;
 
                 const coreFloat fTime2 = CLAMP01(fFragment - INTERFACE_FRAGMENT_DURATION_2 - I_TO_F(g_aiFragmentOrder[i]) * 0.3f);
 
                 m_aFragment[i].SetPosition(vPos + vPos.Normalized() * LERPBR(0.0f, 1.5f, fTime2) + m_aFragmentTable[0].GetPosition());
             }
 
-            m_aFragment[8].SetDirection(coreVector2::Direction(BLENDH3(STEPBR(INTERFACE_FRAGMENT_DURATION, INTERFACE_FRAGMENT_DURATION_EXT, fFragment)) * (4.0f*PI) - (0.25f*PI)));
+            m_aFragment[8].SetDirection(coreVector2::Direction(BLENDH3(STEPBR(INTERFACE_FRAGMENT_DURATION, INTERFACE_FRAGMENT_DURATION_EXT, fFragment)) * (-4.0f*PI) + (0.25f*PI)));
         }
 
         // 
@@ -1635,7 +1635,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.036f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
 
-        m_BannerBar     .SetDirection(coreVector2(-1.0f,0.0f));
+        m_BannerBar     .SetDirection(coreVector2(1.0f,0.0f));
 
         m_BannerBar     .SetCenter(coreVector2(0.0f,0.0f));
         m_aBannerText[2].SetCenter(coreVector2(0.0f,0.08f));
@@ -1807,7 +1807,7 @@ void cInterface::ShowFragment(const coreUint8 iNewIndex, const coreUint32 iOldBi
     for(coreUintW i = 0u; i < INTERFACE_FRAGMENTS; ++i)
     {
         const coreVector2 vDir = FRAGMENT_DIRECTION;
-        const coreVector2 vPos = MapToAxisInv(FRAGMENT_POSITION(i), vDir) * INTERFACE_FRAGMENT_SCALE;
+        const coreVector2 vPos = MapToAxis(FRAGMENT_POSITION(i), vDir) * INTERFACE_FRAGMENT_SCALE;
 
         const coreBool bValid = ((iNewIndex == i) || HAS_BIT(iOldBits, i));
 
@@ -2102,7 +2102,7 @@ coreFloat cInterface::CalcGameCover(const coreObject2D** ppObject, const coreVec
 
         g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW j)
         {
-            const coreVector2 vReal = MapToAxisInv(g_pForeground->Project2D(pPlayer->GetPosition() - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * g_pPostProcessing->GetSize(), g_pPostProcessing->GetDirection());
+            const coreVector2 vReal = MapToAxis(g_pForeground->Project2D(pPlayer->GetPosition() - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * g_pPostProcessing->GetSize(), g_pPostProcessing->GetDirection());
 
             if(InBetween(vReal, vLowerLeft, vUpperRight))
             {
