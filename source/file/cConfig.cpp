@@ -461,44 +461,53 @@ void UpdateInput()
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j)
             }
 
-            if((iJoystickID < s_avOldStick.size()))
+            // 
+            if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
             {
-                if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
+                ASSERT(iJoystickID < s_avOldStick.size())
+
+                const coreVector2 vOldStick = s_avOldStick[iJoystickID];
+                coreVector2       vNewStick = Core::Input->GetJoystickStickR(iJoystickID);
+
+                // 
+                const coreBool bOldValid = (vOldStick.LengthSq() >= POW2(0.7f));
+                const coreBool bNewValid = (vNewStick.LengthSq() >= POW2(0.7f));
+
+                // 
+                if(!vNewStick.IsNull()) vNewStick = vNewStick.Normalized();
+
+                // 
+                coreBool bReset = true;
+                for(coreUintW j = 0u; j < 4u; ++j)
                 {
-                    const coreVector2 vOldStick = s_avOldStick[iJoystickID];
-                    coreVector2       vNewStick = Core::Input->GetJoystickStickR(iJoystickID);
+                    const coreVector2 vBase = StepRotated90(j);
 
-                    const coreBool bOldValid = (vOldStick.LengthSq() >= POW2(0.7f));
-                    const coreBool bNewValid = (vNewStick.LengthSq() >= POW2(0.7f));
+                    // 
+                    const coreBool bOldState = (!vOldStick.IsNull() && SameDirection90(vOldStick, vBase) && (bOldValid));
+                    const coreBool bNewState = (!vNewStick.IsNull() && SameDirection90(vNewStick, vBase) && (bNewValid || bOldState));
 
-                    if(!vNewStick.IsNull()) vNewStick = vNewStick.Normalized();
+                    // 
+                         if(!bOldState &&  bNewState) ADD_BIT(oMap.iActionPress,   PLAYER_ACTION_SHOOT_UP + j)
+                    else if( bOldState && !bNewState) ADD_BIT(oMap.iActionRelease, PLAYER_ACTION_SHOOT_UP + j)
 
-                    coreBool bReset = true;
-                    for(coreUintW j = 0u; j < 4u; ++j)
+                    // 
+                    if(bNewState)
                     {
-                        const coreVector2 vBase = StepRotated90(j);
-
-                        const coreBool bOldState = (!vOldStick.IsNull() && (coreVector2::Dot(vOldStick, vBase) >= (1.0f / SQRT2)) && bOldValid);
-                        const coreBool bNewState = (!vNewStick.IsNull() && (coreVector2::Dot(vNewStick, vBase) >= (bOldState ? 0.01f : (vOldStick.IsNull() ? (1.0f / SQRT2) : 0.8f))) && (bNewValid || bOldState));
-
-                             if(!bOldState &&  bNewState) ADD_BIT(oMap.iActionPress,   PLAYER_ACTION_SHOOT_UP + j)
-                        else if( bOldState && !bNewState) ADD_BIT(oMap.iActionRelease, PLAYER_ACTION_SHOOT_UP + j)
-
-                        if(bNewState)
-                        {
-                            ADD_BIT(oMap.iActionHold, PLAYER_ACTION_SHOOT_UP + j)
-                            bReset = false;
-                        }
-
-                        if(!bOldState && bNewState) s_avOldStick[iJoystickID] = AlongCrossNormal(vNewStick);
+                        ADD_BIT(oMap.iActionHold, PLAYER_ACTION_SHOOT_UP + j)
+                        bReset = false;
                     }
 
-                    if(vNewStick.IsNull() || bReset) s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
+                    // 
+                    if(!bOldState && bNewState) s_avOldStick[iJoystickID] = AlongCrossNormal(vNewStick);
                 }
-                else
-                {
-                    s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
-                }
+
+                // 
+                if(bReset) s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
+            }
+            else
+            {
+                // 
+                s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
             }
 
             // 
