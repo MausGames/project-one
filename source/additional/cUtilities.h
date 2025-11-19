@@ -155,7 +155,7 @@ inline coreFloat RoundFactor(const coreFloat fValue, const coreFloat fFactor)
 
 // ****************************************************************
 // 
-template <typename T> inline void ShuffleRange(const T& tBegin, const T& tEnd, const coreUint32 iSeed)
+template <typename T> inline void ShuffleRange(const T tBegin, const T tEnd, const coreUint32 iSeed)
 {
     std::shuffle(tBegin, tEnd, std::minstd_rand(iSeed));   // different to engine function
 }
@@ -203,13 +203,13 @@ inline coreVector2 AngleLerpDir(const coreVector2 x, const coreVector2 y, const 
 
 // ****************************************************************
 // value range helper-functions
-template <typename T, typename S, typename R> constexpr coreBool InBetween(const T& x, const S& a, const R& b)
+template <typename T> constexpr coreBool InBetween(const T x, const t_ident<T> a, const t_ident<T> b)
 {
     ASSERT(a <= b)
     return (x >= a) && (x < b);   // [a,b)
 }
 
-template <typename T, typename S, typename R> constexpr coreInt32 InBetweenExt(const T& x, const S& a, const R& b)
+template <typename T> constexpr coreInt32 InBetweenExt(const T x, const t_ident<T> a, const t_ident<T> b)
 {
     return (a <= b) ? (((x >= a) && (x < b)) ?  1 : 0) :   // [a,b)
                       (((x >= b) && (x < a)) ? -1 : 0);    // [b,a)
@@ -218,28 +218,28 @@ template <typename T, typename S, typename R> constexpr coreInt32 InBetweenExt(c
 
 // ****************************************************************
 // 
-template <typename T> inline T LerpSmoothRev(const T& x, const T& y, const coreFloat s)
+template <typename T, coreFloatingPoint S> inline T LerpSmoothRev(const T x, const T y, const S s)
 {
-    return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
-                         LERPB(x, (x + y) * 0.5f,        s * 2.0f);
+    return (s >= S(0.5)) ? LERPB(y, (x + y) * S(0.5), S(2) - s * S(2)) :
+                           LERPB(x, (x + y) * S(0.5),        s * S(2));
 }
 
 
 // ****************************************************************
 // ternary interpolation helper-function
-template <typename T, typename S, typename R> constexpr T LerpTernary(const T& x, const S& y, const R& z, const coreFloat s)
+template <typename T, coreFloatingPoint S> constexpr T LerpTernary(const T x, const T y, const T z, const S s)
 {
-    return (s >= 0.5f) ? LERP(y, z, s * 2.0f - 1.0f) :
-                         LERP(x, y, s * 2.0f);
+    return (s >= S(0.5)) ? LERP(y, z, s * S(2) - S(1)) :
+                           LERP(x, y, s * S(2));
 }
 
 
 // ****************************************************************
 // 
-template <typename T, typename S, typename R> inline T LerpPara(const T& x, const S& y, const R& z, const coreFloat s)
+template <typename T, coreFloatingPoint S> inline T LerpPara(const T x, const T y, const T z, const S s)
 {
     const T A = (x - z);
-    return LERPB(x, y + A * 0.5f, s * 2.0f) - (A * s);
+    return LERPB(x, y + A * S(0.5), s * S(2)) - (A * s);
 }
 
 
@@ -261,8 +261,8 @@ inline coreFloat SmoothAimAngle(const coreFloat vOldAngle, const coreFloat vNewA
 inline coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
-    return coreVector2::Direction(SmoothAimAngle(vOldDir.Angle(), vNewDir.Angle(), fStrength));
-} // TODO 1: towards the end of the curve it is so slow that it never hits its target
+    return coreVector2::Direction(SmoothAimAngle(vOldDir.Angle(), vNewDir.Angle(), fStrength));   // TODO 1: towards the end of the curve it is so slow that it never hits its target
+}
 
 
 // ****************************************************************
