@@ -122,8 +122,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    const coreBool bMulti = (pAttacker && g_pGame->IsMulti());
-    m_iLastAttacker = bMulti ? g_pGame->GetPlayerIndex(pAttacker) : 0u;
+    m_iLastAttacker = pAttacker ? g_pGame->GetPlayerIndex(pAttacker) : 0u;
 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
@@ -135,20 +134,31 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         {
             const coreInt32 iTaken = m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker, bNeutral);
             m_iDamageForwarded += iTaken;
+
             return iTaken;
         }
 
         if(iDamage)
         {
-            // 
-            const coreInt32 iPower = (bMulti || bNeutral || (this->GetCurHealth() == 1)) ? 1 : GAME_PLAYERS;
-            
-            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * (bNeutral ? 10000 : ((g_pGame->IsEasy() ? 110 : 101) * (g_pGame->IsMulti() ? 110 : 100)));
-            
-            const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 10000, iElement, vImpact) / iPower);
-            ASSERT(coreMath::IsAligned(this->GetMaxHealth(), iPower))   // ???
-            
-            m_iExtraDamage = iTotal % 10000;
+            coreInt32 iTaken;
+            if(bNeutral)
+            {
+                // 
+                iTaken = ABS(this->_TakeDamage(iDamage, iElement, vImpact));
+            }
+            else
+            {
+                // 
+                const coreInt32 iPower = ((pAttacker && g_pGame->IsMulti()) || (this->GetCurHealth() == 1)) ? 1 : GAME_PLAYERS;
+
+                // 
+                const coreInt32 iTotal = iDamage * iPower * (g_pGame->IsEasy() ? 110 : 101) * (g_pGame->IsMulti() ? 110 : 100) + m_iExtraDamage;
+                m_iExtraDamage = iTotal % 10000;
+
+                // 
+                iTaken = ABS(this->_TakeDamage(iTotal / 10000, iElement, vImpact) / iPower);
+                ASSERT(coreMath::IsAligned(this->GetMaxHealth(), iPower))
+            }
 
             if(iTaken)
             {

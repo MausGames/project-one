@@ -238,7 +238,10 @@ coreInt32 cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 {
     // 
     const coreInt32 iHealthDamage = CLAMP(iDamage, m_iCurHealth - m_iMaxHealth, m_iCurHealth);
+
+    // 
     m_iCurHealth -= iHealthDamage;
+    ASSERT((m_iCurHealth >= 0) && (m_iCurHealth <= m_iMaxHealth))
 
     // 
     return iHealthDamage;
