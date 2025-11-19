@@ -33,7 +33,7 @@ void FragmentMain()
 
     // 
     vec2  v2Center = abs((v_av2TexCoord[0] * 2.0 - 1.0) + v2Distortion * 10.0);
-    float v1Border = smoothstep(0.8, 1.05, max(v2Center.x, v2Center.y)) + max(v1BumpFactor - 0.5, 0.0) + 0.0;
+    float v1Border = coreSmoothStep(0.8, 1.05, max(v2Center.x, v2Center.y)) + max(v1BumpFactor - 0.5, 0.0) + 0.0;
 
     // calculate diffuse and specular value
     vec3 v3Diffuse  = mix(v3Refraction, vec3(1.0), v1Border) * (v1BumpFactor * 0.1 + 0.95);

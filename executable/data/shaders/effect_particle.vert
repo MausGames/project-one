@@ -22,5 +22,5 @@ void VertexMain()
 
     // calculate current simulation time
     float v1Rev = 1.0 - a_v1DivValue;
-    v_v2Time = vec2(min(v1Rev * 3.0, 1.0), smoothstep(0.0, 0.05, v1Rev));
+    v_v2Time = vec2(min(v1Rev * 3.0, 1.0), coreSmoothStep(0.0, 0.05, v1Rev));
 }

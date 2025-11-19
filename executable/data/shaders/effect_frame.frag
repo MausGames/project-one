@@ -33,7 +33,7 @@ void FragmentMain()
         if(v1Len >= v1Thresh)
         {
             // 
-            v1Border = (1.0 - smoothstep(v1Thresh, v1Thresh + 0.1, v1Len)) * 0.2;
+            v1Border = (1.0 - coreSmoothStep(v1Thresh, v1Thresh + 0.1, v1Len)) * 0.2;
             break;
         }
     }

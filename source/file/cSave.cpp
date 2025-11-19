@@ -256,19 +256,8 @@ void cSave::SaveFile()
         pHeader->iChecksum = cSave::__GenerateChecksum(*pHeader);
 
         // 
-        coreByte*  pCompressedData;
-        coreUint32 iCompressedSize;
-        if(coreData::Compress(s_aHeaderData, sizeof(sHeader), &pCompressedData, &iCompressedSize) != CORE_OK)
-        {
-            pCompressedData = new coreByte[sizeof(sHeader)];
-            iCompressedSize = sizeof(sHeader);
-
-            std::memcpy(pCompressedData, &s_aHeaderData, sizeof(sHeader));
-        }
-
-        // 
         coreArchive oArchive;
-        oArchive.CreateFile("header", pCompressedData, iCompressedSize);
+        oArchive.CreateFile("header", s_aHeaderData, sizeof(sHeader), true)->Compress();
 
         // 
         if(s_pScoreQueueData)

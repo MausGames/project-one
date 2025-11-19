@@ -30,24 +30,24 @@ void FragmentMain()
 
     // calculate wipe effect
     float v1Rev = v1ProjPos * 0.5 + 0.5;
-    float v1Mix = smoothstep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
+    float v1Mix = coreSmoothStep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
 
 #elif (_P1_TRANSITION_) == 2
 
     // calculate curtain effect
     float v1Rev = abs(v1ProjPos);
-    float v1Mix = smoothstep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
+    float v1Mix = coreSmoothStep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
 
 #elif (_P1_TRANSITION_) == 3
 
     // calculate circle effect
     float v1Rev = coreLengthSq(v_av2TexCoord[3] / SQRT2);
-    float v1Mix = smoothstep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
+    float v1Mix = coreSmoothStep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
 
 #else
 
     // just fade over
-    float v1Mix = smoothstep(0.0, 1.0, u_v1TransitionTime);
+    float v1Mix = coreSmoothStep(0.0, 1.0, u_v1TransitionTime);
 
 #endif
 

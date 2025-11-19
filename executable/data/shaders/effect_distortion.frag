@@ -14,7 +14,7 @@ void FragmentMain()
 
     // calculate burst-direction offset
     float v1Alpha = dot(normalize(v_av2TexCoord[1]), v_av2TexCoord[2]);
-          v1Alpha = smoothstep(0.4, 0.9, v1Alpha);
+          v1Alpha = coreSmoothStep(0.4, 0.9, v1Alpha);
 
 #else
 

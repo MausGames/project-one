@@ -743,7 +743,7 @@ void cHarenaMission::__SetupOwn()
 
                 constexpr coreUintW aiFlip[] = {14u, 22u, 26u, 41u, 65u, 74u, 79u};
 
-                const coreUintW iFlipIndex = std::find(aiFlip, aiFlip + ARRAY_SIZE(aiFlip), i) - aiFlip;
+                const coreUintW iFlipIndex = coreData::RangeIndex(aiFlip, aiFlip + ARRAY_SIZE(aiFlip), i);
 
                 if((iFlipIndex < ARRAY_SIZE(aiFlip)) && !HAS_BIT(iFlipHide, iFlipIndex))
                 {
@@ -1972,8 +1972,8 @@ void cHarenaMission::__SetupOwn()
     m_aInsanityStage[3] = [this]()
     {
         constexpr coreUintW iNumEnemies = 170u;
-        constexpr coreUintW iNumTypes   = coreMath::CeilAlign(iNumEnemies,  4u) /  4u;
-        constexpr coreUintW iNumState   = coreMath::CeilAlign(iNumEnemies, 16u) / 16u;
+        constexpr coreUintW iNumTypes   = coreMath::DivUp(iNumEnemies,  4u);
+        constexpr coreUintW iNumState   = coreMath::DivUp(iNumEnemies, 16u);
 
         // {sub-stage, child-number}
         constexpr coreUint32 aaiBreak[][2] = {{2u, 1u}, {3u, 1u}, {7u, 26u}, {7u, 39u}, {7u, 57u}, {8u, 1u}, {9u, 20u}, {9u, 48u}, {10u, 36u}};

@@ -2789,7 +2789,7 @@ void UnusedWaves()
 
             g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cWaveBullet>([&](cWaveBullet* OUTPUT pBullet)
             {
-                const coreUintW i = std::find(aiSnakePtr, aiSnakePtr + iSnakeNum, P_TO_UI(pBullet)) - aiSnakePtr;
+                const coreUintW i = coreData::RangeIndex(aiSnakePtr, aiSnakePtr + iSnakeNum, P_TO_UI(pBullet));
                 if(i >= iSnakeNum) return;
 
                 const coreSpline2* pPath = (i < 4u) ? pPath2 : pPath3;
@@ -2805,7 +2805,7 @@ void UnusedWaves()
 
             g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cWaveBullet>([&](cWaveBullet* OUTPUT pBullet)
             {
-                const coreUintW i = std::find(aiSnakePtr, aiSnakePtr + iSnakeNum, P_TO_UI(pBullet)) - aiSnakePtr;
+                const coreUintW i = coreData::RangeIndex(aiSnakePtr, aiSnakePtr + iSnakeNum, P_TO_UI(pBullet));
                 if(i >= iSnakeNum) return;
                 
                 const coreFloat fSpeedTurn = i ? 15.0f : 3.0f;

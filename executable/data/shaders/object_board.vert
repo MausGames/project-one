@@ -30,5 +30,5 @@ void VertexMain()
     v_v1Tickness = 1.0 - (1.8 / u_v3Size.x);
 
     // 
-    v_v1Alpha = smoothstep(0.5, 1.0, u_v2TexSize.x);
+    v_v1Alpha = coreSmoothStep(0.5, 1.0, u_v2TexSize.x);
 }

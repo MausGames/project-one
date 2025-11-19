@@ -31,7 +31,7 @@ void FragmentMain()
 
     // 
     float v1Rev = v1ProjPos * 0.5 + 0.5;
-    float v1Mix = smoothstep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
+    float v1Mix = coreSmoothStep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
 
     // 
 #if defined(_P1_LABEL_)

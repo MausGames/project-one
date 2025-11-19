@@ -16,7 +16,7 @@ void FragmentMain()
 {
     // interpolate texture flipped over time
     float v1Value = mix(coreTexture2D(0, v_av2TexCoord[0]).r,
-                        coreTexture2D(0, v_av2TexCoord[1]).r, v_v2Time.x) * 1.2 * smoothstep(0.0, 0.3, u_v4Color.a);
+                        coreTexture2D(0, v_av2TexCoord[1]).r, v_v2Time.x) * 1.2 * coreSmoothStep(0.0, 0.3, u_v4Color.a);
 
     // draw as alpha map
     gl_FragColor = vec4(u_v4Color.rgb, v1Value * (u_v4Color.a * u_v4Color.a) * v_v2Time.y);

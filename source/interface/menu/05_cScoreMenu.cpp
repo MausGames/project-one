@@ -673,7 +673,7 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
             m_aLine [i].SetFocusable(false);
         }
 
-        m_iPageMax = coreMath::CeilAlign(iTotal, MENU_SCORE_ENTRIES) / MENU_SCORE_ENTRIES;
+        m_iPageMax = coreMath::DivUp(iTotal, MENU_SCORE_ENTRIES);
 
         m_PageText.SetText(iNum ? PRINT("%u-%u / %u", iStart + MIN(iRealNum, 1u), iStart + iRealNum, iTotal) : "-");
 

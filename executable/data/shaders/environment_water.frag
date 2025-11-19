@@ -43,8 +43,8 @@ void FragmentMain()
           v1ReflFactor  = 0.6 * min(coreGGX(v1ReflFactor, 0.008), 1.0);
 
     // adjust depth value
-    v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v4Lighting.w;
-    v1Depth = max(v1Depth - (0.5 - 0.5 * smoothstep(0.3, 0.4, v1Depth)), 0.0);
+    v1Depth = coreSmoothStep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v4Lighting.w;
+    v1Depth = max(v1Depth - (0.5 - 0.5 * coreSmoothStep(0.3, 0.4, v1Depth)), 0.0);
 
     // lookup refraction texture
     vec3 v3Refraction = coreTextureBase2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;

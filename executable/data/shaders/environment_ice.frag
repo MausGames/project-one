@@ -150,11 +150,11 @@ void FragmentMain()
     vec3 v3Reflection = coreTextureBase2D(1, v2ScreenCoord + v2Distortion).rgb;
 
     // 
-    float v1Border = (1.0 - smoothstep(-0.001, 0.0025, (c_v1ThreshTrace - v1Depth) + 0.03 * (v2Distortion.x + v2Distortion.y))) * max(1.0 - 0.05 * v1Height, 0.0) + max(v1BumpFactor - 0.7, 0.0);
+    float v1Border = (1.0 - coreSmoothStep(-0.001, 0.0025, (c_v1ThreshTrace - v1Depth) + 0.03 * (v2Distortion.x + v2Distortion.y))) * max(1.0 - 0.05 * v1Height, 0.0) + max(v1BumpFactor - 0.7, 0.0);
 
     // adjust depth value
-    v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.9 + v_v4Lighting.w;
-    v1Depth = max(v1Depth - (0.5 - 0.5 * smoothstep(0.3, 0.4, v1Depth)), 0.0);
+    v1Depth = coreSmoothStep(0.64, 0.735, v1Depth) * 0.9 + v_v4Lighting.w;
+    v1Depth = max(v1Depth - (0.5 - 0.5 * coreSmoothStep(0.3, 0.4, v1Depth)), 0.0);
 
     // lookup refraction texture
     vec3 v3Refraction = coreTextureBase2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;

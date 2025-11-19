@@ -850,13 +850,12 @@ coreBool cReplay::SaveFile(const coreUint8 iSlot)
     m_Header.iChecksum = cReplay::__GenerateChecksum(m_Header);
 
     // 
-    coreByte* pHeaderData = new coreByte[sizeof(sHeader)];
-    std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
+    coreByte* pHeaderData = r_cast<coreByte*>(&m_Header);
 
     // 
     coreArchive oArchive;
-    oArchive.CreateFile("header", pHeaderData, sizeof(sHeader))->Compress();
-    oArchive.CreateFile("body",   pBodyData,   iBodySize)      ->Compress();
+    oArchive.CreateFile("header", pHeaderData, sizeof(sHeader), true)->Compress();
+    oArchive.CreateFile("body",   pBodyData,   iBodySize)            ->Compress();
 
     // 
     const coreChar* pcPath = REPLAY_SLOTSYSTEM ? coreData::UserFolderPrivate(PRINT(REPLAY_FILE_FOLDER "replay_%04u." REPLAY_FILE_EXTENSION, iSlot)) :

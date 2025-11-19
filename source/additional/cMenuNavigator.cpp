@@ -164,7 +164,7 @@ void cMenuNavigator::Move()
         const coreFloat fMove = LERP(0.002f, 0.005f, (0.5f + 0.5f * SIN(Core::System->GetTotalTimeFloat(1.0) * (2.0f*PI)))) * m_fGrabTime;
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCursor); ++i)
         {
-            const coreVector2 vStep  = StepRotated90X(i) * SQRT2;
+            const coreVector2 vStep = coreVector2::StepRotatedSign90X(i);
             m_aCursor[i].SetPosition(m_vCurPos + (m_vCurSize * 0.5f + fMove) * vStep);
         }
 

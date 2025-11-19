@@ -893,7 +893,7 @@ void cNevoMission::__SetupOwn()
                     const coreObject3D& oTile = m_aTileRaw[i];
                     if(!this->IsTileEnabled(i)) continue;
 
-                    const coreUintW iIndex = std::find(aiOrder, aiOrder + ARRAY_SIZE(aiOrder), i) - aiOrder;
+                    const coreUintW iIndex = coreData::RangeIndex(aiOrder, aiOrder + ARRAY_SIZE(aiOrder), i);
 
                     if((iIndex >= iCurOrder) && (iIndex < ARRAY_SIZE(aiOrder)))
                     {

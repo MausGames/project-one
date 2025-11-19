@@ -372,7 +372,7 @@ void cArcadeInput::__RetrieveIndex(const coreChar cChar, coreUint8* OUTPUT piPag
     // 
     for(coreUintW j = 0u; j < ARCADE_PAGES; ++j)
     {
-        const coreUintW iIndex = std::find(g_aacArcadeGlyph[j], g_aacArcadeGlyph[j] + ARCADE_GLYPHS, cChar) - g_aacArcadeGlyph[j];
+        const coreUintW iIndex = coreData::RangeIndex(g_aacArcadeGlyph[j], g_aacArcadeGlyph[j] + ARCADE_GLYPHS, cChar);
         if(iIndex < ARCADE_GLYPHS)
         {
             // 

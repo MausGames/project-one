@@ -709,7 +709,7 @@ void cMuscusMission::__SetupOwn()
         constexpr coreFloat fSpeed       = 0.8f;
         constexpr coreFloat fFreqSlow    = 1.1f;
         constexpr coreFloat fFreqFast    = 2.0f;
-        constexpr coreUintW iTypeMapSize = coreMath::CeilAlign(MUSCUS_GENERATES, 4u) / 4u;
+        constexpr coreUintW iTypeMapSize = coreMath::DivUp(MUSCUS_GENERATES, 4u);
 
         // {sub-stage from, sub-stage to, generate-number}
         constexpr coreUint32 aaiTouch[][3] = {{2u, 3u, 19u}, {4u, 4u, 23u}, {5u, 5u, 24u}, {6u, 6u, 13u}, {7u, 7u, 15u}};

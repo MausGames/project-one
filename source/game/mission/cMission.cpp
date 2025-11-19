@@ -290,7 +290,7 @@ void cMission::ActivateBoss(const cBoss* pBoss)
     ASSERT(m_iCurSegmentIndex == MISSION_NO_SEGMENT)
 
     // 
-    const coreUintW iIndex = std::find(m_apBoss, m_apBoss + MISSION_BOSSES, pBoss) - m_apBoss;
+    const coreUintW iIndex = coreData::RangeIndex(m_apBoss, m_apBoss + MISSION_BOSSES, pBoss);
     ASSERT(iIndex < MISSION_BOSSES)
 
     // 

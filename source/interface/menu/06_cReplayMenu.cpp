@@ -1297,7 +1297,7 @@ void cReplayMenu::__UpdateFiles()
     cReplay::LoadInfoList(&m_aInfoList);
 
     // 
-    m_iPageMax = coreMath::CeilAlign(m_aInfoList.size(), MENU_REPLAY_ENTRIES) / MENU_REPLAY_ENTRIES;
+    m_iPageMax = coreMath::DivUp(m_aInfoList.size(), MENU_REPLAY_ENTRIES);
 }
 
 

@@ -668,7 +668,7 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     SAFE_DELETE(pOldMission)
 
     // 
-    m_iCurMissionIndex = std::find(m_piMissionList, m_piMissionList + m_iNumMissions, iID) - m_piMissionList;
+    m_iCurMissionIndex = coreData::RangeIndex(m_piMissionList, m_piMissionList + m_iNumMissions, iID);
     ASSERT(m_iCurMissionIndex < m_iNumMissions)
 
     if(iID != cNoMission::ID)

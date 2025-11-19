@@ -1344,7 +1344,7 @@ void cConfigMenu::LoadValues()
 
     // 
     const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
-    m_Language     .SelectIndex(asLanguageList.first_index(Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)));
+    m_Language     .SelectIndex(asLanguageList.index_first(Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)));
     m_GameDirection.SelectValue(g_CurConfig.Game.iGameDirection);
     m_MirrorMode   .SelectValue(g_CurConfig.Game.iMirrorMode);
     m_HudDirection .SelectValue(g_CurConfig.Game.iHudDirection);

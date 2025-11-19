@@ -1463,7 +1463,7 @@ void cViridoMission::__SetupOwn()
                         if(vDiff.LengthSq() < POW2(8.0f))
                         {
                             const coreUintW iIndex = pSquad1->GetIndex(d_cast<const cEnemy*>(m_apShadowOwner[j]));
-                            const coreUintW iBit   = std::find(aiQuad, aiQuad + ARRAY_SIZE(aiQuad), iIndex) - aiQuad;
+                            const coreUintW iBit   = coreData::RangeIndex(aiQuad, aiQuad + ARRAY_SIZE(aiQuad), iIndex);
 
                             ASSERT(iBit < ARRAY_SIZE(aiQuad))
                             ADD_BIT(iShadowState, iBit)
@@ -1643,7 +1643,7 @@ void cViridoMission::__SetupOwn()
 
                         if(!pEnemy->ReachedDeath())
                         {
-                            const coreUintW iBit  = std::find(aiQuad, aiQuad + ARRAY_SIZE(aiQuad), i) - aiQuad;
+                            const coreUintW iBit  = coreData::RangeIndex(aiQuad, aiQuad + ARRAY_SIZE(aiQuad), i);
                             const coreBool  bQuad = g_pGame->IsTask() && (iBit < ARRAY_SIZE(aiQuad)) && !HAS_BIT(iShadowState, iBit);
 
                             this->EnableShadow(i % VIRIDO_SHADOWS_ENEMY, pEnemy, vNewPos, bQuad);

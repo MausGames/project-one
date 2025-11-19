@@ -19,8 +19,8 @@ void FragmentMain()
 
     // 
     float v1Distance = coreTexture2D(0, v_av2TexCoord[0]).r;
-    float v1Value    = smoothstep(1.0           - v1Width, 1.0,           v1Distance);
-    float v1Alpha    = smoothstep(v_v1Threshold - v1Width, v_v1Threshold, v1Distance);
+    float v1Value    = coreSmoothStep(1.0           - v1Width, 1.0,           v1Distance);
+    float v1Alpha    = coreSmoothStep(v_v1Threshold - v1Width, v_v1Threshold, v1Distance);
 
     // 
     float v1Intensity = 1.06 - coreLengthSq(v_av2TexCoord[1]) * 0.12;

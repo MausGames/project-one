@@ -19,7 +19,7 @@ void FragmentMain()
     float v1Intensity = coreLengthSq(v_av2TexCoord[3]) * 0.16;
 
     // 
-    float v1Mix = smoothstep(-0.22 + 0.5, 0.22 + 0.5, v1Value + v1Offset * 0.3);
+    float v1Mix = coreSmoothStep(-0.22 + 0.5, 0.22 + 0.5, v1Value + v1Offset * 0.3);
 
     // 
     gl_FragColor = vec4(vec3(1.0 - v1Detail - v1Intensity), u_v4Color.a) * v1Mix;
