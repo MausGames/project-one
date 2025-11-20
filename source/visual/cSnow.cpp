@@ -17,17 +17,17 @@ cSnow::cSnow()noexcept
 , m_bDirty      (true)
 {
     // 
-    m_pSnowMap   = Core::Manager::Resource->LoadNew<coreTexture>();
     m_piSnowData = ALIGNED_NEW(coreUint8, SNOW_SIZE * SNOW_SIZE, ALIGNMENT_PAGE);
+    m_pSnowMap   = Core::Manager::Resource->LoadNew<coreTexture>();
     STATIC_ASSERT(SNOW_SIZE * SNOW_SIZE == ALIGNMENT_PAGE)
 
     // 
     this->__Reset(CORE_RESOURCE_RESET_INIT);
 
     // load object resources
-    this->DefineProgram("effect_snow_program");
     this->DefineTexture(0u, m_pSnowMap);
     this->DefineTexture(1u, "menu_background_black.png");
+    this->DefineProgram("effect_snow_program");
 
     // set object properties
     this->SetSize (coreVector2(1.0f,1.0f));

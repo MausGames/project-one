@@ -148,8 +148,8 @@ template <typename T, typename... A> RETURN_RESTRICT T* cItemManager::AddItem(co
     pNewItem->ChangeType (TYPE_ITEM);
 
     // 
-    const auto it = std::find_if    (m_apItemList.begin(), m_apItemList.end(), [](const cItem* pItem) {return (pItem->GetID() == T::ID);});
-    const auto et = std::find_if_not(it,                   m_apItemList.end(), [](const cItem* pItem) {return (pItem->GetID() == T::ID);});
+    const auto it = std::find_if(m_apItemList.begin(), m_apItemList.end(), [](const cItem* pItem) {return (pItem->GetID() == T::ID);});
+    const auto et = std::find_if(it,                   m_apItemList.end(), [](const cItem* pItem) {return (pItem->GetID() != T::ID);});
     m_apItemList.insert(et, pNewItem);
 
     return pNewItem;

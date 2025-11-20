@@ -402,8 +402,8 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
 template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, const coreVector2 vRayPos, const coreVector2 vRayDir, const coreObject3D* pRef, F&& nCallback)
 {
     // 
-    const coreList<coreObject3D*>& oPlayerList = Core::Manager::Object->GetObjectList(TYPE_PLAYER);
-    FOR_EACH(it, oPlayerList)
+    const coreList<coreObject3D*>& apPlayerList = Core::Manager::Object->GetObjectList(TYPE_PLAYER);
+    FOR_EACH(it, apPlayerList)
     {
         // 
         cPlayer* pPlayer = d_cast<cPlayer*>(*it);

@@ -166,7 +166,7 @@
 // 
 #define LERP_LINEAR     (&LERP         <coreFloat, coreFloat>)
 #define LERP_SMOOTH     (&LERPS        <coreFloat, coreFloat>)
-#define LERP_SMOOTH_REV (&LerpSmoothRev<coreFloat>)
+#define LERP_SMOOTH_REV (&LerpSmoothRev<coreFloat, coreFloat>)
 #define LERP_BREAK      (&LERPB        <coreFloat, coreFloat>)
 #define LERP_BREAK_REV  (&LERPBR       <coreFloat, coreFloat>)
 #define LERP_HERMITE3   (&LERPH3       <coreFloat, coreFloat>)

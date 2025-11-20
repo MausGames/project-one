@@ -30,8 +30,8 @@ enum eSnowType : coreUint8
 class cSnow : public coreFullscreen, public coreResourceRelation
 {
 protected:
-    coreTexturePtr m_pSnowMap;     // 
     coreUint8*     m_piSnowData;   // 
+    coreTexturePtr m_pSnowMap;     // 
 
     coreFloat m_fVisibility;       // 
     coreFloat m_fDelay;            // 

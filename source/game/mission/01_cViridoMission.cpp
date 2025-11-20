@@ -1236,7 +1236,7 @@ void cViridoMission::__MoveOwnAfter()
                 {
                     if(iCurLaser == j) continue;
                     
-                    coreObject3D* pLaser2 = (*m_Laser.List())[j];
+                    const coreObject3D* pLaser2 = (*m_Laser.List())[j];
                     if(!pLaser2->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
                     
                     if((m_avLaserPos[j] - pLaser2->GetPosition().xy()).LengthSq() >= POW2(20.0f)) continue;       
@@ -1515,7 +1515,7 @@ void cViridoMission::__MoveOwnAfter()
                 if(HAS_BIT(m_iRealState, iIndex))
                 {
                     // 
-                    coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized(vBallDir));
+                    coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized(vPaddleDir));
                     if(IsHorizontal(vPaddleDir)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
                                             else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
 

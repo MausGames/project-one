@@ -2317,7 +2317,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_COLL_PLAYER_ENEMY(pPlayer, pEnemy, vIntersection, bFirstHit, COLL_THIS, COLL_VAL(pSquad1), COLL_VAL(aiTouchNum))
+        STAGE_COLL_PLAYER_ENEMY(pPlayer, pEnemy, vIntersection, bFirstHit, COLL_THIS, COLL_VAL(pSquad1), COLL_VAL(aiTouchNum), COLL_VAL(iBounceIndex))
         {
             if(!bFirstHit) return;
 

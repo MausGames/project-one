@@ -381,7 +381,7 @@ void cErrorMission::__SetupOwn()
                     pJunk->SetPosition(pEnemy->GetPosition());
                     pJunk->Resurrect();
 
-                    avFlyDir[iIndex] = coreVector2::Direction(I_TO_F(j % iCount) * (2.0f * RCP(I_TO_F(iCount))) * PI);
+                    avFlyDir[iIndex] = coreVector2::Direction(I_TO_F(j % iCount) * (2.0f / I_TO_F(iCount)) * PI);
                     afFlySpeed[iIndex] = 200.0f;
 
                     SET_BIT(aiType[0], iIndex, iType & 0x01u)

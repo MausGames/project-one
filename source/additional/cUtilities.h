@@ -471,7 +471,7 @@ constexpr coreFloat DelayTime(const coreFloat fTime, const coreFloat fOffset, co
 // 
 constexpr coreFloat MaxAspectRatio(const coreVector2 vVector)
 {
-    return (vVector.Max() * RCP(vVector.Min()));
+    return (vVector.Max() / vVector.Min());
 }
 
 
@@ -484,7 +484,7 @@ inline coreVector2 GetTranslation(const coreObject2D& oObject)
 
 inline coreVector2 GetTranslationArea(const coreObject2D& oObject)
 {
-    return GetTranslation(oObject) * RCP(Core::System->GetResolution().Min());
+    return GetTranslation(oObject) / Core::System->GetResolution().Min();
 }
 
 inline coreVector2 GetTranslationScreen(const coreObject2D& oObject)

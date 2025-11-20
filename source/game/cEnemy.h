@@ -726,8 +726,8 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 template <typename F> FORCE_INLINE void cEnemyManager::ForEachEnemy(F&& nFunction)const
 {
     // 
-    const coreList<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
-    FOR_EACH(it, oEnemyList)
+    const coreList<coreObject3D*>& apEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
+    FOR_EACH(it, apEnemyList)
     {
         cEnemy* pEnemy = d_cast<cEnemy*>(*it);
         if(!pEnemy || pEnemy->IsChild()) continue;

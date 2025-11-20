@@ -1228,8 +1228,8 @@ template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2 vPosi
 template <typename F> FORCE_INLINE void cBulletManager::ForEachBullet(F&& nFunction)const
 {
     // 
-    const coreList<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);   // TODO 1: is shared between normal and top player
-    FOR_EACH(it, oBulletList)
+    const coreList<coreObject3D*>& apBulletList = Core::Manager::Object->GetObjectList(m_iType);   // TODO 1: is shared between normal and top player
+    FOR_EACH(it, apBulletList)
     {
         cBullet* pBullet = d_cast<cBullet*>(*it);
         if(!pBullet) continue;
