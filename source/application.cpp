@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.3.9";
+const coreChar* const CoreApp::Settings::Version                       = "1.3.10";
 const coreChar* const CoreApp::Settings::Identifier                    = "at.maus-games.eigengrau";
 const coreChar* const CoreApp::Settings::Creator                       = "Martin Mauersics";
 const coreChar* const CoreApp::Settings::Year                          = "2010, 2023";

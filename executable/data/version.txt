@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Eigengrau v1.3.10 (2025-11-24)
+
+- fixed another graphics driver crash on Linux with AMD GPUs, including Steam Deck (since Mesa 25.2.X)
+- fixed broken trophy/achievement display state in stage 5-2
+- fixed occasional wrong input when playing in mirror mode
+- improved text layouting and render performance, also to resolve some issues with custom language patches (like for Korean)
+- improved responsiveness when playing with the right thumbstick
+
+
+-------------------------------------------------------------------
 Eigengrau v1.3.9 (2025-05-28)
 
 - fixed a graphics driver crash on Linux with AMD GPUs, including Steam Deck (since Mesa 24.3.X)
