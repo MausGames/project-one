@@ -23,7 +23,7 @@ void FragmentMain()
                     coreLinearStep(u_v4Scale.y, 1.0, v_v3AnimCoord.z)) * 0.5;
 
     // lookup textures
-    float v1Shape  = coreTexture2D(0, vec2(v1Dir, v1Lerp)).r;
+    float v1Shape  = coreTextureGrad2D(0, vec2(v1Dir, v1Lerp), dFdx(v_av2TexCoord[0]), dFdy(v_av2TexCoord[0])).r;
     float v1Detail = coreTexture2D(1, v_av2TexCoord[0]).r;
 
     // draw shape with detail map and subtle white glow

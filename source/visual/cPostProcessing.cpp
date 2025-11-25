@@ -430,7 +430,7 @@ void cPostProcessing::__UpdateWall()
     // change ordering depending on game-rotation and mirror-mode
     const coreVector2 vBaseDir  = m_vDirectionConfig;//this->GetDirection();
     const coreVector2 vBaseSize = this->GetSize();
-    const coreVector2 vSwap     = (vBaseDir.yx() + vBaseDir) * (IsHorizontal(vBaseDir) ? vBaseSize.yx() : vBaseSize).Processed(SIGN);
+    const coreVector2 vSwap     = (vBaseDir.Rotated90() + vBaseDir) * (IsHorizontal(vBaseDir) ? vBaseSize.yx() : vBaseSize).Processed(SIGN);
     const coreUintW   iAdd2     = IsHorizontal(vBaseDir) ? POST_WALLS_BASE : 0u;
 
     // 

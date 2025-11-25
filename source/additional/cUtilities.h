@@ -247,7 +247,7 @@ template <typename T, coreFloatingPoint S> inline T LerpPara(const T x, const T 
 // 
 inline coreFloat FrictionFactor(const coreFloat fStrength)
 {
-    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);   // TODO 1: still an issue with step size, you need curve increment, but at the location where you use the value [RP]
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);   // # not frame rate independent, could be replaced with coreMath::Friction
 }
 
 
