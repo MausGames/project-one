@@ -1,5 +1,6 @@
 # Eigengrau - Project One
 
+[![engine: core](material/readme/badge_engine.svg)](https://github.com/MausGames/core-engine)
 [![software license: zlib](material/readme/badge_license_software.svg)](LICENSE.txt)
 [![content license: CC BY](material/readme/badge_license_content.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![credits.txt](material/readme/badge_credits.svg)](executable/data/credits.txt)
@@ -30,40 +31,6 @@ Are you really doing the right thing?
 **Work Together (Multiplayer)**
 - A completely new experience: Local co-op changes how some of the stages work and feel.
 - Play with a friend on the same computer and support one another. Or don't. 🙂
-
-Made with the Core Engine ([GitHub](https://github.com/MausGames/core-engine), [GitLab](https://gitlab.com/MausGames/core-engine))
-
-#
-
-**Windows, Linux and macOS Version:**  
-https://store.steampowered.com/app/1624320/Eigengrau/  
-https://mausgames.itch.io/eigengrau (also with browser demo)  
-https://store.epicgames.com/p/eigengrau-62aef0  
-
-**Nintendo Switch™ Version:**  
-https://www.nintendo.com/us/store/products/eigengrau-switch/ (Americas)  
-https://www.nintendo.co.uk/Games/Eigengrau-2463187.html (Europe)  
-https://store-jp.nintendo.com/list/software/70010000071402.html (Japan)
-
-#
-
-<table>
-    <tr>
-        <td><a href="material/screenshots/p1_screen_021.jpg?raw=true"><img src="material/screenshots/p1_screen_021t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_022.jpg?raw=true"><img src="material/screenshots/p1_screen_022t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_023.jpg?raw=true"><img src="material/screenshots/p1_screen_023t.jpg"></a></td>
-    </tr>
-    <tr>
-        <td><a href="material/screenshots/p1_screen_024.jpg?raw=true"><img src="material/screenshots/p1_screen_024t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_025.jpg?raw=true"><img src="material/screenshots/p1_screen_025t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_026.jpg?raw=true"><img src="material/screenshots/p1_screen_026t.jpg"></a></td>
-    </tr>
-    <tr>
-        <td><a href="material/screenshots/p1_screen_027.jpg?raw=true"><img src="material/screenshots/p1_screen_027t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_028.jpg?raw=true"><img src="material/screenshots/p1_screen_028t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_030.jpg?raw=true"><img src="material/screenshots/p1_screen_030t.jpg"></a></td>
-    </tr>
-</table>
 
 ## Highlights
 
@@ -132,9 +99,41 @@ https://store-jp.nintendo.com/list/software/70010000071402.html (Japan)
 - [Design Notes](resources/notes) (various scratch files with tasks, ideas, concepts and more)
 - [Screenshots](https://drive.google.com/drive/folders/1wUOl3Ni1_uNE3cLdaLv8gQ8veeAd05Rv) (a decade of screenshots, from the beginning to the end)
 
-## Additional Notes
+## Notes
 
 - This repository should not include any proprietary assets, confidential APIs, private keys or anything similar. This means that it does not provide (and open-source) the full playable game and it might not compile out-of-the-box due to missing features in engine and game code.
 - The source code contains many empty comments for structural and historical reasons. I don't want to remove them anymore.
 - There were 3 different editions of Eigengrau. Here you can find mainly the third and final edition, which was started around 2014.
 - If you have any questions, please feel free to open an issue or [contact me](https://www.maus-games.at/) directly.
+
+## Links
+
+**Windows, Linux and macOS Version:**  
+<https://store.steampowered.com/app/1624320/Eigengrau>  
+<https://mausgames.itch.io/eigengrau> (also with browser demo)  
+<https://store.epicgames.com/p/eigengrau-62aef0>  
+
+**Nintendo Switch™ Version:**  
+<https://www.nintendo.com/us/store/products/eigengrau-switch> (Americas)  
+<https://www.nintendo.co.uk/Games/Eigengrau-2463187.html> (Europe)  
+<https://store-jp.nintendo.com/list/software/70010000071402.html> (Japan)
+
+<br>
+
+<table>
+    <tr>
+        <td><a href="material/screenshots/p1_screen_021.jpg?raw=true"><img src="material/screenshots/p1_screen_021t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_022.jpg?raw=true"><img src="material/screenshots/p1_screen_022t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_023.jpg?raw=true"><img src="material/screenshots/p1_screen_023t.jpg"></a></td>
+    </tr>
+    <tr>
+        <td><a href="material/screenshots/p1_screen_024.jpg?raw=true"><img src="material/screenshots/p1_screen_024t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_025.jpg?raw=true"><img src="material/screenshots/p1_screen_025t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_026.jpg?raw=true"><img src="material/screenshots/p1_screen_026t.jpg"></a></td>
+    </tr>
+    <tr>
+        <td><a href="material/screenshots/p1_screen_027.jpg?raw=true"><img src="material/screenshots/p1_screen_027t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_028.jpg?raw=true"><img src="material/screenshots/p1_screen_028t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_030.jpg?raw=true"><img src="material/screenshots/p1_screen_030t.jpg"></a></td>
+    </tr>
+</table>
