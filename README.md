@@ -122,18 +122,18 @@ Are you really doing the right thing?
 
 <table>
     <tr>
-        <td><a href="material/screenshots/p1_screen_021.jpg?raw=true"><img src="material/screenshots/p1_screen_021t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_022.jpg?raw=true"><img src="material/screenshots/p1_screen_022t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_023.jpg?raw=true"><img src="material/screenshots/p1_screen_023t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_021.jpg"><img src="material/screenshots/p1_screen_021t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_022.jpg"><img src="material/screenshots/p1_screen_022t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_023.jpg"><img src="material/screenshots/p1_screen_023t.jpg"></a></td>
     </tr>
     <tr>
-        <td><a href="material/screenshots/p1_screen_024.jpg?raw=true"><img src="material/screenshots/p1_screen_024t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_025.jpg?raw=true"><img src="material/screenshots/p1_screen_025t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_026.jpg?raw=true"><img src="material/screenshots/p1_screen_026t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_024.jpg"><img src="material/screenshots/p1_screen_024t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_025.jpg"><img src="material/screenshots/p1_screen_025t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_026.jpg"><img src="material/screenshots/p1_screen_026t.jpg"></a></td>
     </tr>
     <tr>
-        <td><a href="material/screenshots/p1_screen_027.jpg?raw=true"><img src="material/screenshots/p1_screen_027t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_028.jpg?raw=true"><img src="material/screenshots/p1_screen_028t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_030.jpg?raw=true"><img src="material/screenshots/p1_screen_030t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_027.jpg"><img src="material/screenshots/p1_screen_027t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_028.jpg"><img src="material/screenshots/p1_screen_028t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_030.jpg"><img src="material/screenshots/p1_screen_030t.jpg"></a></td>
     </tr>
 </table>
