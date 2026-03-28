@@ -64,20 +64,16 @@ cCreditRoll::cCreditRoll()noexcept
     }
 
     // 
-    const coreMap<coreString, coreString>& asLanguageList = cMenu::GetLanguageList();
+    const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();
 
     // 
     coreMapStr<coreString> asFont;
-    asFont.reserve(asLanguageList.size());
+    asFont.reserve(aLanguageList.size());
 
     // 
-    FOR_EACH(it, asLanguageList)
+    FOR_EACH(it, aLanguageList)
     {
-        // 
-        coreString sFont;
-        if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_STANDARD;
-
-        asFont.emplace_bs(coreData::StrFilename(it->c_str()), coreData::StrFilename(sFont.c_str()));
+        asFont.emplace_bs_unsafe(coreData::StrFilename(it->sPath.c_str()), it->sFont.c_str());
     }
 
     // 

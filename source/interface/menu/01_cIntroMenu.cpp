@@ -193,38 +193,34 @@ void cIntroMenu::StartIntro()
     if(bSelectLanguage)
     {
         // 
-        const coreMap<coreString, coreString>& asLanguageList = cMenu::GetLanguageList();
+        const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();
 
         // 
-        m_apLanguageButton.reserve(asLanguageList.size());
+        m_apLanguageButton.reserve(aLanguageList.size());
 
         // 
-        const coreFloat fOffset = I_TO_F(MIN(asLanguageList.size(), 8u)) * 0.5f - 0.5f;
-        FOR_EACH(it, asLanguageList)
+        const coreFloat fOffset = I_TO_F(MIN(aLanguageList.size(), 8u)) * 0.5f - 0.5f;
+        FOR_EACH(it, aLanguageList)
         {
-            // 
-            coreString sFont;
-            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_STANDARD;
-
             // create new language button
             cGuiButton* pButton = new cGuiButton();
-            pButton->Construct    (MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 20u, MENU_OUTLINE_SMALL);   // # always filter filename
+            pButton->Construct    (MENU_BUTTON, it->sFont.c_str(), 20u, MENU_OUTLINE_SMALL);
             pButton->DefineProgram("menu_border_program");
             pButton->SetPosition  (coreVector2(0.0f,0.09f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
             pButton->SetSize      (coreVector2(0.4f,0.07f));
-            pButton->GetCaption()->SetText(asLanguageList.get_key(it)->c_str());
+            pButton->GetCaption()->SetText(it->sName.c_str());
 
             // 
             m_LanguageBox.BindObject(pButton);
 
             // 
-            m_apLanguageButton.emplace((*it), pButton);
+            m_apLanguageButton.emplace_unsafe(it->sPath, pButton);
         }
 
         // 
         m_LanguageBox.SetPosition (coreVector2(0.0f,0.0f));
         m_LanguageBox.SetSize     (coreVector2(0.5f,0.74f));
-        m_LanguageBox.SetMaxOffset(0.09f * I_TO_F(asLanguageList.size()) + 0.02f - m_LanguageBox.GetSize().y);
+        m_LanguageBox.SetMaxOffset(0.09f * I_TO_F(aLanguageList.size()) + 0.02f - m_LanguageBox.GetSize().y);
 
         m_Navigator.BindScroll(&m_LanguageBox);
 

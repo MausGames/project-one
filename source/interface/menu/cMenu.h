@@ -148,6 +148,13 @@ enum eMenuUpdate : coreUint8
 };
 ENABLE_BITWISE(eMenuUpdate)
 
+struct sLanguage final
+{
+    coreString sName;   // 
+    coreString sPath;   // 
+    coreString sFont;   // 
+};
+
 
 // ****************************************************************
 // menu surface indices
@@ -1606,7 +1613,7 @@ public:
 
     // 
     static void UpdateLanguageFont();
-    static const coreMap<coreString, coreString>& GetLanguageList();
+    static const coreList<sLanguage>& GetLanguageList();
     
     static void ClearScreen();
     

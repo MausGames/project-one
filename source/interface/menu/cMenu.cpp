@@ -93,21 +93,17 @@ cMenu::cMenu()noexcept
     m_TransitionTime.SetTimeID(0);
 
     // 
-    const coreMap<coreString, coreString>& asLanguageList = cMenu::GetLanguageList();
+    const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();
 
     // 
     m_apFontMap.emplace(MENU_FONT_DYNAMIC,  Core::Manager::Resource->Get<coreFont>(MENU_FONT_DYNAMIC));
     m_apFontMap.emplace(MENU_FONT_STANDARD, Core::Manager::Resource->Get<coreFont>(MENU_FONT_STANDARD));
 
     // 
-    FOR_EACH(it, asLanguageList)
+    FOR_EACH(it, aLanguageList)
     {
         // 
-        coreString sFont;
-        if(coreLanguage::FindString(it->c_str(), "FONT", &sFont))
-        {
-            if(!m_apFontMap.count(sFont.c_str())) m_apFontMap.emplace(sFont.c_str(), Core::Manager::Resource->Get<coreFont>(sFont.c_str()));
-        }
+        if(!m_apFontMap.count(it->sFont.c_str())) m_apFontMap.emplace(it->sFont.c_str(), Core::Manager::Resource->Get<coreFont>(it->sFont.c_str()));
     }
 
     // 
@@ -1170,35 +1166,58 @@ void cMenu::UpdateLanguageFont()
 
 // ****************************************************************
 // 
-const coreMap<coreString, coreString>& cMenu::GetLanguageList()
+const coreList<sLanguage>& cMenu::GetLanguageList()
 {
-    // static language list <name, path>
-    static const coreMap<coreString, coreString> s_asLanguage = []()
+    // static language list
+    static const coreList<sLanguage> s_aLanguage = []()
     {
         // 
-        coreMap<coreString, coreString> asOutput;
-        coreLanguage::GetAvailableLanguages(&asOutput);
+        coreMap<coreString, coreString> asAvailable;
+        coreLanguage::GetAvailableLanguages(&asAvailable);
 
         // 
-        if(asOutput.empty()) asOutput.emplace("NO LANGUAGE FOUND", "");
+        if(asAvailable.empty()) asAvailable.emplace("NO LANGUAGE FOUND", "");
 
         // 
-        asOutput.sort_asc();
+        asAvailable.sort_asc();
 
         // 
         const coreChar* pcKey = "English";
-        if(asOutput.count(pcKey))
+        if(asAvailable.count(pcKey))
         {
-            coreString sPath = std::move(asOutput.at(pcKey));
+            coreString sPath = std::move(asAvailable.at(pcKey));
 
-            asOutput.erase(pcKey);
-            asOutput.emplace(asOutput.begin(), pcKey, std::move(sPath));
+            asAvailable.erase(pcKey);
+            asAvailable.emplace_unsafe(asAvailable.begin(), pcKey, std::move(sPath));
         }
 
-        return asOutput;
+        // 
+        coreList<sLanguage> aOutput;
+        aOutput.reserve(asAvailable.size());
+
+        FOR_EACH(it, asAvailable)
+        {
+            // 
+            coreString sFont;
+            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_STANDARD;
+
+            // # always filter filename
+            sFont = coreData::StrFilename(sFont.c_str());
+
+            // 
+            sLanguage oLanguage;
+            oLanguage.sName = std::move(*asAvailable.get_key(it));
+            oLanguage.sPath = std::move(*it);
+            oLanguage.sFont = std::move(sFont);
+
+            // 
+            aOutput.push_back_unsafe(std::move(oLanguage));
+        }
+
+        return aOutput;
     }();
 
-    return s_asLanguage;
+    return s_aLanguage;
 }
 
 

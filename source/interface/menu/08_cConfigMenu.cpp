@@ -495,10 +495,10 @@ cConfigMenu::cConfigMenu()noexcept
     m_MirrorModeNew.SetIndex   (NEW_CONFIG_MIRRORMODE);
 
     // fill configuration entries
-    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_keylist();
+    const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();
 
-    for(coreUintW i = 0u, ie = asLanguageList.size(); i < ie; i++)
-        m_Language.AddEntry(asLanguageList[i].c_str(), i);
+    for(coreUintW i = 0u, ie = aLanguageList.size(); i < ie; i++)
+        m_Language.AddEntry(aLanguageList[i].sName.c_str(), i);
 
     const coreUint8 iMaxSamples    = Core::Graphics->GetMaxSamples();
     const coreUint8 iMaxAnisotropy = Core::Graphics->GetMaxAnisotropy();
@@ -1343,8 +1343,9 @@ void cConfigMenu::LoadValues()
     m_3DSound      .SelectValue(g_CurConfig.Audio.i3DSound);
 
     // 
-    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
-    m_Language     .SelectIndex(asLanguageList.index_first(Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)));
+    const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();
+    const coreChar*            pcLanguage    = Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE);
+    m_Language     .SelectIndex(coreData::RangeIndexIf(aLanguageList.begin(), aLanguageList.end(), [&](const sLanguage& A) {return (A.sPath == pcLanguage);}));
     m_GameDirection.SelectValue(g_CurConfig.Game.iGameDirection);
     m_MirrorMode   .SelectValue(g_CurConfig.Game.iMirrorMode);
     m_HudDirection .SelectValue(g_CurConfig.Game.iHudDirection);
@@ -1615,8 +1616,8 @@ void cConfigMenu::__UpdateVolume()
 void cConfigMenu::__UpdateLanguage()
 {
     // 
-    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
-    Core::Language->Load(asLanguageList[m_Language.GetCurIndex()].c_str());
+    const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();
+    Core::Language->Load(aLanguageList[m_Language.GetCurIndex()].sPath.c_str());
 
     // 
     cMenu::UpdateLanguageFont();
