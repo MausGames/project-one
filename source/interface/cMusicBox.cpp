@@ -163,7 +163,7 @@ void cMusicBox::Move()
     // 
     m_ScrollBox.Interact();
 
-    if(TIME)
+    if(TIME && m_ScrollBox.IsFocused())
     {
         // 
         m_PlayIcon.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -171,13 +171,13 @@ void cMusicBox::Move()
         for(coreUintW i = 0u; i < MUSIC_TRACKS; ++i)
         {
             // 
-            if(m_ScrollBox.IsBarFocused()) m_aLine[i].SetFocused(false);
-            else if(m_aLine[i].GetAlpha()) m_aLine[i].Interact();   // # requires interaction for transition
+                 if(m_ScrollBox.IsBarFocused()) m_aLine[i].SetFocused(false);
+            else if(m_aLine[i].GetAlpha())      m_aLine[i].Interact();   // # requires interaction for transition
 
             // 
             cMenu::UpdateLine(&m_aLine[i], false, g_aMusicTrack[i].vColor);
 
-            if(m_aLine[i].IsClicked() && m_ScrollBox.IsFocused())
+            if(m_aLine[i].IsClicked())
             {
                 // 
                 m_iSelection = i;
