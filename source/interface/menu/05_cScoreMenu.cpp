@@ -217,6 +217,7 @@ cScoreMenu::cScoreMenu()noexcept
     m_Nothing.SetTextLanguage("GAME_WEAPON_NOTHING");
 
     // 
+    m_FilterSegment   .AddEntry        ("",                       255u);   // dummy
     m_FilterPure      .AddEntryLanguage("FILTER_ANY",             254u);
     m_FilterPure      .AddEntryLanguage("FILTER_PURE",            255u);
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
@@ -522,7 +523,8 @@ void cScoreMenu::LoadMissions()
     }
 
     // 
-    m_FilterMission.SelectIndex(0u);
+    m_FilterMission.SelectFirst();
+    m_FilterSegment.SelectFirst();
 
     // 
     m_FilterDifficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
@@ -549,8 +551,14 @@ void cScoreMenu::LoadSegments(const coreUintW iMissionIndex)
     if(iMissionIndex == 254u)
     {
         m_FilterSegment.ClearEntries();
-        m_FilterSegment.AddEntry("-", 255u);
-        m_FilterSegment.SetOverride(-1);
+
+        m_FilterSegment.AddEntryLanguage("FILTER_COMPLETE", 255u);
+        for(coreUintW i = 0u; i < ARRAY_SIZE(g_aMissionData); ++i)
+        {
+            const coreUint8 iAdvance = g_pSave->GetHeader().oProgress.aiAdvance[i] * ((i < MISSION_BASE) ? 1u : 0u);
+
+            if(iAdvance) m_FilterSegment.AddEntry(g_aMissionData[i].pcName, i);
+        }
 
         m_FilterIcon.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
 
@@ -571,7 +579,6 @@ void cScoreMenu::LoadSegments(const coreUintW iMissionIndex)
             m_FilterSegment.AddEntry(PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iMissionIndex, i)), i);
         }
 
-        m_FilterSegment.SetOverride(0);
 
         m_FilterIcon.SetColor3   (g_aMissionData[iMissionIndex].vColor * 0.8f);
         m_FilterIcon.SetTexOffset(g_aMissionData[iMissionIndex].vIcon);
@@ -611,7 +618,9 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
 
     const coreChar* pcDifficulty  = (iDifficultyValue)   ? "normal" : "easy";
     const coreChar* pcPure        = (iPureValue == 255u) ? "_pure"  : "";
-    const coreChar* pcLeaderboard = bSegment ? PRINT("stage_score_solo_%s_%02u_%02u%s", pcDifficulty, iMissionValue, iSegmentValue + 1u, pcPure) : PRINT("arcade_score_solo_%s%s", pcDifficulty, pcPure);
+    const coreChar* pcLeaderboard = bMission ? PRINT("stage_score_solo_%s_%02u_%02u%s", pcDifficulty, iMissionValue, iSegmentValue + 1u, pcPure) :
+                                    bSegment ? PRINT("area_score_solo_%s_%02u%s",       pcDifficulty, iSegmentValue, pcPure) :   // # segment value is used as mission index
+                                               PRINT("arcade_score_solo_%s%s",          pcDifficulty, pcPure);
 
     m_iCurRequest += 1u;
 
