@@ -381,6 +381,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_direct.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_object3d.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_NO_ROTATION SHADER_OBJECT3D);
+    Core::Manager::Resource->Load<coreShader> ("effect_distortion_object3d.frag",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", SHADER_OBJECT3D);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_object3d_inst.vert",   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_INSTANCING CORE_SHADER_OPTION_NO_ROTATION SHADER_OBJECT3D);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_object3d_inst.frag",   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", CORE_SHADER_OPTION_INSTANCING SHADER_OBJECT3D);
     Core::Manager::Resource->Load<coreShader> ("effect_energy.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert");
@@ -713,7 +714,7 @@ void CoreApp::Setup()
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_object3d_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_distortion_object3d.vert")
-        ->AttachShader("effect_distortion.frag")
+        ->AttachShader("effect_distortion_object3d.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_object3d_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
