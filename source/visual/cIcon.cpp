@@ -120,7 +120,7 @@ void cIcon::Update()
             for(coreUintW i = 0u; i < ICON_VARIATIONS; ++i)
             {
                 m_aRangeRaw[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * 22.0f * fScale);
-                m_aRangeRaw[i].SetTexOffset(coreVector2(0.0f,1.0f) * (((!i || !g_pMenu->IsPaused()) ? m_fAnimation.ToFloat() : m_fStorage) + (I_TO_F(i) / I_TO_F(ICON_VARIATIONS))));
+                m_aRangeRaw[i].SetTexOffset(coreVector2(0.0f,1.0f) * (((!i || !g_pMenu->IsPaused()) ? m_fAnimation.Get() : m_fStorage) + (I_TO_F(i) / I_TO_F(ICON_VARIATIONS))));
             }
             m_Range.MoveNormal();
 

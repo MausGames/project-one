@@ -51,7 +51,7 @@ cSave::~cSave()
 
 // ****************************************************************
 // 
-RETURN_NONNULL cSave::sGlobalStats* cSave::EditGlobalStats()
+cSave::sGlobalStats* cSave::EditGlobalStats()
 {
     if(!m_bIgnore)
     {
@@ -64,7 +64,7 @@ RETURN_NONNULL cSave::sGlobalStats* cSave::EditGlobalStats()
     return &s_GlobalStatsDummy;
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsArcade(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty)
+cSave::sLocalStats* cSave::EditLocalStatsArcade(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty)
 {
     if(!m_bIgnore)
     {
@@ -81,14 +81,14 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsArcade(const coreUint8 i
     return &s_LocalStatsDummy;
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsArcade()
+cSave::sLocalStats* cSave::EditLocalStatsArcade()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditLocalStatsArcade(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty());
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex)
+cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex)
 {
     if(!m_bIgnore)
     {
@@ -106,21 +106,21 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUint8 
     return &s_LocalStatsDummy;
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUintW iMissionIndex)
+cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUintW iMissionIndex)
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditLocalStatsMission(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), iMissionIndex);
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission()
+cSave::sLocalStats* cSave::EditLocalStatsMission()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditLocalStatsMission(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), g_pGame->GetCurMissionIndex());
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     if(!m_bIgnore)
     {
@@ -140,21 +140,21 @@ RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUint8 
     return &s_LocalStatsDummy;
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditLocalStatsSegment(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), iMissionIndex, iSegmentIndex);
 }
 
-RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsSegment()
+cSave::sLocalStats* cSave::EditLocalStatsSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditLocalStatsSegment(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty(), g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
-RETURN_NONNULL cSave::sOptions* cSave::EditOptions()
+cSave::sOptions* cSave::EditOptions()
 {
     if(!m_bIgnore)
     {
@@ -167,7 +167,7 @@ RETURN_NONNULL cSave::sOptions* cSave::EditOptions()
     return &s_OptionsDummy;
 }
 
-RETURN_NONNULL cSave::sProgress* cSave::EditProgress()
+cSave::sProgress* cSave::EditProgress()
 {
     if(!m_bIgnore)
     {

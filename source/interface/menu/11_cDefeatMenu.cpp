@@ -126,7 +126,7 @@ void cDefeatMenu::Move()
                 }
 
                 // 
-                m_ContinueTimer.SetText(PRINT("%.0f", MAX0(FLOOR(m_fCountdown.ToFloat()))));
+                m_ContinueTimer.SetText(PRINT("%.0f", MAX0(FLOOR(m_fCountdown.Get()))));
 
                 // 
                 if((fOldCountdown >= 0.0f) && (fOldCountdown < 11.0f) && (F_TO_SI(fOldCountdown) != F_TO_SI(m_fCountdown)))

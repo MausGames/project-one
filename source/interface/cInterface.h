@@ -14,6 +14,7 @@
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 // TODO 4: merge wave time and boss time if possible
 // TODO 3: add animation to combo bar, combo value, score (consider sustained fire on boss, e.g. on Eigengrau)
+// TODO 4: clean up with P2
 
 
 // ****************************************************************
@@ -217,6 +218,8 @@ public:
     void UpdateLayout(const coreBool bForce = false);
     void UpdateSpacing();
     void UpdateEnabled(const coreBool bForce = false);
+
+    // 
     void MoveTimeless();
 
     // 

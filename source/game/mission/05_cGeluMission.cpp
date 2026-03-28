@@ -865,7 +865,7 @@ void cGeluMission::__MoveOwnAfter()
                     if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
                     {
                         ADD_BIT(m_iWayGhost, j)
-                        break;
+                        break;   // # blocks are not overlapping
                     }
                 }
             }

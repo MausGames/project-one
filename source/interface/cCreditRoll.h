@@ -148,10 +148,10 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryFonts[
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryLibraries[] =
 {
-    "ANGLE, GLEW, imgui, libc++, OpenAL_soft",
-    "opus, SDL3, SDL3_image, SDL3_ttf",
-    "stb_dxt, stb_sprintf, stb_vorbis",
-    "xxhash, zstd"
+    "ANGLE, bc7enc_rdo, doctest, GLEW, imgui",
+    "libc++, OpenAL_soft, opus, SDL3",
+    "SDL3_image, SDL3_ttf, stb_dxt",
+    "stb_sprintf, stb_vorbis, xxhash, zstd"
 };
 
 

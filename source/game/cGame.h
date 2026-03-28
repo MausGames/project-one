@@ -350,8 +350,8 @@ public:
     coreBool SkipLoadingCache()const;
 
     // 
-    RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2 vPosition);
-    RETURN_NONNULL cPlayer* FindPlayerDual(const coreUintW   iIndex);
+    cPlayer* FindPlayerSide(const coreVector2 vPosition);
+    cPlayer* FindPlayerDual(const coreUintW   iIndex);
     template <typename F> FORCE_INLINE void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
     template <typename F> FORCE_INLINE void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 

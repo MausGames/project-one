@@ -250,6 +250,8 @@ cConfigMenu::cConfigMenu()noexcept
         m_GameDirection.SetEndless(true);
         m_HudDirection .SetEndless(true);
 
+        m_Language.GetCaption()->ChangeLanguage(Core::Language);   // make sure font is correctly refreshed
+
         m_Navigator.BindObject(&m_Monitor,         &m_VideoTab,        NULL, &m_Resolution,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_Resolution,      &m_Monitor,         NULL, &m_DisplayMode,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_DisplayMode,     &m_Resolution,      NULL, &m_Vsync,           NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);

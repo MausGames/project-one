@@ -118,7 +118,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     ASSERT((m_iNumViews > 0) && (m_iNumViews <= INTERFACE_VIEWS))
 
     // construct player views
-    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i)
     {
         m_aView[i].Construct(i);
     }
@@ -391,9 +391,9 @@ void cInterface::Render()
     if(m_fAlphaAll)
     {
         // render player images
-        for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)                                                 m_aView[i].oCooldownBar .Render();   // # first
-        for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i) for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) m_aView[i].aLife     [j].Render();
-        for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i) for(coreUintW j = 0u; j < 3u;              ++j) m_aView[i].aShieldBar[j].Render();
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i)                                                 m_aView[i].oCooldownBar .Render();   // # first
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i) for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) m_aView[i].aLife     [j].Render();
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i) for(coreUintW j = 0u; j < 3u;              ++j) m_aView[i].aShieldBar[j].Render();
 
         if(m_fAlphaBoss)
         {
@@ -434,7 +434,7 @@ void cInterface::Render()
         // 
         m_TrophyWave.Render();
 
-        for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i)
         {
             // render player labels
             m_aView[i].oShieldValue.Render();
@@ -539,7 +539,7 @@ void cInterface::Move()
     coreFloat fTrophyCover = 1.0f;
 
     // loop through all player views
-    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i)
     {
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
@@ -1251,18 +1251,17 @@ void cInterface::Move()
         // 
         if((m_iBannerType == INTERFACE_BANNER_TYPE_MISSION) || (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS))
         {
-            m_aBannerText[2].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
-            m_aBannerText[3].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
-            
-            m_BannerExtra.SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
-            
-            m_aBannerLogo[0].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
-            m_aBannerLogo[1].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
+            SetTexOffsetSwipe(&m_aBannerText[2], bLeftRight ? -1.0f : 1.0f);
+            SetTexOffsetSwipe(&m_aBannerText[3], bLeftRight ? -1.0f : 1.0f);
+            SetTexOffsetSwipe(&m_BannerExtra,    bLeftRight ? -1.0f : 1.0f);
+
+            m_aBannerLogo[0].SetTexOffset(coreVector2(bLeftRight ? -1.0f : 1.0f, 0.0f));
+            m_aBannerLogo[1].SetTexOffset(coreVector2(bLeftRight ? -1.0f : 1.0f, 0.0f));
         }
         else
         {
-            m_aBannerText[2].SetTexOffset(coreVector2(0.0f,0.0f));
-            m_aBannerText[3].SetTexOffset(coreVector2(0.0f,0.0f));
+            SetTexOffsetSwipe(&m_aBannerText[2], 0.0f);
+            SetTexOffsetSwipe(&m_aBannerText[3], 0.0f);
         }
 
         // 
@@ -1881,7 +1880,7 @@ void cInterface::UpdateLayout(const coreBool bForce)
     };
 
     // loop through all player views
-    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i)
     {
         sPlayerView& oView = m_aView[i];
 
@@ -1995,7 +1994,7 @@ void cInterface::UpdateSpacing()
     const coreVector2 vFlip = (g_CurConfig.Game.iHudType == 2u) ? (cInterface::__IsFlipped() ? coreVector2(-1.0f,1.0f) : coreVector2(1.0f,-1.0f)) : coreVector2(1.0f,1.0f);
     const coreVector2 vAdd  = coreVector2((vFlip.x < 0.0f) ? 0.02f : 0.0f, (vFlip.y < 0.0f) ? 0.02f : 0.0f);
     
-    const coreFloat fShift = -vAdd.y + LERPS(-0.005f, -0.04f, ((g_CurConfig.Game.iHudType == 1u) || !cInterface::__IsFlipped()) ? m_fAlphaBoss.ToFloat() : 0.0f);
+    const coreFloat fShift = -vAdd.y + LERPS(-0.005f, -0.04f, ((g_CurConfig.Game.iHudType == 1u) || !cInterface::__IsFlipped()) ? m_fAlphaBoss.Get() : 0.0f);
     
     const auto nSetSpacingFunc = [&](coreObject2D* OUTPUT pObject, const coreFloat fOffset)
     {
@@ -2003,7 +2002,7 @@ void cInterface::UpdateSpacing()
     };
 
     // 
-    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i)
     {
         sPlayerView& oView = m_aView[i];
 
@@ -2027,7 +2026,7 @@ void cInterface::UpdateEnabled(const coreBool bForce)
     const coreBool bInGame = STATIC_ISVALID(g_pGame) || bForce;
 
     // loop through all player views
-    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(m_iNumViews); i < ie; ++i)
     {
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);

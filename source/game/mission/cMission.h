@@ -1607,7 +1607,7 @@ public:
     inline void LaunchSecret() {m_bSecret = true;}
 
     // 
-    inline RETURN_NONNULL cMission* GetInnerMission()const {ASSERT(m_pInnerMission) return m_pInnerMission;}
+    inline cMission* GetInnerMission()const {ASSERT(m_pInnerMission) return m_pInnerMission;}
 
     // 
     inline cTurf* GetTurf() {return &m_Turf;}

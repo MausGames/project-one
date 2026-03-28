@@ -2517,8 +2517,8 @@ void cGeluMission::__SetupOwn()
 
                 if(!this->IsOrbEnabled(aiTarget[i])) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, pPlayer->GetPosition())
 
-                const coreUint8   x      = (aiTarget[i] % 4u);
-                const coreUint8   y      = (aiTarget[i] / 4u);
+                const coreUint8   x     = (aiTarget[i] % 4u);
+                const coreUint8   y     = (aiTarget[i] / 4u);
                 const coreVector2 vMove = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? coreVector2(0.0f,0.0f) : this->ConsumeFreezeMove(i);
 
                 const coreVector2 vDiff1 = m_aOrbRaw[aiTarget[i]].GetPosition().xy() - pPlayer->GetPosition().xy();

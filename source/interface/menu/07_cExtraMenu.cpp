@@ -731,7 +731,7 @@ void cExtraMenu::LoadMissions()
     }
 
     // 
-    m_FilterMission.SelectIndex(0u);
+    m_FilterMission.SelectFirst();
 
     // 
     m_FilterType      .SelectValue(g_pSave->GetHeader().oOptions.iType);

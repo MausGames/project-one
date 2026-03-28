@@ -494,6 +494,15 @@ inline coreVector2 GetTranslationScreen(const coreObject2D& oObject)
 
 
 // ****************************************************************
+// 
+inline void SetTexOffsetSwipe(coreLabel* OUTPUT pLabel, const coreFloat fLeft)
+{
+    ASSERT(pLabel)
+    pLabel->SetTexOffset(coreVector2(fLeft, pLabel->GetTexOffset().y));
+}
+
+
+// ****************************************************************
 // execute function without frame time
 template <typename F> FORCE_INLINE void Timeless(F&& nFunction)   // []() -> void
 {

@@ -588,7 +588,7 @@ static void LockFramerate()
         const auto nMeasureFunc = [&]()
         {
             iNewPerfTime = SDL_GetPerformanceCounter();
-            dDifference  = coreDouble(iNewPerfTime - iLocalOldPerfTime) * Core::System->GetPerfFrequency();
+            dDifference  = coreDouble(iNewPerfTime - iLocalOldPerfTime) / Core::System->GetPerfFrequency();
         };
 
         // spin as long as frame time is too low
@@ -604,7 +604,7 @@ static void LockFramerate()
             if(iSleep) SDL_Delay(iSleep);
 
             // 
-            else CORE_SPINLOCK_YIELD
+            else CORE_LOCK_YIELD
         }
 
         // save last high-precision time value

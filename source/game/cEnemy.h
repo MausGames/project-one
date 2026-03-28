@@ -128,7 +128,7 @@ public:
     // 
     inline coreBool IsParent ()const {return !m_apMember.empty() && !HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
     inline coreBool IsChild  ()const {return !m_apMember.empty() &&  HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
-    inline cEnemy*  GetParent()      {ASSERT(this->IsChild()) return m_apMember.front();}
+    inline cEnemy*  GetParent()const {ASSERT(this->IsChild()) return m_apMember.front();}
 
     //
     void ChangeToBottom();

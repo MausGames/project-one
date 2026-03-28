@@ -101,7 +101,6 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     // get font properties
     coreFont*        pFont   = m_aLine[0].GetFont().GetResource();
     const coreUint16 iHeight = CORE_LABEL_HEIGHT_RELATIVE(m_aLine[0].GetHeight());
-    const coreFloat  fFactor = CORE_LABEL_SIZE_FACTOR;
 
     // prepare cursor and line pointers
     coreChar* pcCursor    = c_cast<coreChar*>(pcText);   // TODO 1: get rid of const cast
@@ -149,7 +148,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
             // get glyph width
             coreInt32 iAdvance = 0;
             const coreUint8 iBytes   = pFont->RetrieveGlyphMetrics(pcCursor, iHeight, TOOLTIP_OUTLINE_SIZE, NULL, NULL, NULL, NULL, &iAdvance);
-            const coreFloat fAdvance = I_TO_F(iAdvance) * fFactor;
+            const coreFloat fAdvance = I_TO_F(iAdvance) / CORE_LABEL_DETAIL;
 
             // check for whitespace character (valid line-end)
             if((*pcCursor) == ' ')
@@ -183,7 +182,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     fMaxWidth = MAX(fMaxWidth, fCurWidth);
 
     // set background size
-    this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines - 1u) + TOOLTIP_LINE_BOTTOM) + TOOLTIP_BORDER_SIZE + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) * fFactor);
+    this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines - 1u) + TOOLTIP_LINE_BOTTOM) + TOOLTIP_BORDER_SIZE + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) / CORE_LABEL_DETAIL);
 
     // set text line position
     const coreVector2 vBase = (this->GetSize() * this->GetAlignment() + (TOOLTIP_BORDER_SIZE - this->GetSize()) * m_aLine[0].GetAlignment()) * 0.5f + m_vOffset;

@@ -1662,6 +1662,7 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
             return true;
         }
     }
+
     return false;
 }
 

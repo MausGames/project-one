@@ -289,17 +289,17 @@ public:
     DISABLE_COPY(cSave)
 
     // 
-    RETURN_NONNULL sGlobalStats* EditGlobalStats      ();
-    RETURN_NONNULL sLocalStats*  EditLocalStatsArcade (const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty);
-    RETURN_NONNULL sLocalStats*  EditLocalStatsArcade ();
-    RETURN_NONNULL sLocalStats*  EditLocalStatsMission(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex);
-    RETURN_NONNULL sLocalStats*  EditLocalStatsMission(const coreUintW iMissionIndex);
-    RETURN_NONNULL sLocalStats*  EditLocalStatsMission();
-    RETURN_NONNULL sLocalStats*  EditLocalStatsSegment(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    RETURN_NONNULL sLocalStats*  EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    RETURN_NONNULL sLocalStats*  EditLocalStatsSegment();
-    RETURN_NONNULL sOptions*     EditOptions          ();
-    RETURN_NONNULL sProgress*    EditProgress         ();
+    sGlobalStats* EditGlobalStats      ();
+    sLocalStats*  EditLocalStatsArcade (const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty);
+    sLocalStats*  EditLocalStatsArcade ();
+    sLocalStats*  EditLocalStatsMission(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex);
+    sLocalStats*  EditLocalStatsMission(const coreUintW iMissionIndex);
+    sLocalStats*  EditLocalStatsMission();
+    sLocalStats*  EditLocalStatsSegment(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    sLocalStats*  EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    sLocalStats*  EditLocalStatsSegment();
+    sOptions*     EditOptions          ();
+    sProgress*    EditProgress         ();
 
     // 
     coreBool LoadFile(const coreChar* pcPath);

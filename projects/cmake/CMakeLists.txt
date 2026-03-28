@@ -3,7 +3,14 @@ cmake_minimum_required(VERSION 3.31)
 set(BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(ENGINE_DIRECTORY ${BASE_DIRECTORY}/../core-engine)
 
-project(ProjectOne VERSION 1.3.10)
+project(
+    ProjectOne
+    VERSION 1.3.10
+    DESCRIPTION "Colorful shoot 'em up with varied and diverse gameplay"
+    HOMEPAGE_URL "https://www.maus-games.at/eigengrau"
+    LANGUAGES C CXX
+)
+
 add_subdirectory(${ENGINE_DIRECTORY}/projects/cmake CoreEngine)
 add_executable(ProjectOne)
 
@@ -13,8 +20,6 @@ set_target_properties(
     CXX_STANDARD 23
     CXX_SCAN_FOR_MODULES OFF
     DEBUG_POSTFIX _debug
-    BUILD_WITH_INSTALL_RPATH TRUE
-    INSTALL_RPATH $ORIGIN
 )
 
 target_sources(
@@ -106,7 +111,7 @@ if(CORE_EMSCRIPTEN)
     set_target_properties(
         ProjectOne PROPERTIES
         SUFFIX .html
-        RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/emscripten/
+        RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/emscripten
     )
 
 else()
@@ -114,10 +119,16 @@ else()
     set_target_properties(
         ProjectOne PROPERTIES
         SUFFIX .elf
-        RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/linux_x86_64/
+        RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/linux_x86_64
     )
 
     if(NOT CORE_DEBUG)
+
+        set_target_properties(
+            ProjectOne PROPERTIES
+            BUILD_WITH_INSTALL_RPATH TRUE
+            INSTALL_RPATH $ORIGIN
+        )
 
         add_custom_command(
             TARGET ProjectOne POST_BUILD

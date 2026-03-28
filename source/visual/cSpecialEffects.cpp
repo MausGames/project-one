@@ -185,7 +185,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(SOUND_EFFECT_WOOSH_02,      "effect_woosh_02.wav");
 
     // 
-    m_ShakeTimer.SetTimeID(0);
+    m_ShakeTimer.SetTimeID(0u);
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
 
     // 

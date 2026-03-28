@@ -81,11 +81,11 @@ public:
     void RevertSegment();
 
     // 
-    RETURN_NONNULL sCounter* EditCounterTotal  ();
-    RETURN_NONNULL sCounter* EditCounterMission(const coreUintW iMissionIndex);
-    RETURN_NONNULL sCounter* EditCounterMission();
-    RETURN_NONNULL sCounter* EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    RETURN_NONNULL sCounter* EditCounterSegment();
+    sCounter* EditCounterTotal  ();
+    sCounter* EditCounterMission(const coreUintW iMissionIndex);
+    sCounter* EditCounterMission();
+    sCounter* EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    sCounter* EditCounterSegment();
 
     // 
     void GiveMedalArade  (const coreUint8 iMedal);

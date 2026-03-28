@@ -90,7 +90,7 @@ cMenu::cMenu()noexcept
     m_MixObject.Move();
 
     // 
-    m_TransitionTime.SetTimeID(0);
+    m_TransitionTime.SetTimeID(0u);
 
     // 
     const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();

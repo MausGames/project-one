@@ -657,13 +657,14 @@ void CoreApp::Setup()
     coreData::DirectoryScan("data/fonts", "*.otf",  &asPath);
     coreData::DirectoryScan("data/fonts", "*.woff", &asPath);
 
+    coreString sFilename;
     FOR_EACH(it, asPath)   // # config for default font is ignored, because it was already loaded
     {
         coreConfig oConfig(PRINT("%s.ini", it->c_str()));
         const coreUint8 iHinting = oConfig.GetInt ("Config", "Hinting", TTF_HINTING_LIGHT_SUBPIXEL);
         const coreBool  bKerning = oConfig.GetBool("Config", "Kerning", true);
 
-        coreString sFilename = coreData::StrFilename(it->c_str());
+        sFilename = coreData::StrFilename(it->c_str());
         if(DEFINED(_CORE_EMSCRIPTEN_)) sFilename.replace(".woff", ".ttf");
 
         Core::Manager::Resource->Load<coreFont>(sFilename.c_str(), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), TTF_HintingFlags(iHinting), bKerning);

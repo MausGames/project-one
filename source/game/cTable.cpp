@@ -63,33 +63,33 @@ void cDataTable::RevertSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
 // ****************************************************************
 // 
-RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterTotal()
+cDataTable::sCounter* cDataTable::EditCounterTotal()
 {
     // 
     return &m_CounterTotal;
 }
 
-RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterMission(const coreUintW iMissionIndex)
+cDataTable::sCounter* cDataTable::EditCounterMission(const coreUintW iMissionIndex)
 {
     // 
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     return &m_aCounterMission[iMissionIndex];
 }
 
-RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterMission()
+cDataTable::sCounter* cDataTable::EditCounterMission()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return this->EditCounterMission(g_pGame->GetCurMissionIndex());
 }
 
-RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
     if(iSegmentIndex != MISSION_NO_SEGMENT)
@@ -106,7 +106,7 @@ RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUi
     return &s_CounterDummy;
 }
 
-RETURN_NONNULL cDataTable::sCounter* cDataTable::EditCounterSegment()
+cDataTable::sCounter* cDataTable::EditCounterSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
@@ -357,7 +357,7 @@ void cScoreTable::RevertSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -385,7 +385,7 @@ void cScoreTable::RevertSegmentNew()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->RevertSegmentNew(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    this->RevertSegmentNew(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -530,7 +530,7 @@ void cScoreTable::__ChangeMaxSeries(const coreUint32 iMaxValue)
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->__ChangeMaxSeries(iMaxValue, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    this->__ChangeMaxSeries(iMaxValue, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -665,7 +665,7 @@ void cTimeTable::RevertSegment()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    this->RevertSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -688,7 +688,7 @@ void cTimeTable::RevertSegmentNew()
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return this->RevertSegmentNew(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    this->RevertSegmentNew(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 

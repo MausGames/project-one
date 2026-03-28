@@ -35,7 +35,7 @@
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO 4: unify "forward" and "transform" comments in shaders
 // TODO 3: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
-// TODO 4: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
+// TODO 4: RETURN_NONNULL (does not exist anymore) to everything which should never be null (and other attributes, both FUNC and RETURN)
 // TODO 3: reduce number of shader-lights with static_assert, change something like that into static config
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
 // TODO 3: make sure everything with at least 4 instances uses batch-lists
@@ -99,7 +99,7 @@
 #endif
 
 #if defined(_CORE_DEBUG_)
-    #define _P1_DEBUG_INPUT_ (1)
+    #define _P1_DEBUG_INPUT_
 #endif
 
 #if !defined(_CORE_DEBUG_)

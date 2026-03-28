@@ -12,7 +12,6 @@
 
 // TODO 1: transfer to Core Engine
 // TODO 2: fix controller support (mouse gets warped because of input-lock)
-// TODO 3: X character is off some pixels (font problem)
 // TODO 3: do not react to input for a very short time, when opening a non-mapping msg-box
 // TODO 1: cleanup m_aDownloadText
 

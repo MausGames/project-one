@@ -196,8 +196,9 @@ template <typename F> void cOutdoor::__Render(const coreProgramPtr& pProgram, F&
     if(!pProgram->Enable())  return;
 
     // update all object uniforms
-    pProgram->SendUniform("u_v4LerpData1", r_cast<coreVector4&>(m_afLerpData[0]));
-    pProgram->SendUniform("u_v3LerpData2", r_cast<coreVector3&>(m_afLerpData[4]));
+    coreProgram* pLocal = pProgram.GetResource();
+    pLocal->SendUniform("u_v4LerpData1", r_cast<coreVector4&>(m_afLerpData[0]));
+    pLocal->SendUniform("u_v3LerpData2", r_cast<coreVector3&>(m_afLerpData[4]));
 
     // 
     nFunction();

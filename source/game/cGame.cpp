@@ -625,7 +625,7 @@ void cGame::MoveAlways()
         if(!m_fMusicFade) g_MusicPlayer.Stop();
     }
 
-    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.ToFloat()) : 1.0f) * g_pMenu->GetVolume() * m_fMusicVolume * (m_bDefeatDelay ? 0.0f : 1.0f) * MUSIC_VOLUME);
+    g_MusicPlayer.SetVolume((m_fMusicFade ? BLENDH3(m_fMusicFade.Get()) : 1.0f) * g_pMenu->GetVolume() * m_fMusicVolume * (m_bDefeatDelay ? 0.0f : 1.0f) * MUSIC_VOLUME);
 }
 
 
@@ -1111,7 +1111,7 @@ coreBool cGame::SkipLoadingCache()const
 
 // ****************************************************************
 // 
-RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2 vPosition)
+cPlayer* cGame::FindPlayerSide(const coreVector2 vPosition)
 {
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
@@ -1127,7 +1127,7 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2 vPosition)
 
 // ****************************************************************
 // 
-RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
+cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
 {
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
