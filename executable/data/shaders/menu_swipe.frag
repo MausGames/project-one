@@ -35,7 +35,7 @@ void FragmentMain()
 
     // 
 #if defined(_P1_LABEL_)
-    gl_FragColor = vec4(mix(vec3(0.1), u_v4Color.rgb * mix(1.05, 0.87, v_av2TexCoord[0].y / u_v2TexSize.y), v2Alpha.r), max(v2Alpha.r, v2Alpha.g) * v1Mix);
+    gl_FragColor = vec4(mix(vec3(0.1), u_v4Color.rgb * mix(1.05, 0.92, v_av2TexCoord[0].y / (u_v2TexSize.y + u_v2TexOffset.y)), v2Alpha.r), max(v2Alpha.r, v2Alpha.g) * v1Mix);
 #else
     gl_FragColor = v4Texture * vec4(u_v4Color.rgb, v1Mix);
 #endif
