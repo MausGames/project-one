@@ -147,7 +147,7 @@ cTorusBoss::cTorusBoss()noexcept
             pTurret->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_TurretHull.BindObject(pTurret);
+            m_TurretHull.BindObjectUnsafe(pTurret);
         }
     }
 
@@ -183,7 +183,7 @@ cTorusBoss::cTorusBoss()noexcept
             pGunner->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_GunnerHull.BindObject(pGunner);
+            m_GunnerHull.BindObjectUnsafe(pGunner);
         }
     }
 
@@ -218,7 +218,7 @@ cTorusBoss::cTorusBoss()noexcept
             pCharger->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_ChargerHull.BindObject(pCharger);
+            m_ChargerHull.BindObjectUnsafe(pCharger);
         }
     }
 
@@ -253,7 +253,7 @@ cTorusBoss::cTorusBoss()noexcept
             pDriver->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_DriverHull.BindObject(pDriver);
+            m_DriverHull.BindObjectUnsafe(pDriver);
         }
     }
 
@@ -288,7 +288,7 @@ cTorusBoss::cTorusBoss()noexcept
             pWaver->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_WaverHull.BindObject(pWaver);
+            m_WaverHull.BindObjectUnsafe(pWaver);
         }
     }
 

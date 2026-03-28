@@ -316,7 +316,7 @@ void cDesertBackground::__InitOwn()
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_desert.wav");
     m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT, CORE_AUDIO_EFFECT_NONE);
     });
 }
 

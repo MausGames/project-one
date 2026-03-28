@@ -63,7 +63,7 @@ cNevoMission::cNevoMission()noexcept
             pBomb->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Bomb.BindObject(pBomb);
+            m_Bomb.BindObjectUnsafe(pBomb);
         }
     }
 
@@ -89,8 +89,8 @@ cNevoMission::cNevoMission()noexcept
             pBlast->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_BlastLine.BindObject(pBlast);
-                 else m_Blast    .BindObject(pBlast);
+            if(iType) m_BlastLine.BindObjectUnsafe(pBlast);
+                 else m_Blast    .BindObjectUnsafe(pBlast);
         }
     }
 
@@ -111,7 +111,7 @@ cNevoMission::cNevoMission()noexcept
             pTile->SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Tile.BindObject(pTile);
+            m_Tile.BindObjectUnsafe(pTile);
         }
     }
 
@@ -132,7 +132,7 @@ cNevoMission::cNevoMission()noexcept
             pArrow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Arrow.BindObject(pArrow);
+            m_Arrow.BindObjectUnsafe(pArrow);
         }
     }
 
@@ -160,8 +160,8 @@ cNevoMission::cNevoMission()noexcept
             pBlock->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_BlockWave.BindObject(pBlock);
-                 else m_Block    .BindObject(pBlock);
+            if(iType) m_BlockWave.BindObjectUnsafe(pBlock);
+                 else m_Block    .BindObjectUnsafe(pBlock);
         }
     }
 
@@ -200,8 +200,8 @@ cNevoMission::cNevoMission()noexcept
             pChip->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_ChipWave.BindObject(pChip);
-                 else m_Chip    .BindObject(pChip);
+            if(iType) m_ChipWave.BindObjectUnsafe(pChip);
+                 else m_Chip    .BindObjectUnsafe(pChip);
         }
     }
 

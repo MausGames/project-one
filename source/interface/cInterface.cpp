@@ -1734,7 +1734,7 @@ void cInterface::ShowAlert()
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_pAlertSound->PlayRelative(this, 1.0f, 1.0f, true, SOUND_EFFECT);
+    m_pAlertSound->PlayRelative(this, 1.0f, 1.0f, true, SOUND_EFFECT, CORE_AUDIO_EFFECT_NONE);
     m_fAlertStart = g_pGame->GetTimeTable()->GetTimeEvent();
 }
 

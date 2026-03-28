@@ -63,7 +63,7 @@ cDarkBackground::cDarkBackground()noexcept
             pBlock->SetTexOffset(coreVector2(I_TO_F(iType % 4u) * 0.25f, I_TO_F((iType / 4u) % 2u) * 0.5f));
 
             // add object to the list
-            m_Block.BindObject(pBlock);
+            m_Block.BindObjectUnsafe(pBlock);
         }
     }
 
@@ -119,7 +119,7 @@ void cDarkBackground::__InitOwn()
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_dark.wav");
     m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT, CORE_AUDIO_EFFECT_NONE);
     });
 }
 

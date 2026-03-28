@@ -1825,7 +1825,7 @@ template <typename F> RETURN_RESTRICT coreSpline2* cMission::_AddPath(const core
         ASSERT(oNewPath.GetSize() == oNewPath.GetCapacity())
 
         // 
-        m_aPath.emplace(iCodeLine, std::move(oNewPath));
+        m_aPath.emplace_unsafe(iCodeLine, std::move(oNewPath));
     }
 
     return &m_aPath.at(iCodeLine);
@@ -1846,7 +1846,7 @@ template <typename T, typename F> RETURN_RESTRICT cEnemySquad* cMission::_AddSqu
         nInitFunc(&oNewSquad);
 
         // 
-        m_aSquad.emplace(iCodeLine, std::move(oNewSquad));
+        m_aSquad.emplace_unsafe(iCodeLine, std::move(oNewSquad));
     }
 
     return &m_aSquad.at(iCodeLine);

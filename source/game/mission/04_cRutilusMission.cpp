@@ -82,7 +82,7 @@ cRutilusMission::cRutilusMission()noexcept
             pPlate->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Plate.BindObject(pPlate);
+            m_Plate.BindObjectUnsafe(pPlate);
         }
     }
 
@@ -121,7 +121,7 @@ cRutilusMission::cRutilusMission()noexcept
             pWave->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Wave.BindObject(pWave);
+            m_Wave.BindObjectUnsafe(pWave);
         }
     }
 
@@ -151,8 +151,8 @@ cRutilusMission::cRutilusMission()noexcept
             pTock->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_TockWave.BindObject(pTock);
-                 else m_Tock    .BindObject(pTock);
+            if(iType) m_TockWave.BindObjectUnsafe(pTock);
+                 else m_Tock    .BindObjectUnsafe(pTock);
         }
     }
 
@@ -176,8 +176,8 @@ cRutilusMission::cRutilusMission()noexcept
             pSlap->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_SlapWave.BindObject(pSlap);
-                 else m_Slap    .BindObject(pSlap);
+            if(iType) m_SlapWave.BindObjectUnsafe(pSlap);
+                 else m_Slap    .BindObjectUnsafe(pSlap);
         }
     }
 
@@ -731,7 +731,7 @@ void cRutilusMission::__MoveOwnBefore()
     // 
     g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
     {
-        sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput()); wtf
+        sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput());   // TODO 1: get rid of const cast
 
         // 
         if(pInput->vMove.IsNull()) m_aiMoveFlip[i] = 0u;
@@ -1234,7 +1234,7 @@ void cRutilusMission::__MoveOwnAfter()
         // 
         g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput()); wtf
+            sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput());   // TODO 1: get rid of const cast
 
             // 
             if(pPlayer->IsRolling()) return;

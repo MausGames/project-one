@@ -501,9 +501,11 @@ template <typename F> FORCE_INLINE void Timeless(F&& nFunction)   // []() -> voi
     const coreFloat fSave = TIME;
 
     // modify global state and execute function
-    c_cast<coreFloat&>(TIME) = 0.0f;
-    nFunction();
-    c_cast<coreFloat&>(TIME) = fSave;
+    Core::System->OverrideTime(0.0f);
+    {
+        nFunction();
+    }
+    Core::System->OverrideTime(fSave);
 }
 
 

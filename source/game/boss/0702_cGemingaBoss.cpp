@@ -1296,7 +1296,7 @@ void cGemingaBoss::__MoveOwn()
     {
         //if(PHASE_BEGINNING2)
         //{
-        //    m_pVacuumSound->PlayRelative(this, 0.0f, 0.5f, true, SOUND_EFFECT);
+        //    m_pVacuumSound->PlayRelative(this, 0.0f, 0.5f, true, SOUND_EFFECT, CORE_AUDIO_EFFECT_NONE);
         //}
 
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)

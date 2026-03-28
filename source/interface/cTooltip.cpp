@@ -104,7 +104,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     const coreFloat  fFactor = CORE_LABEL_SIZE_FACTOR;
 
     // prepare cursor and line pointers
-    coreChar* pcCursor    = c_cast<coreChar*>(pcText);
+    coreChar* pcCursor    = c_cast<coreChar*>(pcText);   // TODO 1: get rid of const cast
     coreChar* pcLineBegin = pcCursor;
     coreChar* pcLineEnd   = pcCursor;
 

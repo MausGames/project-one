@@ -68,7 +68,7 @@ cGeluMission::cGeluMission()noexcept
             pFang->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Fang.BindObject(pFang);
+            m_Fang.BindObjectUnsafe(pFang);
         }
     }
 
@@ -96,8 +96,8 @@ cGeluMission::cGeluMission()noexcept
             pWay->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_WayArrow.BindObject(pWay);
-                 else m_Way     .BindObject(pWay);
+            if(iType) m_WayArrow.BindObjectUnsafe(pWay);
+                 else m_Way     .BindObjectUnsafe(pWay);
         }
     }
 
@@ -118,7 +118,7 @@ cGeluMission::cGeluMission()noexcept
             pOrb->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Orb.BindObject(pOrb);
+            m_Orb.BindObjectUnsafe(pOrb);
         }
     }
 
@@ -138,7 +138,7 @@ cGeluMission::cGeluMission()noexcept
             pLine->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Line.BindObject(pLine);
+            m_Line.BindObjectUnsafe(pLine);
         }
     }
 
@@ -164,8 +164,8 @@ cGeluMission::cGeluMission()noexcept
             pCoin->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_CoinWave.BindObject(pCoin);
-                 else m_Coin    .BindObject(pCoin);
+            if(iType) m_CoinWave.BindObjectUnsafe(pCoin);
+                 else m_Coin    .BindObjectUnsafe(pCoin);
         }
     }
 
@@ -186,7 +186,7 @@ cGeluMission::cGeluMission()noexcept
             pGap->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Gap.BindObject(pGap);
+            m_Gap.BindObjectUnsafe(pGap);
         }
     }
 
@@ -208,7 +208,7 @@ cGeluMission::cGeluMission()noexcept
             pShine->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Shine.BindObject(pShine);
+            m_Shine.BindObjectUnsafe(pShine);
         }
     }
 

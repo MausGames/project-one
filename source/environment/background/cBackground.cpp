@@ -464,7 +464,7 @@ void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
     oNew.reserve(pObjectList->GetSize());
 
     // 
-    FOR_EACH(it, *pObjectList->List()) oNew.push_back(coreMath::Float32To16((*it)->GetPosition().z));
+    FOR_EACH(it, *pObjectList->List()) oNew.push_back_unsafe(coreMath::Float32To16((*it)->GetPosition().z));
 }
 
 // ****************************************************************
@@ -479,7 +479,7 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
     oNew.reserve(pObjectList->GetSize());
 
     // 
-    FOR_EACH(it, *pObjectList->List()) oNew.push_back((*it)->GetDirection().PackSnorm011());
+    FOR_EACH(it, *pObjectList->List()) oNew.push_back_unsafe((*it)->GetDirection().PackSnorm011());
 
     // TODO 1: may needs change later, what is normal, direction or orientation or both (store quaternion? (already available)) 
 }

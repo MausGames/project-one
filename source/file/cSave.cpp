@@ -617,7 +617,7 @@ coreBool cSave::__RestoreScoreQueueData(coreSet<sScorePack*>* OUTPUT pQueue, con
 
         pPack->iStatus = 0u;
 
-        pQueue->insert(pPack);
+        pQueue->insert_unsafe(pPack);
     }
 
     ASSERT(iSize == coreUint32(pCursor - pData))
@@ -687,7 +687,7 @@ coreBool cSave::__RestoreReplayQueueData(coreSet<sReplayPack*>* OUTPUT pQueue, c
         pPack->pData = new coreByte[pPack->iSize];
         std::memcpy(pPack->pData, pCursor, pPack->iSize); pCursor += pPack->iSize;
 
-        pQueue->insert(pPack);
+        pQueue->insert_unsafe(pPack);
     }
 
     ASSERT(iSize == coreUint32(pCursor - pData))

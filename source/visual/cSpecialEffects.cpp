@@ -911,7 +911,7 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2 vPosFrom, const cor
 
     // 
     WARN_IF(m_LightningList.List()->count(&oLightning)) {}
-       else m_LightningList.BindObject(&oLightning);
+       else m_LightningList.BindObjectUnsafe(&oLightning);
 
     // 
     m_apLightningOwner[m_iCurLightning] = NULL;
@@ -940,7 +940,7 @@ void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2 vD
 
     // 
     WARN_IF(m_LightningList.List()->count(&oLightning)) {}
-       else m_LightningList.BindObject(&oLightning);
+       else m_LightningList.BindObjectUnsafe(&oLightning);
 
     // 
     m_apLightningOwner[m_iCurLightning] = pOwner;
@@ -974,7 +974,7 @@ void cSpecialEffects::CreateGust(const coreFloat fFrequency, const coreFloat fAn
 
         // 
         WARN_IF(m_GustList.List()->count(&oGust)) {}
-           else m_GustList.BindObject(&oGust);
+           else m_GustList.BindObjectUnsafe(&oGust);
     }
 
     // 
@@ -1194,8 +1194,8 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     if(pSound->EnableRef(this)) pSound->Stop();
 
     // 
-    if(bRelative) pSound->PlayRelative(this, CLAMP(fVolume * fBaseVolume, CORE_AUDIO_MIN_GAIN, CORE_AUDIO_MAX_GAIN), CLAMP(fPitch * fBasePitch, CORE_AUDIO_MIN_PITCH, CORE_AUDIO_MAX_PITCH), false, iType);
-             else pSound->PlayPosition(this, CLAMP(fVolume * fBaseVolume, CORE_AUDIO_MIN_GAIN, CORE_AUDIO_MAX_GAIN), CLAMP(fPitch * fBasePitch, CORE_AUDIO_MIN_PITCH, CORE_AUDIO_MAX_PITCH), false, iType, vPosition * 0.1f);
+    if(bRelative) pSound->PlayRelative(this, CLAMP(fVolume * fBaseVolume, CORE_AUDIO_MIN_GAIN, CORE_AUDIO_MAX_GAIN), CLAMP(fPitch * fBasePitch, CORE_AUDIO_MIN_PITCH, CORE_AUDIO_MAX_PITCH), false, iType, CORE_AUDIO_EFFECT_NONE);
+             else pSound->PlayPosition(this, CLAMP(fVolume * fBaseVolume, CORE_AUDIO_MIN_GAIN, CORE_AUDIO_MAX_GAIN), CLAMP(fPitch * fBasePitch, CORE_AUDIO_MIN_PITCH, CORE_AUDIO_MAX_PITCH), false, iType, CORE_AUDIO_EFFECT_NONE, vPosition * 0.1f);
 }
 
 
@@ -1220,7 +1220,7 @@ void cSpecialEffects::ExternPlayPosition(const coreSoundPtr& pSound, const void*
     const coreVector3 vReal = g_CurConfig.Audio.i3DSound ? (vPosition * 0.1f) : Core::Audio->GetListenerPosition();
 
     // 
-    pSound->PlayPosition(pRef, fVolume, fPitch, bLoop, iType, vReal);
+    pSound->PlayPosition(pRef, fVolume, fPitch, bLoop, iType, CORE_AUDIO_EFFECT_NONE, vReal);
 }
 
 

@@ -131,8 +131,8 @@ cLeviathanBoss::cLeviathanBoss()noexcept
             pRay->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_RayWave.BindObject(pRay);
-                 else m_Ray    .BindObject(pRay);
+            if(iType) m_RayWave.BindObjectUnsafe(pRay);
+                 else m_Ray    .BindObjectUnsafe(pRay);
         }
     }
 
@@ -154,7 +154,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
             pMark->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Mark.BindObject(pMark);
+            m_Mark.BindObjectUnsafe(pMark);
         }
     }
 
@@ -699,7 +699,7 @@ void cLeviathanBoss::__MoveOwn()
         {
             if(PHASE_BEGINNING)
             {
-                m_pRumbleSound->PlayRelative(this, 0.0f, 1.0f, true, SOUND_EFFECT);
+                m_pRumbleSound->PlayRelative(this, 0.0f, 1.0f, true, SOUND_EFFECT, CORE_AUDIO_EFFECT_NONE);
             }
 
             vNewOri = coreVector2::Direction(PI*fTime + PI);

@@ -283,7 +283,7 @@ void CoreApp::Render()
         {
             // 
             const coreMatrix4 mOldOrtho = Core::Graphics->GetOrtho();
-            if(g_CurConfig.Game.iMirrorMode >= 2u) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = coreMatrix4::Scaling(IsHorizontal(g_vHudDirection) ? coreVector3(1.0f,-1.0f,1.0f) : coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho;
+            if(g_CurConfig.Game.iMirrorMode >= 2u) Core::Graphics->OverrideOrtho(coreMatrix4::Scaling(IsHorizontal(g_vHudDirection) ? coreVector3(1.0f,-1.0f,1.0f) : coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho);
 
             // render the overlay separately
             if(STATIC_ISVALID(g_pGame)) g_pGame->RenderOverlay();
@@ -292,7 +292,7 @@ void CoreApp::Render()
             g_pMenu->Render();
 
             // 
-            if(g_CurConfig.Game.iMirrorMode >= 2u) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = mOldOrtho;
+            if(g_CurConfig.Game.iMirrorMode >= 2u) Core::Graphics->OverrideOrtho(mOldOrtho);
         }
         Core::Debug->MeasureEnd("Interface");
 
@@ -626,26 +626,26 @@ static void ForceFramerate(const coreBool bFull, const coreBool bUpdate)
     if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
     {
         // 
-        if(!DEFINED(_CORE_DEBUG_) || TIME) c_cast<coreFloat&>(TIME) = s_bUseLogical ? coreFloat(s_fLogicalTime) : coreFloat(s_dPhysicalTime);
+        if(!DEFINED(_CORE_DEBUG_) || TIME) Core::System->OverrideTime(s_bUseLogical ? coreFloat(s_fLogicalTime) : coreFloat(s_dPhysicalTime));
 
         if(bFull)
         {
             // 
-            coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
+            coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());   // TODO 1: get rid of const cast
             if(fFreezeTime)
             {
                 if(bUpdate) fFreezeTime = MAX0(fFreezeTime - TIME);
-                c_cast<coreFloat&>(TIME) *= 0.001f;
+                Core::System->OverrideTime(TIME * 0.001f);
             }
 
             // 
-            coreFloat& fSlowTime     = c_cast<coreFloat&>(g_pSpecialEffects->GetSlowTime());
-            coreFloat& fSlowStrength = c_cast<coreFloat&>(g_pSpecialEffects->GetSlowStrength());
+            coreFloat& fSlowTime     = c_cast<coreFloat&>(g_pSpecialEffects->GetSlowTime());       // TODO 1: get rid of const cast
+            coreFloat& fSlowStrength = c_cast<coreFloat&>(g_pSpecialEffects->GetSlowStrength());   // TODO 1: get rid of const cast
             if(fSlowTime || fSlowStrength)
             {
                 if(bUpdate) fSlowTime     = MAX0(fSlowTime - TIME);
                 if(bUpdate) fSlowStrength = fSlowTime ? 1.0f : MAX0(fSlowStrength - 0.3f * TIME);
-                c_cast<coreFloat&>(TIME) *= LERPH3(1.0f, 0.1f, fSlowStrength);
+                Core::System->OverrideTime(TIME * LERPH3(1.0f, 0.1f, fSlowStrength));
             }
         }
     }

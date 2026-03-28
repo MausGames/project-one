@@ -171,8 +171,10 @@ void cGame::Render()
         {
             if(g_CurConfig.Game.iMirrorMode)
             {
-                if(IsHorizontal(g_pPostProcessing->GetDirection())) c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._22 *= -1.0f;
-                                                               else c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
+                coreMatrix4 mPerspective = Core::Graphics->GetPerspective();
+                if(IsHorizontal(g_pPostProcessing->GetDirection())) mPerspective._22 *= -1.0f;
+                                                               else mPerspective._11 *= -1.0f;
+                Core::Graphics->OverridePerspective(mPerspective);
             }
         };
         

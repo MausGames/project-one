@@ -790,7 +790,7 @@ template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnem
     for(coreUintW i = iNumEnemies; i--; )
     {
         T* pEnemy = cEnemySquad::__GetDefaultEnemyManager()->AllocateEnemy<T>();
-        m_apEnemy.push_back(pEnemy);
+        m_apEnemy.push_back_unsafe(pEnemy);
     }
 }
 

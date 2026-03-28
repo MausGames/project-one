@@ -68,7 +68,7 @@ cCalorMission::cCalorMission()noexcept
             pLoad->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Load.BindObject(pLoad);
+            m_Load.BindObjectUnsafe(pLoad);
         }
     }
 
@@ -104,8 +104,8 @@ cCalorMission::cCalorMission()noexcept
             pHail->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_HailWave.BindObject(pHail);
-                 else m_Hail    .BindObject(pHail);
+            if(iType) m_HailWave.BindObjectUnsafe(pHail);
+                 else m_Hail    .BindObjectUnsafe(pHail);
         }
     }
 
@@ -131,8 +131,8 @@ cCalorMission::cCalorMission()noexcept
             pChest->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_ChestWave.BindObject(pChest);
-                 else m_Chest    .BindObject(pChest);
+            if(iType) m_ChestWave.BindObjectUnsafe(pChest);
+                 else m_Chest    .BindObjectUnsafe(pChest);
         }
     }
 
@@ -199,8 +199,8 @@ cCalorMission::cCalorMission()noexcept
             pStar->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_StarChain.BindObject(pStar);
-                 else m_Star     .BindObject(pStar);
+            if(iType) m_StarChain.BindObjectUnsafe(pStar);
+                 else m_Star     .BindObjectUnsafe(pStar);
         }
     }
 

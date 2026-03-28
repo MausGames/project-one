@@ -47,7 +47,7 @@ cHarenaMission::cHarenaMission()noexcept
             pFloor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Floor.BindObject(pFloor);
+            m_Floor.BindObjectUnsafe(pFloor);
         }
     }
 
@@ -73,8 +73,8 @@ cHarenaMission::cHarenaMission()noexcept
             pSpike->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_SpikeBoard.BindObject(pSpike);
-                 else m_Spike     .BindObject(pSpike);
+            if(iType) m_SpikeBoard.BindObjectUnsafe(pSpike);
+                 else m_Spike     .BindObjectUnsafe(pSpike);
         }
     }
 
@@ -111,8 +111,8 @@ cHarenaMission::cHarenaMission()noexcept
             pEgg->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_EggWave.BindObject(pEgg);
-                 else m_Egg    .BindObject(pEgg);
+            if(iType) m_EggWave.BindObjectUnsafe(pEgg);
+                 else m_Egg    .BindObjectUnsafe(pEgg);
         }
     }
 
@@ -135,7 +135,7 @@ cHarenaMission::cHarenaMission()noexcept
             pFlummi->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Flummi.BindObject(pFlummi);
+            m_Flummi.BindObjectUnsafe(pFlummi);
         }
     }
 

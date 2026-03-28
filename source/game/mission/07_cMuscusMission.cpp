@@ -62,8 +62,8 @@ cMuscusMission::cMuscusMission()noexcept
             pGenerate->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_GenerateWave.BindObject(pGenerate);
-                 else m_Generate    .BindObject(pGenerate);
+            if(iType) m_GenerateWave.BindObjectUnsafe(pGenerate);
+                 else m_Generate    .BindObjectUnsafe(pGenerate);
         }
     }
 
@@ -87,8 +87,8 @@ cMuscusMission::cMuscusMission()noexcept
             pPearl->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_PearlWave.BindObject(pPearl);
-                 else m_Pearl    .BindObject(pPearl);
+            if(iType) m_PearlWave.BindObjectUnsafe(pPearl);
+                 else m_Pearl    .BindObjectUnsafe(pPearl);
         }
     }
 

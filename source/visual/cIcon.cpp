@@ -42,7 +42,7 @@ cIcon::cIcon()noexcept
             pRange->SetTexSize  (coreVector2(0.1f,0.1f));
 
             // 
-            m_Range.BindObject(pRange);
+            m_Range.BindObjectUnsafe(pRange);
         }
     }
 

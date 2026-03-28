@@ -1058,6 +1058,7 @@ void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
     coreData::DirectoryScan(coreData::UserFolderPrivate(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
 
     // 
+    ASSERT(paInfoList->empty())
     paInfoList->reserve(asFile.size());
 
     FOR_EACH(it, asFile)
@@ -1073,7 +1074,7 @@ void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
             oInfo.oHeader = oReplay.m_Header;
 
             // 
-            paInfoList->push_back(std::move(oInfo));
+            paInfoList->push_back_unsafe(std::move(oInfo));
         }
     }
 

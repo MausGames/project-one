@@ -78,8 +78,8 @@ cViridoMission::cViridoMission()noexcept
             pBall->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_BallTrail.BindObject(pBall);
-                 else m_Ball     .BindObject(pBall);
+            if(iType) m_BallTrail.BindObjectUnsafe(pBall);
+                 else m_Ball     .BindObjectUnsafe(pBall);
         }
     }
 
@@ -121,8 +121,8 @@ cViridoMission::cViridoMission()noexcept
             pBarrier->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(i < VIRIDO_BARRIERS_FIRST) m_Barrier1.BindObject(pBarrier);
-                                     else m_Barrier2.BindObject(pBarrier);
+            if(i < VIRIDO_BARRIERS_FIRST) m_Barrier1.BindObjectUnsafe(pBarrier);
+                                     else m_Barrier2.BindObjectUnsafe(pBarrier);
         }
     }
 
@@ -148,8 +148,8 @@ cViridoMission::cViridoMission()noexcept
             pLaser->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_LaserWave.BindObject(pLaser);
-                 else m_Laser    .BindObject(pLaser);
+            if(iType) m_LaserWave.BindObjectUnsafe(pLaser);
+                 else m_Laser    .BindObjectUnsafe(pLaser);
         }
     }
 
@@ -169,7 +169,7 @@ cViridoMission::cViridoMission()noexcept
             pShadow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Shadow.BindObject(pShadow);
+            m_Shadow.BindObjectUnsafe(pShadow);
         }
     }
 
@@ -190,7 +190,7 @@ cViridoMission::cViridoMission()noexcept
             pHint->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Hint.BindObject(pHint);
+            m_Hint.BindObjectUnsafe(pHint);
         }
     }
 
@@ -216,8 +216,8 @@ cViridoMission::cViridoMission()noexcept
             pBean->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_BeanWave.BindObject(pBean);
-                 else m_Bean    .BindObject(pBean);
+            if(iType) m_BeanWave.BindObjectUnsafe(pBean);
+                 else m_Bean    .BindObjectUnsafe(pBean);
         }
     }
 

@@ -1051,7 +1051,7 @@ void cMessierBoss::__MoveOwn()
             {
                 this->__EnableHole();
 
-                m_pVoidSound->PlayRelative(this, 4.0f, 0.5f, true, SOUND_EFFECT);
+                m_pVoidSound->PlayRelative(this, 4.0f, 0.5f, true, SOUND_EFFECT, CORE_AUDIO_EFFECT_NONE);
             }
 
             if(GetCurBackRotation())

@@ -87,7 +87,7 @@ cDharukBoss::cDharukBoss()noexcept
             pDuplicate->SetEnabled((i < DHARUK_TRAILS) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_DuplicateTrail.BindObject(pDuplicate);
+            m_DuplicateTrail.BindObjectUnsafe(pDuplicate);
         }
     }
 
@@ -114,8 +114,8 @@ cDharukBoss::cDharukBoss()noexcept
             pBoomerang->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            if(iType) m_BoomerangTrail.BindObject(pBoomerang);
-                 else m_Boomerang     .BindObject(pBoomerang);
+            if(iType) m_BoomerangTrail.BindObjectUnsafe(pBoomerang);
+                 else m_Boomerang     .BindObjectUnsafe(pBoomerang);
         }
     }
 

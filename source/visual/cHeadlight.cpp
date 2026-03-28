@@ -83,7 +83,7 @@ void cHeadlight::Move()
         {
             // 
             this->StopFlicker();
-            if(m_iShatter == HEADLIGHT_TYPE_SHATTER) m_pShatterSound->PlayRelative(NULL, 0.7f, 1.0f, false, SOUND_EFFECT);
+            if(m_iShatter == HEADLIGHT_TYPE_SHATTER) m_pShatterSound->PlayRelative(NULL, 0.7f, 1.0f, false, SOUND_EFFECT, CORE_AUDIO_EFFECT_NONE);
 
             // 
             m_Spot.SetAlpha((m_iShatter == HEADLIGHT_TYPE_ON) ? 1.0f : 0.0f);
@@ -224,7 +224,7 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
 void cHeadlight::PlayFlicker(const coreUint8 iShatter)
 {
     // 
-    if(!m_Flicker.GetStatus()) m_pFlickerSound->PlayRelative(this, 1.2f, (iShatter == HEADLIGHT_TYPE_ON) ? 1.1f : 1.0f, true, SOUND_EFFECT);
+    if(!m_Flicker.GetStatus()) m_pFlickerSound->PlayRelative(this, 1.2f, (iShatter == HEADLIGHT_TYPE_ON) ? 1.1f : 1.0f, true, SOUND_EFFECT, CORE_AUDIO_EFFECT_NONE);
     m_Flicker.Play(CORE_TIMER_PLAY_RESET);
 
     // 

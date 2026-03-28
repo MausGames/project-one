@@ -55,7 +55,7 @@ void cShieldEffect::Construct(const coreHashString& sModelName, const coreHashSt
             pShield->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_ShieldList.BindObject(pShield);
+            m_ShieldList.BindObjectUnsafe(pShield);
         }
     }
 

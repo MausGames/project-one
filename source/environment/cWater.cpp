@@ -141,8 +141,9 @@ void cWater::UpdateReflection()
     m_Reflection.StartDraw();
     if(DEFINED(_CORE_GLES_)) m_Reflection.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
     {
-        // flip projection left-right (also culling!, after StartDraw())
-        c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
+        // flip projection left-right (also culling!)
+        coreMatrix4 mPerspective = Core::Graphics->GetPerspective(); mPerspective._11 *= -1.0f;
+        Core::Graphics->OverridePerspective(mPerspective);
 
         glDepthFunc(GL_ALWAYS);   // better performance than clear
         glDisable  (GL_BLEND);
@@ -189,10 +190,13 @@ void cWater::UpdateReflection()
         }
     }
 
-    // reset camera, light and projection
+    // reset camera and light
     Core::Graphics->SetCamera(vOldCamPos, CAMERA_DIRECTION, vOldCamOri);
     Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), vOldLight, coreVector4(0.0f,0.0f,0.0f,0.0f));
-    c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
+
+    // reset projection
+    coreMatrix4 mPerspective = Core::Graphics->GetPerspective(); mPerspective._11 *= -1.0f;
+    Core::Graphics->OverridePerspective(mPerspective);
 }
 
 
@@ -336,7 +340,7 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
         pDrop->SetAlpha     (0.0f);
 
         // 
-        m_DropList.BindObject(pDrop);
+        m_DropList.BindObjectUnsafe(pDrop);
     }
 
     // 

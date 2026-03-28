@@ -165,7 +165,7 @@ cTigerBoss::cTigerBoss()noexcept
             pSting->SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
-            m_Sting.BindObject(pSting);
+            m_Sting.BindObjectUnsafe(pSting);
         }
     }
 

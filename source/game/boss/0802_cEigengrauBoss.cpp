@@ -1226,7 +1226,7 @@ void cEigengrauBoss::__MoveOwn()
 
                 if((iTickNew % 4u) < 2u) m_avVector[HEART_BEAT].y = 0.5f * fPower;
 
-                if((iTickNew % 4u) == 0u && fPower) m_pHeartSound->PlayRelative(NULL, fPower, 1.0f, false, SOUND_EFFECT);
+                if((iTickNew % 4u) == 0u && fPower) m_pHeartSound->PlayRelative(NULL, fPower, 1.0f, false, SOUND_EFFECT, CORE_AUDIO_EFFECT_NONE);
             }
 
             m_avVector[HEART_BEAT].y *= FrictionFactor(3.0f);

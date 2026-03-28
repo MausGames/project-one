@@ -63,9 +63,8 @@ cSeaBackground::cSeaBackground()noexcept
                    !cBackground::_CheckIntersectionQuick(pList3, vPosition, POW2(6.0f)))
                 {
                     // 
-                    const coreVector3 vDirection   = m_pOutdoor->RetrieveBackNormal(vPosition);
-                    const coreVector3 vTangent     = coreVector3::Cross(vDirection, -CAMERA_DIRECTION).Normalized();
-                    const coreVector3 vOrientation = coreVector3::Cross(vDirection, vTangent);
+                    const coreVector3 vOrientation = m_pOutdoor->RetrieveBackNormal(vPosition);
+                    const coreVector3 vDirection   = CAMERA_DIRECTION.Orthonormalized(vOrientation);
 
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -74,8 +73,8 @@ cSeaBackground::cSeaBackground()noexcept
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
                     pObject->SetSize       (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(2.2f, 2.6f) * 1.65f);
-                    pObject->SetDirection  (vOrientation);
-                    pObject->SetOrientation(vDirection);
+                    pObject->SetDirection  (vDirection);
+                    pObject->SetOrientation(vOrientation);
                     pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.7f, 0.85f));
 
                     // add object to the list
@@ -312,7 +311,7 @@ void cSeaBackground::__InitOwn()
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_sea.wav");
     m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT, CORE_AUDIO_EFFECT_NONE);
     });
 }
 
