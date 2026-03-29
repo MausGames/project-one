@@ -47,6 +47,10 @@ static void UpdateListener();                                               //
 static void ReshapeGame();                                                  // reshape and resize game
 static void DebugGame();                                                    // debug and test game
 
+#if defined(_CORE_EMSCRIPTEN_)
+    static coreFloat s_fEmscriptenTime = 0.0f;
+#endif
+
 
 // ****************************************************************
 // init the application
@@ -310,6 +314,13 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
+#if defined(_CORE_EMSCRIPTEN_)
+
+    // 
+    if(TIME && Core::System->GetCurFrame()) s_fEmscriptenTime = LERP(s_fEmscriptenTime, TIME, 1.0f / I_TO_F(coreMath::DivUp(Core::System->GetCurFrame(), 100u)));
+
+#endif
+
     // reshape and resize game
     if(Core::System->GetWinSizeChanged()) ReshapeGame();
     
@@ -502,8 +513,16 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
     const SDL_DisplayMode* pMode     = SDL_GetCurrentDisplayMode(Core::System->GetDisplayData(Core::System->GetDisplayIndex()).iDisplayID);
     coreUint16             iModeRate = pMode ? F_TO_UI(ROUND(pMode->refresh_rate)) : 0u;
 
-#if defined(_CORE_EMSCRIPTEN_) || defined(_CORE_SWITCH_)
-    if(!iModeRate) iModeRate = 60;
+#if defined(_CORE_EMSCRIPTEN_)
+
+    // 
+    if(!iModeRate) iModeRate = s_fEmscriptenTime ? F_TO_UI(ROUND(1.0f / s_fEmscriptenTime)) : F_TO_UI(FRAMERATE_MIN);
+
+#elif defined(_CORE_SWITCH_)
+
+    // 
+    if(!iModeRate) iModeRate = 60u;
+
 #endif
 
     // 
@@ -573,7 +592,7 @@ coreVector2 CalcFinalDirection()
 // lock frame rate
 static void LockFramerate()
 {
-#if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
+#if !defined(_CORE_SWITCH_)
 
     if(!Core::Debug->IsEnabled() && !SDL_GL_GetSwapIntervalInline())
     {
