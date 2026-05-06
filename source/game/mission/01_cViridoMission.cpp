@@ -929,12 +929,12 @@ void cViridoMission::__MoveOwnBefore()
 
             // 
             pTrail->SetAlpha(pTrail->GetAlpha() - 2.0f * TIME);
-            if(pTrail->GetAlpha() < 0.0f)
+            if(pTrail->GetAlpha() <= 0.0f)
             {
                 // 
                 pTrail->SetPosition (pBall->GetPosition ());
                 pTrail->SetDirection(pBall->GetDirection());
-                pTrail->SetAlpha    (1.0f);
+                pTrail->SetAlpha    (pTrail->GetAlpha() + 1.0f);
             }
 
             // 

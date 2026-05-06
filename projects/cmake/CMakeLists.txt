@@ -131,7 +131,7 @@ else()
         )
 
         add_custom_command(
-            TARGET ProjectOne POST_BUILD
+            TARGET ProjectOne POST_BUILD VERBATIM
             COMMAND ${ENGINE_DIRECTORY}/tools/scripts/extract_symbols.sh $<TARGET_FILE:ProjectOne>
         )
 

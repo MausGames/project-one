@@ -127,7 +127,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         // 
-        m_bWasDamaged = (m_iCurHealth != 0) && (iDamage != 0);
+        m_bWasDamaged = (iDamage != 0) && (m_iCurHealth != 0);   // TODO 1: can be overwritten in the same frame
 
         // forward to parent
         if(this->IsChild())

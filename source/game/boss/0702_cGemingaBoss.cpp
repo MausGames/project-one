@@ -2014,7 +2014,7 @@ void cGemingaBoss::__MoveOwn()
 
     if(fSuck)
     {
-        m_SuckEffect.CreateParticle(1u, fSuck * 30.0f, [&](coreParticle* OUTPUT pParticle)
+        m_SuckEffect.CreateParticle(1u, fSuck * 30.0f, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
         {
             const coreVector2 vPos = coreVector2(Core::Rand->Float(-1.5f, 1.5f), 1.3f) * FOREGROUND_AREA;
 

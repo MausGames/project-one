@@ -381,7 +381,7 @@ void cVolcanoBackground::__MoveOwn()
         const coreObject3D* pSmoke = (*pList->List())[i];
         if(!pSmoke->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
 
-        m_aSmokeEffect[i].CreateParticle(1, 6.0f, [](coreParticle* OUTPUT pParticle)
+        m_aSmokeEffect[i].CreateParticle(1, 6.0f, [](coreParticle* OUTPUT pParticle, const coreUintW j)
         {
             constexpr coreFloat fScale = 10.0f;
             pParticle->SetPositionRel(coreVector3(0.0f,0.0f,0.0f), coreVector3::Rand(1.0f) + coreVector3::Rand(-fScale, fScale) + coreVector3(0.0f,20.0f,10.0f) * 2.0f);

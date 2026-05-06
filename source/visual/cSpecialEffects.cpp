@@ -498,10 +498,9 @@ void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreF
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), bDeep ? Core::Rand->Float(-1.0f,1.0f) : 0.0f).Normalized();
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), bDeep ? Core::Rand->Float(-1.0f,1.0f) : 0.0f).Normalized();
 
         pParticle->SetPositionRel(vPosition + vDir,           vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f * fSize,               1.0f * fSize);
@@ -519,10 +518,9 @@ void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFl
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), bDeep ? Core::Rand->Float(-1.0f,1.0f) : 0.0f).Normalized();
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), bDeep ? Core::Rand->Float(-1.0f,1.0f) : 0.0f).Normalized();
 
         pParticle->SetPositionRel(vPosition + vDir,                 vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f,                             1.0f);
@@ -540,10 +538,9 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreF
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleSmoke[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleSmoke[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionRel(vPosition + vDir*0.0f,           vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.0f,                       12.5f);
@@ -561,10 +558,9 @@ void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFl
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleFire[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleFire[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionRel(vPosition + vDir*0.0f,                 vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (4.5f,                             11.5f);
@@ -582,10 +578,9 @@ void cSpecialEffects::CreateSplashDot(const coreVector3 vPosition, const coreFlo
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleDot[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDot[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionRel(vPosition + vDir * (fScale ? 1.0f : 0.0f),           vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (4.5f,                       3.0f);
@@ -608,10 +603,9 @@ void cSpecialEffects::CreateBlowColor(const coreVector3 vPosition, const coreVec
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionRel(vPosition + vDir,           vDir * (Core::Rand->Float(fScale) * 0.25f) + vDirection * (Core::Rand->Float(fScale) * 0.75f));
         pParticle->SetScaleAbs   (3.5f,                       1.0f);
@@ -631,10 +625,9 @@ void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVect
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionRel(vPosition + vDir,                 vDir * (Core::Rand->Float(fScale) * 0.25f) + vDirection * (Core::Rand->Float(fScale) * 0.75f));
         pParticle->SetScaleAbs   (3.5f,                             1.0f);
@@ -654,10 +647,9 @@ void cSpecialEffects::CreateBlowSmoke(const coreVector3 vPosition, const coreVec
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleSmoke[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleSmoke[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionRel(vPosition + vDir*0.0f,           vDir * (Core::Rand->Float(fScale) * 0.25f) + vDirection * (Core::Rand->Float(fScale) * 0.75f));
         pParticle->SetScaleAbs   (3.0f,                       12.5f);
@@ -677,10 +669,9 @@ void cSpecialEffects::CreateBlowFire(const coreVector3 vPosition, const coreVect
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleFire[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleFire[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionRel(vPosition + vDir*0.0f,           vDir * (Core::Rand->Float(fScale) * 0.25f) + vDirection * (Core::Rand->Float(fScale) * 0.75f));
         pParticle->SetScaleAbs   (4.5f,                        11.5f);
@@ -701,10 +692,9 @@ void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreF
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionAbs(vPosition + vDir * Core::Rand->Float(fScale), vPosition + vDir);
         pParticle->SetScaleAbs   (3.5f,                                         1.0f);
@@ -722,10 +712,9 @@ void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFl
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
 
         pParticle->SetPositionAbs(vPosition + vDir * Core::Rand->Float(fScale), vPosition + vDir);
         pParticle->SetScaleAbs   (3.5f,                                         1.0f);
@@ -746,10 +735,9 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFl
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir  = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir  = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
         const coreFloat   fRand = Core::Rand->Float(fScale);
 
         pParticle->SetPositionAbs(vPosition + vDir * fRand,   vPosition + vDir * (fScale-fRand));
@@ -768,10 +756,9 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3 vPosition, const coreFlo
     const coreFloat fStep = (2.0f*PI) / I_TO_F(iNum2);
 
     // 
-    coreUintW i = 0u;
-    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum2, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vDir  = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
+        const coreVector3 vDir  = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i)), 0.0f);
         const coreFloat   fRand = Core::Rand->Float(fScale);
 
         pParticle->SetPositionAbs(vPosition + vDir * fRand,         vPosition + vDir * (fScale-fRand));
@@ -811,12 +798,10 @@ void cSpecialEffects::CreateBreakupColor(const coreObject3D* pObject, const core
     ASSERT(fStep >= 1.0f)
 
     // 
-    //coreUintW i = 0u;
-    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(/*pModel->GetNumVertices() / iStep*/iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(/*pModel->GetNumVertices() / iStep*/iNum, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[/*i*/F_TO_UI(fCurrent)] * vSize);
+        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[F_TO_UI(fCurrent)] * vSize);
         const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
-        //i += iStep;
         fCurrent += fStep;
 
         pParticle->SetPositionRel(vPosition + vVertex,        vDir * Core::Rand->Float(fScale));
@@ -853,12 +838,10 @@ void cSpecialEffects::CreateBreakupDark(const coreObject3D* pObject, const coreF
     ASSERT(fStep >= 1.0f)
 
     // 
-    //coreUintW i = 0u;
-    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(/*pModel->GetNumVertices() / iStep*/iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(/*pModel->GetNumVertices() / iStep*/iNum, [&](coreParticle* OUTPUT pParticle, const coreUintW i)
     {
-        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[/*i*/F_TO_UI(fCurrent)] * vSize);
+        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[F_TO_UI(fCurrent)] * vSize);
         const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
-        //i += iStep;
         fCurrent += fStep;
 
         pParticle->SetPositionRel(vPosition + vVertex,              vDir * Core::Rand->Float(fScale));

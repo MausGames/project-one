@@ -505,16 +505,23 @@ cConfigMenu::cConfigMenu()noexcept
     const coreUint8 iMaxSamples    = Core::Graphics->GetMaxSamples();
     const coreUint8 iMaxAnisotropy = Core::Graphics->GetMaxAnisotropy();
 
-    m_DisplayMode    .AddEntryLanguage("DISPLAYMODE_WINDOW",     CORE_SYSTEM_MODE_WINDOWED);
-    m_DisplayMode    .AddEntryLanguage("DISPLAYMODE_BORDERLESS", CORE_SYSTEM_MODE_BORDERLESS);
-    m_DisplayMode    .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", CORE_SYSTEM_MODE_FULLSCREEN);
+    if(coreData::DetectGamescope())
+    {
+        m_DisplayMode.AddEntry("Gamescope", CORE_SYSTEM_MODE_WINDOWED);
+    }
+    else
+    {
+        m_DisplayMode.AddEntryLanguage("DISPLAYMODE_WINDOW",     CORE_SYSTEM_MODE_WINDOWED);
+        m_DisplayMode.AddEntryLanguage("DISPLAYMODE_BORDERLESS", CORE_SYSTEM_MODE_BORDERLESS);
+        m_DisplayMode.AddEntryLanguage("DISPLAYMODE_FULLSCREEN", CORE_SYSTEM_MODE_FULLSCREEN);
+    }
     m_Vsync          .AddEntryLanguage("VALUE_OFF",              0u);
     m_Vsync          .AddEntryLanguage("VALUE_AUTO",             1u);
     m_AntiAliasing   .AddEntryLanguage("VALUE_OFF",              0u);
-         if(CORE_GL_SUPPORT(INTEL_framebuffer_CMAA))               for(coreUintW i = 1u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 1u)                       ? "CMAA" : "MSAA"), i);
-    else if(CORE_GL_SUPPORT(AMD_framebuffer_multisample_advanced)) for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 2u || i == 4u || i == 8u) ? "EQAA" : "MSAA"), i);
-    else if(CORE_GL_SUPPORT(NV_framebuffer_multisample_coverage))  for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 4u || i == 8u)            ? "CSAA" : "MSAA"), i);
-    else                                                           for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (MSAA)", i),                                                    i);
+         if(CORE_GL_SUPPORT(INTEL_framebuffer_CMAA))               for(coreUintW i = 1u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 1u)                                               ? "CMAA" : "MSAA"), i);
+    else if(CORE_GL_SUPPORT(AMD_framebuffer_multisample_advanced)) for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i >= 4u && i <= Core::Graphics->GetMaxSamplesEQAA(2u)) ? "EQAA" : "MSAA"), i);
+    else if(CORE_GL_SUPPORT(NV_framebuffer_multisample_coverage))  for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i >= 4u && i <= Core::Graphics->GetMaxSamplesCSAA(1u)) ? "CSAA" : "MSAA"), i);
+    else                                                           for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (MSAA)", i),                                                                            i);
     if(m_AntiAliasing.GetValue(m_AntiAliasing.GetNumEntries() - 1u) != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux (MSAA)", iMaxSamples), iMaxSamples);   // possible 6x
     m_TextureFilter  .AddEntryLanguage("VALUE_OFF",              0u);
     for(coreUintW i = 2u, ie = iMaxAnisotropy; i <= ie; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);

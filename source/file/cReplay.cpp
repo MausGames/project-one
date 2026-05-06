@@ -813,6 +813,7 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     if(!bOnlyHeader)
     {
         // 
+        pBodyFile->LoadData(true);
         pBodyFile->Decompress(m_Header.iBodySize);
 
         // 
