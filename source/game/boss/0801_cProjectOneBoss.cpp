@@ -707,11 +707,7 @@ void cProjectOneBoss::__MoveOwn()
 
             g_pMenu->PreventSaveText();
 
-            g_pSpecialEffects->CreateExplosion (this->GetPosition());
-            g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
-            g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-            g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
-            g_pSpecialEffects->SlowScreen(4.0f);
+            g_pSpecialEffects->CreateExplosionExt(this->GetPosition());
 
             g_pGame->GetItemManager()->ClearItems(true);
 
@@ -770,11 +766,7 @@ void cProjectOneBoss::__MoveOwn()
         {
             PHASE_CHANGE_INC
 
-            g_pSpecialEffects->CreateExplosion (pPlayer->GetPosition());
-            g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), 200.0f, 400u, true);
-            g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-            g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
-            g_pSpecialEffects->SlowScreen(4.0f);
+            g_pSpecialEffects->CreateExplosionExt(pPlayer->GetPosition());
 
             pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
 

@@ -535,8 +535,10 @@ void cExtraMenu::Move()
                     if(bSuccess)
                     {
                         // 
-                        pArcadeInput->Flash();
                         this->LoadMissions();
+
+                        // 
+                        g_pSpecialEffects->CreateExplosionExt(coreVector3(0.0f,0.0f,0.0f));
                     }
 
                     // 

@@ -867,11 +867,7 @@ void cCholBoss::__MoveOwn()
                         this->_CreateFragment(5u);
                     }
 
-                    g_pSpecialEffects->CreateExplosion (this->GetPosition());
-                    g_pSpecialEffects->CreateSplashDark(this->GetPosition(), 200.0f, 400u, true);
-                    g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                    g_pSpecialEffects->PlaySound       (this->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
-                    g_pSpecialEffects->SlowScreen(4.0f);
+                    g_pSpecialEffects->CreateExplosionExt(this->GetPosition());
                 }
                 else
                 {

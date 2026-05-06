@@ -1071,6 +1071,16 @@ void cSpecialEffects::CreateExplosion(const coreVector3 vPosition)
     this->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 2000u);
 }
 
+void cSpecialEffects::CreateExplosionExt(const coreVector3 vPosition)
+{
+    // 
+    this->CreateExplosion (vPosition);
+    this->CreateSplashDark(vPosition, 200.0f, 400u, true);
+    this->PlaySound       (vPosition, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
+    this->PlaySound       (vPosition, 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
+    this->SlowScreen      (4.0f);
+}
+
 
 // ****************************************************************
 // 

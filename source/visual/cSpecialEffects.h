@@ -283,7 +283,8 @@ public:
     void CreateBlastTetra (const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
 
     // 
-    void CreateExplosion(const coreVector3 vPosition);
+    void CreateExplosion   (const coreVector3 vPosition);
+    void CreateExplosionExt(const coreVector3 vPosition);
 
     // 
     void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex);

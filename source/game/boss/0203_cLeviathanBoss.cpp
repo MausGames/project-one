@@ -1407,11 +1407,7 @@ void cLeviathanBoss::__MoveOwn()
                     this->_CreateFragment(2u, m_Head.GetPosition().xy());
                 }
 
-                g_pSpecialEffects->CreateExplosion (m_Head.GetPosition());
-                g_pSpecialEffects->CreateSplashDark(m_Head.GetPosition(), 200.0f, 400u, true);
-                g_pSpecialEffects->PlaySound       (m_Head.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                g_pSpecialEffects->PlaySound       (m_Head.GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
-                g_pSpecialEffects->SlowScreen(4.0f);
+                g_pSpecialEffects->CreateExplosionExt(m_Head.GetPosition());
             }
             else
             {
@@ -1459,11 +1455,7 @@ void cLeviathanBoss::__MoveOwn()
         if(PHASE_MAINTIME_POINT(1.3f))
         {
             //g_pSpecialEffects->MacroExplosionDarkBig(pPlayer->GetPosition());
-                g_pSpecialEffects->CreateExplosion (pPlayer->GetPosition());
-                g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), 200.0f, 400u, true);
-                g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                g_pSpecialEffects->PlaySound       (pPlayer->GetPosition(), 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
-                g_pSpecialEffects->SlowScreen(4.0f);
+            g_pSpecialEffects->CreateExplosionExt(pPlayer->GetPosition());
             
             pPlayer->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
             pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL);

@@ -1779,11 +1779,7 @@ void cGemingaBoss::__MoveOwn()
                     this->_CreateFragment(7u, vCenter.xy());
                 }
 
-                g_pSpecialEffects->CreateExplosion (vCenter);
-                g_pSpecialEffects->CreateSplashDark(vCenter, 200.0f, 400u, true);
-                g_pSpecialEffects->PlaySound       (vCenter, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
-                g_pSpecialEffects->PlaySound       (vCenter, 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
-                g_pSpecialEffects->SlowScreen(4.0f);
+                g_pSpecialEffects->CreateExplosionExt(vCenter);
             }
         });
     }

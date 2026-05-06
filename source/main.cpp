@@ -963,8 +963,7 @@ static void DebugGame()
     {
         //g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
         //g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
-        g_pSpecialEffects->CreateExplosion(coreVector3(0.0f,0.0f,0.0f));
-        g_pSpecialEffects->SlowScreen(4.0f);
+        g_pSpecialEffects->CreateExplosionExt(coreVector3(0.0f,0.0f,0.0f));
     }
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))
