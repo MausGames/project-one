@@ -107,8 +107,8 @@ cCholBoss::cCholBoss()noexcept
     m_Fire.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_apFireModel[0] = Core::Manager::Resource->Get<coreModel>("ship_boss_chol_fire_01.md3");
-    m_apFireModel[1] = Core::Manager::Resource->Get<coreModel>("ship_boss_chol_fire_02.md3");
+    m_apFireModel[0] = Core::Manager::Resource->Get("ship_boss_chol_fire_01.md3");
+    m_apFireModel[1] = Core::Manager::Resource->Get("ship_boss_chol_fire_02.md3");
 }
 
 

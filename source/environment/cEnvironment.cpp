@@ -38,10 +38,10 @@ cEnvironment::cEnvironment()noexcept
     m_MixObject.Move();
 
     // 
-    m_apMixProgram[ENVIRONMENT_MIX_FADE]    = Core::Manager::Resource->Get<coreProgram>("full_transition_fade_program");
-    m_apMixProgram[ENVIRONMENT_MIX_WIPE]    = Core::Manager::Resource->Get<coreProgram>("full_transition_wipe_program");
-    m_apMixProgram[ENVIRONMENT_MIX_CURTAIN] = Core::Manager::Resource->Get<coreProgram>("full_transition_curtain_program");
-    m_apMixProgram[ENVIRONMENT_MIX_CIRCLE]  = Core::Manager::Resource->Get<coreProgram>("full_transition_circle_program");
+    m_apMixProgram[ENVIRONMENT_MIX_FADE]    = Core::Manager::Resource->Get("full_transition_fade_program");
+    m_apMixProgram[ENVIRONMENT_MIX_WIPE]    = Core::Manager::Resource->Get("full_transition_wipe_program");
+    m_apMixProgram[ENVIRONMENT_MIX_CURTAIN] = Core::Manager::Resource->Get("full_transition_curtain_program");
+    m_apMixProgram[ENVIRONMENT_MIX_CIRCLE]  = Core::Manager::Resource->Get("full_transition_circle_program");
 
     // reset transformation properties
     m_avDirection[1] = m_avDirection[0] = ENVIRONMENT_DEFAULT_DIRECTION;

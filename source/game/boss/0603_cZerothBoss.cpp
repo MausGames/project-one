@@ -156,7 +156,7 @@ cZerothBoss::cZerothBoss()noexcept
     }
 
     // 
-    m_pLaserSound = Core::Manager::Resource->Get<coreSound>("effect_laser.wav");
+    m_pLaserSound = Core::Manager::Resource->Get("effect_laser.wav");
 
     STATIC_ASSERT(offsetof(cZerothBoss, m_aLimb) < offsetof(cZerothBoss, m_Body))   // initialization order for collision detection
 }

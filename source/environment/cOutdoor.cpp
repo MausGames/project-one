@@ -408,8 +408,8 @@ void cOutdoor::LoadProgram(const coreBool bGlow)
     m_iHandleIndex = bGlow ? SHADOW_HANDLE_OUTDOOR_GLOW : SHADOW_HANDLE_OUTDOOR;
 
     // 
-    m_pDefaultProgram = Core::Manager::Resource->Get<coreProgram>(bGlow ? "environment_outdoor_glow_program"       : "environment_outdoor_program");
-    m_pLightProgram   = Core::Manager::Resource->Get<coreProgram>(bGlow ? "environment_outdoor_light_glow_program" : "environment_outdoor_light_program");
+    m_pDefaultProgram = Core::Manager::Resource->Get(bGlow ? "environment_outdoor_glow_program"       : "environment_outdoor_program");
+    m_pLightProgram   = Core::Manager::Resource->Get(bGlow ? "environment_outdoor_light_glow_program" : "environment_outdoor_light_program");
 }
 
 

@@ -96,14 +96,14 @@ cMenu::cMenu()noexcept
     const coreList<sLanguage>& aLanguageList = cMenu::GetLanguageList();
 
     // 
-    m_apFontMap.emplace(MENU_FONT_DYNAMIC,  Core::Manager::Resource->Get<coreFont>(MENU_FONT_DYNAMIC));
-    m_apFontMap.emplace(MENU_FONT_STANDARD, Core::Manager::Resource->Get<coreFont>(MENU_FONT_STANDARD));
+    m_apFontMap.emplace(MENU_FONT_DYNAMIC,  Core::Manager::Resource->Get(MENU_FONT_DYNAMIC));
+    m_apFontMap.emplace(MENU_FONT_STANDARD, Core::Manager::Resource->Get(MENU_FONT_STANDARD));
 
     // 
     FOR_EACH(it, aLanguageList)
     {
         // 
-        if(!m_apFontMap.count(it->sFont.c_str())) m_apFontMap.emplace(it->sFont.c_str(), Core::Manager::Resource->Get<coreFont>(it->sFont.c_str()));
+        if(!m_apFontMap.count(it->sFont.c_str())) m_apFontMap.emplace(it->sFont.c_str(), Core::Manager::Resource->Get(it->sFont.c_str()));
     }
 
     // 

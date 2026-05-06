@@ -126,8 +126,8 @@ cRutilusMission::cRutilusMission()noexcept
     }
 
     // 
-    m_apWaveModel[0] = Core::Manager::Resource->Get<coreModel>("object_cube_top.md3");
-    m_apWaveModel[1] = Core::Manager::Resource->Get<coreModel>("object_tube.md3");
+    m_apWaveModel[0] = Core::Manager::Resource->Get("object_cube_top.md3");
+    m_apWaveModel[1] = Core::Manager::Resource->Get("object_tube.md3");
 
     // 
     m_Tock    .DefineProgram("effect_energy_flat_invert_inst_program");

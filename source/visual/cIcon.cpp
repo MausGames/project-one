@@ -47,7 +47,7 @@ cIcon::cIcon()noexcept
     }
 
     // 
-    m_pDefaultModel = Core::Manager::Resource->Get<coreModel>("object_cube_top.md3");
+    m_pDefaultModel = Core::Manager::Resource->Get("object_cube_top.md3");
 }
 
 

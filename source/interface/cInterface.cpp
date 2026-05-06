@@ -335,7 +335,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_Medal.SetTexSize   (coreVector2(0.25f,0.25f));
 
     // 
-    m_pAlertSound = Core::Manager::Resource->Get<coreSound>("effect_alert.wav");
+    m_pAlertSound = Core::Manager::Resource->Get("effect_alert.wav");
 
     // 
     this->ChangeLanguage(Core::Language);

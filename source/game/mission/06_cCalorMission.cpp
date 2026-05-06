@@ -266,12 +266,12 @@ cCalorMission::cCalorMission()noexcept
         };
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_apResCache); ++i)
         {
-            m_apResCache[i] = Core::Manager::Resource->Get<coreResourceDummy>(apcName[i]);
+            m_apResCache[i] = Core::Manager::Resource->Get(apcName[i]);
             STATIC_ASSERT(ARRAY_SIZE(m_apResCache) == ARRAY_SIZE(apcName))
         }
 
         // 
-        m_pNightmareSound = Core::Manager::Resource->Get<coreSound>("effect_nightmare.wav");
+        m_pNightmareSound = Core::Manager::Resource->Get("effect_nightmare.wav");
     }
 
     STATIC_ASSERT(CALOR_STARS <= BITSOF(m_iStarSwing))

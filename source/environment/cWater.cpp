@@ -43,8 +43,8 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
         m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE, WATER_SKY_SIZE));
 
         // 
-        m_apSkyProgram[0] = Core::Manager::Resource->Get<coreProgram>("default_2d_program");
-        m_apSkyProgram[1] = Core::Manager::Resource->Get<coreProgram>("environment_vignette_program");
+        m_apSkyProgram[0] = Core::Manager::Resource->Get("default_2d_program");
+        m_apSkyProgram[1] = Core::Manager::Resource->Get("environment_vignette_program");
     }
 
     // load object resources
@@ -344,8 +344,8 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
     }
 
     // 
-    m_apSkyProgram[0] = Core::Manager::Resource->Get<coreProgram>("menu_grey_program");
-    m_apSkyProgram[1] = Core::Manager::Resource->Get<coreProgram>("environment_vignette_grey_program");
+    m_apSkyProgram[0] = Core::Manager::Resource->Get("menu_grey_program");
+    m_apSkyProgram[1] = Core::Manager::Resource->Get("environment_vignette_grey_program");
 
     // 
     this->DefineTexture(0u, m_WaveMap.GetColorTarget(0u).pTexture);

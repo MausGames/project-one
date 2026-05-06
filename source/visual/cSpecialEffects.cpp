@@ -87,9 +87,9 @@ cSpecialEffects::cSpecialEffects()noexcept
         m_aBlast[i].DefineProgram("effect_energy_spheric_program");
         m_aBlast[i].SetAlpha     (0.0f);
     }
-    m_apBlastModel[0] = Core::Manager::Resource->Get<coreModel>("object_sphere.md3");
-    m_apBlastModel[1] = Core::Manager::Resource->Get<coreModel>("object_cube_top.md3");
-    m_apBlastModel[2] = Core::Manager::Resource->Get<coreModel>("object_tetra_top.md3");
+    m_apBlastModel[0] = Core::Manager::Resource->Get("object_sphere.md3");
+    m_apBlastModel[1] = Core::Manager::Resource->Get("object_cube_top.md3");
+    m_apBlastModel[2] = Core::Manager::Resource->Get("object_tetra_top.md3");
 
     // 
     for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i)
@@ -113,7 +113,7 @@ cSpecialEffects::cSpecialEffects()noexcept
         ASSERT(eSoundIndex < SOUND_MAX)
         coreSoundPtr& pSoundPtr = m_apSound[eSoundIndex];
 
-        if(!pSoundPtr) pSoundPtr = Core::Manager::Resource->Get<coreSound>(pcName);
+        if(!pSoundPtr) pSoundPtr = Core::Manager::Resource->Get(pcName);
         ASSERT(!std::strcmp(pSoundPtr.GetHandle()->GetName(), pcName))
     };
     nLoadSoundFunc(SOUND_PLAYER_EXPLOSION,     "player_explosion.wav");

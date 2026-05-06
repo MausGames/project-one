@@ -14,8 +14,8 @@
 void cOutlineStyle::Construct(const coreHashString& sProgramSingleName, const coreHashString& sProgramInstancedName)
 {
     // load shader-programs for outlined objects
-    m_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(sProgramSingleName);
-    m_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>(sProgramInstancedName);
+    m_pProgramSingle    = Core::Manager::Resource->Get(sProgramSingleName);
+    m_pProgramInstanced = Core::Manager::Resource->Get(sProgramInstancedName);
 }
 
 

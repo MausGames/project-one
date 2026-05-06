@@ -145,7 +145,7 @@ void cFigure::SetBaseAsType(const coreUint8 iType)
 void cFigure::GlobalInit()
 {
     // 
-    s_apTexCache.push_back(Core::Manager::Resource->Get<coreTexture>(cFigure::DetermineTexture(FIGURE_BASE_KEYBOARD)));
+    s_apTexCache.push_back(Core::Manager::Resource->Get(cFigure::DetermineTexture(FIGURE_BASE_KEYBOARD)));
 }
 
 
@@ -176,7 +176,7 @@ void cFigure::GlobalUpdate()
         const coreUint8 iBase = Core::Input->GetJoystickGamepadType(i - 1u);
         if(iBase != s_apTexBase[i])
         {
-            s_apTexCache[i] = Core::Manager::Resource->Get<coreTexture>(cFigure::DetermineTexture(iBase));
+            s_apTexCache[i] = Core::Manager::Resource->Get(cFigure::DetermineTexture(iBase));
             s_apTexBase [i] = iBase;
         }
     }

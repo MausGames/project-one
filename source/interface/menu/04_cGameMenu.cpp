@@ -807,10 +807,10 @@ cGameMenu::cGameMenu()noexcept
     // 
     for(coreUintW i = 0u; i < FRAGMENTS; ++i)
     {
-        m_apFragment[i] = Core::Manager::Resource->Get<coreTexture>(PRINT("menu_fragment_%02zu.png", i + 1u));
+        m_apFragment[i] = Core::Manager::Resource->Get(PRINT("menu_fragment_%02zu.png", i + 1u));
     }
-    m_apSegment[0] = Core::Manager::Resource->Get<coreTexture>("menu_segment_boss.png");
-    m_apSegment[1] = Core::Manager::Resource->Get<coreTexture>("menu_segment_wave.png");
+    m_apSegment[0] = Core::Manager::Resource->Get("menu_segment_boss.png");
+    m_apSegment[1] = Core::Manager::Resource->Get("menu_segment_wave.png");
 
     // 
     m_NavigatorMain.BindObject(&m_BackButtonMain, &m_aaSegmentTile[MENU_GAME_MISSIONS - 1u][MENU_GAME_SEGMENTS - 1u], NULL, &m_ArcadeComplete, NULL, MENU_TYPE_DEFAULT);

@@ -293,8 +293,8 @@ cTorusBoss::cTorusBoss()noexcept
     }
 
     // 
-    m_pRumbleSound = Core::Manager::Resource->Get<coreSound>("effect_rumble.wav");
-    m_pWooshSound  = Core::Manager::Resource->Get<coreSound>("effect_woosh_01.wav");
+    m_pRumbleSound = Core::Manager::Resource->Get("effect_rumble.wav");
+    m_pWooshSound  = Core::Manager::Resource->Get("effect_woosh_01.wav");
 
     STATIC_ASSERT(TORUS_TURRETS  <= BITSOF(m_iTurretActive))
     STATIC_ASSERT(TORUS_TURRETS  <= BITSOF(m_iTurretMove))

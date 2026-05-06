@@ -184,8 +184,8 @@ cTigerBoss::cTigerBoss()noexcept
     {
         for(coreUintW j = 0u, je = aiSubs[i]; j < je; ++j)
         {
-            m_aapModelHigh[i][j] = Core::Manager::Resource->Get<coreModel>(PRINT("ship_boss_tiger_weapon_%02zu_%02zu_high.md3", i + 1u, j + 1u));
-            m_aapModelLow [i][j] = Core::Manager::Resource->Get<coreModel>(PRINT("ship_boss_tiger_weapon_%02zu_%02zu_low.md3",  i + 1u, j + 1u));
+            m_aapModelHigh[i][j] = Core::Manager::Resource->Get(PRINT("ship_boss_tiger_weapon_%02zu_%02zu_high.md3", i + 1u, j + 1u));
+            m_aapModelLow [i][j] = Core::Manager::Resource->Get(PRINT("ship_boss_tiger_weapon_%02zu_%02zu_low.md3",  i + 1u, j + 1u));
         }
     }
     m_aapModelHigh[1][2] = m_aapModelHigh[1][1];
@@ -194,7 +194,7 @@ cTigerBoss::cTigerBoss()noexcept
     m_aapModelLow [4][4] = m_aapModelLow [4][3] = m_aapModelLow [4][2] = m_aapModelLow [4][1];
 
     // 
-    m_pTankSound = Core::Manager::Resource->Get<coreSound>("effect_tank.wav");
+    m_pTankSound = Core::Manager::Resource->Get("effect_tank.wav");
 
     // 
     this->__SwitchWeapon(0u);

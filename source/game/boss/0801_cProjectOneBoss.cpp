@@ -292,7 +292,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     m_HelperPath.Refine();
 
     // 
-    m_pNightmareSound = Core::Manager::Resource->Get<coreSound>("effect_nightmare.wav");
+    m_pNightmareSound = Core::Manager::Resource->Get("effect_nightmare.wav");
 
     // 
     m_aPurplePath[0].Reserve(2u);

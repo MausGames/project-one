@@ -86,8 +86,8 @@ cPlayer::cPlayer()noexcept
     m_ScoreTable.SetOwner(this);
 
     // 
-    m_pNormalProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_program");
-    m_pDarkProgram   = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
+    m_pNormalProgram = Core::Manager::Resource->Get("object_ship_program");
+    m_pDarkProgram   = Core::Manager::Resource->Get("object_ship_darkness_program");
     this->ActivateNormalShading();
 
     // 

@@ -29,11 +29,11 @@ cPostProcessing::cPostProcessing()noexcept
 , m_afResetOffset     {}
 {
     // load post-processing shader-programs
-    m_pProgramSimple      = Core::Manager::Resource->Get<coreProgram>("full_post_program");
-    m_pProgramDistorted   = Core::Manager::Resource->Get<coreProgram>("full_post_distorted_program");
-    m_pProgramTransparent = Core::Manager::Resource->Get<coreProgram>("full_post_transparent_program");
-    m_pProgramChroma      = Core::Manager::Resource->Get<coreProgram>("full_post_chroma_program");
-    m_pProgramDebug       = Core::Manager::Resource->Get<coreProgram>("full_post_debug_program");
+    m_pProgramSimple      = Core::Manager::Resource->Get("full_post_program");
+    m_pProgramDistorted   = Core::Manager::Resource->Get("full_post_distorted_program");
+    m_pProgramTransparent = Core::Manager::Resource->Get("full_post_transparent_program");
+    m_pProgramChroma      = Core::Manager::Resource->Get("full_post_chroma_program");
+    m_pProgramDebug       = Core::Manager::Resource->Get("full_post_debug_program");
     this->Recompile();
 
     // create interiors
@@ -266,7 +266,7 @@ void cPostProcessing::Recompile()
 
     const auto nUpdateFunc = [](const coreHashString& sName, const coreChar* pcConfig)
     {
-        coreResourceHandle* pHandle = Core::Manager::Resource->Get<coreShader>(sName);
+        coreResourceHandle* pHandle = Core::Manager::Resource->Get(sName);
         pHandle->LockResource([&](coreShader* OUTPUT pShader)
         {
             pShader->SetCustomCode(pcConfig);

@@ -147,7 +147,7 @@ cGemingaBoss::cGemingaBoss()noexcept
     m_aPackPath[3].Refine();
 
     // 
-    //m_pVacuumSound = Core::Manager::Resource->Get<coreSound>("effect_vacuum.wav");
+    //m_pVacuumSound = Core::Manager::Resource->Get("effect_vacuum.wav");
 
     if(!g_pGame->SkipLoadingCache())
     {
@@ -184,7 +184,7 @@ cGemingaBoss::cGemingaBoss()noexcept
         };
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_apResCache); ++i)
         {
-            m_apResCache[i] = Core::Manager::Resource->Get<coreResourceDummy>(apcName[i]);
+            m_apResCache[i] = Core::Manager::Resource->Get(apcName[i]);
             STATIC_ASSERT(ARRAY_SIZE(m_apResCache) == ARRAY_SIZE(apcName))
         }
     }

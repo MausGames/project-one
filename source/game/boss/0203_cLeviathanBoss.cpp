@@ -159,8 +159,8 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     }
 
     // 
-    m_pLaserSound  = Core::Manager::Resource->Get<coreSound>("effect_laser.wav");
-    m_pRumbleSound = Core::Manager::Resource->Get<coreSound>("effect_rumble.wav");
+    m_pLaserSound  = Core::Manager::Resource->Get("effect_laser.wav");
+    m_pRumbleSound = Core::Manager::Resource->Get("effect_rumble.wav");
 }
 
 

@@ -147,8 +147,8 @@ cMessierBoss::cMessierBoss()noexcept
     }
 
     // 
-    m_pBellSound = Core::Manager::Resource->Get<coreSound>("effect_bell.wav");
-    m_pVoidSound = Core::Manager::Resource->Get<coreSound>("environment_space.wav");
+    m_pBellSound = Core::Manager::Resource->Get("effect_bell.wav");
+    m_pVoidSound = Core::Manager::Resource->Get("environment_space.wav");
 }
 
 

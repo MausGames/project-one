@@ -291,7 +291,7 @@ void cSnowBackground::__InitOwn()
     m_pWater = new cIceWater("environment_clouds_blue.png");
 
     // load base sound-effect
-    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_snow.wav");
+    m_pBaseSound = Core::Manager::Resource->Get("environment_snow.wav");
     m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT, CORE_AUDIO_EFFECT_NONE);

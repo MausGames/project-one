@@ -115,18 +115,18 @@ void cShadow::Reconfigure()
 void cShadow::GlobalInit()
 {
     // load shader-programs for shadow-casting objects
-    s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>("effect_shadow_program");
-    s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>("effect_shadow_inst_program");
+    s_pProgramSingle    = Core::Manager::Resource->Get("effect_shadow_program");
+    s_pProgramInstanced = Core::Manager::Resource->Get("effect_shadow_inst_program");
 
     // load shader-programs for shadow-receiving objects
-    s_apHandle[SHADOW_HANDLE_OUTDOOR]            = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
-    s_apHandle[SHADOW_HANDLE_OUTDOOR_GLOW]       = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_glow_program");
-    s_apHandle[SHADOW_HANDLE_OUTDOOR_LIGHT]      = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_light_program");
-    s_apHandle[SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW] = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_light_glow_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT]             = Core::Manager::Resource->Get<coreProgram>("object_ground_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_INST]        = Core::Manager::Resource->Get<coreProgram>("object_ground_inst_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_WAVE]        = Core::Manager::Resource->Get<coreProgram>("object_wave_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_WAVE_INST]   = Core::Manager::Resource->Get<coreProgram>("object_wave_inst_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR]            = Core::Manager::Resource->Get("environment_outdoor_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR_GLOW]       = Core::Manager::Resource->Get("environment_outdoor_glow_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR_LIGHT]      = Core::Manager::Resource->Get("environment_outdoor_light_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW] = Core::Manager::Resource->Get("environment_outdoor_light_glow_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT]             = Core::Manager::Resource->Get("object_ground_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_INST]        = Core::Manager::Resource->Get("object_ground_inst_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_WAVE]        = Core::Manager::Resource->Get("object_wave_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_WAVE_INST]   = Core::Manager::Resource->Get("object_wave_inst_program");
 
     // adjust shader-programs
     cShadow::Recompile();

@@ -172,7 +172,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
     m_PlayerPath.Refine();
 
     // 
-    m_pHeartSound = Core::Manager::Resource->Get<coreSound>("effect_heart.wav");
+    m_pHeartSound = Core::Manager::Resource->Get("effect_heart.wav");
 }
 
 

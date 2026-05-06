@@ -62,7 +62,7 @@ cHarenaMission::cHarenaMission()noexcept
 
             // load object resources
             coreObject3D* pSpike = &m_aSpikeRaw[i];
-            pSpike->DefineModel  (iType ? Core::Manager::Object->GetLowQuad() : Core::Manager::Resource->Get<coreModel>("object_spike.md3"));
+            pSpike->DefineModel  (iType ? Core::Manager::Object->GetLowQuad() : Core::Manager::Resource->Get("object_spike.md3"));
             pSpike->DefineTexture(0u, iType ? "menu_background_black.png" : "ship_enemy.png");
             pSpike->DefineProgram(iType ? "object_board_program" : "object_ship_depth_program");
 

@@ -211,9 +211,9 @@ cMossBackground::cMossBackground()noexcept
     m_Lightning.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_apThunder[0] = Core::Manager::Resource->Get<coreSound>("environment_thunder_01.wav");
-    m_apThunder[1] = Core::Manager::Resource->Get<coreSound>("environment_thunder_02.wav");
-    m_apThunder[2] = Core::Manager::Resource->Get<coreSound>("environment_thunder_03.wav");
+    m_apThunder[0] = Core::Manager::Resource->Get("environment_thunder_01.wav");
+    m_apThunder[1] = Core::Manager::Resource->Get("environment_thunder_02.wav");
+    m_apThunder[2] = Core::Manager::Resource->Get("environment_thunder_03.wav");
 
     // 
     m_Headlight.SetAlpha(0.0f);
@@ -237,7 +237,7 @@ void cMossBackground::__InitOwn()
     m_pWater = new cRainWater("environment_clouds_grey.png");
 
     // load base sound-effect
-    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_moss.wav");
+    m_pBaseSound = Core::Manager::Resource->Get("environment_moss.wav");
     m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT, CORE_AUDIO_EFFECT_NONE);

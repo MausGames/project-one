@@ -116,7 +116,7 @@ void cDarkBackground::Dissolve()
 void cDarkBackground::__InitOwn()
 {
     // load base sound-effect
-    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_dark.wav");
+    m_pBaseSound = Core::Manager::Resource->Get("environment_dark.wav");
     m_iToken = m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT, CORE_AUDIO_EFFECT_NONE);

@@ -37,8 +37,8 @@ cHeadlight::cHeadlight()noexcept
     m_Point.DefineProgram("menu_grey_program");
 
     // 
-    m_pFlickerSound = Core::Manager::Resource->Get<coreSound>("effect_flicker.wav");
-    //m_pShatterSound = Core::Manager::Resource->Get<coreSound>("effect_shatter.wav");
+    m_pFlickerSound = Core::Manager::Resource->Get("effect_flicker.wav");
+    //m_pShatterSound = Core::Manager::Resource->Get("effect_shatter.wav");
 }
 
 
