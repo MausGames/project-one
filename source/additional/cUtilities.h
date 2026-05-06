@@ -12,6 +12,7 @@
 
 // TODO 4: move ID color directly into background class if not used otherwise (emphasize "highlight" usage)
 // TODO 1: move a lot of those utilities into engine if proven well, look for other stuff in whole game (also from other projects)
+// TODO 3: replace StrToUpperUTF8 with ICU function from engine
 
 
 // ****************************************************************
@@ -515,6 +516,63 @@ template <typename F> FORCE_INLINE void Timeless(F&& nFunction)   // []() -> voi
         nFunction();
     }
     Core::System->OverrideTime(fSave);
+}
+
+
+// ****************************************************************
+// turn strings into upper-case variants (# heuristic, should be replaced with ICU)
+inline coreUintW CharToWchar(coreWchar* OUTPUT pcOutput, const coreUintW iOutputSize, const coreChar* pcInput)
+{
+    ASSERT(pcOutput && pcInput)
+
+    static SDL_iconv_t s_Iconv = SDL_iconv_open("WCHAR_T", "UTF-8");
+
+    const coreChar* pcInputPtr   = r_cast<const coreChar*>(pcInput);
+    coreChar*       pcOutputPtr  = r_cast<coreChar*>(pcOutput);
+    coreUintW       iInputBytes  = (std::strlen(pcInput) + 1u) * sizeof(coreChar);
+    coreUintW       iOutputBytes = iOutputSize * sizeof(coreWchar);
+
+    SDL_iconv(s_Iconv, &pcInputPtr, &iInputBytes, &pcOutputPtr, &iOutputBytes);
+
+    return (iOutputSize - iOutputBytes / sizeof(coreWchar) - 1u);
+}
+
+inline coreUintW WcharToChar(coreChar* OUTPUT pcOutput, const coreUintW iOutputSize, const coreWchar* pcInput)
+{
+    ASSERT(pcOutput && pcInput)
+
+    static SDL_iconv_t s_Iconv = SDL_iconv_open("UTF-8", "WCHAR_T");
+
+    const coreChar* pcInputPtr   = r_cast<const coreChar*>(pcInput);
+    coreChar*       pcOutputPtr  = r_cast<coreChar*>(pcOutput);
+    coreUintW       iInputBytes  = (std::wcslen(pcInput) + 1u) * sizeof(coreWchar);
+    coreUintW       iOutputBytes = iOutputSize * sizeof(coreChar);
+
+    SDL_iconv(s_Iconv, &pcInputPtr, &iInputBytes, &pcOutputPtr, &iOutputBytes);
+
+    return (iOutputSize - iOutputBytes / sizeof(coreChar) - 1u);
+}
+
+inline const coreChar* StrToUpperUTF8(const coreChar* pcInput)
+{
+    ASSERT(pcInput)
+
+    coreWchar acTemp[CORE_DATA_STRING_LEN] = {};
+
+    const coreUintW iLen1 = CharToWchar(acTemp, CORE_DATA_STRING_LEN, pcInput);
+    if(!iLen1 || (iLen1 >= CORE_DATA_STRING_LEN)) return pcInput;
+
+    for(coreUintW i = 0u; i < iLen1; ++i)
+    {
+        acTemp[i] = coreWchar(towupper(acTemp[i]));
+    }
+
+    static coreChar s_acBuffer[CORE_DATA_STRING_LEN];
+
+    const coreUintW iLen2 = WcharToChar(s_acBuffer, CORE_DATA_STRING_LEN, acTemp);
+    if(!iLen2 || (iLen2 >= CORE_DATA_STRING_LEN)) return pcInput;
+
+    return s_acBuffer;
 }
 
 

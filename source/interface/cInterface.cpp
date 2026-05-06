@@ -2160,7 +2160,7 @@ void cInterface::__UpdateTranslate()
     
     if(!m_sSegmentString.empty())
     {
-        m_SegmentName.SetText(PRINT("%s %s", coreData::StrToUpperUTF8(Core::Language->GetString("SEGMENT")), m_sSegmentString.c_str()));
+        m_SegmentName.SetText(PRINT("%s %s", StrToUpperUTF8(Core::Language->GetString("SEGMENT")), m_sSegmentString.c_str()));
     }
 }
 

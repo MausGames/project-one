@@ -302,5 +302,5 @@ void cMusicBox::ResetNavigator()
     }
 
     // 
-    m_Header.SetText(coreData::StrToUpperUTF8(Core::Language->GetString("EXTRA_MUSIC")));
+    m_Header.SetText(StrToUpperUTF8(Core::Language->GetString("EXTRA_MUSIC")));
 }
