@@ -127,7 +127,7 @@ struct sConfig final
         coreUint8 iGlow;         // glow level
         coreUint8 iDistortion;   // distortion level
         coreUint8 iParticle;     // 
-        coreUint8 iShake;        // 
+        coreInt16 iShake;        // 
         coreUint8 iFlash;        // 
         coreUint8 iHitStop;      // 
         coreUint8 iChroma;       // 

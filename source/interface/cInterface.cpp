@@ -357,6 +357,10 @@ cInterface::~cInterface()
 // render the interface
 void cInterface::Render()
 {
+    // 
+    const coreMatrix4 mOldOrtho = Core::Graphics->GetOrtho();
+    if(g_CurConfig.Graphics.iShake > 0) Core::Graphics->OverrideOrtho(mOldOrtho * coreMatrix4::Translation(coreVector3(g_pPostProcessing->GetShake(), 0.0f)));   // opposite to walls
+
     if(this->IsBannerActive())
     {
         // 
@@ -494,6 +498,9 @@ void cInterface::Render()
     // 
     m_aDialogText[0].Render();
     m_aDialogText[1].Render();
+
+    // 
+    if(g_CurConfig.Graphics.iShake > 0) Core::Graphics->OverrideOrtho(mOldOrtho);
 }
 
 
@@ -1244,7 +1251,7 @@ void cInterface::Move()
             if(m_fShake >= 1.0f)
             {
                 m_fShake = FRACT(m_fShake);
-                m_aBannerText[3].SetPosition(coreVector2::Rand(1.0f) * 0.0017f);//(g_CurConfig.Graphics.iShake ? 0.0016f : 0.0f));   // only on/off
+                m_aBannerText[3].SetPosition(coreVector2::Rand(1.0f) * 0.0017f);
             }
         }
 

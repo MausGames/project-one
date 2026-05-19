@@ -544,7 +544,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_WaterQuality   .AddEntryLanguage("VALUE_LOW",              0u);
     m_WaterQuality   .AddEntryLanguage("VALUE_HIGH",             1u);
     for(coreUintW i = 0u; i <= 200u; i += 5u) m_ParticleEffects.AddEntry(PRINT("%zu%%", i), i);
-    for(coreUintW i = 0u; i <= 200u; i += 5u) m_ShakeEffects   .AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 80u;  i += 1u) m_ShakeEffects   .AddEntry(PRINT("%d%%",  cConfigMenu::__ShakeToInt16(i)), i);
     m_FlashEffects   .AddEntryLanguage("VALUE_OFF",              0u);
     m_FlashEffects   .AddEntryLanguage("VALUE_ON",               1u);
     m_HitStopEffects .AddEntryLanguage("VALUE_OFF",              0u);
@@ -1249,7 +1249,7 @@ void cConfigMenu::CheckValues()
         __CHECK_VALUE(VIDEO_SHADOWQUALITY,   m_ShadowQuality         .GetCurValue()   != g_OldConfig.Graphics.iShadow)
         __CHECK_VALUE(VIDEO_WATERQUALITY,    m_WaterQuality          .GetCurValue()   != g_OldConfig.Graphics.iReflection)
         __CHECK_VALUE(VIDEO_PARTICLEEFFECTS, m_ParticleEffects       .GetCurValue()   != g_OldConfig.Graphics.iParticle)
-        __CHECK_VALUE(VIDEO_SHAKEEFFECTS,    m_ShakeEffects          .GetCurValue()   != g_OldConfig.Graphics.iShake)
+        __CHECK_VALUE(VIDEO_SHAKEEFFECTS,    m_ShakeEffects          .GetCurValue()   != cConfigMenu::__ShakeToUint8(g_OldConfig.Graphics.iShake))
         __CHECK_VALUE(VIDEO_FLASHEFFECTS,    m_FlashEffects          .GetCurValue()   != g_OldConfig.Graphics.iFlash)
         __CHECK_VALUE(VIDEO_HITSTOPEFFECTS,  m_HitStopEffects        .GetCurValue()   != g_OldConfig.Graphics.iHitStop)
         __CHECK_VALUE(VIDEO_CHROMAEFFECTS,   m_ChromaEffects         .GetCurValue()   != g_OldConfig.Graphics.iChroma)
@@ -1349,7 +1349,7 @@ void cConfigMenu::LoadValues()
     m_ShadowQuality  .SelectValue(g_CurConfig.Graphics.iShadow);
     m_WaterQuality   .SelectValue(g_CurConfig.Graphics.iReflection);
     m_ParticleEffects.SelectValue(g_CurConfig.Graphics.iParticle);
-    m_ShakeEffects   .SelectValue(g_CurConfig.Graphics.iShake);
+    m_ShakeEffects   .SelectValue(cConfigMenu::__ShakeToUint8(g_CurConfig.Graphics.iShake));
     m_FlashEffects   .SelectValue(g_CurConfig.Graphics.iFlash);
     m_HitStopEffects .SelectValue(g_CurConfig.Graphics.iHitStop);
     m_ChromaEffects  .SelectValue(g_CurConfig.Graphics.iChroma);
@@ -1444,7 +1444,7 @@ void cConfigMenu::SaveValues()
     g_CurConfig.Graphics.iShadow     = m_ShadowQuality  .GetCurValue();
     g_CurConfig.Graphics.iReflection = m_WaterQuality   .GetCurValue();
     g_CurConfig.Graphics.iParticle   = m_ParticleEffects.GetCurValue();
-    g_CurConfig.Graphics.iShake      = m_ShakeEffects   .GetCurValue();
+    g_CurConfig.Graphics.iShake      = cConfigMenu::__ShakeToInt16(m_ShakeEffects.GetCurValue());
     g_CurConfig.Graphics.iFlash      = m_FlashEffects   .GetCurValue();
     g_CurConfig.Graphics.iHitStop    = m_HitStopEffects .GetCurValue();
     g_CurConfig.Graphics.iChroma     = m_ChromaEffects  .GetCurValue();

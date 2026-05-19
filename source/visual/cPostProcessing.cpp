@@ -20,6 +20,8 @@ cPostProcessing::cPostProcessing()noexcept
 , m_afOffset          {}
 , m_bOffsetActive     (false)
 , m_fChroma           (0.0f)
+, m_vShake            (coreVector2(0.0f,0.0f))
+, m_bShakeDelay       (false)
 , m_fAnimation        (0.0f)
 
 , m_fFrameValue       (0.0f)
@@ -210,7 +212,8 @@ void cPostProcessing::Move()
     m_Black.SetSize(coreVector2(1.0f,1.0f) * MaxAspectRatio(Core::System->GetResolution()));
     m_Black.Move();
 
-    if(m_bOffsetActive)
+    // 
+    if(m_bOffsetActive || (m_bShakeDelay || !m_vShake.IsNull()))
     {
         // update wallpapers
         this->__UpdateWall();
@@ -218,6 +221,9 @@ void cPostProcessing::Move()
         // 
         if(std::all_of(m_afOffset, m_afOffset + POST_WALLS, [](const coreFloat x) {return coreMath::IsNear(x, 0.0f);}))
             m_bOffsetActive = false;
+
+        // 
+        m_bShakeDelay = !m_vShake.IsNull();
     }
 
     
@@ -365,6 +371,9 @@ void cPostProcessing::__UpdateInterior()
     // 
     this->SetDirection(MapToAxis(m_vDirectionConfig, m_vDirectionGame * this->GetSize()));
 
+    // 
+    const coreVector2 vShakeInterior = (g_CurConfig.Graphics.iShake < 0) ? m_vShake : coreVector2(0.0f,0.0f);
+
     if(m_bSplitScreen)
     {
         // 
@@ -378,7 +387,7 @@ void cPostProcessing::__UpdateInterior()
         {
             const coreVector2 vOffset = this->GetDirection().Rotated90().InvertedY() * (this->GetSize().x * (i ? 0.25f : -0.25f));
 
-            m_aInterior[i].SetPosition (this->GetPosition () + vOffset);
+            m_aInterior[i].SetPosition (this->GetPosition () + vShakeInterior + vOffset);
             m_aInterior[i].SetSize     (this->GetSize     () * coreVector2(0.5f,1.0f));
             m_aInterior[i].SetDirection(this->GetDirection());
             m_aInterior[i].SetTexSize  (coreVector2(0.5f,1.0f));
@@ -395,7 +404,7 @@ void cPostProcessing::__UpdateInterior()
         }
 
         // 
-        m_aInterior[0].SetPosition (this->GetPosition ());
+        m_aInterior[0].SetPosition (this->GetPosition () + vShakeInterior);
         m_aInterior[0].SetSize     (this->GetSize     ());
         m_aInterior[0].SetDirection(this->GetDirection());
         m_aInterior[0].SetTexSize  (coreVector2(1.0f,1.0f));
@@ -409,7 +418,7 @@ void cPostProcessing::__UpdateInterior()
         const coreFloat fScale  = 0.025f * I_TO_F(POST_BORDERS - i);
         const coreFloat fOffset = I_TO_F(i) / I_TO_F(POST_BORDERS);
 
-        m_aBorder[i].SetPosition (this->GetPosition ());
+        m_aBorder[i].SetPosition (this->GetPosition () + vShakeInterior);
         m_aBorder[i].SetSize     (this->GetSize     () * (1.0f + fScale));
         m_aBorder[i].SetDirection(this->GetDirection());
         m_aBorder[i].SetTexOffset(coreVector2(0.15f,0.15f) * (m_fAnimation + fOffset));
@@ -435,12 +444,15 @@ void cPostProcessing::__UpdateWall()
     const coreUintW   iAdd2     = IsHorizontal(vBaseDir) ? POST_WALLS_BASE : 0u;
 
     // 
+    const coreVector2 vShakeWall = (g_CurConfig.Graphics.iShake > 0) ? m_vShake : coreVector2(0.0f,0.0f);   // opposite to interface
+
+    // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
     {
         const coreVector2 vTurn = ((i < 2u) ? vFlip.yx() : vFlip) * ((i % 2u) ? 1.0f : -1.0f) * vSwap;
         const coreFloat   fMove = ((i < 2u) ? vSize.y    :  1.1f) - m_afOffset[(i + iAdd + iAdd2) % POST_WALLS];
 
-        m_aWall[i].SetPosition (vTurn *  fMove);
+        m_aWall[i].SetPosition (vTurn *  fMove - vShakeWall);
         m_aWall[i].SetSize     (vSize);
         m_aWall[i].SetDirection(vTurn);
         m_aWall[i].SetCenter   (vTurn *  0.5f);

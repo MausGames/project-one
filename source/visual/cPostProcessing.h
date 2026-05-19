@@ -63,6 +63,9 @@ private:
 
     coreFloat m_fChroma;                        // 
 
+    coreVector2 m_vShake;                       // 
+    coreBool    m_bShakeDelay;                  // 
+
     coreFlow m_fAnimation;                      // 
 
     coreFullscreen m_Frame;                     // 
@@ -128,9 +131,11 @@ public:
     inline void SetBrightnessAll(const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBrightness(i, fBorder);}
     inline void SetBorderAll    (const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBorder    (i, fBorder);}
     inline void SetChroma       (const coreFloat   fChroma)                             {m_fChroma = fChroma;}
+    inline void SetShake        (const coreVector2 vShake)                              {m_vShake  = vShake;}
 
     // 
     inline const coreVector2& GetDirectionGame()const {return m_vDirectionGame;}
+    inline const coreVector2& GetShake        ()const {return m_vShake;}
 
 
 private:

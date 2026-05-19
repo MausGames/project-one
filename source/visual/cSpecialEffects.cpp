@@ -442,8 +442,8 @@ void cSpecialEffects::Move()
         }
 
         // 
-        const coreFloat fPower = m_fShakeStrength * m_fShakeOverride * I_TO_F(g_CurConfig.Graphics.iShake) * 0.00007f;
-        g_pPostProcessing->SetPosition((vBase * fPower * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
+        const coreFloat fPower = m_fShakeStrength * m_fShakeOverride * I_TO_F(ABS(g_CurConfig.Graphics.iShake)) * 0.00007f;
+        g_pPostProcessing->SetShake((vBase * fPower * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
 
         // 
         if(!m_fShakeStrength)
@@ -1332,7 +1332,7 @@ void cSpecialEffects::ClearAll()
     m_fSlowTime      = 0.0f;
 
     // 
-    g_pPostProcessing->SetPosition(coreVector2(0.0f,0.0f));
+    g_pPostProcessing->SetShake(coreVector2(0.0f,0.0f));
 }
 
 

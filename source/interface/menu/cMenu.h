@@ -1138,6 +1138,10 @@ private:
     // 
     static inline coreFloat __VolumeToFloat(const coreUint8 iVolume) {return I_TO_F(iVolume) * 0.01f;}
     static inline coreUint8 __VolumeToUint8(const coreFloat fVolume) {return F_TO_UI(ROUND(CLAMP01(fVolume) * 20.0f) * 5.0f);}
+
+    // 
+    static inline coreUint8 __ShakeToUint8(const coreInt16 iShake) {return coreUint8(iShake  / 5 + 40);}
+    static inline coreInt16 __ShakeToInt16(const coreUint8 iShake) {return coreInt16(iShake) * 5 - 200;}
 };
 
 
