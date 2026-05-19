@@ -226,6 +226,7 @@ void LoadConfig()
     UpgradeConfig();
 
     // read graphics values
+    g_OldConfig.Graphics.iBrightness = Core::Config->GetInt(CONFIG_GRAPHICS_BRIGHTNESS);
     g_OldConfig.Graphics.iRender     = Core::Config->GetInt(CONFIG_GRAPHICS_RENDER);
     g_OldConfig.Graphics.iShadow     = Core::Config->GetInt(CONFIG_GRAPHICS_SHADOW);
     g_OldConfig.Graphics.iReflection = Core::Config->GetInt(CONFIG_GRAPHICS_REFLECTION);
@@ -305,6 +306,7 @@ void SaveConfig()
     g_OldConfig = g_CurConfig;
 
     // write graphics values
+    Core::Config->SetInt(CONFIG_GRAPHICS_BRIGHTNESS, g_OldConfig.Graphics.iBrightness);
     Core::Config->SetInt(CONFIG_GRAPHICS_RENDER,     g_OldConfig.Graphics.iRender);
     Core::Config->SetInt(CONFIG_GRAPHICS_SHADOW,     g_OldConfig.Graphics.iShadow);
     Core::Config->SetInt(CONFIG_GRAPHICS_REFLECTION, g_OldConfig.Graphics.iReflection);

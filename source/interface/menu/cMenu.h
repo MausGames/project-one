@@ -263,6 +263,7 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_RESOLUTION,
     ENTRY_VIDEO_DISPLAYMODE,
     ENTRY_VIDEO_VSYNC,
+    ENTRY_VIDEO_BRIGHTNESS,
     ENTRY_VIDEO_ANTIALIASING,
     ENTRY_VIDEO_TEXTUREFILTER,
     ENTRY_VIDEO_RENDERQUALITY,
@@ -1023,6 +1024,7 @@ private:
     cGuiSwitchBox m_Resolution;                          // 
     cGuiSwitchBox m_DisplayMode;                         // 
     cGuiSwitchBox m_Vsync;                               // 
+    cGuiSwitchBox m_Brightness;                          // 
     cGuiSwitchBox m_AntiAliasing;                        // 
     cGuiSwitchBox m_TextureFilter;                       // 
     cGuiSwitchBox m_RenderQuality;                       // 
@@ -1098,6 +1100,7 @@ public:
 
 private:
     // 
+    void __UpdateBrightness();
     void __UpdateRenderQuality();
     void __UpdateShadowQuality();
     void __UpdateWaterQuality();

@@ -120,10 +120,12 @@ public:
     inline void SetDirectionGame(const coreVector2 vDirectionGame)                      {m_vDirectionGame = vDirectionGame; ASSERT(vDirectionGame.IsNormalized())}
     inline void SetFrameValue   (const coreFloat   fFrameValue) {m_fFrameValue = fFrameValue;}
     inline void SetSaturation   (const coreUintW   iIndex, const coreFloat fSaturation) {ASSERT((iIndex < POST_INTERIORS) && (fSaturation >= 0.0f) && (fSaturation <= 1.0f)) m_avData[iIndex].x = LERP(0.0f, 0.94f, fSaturation);}
-    inline void SetValue        (const coreUintW   iIndex, const coreFloat fValue)      {ASSERT((iIndex < POST_INTERIORS) && (fValue      >= 0.0f) && (fValue      <= 1.0f)) m_avData[iIndex].y = LERP(0.0f, 1.0f,  fValue);}
+    //inline void SetValue        (const coreUintW   iIndex, const coreFloat fValue)      {ASSERT((iIndex < POST_INTERIORS) && (fValue      >= 0.0f) && (fValue      <= 1.0f)) m_avData[iIndex].y = LERP(0.0f, 1.0f,  fValue);}
+    inline void SetBrightness   (const coreUintW   iIndex, const coreFloat fValue)      {ASSERT((iIndex < POST_INTERIORS) && (fValue      >= 0.0f) && (fValue      <= 2.0f)) m_avData[iIndex].y = fValue;}
     inline void SetBorder       (const coreUintW   iIndex, const coreFloat fBorder)     {ASSERT((iIndex < POST_INTERIORS) && (fBorder     >= 0.0f) && (fBorder     <= 1.0f)) m_avData[iIndex].z = LERP(0.4f, 2.0f,  fBorder);}
     inline void SetSaturationAll(const coreFloat   fSaturation)                         {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetSaturation(i, fSaturation);}
     inline void SetValueAll     (const coreFloat   fValue)                              {/*for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetValue     (i, fValue);*/ m_Black.SetAlpha(1.0f - fValue); m_Black.SetEnabled(m_Black.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);}
+    inline void SetBrightnessAll(const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBrightness(i, fBorder);}
     inline void SetBorderAll    (const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBorder    (i, fBorder);}
     inline void SetChroma       (const coreFloat   fChroma)                             {m_fChroma = fChroma;}
 

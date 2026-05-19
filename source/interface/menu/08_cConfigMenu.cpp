@@ -137,6 +137,7 @@ cConfigMenu::cConfigMenu()noexcept
     #endif
 
         if(i == ENTRY_VIDEO_RENDERQUALITY)   ++iOffset;   // # new paragraph
+        if(i == ENTRY_VIDEO_PARTICLEEFFECTS) ++iOffset;
         if(i == ENTRY_AUDIO_MUSICVOLUME)     ++iOffset;
         if(i == ENTRY_AUDIO_QUALITY)         ++iOffset;
         if(i == ENTRY_AUDIO_3DSOUND)         ++iOffset;
@@ -159,7 +160,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_AUDIO_MODE)            ++iOffset;
         if(i == ENTRY_GAME_PUREMODE)         ++iOffset;
     #else
-        if(i == ENTRY_VIDEO_PARTICLEEFFECTS) ++iOffset;
+        if(i == ENTRY_VIDEO_BRIGHTNESS)      ++iOffset;
         if(i == ENTRY_INPUT_RUMBLE)          ++iOffset;
         if(i == ENTRY_GAME_UPDATEFREQ)       ++iOffset;
     #endif
@@ -215,6 +216,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_Resolution,      VIDEO_RESOLUTION,      0.31f)
         __SET_OPTION(m_DisplayMode,     VIDEO_DISPLAYMODE,     0.31f)
         __SET_OPTION(m_Vsync,           VIDEO_VSYNC,           0.31f)
+        __SET_OPTION(m_Brightness,      VIDEO_BRIGHTNESS,      0.31f)
         __SET_OPTION(m_AntiAliasing,    VIDEO_ANTIALIASING,    0.31f)
         __SET_OPTION(m_TextureFilter,   VIDEO_TEXTUREFILTER,   0.31f)
         __SET_OPTION(m_RenderQuality,   VIDEO_RENDERQUALITY,   0.31f)
@@ -255,8 +257,9 @@ cConfigMenu::cConfigMenu()noexcept
         m_Navigator.BindObject(&m_Monitor,         &m_VideoTab,        NULL, &m_Resolution,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_Resolution,      &m_Monitor,         NULL, &m_DisplayMode,     NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_DisplayMode,     &m_Resolution,      NULL, &m_Vsync,           NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_Vsync,           &m_DisplayMode,     NULL, &m_AntiAliasing,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
-        m_Navigator.BindObject(&m_AntiAliasing,    &m_Vsync,           NULL, &m_TextureFilter,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_Vsync,           &m_DisplayMode,     NULL, &m_Brightness,      NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_Brightness,      &m_Vsync,           NULL, &m_AntiAliasing,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
+        m_Navigator.BindObject(&m_AntiAliasing,    &m_Brightness,      NULL, &m_TextureFilter,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_TextureFilter,   &m_AntiAliasing,    NULL, &m_RenderQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_RenderQuality,   &m_TextureFilter,   NULL, &m_ShadowQuality,   NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
         m_Navigator.BindObject(&m_ShadowQuality,   &m_RenderQuality,   NULL, &m_WaterQuality,    NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_CONFIG_VIDEO);
@@ -448,7 +451,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_VideoBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
     m_VideoBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
 #if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
-    m_VideoBox.SetMaxOffset(0.05f * 15.5f - m_VideoBox.GetSize().y);
+    m_VideoBox.SetMaxOffset(0.05f * 17.0f - m_VideoBox.GetSize().y);
 #endif
 
     for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLine [i]);}
@@ -457,6 +460,7 @@ cConfigMenu::cConfigMenu()noexcept
     if(!m_Resolution     .GetStatus()) m_VideoBox.BindObject(&m_Resolution);
     if(!m_DisplayMode    .GetStatus()) m_VideoBox.BindObject(&m_DisplayMode);
     if(!m_Vsync          .GetStatus()) m_VideoBox.BindObject(&m_Vsync);
+    if(!m_Brightness     .GetStatus()) m_VideoBox.BindObject(&m_Brightness);
     if(!m_AntiAliasing   .GetStatus()) m_VideoBox.BindObject(&m_AntiAliasing);
     if(!m_TextureFilter  .GetStatus()) m_VideoBox.BindObject(&m_TextureFilter);
     if(!m_RenderQuality  .GetStatus()) m_VideoBox.BindObject(&m_RenderQuality);
@@ -517,6 +521,7 @@ cConfigMenu::cConfigMenu()noexcept
     }
     m_Vsync          .AddEntryLanguage("VALUE_OFF",              0u);
     m_Vsync          .AddEntryLanguage("VALUE_AUTO",             1u);
+    for(coreUintW i = 50u; i <= 150u; i += 1u)                    m_Brightness   .AddEntry(PRINT("%zu%%", i), i);
     m_AntiAliasing   .AddEntryLanguage("VALUE_OFF",              0u);
          if(CORE_GL_SUPPORT(INTEL_framebuffer_CMAA))               for(coreUintW i = 1u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i == 1u)                                               ? "CMAA" : "MSAA"), i);
     else if(CORE_GL_SUPPORT(AMD_framebuffer_multisample_advanced)) for(coreUintW i = 2u, ie = iMaxSamples; i <= ie; i <<= 1u) m_AntiAliasing.AddEntry(PRINT("%zux (%s)",   i, (i >= 4u && i <= Core::Graphics->GetMaxSamplesEQAA(2u)) ? "EQAA" : "MSAA"), i);
@@ -612,7 +617,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindScroll(&m_VideoBox);
     m_Navigator.BindScroll(&m_InputBox);
 
-    m_Navigator.AssignFirst(DEFINED(_CORE_EMSCRIPTEN_) ? &m_AntiAliasing : (DEFINED(_CORE_SWITCH_) ? &m_ParticleEffects : &m_Monitor));
+    m_Navigator.AssignFirst(DEFINED(_CORE_EMSCRIPTEN_) ? &m_AntiAliasing : (DEFINED(_CORE_SWITCH_) ? &m_Brightness : &m_Monitor));
     m_Navigator.AssignBack (&m_BackButton);
     m_Navigator.AssignMenu (this);
 
@@ -737,6 +742,10 @@ void cConfigMenu::Move()
             }
 
             // 
+            if(m_Brightness.GetUserSwitch())
+                this->__UpdateBrightness();
+
+            // 
             if(m_RenderQuality.GetUserSwitch())
                 this->__UpdateRenderQuality();
 
@@ -753,6 +762,7 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_Resolution);
             cMenu::UpdateSwitchBox(&m_DisplayMode);
             cMenu::UpdateSwitchBox(&m_Vsync);
+            cMenu::UpdateSwitchBox(&m_Brightness);
             cMenu::UpdateSwitchBox(&m_AntiAliasing);
             cMenu::UpdateSwitchBox(&m_TextureFilter);
             cMenu::UpdateSwitchBox(&m_RenderQuality);
@@ -1234,6 +1244,7 @@ void cConfigMenu::CheckValues()
         __CHECK_VALUE(VIDEO_VSYNC,           m_Vsync                 .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC))
         __CHECK_VALUE(VIDEO_ANTIALIASING,    m_AntiAliasing          .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))
         __CHECK_VALUE(VIDEO_TEXTUREFILTER,   m_TextureFilter         .GetCurValue()   != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))
+        __CHECK_VALUE(VIDEO_BRIGHTNESS,      m_Brightness            .GetCurValue()   != g_OldConfig.Graphics.iBrightness)
         __CHECK_VALUE(VIDEO_RENDERQUALITY,   m_RenderQuality         .GetCurValue()   != g_OldConfig.Graphics.iRender)
         __CHECK_VALUE(VIDEO_SHADOWQUALITY,   m_ShadowQuality         .GetCurValue()   != g_OldConfig.Graphics.iShadow)
         __CHECK_VALUE(VIDEO_WATERQUALITY,    m_WaterQuality          .GetCurValue()   != g_OldConfig.Graphics.iReflection)
@@ -1303,6 +1314,7 @@ void cConfigMenu::CheckValues()
 // 
 void cConfigMenu::LoadValues()
 {
+    const coreUintW iBrightnessIndex    = m_Brightness   .GetCurIndex();
     const coreUintW iRenderQualityIndex = m_RenderQuality.GetCurIndex();
     const coreUintW iShadowQualityIndex = m_ShadowQuality.GetCurIndex();
     const coreUintW iWaterQualityIndex  = m_WaterQuality .GetCurIndex();
@@ -1332,6 +1344,7 @@ void cConfigMenu::LoadValues()
     m_Vsync          .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC));
     m_AntiAliasing   .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
     m_TextureFilter  .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
+    m_Brightness     .SelectValue(g_CurConfig.Graphics.iBrightness);
     m_RenderQuality  .SelectValue(g_CurConfig.Graphics.iRender);
     m_ShadowQuality  .SelectValue(g_CurConfig.Graphics.iShadow);
     m_WaterQuality   .SelectValue(g_CurConfig.Graphics.iReflection);
@@ -1379,6 +1392,7 @@ void cConfigMenu::LoadValues()
     // 
     if(m_SaveButton.GetOverride() >= 0)
     {
+        if(iBrightnessIndex    != m_Brightness   .GetCurIndex()) this->__UpdateBrightness();
         if(iRenderQualityIndex != m_RenderQuality.GetCurIndex()) this->__UpdateRenderQuality();
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
         if(iWaterQualityIndex  != m_WaterQuality .GetCurIndex()) this->__UpdateWaterQuality();
@@ -1425,6 +1439,7 @@ void cConfigMenu::SaveValues()
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_VSYNC,               m_Vsync        .GetCurValue());
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurValue());
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurValue());
+    g_CurConfig.Graphics.iBrightness = m_Brightness     .GetCurValue();
     g_CurConfig.Graphics.iRender     = m_RenderQuality  .GetCurValue();
     g_CurConfig.Graphics.iShadow     = m_ShadowQuality  .GetCurValue();
     g_CurConfig.Graphics.iReflection = m_WaterQuality   .GetCurValue();
@@ -1561,6 +1576,18 @@ void cConfigMenu::PrintFigure(cFigure* OUTPUT pFigure, const coreUint8 iType, co
 {
     pFigure->SetBaseAsType(iType);
     pFigure->SetKey       (iKey);
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__UpdateBrightness()
+{
+    // 
+    g_CurConfig.Graphics.iBrightness = m_Brightness.GetCurValue();
+
+    // 
+    g_pPostProcessing->SetBrightnessAll(I_TO_F(g_CurConfig.Graphics.iBrightness) * 0.01f);
 }
 
 

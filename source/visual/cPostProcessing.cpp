@@ -71,6 +71,7 @@ cPostProcessing::cPostProcessing()noexcept
     this->SetWallOpacity  (0.0f);
     this->SetSaturationAll(1.0f);
     this->SetValueAll     (1.0f);
+    this->SetBrightnessAll(I_TO_F(g_CurConfig.Graphics.iBrightness) * 0.01f);
     this->SetBorderAll    (POST_DEFAULT_BORDER_MIN);
 
     

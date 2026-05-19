@@ -29,6 +29,7 @@
 #define CONFIG_DEFAULT_VOLUME (0.7f)
 #define CONFIG_RESAMPLER_HIGH (5u)
 
+#define CONFIG_GRAPHICS_BRIGHTNESS   "Graphics", "Brightness",                                         (100)
 #define CONFIG_GRAPHICS_RENDER       "Graphics", "Render",                                             (1)
 #define CONFIG_GRAPHICS_SHADOW       "Graphics", "Shadow",                                             (2)
 #define CONFIG_GRAPHICS_REFLECTION   "Graphics", "Reflection",                                         (1)
@@ -119,6 +120,7 @@ struct sConfig final
 {
     struct
     {
+        coreUint8 iBrightness;   // 
         coreUint8 iRender;       // render level
         coreUint8 iShadow;       // shadow level
         coreUint8 iReflection;   // water reflection level

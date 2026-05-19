@@ -92,7 +92,7 @@ void FragmentMain()
 #endif
 
     // 
-    gl_FragColor = vec4(coreSaturate(v4Intermediate.rgb + vec3(coreDither() / 50.0)), v4Intermediate.a);
+    gl_FragColor = vec4(coreSaturate(v4Intermediate.rgb * u_v4Color.g + vec3(coreDither() / 50.0)), v4Intermediate.a);
 
 #if defined(_P1_DEBUG_)
 
