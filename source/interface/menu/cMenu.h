@@ -1555,7 +1555,6 @@ private:
     
     coreFlow m_fVolume;
     
-    
     cInterface m_Interface;
     coreFlow   m_fInterfaceAlpha;
 

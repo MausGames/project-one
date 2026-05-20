@@ -95,7 +95,7 @@ void cFigure::Move()
                     pcText = SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(m_iKey), SDL_KMOD_NONE, true));
 
                     // 
-                    this->SetTexOffset(((std::strlen(pcText) > 3u) ? coreVector2(9.0f,4.0f) : coreVector2(8.0f,4.0f)) * FIGURE_SCALE_KEYBOARD);
+                    this->SetTexOffset(((coreStrLen(pcText) > 3u) ? coreVector2(9.0f,4.0f) : coreVector2(8.0f,4.0f)) * FIGURE_SCALE_KEYBOARD);
                 }
             }
             else

@@ -421,6 +421,7 @@ coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, coreSet<sScorePack*>* OUTP
     if(pScoreFile)
     {
         // 
+        pScoreFile->LoadData(true);
         pScoreFile->Decompress(10u * 1024u * 1024u);
 
         // 

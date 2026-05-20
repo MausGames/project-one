@@ -284,7 +284,7 @@ public:
 
     // 
     void CreateExplosion   (const coreVector3 vPosition);
-    void CreateExplosionExt(const coreVector3 vPosition);
+    void CreateExplosionExt(const coreVector3 vPosition, const coreBool bSlowScreen = true);
 
     // 
     void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const coreFloat fPitch, const eSoundEffect eSoundIndex);

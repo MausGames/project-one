@@ -118,10 +118,10 @@ void cOutdoor::RenderDepth()
 // load outdoor geometry
 void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed)
 {
-    BIG_STATIC sVertex     s_aVertexData[OUTDOOR_TOTAL_VERTICES];
-    BIG_STATIC coreUint16  s_aiIndexData[OUTDOOR_TOTAL_INDICES];
-    BIG_STATIC coreVector3 s_avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho1, 0, sizeof(s_avOrtho1));
-    BIG_STATIC coreVector3 s_avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho2, 0, sizeof(s_avOrtho2));
+    static sVertex     s_aVertexData[OUTDOOR_TOTAL_VERTICES];
+    static coreUint16  s_aiIndexData[OUTDOOR_TOTAL_INDICES];
+    static coreVector3 s_avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho1, 0, sizeof(s_avOrtho1));
+    static coreVector3 s_avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho2, 0, sizeof(s_avOrtho2));
 
     // save properties
     m_iAlgorithm = iAlgorithm;
@@ -275,7 +275,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
     }
 
     // reduce total vertex size
-    BIG_STATIC sVertexPacked s_aPackedData[OUTDOOR_TOTAL_VERTICES];
+    static sVertexPacked s_aPackedData[OUTDOOR_TOTAL_VERTICES];
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         const sVertex& oVertex = s_aVertexData[i];
@@ -298,7 +298,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
     if(!CORE_GL_SUPPORT(EXT_gpu_shader4))
     {
         // 
-        BIG_STATIC coreVector2 s_avPosition[OUTDOOR_TOTAL_VERTICES];
+        static coreVector2 s_avPosition[OUTDOOR_TOTAL_VERTICES];
         for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) s_avPosition[i] = s_aVertexData[i].vPosition.xy();
 
         // 

@@ -302,10 +302,10 @@ cExtraMenu::cExtraMenu()noexcept
                                                  (i == MENU_EXTRA_STATS - 1u) ? s_cast<coreObject2D*>(&m_BackButton) : &m_aStatsLine[(i + 1u)                    % MENU_EXTRA_STATS], NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_STATS);
     }
 
-    m_Navigator.BindObject(&m_Password, &m_OtherTab, NULL, &m_Credits,    NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
-    m_Navigator.BindObject(&m_Credits,  &m_Password, NULL, &m_Music,      NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
-    m_Navigator.BindObject(&m_Music,    &m_Credits,  NULL, &m_Style,      NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
-    m_Navigator.BindObject(&m_Style,    &m_Music,    NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Password, &m_OtherTab, NULL, &m_Credits,    NULL, MENU_TYPE_TAB_NODE,                                                  SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Credits,  &m_Password, NULL, &m_Music,      NULL, MENU_TYPE_TAB_NODE,                                                  SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Music,    &m_Credits,  NULL, &m_Style,      NULL, MENU_TYPE_TAB_NODE,                                                  SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Style,    &m_Music,    NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE, SURFACE_EXTRA_OTHER);
 
     m_Navigator.BindObject(&m_BackButton, &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, NULL, NULL, MENU_TYPE_DEFAULT);
 
@@ -578,8 +578,8 @@ void cExtraMenu::Move()
                     const coreBool bSuccess = ApplyPassword(pcText);
 
                     // 
-                         if(!std::strcmp(pcText, "PASSWORD")) pArcadeInput->OverrideText("NICE TRY");
-                    else if(!std::strcmp(pcText, "PASSWORT")) pArcadeInput->OverrideText("SO NICHT");
+                         if(!coreStrCmp(pcText, "PASSWORD")) pArcadeInput->OverrideText("NICE TRY");
+                    else if(!coreStrCmp(pcText, "PASSWORT")) pArcadeInput->OverrideText("SO NICHT");
                     else
                     {
                         // 
@@ -592,7 +592,7 @@ void cExtraMenu::Move()
                         this->LoadMissions();
 
                         // 
-                        g_pSpecialEffects->CreateExplosionExt(coreVector3(0.0f,0.0f,0.0f));
+                        g_pSpecialEffects->CreateExplosionExt(coreVector3(0.0f,0.0f,0.0f), false);
                     }
 
                     // 

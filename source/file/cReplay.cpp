@@ -1096,7 +1096,7 @@ void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
             coreBool bFound = false;
             for(coreUintW j = 0u; j < iNum; ++j)
             {
-                if(!std::strcmp(coreData::StrFilename((*paInfoList)[j].sPath.c_str()), pcFilename))
+                if(!coreStrCmp(coreData::StrFilename((*paInfoList)[j].sPath.c_str()), pcFilename))
                 {
                     (*paInfoList)[j].iSlot = i;
 

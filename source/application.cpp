@@ -1186,7 +1186,7 @@ void CoreApp::Setup()
         ->AttachShader("full_post_chroma.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_layer_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_layer_program", CORE_RESOURCE_UPDATE_PERSIST, NULL)->GetRawResource())
         ->AttachShader("full.vert")
         ->AttachShader("full_post_layer.frag")
         ->Finish();

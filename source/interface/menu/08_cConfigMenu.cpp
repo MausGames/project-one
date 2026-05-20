@@ -1284,7 +1284,7 @@ void cConfigMenu::CheckValues()
         __CHECK_INPUT(INPUT_ACTION9,         this->__RetrieveInputDirCurValue(i, 12u) != this->__RetrieveInputDirOldValue(i, 12u), INPUT_SETS)
         __CHECK_INPUT(INPUT_ACTION10,        this->__RetrieveInputDirCurValue(i, 13u) != this->__RetrieveInputDirOldValue(i, 13u), INPUT_SETS)
 
-        __CHECK_VALUE(GAME_LANGUAGE,         std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))
+        __CHECK_VALUE(GAME_LANGUAGE,         coreStrCmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))
         __CHECK_VALUE(GAME_GAMEDIRECTION,    m_GameDirection         .GetCurValue()   != g_OldConfig.Game.iGameDirection)
         __CHECK_VALUE(GAME_HUDDIRECTION,     m_HudDirection          .GetCurValue()   != g_OldConfig.Game.iHudDirection)
         __CHECK_VALUE(GAME_HUDTYPE,          m_HudType               .GetCurValue()   != g_OldConfig.Game.iHudType)

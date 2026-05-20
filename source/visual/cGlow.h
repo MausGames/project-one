@@ -13,6 +13,7 @@
 // TODO 3: glow is cleared abruptly when getting inactive, should afterglow instead
 // TODO 4: remove exposed clear function (location where this is called should use a different way)
 // TODO 3: sort bound objects and lists by shaders, then by models (not textures), handle index/address
+// TODO 3: do I really need float framebuffers (value > 1.0) and coreSaturate ?
 
 
 // ****************************************************************

@@ -114,7 +114,7 @@ cSpecialEffects::cSpecialEffects()noexcept
         coreSoundPtr& pSoundPtr = m_apSound[eSoundIndex];
 
         if(!pSoundPtr) pSoundPtr = Core::Manager::Resource->Get(pcName);
-        ASSERT(!std::strcmp(pSoundPtr.GetHandle()->GetName(), pcName))
+        ASSERT(!coreStrCmp(pSoundPtr.GetHandle()->GetName(), pcName))
     };
     nLoadSoundFunc(SOUND_PLAYER_EXPLOSION,     "player_explosion.wav");
     nLoadSoundFunc(SOUND_ENEMY_EXPLOSION_01,   "enemy_explosion_01.wav");
@@ -1054,14 +1054,16 @@ void cSpecialEffects::CreateExplosion(const coreVector3 vPosition)
     this->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 2000u);
 }
 
-void cSpecialEffects::CreateExplosionExt(const coreVector3 vPosition)
+void cSpecialEffects::CreateExplosionExt(const coreVector3 vPosition, const coreBool bSlowScreen)
 {
     // 
     this->CreateExplosion (vPosition);
     this->CreateSplashDark(vPosition, 200.0f, 400u, true);
     this->PlaySound       (vPosition, 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_11);
     this->PlaySound       (vPosition, 1.2f, 0.6f, SOUND_EFFECT_SHAKE_02);
-    this->SlowScreen      (4.0f);
+
+    // 
+    if(bSlowScreen) this->SlowScreen(4.0f);
 }
 
 

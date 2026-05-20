@@ -537,7 +537,7 @@ inline coreUintW CharToWchar(coreWchar* OUTPUT pcOutput, const coreUintW iOutput
 
     const coreChar* pcInputPtr   = r_cast<const coreChar*>(pcInput);
     coreChar*       pcOutputPtr  = r_cast<coreChar*>(pcOutput);
-    coreUintW       iInputBytes  = (std::strlen(pcInput) + 1u) * sizeof(coreChar);
+    coreUintW       iInputBytes  = (coreStrLen(pcInput) + 1u) * sizeof(coreChar);
     coreUintW       iOutputBytes = iOutputSize * sizeof(coreWchar);
 
     SDL_iconv(s_Iconv, &pcInputPtr, &iInputBytes, &pcOutputPtr, &iOutputBytes);

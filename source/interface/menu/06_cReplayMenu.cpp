@@ -980,7 +980,7 @@ void cReplayMenu::Move()
 
                 // 
                 const coreChar* pcText = pArcadeInput->GetText();
-                if(pcText[0] && std::strcmp(pcText, oInfo.oHeader.acName))
+                if(pcText[0] && coreStrCmp(pcText, oInfo.oHeader.acName))
                 {
                     // 
                     cReplay::RenameReplay(oInfo.sPath.c_str(), pcText);
@@ -1315,7 +1315,7 @@ void cReplayMenu::__UpdateList(const coreBool bReset)
     {
         const cReplay::sHeader& oHeader = m_aInfoList[i + iStart].oHeader;
 
-        const coreUintW iLen   = std::strlen(oHeader.acName);
+        const coreUintW iLen   = coreStrLen(oHeader.acName);
         const coreChar* pcName = (iLen <= REPLAY_NAME_INPUT) ? oHeader.acName : PRINT("%.*s~", REPLAY_NAME_INPUT, oHeader.acName);
 
         g_pMenu->SetTextWithFont(&m_aName[i], pcName);

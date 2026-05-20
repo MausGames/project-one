@@ -74,7 +74,7 @@ void CoreApp::Init()
     g_bDemoVersion = CoreApp::Settings::IsDemo();
 
     // 
-    g_bLeaderboards = !std::strcmp(Core::Platform->GetIdentifier(), "Steam") || DEFINED(_CORE_SWITCH_);
+    g_bLeaderboards = !coreStrCmp(Core::Platform->GetIdentifier(), "Steam") || DEFINED(_CORE_SWITCH_);
 
     // 
     InitAchievements();
@@ -992,7 +992,7 @@ static void DebugGame()
     {
         //g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
         //g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
-        g_pSpecialEffects->CreateExplosionExt(coreVector3(0.0f,0.0f,0.0f));
+        g_pSpecialEffects->CreateExplosionExt(coreVector3(0.0f,0.0f,0.0f), false);
     }
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))

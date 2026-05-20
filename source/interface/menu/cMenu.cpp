@@ -373,7 +373,7 @@ void cMenu::Move()
                         this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
                     }
                 }
-                else if((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && g_MenuInput.bPause) || Core::System->GetWinFocusLost())
+                else if((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && g_MenuInput.bPause) || (Core::System->GetWinFocusLost() && !DEFINED(_CORE_DEBUG_)))
                 {
                     // 
                     m_PauseMenu.ChangeSurface(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) ? SURFACE_PAUSE_FULL : SURFACE_PAUSE_LIGHT, 0.0f);

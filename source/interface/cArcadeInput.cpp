@@ -339,7 +339,7 @@ void cArcadeInput::__MoveCursor(const coreUint8 iNewPage, const coreUint8 iNewGy
 void cArcadeInput::__SetText(const coreChar* pcText)
 {
     // 
-    const coreUintW iLen = std::strlen(pcText);
+    const coreUintW iLen = coreStrLen(pcText);
 
     // 
     m_aText[0].SetText((iLen < m_iTextLength) ? PRINT("%s|", pcText) : pcText);

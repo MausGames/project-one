@@ -20,8 +20,8 @@ cCalorMission::cCalorMission()noexcept
 , m_Hail            (CALOR_HAILS)
 , m_HailWave        (CALOR_HAILS)
 , m_fHailTime       (0.0f)
-, m_Chest           (CALOR_HAILS)
-, m_ChestWave       (CALOR_HAILS)
+, m_Chest           (CALOR_CHESTS)
+, m_ChestWave       (CALOR_CHESTS)
 , m_afChestTime     {}
 , m_pAimOwner       (NULL)
 , m_fAimTime        (0.0f)
