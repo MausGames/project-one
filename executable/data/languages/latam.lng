@@ -187,6 +187,7 @@ $EXTRA_PROGRESS = Progreso
 $EXTRA_PASSWORD = Contraseña
 $EXTRA_CREDITS = Créditos
 $EXTRA_MUSIC = Rocola
+$EXTRA_STYLE = Estilo de renderizado
 
 $FILTER_ALL = TODO
 $FILTER_COMPLETE = COMPLETO

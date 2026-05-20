@@ -1226,6 +1226,9 @@ const coreList<sLanguage>& cMenu::GetLanguageList()
 void cMenu::ClearScreen()
 {
     // 
+    g_pPostProcessing->FixupOverdraw();
+
+    // 
     g_pPostProcessing->SetSaturationAll(1.0f);
     g_pPostProcessing->SetValueAll     (1.0f);
 
@@ -1598,6 +1601,9 @@ void cMenu::__StartGame()
     InitFramerate(GetCurUpdateFreq(), GetCurGameSpeed());
 
     // 
+    g_bOverdrawMode = REPLAY_WRAP_CHEAT_OVERDRAW;
+
+    // 
     coreInt32 iMissionID;
     coreUint8 iTakeFrom, iTakeTo, iKind;
     m_GameMenu.RetrieveStartData(&iMissionID, &iTakeFrom, &iTakeTo, &iKind);
@@ -1679,6 +1685,9 @@ void cMenu::__EndGame()
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     STATIC_DELETE(g_pGame)
+
+    // 
+    g_bOverdrawMode = false;
 
     // 
     InitFramerate();

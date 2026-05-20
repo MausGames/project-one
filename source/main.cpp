@@ -13,6 +13,7 @@ coreVector2     g_vGameResolution = coreVector2(0.0f,0.0f);
 coreDouble      g_adGameTime[2]   = {};
 coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
 coreBool        g_bTiltMode       = false;
+coreBool        g_bOverdrawMode   = false;
 coreFloat       g_fShiftMode      = 0.0f;
 coreBool        g_bDemoVersion    = false;
 coreBool        g_bLeaderboards   = false;
@@ -224,7 +225,7 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Environment");
         Core::Debug->MeasureStart("Foreground");
         {
-            if((STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive() || g_pWindscreen->IsActive()) && !g_bTiltMode)
+            if((STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive() || g_pWindscreen->IsActive()) && !g_bTiltMode && !g_bOverdrawMode)
             {
                 // create foreground frame buffer
                 g_pForeground->Start();
@@ -264,7 +265,7 @@ void CoreApp::Render()
             // render post-processing
             g_pPostProcessing->Render();
 
-            if(g_bTiltMode)
+            if(g_bTiltMode || g_bOverdrawMode)
             {
                 if(STATIC_ISVALID(g_pGame))
                 {
@@ -758,21 +759,34 @@ static void DebugGame()
             const coreInt32* piMissionList = g_bDemoVersion ?            GAME_MISSION_LIST_DEMO  :            GAME_MISSION_LIST_MAIN;
             const coreUintW  iNumMissions  = g_bDemoVersion ? ARRAY_SIZE(GAME_MISSION_LIST_DEMO) : ARRAY_SIZE(GAME_MISSION_LIST_MAIN);
 
-            InitFramerate(GetCurUpdateFreq(), GetCurGameSpeed());
+            const auto nLoadGameFunc = [&](const coreInt32 iMissionID)
+            {
+                STATIC_NEW(g_pGame, oOptions, piMissionList, iNumMissions)
+                g_pGame->LoadMissionID(iMissionID);
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, piMissionList, iNumMissions) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f); g_pEnvironment->Activate(); g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);}
-                 if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4),     CORE_INPUT_PRESS)) __LOAD_GAME(cHarenaMission ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5),     CORE_INPUT_PRESS)) __LOAD_GAME(cRutilusMission::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6),     CORE_INPUT_PRESS)) __LOAD_GAME(cGeluMission   ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7),     CORE_INPUT_PRESS)) __LOAD_GAME(cCalorMission  ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8),     CORE_INPUT_PRESS)) __LOAD_GAME(cMuscusMission ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9),     CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0),     CORE_INPUT_PRESS)) __LOAD_GAME(cErrorMission  ::ID)
-            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(MINUS), CORE_INPUT_PRESS)) __LOAD_GAME(cBonus1Mission ::ID)
-            #undef __LOAD_GAME
+                g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);
+
+                g_pPostProcessing->SetWallOpacity(1.0f);
+
+                g_pEnvironment->Activate();
+                g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f); 
+
+                InitFramerate(GetCurUpdateFreq(), GetCurGameSpeed());
+
+                g_bOverdrawMode = REPLAY_WRAP_CHEAT_OVERDRAW;
+            };
+
+                 if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) nLoadGameFunc(cIntroMission  ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) nLoadGameFunc(cViridoMission ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) nLoadGameFunc(cNevoMission   ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4),     CORE_INPUT_PRESS)) nLoadGameFunc(cHarenaMission ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5),     CORE_INPUT_PRESS)) nLoadGameFunc(cRutilusMission::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6),     CORE_INPUT_PRESS)) nLoadGameFunc(cGeluMission   ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7),     CORE_INPUT_PRESS)) nLoadGameFunc(cCalorMission  ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8),     CORE_INPUT_PRESS)) nLoadGameFunc(cMuscusMission ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9),     CORE_INPUT_PRESS)) nLoadGameFunc(cAterMission   ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0),     CORE_INPUT_PRESS)) nLoadGameFunc(cErrorMission  ::ID);
+            else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(MINUS), CORE_INPUT_PRESS)) nLoadGameFunc(cBonus1Mission ::ID);
         }
     }
 

@@ -66,6 +66,8 @@ private:
     coreVector2 m_vShake;                       // 
     coreBool    m_bShakeDelay;                  // 
 
+    coreFlow m_fOverdrawAlpha;                  // 
+
     coreFlow m_fAnimation;                      // 
 
     coreFullscreen m_Frame;                     // 
@@ -86,17 +88,7 @@ public:
     void Render()final;
     void Move  ()final;
     
-    inline void RenderTilt()
-    {
-        m_Black.Render();
-
-        if((m_fFrameValue < 2.0f) && (!coreMath::IsNear(Core::System->GetResolution().AspectRatio(), 1.0f) || m_bOffsetActive))
-        {
-            // render wallpapers
-            for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
-                m_aWall[i].Render();
-        }
-    }
+    void RenderTilt();
 
     // recompile post-processing shader-programs
     void Recompile();
@@ -106,6 +98,9 @@ public:
 
     // 
     void UpdateLayout();
+
+    // 
+    void FixupOverdraw();
 
     // 
     inline coreBool IsOffset  ()const {return m_bOffsetActive;}
@@ -136,6 +131,7 @@ public:
     // 
     inline const coreVector2& GetDirectionGame()const {return m_vDirectionGame;}
     inline const coreVector2& GetShake        ()const {return m_vShake;}
+    inline const coreVector4& GetInteriorColor()const {return m_aInterior[0].GetColor4();}
 
 
 private:

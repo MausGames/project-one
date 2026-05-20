@@ -61,6 +61,8 @@ cEigengrauBoss::cEigengrauBoss()noexcept
 , m_fAnimation        (0.0f)
 , m_fRotation         (0.0f)
 , m_fRotationSpeed    (0.0f)
+, m_fChromaValue      (0.0f)
+, m_fChromaSpeed      (1.0f)
 , m_fRangeAnim        (0.0f)
 , m_fRangeAnimPlayer  (0.0f)
 , m_fRangeSpeed       (1.0f)
@@ -194,6 +196,7 @@ void cEigengrauBoss::__ResurrectOwn()
 
     // 
     g_bTiltMode = true;
+    this->__CreateChroma(1.0f);
 
     // 
     m_fAttackSpeed = g_pGame->IsEasy() ? 1.1f : 1.5f;
@@ -1314,6 +1317,10 @@ void cEigengrauBoss::__MoveOwn()
     m_Lightning.SetAlpha  (BLENDH3(MIN1(m_fLightningDelay * 0.4f)));
     m_Lightning.SetEnabled(m_fLightningDelay ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Lightning.Move();
+
+    // 
+    m_fChromaValue.UpdateMax(-m_fChromaSpeed, 0.0f);
+    g_pPostProcessing->SetChroma(BLENDBR(m_fChromaValue) * 1.5f);
 }
 
 

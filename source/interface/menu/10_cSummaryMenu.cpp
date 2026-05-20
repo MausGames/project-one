@@ -189,7 +189,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     for(coreUintW i = 0u; i < MENU_SUMMARY_RUNS; ++i)
     {
         m_aContinueImage[i].DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
-        m_aContinueImage[i].DefineProgram("default_2d_program");
+        m_aContinueImage[i].DefineProgram("menu_icon_program");
         m_aContinueImage[i].SetPosition  (m_aaArcadeScoreRun[0][i].GetPosition() + coreVector2(0.0f,0.065f));
         m_aContinueImage[i].SetSize      (coreVector2(1.0f,1.0f) * 0.058f);
         m_aContinueImage[i].SetTexSize   (ICON_TEXSIZE);

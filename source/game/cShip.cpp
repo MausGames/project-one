@@ -46,6 +46,12 @@ void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted, con
 // 
 coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance)
 {
+    if(g_bOverdrawMode && (fDistance < 0.0f))
+    {
+        this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+        return false;
+    }
+
     // 
     coreVector2 vPosition;
     coreVector2 vDirection;

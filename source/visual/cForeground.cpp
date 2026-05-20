@@ -77,7 +77,7 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
 {
     ASSERT(pObject)
     
-    if(g_bTiltMode)
+    if(g_bTiltMode || g_bOverdrawMode)
     {
         // 
         if(pObject->GetPosition().z >= CAMERA_POSITION.z)                                return false;
@@ -89,7 +89,7 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
         const coreVector2 vProjectedPos = this->Project3D(MapToAxis(pObject->GetPosition() - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f), Core::Graphics->GetCamOrientation().xy()));
         const coreFloat   fRadius       = pObject->GetVisualRadius();
 
-        const coreVector2 vRatio = Core::System->GetResolution().HighRatio();
+        const coreVector2 vRatio = g_bTiltMode ? Core::System->GetResolution().HighRatio() : (coreVector2(1.0f,1.0f) * Core::System->GetResolution().HighRatio().Max());
 
         // 
         return ((ABS(vProjectedPos.x) < (FOREGROUND_AREA.x * 1.1f + fRadius) * vRatio.x) &&

@@ -244,6 +244,18 @@ cExtraMenu::cExtraMenu()noexcept
     m_Music.SetSize     (m_Password.GetSize());
     m_Music.SetAlignment(m_Password.GetAlignment());
 
+    m_Style.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1 + MENU_SWITCHBOX_ZOOM, MENU_OUTLINE_SMALL);
+    m_Style.SetPosition (coreVector2(-1.00f,1.00f) * m_aOtherName[3].GetPosition());
+    m_Style.SetSize     (m_Password.GetSize());
+    m_Style.SetAlignment(m_Password.GetAlignment());
+    m_Style.SetEndless  (true);
+    m_Style.GetCaption()->SetColor3(COLOR_MENU_WHITE);   // for locked override
+
+    m_NoLeaderboards.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_NoLeaderboards.SetPosition    (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f,0.045f));
+    m_NoLeaderboards.SetColor3      (COLOR_MENU_RED);
+    m_NoLeaderboards.SetTextLanguage("CONFIG_GAME_LEADERBOARD", [=](coreString* OUTPUT psString) {psString->append(PRINT(": %s", Core::Language->GetString("VALUE_OFF")));});
+
     m_PasswordHeader.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
     m_PasswordHeader.SetPosition    (coreVector2(0.0f,0.35f));
     m_PasswordHeader.SetColor3      (COLOR_MENU_WHITE);
@@ -255,6 +267,9 @@ cExtraMenu::cExtraMenu()noexcept
     m_MusicBoxNew.SetPosition(m_Music.GetPosition() + coreVector2(0.045f,0.0f));
     m_MusicBoxNew.SetIndex   (NEW_EXTRA_MUSICBOX);
 
+    m_RenderStyleNew.SetPosition(m_Style.GetPosition() + coreVector2(0.045f,0.0f));
+    m_RenderStyleNew.SetIndex   (NEW_EXTRA_RENDERSTYLE);
+
     // 
     m_FilterSegment   .AddEntry        ("",                       255u);   // dummy
     m_FilterType      .AddEntryLanguage("GAME_TYPE_SOLO",         GAME_TYPE_SOLO);
@@ -263,6 +278,7 @@ cExtraMenu::cExtraMenu()noexcept
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", GAME_DIFFICULTY_NORMAL);
     m_FilterDifficulty.AddEntryLanguage("FILTER_ALL",             255u);
+    m_Style           .AddEntry        ("",                       0u);   // dummy
 
     // 
     m_Navigator.BindObject(&m_TrophyTab, &m_BackButton, &m_OtherTab,  &m_FilterMission, &m_StatsTab,  MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
@@ -288,13 +304,14 @@ cExtraMenu::cExtraMenu()noexcept
 
     m_Navigator.BindObject(&m_Password, &m_OtherTab, NULL, &m_Credits,    NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
     m_Navigator.BindObject(&m_Credits,  &m_Password, NULL, &m_Music,      NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
-    m_Navigator.BindObject(&m_Music,    &m_Credits,  NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Music,    &m_Credits,  NULL, &m_Style,      NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
+    m_Navigator.BindObject(&m_Style,    &m_Music,    NULL, &m_BackButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_EXTRA_OTHER);
 
     m_Navigator.BindObject(&m_BackButton, &m_aStatsLine[MENU_EXTRA_STATS - 1u], NULL, NULL, NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.BindSurface(&m_TrophyTab, SURFACE_EXTRA_TROPHY, &m_aTrophyLine[MENU_EXTRA_TROPHIES - 1u], NULL, &m_aTrophyLine[0], NULL);
     m_Navigator.BindSurface(&m_StatsTab,  SURFACE_EXTRA_STATS,  &m_aStatsLine [MENU_EXTRA_STATS    - 1u], NULL, &m_FilterMission,  NULL);
-    m_Navigator.BindSurface(&m_OtherTab,  SURFACE_EXTRA_OTHER,  &m_Music,                                 NULL, &m_Password,       NULL);
+    m_Navigator.BindSurface(&m_OtherTab,  SURFACE_EXTRA_OTHER,  &m_Style,                                 NULL, &m_Password,       NULL);
 
     m_Navigator.BindScroll(&m_TrophyBox);
     m_Navigator.BindScroll(&m_StatsBox);
@@ -354,7 +371,10 @@ cExtraMenu::cExtraMenu()noexcept
     this->BindObject(SURFACE_EXTRA_OTHER, &m_Password);
     this->BindObject(SURFACE_EXTRA_OTHER, &m_Credits);
     this->BindObject(SURFACE_EXTRA_OTHER, &m_Music);
+    this->BindObject(SURFACE_EXTRA_OTHER, &m_Style);
+    this->BindObject(SURFACE_EXTRA_OTHER, &m_NoLeaderboards);
     this->BindObject(SURFACE_EXTRA_OTHER, &m_MusicBoxNew);
+    this->BindObject(SURFACE_EXTRA_OTHER, &m_RenderStyleNew);
 
     for(coreUintW i = 0u; i < SURFACE_EXTRA_PASSWORD; ++i) this->BindObject(i, &m_Navigator);
 
@@ -501,6 +521,23 @@ void cExtraMenu::Move()
                 m_OtherNew   .Resolve();
                 m_MusicBoxNew.Resolve();
             }
+            else if(m_Style.GetUserSwitch())
+            {
+                // 
+                switch(m_Style.GetCurValue())
+                {
+                default: UNREACHABLE
+                case 0u: ChangeRenderStyle(CHEAT_RENDER_DEFAULT, false); break;
+                case 1u: ChangeRenderStyle(CHEAT_RENDER_PIXEL,   false); break;
+                case 2u: ChangeRenderStyle(CHEAT_RENDER_RETRO,   false); break;
+                case 3u: ChangeRenderStyle(CHEAT_RENDER_SEPIA,   false); break;
+                case 4u: ChangeRenderStyle(CHEAT_RENDER_DEFAULT, true);  break;
+                }
+
+                // 
+                m_OtherNew      .Resolve();
+                m_RenderStyleNew.Resolve();
+            }
 
             // 
             cMenu::UpdateButton(&m_Password, &m_Navigator, m_Password.IsFocused());
@@ -508,7 +545,24 @@ void cExtraMenu::Move()
             cMenu::UpdateButton(&m_Music,    &m_Navigator, m_Music   .IsFocused());
 
             // 
+            cMenu::UpdateSwitchBox(&m_Style);
+
+            // 
             for(coreUintW i = 0u; i < MENU_EXTRA_OTHERS; ++i) cMenu::UpdateLine(&m_aOtherLine[i], true, g_pMenu->GetButtonColor(), cMenuNavigator::IsUsingAny() ? MENU_UPDATE_NO_SOUND : MENU_UPDATE_DEFAULT);
+
+            // 
+            switch(m_Style.GetCurValue())
+            {
+            default: UNREACHABLE
+            case 0u: m_Style.GetCaption()->SetColor3(COLOR_MENU_WHITE);  break;
+            case 1u: m_Style.GetCaption()->SetColor3(COLOR_MENU_BLUE);   break;
+            case 2u: m_Style.GetCaption()->SetColor3(COLOR_MENU_GREEN);  break;
+            case 3u: m_Style.GetCaption()->SetColor3(COLOR_MENU_YELLOW); break;
+            case 4u: m_Style.GetCaption()->SetColor3(COLOR_MENU_RED);    break;
+            }
+
+            // 
+            m_NoLeaderboards.SetEnabled(((m_Style.GetCurValue() == 4u) && g_bLeaderboards) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         }
         break;
 
@@ -745,11 +799,36 @@ void cExtraMenu::LoadMissions()
     
     
     
-    const coreBool bMusicBox = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MUSICBOX);
-    
-    m_aOtherName[2].SetTextLanguage(bMusicBox ? "EXTRA_MUSIC" : "UNKNOWN");
+    const coreBool bMusicBox    = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MUSICBOX);
+    const coreBool bRenderStyle = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_RENDERSTYLE);
+
+    m_aOtherName[2].SetTextLanguage(bMusicBox    ? "EXTRA_MUSIC" : "UNKNOWN");
+    m_aOtherName[3].SetTextLanguage(bRenderStyle ? "EXTRA_STYLE" : "UNKNOWN");
+
     m_Music.GetCaption()->SetTextLanguage(bMusicBox ? "LISTEN" : "UNKNOWN");
     m_Music.SetOverride(bMusicBox ? 0 : -1);
+
+    const coreUint8 iValue = m_Style.GetNumEntries() ? m_Style.GetCurValue() : 0u;
+
+    if(bRenderStyle)
+    {
+        m_Style.ClearEntries();
+        m_Style.AddEntry("DEFAULT",  0u);
+        m_Style.AddEntry("PIXEL",    1u);
+        m_Style.AddEntry("RETRO",    2u);
+        m_Style.AddEntry("SEPIA",    3u);
+        m_Style.AddEntry("OVERDRAW", 4u);
+
+        m_Style.SetOverride(0);
+        m_Style.Next(); m_Style.Previous();
+    }
+    else
+    {
+        m_Style.SetOverride(-1);
+        m_Style.GetCaption()->SetText("-");
+    }
+
+    if(!m_Style.SelectValue(iValue)) m_Style.SelectFirst();
 }
 
 

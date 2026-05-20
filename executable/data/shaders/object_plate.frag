@@ -6,6 +6,7 @@
 //| Released under the zlib License                 |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
+#include "engine/util_color.glsl"
 
 
 // shader input
@@ -24,4 +25,11 @@ void FragmentMain()
 
     // 
     gl_FragColor = vec4(vec3((1.0 - 0.4 * max(v2Border.x, v2Border.y) - v1Intensity) * (0.5 + 0.5 * v1Detail1 + 0.7 * v1Detail2)) * mix(vec3(1.0), u_v4Color.rgb, u_v4Color.a), 0.7);
+
+#if defined(_P1_SHADING_RETRO_)
+
+    // 
+    gl_FragColor.rgb = vec3(coreLuminance(gl_FragColor.rgb));
+
+#endif
 }

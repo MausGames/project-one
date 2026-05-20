@@ -194,32 +194,35 @@
 #define COLOR_PLAYER_GREEN   (COLOR_ENERGY_GREEN   * 0.77f)
 
 // shader modifiers
-#define SHADER_TRANSITION(x) "#define _P1_TRANSITION_"  " (" #x ") \n"   // full_transition
-#define SHADER_SHADOW(x)     "#define _P1_SHADOW_"      " (" #x ") \n"   // outdoor, object_ground
-#define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_"    " (" #x ") \n"   // weather
-#define SHADER_GLOW          "#define _P1_GLOW_"        " (1) \n"        // post, outdoor, object_ship
-#define SHADER_DISTORTION    "#define _P1_DISTORTION_"  " (1) \n"        // post
-#define SHADER_TRANSPARENT   "#define _P1_TRANSPARENT_" " (1) \n"        // post
-#define SHADER_CHROMA        "#define _P1_CHROMA_"      " (1) \n"        // post
-#define SHADER_DEBUG         "#define _P1_DEBUG_"       " (1) \n"        // post
-#define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"    " (1) \n"        // distortion
-#define SHADER_LABEL         "#define _P1_LABEL_"       " (1) \n"        // swipe
-#define SHADER_SINGLE        "#define _P1_SINGLE_"      " (1) \n"        // decal, weather
-#define SHADER_LIGHT         "#define _P1_LIGHT_"       " (1) \n"        // outdoor, decal, outline
-#define SHADER_DARKNESS      "#define _P1_DARKNESS_"    " (1) \n"        // object_ship
-#define SHADER_DEPTH         "#define _P1_DEPTH_"       " (1) \n"        // object_ship
-#define SHADER_DETAIL        "#define _P1_DETAIL_"      " (1) \n"        // object_ship
-#define SHADER_BLINK         "#define _P1_BLINK_"       " (1) \n"        // energy, object_ship, object_meteor
-#define SHADER_THICK         "#define _P1_THICK_"       " (1) \n"        // outline
-#define SHADER_FLAT          "#define _P1_FLAT_"        " (1) \n"        // outline, energy
-#define SHADER_BULLET        "#define _P1_BULLET_"      " (1) \n"        // outline, energy
-#define SHADER_SPHERIC       "#define _P1_SPHERIC_"     " (1) \n"        // energy
-#define SHADER_INVERT        "#define _P1_INVERT_"      " (1) \n"        // energy
-#define SHADER_DIRECT        "#define _P1_DIRECT_"      " (1) \n"        // outline, energy, distortion, menu_border
-#define SHADER_WAVE          "#define _P1_WAVE_"        " (1) \n"        // object
-#define SHADER_GREY          "#define _P1_GREY_"        " (1) \n"        // vignette
-#define SHADER_VIGNETTE      "#define _P1_VIGNETTE_"    " (1) \n"        // grey
-#define SHADER_ROTATED       "#define _P1_ROTATED_"     " (1) \n"        // energy
+#define SHADER_TRANSITION(x) "#define _P1_TRANSITION_"    " (" #x ") \n"   // full_transition
+#define SHADER_SHADOW(x)     "#define _P1_SHADOW_"        " (" #x ") \n"   // outdoor, object_ground
+#define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_"      " (" #x ") \n"   // weather
+#define SHADER_GLOW          "#define _P1_GLOW_"          " (1) \n"        // post, outdoor, object_ship
+#define SHADER_DISTORTION    "#define _P1_DISTORTION_"    " (1) \n"        // post
+#define SHADER_TRANSPARENT   "#define _P1_TRANSPARENT_"   " (1) \n"        // post
+#define SHADER_CHROMA        "#define _P1_CHROMA_"        " (1) \n"        // post
+#define SHADER_DEBUG         "#define _P1_DEBUG_"         " (1) \n"        // post
+#define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"      " (1) \n"        // distortion
+#define SHADER_LABEL         "#define _P1_LABEL_"         " (1) \n"        // swipe
+#define SHADER_SINGLE        "#define _P1_SINGLE_"        " (1) \n"        // decal, weather
+#define SHADER_LIGHT         "#define _P1_LIGHT_"         " (1) \n"        // outdoor, decal, outline
+#define SHADER_DARKNESS      "#define _P1_DARKNESS_"      " (1) \n"        // object_ship
+#define SHADER_DEPTH         "#define _P1_DEPTH_"         " (1) \n"        // object_ship
+#define SHADER_DETAIL        "#define _P1_DETAIL_"        " (1) \n"        // object_ship
+#define SHADER_BLINK         "#define _P1_BLINK_"         " (1) \n"        // energy, object_ship, object_meteor
+#define SHADER_THICK         "#define _P1_THICK_"         " (1) \n"        // outline
+#define SHADER_FLAT          "#define _P1_FLAT_"          " (1) \n"        // outline, energy
+#define SHADER_BULLET        "#define _P1_BULLET_"        " (1) \n"        // outline, energy
+#define SHADER_SPHERIC       "#define _P1_SPHERIC_"       " (1) \n"        // energy
+#define SHADER_INVERT        "#define _P1_INVERT_"        " (1) \n"        // energy
+#define SHADER_DIRECT        "#define _P1_DIRECT_"        " (1) \n"        // outline, energy, distortion, menu_border
+#define SHADER_WAVE          "#define _P1_WAVE_"          " (1) \n"        // object
+#define SHADER_GREY          "#define _P1_GREY_"          " (1) \n"        // vignette
+#define SHADER_VIGNETTE      "#define _P1_VIGNETTE_"      " (1) \n"        // grey
+#define SHADER_ROTATED       "#define _P1_ROTATED_"       " (1) \n"        // energy
+#define SHADER_SHADING_PIXEL "#define _P1_SHADING_PIXEL_" " (1) \n"
+#define SHADER_SHADING_RETRO "#define _P1_SHADING_RETRO_" " (1) \n"
+#define SHADER_SHADING_SEPIA "#define _P1_SHADING_SEPIA_" " (1) \n"
 
 // use better resource file formats without affecting Nintendo Switch
 #if defined(_CORE_SWITCH_)
@@ -363,6 +366,7 @@ extern coreVector2     g_vGameResolution;   // pre-calculated 1:1
 extern coreDouble      g_adGameTime[2];     // 
 extern coreVector2     g_vHudDirection;     // 
 extern coreBool        g_bTiltMode;         // 
+extern coreBool        g_bOverdrawMode;     // 
 extern coreFloat       g_fShiftMode;        // 
 extern coreBool        g_bDemoVersion;      // 
 extern coreBool        g_bLeaderboards;     // 

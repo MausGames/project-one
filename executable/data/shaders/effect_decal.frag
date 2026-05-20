@@ -7,6 +7,7 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "engine/data_transform_2d.glsl"
+#include "engine/util_color.glsl"
 
 
 void FragmentMain()
@@ -54,6 +55,13 @@ void FragmentMain()
     // draw color with alpha
     vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
     gl_FragColor   = vec4(v4Texture.rgb * v1Light, v4Texture.a) * u_v4Color;
+
+#endif
+
+#if defined(_P1_SHADING_RETRO_)
+
+    // 
+    gl_FragColor.rgb = vec3(coreLuminance(gl_FragColor.rgb));
 
 #endif
 }

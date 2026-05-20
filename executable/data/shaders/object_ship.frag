@@ -92,4 +92,11 @@ void FragmentMain()
 
     // draw final color
     gl_FragColor = vec4((v3Diffuse + v3Specular) * mix(vec3(1.0), v3Highlight, v4TexColor.a) + v3Blink, u_v4Color.a);
+
+#if defined(_P1_SHADING_RETRO_)
+
+    // 
+    gl_FragColor.rgb = vec3(0.04);
+
+#endif
 }

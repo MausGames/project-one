@@ -438,6 +438,9 @@ void cProjectOneBoss::__KillOwn(const coreBool bAnimated)
     m_fArrowValue = 0.0f;
 
     // 
+    g_bOverdrawMode = REPLAY_WRAP_CHEAT_OVERDRAW;
+
+    // 
     if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
 
     // 
@@ -1238,6 +1241,8 @@ void cProjectOneBoss::__MoveOwn()
             this->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
 
             this->__CreateChroma(1.0f);
+
+            g_bOverdrawMode = true;
 
             g_MusicPlayer.Stop();
             g_MusicPlayer.Play();
@@ -4904,6 +4909,8 @@ void cProjectOneBoss::__MoveWhite()
 
                 g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
+
+                g_bOverdrawMode = REPLAY_WRAP_CHEAT_OVERDRAW;
 
                 g_MusicPlayer.Stop();
                 g_pGame->SetMusicVolume(1.0f);

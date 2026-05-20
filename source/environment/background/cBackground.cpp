@@ -104,7 +104,7 @@ void cBackground::Exit()
 // render the background
 void cBackground::Render()
 {
-    if(!m_FrameBuffer.GetIdentifier())
+    if(!m_FrameBuffer.GetIdentifier() || (g_eCheatRender == CHEAT_RENDER_RETRO))
     {
         m_ResolvedTexture.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
         return;

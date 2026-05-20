@@ -8,7 +8,9 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-coreBool g_bCheatP1 = false;
+coreBool     g_bCheatP1       = false;
+eCheatRender g_eCheatRender   = CHEAT_RENDER_DEFAULT;
+coreBool     g_bCheatOverdraw = false;
 
 
 // ****************************************************************
@@ -146,6 +148,17 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
+    // UMBER brown
+    case 5118544289638048171u:
+        {
+            if(!HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_RENDERSTYLE))
+            {
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_EXTRA_RENDERSTYLE)   // # only
+            }
+            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_RENDERSTYLE)
+        }
+        break;
+
     default:
         // password not valid
         return false;
@@ -162,4 +175,91 @@ coreBool ApplyPassword(const coreChar* pcText)
 
     // password valid
     return true;
+}
+
+
+// ****************************************************************
+// 
+void ChangeRenderStyle(const eCheatRender eRender, const coreBool bOverdraw)
+{
+    constexpr const coreChar* acShaderList[] =
+    {
+        "effect_decal.frag",
+        "effect_decal_inst.frag",
+        "effect_particle_smoke.frag",
+        "effect_particle_color.frag",
+        "effect_particle_dark.frag",
+        "effect_particle_fire.frag",
+        "effect_energy.frag",
+        "effect_energy_blink.frag",
+        "effect_energy_inst.frag",
+        "effect_outline.frag",
+        "effect_outline_light.frag",
+        "effect_outline_direct.frag",
+        "effect_outline_inst.frag",
+        "effect_outline_light_inst.frag",
+        "effect_outline_direct_inst.frag",
+        "full_post.frag",
+        "full_post_distorted.frag",
+        //"full_post_transparent.frag",   # skip due to double-rendering
+        "full_post_chroma.frag",
+        "full_post_layer.frag",
+        "full_post_debug.frag",
+        "menu_icon.vert",
+        "menu_icon.frag",
+        "object_board.frag",
+        "object_board_inst.frag",
+        "object_ice.frag",
+        "object_meteor.frag",
+        "object_meteor_blink.frag",
+        "object_meteor_inst.frag",
+        "object_meteor_blink_inst.frag",
+        "object_plate.frag",
+        "object_plate_inst.frag",
+        "object_ship.frag",
+        "object_ship_glow.frag",
+        "object_ship_depth.frag",
+        "object_ship_detail.frag",
+        "object_ship_blink.frag",
+        "object_ship_darkness.frag",
+        "object_ship_glow_inst.frag",
+        "object_ship_depth_inst.frag",
+        "object_ship_detail_inst.frag",
+        "object_ship_blink_inst.frag",
+        "object_tile.frag",
+        "object_tile_inst.frag"
+    };
+
+    // 
+    g_eCheatRender   = eRender;
+    g_bCheatOverdraw = bOverdraw;
+
+    // 
+    coreWorkString sWork;
+    for(coreUintW i = 0u; i < ARRAY_SIZE(acShaderList); ++i)
+    {
+        coreResourceHandle* pHandle = Core::Manager::Resource->Get(acShaderList[i]);
+
+        pHandle->LockResource([&](coreShader* OUTPUT pShader)
+        {
+            sWork = pShader->GetCustomCode();
+
+            sWork.replace(SHADER_SHADING_PIXEL, "");
+            sWork.replace(SHADER_SHADING_RETRO, "");
+            sWork.replace(SHADER_SHADING_SEPIA, "");
+
+                 if(g_eCheatRender == CHEAT_RENDER_PIXEL) sWork.append(SHADER_SHADING_PIXEL);
+            else if(g_eCheatRender == CHEAT_RENDER_RETRO) sWork.append(SHADER_SHADING_RETRO);
+            else if(g_eCheatRender == CHEAT_RENDER_SEPIA) sWork.append(SHADER_SHADING_SEPIA);
+
+            pShader->SetCustomCode(sWork.c_str());
+        });
+    }
+
+    // 
+    Core::Manager::Resource->Reset();
+
+    // finish now
+    coreSync::Finish();
+    Core::Manager::Resource->UpdateWait();
 }

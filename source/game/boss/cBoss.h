@@ -1384,6 +1384,9 @@ private:
     coreFlow m_fAnimation;                           // 
     coreFlow m_fRotation;
     coreFlow m_fRotationSpeed;
+
+    coreFlow  m_fChromaValue;                         // 
+    coreFloat m_fChromaSpeed;                         // 
     
     coreFlow  m_fRangeAnim;
     coreFlow  m_fRangeAnimPlayer;
@@ -1442,6 +1445,9 @@ private:
     // 
     void __ResurrectFollower(const coreUintW iIndex);
     void __KillFollower     (const coreUintW iIndex);
+
+    // 
+    inline void __CreateChroma(const coreFloat fSpeed) {m_fChromaValue = 1.0f; m_fChromaSpeed = fSpeed;}
 };
 
 

@@ -560,6 +560,8 @@ void cBridgeMenu::ApplyUnlocks()
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_EXTRA_OTHER)
         ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_EXTRA_MUSICBOX)
+        ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_EXTRA_RENDERSTYLE)   // TODO 1: own unlock event
+        ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_RENDERSTYLE)   // TODO 1: own unlock event
         break;
 
     case UNLOCK_WEAPON_PULSE:

@@ -22,6 +22,7 @@ cPostProcessing::cPostProcessing()noexcept
 , m_fChroma           (0.0f)
 , m_vShake            (coreVector2(0.0f,0.0f))
 , m_bShakeDelay       (false)
+, m_fOverdrawAlpha    (1.0f)
 , m_fAnimation        (0.0f)
 
 , m_fFrameValue       (0.0f)
@@ -93,6 +94,7 @@ void cPostProcessing::Render()
     // select between debug, distorted or simple shader-program
          if(g_bDebugOutput)            this->DefineProgram(m_pProgramDebug);
     else if(g_bTiltMode)               this->DefineProgram(m_pProgramTransparent);
+    else if(g_bOverdrawMode)           this->DefineProgram(m_pProgramTransparent);
     else if(m_fChroma)                 this->DefineProgram(m_pProgramChroma);
     else if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
     else                               this->DefineProgram(m_pProgramSimple);
@@ -150,6 +152,14 @@ void cPostProcessing::Render()
 
         // 
         m_Black.Render();
+
+        // 
+        if(g_bOverdrawMode) m_fOverdrawAlpha.UpdateMax(-1.0f, 0.0f);
+                       else m_fOverdrawAlpha.UpdateMin( 1.0f, 1.0f);
+
+        // 
+        const coreVector3 vBrightCorrection = coreVector3(1.0f,1.0f,1.0f) / (g_bOverdrawMode ? m_avData[0].y : 1.0f);
+        for(coreUintW i = 0u; i < POST_WALLS; ++i) m_aWall[i].SetColor3(vBrightCorrection);
 
         if((m_fFrameValue < 2.0f) && (!coreMath::IsNear(Core::System->GetResolution().AspectRatio(), 1.0f) || m_bOffsetActive))
         {
@@ -253,7 +263,33 @@ void cPostProcessing::Move()
     
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
         {
-            m_aInterior[i].SetAlpha(g_CurConfig.Graphics.iChroma ? (m_fChroma * POST_CHROMA_FACTOR) : 0.0f);
+            m_aInterior[i].SetAlpha(g_CurConfig.Graphics.iChroma ? (m_fChroma * POST_CHROMA_FACTOR + ((g_eCheatRender == CHEAT_RENDER_SEPIA) ? 0.001f : 0.0f)) : 0.0f);
+        }
+    }
+}
+
+
+// ****************************************************************
+// 
+void cPostProcessing::RenderTilt()
+{
+    m_Black.Render();
+
+    if(m_fOverdrawAlpha)
+    {
+        const coreFloat fBlend = BLENDH3(m_fOverdrawAlpha);
+
+        if((m_fFrameValue < 2.0f) && (!coreMath::IsNear(Core::System->GetResolution().AspectRatio(), 1.0f) || m_bOffsetActive))
+        {
+            // render wallpapers
+            for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
+            {
+                const coreFloat fOldAlpha = m_aWall[i].GetAlpha();
+
+                m_aWall[i].SetAlpha(fBlend);
+                m_aWall[i].Render();
+                m_aWall[i].SetAlpha(fOldAlpha);
+            }
         }
     }
 }
@@ -341,6 +377,23 @@ void cPostProcessing::UpdateLayout()
     // 
     this->__UpdateInterior();
     this->__UpdateWall();
+}
+
+
+// ****************************************************************
+// 
+void cPostProcessing::FixupOverdraw()
+{
+    if(!m_fOverdrawAlpha && m_Black.GetAlpha())
+    {
+        for(coreUintW i = 0u; i < POST_WALLS; ++i)
+        {
+            const coreVector2 vResolution = Core::System->GetResolution();
+            const coreVector2 vSize       = coreVector2(0.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f);
+
+            g_pPostProcessing->SetWallOffset(i, -vSize.Max());
+        }
+    }
 }
 
 

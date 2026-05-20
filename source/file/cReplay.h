@@ -64,6 +64,8 @@ STATIC_ASSERT((REPLAY_RUNS + 1u <= BIT(2u)) && (REPLAY_MISSIONS <= BIT(4u)) && (
 #define REPLAY_WRAP_CONFIG_HIT_STOP      ((g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigHitStop      : g_CurConfig.Graphics.iHitStop)
 #define REPLAY_WRAP_CONFIG_ROTATION_TURN ((g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigRotationTurn : g_CurConfig.Legacy  .iRotationTurn)
 
+#define REPLAY_WRAP_CHEAT_OVERDRAW       ((g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? HAS_BIT(g_pReplay->GetHeader().iStatus, REPLAY_STATUS_CHEAT_OVERDRAW) : g_bCheatOverdraw)
+
 #if defined(_CORE_SWITCH_)
     #define REPLAY_SLOTSYSTEM (true)
 #else
@@ -114,8 +116,9 @@ enum eReplayChange : coreUint8
 
 enum eReplayStatus : coreUint8
 {
-    REPLAY_STATUS_DOWNLOADED    = 0u,   // 
-    REPLAY_STATUS_ONECOLORCLEAR = 1u    // 
+    REPLAY_STATUS_DOWNLOADED     = 0u,   // 
+    REPLAY_STATUS_ONECOLORCLEAR  = 1u,   // 
+    REPLAY_STATUS_CHEAT_OVERDRAW = 2u    // 
 };
 
 STATIC_ASSERT(REPLAY_CHANGE_PROGRESS_FRAGMENT_8 - REPLAY_CHANGE_PROGRESS_FRAGMENT_0 == FRAGMENTS - 1u)

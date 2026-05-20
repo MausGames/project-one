@@ -521,6 +521,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_grey_vignette.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_VIGNETTE);
     Core::Manager::Resource->Load<coreShader> ("menu_helper.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_helper.vert", CORE_SHADER_OPTION_NO_PERSPECTIVE);
     Core::Manager::Resource->Load<coreShader> ("menu_helper.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_helper.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE);
+    Core::Manager::Resource->Load<coreShader> ("menu_icon.vert",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_icon.vert", CORE_SHADER_OPTION_NO_PERSPECTIVE);
+    Core::Manager::Resource->Load<coreShader> ("menu_icon.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_icon.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_PERSPECTIVE);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE);
     Core::Manager::Resource->Load<coreShader> ("menu_segment.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_segment.vert", CORE_SHADER_OPTION_NO_PERSPECTIVE);
@@ -1251,6 +1253,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_helper_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("menu_helper.vert")
         ->AttachShader("menu_helper.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_icon_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_icon.vert")
+        ->AttachShader("menu_icon.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_inner_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

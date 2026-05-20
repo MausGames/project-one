@@ -29,4 +29,11 @@ void FragmentMain()
 
     // 
     gl_FragColor = vec4(vec3((1.0 - 0.85 * v1Border - v1Intensity) + v1Shape * v_v1Alpha + v1Detail), 1.0) * u_v4Color;
+
+#if defined(_P1_SHADING_RETRO_)
+
+    // 
+    gl_FragColor.rgb = vec3(mix(gl_FragColor.r, gl_FragColor.b * 0.5, v_v1Alpha));
+
+#endif
 }

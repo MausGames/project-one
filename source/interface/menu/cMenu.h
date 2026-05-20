@@ -88,7 +88,7 @@
 #define MENU_EXTRA_TROPHIES           (48u)
 #define MENU_EXTRA_FILTERS            (3u)
 #define MENU_EXTRA_STATS              (27u)
-#define MENU_EXTRA_OTHERS             (3u)
+#define MENU_EXTRA_OTHERS             (4u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
 #define MENU_PAUSE_RESUME_POSITION    (coreVector2(0.0f,0.135f))
 #define MENU_SUMMARY_ARCADES          (9u)
@@ -923,9 +923,12 @@ private:
     cGuiLabel  m_aOtherName[MENU_EXTRA_OTHERS];       // 
     cGuiObject m_aOtherLine[MENU_EXTRA_OTHERS];       // 
 
-    cGuiButton m_Password;                            // 
-    cGuiButton m_Credits;                             // 
-    cGuiButton m_Music;                               // 
+    cGuiButton    m_Password;                         // 
+    cGuiButton    m_Credits;                          // 
+    cGuiButton    m_Music;                            // 
+    cGuiSwitchBox m_Style;                            // 
+
+    cGuiLabel m_NoLeaderboards;                       // 
 
     cGuiLabel m_PasswordHeader;                       // 
 
@@ -939,6 +942,7 @@ private:
 
     cNewIndicator m_OtherNew;
     cNewIndicator m_MusicBoxNew;
+    cNewIndicator m_RenderStyleNew;
 
     cMenuNavigator m_Navigator;
 

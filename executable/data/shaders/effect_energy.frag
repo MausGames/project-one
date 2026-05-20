@@ -6,6 +6,7 @@
 //| Released under the zlib License                 |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
+#include "engine/util_color.glsl"
 
 
 // shader uniforms
@@ -49,4 +50,11 @@ void FragmentMain()
     // draw blended color
     float v1Full = max(v_v1Strength + v1Detail, 0.0);
     gl_FragColor = vec4(u_v4Color.rgb * v1Full + v3Blink, u_v4Color.a * min(v1Full, 1.0));
+
+#if defined(_P1_SHADING_RETRO_)
+
+    // 
+    gl_FragColor.rgb = vec3(1.0 - coreLuminance(gl_FragColor.rgb));
+
+#endif
 }

@@ -158,7 +158,7 @@ void cWater::UpdateReflection()
         glDepthFunc(GL_LEQUAL);
         glEnable   (GL_BLEND);
 
-        if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive()))
+        if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive()) && !g_bOverdrawMode)
         {
             // 
             cLodObject::AllowHigh(false);

@@ -24,7 +24,7 @@
 void FragmentMain()
 {
     // select base color
-#if defined(_P1_LIGHT_)
+#if defined(_P1_LIGHT_) || defined(_P1_SHADING_RETRO_)
     const vec3 v3Base = vec3(0.9);
 #else
     const vec3 v3Base = vec3(0.0);

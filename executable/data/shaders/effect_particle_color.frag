@@ -15,4 +15,11 @@ void FragmentMain()
     // draw colored texture with highlights (r = texture, g = highlight)
     vec2 v2Value = coreTexture2D(0, v_av2TexCoord[0]).rg;
     gl_FragColor = vec4(vec3(3.0 * v2Value.r + v2Value.g), 1.0) * u_v4Color;
+
+#if defined(_P1_SHADING_RETRO_)
+
+    // 
+    gl_FragColor.rgb = vec3(v2Value.g + 0.04);
+
+#endif
 }

@@ -43,6 +43,9 @@ void cReplay::CreateGame()
     InitFramerate(m_Header.iConfigUpdateFreq, m_Header.iConfigGameSpeed);
 
     // 
+    g_bOverdrawMode = HAS_BIT(m_Header.iStatus, REPLAY_STATUS_CHEAT_OVERDRAW);
+
+    // 
     sGameOptions oOptions = {};
     oOptions.iKind        = m_Header.iOptionKind;
     oOptions.iType        = m_Header.iOptionType;
@@ -179,6 +182,9 @@ void cReplay::StartRecording()
     m_Header.iMissionTakeFrom   = g_pGame->GetCurMission()->GetTakeFrom();
     m_Header.iMissionTakeTo     = g_pGame->GetCurMission()->GetTakeTo();
     std::memcpy(m_Header.aiMissionList, g_pGame->GetMissionList(), sizeof(coreInt32) * g_pGame->GetNumMissions());
+
+    // 
+    if(g_bCheatOverdraw) ADD_BIT(m_Header.iStatus, REPLAY_STATUS_CHEAT_OVERDRAW)
 
     Core::Log->Info("Replay recording started");
 }

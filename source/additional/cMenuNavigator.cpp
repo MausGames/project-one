@@ -43,7 +43,7 @@ cMenuNavigator::cMenuNavigator()noexcept
 {
     // 
     this->DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
-    this->DefineProgram("default_2d_program");
+    this->DefineProgram("menu_icon_program");
     this->SetSize      (coreVector2(0.07f,0.07f));
     this->SetTexSize   (ICON_TEXSIZE);
 

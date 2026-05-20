@@ -17,7 +17,7 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     for(coreUintW i = 0u; i < INTERFACE_LIVES; ++i)
     {
         aLife[i].DefineTexture(0u, g_pSpecialEffects->GetIconTexture(iIndex));
-        aLife[i].DefineProgram("default_2d_program");
+        aLife[i].DefineProgram("menu_icon_program");
         aLife[i].SetTexSize   (ICON_TEXSIZE);
         aLife[i].SetTexOffset (ICON_TEXOFFSET * I_TO_F(i + 1u));
     }
