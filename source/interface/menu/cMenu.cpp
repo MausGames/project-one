@@ -912,9 +912,9 @@ void cMenu::Move()
     else fPauseAlpha = MAX(fPauseAlpha - TIME * fPauseSpeed, 0.0f);
 
     // 
-    m_PauseLayer.SetSize     (Core::System->GetCanonSize());
+    m_PauseLayer.SetSize     (GetCanonSizeRotated());
     m_PauseLayer.SetAlpha    (fPauseAlpha);
-    m_PauseLayer.SetTexSize  (Core::System->GetCanonSize() * 1.2f);
+    m_PauseLayer.SetTexSize  (GetCanonSizeRotated() * 1.2f);
     m_PauseLayer.SetTexOffset(MENU_LAYER_TEXOFFSET);
     m_PauseLayer.SetEnabled  (fPauseAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 

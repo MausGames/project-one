@@ -145,9 +145,9 @@ void cMsgBox::Move()
     }
 
     // 
-    this->SetSize     (Core::System->GetCanonSize());
+    this->SetSize     (GetCanonSizeRotated());
     this->SetAlpha    (m_fFade * 0.5f);
-    this->SetTexSize  (Core::System->GetCanonSize() * 1.2f);
+    this->SetTexSize  (GetCanonSizeRotated() * 1.2f);
     this->SetTexOffset(MENU_LAYER_TEXOFFSET);
     this->coreFullscreen::Move();
 

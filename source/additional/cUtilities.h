@@ -478,6 +478,14 @@ constexpr coreFloat MaxAspectRatio(const coreVector2 vVector)
 
 // ****************************************************************
 // 
+inline coreVector2 GetCanonSizeRotated()
+{
+    return Core::System->GetCanonSize().MapToAxis(g_vHudDirection).Processed(ABS);
+}
+
+
+// ****************************************************************
+// 
 inline coreVector2 GetTranslation(const coreObject2D& oObject)
 {
     return oObject.GetScreenPosition();

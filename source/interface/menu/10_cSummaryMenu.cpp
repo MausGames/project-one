@@ -705,8 +705,8 @@ void cSummaryMenu::Move()
             nBlendMedalFunc(&m_ArcadeTotalMedal, 0.13f, fThreshold3, SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]));
 
             // 
-            m_ArcadeLayer.SetSize     (Core::System->GetCanonSize());
-            m_ArcadeLayer.SetTexSize  (Core::System->GetCanonSize() * 1.2f);
+            m_ArcadeLayer.SetSize     (GetCanonSizeRotated());
+            m_ArcadeLayer.SetTexSize  (GetCanonSizeRotated() * 1.2f);
             m_ArcadeLayer.SetTexOffset(MENU_LAYER_TEXOFFSET);
             
             
