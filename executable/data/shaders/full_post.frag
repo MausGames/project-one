@@ -37,9 +37,27 @@ void FragmentMain()
     // 
     vec2 v2DistCoord = v_av2TexCoord[1];
 
+#if defined(_P1_LAYER_)
+
+    // 
+    v2DistCoord = (v2DistCoord - 0.5) * u_v4Resolution.xy / min(u_v4Resolution.x, u_v4Resolution.y) + 0.5;
+
+#endif
+
     // lookup distortion map
     vec2 v2Distortion = coreTextureBase2D(3, v2DistCoord).rg;   // # low-res
          v2Distortion = v2Distortion * 2.0 - 1.0 + (1.0/255.0);
+
+#if defined(_P1_LAYER_)
+
+    // 
+    if(any(lessThan   (v2DistCoord, vec2(0.0))) ||
+       any(greaterThan(v2DistCoord, vec2(1.0))))
+    {
+        v2Distortion = vec2(0.0);
+    }
+
+#endif
 
     // move texture coordinates
     v2TexCoord += v2Distortion * vec2(-0.1, 0.1);

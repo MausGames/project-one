@@ -201,6 +201,7 @@
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_"    " (1) \n"        // post
 #define SHADER_TRANSPARENT   "#define _P1_TRANSPARENT_"   " (1) \n"        // post
 #define SHADER_CHROMA        "#define _P1_CHROMA_"        " (1) \n"        // post
+#define SHADER_LAYER         "#define _P1_LAYER_"         " (1) \n"        // post
 #define SHADER_DEBUG         "#define _P1_DEBUG_"         " (1) \n"        // post
 #define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"      " (1) \n"        // distortion
 #define SHADER_LABEL         "#define _P1_LABEL_"         " (1) \n"        // swipe
@@ -402,6 +403,7 @@ extern coreMusicPlayer g_MusicPlayer;       // default music-player
 #include "visual/cWindscreen.h"
 #include "visual/cSpecialEffects.h"
 #include "visual/cForeground.h"
+#include "visual/cLayer.h"
 #include "visual/cPostProcessing.h"
 
 extern cReplay*         const g_pReplay;           // 
@@ -443,6 +445,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 
 extern cForeground*  const g_pForeground;    // main foreground object
 extern cEnvironment* const g_pEnvironment;   // main environment object
+extern cLayer*       const g_pLayer;         // 
 extern cMenu*        const g_pMenu;          // main menu object
 extern cGame*        const g_pGame;          // main game object
 

@@ -171,9 +171,7 @@ void cGame::Render()
         {
             if(g_CurConfig.Game.iMirrorMode)
             {
-                coreMatrix4 mPerspective = Core::Graphics->GetPerspective();
-                if(IsHorizontal(g_pPostProcessing->GetDirection())) mPerspective._22 *= -1.0f;
-                                                               else mPerspective._11 *= -1.0f;
+                coreMatrix4 mPerspective = Core::Graphics->GetPerspective(); mPerspective._11 *= -1.0f;
                 Core::Graphics->OverridePerspective(mPerspective);
             }
         };
@@ -184,9 +182,8 @@ void cGame::Render()
             const coreVector3 vShake = coreVector3(g_pPostProcessing->GetPosition() * 80.0f, 0.0f);
             vCamPos += this->CalculateCamShift() * 0.5f + vShake;
         }
-        
-        const coreVector3 vCamOri = MapToAxisInv(CAMERA_ORIENTATION, g_pPostProcessing->GetDirection());
-        
+
+        const coreVector3 vCamOri = MapToAxisInv(CAMERA_ORIENTATION, g_pPostProcessing->GetDirection() * coreVector2(g_CurConfig.Game.iMirrorMode ? -1.0f : 1.0f, 1.0f));
         Core::Graphics->SetCamera(vCamPos, CAMERA_DIRECTION, vCamOri);   // do not reset at the end
             
         Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 51.0f, 500.0f, 0.0f);    // invoke transform-update

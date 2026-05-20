@@ -32,6 +32,7 @@ STATIC_MEMORY(cSpecialEffects, g_pSpecialEffects)
 STATIC_MEMORY(cPostProcessing, g_pPostProcessing)
 STATIC_MEMORY(cForeground,     g_pForeground)
 STATIC_MEMORY(cEnvironment,    g_pEnvironment)
+STATIC_MEMORY(cLayer,          g_pLayer)
 STATIC_MEMORY(cMenu,           g_pMenu)
 STATIC_MEMORY(cGame,           g_pGame)
 
@@ -149,6 +150,7 @@ void CoreApp::Exit()
 
     // delete and exit main components
     STATIC_DELETE(g_pMenu)
+    STATIC_DELETE(g_pLayer)
     STATIC_DELETE(g_pEnvironment)
     STATIC_DELETE(g_pForeground)
     STATIC_DELETE(g_pPostProcessing)
@@ -187,7 +189,16 @@ void CoreApp::Render()
         ForceFramerate(false, false);
         return;
     }
-    
+
+    if(g_bTiltMode || g_bOverdrawMode)
+    {
+        if(!STATIC_ISVALID(g_pLayer)) STATIC_NEW(g_pLayer)
+    }
+    else
+    {
+        if(STATIC_ISVALID(g_pLayer)) STATIC_DELETE(g_pLayer)
+    }
+
     Core::Debug->MeasureStart("Update Always");
     {
         const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
@@ -262,26 +273,30 @@ void CoreApp::Render()
 
         Core::Debug->MeasureStart("Post Processing");
         {
-            // render post-processing
-            g_pPostProcessing->Render();
-
-            if(g_bTiltMode || g_bOverdrawMode)
+            if(STATIC_ISVALID(g_pLayer)) g_pLayer->Start();
             {
-                if(STATIC_ISVALID(g_pGame))
+                // render post-processing
+                g_pPostProcessing->Render();
+
+                if(g_bTiltMode || g_bOverdrawMode)
                 {
-                    if(g_CurConfig.Game.iMirrorMode) glEnable(GL_CULL_FACE);
-
-                    glEnable(GL_DEPTH_TEST);
+                    if(STATIC_ISVALID(g_pGame))
                     {
-                        g_pGame->Render();
+                        if(g_CurConfig.Game.iMirrorMode) glEnable(GL_CULL_FACE);
+
+                        glEnable(GL_DEPTH_TEST);
+                        {
+                            g_pGame->Render();
+                        }
+                        glDisable(GL_DEPTH_TEST);
+
+                        if(g_CurConfig.Game.iMirrorMode) glDisable(GL_CULL_FACE);
                     }
-                    glDisable(GL_DEPTH_TEST);
-
-                    g_pPostProcessing->RenderTilt();
-
-                    if(g_CurConfig.Game.iMirrorMode) glDisable(GL_CULL_FACE);
                 }
             }
+            if(STATIC_ISVALID(g_pLayer)) g_pLayer->End();
+
+            if(g_bTiltMode || g_bOverdrawMode) g_pPostProcessing->RenderTilt();
         }
         Core::Debug->MeasureEnd("Post Processing");
         Core::Debug->MeasureStart("Interface");

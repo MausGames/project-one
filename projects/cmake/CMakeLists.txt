@@ -80,6 +80,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/visual/cHeadlight.cpp
     ${BASE_DIRECTORY}/source/visual/cIcon.cpp
     ${BASE_DIRECTORY}/source/visual/cInk.cpp
+    ${BASE_DIRECTORY}/source/visual/cLayer.cpp
     ${BASE_DIRECTORY}/source/visual/cOutline.cpp
     ${BASE_DIRECTORY}/source/visual/cPostProcessing.cpp
     ${BASE_DIRECTORY}/source/visual/cShadow.cpp

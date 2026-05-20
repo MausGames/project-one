@@ -502,6 +502,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("full_post_distorted.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_GLOW SHADER_DISTORTION);
     Core::Manager::Resource->Load<coreShader> ("full_post_transparent.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_GLOW SHADER_TRANSPARENT);
     Core::Manager::Resource->Load<coreShader> ("full_post_chroma.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_GLOW SHADER_DISTORTION SHADER_CHROMA);
+    Core::Manager::Resource->Load<coreShader> ("full_post_layer.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_GLOW SHADER_DISTORTION SHADER_CHROMA SHADER_LAYER);
     Core::Manager::Resource->Load<coreShader> ("full_post_debug.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_GLOW SHADER_DISTORTION SHADER_DEBUG);
     Core::Manager::Resource->Load<coreShader> ("full_transition_fade.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_TRANSITION(0));
     Core::Manager::Resource->Load<coreShader> ("full_transition_wipe.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", CORE_SHADER_OPTION_NO_PERSPECTIVE SHADER_TRANSITION(1));
@@ -1183,6 +1184,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_chroma_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("full.vert")
         ->AttachShader("full_post_chroma.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_layer_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("full.vert")
+        ->AttachShader("full_post_layer.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_debug_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

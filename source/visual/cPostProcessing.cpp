@@ -89,7 +89,7 @@ cPostProcessing::cPostProcessing()noexcept
 void cPostProcessing::Render()
 {
     // switch back to default frame buffer
-    coreFrameBuffer::EndDraw();
+    if(!STATIC_ISVALID(g_pLayer)) coreFrameBuffer::EndDraw();
 
     // select between debug, distorted or simple shader-program
          if(g_bDebugOutput)            this->DefineProgram(m_pProgramDebug);
@@ -141,6 +141,8 @@ void cPostProcessing::Render()
                         m_aBorder[i].Render();
                 }
                 glDisable(GL_DEPTH_TEST);
+
+                if(STATIC_ISVALID(g_pLayer)) glClear(GL_DEPTH_BUFFER_BIT);
             }
             else
             {
