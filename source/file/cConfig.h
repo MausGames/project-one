@@ -48,6 +48,7 @@
 #define CONFIG_AUDIO_3D_SOUND        "Audio",    "3DSound",                                            (1)
 
 #define CONFIG_INPUT_TYPE(p)         "Input",    PRINT("P%zu_Type",        (p)),                       (p + INPUT_SETS_KEYBOARD)
+#define CONFIG_INPUT_TYPE_SAVE(p)    "Input",    PRINT("P%zu_TypeSave",    (p)),                       (p + INPUT_SETS_KEYBOARD)
 #define CONFIG_INPUT_RUMBLE(p)       "Input",    PRINT("P%zu_Rumble",      (p)),                       (0)
 #define CONFIG_INPUT_FIRE_MODE(p)    "Input",    PRINT("P%zu_FireMode",    (p)),                       (0)
 #define CONFIG_INPUT_CONTROL_MODE(p) "Input",    PRINT("P%zu_ControlMode", (p)),                       (1)
@@ -147,6 +148,7 @@ struct sConfig final
     struct
     {
         coreUint8 aiType       [INPUT_TYPES];        // selected input set (each element should have a different value)
+        coreUint8 aiTypeSave   [INPUT_TYPES];        // 
         coreUint8 aiRumble     [INPUT_TYPES];        // 
         coreUint8 aiFireMode   [INPUT_TYPES];        // 
         coreUint8 aiControlMode[INPUT_TYPES];        // 

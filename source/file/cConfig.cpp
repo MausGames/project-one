@@ -19,7 +19,8 @@ static coreBool  s_abFireToggle[INPUT_TYPES + 1u] = {};   //
 static coreBool  s_abFireSpeed [INPUT_TYPES + 1u] = {};   // 
 static coreUint8 s_aiTwinState [INPUT_TYPES + 1u] = {};   // 
 
-static coreList<coreVector2> s_avOldStick = {};
+static coreUintW             s_iJoystickNum = 0u;
+static coreList<coreVector2> s_avOldStick   = {};
 
 
 // ****************************************************************
@@ -81,7 +82,7 @@ static void UpgradeConfig()
         {
             for(coreUintW i = 0u; i < INPUT_SETS; ++i)
             {
-                Core::Config->SetInt(CONFIG_INPUT_ACTION(i, 9u), DEFAULT_ACTION(i, 9u));
+                Core::Config->SetInt(CONFIG_INPUT_ACTION(i, 9u));
             }
         }
 
@@ -118,6 +119,12 @@ static void UpgradeConfig()
 
             #endif
         }
+
+        if(__UPGRADE(6))
+        {
+            Core::Config->SetInt(CONFIG_INPUT_TYPE_SAVE(0zu), Core::Config->GetInt(CONFIG_INPUT_TYPE(0zu)));
+            Core::Config->SetInt(CONFIG_INPUT_TYPE     (1zu));
+        }
     }
     #undef __UPGRADE
 
@@ -141,7 +148,7 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
     coreUint8 iReset = 0u;
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);
+        pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiTypeSave[i], 0u, INPUT_SETS-1u);
 
         // reset without available device
         if((pConfig->Input.aiType[i] >= INPUT_SETS_KEYBOARD) && (pConfig->Input.aiType[i] - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
@@ -204,6 +211,9 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
     pConfig->Audio.fEffectVolume  = MAX(pConfig->Audio.fEffectVolume,  0.0f);
     pConfig->Audio.fAmbientVolume = MAX(pConfig->Audio.fAmbientVolume, 0.0f);
     pConfig->Audio.fMenuVolume    = MAX(pConfig->Audio.fMenuVolume,    0.0f);
+
+    // 
+    s_iJoystickNum = Core::Input->GetJoystickNum();
 }
 
 
@@ -249,6 +259,7 @@ void LoadConfig()
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         g_OldConfig.Input.aiType       [i] = Core::Config->GetInt(CONFIG_INPUT_TYPE        (i));
+        g_OldConfig.Input.aiTypeSave   [i] = Core::Config->GetInt(CONFIG_INPUT_TYPE_SAVE   (i));
         g_OldConfig.Input.aiRumble     [i] = Core::Config->GetInt(CONFIG_INPUT_RUMBLE      (i));
         g_OldConfig.Input.aiFireMode   [i] = Core::Config->GetInt(CONFIG_INPUT_FIRE_MODE   (i));
         g_OldConfig.Input.aiControlMode[i] = Core::Config->GetInt(CONFIG_INPUT_CONTROL_MODE(i));
@@ -329,6 +340,7 @@ void SaveConfig()
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         Core::Config->SetInt(CONFIG_INPUT_TYPE        (i), g_OldConfig.Input.aiType       [i]);
+        Core::Config->SetInt(CONFIG_INPUT_TYPE_SAVE   (i), g_OldConfig.Input.aiTypeSave   [i]);
         Core::Config->SetInt(CONFIG_INPUT_RUMBLE      (i), g_OldConfig.Input.aiRumble     [i]);
         Core::Config->SetInt(CONFIG_INPUT_FIRE_MODE   (i), g_OldConfig.Input.aiFireMode   [i]);
         Core::Config->SetInt(CONFIG_INPUT_CONTROL_MODE(i), g_OldConfig.Input.aiControlMode[i]);
@@ -378,6 +390,16 @@ void SaveConfig()
 // update input interface
 void UpdateInput()
 {
+#if !defined(_CORE_SWITCH_)
+
+    if(s_iJoystickNum != Core::Input->GetJoystickNum())
+    {
+        CheckConfig(&g_CurConfig);
+        ASSERT(s_iJoystickNum == Core::Input->GetJoystickNum())
+    }
+
+#endif
+
     // 
     s_avOldStick.resize(Core::Input->GetJoystickNum(), coreVector2(0.0f,0.0f));
 

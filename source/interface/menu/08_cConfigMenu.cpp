@@ -827,7 +827,8 @@ void cConfigMenu::Move()
             if(m_SwapInput.IsClicked())
             {
                 // 
-                std::swap(g_CurConfig.Input.aiType[0], g_CurConfig.Input.aiType[1]);
+                std::swap(g_CurConfig.Input.aiType    [0], g_CurConfig.Input.aiType    [1]);
+                std::swap(g_CurConfig.Input.aiTypeSave[0], g_CurConfig.Input.aiTypeSave[1]);
                 for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oType.SelectValue(g_CurConfig.Input.aiType[i]);
 
                 // 
@@ -876,7 +877,8 @@ void cConfigMenu::Move()
                     }
 
                     // 
-                    g_CurConfig.Input.aiType[i] = oInput.oType.GetCurValue();
+                    g_CurConfig.Input.aiType    [i] = oInput.oType.GetCurValue();
+                    g_CurConfig.Input.aiTypeSave[i] = oInput.oType.GetCurValue();
                     this->__LoadInputs();
                     this->__RefreshManual();
                 }
