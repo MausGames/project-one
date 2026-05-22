@@ -91,6 +91,7 @@
 #define MENU_EXTRA_OTHERS             (4u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
 #define MENU_PAUSE_RESUME_POSITION    (coreVector2(0.0f,0.135f))
+#define MENU_PAUSE_BADGES             (BADGES - 4u)
 #define MENU_SUMMARY_ARCADES          (9u)
 #define MENU_SUMMARY_RUNS             (CONTINUES + 1u)
 #define MENU_SUMMARY_MEDALS           (6u)
@@ -1154,10 +1155,21 @@ private:
 class cPauseMenu final : public coreMenu
 {
 private:
-    cGuiButton m_ResumeButton;    // resume button
-    cGuiButton m_RestartButton;   // restart button
-    cGuiButton m_ConfigButton;    // config button
-    cGuiButton m_ExitButton;      // exit button
+    cGuiButton m_ResumeButton;                        // resume button
+    cGuiButton m_RestartButton;                       // restart button
+    cGuiButton m_ConfigButton;                        // config button
+    cGuiButton m_ExitButton;                          // exit button
+
+    cGuiObject m_aBadge     [MENU_PAUSE_BADGES];      // 
+    cGuiObject m_aBadgeWave [MENU_PAUSE_BADGES];      // 
+    cGuiObject m_aBadgeBack [MENU_PAUSE_BADGES];      // 
+    cGuiLabel  m_aaBadgeDesc[MENU_PAUSE_BADGES][2];   // 
+
+    cGuiObject m_Trophy;                              // 
+    cGuiObject m_TrophyWave;                          // 
+    cGuiObject m_TrophyBack;                          // 
+    cGuiLabel  m_TrophyMark;                          // 
+    cGuiLabel  m_aTrophyDesc[2];                      // 
 
     cMenuNavigator m_Navigator;
 
@@ -1169,6 +1181,9 @@ public:
 
     // move the pause menu
     void Move()final;
+
+    // 
+    void LoadDescriptions();
 
     // 
     void ActivateFirstPlay();

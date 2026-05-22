@@ -377,6 +377,7 @@ void cMenu::Move()
                 {
                     // 
                     m_PauseMenu.ChangeSurface(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) ? SURFACE_PAUSE_FULL : SURFACE_PAUSE_LIGHT, 0.0f);
+                    m_PauseMenu.LoadDescriptions();
                     m_PauseMenu.ResetNavigator();
 
                     // 
